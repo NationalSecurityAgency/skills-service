@@ -96,7 +96,8 @@ const checkDescription = useDebounceFn((value, testContext) => {
   if (!value || value.trim().length === 0 || !appConfig.paragraphValidationRegex) {
     return true
   }
-  return descriptionValidatorService.validateDescription(value, false, enableProtectedUserCommunity.value, false).then((result) => {
+  const quizIdParam = props.isEdit ? props.quiz.quizId : null
+  return descriptionValidatorService.validateDescriptionWithIdsProvided(value, null, quizIdParam, enableProtectedUserCommunity.value).then((result) => {
     if (result.valid) {
       return true
     }
@@ -155,6 +156,7 @@ const schema = object({
   'description': string()
       .max(appConfig.descriptionMaxLength)
       .test('descriptionValidation', 'Description is invalid', (value, testContext) => checkDescription(value, testContext))
+      .test('noAttachmetsForNewQuiz', 'Attachments can only be added when editing an existing quiz', (value, testContext) => props.isEdit || descriptionValidatorService.attachmentsNotAllowed(value, testContext))
       .label('Description')
 })
 

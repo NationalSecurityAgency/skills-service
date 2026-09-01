@@ -175,6 +175,10 @@ class ProjAdminService {
             log.debug("Saved [{}]", projectDefinition)
             savedProjDef = projectDefinition
         } else {
+            if (projectRequest.description && attachmentService.findAttachmentUuids(projectRequest.description)) {
+                throw new SkillException("Attachments in the description are not allowed when creating a new project", projectRequest.projectId, null, ErrorCode.BadParam)
+            }
+
             // TODO: temp hack around since user is not yet defined when Inception project is created
             // This will be addressed in ticket #139
             String clientSecret = new ClientSecretGenerator().generateClientSecret()

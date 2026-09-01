@@ -302,4 +302,80 @@ describe('Community Project Creation Tests', () => {
         cy.get('[data-cy="pageHeader"] [data-cy="skillId"]').contains('ID: skill2')
     });
 
+
+    it('skill description: validate that copied Markdown with an attachment from UC project is not allowed in non-UC project', () => {
+        cy.createProject(1, {enableProtectedUserCommunity: true})
+        cy.createSubject(1, 1);
+
+        cy.createProject(2)
+        cy.createSubject(2, 1);
+        // cy.viewport(1000, 2000)
+
+        cy.visit('/administrator/projects/proj1/subjects/subj1');
+        cy.get('[data-cy=newSkillButton]').click();
+        cy.get('[data-cy=skillName]').type('skill1');
+
+        cy.get(`button.attachment-button`).click({force: true})
+        cy.get('input[type=file]').selectFile('cypress/attachments/test-pdf.pdf', { force: true })
+
+        cy.get('.toastui-editor-mode-switch').contains('Markdown').click()
+        cy.get('.toastui-editor-md-container.toastui-editor-md-tab-style').invoke('text').as('markdownToPaste');
+
+        cy.get('@markdownToPaste').then((markdown) => {
+            cy.log(`Markdown to copy is: ${markdown}`);
+
+            cy.get('[data-cy="saveDialogBtn"]').should('be.enabled')
+            cy.get('[data-cy="saveDialogBtn"]').click()
+            cy.get('[data-cy="editSkillButton_skill1Skill"]')
+
+            cy.visit('/administrator/projects/proj2/subjects/subj1');
+            cy.get('[data-cy=newSkillButton]').click();
+            cy.get('[data-cy=skillName]').type('skill1');
+            cy.get('.toastui-editor-mode-switch').contains('Markdown').click()
+
+            cy.get('[data-cy="saveDialogBtn"]').should('be.enabled')
+            cy.typeInMarkdownEditor('[data-cy="markdownEditorInput"]', markdown, true);
+            cy.get('[data-cy="descriptionError"]').contains('Skill Description - Attachment [test-pdf.pdf] is not allowed to be copied to this project')
+            cy.get('[data-cy="saveDialogBtn"]').should('be.disabled')
+        });
+
+
+    });
+
+    it('project description: validate that copied Markdown with an attachment from UC project is not allowed in non-UC project', () => {
+        cy.createProject(1, {enableProtectedUserCommunity: true})
+        cy.createSubject(1, 1);
+
+        cy.createProject(2)
+
+        cy.visit('/administrator/projects/proj1/subjects/subj1');
+        cy.get('[data-cy=newSkillButton]').click();
+        cy.get('[data-cy=skillName]').type('skill1');
+
+        cy.get(`button.attachment-button`).click({force: true})
+        cy.get('input[type=file]').selectFile('cypress/attachments/test-pdf.pdf', { force: true })
+
+        cy.get('.toastui-editor-mode-switch').contains('Markdown').click()
+        cy.get('.toastui-editor-md-container.toastui-editor-md-tab-style').invoke('text').as('markdownToPaste');
+
+        cy.get('@markdownToPaste').then((markdown) => {
+            cy.log(`Markdown to copy is: ${markdown}`);
+
+            cy.get('[data-cy="saveDialogBtn"]').should('be.enabled')
+            cy.get('[data-cy="saveDialogBtn"]').click()
+            cy.get('[data-cy="editSkillButton_skill1Skill"]')
+
+            cy.visit('/administrator/');
+            cy.get('[data-cy="projectCard_proj2"] [data-cy="editProjBtn"]').click();
+            cy.get('.toastui-editor-mode-switch').contains('Markdown').click()
+
+            cy.get('[data-cy="saveDialogBtn"]').should('be.enabled')
+            cy.typeInMarkdownEditor('[data-cy="markdownEditorInput"]', markdown, true);
+            cy.get('[data-cy="descriptionError"]').contains('Project Description - Attachment [test-pdf.pdf] is not allowed to be copied to this project')
+            cy.get('[data-cy="saveDialogBtn"]').should('be.disabled')
+        });
+
+
+    });
+
 });

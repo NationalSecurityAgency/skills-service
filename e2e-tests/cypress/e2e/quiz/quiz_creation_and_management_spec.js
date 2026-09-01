@@ -748,5 +748,35 @@ describe('Quiz CRUD Tests', () => {
         cy.get(quizTableSelector).should('contain', 'a few seconds ago')
         cy.get(quizTableSelector).should('not.contain','Invalid Date')
     });
+
+    it('attachments are not allowed to be added when quiz is initially created', () => {
+        const attachmentMarkdown = '[test-pdf.pdf](/api/download/8ab81f77-3484-4f5a-ae58-ae4e7143b449)'
+
+        cy.createQuizDef(1, {description: null})
+        cy.visit('/administrator/quizzes/')
+        cy.get('[data-cy="editQuizButton_quiz1"]')
+
+        cy.get('[data-cy="btn_Quizzes And Surveys"]').click()
+        cy.get('.p-dialog-header').contains('New Quiz/Survey')
+
+        cy.get('[data-cy="quizName"]').type('My First Quiz')
+        cy.get('[data-cy="idInputValue"]').should('have.value', 'MyFirstQuiz')
+
+        cy.get('.toastui-editor-mode-switch').contains('Markdown').click()
+
+        cy.get('[data-cy="saveDialogBtn"]').should('be.enabled')
+        cy.typeInMarkdownEditor('[data-cy="markdownEditorInput"]', attachmentMarkdown, true);
+        cy.get('[data-cy="descriptionError"]').contains('Attachments can only be added when editing an existing quiz')
+        cy.get('[data-cy="saveDialogBtn"]').should('be.disabled')
+        cy.get('[data-cy="closeDialogBtn"]').click()
+
+        cy.get('[data-cy="editQuizButton_quiz1"]').click()
+        cy.get('[data-cy="idInputValue"]').should('have.value', 'quiz1')
+        cy.get('.toastui-editor-mode-switch').contains('Markdown').click()
+        cy.typeInMarkdownEditor('[data-cy="markdownEditorInput"]', attachmentMarkdown, true);
+        cy.wait(2000)
+        cy.get('[data-cy="descriptionError"]').should('not.be.visible')
+        cy.get('[data-cy="saveDialogBtn"]').should('be.enabled')
+    });
 });
 

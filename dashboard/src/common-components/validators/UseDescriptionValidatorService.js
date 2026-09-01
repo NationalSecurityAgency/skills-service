@@ -29,10 +29,20 @@ export const useDescriptionValidatorService = () => {
         };
     }
 
-  const validateDescription = (description, enableProjectIdParam = true, useProtectedCommunityValidator = null, enableQuizIdParam = true) => {
-    const body = getBody(description, enableProjectIdParam, useProtectedCommunityValidator, enableQuizIdParam)
-    return axios.post('/api/validation/description', body).then((result) => result.data);
-  }
+    const validateDescription = (description, enableProjectIdParam = true, useProtectedCommunityValidator = null, enableQuizIdParam = true) => {
+        const body = getBody(description, enableProjectIdParam, useProtectedCommunityValidator, enableQuizIdParam)
+        return axios.post('/api/validation/description', body).then((result) => result.data);
+    }
+
+    const validateDescriptionWithIdsProvided = (description, projectId = null, quizId = null, useProtectedCommunityValidator = null) => {
+        const body = {
+            value: description,
+            projectId,
+            useProtectedCommunityValidator,
+            quizId,
+        }
+        return axios.post('/api/validation/description', body).then((result) => result.data);
+    }
 
     const addPrefixToInvalidParagraphs = (description, prefix, enableProjectIdParam = true, useProtectedCommunityValidator = null, enableQuizIdParam = true) => {
         const body = getBody(description, enableProjectIdParam, useProtectedCommunityValidator, enableQuizIdParam)
@@ -40,8 +50,25 @@ export const useDescriptionValidatorService = () => {
         return axios.post('/api/validation/addPrefixToInvalidParagraphs', body).then((result) => result.data);
     }
 
-  return {
-    validateDescription,
-    addPrefixToInvalidParagraphs
-  }
+    const attachmentsNotAllowed = (value) => {
+        if (!value) {
+            return true
+        }
+        const markdownLinkRegex = /\[[^\]]*\]\(([^)]+)\)/g
+        let match
+        while ((match = markdownLinkRegex.exec(value)) !== null) {
+            const link = match[1].trim()
+            if (link.startsWith('/api/download')) {
+                return false
+            }
+        }
+        return true
+    }
+
+    return {
+        validateDescription,
+        validateDescriptionWithIdsProvided,
+        attachmentsNotAllowed,
+        addPrefixToInvalidParagraphs
+    }
 };

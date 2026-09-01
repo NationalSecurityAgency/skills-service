@@ -82,7 +82,8 @@ const checkDescription = useDebounceFn((value, testContext) => {
   if (!value || value.trim().length === 0 || !appConfig.paragraphValidationRegex) {
     return true
   }
-  return descriptionValidatorService.validateDescription(value, false, enableProtectedUserCommunity.value, false).then((result) => {
+  const projIdParam = props.isEdit ? props.project.projectId : null
+  return descriptionValidatorService.validateDescriptionWithIdsProvided(value, projIdParam, null, enableProtectedUserCommunity.value).then((result) => {
     if (result.valid) {
       return true
     }
@@ -138,9 +139,10 @@ const schema = object({
   'enableProtectedUserCommunity': boolean()
     .test('communityReqValidation', 'Unmet community requirements', (value, testContext) => checkProjectCommunityRequirements(value, testContext))
     .label('Enable Protected User Community'),
-  'description': string()
+   'description': string()
     .max(appConfig.descriptionMaxLength)
     .test('descriptionValidation', 'Description is invalid', (value, testContext) => checkDescription(value, testContext))
+    .test('noAttachmetsForNewProjects', 'Attachments can only be added when editing an existing project', (value, testContext) => props.isEdit || descriptionValidatorService.attachmentsNotAllowed(value, testContext))
     .label('Project Description')
 })
 

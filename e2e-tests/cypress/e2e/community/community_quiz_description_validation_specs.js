@@ -868,5 +868,96 @@ describe('Community Quiz Description Validation Tests', () => {
         cy.get('[data-cy="closeDialogBtn"]').should('be.focused')
     });
 
+    it('question description: validate that copied Markdown with an attachment from UC quiz is not allowed in non-UC quiz', () => {
+        cy.createQuizDef(1, {enableProtectedUserCommunity: true})
+        cy.createTextInputQuestionDef(1, 1)
+
+        cy.createQuizDef(2)
+        cy.createTextInputQuestionDef(2, 1)
+
+        cy.visit('/administrator/quizzes/quiz1')
+        cy.get('[data-cy="editQuestionButton_1"]')
+        cy.get('[data-cy="btn_Questions"]').click()
+
+        cy.get('[data-cy="answerTypeSelector"]').click()
+        cy.get('[data-cy="selectionItem_SingleChoice"]').click()
+        cy.get('[data-cy="answer-0"] [data-cy="answerText"]').type('1')
+        cy.get('[data-cy="answer-1"] [data-cy="answerText"]').type('4')
+        cy.get('[data-cy="answer-1"] [data-cy="selectCorrectAnswer"]').click()
+
+        cy.get(`button.attachment-button`).click({force: true})
+        cy.get('input[type=file]').selectFile('cypress/attachments/test-pdf.pdf', { force: true })
+
+        cy.get('.toastui-editor-mode-switch').contains('Markdown').click()
+        cy.get('.toastui-editor-md-container.toastui-editor-md-tab-style').invoke('text').as('markdownToPaste');
+
+        cy.get('@markdownToPaste').then((markdown) => {
+            cy.log(`Markdown to copy is: ${markdown}`);
+
+            cy.get('[data-cy="saveDialogBtn"]').should('be.enabled')
+            cy.get('[data-cy="saveDialogBtn"]').click()
+            cy.get('[data-cy="editQuestionButton_2"]')
+
+            cy.visit('/administrator/quizzes/quiz2')
+            cy.get('[data-cy="editQuestionButton_1"]')
+            cy.get('[data-cy="btn_Questions"]').click()
+
+            cy.get('[data-cy="answerTypeSelector"]').click()
+            cy.get('[data-cy="selectionItem_SingleChoice"]').click()
+            cy.get('[data-cy="answer-0"] [data-cy="answerText"]').type('1')
+            cy.get('[data-cy="answer-1"] [data-cy="answerText"]').type('4')
+            cy.get('[data-cy="answer-1"] [data-cy="selectCorrectAnswer"]').click()
+
+            cy.get('.toastui-editor-mode-switch').contains('Markdown').click()
+
+            cy.get('[data-cy="saveDialogBtn"]').should('be.enabled')
+            cy.get('[data-cy="markdownEditorInput"]').type(markdown)
+            cy.get('[data-cy="descriptionError"]').contains('Question - Attachment [test-pdf.pdf] is not allowed to be copied to this quiz')
+            cy.get('[data-cy="saveDialogBtn"]').should('be.disabled')
+        })
+    });
+
+    it('quiz description: validate that copied Markdown with an attachment from UC quiz is not allowed in non-UC quiz', () => {
+        cy.createQuizDef(1, {enableProtectedUserCommunity: true})
+        cy.createTextInputQuestionDef(1, 1)
+
+        cy.createQuizDef(2, { description: null })
+        cy.createTextInputQuestionDef(2, 1)
+
+        cy.visit('/administrator/quizzes/quiz1')
+        cy.get('[data-cy="editQuestionButton_1"]')
+        cy.get('[data-cy="btn_Questions"]').click()
+
+        cy.get('[data-cy="answerTypeSelector"]').click()
+        cy.get('[data-cy="selectionItem_SingleChoice"]').click()
+        cy.get('[data-cy="answer-0"] [data-cy="answerText"]').type('1')
+        cy.get('[data-cy="answer-1"] [data-cy="answerText"]').type('4')
+        cy.get('[data-cy="answer-1"] [data-cy="selectCorrectAnswer"]').click()
+
+        cy.get(`button.attachment-button`).click({force: true})
+        cy.get('input[type=file]').selectFile('cypress/attachments/test-pdf.pdf', { force: true })
+
+        cy.get('.toastui-editor-mode-switch').contains('Markdown').click()
+        cy.get('.toastui-editor-md-container.toastui-editor-md-tab-style').invoke('text').as('markdownToPaste');
+
+        cy.get('@markdownToPaste').then((markdown) => {
+            cy.log(`Markdown to copy is: ${markdown}`);
+
+            cy.get('[data-cy="saveDialogBtn"]').should('be.enabled')
+            cy.get('[data-cy="saveDialogBtn"]').click()
+            cy.get('[data-cy="editQuestionButton_2"]')
+
+            cy.visit('/administrator/quizzes')
+            cy.get('[data-cy="editQuizButton_quiz2"]').click()
+
+            cy.get('.toastui-editor-mode-switch').contains('Markdown').click()
+
+            cy.get('[data-cy="saveDialogBtn"]').should('be.enabled')
+            cy.get('[data-cy="markdownEditorInput"]').type(markdown)
+            cy.get('[data-cy="descriptionError"]').contains('Quiz/Survey Description - Attachment [test-pdf.pdf] is not allowed to be copied to this quiz')
+            cy.get('[data-cy="saveDialogBtn"]').should('be.disabled')
+        })
+    });
+
 
 });
