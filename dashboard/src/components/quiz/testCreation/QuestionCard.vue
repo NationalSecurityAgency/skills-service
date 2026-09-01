@@ -193,9 +193,11 @@ const toggleQuestionState = () => {
             </div>
           </div>
         </div>
-        <div v-if="isFillInTheBlankType && !collapsed" class="flex">
+        <div v-if="isFillInTheBlankType && !collapsed" class="flex flex-col">
           <div v-for="(a, index) in question.answers" :key="a.id" class="flex flex-row flex-wrap mt-1 pl-1">
-            <div class="flex items-center justify-center pb-1" >{{index}}: {{ a.answer }}</div>
+            <div class="flex items-center justify-center pb-1" >
+              <i class="far text-primary fa-check-square" style="font-size: 1.3rem;"></i> {{ a.answer }}
+            </div>
           </div>
         </div>
         <div v-if="isRatingType && !collapsed" class="flex">

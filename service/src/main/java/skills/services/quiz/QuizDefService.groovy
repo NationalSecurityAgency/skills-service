@@ -1186,7 +1186,7 @@ class QuizDefService {
                     } else {
                         if (questionDef.type == QuizQuestionType.Matching) {
                             isCorrect = (!answers.find { it.answer.correctMatch != it.answer.selectedMatch }) as Boolean
-                        } else if (questionDef.type == QuizQuestionType.TextInput) {
+                        } else if (questionDef.type == QuizQuestionType.TextInput || questionDef.type == QuizQuestionType.FillInTheBlank) {
                             isCorrect = userQuizQuestionAttempt?.status == UserQuizQuestionAttempt.QuizQuestionStatus.CORRECT
                         } else {
                             isCorrect = !answers.find { it.isConfiguredCorrect != it.isSelected }

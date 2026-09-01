@@ -622,6 +622,9 @@ class QuizRunService {
             }
             QuizDef quizDef = getQuizDef(quizId)
             handleReportingTextInputQuestion(quizDef, userId, quizAttemptId, answerDefId, quizReportAnswerReq)
+        } else if (answerDefPartialInfo.getQuestionType() == QuizQuestionType.FillInTheBlank) {
+            propsBasedValidator.quizValidationMaxStrLength(PublicProps.UiProp.maxTakeQuizInputTextAnswerLength, "Answer", quizReportAnswerReq.answerText, quizId)
+            handleReportingFillInTheBlankQuestion(userId, quizAttemptId, answerDefId, quizReportAnswerReq)
         } else if (answerDefPartialInfo.getQuestionType() == QuizQuestionType.Matching) {
             handleReportingMatchingQuestion(userId, quizAttemptId, answerDefId, quizReportAnswerReq, answerDefPartialInfo)
         } else {
@@ -642,6 +645,27 @@ class QuizRunService {
                     quizAnswerDefinitionRefId: answerDefId,
                     userId: userId,
                     status: quizReportAnswerReq.getAnswerText() == parsed.value ? UserQuizAnswerAttempt.QuizAnswerStatus.CORRECT : UserQuizAnswerAttempt.QuizAnswerStatus.WRONG,
+                    answer: quizReportAnswerReq.getAnswerText(),
+            )
+            quizAttemptAnswerRepo.save(newAnswerAttempt)
+        }
+    }
+
+    private void handleReportingFillInTheBlankQuestion(String userId, Integer quizAttemptId, Integer answerDefId, QuizReportAnswerReq quizReportAnswerReq) {
+        UserQuizAnswerAttempt existingAnswerAttempt = quizAttemptAnswerRepo.findByUserQuizAttemptRefIdAndQuizAnswerDefinitionRefId(quizAttemptId, answerDefId)
+        if (existingAnswerAttempt) {
+            if (quizReportAnswerReq.isSelected) {
+                existingAnswerAttempt.answer = quizReportAnswerReq.getAnswerText()
+                quizAttemptAnswerRepo.save(existingAnswerAttempt)
+            } else {
+                quizAttemptAnswerRepo.delete(existingAnswerAttempt)
+            }
+        } else if (quizReportAnswerReq.isSelected) {
+            UserQuizAnswerAttempt newAnswerAttempt = new UserQuizAnswerAttempt(
+                    userQuizAttemptRefId: quizAttemptId,
+                    quizAnswerDefinitionRefId: answerDefId,
+                    userId: userId,
+                    status: UserQuizAnswerAttempt.QuizAnswerStatus.NEEDS_GRADING,
                     answer: quizReportAnswerReq.getAnswerText(),
             )
             quizAttemptAnswerRepo.save(newAnswerAttempt)
@@ -902,6 +926,23 @@ class QuizRunService {
                 if(attempt) {
                     status = attempt.find{answer -> answer.status == UserQuizAnswerAttempt.QuizAnswerStatus.WRONG } ? UserQuizQuestionAttempt.QuizQuestionStatus.WRONG : UserQuizQuestionAttempt.QuizQuestionStatus.CORRECT
                     correctIds = attempt.findAll{answer -> answer.status == UserQuizAnswerAttempt.QuizAnswerStatus.CORRECT }.collect { it.quizAnswerDefinitionRefId }
+                } else {
+                    status = UserQuizQuestionAttempt.QuizQuestionStatus.WRONG
+                }
+                isCorrect = status == UserQuizQuestionAttempt.QuizQuestionStatus.CORRECT
+            } else if (quizQuestionDef.type == QuizQuestionType.FillInTheBlank) {
+                List<UserQuizAnswerAttempt> attempt = quizAttemptAnswerRepo.findAllByUserQuizAttemptRefIdAndQuizAnswerDefinitionRefIdIn(quizAttemptId, selectedIds.toSet())
+                if(attempt) {
+                    List<UserQuizAnswerAttempt> questionToGrade = attempt.findAll{answer -> answer.status == UserQuizAnswerAttempt.QuizAnswerStatus.NEEDS_GRADING }
+                    questionToGrade.each{ answerAttempt ->
+                        def questionToCompare = quizAnswerDefs.find{it.id == answerAttempt.quizAnswerDefinitionRefId }
+                        if(questionToCompare) {
+                            answerAttempt.status = questionToCompare.answer == answerAttempt.answer ?  UserQuizAnswerAttempt.QuizAnswerStatus.CORRECT :  UserQuizAnswerAttempt.QuizAnswerStatus.WRONG
+                        } else {
+                            answerAttempt.status =  UserQuizAnswerAttempt.QuizAnswerStatus.WRONG
+                        }
+                    }
+                    status = questionToGrade.find{answer -> answer.status == UserQuizAnswerAttempt.QuizAnswerStatus.WRONG } ? UserQuizQuestionAttempt.QuizQuestionStatus.WRONG : UserQuizQuestionAttempt.QuizQuestionStatus.CORRECT
                 } else {
                     status = UserQuizQuestionAttempt.QuizQuestionStatus.WRONG
                 }
