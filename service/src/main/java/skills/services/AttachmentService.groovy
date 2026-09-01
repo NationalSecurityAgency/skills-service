@@ -27,8 +27,11 @@ import org.springframework.util.unit.DataSize
 import org.springframework.web.multipart.MultipartFile
 import skills.auth.UserInfoService
 import skills.controller.exceptions.AttachmentValidator
+import skills.controller.exceptions.ErrorCode
+import skills.controller.exceptions.SkillException
 import skills.controller.exceptions.SkillsValidator
 import skills.controller.result.model.UploadAttachmentResult
+import skills.services.admin.UserCommunityService
 import skills.storage.model.Attachment
 import skills.storage.repos.AttachmentRepo
 import skills.storage.repos.SkillDefWithExtraRepo
@@ -49,6 +52,9 @@ class AttachmentService {
 
     @Autowired
     SkillDefWithExtraRepo skillDefWithExtraRepo
+
+    @Autowired
+    UserCommunityService userCommunityService
 
     @Value('${skills.config.allowedAttachmentMimeTypes}')
     List<MediaType> allowedAttachmentMimeTypes;
@@ -97,6 +103,26 @@ class AttachmentService {
 
     @Transactional
     Attachment copyAttachmentWithNewUuid(Attachment attachment, String newProjectId = null, String newQuizId = null, String skillId = null) {
+        if (userCommunityService.isUserCommunityConfigured()) {
+            if (newProjectId && attachment.projectId && attachment.projectId != newProjectId) {
+                boolean fromUC = userCommunityService.isUserCommunityOnlyProject(attachment.projectId)
+                boolean toUC = userCommunityService.isUserCommunityOnlyProject(newProjectId)
+
+                if (fromUC && !toUC) {
+                    throw new SkillException("Not allowed to copy attachments from non-UC project to UC project: [${attachment.projectId} -> ${newProjectId}]", newProjectId, null, ErrorCode.AccessDenied)
+                }
+            }
+            if (newQuizId && attachment.quizId && attachment.quizId != newQuizId) {
+                boolean fromUC = userCommunityService.isUserCommunityOnlyQuiz(attachment.quizId)
+                boolean toUC = userCommunityService.isUserCommunityOnlyQuiz(newQuizId)
+
+                if (fromUC && !toUC) {
+                    throw new SkillException("Not allowed to copy attachments from non-UC quiz to UC quiz: [${attachment.projectId} -> ${newProjectId}]", newProjectId, null, ErrorCode.AccessDenied)
+                }
+            }
+        }
+
+
         Attachment res = constructNewAttachmentWithNewUuid(attachment, newProjectId, newQuizId, skillId)
         persistAttachment(res)
         return res
@@ -137,9 +163,10 @@ class AttachmentService {
             uuidsToHandle?.each { String uuid ->
                 Attachment attachment = attachmentRepo.findByUuid(uuid)
                 if (attachment) {
-                    // check to see if this attachment already exist  which can happen when an item is being copied
-                    boolean otherExist = shouldCopyUuid.call(uuid)
-                    if (otherExist) {
+                    boolean isProjDifferent = projectId && attachment.projectId && projectId != attachment.projectId
+                    boolean isQuizDifferent = quizId && attachment.quizId && quizId != attachment.quizId
+                    boolean isDifferentOrigAndDest = isProjDifferent || isQuizDifferent
+                    if (isDifferentOrigAndDest || shouldCopyUuid.call(uuid)) {
                         // skill id will be updated later in the stack
                         // cannot set it here as skill was not saved yet
                         Attachment newAttachment = copyAttachmentWithNewUuid(attachment, projectId, quizId)
@@ -191,6 +218,50 @@ class AttachmentService {
             return UUID_PATTERN.matcher(description).findAll().collect { it[1] }
         }
         return []
+    }
+
+    CustomValidationResult validateIfAttachmentsAreAllowedToBeCopied(String description, String projectId, String quizId) {
+        if (projectId && quizId) {
+            throw new IllegalStateException("must not supply both projectId[${projectId}] and quizId[${quizId}]")
+        }
+
+        if (userCommunityService.isUserCommunityConfigured() && description && (projectId || quizId)) {
+            def matcher = UUID_PATTERN.matcher(description)
+
+            boolean foundMatch = matcher.find()
+            if (foundMatch) {
+                Boolean isDestProjNotUC = projectId ? !userCommunityService.isUserCommunityOnlyProject(projectId) : false
+                Boolean isDestQuizNotUC = quizId ? !userCommunityService.isUserCommunityOnlyQuiz(quizId) : false
+                boolean destinationIsNonUC = (isDestProjNotUC || isDestQuizNotUC)
+
+                if (destinationIsNonUC) {
+                    do {
+                        String fullMatch = matcher.group(0)
+                        String uuid = matcher.group(1)
+
+                        Attachment attachment = attachmentRepo.findByUuid(uuid)
+                        if (attachment?.projectId && userCommunityService.isUserCommunityOnlyProject(attachment.projectId)) {
+                            String linkName = extractNameFromDownloadLink(fullMatch)
+                            return new CustomValidationResult(valid: false, msg: "Attachment [$linkName] is not allowed to be copied to this project")
+                        }
+                        if (attachment?.quizId && userCommunityService.isUserCommunityOnlyQuiz(attachment.quizId)) {
+                            String linkName = extractNameFromDownloadLink(fullMatch)
+                            return new CustomValidationResult(valid: false, msg: "Attachment [$linkName] is not allowed to be copied to this quiz")
+                        }
+                        foundMatch = matcher.find()
+                    } while( foundMatch)
+                }
+            }
+        }
+        // Return valid result as placeholder - implement your actual validation
+        return CustomValidationResult.valid()
+    }
+
+    private String extractNameFromDownloadLink(String downloadLink) {
+        // Extract the link name by removing the markdown link syntax
+        // Format: [<name>](/api/download/<uuid>)
+        String linkName = downloadLink.replaceFirst(/\[/, "").replaceFirst(/\](.*)/, "")
+        return linkName
     }
 
     void persistAttachment(Attachment attachment) {

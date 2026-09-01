@@ -270,4 +270,30 @@ describe('Projects Admin Management Tests', () => {
         cy.get('[data-cy="projectCard_proj1"]')
             .should('not.exist');
     });
+
+    it('attachments are not allowed to be added when project is initially is created', () => {
+        cy.createProject(2)
+        const attachmentMarkdown = '[test-pdf.pdf](/api/download/8ab81f77-3484-4f5a-ae58-ae4e7143b449)'
+        cy.visit('/administrator');
+        cy.get('[data-cy="editProjBtn"]')
+        cy.get('[data-cy=newProjectButton]').click();
+        cy.get('[data-cy=projectName]').type('Proj1');
+
+        cy.get('.toastui-editor-mode-switch').contains('Markdown').click()
+
+        cy.get('[data-cy="saveDialogBtn"]').should('be.enabled')
+        cy.typeInMarkdownEditor('[data-cy="markdownEditorInput"]', attachmentMarkdown, true);
+        cy.get('[data-cy="descriptionError"]').contains('Attachments can only be added when editing an existing project')
+        cy.get('[data-cy="saveDialogBtn"]').should('be.disabled')
+
+        cy.get('[data-cy="closeDialogBtn"]').click()
+
+        cy.get('[data-cy="editProjBtn"]').click()
+        cy.get('[data-cy="idInputValue"]').should('have.value', 'proj2')
+        cy.get('.toastui-editor-mode-switch').contains('Markdown').click()
+        cy.typeInMarkdownEditor('[data-cy="markdownEditorInput"]', attachmentMarkdown, true);
+        cy.wait(2000)
+        cy.get('[data-cy="descriptionError"]').should('not.be.visible')
+        cy.get('[data-cy="saveDialogBtn"]').should('be.enabled')
+    });
 });

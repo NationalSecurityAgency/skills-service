@@ -1781,12 +1781,14 @@ Cypress.Commands.add('assignUserAsAdmin', (projId, userId) => {
     cy.request('PUT', `/admin/projects/${projId}/users/${userId}/roles/ROLE_PROJECT_ADMIN`)
 })
 
-Cypress.Commands.add('typeInMarkdownEditor', (selector, text) => {
-    const fullSelector = `${selector} .toastui-editor-ww-container .toastui-editor-contents`
+Cypress.Commands.add('typeInMarkdownEditor', (selector, text, isMarkdownEditor = false) => {
+    const containerCss = isMarkdownEditor ? '.toastui-editor-md-container .toastui-editor' : '.toastui-editor-ww-container .toastui-editor-contents'
+    const viewSelector = `${selector} ${containerCss}`
+    const typeSelector = isMarkdownEditor ? `${viewSelector} textarea` : viewSelector
     cy.wait(100)
-    cy.get(fullSelector).scrollIntoView().should('be.visible')
-    cy.wait(100)
-    cy.get(fullSelector).type(text, { force: true })
+    cy.get(viewSelector).scrollIntoView().should('be.visible')
+    cy.wait(250)
+    cy.get(typeSelector).type(text, { force: true })
 })
 
 Cypress.Commands.add('validateMarkdownViewerText', (selector, expectedLinesArr) => {

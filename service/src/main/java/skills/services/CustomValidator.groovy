@@ -19,17 +19,6 @@ import callStack.profiler.Profile
 import groovy.util.logging.Slf4j
 import jakarta.annotation.PostConstruct
 import org.apache.commons.lang3.StringUtils
-import org.commonmark.Extension
-import org.commonmark.ext.gfm.tables.TableBlock
-import org.commonmark.ext.gfm.tables.TableHead
-import org.commonmark.ext.gfm.tables.TablesExtension
-import org.commonmark.node.*
-import org.commonmark.parser.IncludeSourceSpans
-import org.commonmark.parser.Parser
-import org.commonmark.renderer.markdown.MarkdownRenderer
-import org.commonmark.renderer.text.TextContentRenderer
-import org.jsoup.Jsoup
-import org.jsoup.nodes.Element
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
@@ -40,7 +29,6 @@ import skills.controller.request.model.*
 import skills.controller.result.model.ModifiedDescription
 import skills.services.admin.UserCommunityService
 
-import java.util.concurrent.atomic.AtomicBoolean
 import java.util.regex.Matcher
 import java.util.regex.Pattern
 
@@ -74,6 +62,9 @@ class CustomValidator {
 
     @Autowired
     UserInfoService userInfoService
+
+    @Autowired
+    AttachmentService attachmentService
 
     private String paragraphValidationMsg
     private String userCommunityParagraphValidationMsg
@@ -203,6 +194,25 @@ class CustomValidator {
         String message
     }
 
+    CustomValidationResult validateDescription(String description, String projectId=null, Boolean utilizeUserCommunityParagraphPatternByDefault = false, String quizId = null) {
+        if(projectId || quizId) {
+            CustomValidationResult attachmentValRes = attachmentService.validateIfAttachmentsAreAllowedToBeCopied(description, projectId, quizId)
+            if (!attachmentValRes.isValid()) {
+                return attachmentValRes
+            }
+        }
+
+        ParagraphValidator.InternalValidationResult result = new ParagraphValidator(new ParagraphValidator.InternalValidationRequest(
+                description: description,
+                projectId: projectId,
+                validationPattern: getValidationPattern(projectId, utilizeUserCommunityParagraphPatternByDefault, quizId),
+                forceValidationPattern: forceValidationPattern,
+                utilizeUserCommunityParagraphPatternByDefault: utilizeUserCommunityParagraphPatternByDefault,
+                quizId: quizId)).validateMarkdown()
+
+        return new CustomValidationResult(valid: result.isValid, msg: result.validationMsg, validationFailedDetails: result.validationFailedDetails ?: null)
+    }
+
     private ValidationPattern getValidationPattern(String projectId = null, Boolean utilizeUserCommunityParagraphPatternByDefault = false, String quizId = null) {
         Pattern paragraphPatternToUse = this.paragraphPattern
         String paragraphValidationMsgToUse = this.paragraphValidationMsg
@@ -218,17 +228,6 @@ class CustomValidator {
         }
 
         return new ValidationPattern(pattern: paragraphPatternToUse, message: paragraphValidationMsgToUse)
-    }
-
-    CustomValidationResult validateDescription(String description, String projectId=null, Boolean utilizeUserCommunityParagraphPatternByDefault = false, String quizId = null) {
-        ParagraphValidator.InternalValidationResult result = new ParagraphValidator(new ParagraphValidator.InternalValidationRequest(
-                description: description,
-                projectId: projectId,
-                validationPattern: getValidationPattern(projectId, utilizeUserCommunityParagraphPatternByDefault, quizId),
-                forceValidationPattern: forceValidationPattern,
-                utilizeUserCommunityParagraphPatternByDefault: utilizeUserCommunityParagraphPatternByDefault,
-                quizId: quizId)).validateMarkdown()
-        return new CustomValidationResult(valid: result.isValid, msg: result.validationMsg, validationFailedDetails: result.validationFailedDetails ?: null)
     }
 
     ModifiedDescription addPrefixToInvalidParagraphs(String description, String prefix, String projectId=null, Boolean utilizeUserCommunityParagraphPatternByDefault = false, String quizId = null) {

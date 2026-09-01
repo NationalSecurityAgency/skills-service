@@ -537,7 +537,7 @@ defineExpose({
 
       <div v-if="descriptionWarningMsg"
            data-cy="descriptionWarningMessage"
-           class="border border-surface bg-sky-50 text-blue-800 dark:bg-surface-700 rounded-t px-3 py-2 sd-theme-tile-background flex gap-2 items-center"
+           class="border border-surface bg-sky-50 text-blue-800 dark:bg-surface-800 dark:text-yellow-50 rounded-t px-3 py-2 sd-theme-tile-background flex gap-2 items-center"
       >
         <i class="fa-solid fa-circle-exclamation text-lg" aria-hidden="true"></i> {{ descriptionWarningMsg }}
       </div>
@@ -743,7 +743,8 @@ div.toastui-editor-contents {
 
 .editor-footer-link {
   margin-right: auto;
-  margin-left: 12px;
+  margin-top: 5px;
+  margin-left: 10px;
   display: inline-flex;
   align-items: center;
   text-decoration: none;

@@ -466,7 +466,7 @@ const startAiAssistant = () => {
           label-class="text-primary font-bold"
           :resizable="true"
           name="question" />
-      <div data-cy="answerHintSection" v-if="isQuizType">
+      <div data-cy="answerHintSection" v-if="isQuizType" class="mt-3">
         <div class="flex mb-2">
           <SkillsCheckboxInput
               v-model="showHint"
