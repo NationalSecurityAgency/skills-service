@@ -96,6 +96,10 @@ const ratingSelected = (value) => {
 const getQuestionNumFromPath = (path) => {
   return Number(path.split('[').pop().split(']')[0]) + 1;
 }
+const allBlanksFilled = (value) => {
+  const unansweredQuestions = value.filter((q) => q.trim() === '')
+  return unansweredQuestions.length === 0;
+}
 
 const validateFunCache = new Map()
 
@@ -167,6 +171,20 @@ const schema = object({
                       .test('customAnswerValidator',"", async (value, context) => {
                         return await createValidateAnswerFn(value, context)
                       }),
+                }),
+            'answerTextArray': array()
+                .when('questionType', {
+                  is:  QuestionType.FillInTheBlank,
+                  then: (sch) => sch
+                      .required()
+                      .test('mustBeFilledIn', 'All blanks must be filled in', (value) => allBlanksFilled(value))
+                      .label('Answers')
+                  // then: (sch)  => sch
+                  //     .trim()
+                  //     .required((d) => `Answer to question #${getQuestionNumFromPath(d.path)} is required`)
+                  //     .test('customAnswerValidator',"", async (value, context) => {
+                  //       return await createValidateAnswerFn(value, context)
+                  //     }),
                 }),
             'answerRating': number()
                 .when('questionType', {
