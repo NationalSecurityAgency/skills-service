@@ -349,6 +349,13 @@ const startQuizAttempt = () => {
               // eslint-disable-next-line no-param-reassign
               answerOptions[0].answerText = enteredTextObj.answerText;
             }
+          } else if (enteredText && q.questionType === QuestionType.FillInTheBlank) {
+            enteredText.forEach((answer) => {
+              let currentAnswer = answerOptions.find((a) => a.id === answer.answerId);
+              if(currentAnswer) {
+                currentAnswer.answerOption = answer.answerText;
+              }
+            })
           } else if (enteredText && q.questionType === QuestionType.Matching) {
             enteredText.map((existingAnswer) => {
               let selectedAnswer = answerOptions.find((it) => it.id === existingAnswer.answerId)
@@ -370,11 +377,13 @@ const startQuizAttempt = () => {
 const initializeFormData = (copy) => {
   const formQuestions = copy.questions.map((q) => {
     const answerRating = q.questionType === QuestionType.Rating ? q.answerOptions.find((a) => a.selected) : 0
+
     return {
       questionType: q.questionType,
       quizAnswers: q.answerOptions.map((a) => ({ ...a, selected: a.selected ? a.selected : false })),
       answerText: q.questionType === QuestionType.TextInput ? (q.answerOptions[0]?.answerText || '') : '',
       answerRating: answerRating ? Number(answerRating.answerOption) : 0,
+      answerTextArray: q.answerOptions.map((a) => a.answerOption),
     }
   })
   checkIfAnswerChangedForValidation.reset()
