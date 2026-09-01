@@ -163,6 +163,9 @@ const selectionChanged = (currentAnswer) => {
     });
   });
 }
+
+const fillInTheBlankChangedDebounced = useDebounceFn((textInput, answerId) => fillInTheBlankChanged(textInput, answerId), appConfig.formFieldDebounceInMs)
+
 const fillInTheBlankChanged = (textInput, answerId) => {
   if(answerOptions.value[answerId]) {
     const currentAnswer = {
@@ -325,7 +328,7 @@ const updateAnswerOrder = (newOrder) => {
           <div v-else-if="isFillInTheBlank">
             <div v-for="(a, index) in q.answerOptions">
               <SkillsTextInput
-                  @input="(e) => fillInTheBlankChanged(e, index)"
+                  @input="(e) => fillInTheBlankChangedDebounced(e, index)"
                   :placeholder="`Answer ${index}`"
                   :name="`${fieldName}[${index}]`" />
             </div>

@@ -608,7 +608,7 @@ class QuizRunService {
 
         QuizAnswerDefRepo.AnswerDefPartialInfo answerDefPartialInfo = getAnswerDefPartialInfo(quizId, answerDefId)
 
-        if (answerDefPartialInfo.getQuestionType() == QuizQuestionType.TextInput || answerDefPartialInfo.getQuestionType() == QuizQuestionType.FillInTheBlank) {
+        if (answerDefPartialInfo.getQuestionType() == QuizQuestionType.TextInput) {
             if (quizReportAnswerReq.isSelected) {
                 propsBasedValidator.quizValidationMaxStrLength(PublicProps.UiProp.maxTakeQuizInputTextAnswerLength,
                         "Answer", quizReportAnswerReq.answerText, quizId)
@@ -623,7 +623,7 @@ class QuizRunService {
             QuizDef quizDef = getQuizDef(quizId)
             handleReportingTextInputQuestion(quizDef, userId, quizAttemptId, answerDefId, quizReportAnswerReq)
         } else if (answerDefPartialInfo.getQuestionType() == QuizQuestionType.FillInTheBlank) {
-            propsBasedValidator.quizValidationMaxStrLength(PublicProps.UiProp.maxTakeQuizInputTextAnswerLength, "Answer", quizReportAnswerReq.answerText, quizId)
+//            propsBasedValidator.quizValidationMaxStrLength(PublicProps.UiProp.maxTakeQuizInputTextAnswerLength, "Answer", quizReportAnswerReq.answerText, quizId)
             handleReportingFillInTheBlankQuestion(userId, quizAttemptId, answerDefId, quizReportAnswerReq)
         } else if (answerDefPartialInfo.getQuestionType() == QuizQuestionType.Matching) {
             handleReportingMatchingQuestion(userId, quizAttemptId, answerDefId, quizReportAnswerReq, answerDefPartialInfo)
