@@ -315,7 +315,7 @@ class QuizRunService {
             if(it.type == QuizQuestionType.Matching) {
                 JsonSlurper slurper = new JsonSlurper()
                 def values = []
-                quizAnswerDefs.collect{ answer ->
+                quizAnswerDefs.collect { answer ->
                     def parsedAnswer = slurper.parseText(answer.multiPartAnswer)
                     parsedAnswer.id = answer.id
                     matchingTerms.push(parsedAnswer.value)
@@ -328,7 +328,14 @@ class QuizRunService {
                             id: answer.id,
                             answerOption: answer.value
                     )
-                }.sort{ it.id }
+                }.sort { it.id }
+            } else if( it.type == QuizQuestionType.FillInTheBlank) {
+                answerOptions = quizAnswerDefs.collect {
+                    new QuizAnswerOptionsInfo(
+                            id: it.id,
+                            answerOption: ''
+                    )
+                }
             } else {
                 answerOptions = quizAnswerDefs.collect {
                     new QuizAnswerOptionsInfo(
@@ -605,7 +612,7 @@ class QuizRunService {
 
         QuizAnswerDefRepo.AnswerDefPartialInfo answerDefPartialInfo = getAnswerDefPartialInfo(quizId, answerDefId)
 
-        if (answerDefPartialInfo.getQuestionType() == QuizQuestionType.TextInput) {
+        if (answerDefPartialInfo.getQuestionType() == QuizQuestionType.TextInput || answerDefPartialInfo.getQuestionType() == QuizQuestionType.FillInTheBlank) {
             if (quizReportAnswerReq.isSelected) {
                 propsBasedValidator.quizValidationMaxStrLength(PublicProps.UiProp.maxTakeQuizInputTextAnswerLength,
                         "Answer", quizReportAnswerReq.answerText, quizId)

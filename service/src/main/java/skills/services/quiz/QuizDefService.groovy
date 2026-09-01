@@ -1147,6 +1147,7 @@ class QuizDefService {
                     boolean isTextInput = questionDef.type == QuizQuestionType.TextInput
                     boolean isRating = questionDef.type == QuizQuestionType.Rating
                     boolean isMatching = questionDef.type == QuizQuestionType.Matching
+                    boolean isFillInTheBlank = questionDef.type == QuizQuestionType.FillInTheBlank
                     List<UserGradedQuizAnswerResult> answers = quizAnswerDefs.collect { QuizAnswerDef answerDef ->
                         UserQuizAnswerAttemptRepo.AnswerIdAndAnswerText foundSelected = alreadySelected.find { it.answerId == answerDef.id }
 
@@ -1180,6 +1181,11 @@ class QuizDefService {
                                     selectedMatch: InputSanitizer.unsanitizeEscapedHtml(originalAnswer.value),
                                     correctMatch: InputSanitizer.unsanitizeEscapedHtml(originalAnswer.answer)
                             )
+                        } else if(isFillInTheBlank) {
+                            answer = [
+                                    answerText: foundSelected?.answerText,
+                                    isCorrect: foundSelected?.answerStatus
+                            ]
                         } else {
                             answer = InputSanitizer.unsanitizeEscapedHtml(answerDef.answer)
                         }
