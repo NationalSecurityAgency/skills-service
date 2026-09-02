@@ -326,7 +326,7 @@ class QuizRunService {
                     )
                 }.sort { it.id }
             } else if( it.type == QuizQuestionType.FillInTheBlank) {
-                answerOptions = quizAnswerDefs.collect {
+                answerOptions = quizAnswerDefs.sort{it.displayOrder}.collect {
                     new QuizAnswerOptionsInfo(
                             id: it.id,
                             answerOption: ''
@@ -933,16 +933,16 @@ class QuizRunService {
             } else if (quizQuestionDef.type == QuizQuestionType.FillInTheBlank) {
                 List<UserQuizAnswerAttempt> attempt = quizAttemptAnswerRepo.findAllByUserQuizAttemptRefIdAndQuizAnswerDefinitionRefIdIn(quizAttemptId, selectedIds.toSet())
                 if(attempt) {
-                    List<UserQuizAnswerAttempt> questionToGrade = attempt.findAll{answer -> answer.status == UserQuizAnswerAttempt.QuizAnswerStatus.NEEDS_GRADING }
-                    questionToGrade.each{ answerAttempt ->
+                    attempt.each{ answerAttempt ->
                         def questionToCompare = quizAnswerDefs.find{it.id == answerAttempt.quizAnswerDefinitionRefId }
                         if(questionToCompare) {
-                            answerAttempt.status = questionToCompare.answer == answerAttempt.answer ?  UserQuizAnswerAttempt.QuizAnswerStatus.CORRECT :  UserQuizAnswerAttempt.QuizAnswerStatus.WRONG
+                            def possibleAnswers = questionToCompare.answer.split(/;/)
+                            answerAttempt.status = possibleAnswers.find{ it.trim() == answerAttempt.answer.trim() } ? UserQuizAnswerAttempt.QuizAnswerStatus.CORRECT :  UserQuizAnswerAttempt.QuizAnswerStatus.WRONG
                         } else {
                             answerAttempt.status =  UserQuizAnswerAttempt.QuizAnswerStatus.WRONG
                         }
                     }
-                    status = questionToGrade.find{answer -> answer.status == UserQuizAnswerAttempt.QuizAnswerStatus.WRONG } ? UserQuizQuestionAttempt.QuizQuestionStatus.WRONG : UserQuizQuestionAttempt.QuizQuestionStatus.CORRECT
+                    status = attempt.find{answer -> answer.status == UserQuizAnswerAttempt.QuizAnswerStatus.WRONG } ? UserQuizQuestionAttempt.QuizQuestionStatus.WRONG : UserQuizQuestionAttempt.QuizQuestionStatus.CORRECT
                 } else {
                     status = UserQuizQuestionAttempt.QuizQuestionStatus.WRONG
                 }

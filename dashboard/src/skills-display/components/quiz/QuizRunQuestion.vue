@@ -42,7 +42,7 @@ const props = defineProps({
 })
 
 const isLoading = ref(true);
-const emit = defineEmits(['answer-text-changed', 'selected-answer', 'answer-matched'])
+const emit = defineEmits(['answer-text-changed', 'selected-answer', 'answer-matched', 'fill-in-the-blank-changed'])
 
 const appConfig = useAppConfig()
 
@@ -175,11 +175,10 @@ const fillInTheBlankChanged = (textInput, answerId) => {
       answerText: textInput,
     }
     reportAnswer(currentAnswer).then((reportAnswerPromise) => {
-    //   // only 1 answer in case of TextInput
-    //   emit('answer-text-changed', {
-    //     ...currentAnswer,
-    //     reportAnswerPromise,
-    //   });
+      emit('fill-in-the-blank-changed', {
+        ...currentAnswer,
+        reportAnswerPromise,
+      });
     });
   }
 }
@@ -329,7 +328,7 @@ const updateAnswerOrder = (newOrder) => {
             <div v-for="(a, index) in q.answerOptions">
               <SkillsTextInput
                   @input="(e) => fillInTheBlankChangedDebounced(e, index)"
-                  :placeholder="`Answer ${index}`"
+                  :placeholder="`Fill in blank ${index + 1}`"
                   :name="`${fieldName}[${index}]`" />
             </div>
           </div>

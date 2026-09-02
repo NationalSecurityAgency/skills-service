@@ -1125,6 +1125,10 @@ class QuizDefService {
                     boolean isRating = questionDef.type == QuizQuestionType.Rating
                     boolean isMatching = questionDef.type == QuizQuestionType.Matching
                     boolean isFillInTheBlank = questionDef.type == QuizQuestionType.FillInTheBlank
+
+                    if(isFillInTheBlank) {
+                        quizAnswerDefs.sort{ it.displayOrder }
+                    }
                     List<UserGradedQuizAnswerResult> answers = quizAnswerDefs.collect { QuizAnswerDef answerDef ->
                         UserQuizAnswerAttemptRepo.AnswerIdAndAnswerText foundSelected = alreadySelected.find { it.answerId == answerDef.id }
 
