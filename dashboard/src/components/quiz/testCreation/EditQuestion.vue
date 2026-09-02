@@ -69,11 +69,13 @@ onMounted(() => {
   if (props.isEdit || props.isCopy) {
     questionType.value.selectedType = questionType.value.options.find((o) => o.id === props.questionDef.questionType)
     if (props.isEdit) {
-      loadingComponent.value = true;
-      QuizService.getGradingStatus(props.questionDef.quizId, props.questionDef.id).then((gradingStatus) => {
-        editTypeDisabled.value = gradingStatus.data.hasPendingGrades;
-        loadingComponent.value = false;
-      })
+      if(props.questionDef.questionType === QuestionType.TextInput) {
+        loadingComponent.value = true;
+        QuizService.getGradingStatus(props.questionDef.quizId, props.questionDef.id).then((gradingStatus) => {
+          editTypeDisabled.value = gradingStatus.data.hasPendingGrades;
+          loadingComponent.value = false;
+        })
+      }
     }
   }
   if (isQuizType.value && props.questionDef.answerHint) {
@@ -216,7 +218,7 @@ const atLeastTwoAnswersFilledIn = (value) => {
   if (value === undefined) {
     return false
   }
-  if (!isDirty.value || isQuestionTypeTextInput.value || isQuestionTypeRatingInput.value || isQuestionTypeMatching.value) {
+  if (!isDirty.value || isQuestionTypeTextInput.value || isQuestionTypeRatingInput.value || isQuestionTypeMatching.value || isQuestionTypeFillInTheBlank.value) {
     return true;
   }
   const numWithContent = value.filter((a) => (a.answer && a.answer.trim().length > 0)).length;
@@ -226,7 +228,7 @@ const correctAnswersMustHaveText = (value) => {
   if (value === undefined) {
     return false
   }
-  if (isSurveyType.value || !isDirty.value || isQuestionTypeTextInput.value || isQuestionTypeRatingInput.value || isQuestionTypeMatching.value) {
+  if (isSurveyType.value || !isDirty.value || isQuestionTypeTextInput.value || isQuestionTypeRatingInput.value || isQuestionTypeMatching.value || isQuestionTypeFillInTheBlank.value) {
     return true;
   }
   const correctWithoutText = value.filter((a) => (a.isCorrect && (!a.answer || a.answer.trim().length === 0))).length;
@@ -274,6 +276,15 @@ const matchesMustNotBeBlank = (value) => {
   })
   return emptyAnswers.length === 0;
 }
+
+const allAnswersFilledIn = (value) => {
+  if(!isQuestionTypeFillInTheBlank.value) {
+    return true;
+  }
+  const emptyAnswers = value.filter((a) => (!a.answer || a.answer.trim().length === 0))
+  return emptyAnswers.length === 0;
+}
+
 const noRepeatAnswers = (value) => {
   if(!isQuestionTypeMatching.value) {
     return true;
@@ -316,6 +327,7 @@ const schema = object({
       .test('multipleChoiceQuestionsMustHaveAtLeast2Answer', 'Multiple Answers Question must have at least 2 correct answers', (value) => multipleChoiceQuestionsMustHaveAtLeast2Answer(value))
       .test('matchesMustNotBeBlank', 'Answers must include both a term and a value', (value) => matchesMustNotBeBlank(value))
       .test('noRepeatAnswers', 'Answers can not contain duplicate terms or values', (value) => noRepeatAnswers(value))
+      .test('allAnswersFilledIn', 'All answers must be filled in', (value) => allAnswersFilledIn(value))
   ,
 })
 const initialQuestionData = {
