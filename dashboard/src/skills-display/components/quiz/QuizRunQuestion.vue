@@ -327,6 +327,7 @@ const updateAnswerOrder = (newOrder) => {
           <div v-else-if="isFillInTheBlank">
             <div v-for="(a, index) in q.answerOptions">
               <SkillsTextInput
+                  :disabled="quizComplete"
                   @input="(e) => fillInTheBlankChangedDebounced(e, index)"
                   :placeholder="`Fill in blank ${index + 1}`"
                   :name="`${fieldName}[${index}]`" />
