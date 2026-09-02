@@ -127,7 +127,6 @@ class SubjAdminService {
         if (existing && isExistingEnabled && !isEnabledSkillInRequest) {
             throw new SkillException("Cannot disable an existing enabled Subject. SubjectId=[${origSubjectId}]", projectId, null, ErrorCode.BadParam)
         }
-
         String prevSubjId = existing?.skillId
 
         SkillDefWithExtra res
@@ -135,6 +134,12 @@ class SubjAdminService {
             Props.copy(subjectRequest, existing)
             //we need to manually copy subjectId into skillId
             existing.skillId = subjectRequest.subjectId
+
+            Closure<Boolean> alreadyExistLookup = { String uuid ->
+                return skillDefWithExtraRepo.otherSkillsExistInProjectWithAttachmentUUID(existing.projectId, prevSubjId, uuid)
+            }
+            existing.description = attachmentService.copyAttachmentsForIncomingDescription(existing.description, existing.projectId, prevSubjId, null, alreadyExistLookup)
+
             DataIntegrityExceptionHandlers.subjectDataIntegrityViolationExceptionHandler.handle(projectId) {
                 res = skillDefWithExtraRepo.save(existing)
             }
@@ -150,12 +155,14 @@ class SubjAdminService {
             Integer lastDisplayOrder = skillDefRepo.calculateHighestDisplayOrderByProjectIdAndType(projectId, SkillDef.ContainerType.Subject)
             int displayOrder = lastDisplayOrder != null ? lastDisplayOrder + 1 : 1
             String enabled = isEnabledSkillInRequest.toString()
+
+            String description = attachmentService.copyAttachmentsForIncomingDescription(subjectRequest?.description, projectId, subjectRequest.subjectId, null)
             SkillDefWithExtra skillDef = new SkillDefWithExtra(
                     type: SkillDef.ContainerType.Subject,
                     projectId: projectId,
                     skillId: subjectRequest.subjectId,
                     name: subjectRequest?.name,
-                    description: subjectRequest?.description,
+                    description: description,
                     iconClass: subjectRequest?.iconClass ?: "fa fa-question-circle",
                     projRefId: projDef.id,
                     displayOrder: displayOrder,

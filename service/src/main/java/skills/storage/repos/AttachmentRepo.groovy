@@ -42,6 +42,6 @@ interface AttachmentRepo extends CrudRepository<Attachment, Integer> {
                           @Param("length") long length)
 
 
-    boolean existsByUuidAndProjectIdIgnoreCase(String uuid, String projectId)
+    boolean existsByUuidAndProjectIdIgnoreCaseAndSkillIdNotNull(String uuid, String projectId)
     boolean existsByUuidAndQuizIdIgnoreCase(String uuid, String projectId)
 }

@@ -169,8 +169,8 @@ class ProjAdminService {
         if (isEdit) {
             Props.copy(projectRequest, projectDefinition)
             if (projectDefinition.description) {
-                Closure<Boolean> alreadyExistLookup = { String uuid -> return attachmentService.doesAttachmentExistInProject(uuid, projectDefinition.projectId) }
-                description = attachmentService.copyAttachmentsForIncomingDescription(projectDefinition.description, projectDefinition.projectId, null, null, alreadyExistLookup)
+                Closure<Boolean> existElsewhereInProjLookup = { String uuid -> return attachmentService.doesAttachmentExistInProjectAndLinkedToASkillId(uuid, originalProjectId) }
+                description = attachmentService.copyAttachmentsForIncomingDescription(projectDefinition.description, originalProjectId, null, null, existElsewhereInProjLookup)
                 projectDefinition.description = description
             }
             log.debug("Updating [{}]", projectDefinition)
