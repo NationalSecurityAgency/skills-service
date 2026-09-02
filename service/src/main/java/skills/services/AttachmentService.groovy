@@ -104,12 +104,23 @@ class AttachmentService {
     @Transactional
     Attachment copyAttachmentWithNewUuid(Attachment attachment, String newProjectId = null, String newQuizId = null, String skillId = null) {
         if (userCommunityService.isUserCommunityConfigured()) {
-            if (newProjectId && attachment.projectId && attachment.projectId != newProjectId) {
-                boolean fromUC = userCommunityService.isUserCommunityOnlyProject(attachment.projectId)
+            if (newProjectId) {
                 boolean toUC = userCommunityService.isUserCommunityOnlyProject(newProjectId)
+                boolean fromUC = userCommunityService.isUserCommunityOnlyProject(attachment.projectId)
 
-                if (fromUC && !toUC) {
-                    throw new SkillException("Not allowed to copy attachments from non-UC project to UC project: [${attachment.projectId} -> ${newProjectId}]", newProjectId, null, ErrorCode.AccessDenied)
+                if (toUC || fromUC) {
+                    String userId = userInfoService.getCurrentUserId();
+                    if (!userCommunityService.isUserCommunityMember(userId)) {
+                        log.warn("User attempted to copy attachment with uuid=[${attachment.uuid}] from projectId=[${attachment.projectId}] to projectId=[${newProjectId}] but user is not UC member")
+                        throw new SkillException("Not authorized to copy the attachment", ErrorCode.AccessDenied)
+                    }
+                }
+
+
+                if (newProjectId && attachment.projectId && attachment.projectId != newProjectId) {
+                    if (fromUC && !toUC) {
+                        throw new SkillException("Not allowed to copy attachments from non-UC project to UC project: [${attachment.projectId} -> ${newProjectId}]", newProjectId, null, ErrorCode.AccessDenied)
+                    }
                 }
             }
             if (newQuizId && attachment.quizId && attachment.quizId != newQuizId) {
@@ -268,8 +279,8 @@ class AttachmentService {
         attachmentRepo.save(attachment)
     }
 
-    boolean doesAttachmentExistInProject(String attachmentUuid, String projectId) {
-        return attachmentRepo.existsByUuidAndProjectIdIgnoreCase(attachmentUuid, projectId)
+    boolean doesAttachmentExistInProjectAndLinkedToASkillId(String attachmentUuid, String projectId) {
+        return attachmentRepo.existsByUuidAndProjectIdIgnoreCaseAndSkillIdNotNull(attachmentUuid, projectId)
     }
 
     boolean doesAttachmentExistInQuiz(String attachmentUuid, String quizId) {
