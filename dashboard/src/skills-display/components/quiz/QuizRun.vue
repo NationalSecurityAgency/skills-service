@@ -179,12 +179,6 @@ const schema = object({
                       .required()
                       .test('mustBeFilledIn', 'All blanks must be filled in', (value) => allBlanksFilled(value))
                       .label('Answers')
-                  // then: (sch)  => sch
-                  //     .trim()
-                  //     .required((d) => `Answer to question #${getQuestionNumFromPath(d.path)} is required`)
-                  //     .test('customAnswerValidator',"", async (value, context) => {
-                  //       return await createValidateAnswerFn(value, context)
-                  //     }),
                 }),
             'answerRating': number()
                 .when('questionType', {
@@ -368,7 +362,7 @@ const startQuizAttempt = () => {
               answerOptions[0].answerText = enteredTextObj.answerText;
             }
           } else if (enteredText && q.questionType === QuestionType.FillInTheBlank) {
-            enteredText.forEach((answer) => {
+            enteredText.map((answer) => {
               let currentAnswer = answerOptions.find((a) => a.id === answer.answerId);
               if(currentAnswer) {
                 currentAnswer.answerOption = answer.answerText;
@@ -605,7 +599,8 @@ const onResize = (newWidth) => {
                   @selected-answer="updateSelectedAnswers"
                   @answer-matched="updateMatchedAnswer"
                   :quizComplete="!!quizResult"
-                  @answer-text-changed="updateSelectedAnswers"/>
+                  @answer-text-changed="updateSelectedAnswers"
+                  @fill-in-the-blank-changed="updateSelectedAnswers"/>
             </div>
           </SkillsOverlay>
 
