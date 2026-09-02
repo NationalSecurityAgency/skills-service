@@ -268,4 +268,11 @@ class AttachmentService {
         attachmentRepo.save(attachment)
     }
 
+    boolean doesAttachmentExistInProject(String attachmentUuid, String projectId) {
+        return attachmentRepo.existsByUuidAndProjectIdIgnoreCase(attachmentUuid, projectId)
+    }
+
+    boolean doesAttachmentExistInQuiz(String attachmentUuid, String quizId) {
+        return attachmentRepo.existsByUuidAndQuizIdIgnoreCase(attachmentUuid, quizId)
+    }
 }

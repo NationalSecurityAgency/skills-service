@@ -163,10 +163,16 @@ class ProjAdminService {
         final boolean isEdit = projectDefinition
         String previousName = projectDefinition?.name
         String previousProjId = projectDefinition?.projectId
+        String description = projectRequest.description
 
         ProjDefParent savedProjDef
         if (isEdit) {
             Props.copy(projectRequest, projectDefinition)
+            if (projectDefinition.description) {
+                Closure<Boolean> alreadyExistLookup = { String uuid -> return attachmentService.doesAttachmentExistInProject(uuid, projectDefinition.projectId) }
+                description = attachmentService.copyAttachmentsForIncomingDescription(projectDefinition.description, projectDefinition.projectId, null, null, alreadyExistLookup)
+                projectDefinition.description = description
+            }
             log.debug("Updating [{}]", projectDefinition)
 
             DataIntegrityExceptionHandlers.dataIntegrityViolationExceptionHandler.handle(projectDefinition.projectId) {
@@ -175,7 +181,7 @@ class ProjAdminService {
             log.debug("Saved [{}]", projectDefinition)
             savedProjDef = projectDefinition
         } else {
-            if (projectRequest.description && attachmentService.findAttachmentUuids(projectRequest.description)) {
+            if (description && attachmentService.findAttachmentUuids(description)) {
                 throw new SkillException("Attachments in the description are not allowed when creating a new project", projectRequest.projectId, null, ErrorCode.BadParam)
             }
 
@@ -184,7 +190,7 @@ class ProjAdminService {
             String clientSecret = new ClientSecretGenerator().generateClientSecret()
 
             projectDefinition = new ProjDefWithDescription(projectId: projectRequest.projectId, name: projectRequest.name,
-                    clientSecret: clientSecret, description: projectRequest.description)
+                    clientSecret: clientSecret, description: description)
             log.debug("Created project [{}]", projectDefinition)
 
             if (!userInfoService.isCurrentUserASuperDuperUser()) {
@@ -205,7 +211,7 @@ class ProjAdminService {
 
             savedProjDef = projDef
         }
-        attachmentService.updateAttachmentsAttrsBasedOnUuidsInMarkdown(projectRequest.description, projectDefinition.projectId, null, null)
+        attachmentService.updateAttachmentsAttrsBasedOnUuidsInMarkdown(description, projectDefinition.projectId, null, null)
 
         Map actionAttributes
         if (isEdit) {

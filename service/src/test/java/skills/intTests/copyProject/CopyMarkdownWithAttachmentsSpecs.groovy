@@ -19,6 +19,7 @@ package skills.intTests.copyProject
 import org.springframework.http.HttpStatus
 import skills.intTests.utils.SkillsClientException
 import skills.storage.model.Attachment
+import spock.lang.IgnoreRest
 
 import static skills.intTests.utils.SkillsFactory.*
 
@@ -34,6 +35,52 @@ class CopyMarkdownWithAttachmentsSpecs extends CopyIntSpec {
         SkillsClientException e = thrown(SkillsClientException)
         e.httpStatus == HttpStatus.BAD_REQUEST
         e.message.contains("Attachments in the description are not allowed when creating a new project")
+    }
+
+    def "paste markdown with attachment to another project: by editing a project"() {
+        def p1 = createProject(1)
+        def p1subj1 = createSubject(1, 1)
+        skillsService.createProjectAndSubjectAndSkills(p1, p1subj1, null)
+
+        def attachment1Href = attachFileAndReturnHref(p1.projectId)
+        def attachment2Href = attachFileAndReturnHref(p1.projectId)
+
+        def p1Skills = createSkills(2, 1, 1, 100)
+        p1Skills[0].description = "Here is a [Link](${attachment1Href})".toString()
+        p1Skills[1].description = "Here is a [Link](${attachment2Href})".toString()
+        skillsService.createSkills(p1Skills)
+
+        def p2 = createProject(2)
+        skillsService.createProjectAndSubjectAndSkills(p2, null, null)
+
+        when:
+        p2.description = "Here is a [Link](${attachment1Href})".toString()
+        skillsService.updateProject(p2, p2.projectId)
+
+        def origProjSkill1 = skillsService.getSkill([projectId: p1.projectId, subjectId: p1subj1.subjectId, skillId: p1Skills[0].skillId])
+        def origProjSkill2 = skillsService.getSkill([projectId: p1.projectId, subjectId: p1subj1.subjectId, skillId: p1Skills[1].skillId])
+
+        def copyProj = skillsService.getProjectDescription(p2.projectId)
+
+        List<Attachment> attachments = attachmentRepo.findAll()
+        then:
+        origProjSkill1.description == "Here is a [Link](${attachment1Href})"
+        origProjSkill2.description == "Here is a [Link](${attachment2Href})"
+
+        attachments.size() == 3
+        Attachment originalAttachment1 = attachments.find {  attachment1Href.contains(it.uuid)}
+        Attachment originalAttachment2 = attachments.find {  attachment2Href.contains(it.uuid)}
+        originalAttachment1.projectId == p1.projectId
+        originalAttachment2.projectId == p1.projectId
+
+        List<Attachment> newAttachments = attachments.findAll {
+            !attachment1Href.contains(it.uuid) && !attachment2Href.contains(it.uuid)
+        }
+
+        assert newAttachments.size() == 1
+        copyProj.description == "Here is a [Link](/api/download/${newAttachments[0].uuid})".toString()
+
+        newAttachments[0].projectId == p2.projectId
     }
 
 
