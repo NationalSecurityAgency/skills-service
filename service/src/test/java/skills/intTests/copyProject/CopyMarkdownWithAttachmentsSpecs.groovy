@@ -18,6 +18,7 @@ package skills.intTests.copyProject
 import org.springframework.http.HttpStatus
 import skills.intTests.utils.SkillsClientException
 import skills.storage.model.Attachment
+import skills.storage.model.SkillDef
 
 import static skills.intTests.utils.SkillsFactory.*
 
@@ -633,6 +634,944 @@ class CopyMarkdownWithAttachmentsSpecs extends CopyIntSpec {
             assert it.projectId == p2.projectId
         }
         attachments1.uuid.sort() == attachments.uuid.sort()
+    }
+
+    def "paste markdown with attachment to another project: by editing a skill and changing skillId at the same time"() {
+        def p1 = createProject(1)
+        def p1subj1 = createSubject(1, 1)
+        skillsService.createProjectAndSubjectAndSkills(p1, p1subj1, null)
+
+        def attachment1Href = attachFileAndReturnHref(p1.projectId)
+        def attachment2Href = attachFileAndReturnHref(p1.projectId)
+
+        def p1Skills = createSkills(2, 1, 1, 100)
+        p1Skills[0].description = "Here is a [Link](${attachment1Href})".toString()
+        p1Skills[1].description = "Here is a [Link](${attachment2Href})".toString()
+        skillsService.createSkills(p1Skills)
+
+        def p2 = createProject(2)
+        def p2subj1 = createSubject(2, 1)
+        def p2Skills = createSkills(2, 2, 1, 100)
+        skillsService.createProjectAndSubjectAndSkills(p2, p2subj1, p2Skills)
+
+        when:
+        String originalSkillId = p2Skills[0].skillId
+        p2Skills[0].skillId = "newId"
+        p2Skills[0].description = "Here is a [Link](${attachment1Href})".toString()
+        skillsService.updateSkill(p2Skills[0], originalSkillId)
+
+        def origProjSkill1 = skillsService.getSkill([projectId: p1.projectId, subjectId: p1subj1.subjectId, skillId: p1Skills[0].skillId])
+        def origProjSkill2 = skillsService.getSkill([projectId: p1.projectId, subjectId: p1subj1.subjectId, skillId: p1Skills[1].skillId])
+
+        def copyProjSkill1 = skillsService.getSkill([projectId: p2.projectId, subjectId: p2subj1.subjectId, skillId: p2Skills[0].skillId])
+
+        List<Attachment> attachments = attachmentRepo.findAll()
+        skillsService.updateSkill(copyProjSkill1, copyProjSkill1.skillId)
+        skillsService.updateSkill(copyProjSkill1, copyProjSkill1.skillId)
+        List<Attachment> attachments1 = attachmentRepo.findAll()
+        then:
+        origProjSkill1.description == "Here is a [Link](${attachment1Href})"
+        origProjSkill2.description == "Here is a [Link](${attachment2Href})"
+
+        attachments.size() == 3
+        Attachment originalAttachment1 = attachments.find {  attachment1Href.contains(it.uuid)}
+        Attachment originalAttachment2 = attachments.find {  attachment2Href.contains(it.uuid)}
+        originalAttachment1.projectId == p1.projectId
+        originalAttachment2.projectId == p1.projectId
+
+        List<Attachment> newAttachments = attachments.findAll {
+            !attachment1Href.contains(it.uuid) && !attachment2Href.contains(it.uuid)
+        }
+
+        newAttachments.size() == 1
+        copyProjSkill1.description == "Here is a [Link](/api/download/${newAttachments[0].uuid})".toString()
+
+        newAttachments.each {
+            assert it.projectId == p2.projectId
+        }
+        attachments1.uuid.sort() == attachments.uuid.sort()
+    }
+
+    def "paste markdown with attachment to the same project: to a new skill"() {
+        def p1 = createProject(1)
+        def p1subj1 = createSubject(1, 1)
+        skillsService.createProjectAndSubjectAndSkills(p1, p1subj1, null)
+
+        def attachment1Href = attachFileAndReturnHref(p1.projectId)
+        def attachment2Href = attachFileAndReturnHref(p1.projectId)
+
+        def p1Skills = createSkills(3, 1, 1, 100)
+        p1Skills[0].description = "Here is a [Link](${attachment1Href})".toString()
+        p1Skills[1].description = "Here is a [Link](${attachment2Href})".toString()
+        skillsService.createSkills(p1Skills[0..1])
+
+
+        when:
+        p1Skills[2].description = "Here is a [Link](${attachment1Href})".toString()
+        skillsService.createSkill(p1Skills[2])
+
+        def origProjSkill1 = skillsService.getSkill([projectId: p1.projectId, subjectId: p1subj1.subjectId, skillId: p1Skills[0].skillId])
+        def origProjSkill2 = skillsService.getSkill([projectId: p1.projectId, subjectId: p1subj1.subjectId, skillId: p1Skills[1].skillId])
+
+        def copyProjSkill1 = skillsService.getSkill([projectId: p1.projectId, subjectId: p1subj1.subjectId, skillId: p1Skills[2].skillId])
+
+        List<Attachment> attachments = attachmentRepo.findAll()
+        skillsService.updateSkill(copyProjSkill1, copyProjSkill1.skillId)
+        skillsService.updateSkill(copyProjSkill1, copyProjSkill1.skillId)
+        List<Attachment> attachments1 = attachmentRepo.findAll()
+        then:
+        origProjSkill1.description == "Here is a [Link](${attachment1Href})"
+        origProjSkill2.description == "Here is a [Link](${attachment2Href})"
+
+        attachments.size() == 3
+        Attachment originalAttachment1 = attachments.find {  attachment1Href.contains(it.uuid)}
+        Attachment originalAttachment2 = attachments.find {  attachment2Href.contains(it.uuid)}
+        originalAttachment1.projectId == p1.projectId
+        originalAttachment2.projectId == p1.projectId
+
+        List<Attachment> newAttachments = attachments.findAll {
+            !attachment1Href.contains(it.uuid) && !attachment2Href.contains(it.uuid)
+        }
+
+        newAttachments.size() == 1
+        copyProjSkill1.description == "Here is a [Link](/api/download/${newAttachments[0].uuid})".toString()
+
+        newAttachments.each {
+            assert it.projectId == p1.projectId
+        }
+
+        attachments1.uuid.sort() == attachments.uuid.sort()
+    }
+
+    def "paste markdown with attachment to the same project: by editing a skill"() {
+        def p1 = createProject(1)
+        def p1subj1 = createSubject(1, 1)
+        skillsService.createProjectAndSubjectAndSkills(p1, p1subj1, null)
+
+        def attachment1Href = attachFileAndReturnHref(p1.projectId)
+        def attachment2Href = attachFileAndReturnHref(p1.projectId)
+
+        def p1Skills = createSkills(3, 1, 1, 100)
+        p1Skills[0].description = "Here is a [Link](${attachment1Href})".toString()
+        p1Skills[1].description = "Here is a [Link](${attachment2Href})".toString()
+        skillsService.createSkills(p1Skills)
+
+        when:
+        p1Skills[2].description = "Here is a [Link](${attachment1Href})".toString()
+        skillsService.updateSkill(p1Skills[2], p1Skills[2].skillId)
+
+        def origProjSkill1 = skillsService.getSkill([projectId: p1.projectId, subjectId: p1subj1.subjectId, skillId: p1Skills[0].skillId])
+        def origProjSkill2 = skillsService.getSkill([projectId: p1.projectId, subjectId: p1subj1.subjectId, skillId: p1Skills[1].skillId])
+
+        def copyProjSkill1 = skillsService.getSkill([projectId: p1.projectId, subjectId: p1subj1.subjectId, skillId: p1Skills[2].skillId])
+
+        List<Attachment> attachments = attachmentRepo.findAll()
+        skillsService.updateSkill(copyProjSkill1, copyProjSkill1.skillId)
+        skillsService.updateSkill(copyProjSkill1, copyProjSkill1.skillId)
+        List<Attachment> attachments1 = attachmentRepo.findAll()
+        then:
+        origProjSkill1.description == "Here is a [Link](${attachment1Href})"
+        origProjSkill2.description == "Here is a [Link](${attachment2Href})"
+
+        attachments.size() == 3
+        Attachment originalAttachment1 = attachments.find {  attachment1Href.contains(it.uuid)}
+        Attachment originalAttachment2 = attachments.find {  attachment2Href.contains(it.uuid)}
+        originalAttachment1.projectId == p1.projectId
+        originalAttachment2.projectId == p1.projectId
+
+        List<Attachment> newAttachments = attachments.findAll {
+            !attachment1Href.contains(it.uuid) && !attachment2Href.contains(it.uuid)
+        }
+        newAttachments.size() == 1
+        copyProjSkill1.description == "Here is a [Link](/api/download/${newAttachments[0].uuid})".toString()
+
+        newAttachments.each {
+            assert it.projectId == p1.projectId
+        }
+        attachments1.uuid.sort() == attachments.uuid.sort()
+    }
+
+    def "paste markdown with attachment to the same project: by editing a skill and changing skillId at the same time"() {
+        def p1 = createProject(1)
+        def p1subj1 = createSubject(1, 1)
+        skillsService.createProjectAndSubjectAndSkills(p1, p1subj1, null)
+
+        def attachment1Href = attachFileAndReturnHref(p1.projectId)
+        def attachment2Href = attachFileAndReturnHref(p1.projectId)
+
+        def p1Skills = createSkills(3, 1, 1, 100)
+        p1Skills[0].description = "Here is a [Link](${attachment1Href})".toString()
+        p1Skills[1].description = "Here is a [Link](${attachment2Href})".toString()
+        skillsService.createSkills(p1Skills)
+
+        when:
+        String origSkillId = p1Skills[2].skillId
+        p1Skills[2].skillId = "newSkillId"
+        p1Skills[2].description = "Here is a [Link](${attachment1Href})".toString()
+        skillsService.updateSkill(p1Skills[2], origSkillId)
+
+        def origProjSkill1 = skillsService.getSkill([projectId: p1.projectId, subjectId: p1subj1.subjectId, skillId: p1Skills[0].skillId])
+        def origProjSkill2 = skillsService.getSkill([projectId: p1.projectId, subjectId: p1subj1.subjectId, skillId: p1Skills[1].skillId])
+
+        def copyProjSkill1 = skillsService.getSkill([projectId: p1.projectId, subjectId: p1subj1.subjectId, skillId: p1Skills[2].skillId])
+
+        List<Attachment> attachments = attachmentRepo.findAll()
+        skillsService.updateSkill(copyProjSkill1, copyProjSkill1.skillId)
+        skillsService.updateSkill(copyProjSkill1, copyProjSkill1.skillId)
+        List<Attachment> attachments1 = attachmentRepo.findAll()
+        then:
+        origProjSkill1.description == "Here is a [Link](${attachment1Href})"
+        origProjSkill2.description == "Here is a [Link](${attachment2Href})"
+
+        attachments.size() == 3
+        Attachment originalAttachment1 = attachments.find {  attachment1Href.contains(it.uuid)}
+        Attachment originalAttachment2 = attachments.find {  attachment2Href.contains(it.uuid)}
+        originalAttachment1.projectId == p1.projectId
+        originalAttachment2.projectId == p1.projectId
+
+        List<Attachment> newAttachments = attachments.findAll {
+            !attachment1Href.contains(it.uuid) && !attachment2Href.contains(it.uuid)
+        }
+        newAttachments.size() == 1
+        copyProjSkill1.description == "Here is a [Link](/api/download/${newAttachments[0].uuid})".toString()
+
+        newAttachments.each {
+            assert it.projectId == p1.projectId
+        }
+        attachments1.uuid.sort() == attachments.uuid.sort()
+    }
+
+    def "paste markdown with attachment to another project: to a new skills group"() {
+        def p1 = createProject(1)
+        def p1subj1 = createSubject(1, 1)
+        skillsService.createProjectAndSubjectAndSkills(p1, p1subj1, null)
+
+        def attachment1Href = attachFileAndReturnHref(p1.projectId)
+        def attachment2Href = attachFileAndReturnHref(p1.projectId)
+
+        def p1Skills = createSkills(2, 1, 1, 100)
+        p1Skills[0].description = "Here is a [Link](${attachment1Href})".toString()
+        p1Skills[1].description = "Here is a [Link](${attachment2Href})".toString()
+        skillsService.createSkills(p1Skills)
+
+        def p2 = createProject(2)
+        def p2subj1 = createSubject(2, 1)
+        skillsService.createProjectAndSubjectAndSkills(p2, p2subj1, null)
+        def group = createSkillsGroup(2, 1, 11)
+
+        when:
+        group.description = "Here is a [Link](${attachment1Href})".toString()
+        skillsService.createSkill(group)
+
+        def origProjSkill1 = skillsService.getSkill([projectId: p1.projectId, subjectId: p1subj1.subjectId, skillId: p1Skills[0].skillId])
+        def origProjSkill2 = skillsService.getSkill([projectId: p1.projectId, subjectId: p1subj1.subjectId, skillId: p1Skills[1].skillId])
+
+        def copyProjSkill1 = skillsService.getSkill([projectId: p2.projectId, subjectId: p1subj1.subjectId, skillId: group.skillId])
+
+        List<Attachment> attachments = attachmentRepo.findAll()
+        skillsService.updateSkill(copyProjSkill1, copyProjSkill1.skillId)
+        skillsService.updateSkill(copyProjSkill1, copyProjSkill1.skillId)
+        List<Attachment> attachments1 = attachmentRepo.findAll()
+        then:
+        origProjSkill1.description == "Here is a [Link](${attachment1Href})"
+        origProjSkill2.description == "Here is a [Link](${attachment2Href})"
+
+        attachments.size() == 3
+        Attachment originalAttachment1 = attachments.find {  attachment1Href.contains(it.uuid)}
+        Attachment originalAttachment2 = attachments.find {  attachment2Href.contains(it.uuid)}
+        originalAttachment1.projectId == p1.projectId
+        originalAttachment2.projectId == p1.projectId
+
+        List<Attachment> newAttachments = attachments.findAll {
+            !attachment1Href.contains(it.uuid) && !attachment2Href.contains(it.uuid)
+        }
+        newAttachments.size() == 1
+        copyProjSkill1.description == "Here is a [Link](/api/download/${newAttachments[0].uuid})".toString()
+
+        newAttachments.each {
+            assert it.projectId == p2.projectId
+        }
+
+        attachments1.uuid.sort() == attachments.uuid.sort()
+    }
+
+    def "paste markdown with attachment to another project: by editing a skills group"() {
+        def p1 = createProject(1)
+        def p1subj1 = createSubject(1, 1)
+        skillsService.createProjectAndSubjectAndSkills(p1, p1subj1, null)
+
+        def attachment1Href = attachFileAndReturnHref(p1.projectId)
+        def attachment2Href = attachFileAndReturnHref(p1.projectId)
+
+        def p1Skills = createSkills(2, 1, 1, 100)
+        p1Skills[0].description = "Here is a [Link](${attachment1Href})".toString()
+        p1Skills[1].description = "Here is a [Link](${attachment2Href})".toString()
+        skillsService.createSkills(p1Skills)
+
+        def p2 = createProject(2)
+        def p2subj1 = createSubject(2, 1)
+        def group = createSkillsGroup(2, 1, 11)
+        skillsService.createProjectAndSubjectAndSkills(p2, p2subj1, [group])
+
+        when:
+        group.description = "Here is a [Link](${attachment1Href})".toString()
+        skillsService.updateSkill(group, group.skillId)
+
+        def origProjSkill1 = skillsService.getSkill([projectId: p1.projectId, subjectId: p1subj1.subjectId, skillId: p1Skills[0].skillId])
+        def origProjSkill2 = skillsService.getSkill([projectId: p1.projectId, subjectId: p1subj1.subjectId, skillId: p1Skills[1].skillId])
+
+        def copyProjSkill1 = skillsService.getSkill([projectId: p2.projectId, subjectId: p1subj1.subjectId, skillId: group.skillId])
+
+        List<Attachment> attachments = attachmentRepo.findAll()
+        skillsService.updateSkill(copyProjSkill1, copyProjSkill1.skillId)
+        skillsService.updateSkill(copyProjSkill1, copyProjSkill1.skillId)
+        List<Attachment> attachments1 = attachmentRepo.findAll()
+        then:
+        origProjSkill1.description == "Here is a [Link](${attachment1Href})"
+        origProjSkill2.description == "Here is a [Link](${attachment2Href})"
+
+        attachments.size() == 3
+        Attachment originalAttachment1 = attachments.find {  attachment1Href.contains(it.uuid)}
+        Attachment originalAttachment2 = attachments.find {  attachment2Href.contains(it.uuid)}
+        originalAttachment1.projectId == p1.projectId
+        originalAttachment2.projectId == p1.projectId
+
+        List<Attachment> newAttachments = attachments.findAll {
+            !attachment1Href.contains(it.uuid) && !attachment2Href.contains(it.uuid)
+        }
+        newAttachments.size() == 1
+        copyProjSkill1.description == "Here is a [Link](/api/download/${newAttachments[0].uuid})".toString()
+        newAttachments[0].projectId == p2.projectId
+
+        attachments1.uuid.sort() == attachments.uuid.sort()
+    }
+
+    def "paste markdown with attachment to another project: by editing a skills group and changing groupId at the same time"() {
+        def p1 = createProject(1)
+        def p1subj1 = createSubject(1, 1)
+        skillsService.createProjectAndSubjectAndSkills(p1, p1subj1, null)
+
+        def attachment1Href = attachFileAndReturnHref(p1.projectId)
+        def attachment2Href = attachFileAndReturnHref(p1.projectId)
+
+        def p1Skills = createSkills(2, 1, 1, 100)
+        p1Skills[0].description = "Here is a [Link](${attachment1Href})".toString()
+        p1Skills[1].description = "Here is a [Link](${attachment2Href})".toString()
+        skillsService.createSkills(p1Skills)
+
+        def p2 = createProject(2)
+        def p2subj1 = createSubject(2, 1)
+        def group = createSkillsGroup(2, 1, 11)
+        skillsService.createProjectAndSubjectAndSkills(p2, p2subj1, [group])
+
+        when:
+        String originalSkillId = group.skillId
+        group.skillId = "newId"
+        group.description = "Here is a [Link](${attachment1Href})".toString()
+        skillsService.updateSkill(group, originalSkillId)
+
+        def origProjSkill1 = skillsService.getSkill([projectId: p1.projectId, subjectId: p1subj1.subjectId, skillId: p1Skills[0].skillId])
+        def origProjSkill2 = skillsService.getSkill([projectId: p1.projectId, subjectId: p1subj1.subjectId, skillId: p1Skills[1].skillId])
+
+        def copyProjSkill1 = skillsService.getSkill([projectId: p2.projectId, subjectId: p2subj1.subjectId, skillId: group.skillId])
+
+        List<Attachment> attachments = attachmentRepo.findAll()
+        skillsService.updateSkill(copyProjSkill1, copyProjSkill1.skillId)
+        skillsService.updateSkill(copyProjSkill1, copyProjSkill1.skillId)
+        List<Attachment> attachments1 = attachmentRepo.findAll()
+        then:
+        origProjSkill1.description == "Here is a [Link](${attachment1Href})"
+        origProjSkill2.description == "Here is a [Link](${attachment2Href})"
+
+        attachments.size() == 3
+        Attachment originalAttachment1 = attachments.find {  attachment1Href.contains(it.uuid)}
+        Attachment originalAttachment2 = attachments.find {  attachment2Href.contains(it.uuid)}
+        originalAttachment1.projectId == p1.projectId
+        originalAttachment2.projectId == p1.projectId
+
+        List<Attachment> newAttachments = attachments.findAll {
+            !attachment1Href.contains(it.uuid) && !attachment2Href.contains(it.uuid)
+        }
+
+        newAttachments.size() == 1
+        copyProjSkill1.description == "Here is a [Link](/api/download/${newAttachments[0].uuid})".toString()
+        newAttachments[0].projectId == p2.projectId
+
+        attachments1.uuid.sort() == attachments.uuid.sort()
+    }
+
+    def "paste markdown with attachment to the same project: to a new skills group"() {
+        def p1 = createProject(1)
+        def p1subj1 = createSubject(1, 1)
+        skillsService.createProjectAndSubjectAndSkills(p1, p1subj1, null)
+
+        def attachment1Href = attachFileAndReturnHref(p1.projectId)
+        def attachment2Href = attachFileAndReturnHref(p1.projectId)
+
+        def p1Skills = createSkills(2, 1, 1, 100)
+        p1Skills[0].description = "Here is a [Link](${attachment1Href})".toString()
+        p1Skills[1].description = "Here is a [Link](${attachment2Href})".toString()
+        skillsService.createSkills(p1Skills[0..1])
+
+        when:
+        def group = createSkillsGroup(1, 1, 11)
+        group.description = "Here is a [Link](${attachment1Href})".toString()
+        skillsService.createSkill(group)
+
+        def origProjSkill1 = skillsService.getSkill([projectId: p1.projectId, subjectId: p1subj1.subjectId, skillId: p1Skills[0].skillId])
+        def origProjSkill2 = skillsService.getSkill([projectId: p1.projectId, subjectId: p1subj1.subjectId, skillId: p1Skills[1].skillId])
+
+        def copyProjSkill1 = skillsService.getSkill([projectId: p1.projectId, subjectId: p1subj1.subjectId, skillId: group.skillId])
+
+        List<Attachment> attachments = attachmentRepo.findAll()
+        skillsService.updateSkill(copyProjSkill1, copyProjSkill1.skillId)
+        skillsService.updateSkill(copyProjSkill1, copyProjSkill1.skillId)
+        List<Attachment> attachments1 = attachmentRepo.findAll()
+        then:
+        origProjSkill1.description == "Here is a [Link](${attachment1Href})"
+        origProjSkill2.description == "Here is a [Link](${attachment2Href})"
+
+        attachments.size() == 3
+        Attachment originalAttachment1 = attachments.find {  attachment1Href.contains(it.uuid)}
+        Attachment originalAttachment2 = attachments.find {  attachment2Href.contains(it.uuid)}
+        originalAttachment1.projectId == p1.projectId
+        originalAttachment2.projectId == p1.projectId
+
+        List<Attachment> newAttachments = attachments.findAll {
+            !attachment1Href.contains(it.uuid) && !attachment2Href.contains(it.uuid)
+        }
+
+        newAttachments.size() == 1
+        copyProjSkill1.description == "Here is a [Link](/api/download/${newAttachments[0].uuid})".toString()
+        newAttachments[0].projectId == p1.projectId
+
+        attachments1.uuid.sort() == attachments.uuid.sort()
+    }
+
+    def "paste markdown with attachment to the same project: by editing a skills group"() {
+        def p1 = createProject(1)
+        def p1subj1 = createSubject(1, 1)
+        skillsService.createProjectAndSubjectAndSkills(p1, p1subj1, null)
+
+        def attachment1Href = attachFileAndReturnHref(p1.projectId)
+        def attachment2Href = attachFileAndReturnHref(p1.projectId)
+
+        def p1Skills = createSkills(2, 1, 1, 100)
+        p1Skills[0].description = "Here is a [Link](${attachment1Href})".toString()
+        p1Skills[1].description = "Here is a [Link](${attachment2Href})".toString()
+
+        def group = createSkillsGroup(1, 1, 11)
+        skillsService.createSkills([p1Skills, group].flatten())
+
+        when:
+        group.description = "Here is a [Link](${attachment1Href})".toString()
+        skillsService.updateSkill(group, group.skillId)
+
+        def origProjSkill1 = skillsService.getSkill([projectId: p1.projectId, subjectId: p1subj1.subjectId, skillId: p1Skills[0].skillId])
+        def origProjSkill2 = skillsService.getSkill([projectId: p1.projectId, subjectId: p1subj1.subjectId, skillId: p1Skills[1].skillId])
+
+        def copyProjSkill1 = skillsService.getSkill([projectId: p1.projectId, subjectId: p1subj1.subjectId, skillId: group.skillId])
+
+        List<Attachment> attachments = attachmentRepo.findAll()
+        skillsService.updateSkill(copyProjSkill1, copyProjSkill1.skillId)
+        skillsService.updateSkill(copyProjSkill1, copyProjSkill1.skillId)
+        List<Attachment> attachments1 = attachmentRepo.findAll()
+        then:
+        origProjSkill1.description == "Here is a [Link](${attachment1Href})"
+        origProjSkill2.description == "Here is a [Link](${attachment2Href})"
+
+        attachments.size() == 3
+        Attachment originalAttachment1 = attachments.find {  attachment1Href.contains(it.uuid)}
+        Attachment originalAttachment2 = attachments.find {  attachment2Href.contains(it.uuid)}
+        originalAttachment1.projectId == p1.projectId
+        originalAttachment2.projectId == p1.projectId
+
+        List<Attachment> newAttachments = attachments.findAll {
+            !attachment1Href.contains(it.uuid) && !attachment2Href.contains(it.uuid)
+        }
+        newAttachments.size() == 1
+        copyProjSkill1.description == "Here is a [Link](/api/download/${newAttachments[0].uuid})".toString()
+        newAttachments[0].projectId == p1.projectId
+
+        attachments1.uuid.sort() == attachments.uuid.sort()
+    }
+
+    def "paste markdown with attachment to the same project: by editing a skills group and changing group at the same time"() {
+        def p1 = createProject(1)
+        def p1subj1 = createSubject(1, 1)
+        skillsService.createProjectAndSubjectAndSkills(p1, p1subj1, null)
+
+        def attachment1Href = attachFileAndReturnHref(p1.projectId)
+        def attachment2Href = attachFileAndReturnHref(p1.projectId)
+
+        def p1Skills = createSkills(2, 1, 1, 100)
+        p1Skills[0].description = "Here is a [Link](${attachment1Href})".toString()
+        p1Skills[1].description = "Here is a [Link](${attachment2Href})".toString()
+        def group = createSkillsGroup(1, 1, 11)
+        skillsService.createSkills([p1Skills, group].flatten())
+
+        when:
+        String origSkillId = group.skillId
+        group.skillId = "newSkillId"
+        group.description = "Here is a [Link](${attachment1Href})".toString()
+        skillsService.updateSkill(group, origSkillId)
+
+        def origProjSkill1 = skillsService.getSkill([projectId: p1.projectId, subjectId: p1subj1.subjectId, skillId: p1Skills[0].skillId])
+        def origProjSkill2 = skillsService.getSkill([projectId: p1.projectId, subjectId: p1subj1.subjectId, skillId: p1Skills[1].skillId])
+
+        def copyProjSkill1 = skillsService.getSkill([projectId: p1.projectId, subjectId: p1subj1.subjectId, skillId: group.skillId])
+
+        List<Attachment> attachments = attachmentRepo.findAll()
+        skillsService.updateSkill(copyProjSkill1, copyProjSkill1.skillId)
+        skillsService.updateSkill(copyProjSkill1, copyProjSkill1.skillId)
+        List<Attachment> attachments1 = attachmentRepo.findAll()
+        then:
+        origProjSkill1.description == "Here is a [Link](${attachment1Href})"
+        origProjSkill2.description == "Here is a [Link](${attachment2Href})"
+
+        attachments.size() == 3
+        Attachment originalAttachment1 = attachments.find {  attachment1Href.contains(it.uuid)}
+        Attachment originalAttachment2 = attachments.find {  attachment2Href.contains(it.uuid)}
+        originalAttachment1.projectId == p1.projectId
+        originalAttachment2.projectId == p1.projectId
+
+        List<Attachment> newAttachments = attachments.findAll {
+            !attachment1Href.contains(it.uuid) && !attachment2Href.contains(it.uuid)
+        }
+        newAttachments.size() == 1
+        copyProjSkill1.description == "Here is a [Link](/api/download/${newAttachments[0].uuid})".toString()
+        newAttachments[0].projectId == p1.projectId
+        attachments1.uuid.sort() == attachments.uuid.sort()
+    }
+
+    def "paste markdown with attachment to another project: to a new badge"() {
+        def p1 = createProject(1)
+        def p1subj1 = createSubject(1, 1)
+        skillsService.createProjectAndSubjectAndSkills(p1, p1subj1, null)
+
+        def attachment1Href = attachFileAndReturnHref(p1.projectId)
+        def attachment2Href = attachFileAndReturnHref(p1.projectId)
+
+        def p1Skills = createSkills(2, 1, 1, 100)
+        p1Skills[0].description = "Here is a [Link](${attachment1Href})".toString()
+        p1Skills[1].description = "Here is a [Link](${attachment2Href})".toString()
+        skillsService.createSkills(p1Skills)
+
+        def p2 = createProject(2)
+        skillsService.createProjectAndSubjectAndSkills(p2, null, null)
+
+        when:
+        def badge = createBadge(2, 1)
+        badge.description = "Here is a [Link](${attachment1Href})".toString()
+        skillsService.createBadge(badge)
+
+        def origProjSkill1 = skillsService.getSkill([projectId: p1.projectId, subjectId: p1subj1.subjectId, skillId: p1Skills[0].skillId])
+        def origProjSkill2 = skillsService.getSkill([projectId: p1.projectId, subjectId: p1subj1.subjectId, skillId: p1Skills[1].skillId])
+
+        def copyBadge = skillsService.getBadge(badge)
+
+        List<Attachment> attachments = attachmentRepo.findAll()
+
+        skillsService.updateBadge(copyBadge)
+        skillsService.updateBadge(copyBadge)
+        List<Attachment> attachments1 = attachmentRepo.findAll()
+        then:
+        origProjSkill1.description == "Here is a [Link](${attachment1Href})"
+        origProjSkill2.description == "Here is a [Link](${attachment2Href})"
+
+        attachments.size() == 3
+        Attachment originalAttachment1 = attachments.find {  attachment1Href.contains(it.uuid)}
+        Attachment originalAttachment2 = attachments.find {  attachment2Href.contains(it.uuid)}
+        originalAttachment1.projectId == p1.projectId
+        originalAttachment2.projectId == p1.projectId
+
+        List<Attachment> newAttachments = attachments.findAll {
+            !attachment1Href.contains(it.uuid) && !attachment2Href.contains(it.uuid)
+        }
+
+        assert newAttachments.size() == 1
+        copyBadge.description == "Here is a [Link](/api/download/${newAttachments[0].uuid})".toString()
+
+        newAttachments[0].projectId == p2.projectId
+
+        attachments1.uuid.sort() == attachments.uuid.sort()
+    }
+
+    def "paste markdown with attachment to another project: by editing a badge"() {
+        def p1 = createProject(1)
+        def p1subj1 = createSubject(1, 1)
+        skillsService.createProjectAndSubjectAndSkills(p1, p1subj1, null)
+
+        def attachment1Href = attachFileAndReturnHref(p1.projectId)
+        def attachment2Href = attachFileAndReturnHref(p1.projectId)
+
+        def p1Skills = createSkills(2, 1, 1, 100)
+        p1Skills[0].description = "Here is a [Link](${attachment1Href})".toString()
+        p1Skills[1].description = "Here is a [Link](${attachment2Href})".toString()
+        skillsService.createSkills(p1Skills)
+
+        def p2 = createProject(2)
+        def p2subj1 = createSubject(2, 1)
+        skillsService.createProjectAndSubjectAndSkills(p2, p2subj1, null)
+
+        def badge = createBadge(2, 1)
+        skillsService.createBadge(badge)
+
+        when:
+        badge.description = "Here is a [Link](${attachment1Href})".toString()
+        skillsService.updateBadge(badge)
+
+        def origProjSkill1 = skillsService.getSkill([projectId: p1.projectId, subjectId: p1subj1.subjectId, skillId: p1Skills[0].skillId])
+        def origProjSkill2 = skillsService.getSkill([projectId: p1.projectId, subjectId: p1subj1.subjectId, skillId: p1Skills[1].skillId])
+
+        def copyBadge = skillsService.getBadge(badge)
+
+        List<Attachment> attachments = attachmentRepo.findAll()
+
+        skillsService.updateBadge(copyBadge)
+        skillsService.updateBadge(copyBadge)
+        List<Attachment> attachments1 = attachmentRepo.findAll()
+        then:
+        origProjSkill1.description == "Here is a [Link](${attachment1Href})"
+        origProjSkill2.description == "Here is a [Link](${attachment2Href})"
+
+        attachments.size() == 3
+        Attachment originalAttachment1 = attachments.find {  attachment1Href.contains(it.uuid)}
+        Attachment originalAttachment2 = attachments.find {  attachment2Href.contains(it.uuid)}
+        originalAttachment1.projectId == p1.projectId
+        originalAttachment2.projectId == p1.projectId
+
+        List<Attachment> newAttachments = attachments.findAll {
+            !attachment1Href.contains(it.uuid) && !attachment2Href.contains(it.uuid)
+        }
+
+        assert newAttachments.size() == 1
+        copyBadge.description == "Here is a [Link](/api/download/${newAttachments[0].uuid})".toString()
+
+        newAttachments[0].projectId == p2.projectId
+
+        attachments1.uuid.sort() == attachments.uuid.sort()
+    }
+
+    def "paste markdown with attachment to another project: by editing a badge - multiple links"() {
+        def p1 = createProject(1)
+        def p1subj1 = createSubject(1, 1)
+        skillsService.createProjectAndSubjectAndSkills(p1, p1subj1, null)
+
+        def attachment1Href = attachFileAndReturnHref(p1.projectId)
+        def attachment2Href = attachFileAndReturnHref(p1.projectId)
+
+        def p1Skills = createSkills(2, 1, 1, 100)
+        p1Skills[0].description = "Here is a [Link](${attachment1Href})".toString()
+        p1Skills[1].description = "Here is a [Link](${attachment2Href})".toString()
+        skillsService.createSkills(p1Skills)
+
+        def p2 = createProject(2)
+        def p2subj1 = createSubject(2, 1)
+        skillsService.createProjectAndSubjectAndSkills(p2, p2subj1, null)
+
+        def badge = createBadge(2, 1)
+        skillsService.createBadge(badge)
+
+        when:
+        badge.description = "Here is a [Link](${attachment1Href})\n\nAnother a [Link](${attachment2Href})".toString()
+        skillsService.updateBadge(badge)
+
+        def origProjSkill1 = skillsService.getSkill([projectId: p1.projectId, subjectId: p1subj1.subjectId, skillId: p1Skills[0].skillId])
+        def origProjSkill2 = skillsService.getSkill([projectId: p1.projectId, subjectId: p1subj1.subjectId, skillId: p1Skills[1].skillId])
+
+        def copyBadge = skillsService.getBadge(badge)
+
+        List<Attachment> attachments = attachmentRepo.findAll()
+
+        skillsService.updateBadge(copyBadge)
+        skillsService.updateBadge(copyBadge)
+        List<Attachment> attachments1 = attachmentRepo.findAll()
+        then:
+        origProjSkill1.description == "Here is a [Link](${attachment1Href})"
+        origProjSkill2.description == "Here is a [Link](${attachment2Href})"
+
+        attachments.size() == 4
+        Attachment originalAttachment1 = attachments.find {  attachment1Href.contains(it.uuid)}
+        Attachment originalAttachment2 = attachments.find {  attachment2Href.contains(it.uuid)}
+        originalAttachment1.projectId == p1.projectId
+        originalAttachment2.projectId == p1.projectId
+
+        List<Attachment> newAttachments = attachments.findAll {
+            !attachment1Href.contains(it.uuid) && !attachment2Href.contains(it.uuid)
+        }
+
+        assert newAttachments.size() == 2
+        newAttachments.each {
+            assert copyBadge.description.contains("[Link](/api/download/${it.uuid})".toString())
+            assert it.projectId == p2.projectId
+        }
+
+        attachments1.uuid.sort() == attachments.uuid.sort()
+    }
+
+    def "paste markdown with attachment to another project: by editing a badge and changing badgeId at the same time"() {
+        def p1 = createProject(1)
+        def p1subj1 = createSubject(1, 1)
+        skillsService.createProjectAndSubjectAndSkills(p1, p1subj1, null)
+
+        def attachment1Href = attachFileAndReturnHref(p1.projectId)
+        def attachment2Href = attachFileAndReturnHref(p1.projectId)
+
+        def p1Skills = createSkills(2, 1, 1, 100)
+        p1Skills[0].description = "Here is a [Link](${attachment1Href})".toString()
+        p1Skills[1].description = "Here is a [Link](${attachment2Href})".toString()
+        skillsService.createSkills(p1Skills)
+
+        def p2 = createProject(2)
+        def p2subj1 = createSubject(2, 1)
+        skillsService.createProjectAndSubjectAndSkills(p2, p2subj1, null)
+
+        def badge = createBadge(2, 1)
+        skillsService.createBadge(badge)
+
+        when:
+        String origBadgeId = badge.badgeId
+        badge.subjectId = "newBadgeId"
+        badge.description = "Here is a [Link](${attachment1Href})".toString()
+        skillsService.updateBadge(badge, origBadgeId)
+
+        def origProjSkill1 = skillsService.getSkill([projectId: p1.projectId, subjectId: p1subj1.subjectId, skillId: p1Skills[0].skillId])
+        def origProjSkill2 = skillsService.getSkill([projectId: p1.projectId, subjectId: p1subj1.subjectId, skillId: p1Skills[1].skillId])
+
+        def copyBadge = skillsService.getBadge(badge)
+
+        List<Attachment> attachments = attachmentRepo.findAll()
+
+        skillsService.updateBadge(copyBadge)
+        skillsService.updateBadge(copyBadge)
+        List<Attachment> attachments1 = attachmentRepo.findAll()
+        then:
+        origProjSkill1.description == "Here is a [Link](${attachment1Href})"
+        origProjSkill2.description == "Here is a [Link](${attachment2Href})"
+
+        attachments.size() == 3
+        Attachment originalAttachment1 = attachments.find {  attachment1Href.contains(it.uuid)}
+        Attachment originalAttachment2 = attachments.find {  attachment2Href.contains(it.uuid)}
+        originalAttachment1.projectId == p1.projectId
+        originalAttachment2.projectId == p1.projectId
+
+        List<Attachment> newAttachments = attachments.findAll {
+            !attachment1Href.contains(it.uuid) && !attachment2Href.contains(it.uuid)
+        }
+
+        assert newAttachments.size() == 1
+        copyBadge.description == "Here is a [Link](/api/download/${newAttachments[0].uuid})".toString()
+
+        newAttachments[0].projectId == p2.projectId
+
+        attachments1.uuid.sort() == attachments.uuid.sort()
+    }
+
+    def "paste markdown with attachment to the same project: by editing a badge"() {
+        def p1 = createProject(1)
+        def p1subj1 = createSubject(1, 1)
+        skillsService.createProjectAndSubjectAndSkills(p1, p1subj1, null)
+
+        def attachment1Href = attachFileAndReturnHref(p1.projectId)
+        def attachment2Href = attachFileAndReturnHref(p1.projectId)
+
+        def p1Skills = createSkills(2, 1, 1, 100)
+        p1Skills[0].description = "Here is a [Link](${attachment1Href})".toString()
+        p1Skills[1].description = "Here is a [Link](${attachment2Href})".toString()
+        skillsService.createSkills(p1Skills)
+
+        def badge = createBadge(1, 1)
+        skillsService.createBadge(badge)
+
+        when:
+        badge.description = "Here is a [Link](${attachment1Href})".toString()
+        String origBadgeId = badge.badgeId
+        badge.badgeId = "newBadgeId"
+        skillsService.updateBadge(badge, origBadgeId)
+
+        def origProjSkill1 = skillsService.getSkill([projectId: p1.projectId, subjectId: p1subj1.subjectId, skillId: p1Skills[0].skillId])
+        def origProjSkill2 = skillsService.getSkill([projectId: p1.projectId, subjectId: p1subj1.subjectId, skillId: p1Skills[1].skillId])
+
+        def copyBadge = skillsService.getBadge(badge)
+
+        List<Attachment> attachments = attachmentRepo.findAll()
+
+        skillsService.updateBadge(copyBadge)
+        skillsService.updateBadge(copyBadge)
+        List<Attachment> attachments1 = attachmentRepo.findAll()
+        then:
+        origProjSkill1.description == "Here is a [Link](${attachment1Href})"
+        origProjSkill2.description == "Here is a [Link](${attachment2Href})"
+
+        attachments.size() == 3
+        Attachment originalAttachment1 = attachments.find {  attachment1Href.contains(it.uuid)}
+        Attachment originalAttachment2 = attachments.find {  attachment2Href.contains(it.uuid)}
+        originalAttachment1.projectId == p1.projectId
+        originalAttachment2.projectId == p1.projectId
+
+        List<Attachment> newAttachments = attachments.findAll {
+            !attachment1Href.contains(it.uuid) && !attachment2Href.contains(it.uuid)
+        }
+
+        assert newAttachments.size() == 1
+        copyBadge.description == "Here is a [Link](/api/download/${newAttachments[0].uuid})".toString()
+
+        newAttachments[0].projectId == p1.projectId
+
+        attachments1.uuid.sort() == attachments.uuid.sort()
+    }
+
+    def "paste markdown with attachment to the same project: by editing a badge and changing badgeId at the same time"() {
+        def p1 = createProject(1)
+        def p1subj1 = createSubject(1, 1)
+        skillsService.createProjectAndSubjectAndSkills(p1, p1subj1, null)
+
+        def attachment1Href = attachFileAndReturnHref(p1.projectId)
+        def attachment2Href = attachFileAndReturnHref(p1.projectId)
+
+        def p1Skills = createSkills(2, 1, 1, 100)
+        p1Skills[0].description = "Here is a [Link](${attachment1Href})".toString()
+        p1Skills[1].description = "Here is a [Link](${attachment2Href})".toString()
+        skillsService.createSkills(p1Skills)
+
+        def badge = createBadge(1, 1)
+        skillsService.createBadge(badge)
+
+        when:
+        badge.description = "Here is a [Link](${attachment1Href})".toString()
+        skillsService.updateBadge(badge)
+
+        def origProjSkill1 = skillsService.getSkill([projectId: p1.projectId, subjectId: p1subj1.subjectId, skillId: p1Skills[0].skillId])
+        def origProjSkill2 = skillsService.getSkill([projectId: p1.projectId, subjectId: p1subj1.subjectId, skillId: p1Skills[1].skillId])
+
+        def copyBadge = skillsService.getBadge(badge)
+
+        List<Attachment> attachments = attachmentRepo.findAll()
+
+        skillsService.updateBadge(copyBadge)
+        skillsService.updateBadge(copyBadge)
+        List<Attachment> attachments1 = attachmentRepo.findAll()
+        then:
+        origProjSkill1.description == "Here is a [Link](${attachment1Href})"
+        origProjSkill2.description == "Here is a [Link](${attachment2Href})"
+
+        attachments.size() == 3
+        Attachment originalAttachment1 = attachments.find {  attachment1Href.contains(it.uuid)}
+        Attachment originalAttachment2 = attachments.find {  attachment2Href.contains(it.uuid)}
+        originalAttachment1.projectId == p1.projectId
+        originalAttachment2.projectId == p1.projectId
+
+        List<Attachment> newAttachments = attachments.findAll {
+            !attachment1Href.contains(it.uuid) && !attachment2Href.contains(it.uuid)
+        }
+
+        assert newAttachments.size() == 1
+        copyBadge.description == "Here is a [Link](/api/download/${newAttachments[0].uuid})".toString()
+
+        newAttachments[0].projectId == p1.projectId
+
+        attachments1.uuid.sort() == attachments.uuid.sort()
+    }
+
+    def "paste markdown with attachment to the same project: by creating a new badge"() {
+        def p1 = createProject(1)
+        def p1subj1 = createSubject(1, 1)
+        skillsService.createProjectAndSubjectAndSkills(p1, p1subj1, null)
+
+        def attachment1Href = attachFileAndReturnHref(p1.projectId)
+        def attachment2Href = attachFileAndReturnHref(p1.projectId)
+
+        def p1Skills = createSkills(2, 1, 1, 100)
+        p1Skills[0].description = "Here is a [Link](${attachment1Href})".toString()
+        p1Skills[1].description = "Here is a [Link](${attachment2Href})".toString()
+        skillsService.createSkills(p1Skills)
+
+        when:
+        def badge = createBadge(1, 1)
+        badge.description = "Here is a [Link](${attachment1Href})".toString()
+        skillsService.updateBadge(badge)
+
+        def origProjSkill1 = skillsService.getSkill([projectId: p1.projectId, subjectId: p1subj1.subjectId, skillId: p1Skills[0].skillId])
+        def origProjSkill2 = skillsService.getSkill([projectId: p1.projectId, subjectId: p1subj1.subjectId, skillId: p1Skills[1].skillId])
+
+        def copyBadge = skillsService.getBadge(badge)
+
+        List<Attachment> attachments = attachmentRepo.findAll()
+
+        skillsService.updateBadge(copyBadge)
+        skillsService.updateBadge(copyBadge)
+        List<Attachment> attachments1 = attachmentRepo.findAll()
+        then:
+        origProjSkill1.description == "Here is a [Link](${attachment1Href})"
+        origProjSkill2.description == "Here is a [Link](${attachment2Href})"
+
+        attachments.size() == 3
+        Attachment originalAttachment1 = attachments.find {  attachment1Href.contains(it.uuid)}
+        Attachment originalAttachment2 = attachments.find {  attachment2Href.contains(it.uuid)}
+        originalAttachment1.projectId == p1.projectId
+        originalAttachment2.projectId == p1.projectId
+
+        List<Attachment> newAttachments = attachments.findAll {
+            !attachment1Href.contains(it.uuid) && !attachment2Href.contains(it.uuid)
+        }
+
+        assert newAttachments.size() == 1
+        copyBadge.description == "Here is a [Link](/api/download/${newAttachments[0].uuid})".toString()
+
+        newAttachments[0].projectId == p1.projectId
+
+        attachments1.uuid.sort() == attachments.uuid.sort()
+    }
+
+    def "paste markdown with attachment to another project: to approval justification"() {
+        def p1 = createProject(1)
+        def p1subj1 = createSubject(1, 1)
+        skillsService.createProjectAndSubjectAndSkills(p1, p1subj1, null)
+
+        def attachment1Href = attachFileAndReturnHref(p1.projectId)
+        def attachment2Href = attachFileAndReturnHref(p1.projectId)
+
+        def p1Skills = createSkills(2, 1, 1, 100)
+        p1Skills[0].description = "Here is a [Link](${attachment1Href})".toString()
+        p1Skills[1].description = "Here is a [Link](${attachment2Href})".toString()
+        skillsService.createSkills(p1Skills)
+
+        def p2 = createProject(2)
+        def p2subj1 = createSubject(2, 1)
+        def p2skills = createSkills(2, 2, 1, 100)
+        p2skills.each { it.selfReportingType = SkillDef.SelfReportingType.Approval }
+        skillsService.createProjectAndSubjectAndSkills(p2, p2subj1, p2skills)
+
+        when:
+        String justification =  "Here is a [Link](${attachment1Href})".toString()
+        skillsService.addSkill(p2skills[0], skillsService.userName, new Date(), justification)
+
+        def origProjSkill1 = skillsService.getSkill([projectId: p1.projectId, subjectId: p1subj1.subjectId, skillId: p1Skills[0].skillId])
+        def origProjSkill2 = skillsService.getSkill([projectId: p1.projectId, subjectId: p1subj1.subjectId, skillId: p1Skills[1].skillId])
+
+        def skillSummary = skillsService.getSingleSkillSummary(skillsService.userName, p2.projectId, p2skills[0].skillId)
+
+        List<Attachment> attachments = attachmentRepo.findAll()
+
+        then:
+        origProjSkill1.description == "Here is a [Link](${attachment1Href})"
+        origProjSkill2.description == "Here is a [Link](${attachment2Href})"
+
+        attachments.size() == 3
+        Attachment originalAttachment1 = attachments.find {  attachment1Href.contains(it.uuid)}
+        Attachment originalAttachment2 = attachments.find {  attachment2Href.contains(it.uuid)}
+        originalAttachment1.projectId == p1.projectId
+        originalAttachment2.projectId == p1.projectId
+
+        List<Attachment> newAttachments = attachments.findAll {
+            !attachment1Href.contains(it.uuid) && !attachment2Href.contains(it.uuid)
+        }
+
+        assert newAttachments.size() == 1
+        skillSummary.approvalHistory.description == ["Here is a [Link](/api/download/${newAttachments[0].uuid})".toString()]
+
+        newAttachments[0].projectId == p2.projectId
     }
 
 }

@@ -173,6 +173,12 @@ class BadgeAdminService {
             }
             Props.copy(badgeRequest, skillDefinition)
             skillDefinition.skillId = badgeRequest.badgeId
+
+
+            Closure<Boolean> alreadyExistLookup = { String uuid ->
+                return skillDefWithExtraRepo.otherSkillsExistInProjectWithAttachmentUUID(skillDefinition.projectId, previousBadgeId, uuid)
+            }
+            skillDefinition.description = attachmentService.copyAttachmentsForIncomingDescription(skillDefinition.description, skillDefinition.projectId, previousBadgeId, null, alreadyExistLookup)
         } else {
             ProjDef projDef
             if (type == SkillDef.ContainerType.Badge) {
@@ -182,12 +188,13 @@ class BadgeAdminService {
 
             int displayOrder = getBadgeDisplayOrder(projDef, type)
 
+            String description = attachmentService.copyAttachmentsForIncomingDescription(badgeRequest?.description, projectId, badgeRequest.badgeId, null)
             skillDefinition = new SkillDefWithExtra(
                     type: type,
                     projectId: projectId,
                     skillId: badgeRequest.badgeId,
                     name: badgeRequest?.name,
-                    description: badgeRequest?.description,
+                    description: description,
                     iconClass: badgeRequest?.iconClass ?: "fa fa-question-circle",
                     startDate: badgeRequest.startDate,
                     endDate: badgeRequest.endDate,
