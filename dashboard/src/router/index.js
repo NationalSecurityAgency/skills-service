@@ -110,7 +110,7 @@ const redirectToSkillsDisplayIfRequested = (to) => {
       query: { skillsClientDisplayPath: to.path },
     }
   }
-  return true
+  return to.name === 'NotFoundPage' ? true : { name: 'NotFoundPage' };
 }
 
 const routes = [
