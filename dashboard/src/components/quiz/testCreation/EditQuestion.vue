@@ -573,7 +573,13 @@ const numberOfBlanks = computed(() => {
               class="text-secondary">Check one correct answer on the left:</span>
           <span
             v-if="isQuestionTypeMatching" class="text-secondary">Add pairs of terms and their matching values:</span>
-          <span v-if="isQuestionTypeFillInTheBlank" class="text-secondary">Add acceptable matches for each space above:</span>
+          <span v-if="isQuestionTypeFillInTheBlank" class="text-secondary">
+            <span v-if="numberOfBlanks === 0">
+              Add spaces to the question text to create answer options below.
+            </span>
+            <span v-else>Add acceptable matches for each space above.</span>
+             Answer options can support multiple answers separated by a colon (;):
+          </span>
         </div>
         <ConfigureAnswers
             v-if="!isQuestionTypeMatching && !isQuestionTypeFillInTheBlank && props.questionDef.quizType"
