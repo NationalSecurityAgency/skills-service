@@ -54,6 +54,9 @@ const isRatingType = computed(() => {
 const isMatchingType = computed(() => {
   return props.question.questionType === QuestionType.Matching;
 })
+const isFillInTheBlankType = computed(() => {
+  return props.question.questionType === QuestionType.FillInTheBlank;
+})
 const hasAnswer = computed(() => {
   if (isMatchingType.value) {
     return props.question.answers.find((a) => a.answer?.selectedMatch === null || a.answer?.selectedMatch === undefined || a.answer?.selectedMatch === '') === undefined;
@@ -144,7 +147,7 @@ const onGradeOverridden = (res) => {
                 :instance-id="`question_${question.id}`"
                 data-cy="questionDisplayText"/>
           </div>
-          <div v-if="!isTextInputType && !isRatingType && !isMatchingType">
+          <div v-if="!isTextInputType && !isRatingType && !isMatchingType && !isFillInTheBlankType">
             <div v-for="(a, index) in question.answers" :key="a.id" class="flex flex-row flex-wrap mt-1 pl-1">
               <div class="flex items-center justify-center pb-1" :data-cy="`answerDisplay-${index}`">
                 <SelectCorrectAnswer v-model="a.isSelected"
@@ -157,6 +160,13 @@ const onGradeOverridden = (res) => {
               <div class="flex items-center justify-center ml-2 pb-1">
                 <div class="answerText" :data-cy="`answer-${index}_displayText`">{{ a.answer }}</div>
               </div>
+            </div>
+          </div>
+          <div v-if="isFillInTheBlankType">
+            <div v-for="(a, index) in question.answers" :key="a.id" class="flex mt-1 pl-1 flex-row items-baseline">
+              <i v-if="a.answer.isCorrect === 'CORRECT'" class="far text-primary fa-check-square" style="font-size: 1.3rem;"></i>
+              <i v-else class="fa fa-ban text-red-500" style="font-size: 1.1rem;"></i>
+              {{ a.answer.answerText }}
             </div>
           </div>
           <div v-if="isRatingType" class="flex">

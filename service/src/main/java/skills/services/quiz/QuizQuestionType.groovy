@@ -21,4 +21,5 @@ enum QuizQuestionType {
     TextInput,
     Rating,
     Matching,
+    FillInTheBlank
 }

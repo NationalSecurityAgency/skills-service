@@ -19,8 +19,10 @@ export default {
     TextInput: 'TextInput',
     Rating: 'Rating',
     Matching: 'Matching',
+    FillInTheBlank: 'FillInTheBlank',
     isMultipleChoice: (questionType) => questionType === 'MultipleChoice',
     isSingleChoice: (questionType) => questionType === 'SingleChoice',
     isTextInput: (questionType) => questionType === 'TextInput',
     isMatching: (questionType) => questionType === 'Matching',
+    isFillInTheBlank: (questionType) => questionType === 'FillInTheBlank',
 };

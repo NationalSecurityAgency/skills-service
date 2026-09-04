@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <script setup>
-import { computed, ref } from 'vue'
+import { computed, ref, watch, onMounted } from 'vue'
 import { useFieldArray } from "vee-validate";
 import SelectCorrectAnswer from '@/components/quiz/testCreation/SelectCorrectAnswer.vue';
 import { useAppConfig } from '@/common-components/stores/UseAppConfig.js';
@@ -31,8 +31,55 @@ const props = defineProps({
     type: String,
     required: true,
   },
+  numberOfBlanks: {
+    type: Number,
+    required: true,
+    default: 0,
+  }
 })
-const { remove, insert, push, replace, fields } = useFieldArray('answers');
+
+onMounted(() => {
+  if(props.numberOfBlanks === 0) {
+    replace([])
+  } else if( props.numberOfBlanks > 0) {
+    const existingFields = fields.value.map(item => ({
+      id: item.value.id,
+      answer: item.value.answer,
+      isCorrect: item.value.isCorrect,
+    }))
+    replace([])
+
+    for(let x = 0; x < props.numberOfBlanks; x++) {
+      if(existingFields[x]) {
+        push(existingFields[x]);
+      } else {
+        push({
+          id: null,
+          answer: '',
+          isCorrect: true,
+        })
+      }
+    }
+  }
+})
+
+watch(() => props.numberOfBlanks, (newValue, oldValue) => {
+  if(oldValue < newValue) {
+    for(let x = oldValue; x < newValue; x++) {
+      push({
+        id: null,
+        answer: '',
+        isCorrect: true,
+      })
+    }
+  } else if(oldValue > newValue) {
+    for(let x = newValue; x < oldValue; x++) {
+      remove(fields.value.length - 1)
+    }
+  }
+})
+
+const { remove, push, replace, fields } = useFieldArray('answers');
 const appConfig = useAppConfig()
 const log = useLog()
 const isQuizType = computed(() => {
@@ -44,21 +91,7 @@ const maxAnswersAllowed = computed(() => {
 const noMoreAnswers = computed(() => {
   return fields.value && fields.value.length >= maxAnswersAllowed.value
 })
-const twoOrLessAnswers = computed(() => {
-  return !fields.value || fields.value.length <= 2
-})
 
-function addNewAnswer(index) {
-  const initialValue = {
-    id: null,
-    answer: '',
-    isCorrect: false,
-  };
-  insert(index + 1, initialValue)
-}
-function removeAnswer(index) {
-  remove(index)
-}
 const replaceAnswers = (answers) => {
   const fieldSize = fields.value.length
   for(let x = 0; x < fieldSize; x++) {
@@ -113,25 +146,6 @@ defineExpose( {
           data-cy="answerText"
           :id="`answer_${index}`"
           :name="`answers[${index}].answer`"/>
-
-      <ButtonGroup class="ml-1">
-        <SkillsButton
-          :disabled="noMoreAnswers"
-          :aria-label="`Add New Answer at index ${index}`"
-          data-cy="addNewAnswer"
-          outlined
-          icon="fas fa-plus"
-          @click="addNewAnswer(index)">
-        </SkillsButton>
-        <SkillsButton
-          :disabled="twoOrLessAnswers"
-          :aria-label="`Delete Answer at index ${index}`"
-          data-cy="removeAnswer"
-          outlined
-          icon="fas fa-minus"
-          @click="removeAnswer(index)">
-        </SkillsButton>
-      </ButtonGroup>
     </div>
   </div>
 </template>

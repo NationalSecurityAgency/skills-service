@@ -42,7 +42,7 @@ const props = defineProps({
 })
 
 const isLoading = ref(true);
-const emit = defineEmits(['answer-text-changed', 'selected-answer', 'answer-matched'])
+const emit = defineEmits(['answer-text-changed', 'selected-answer', 'answer-matched', 'fill-in-the-blank-changed'])
 
 const appConfig = useAppConfig()
 
@@ -85,6 +85,9 @@ const isRating = computed(() => {
 const isMatchingType = computed(() => {
   return props.q.questionType === QuestionType.Matching;
 })
+const isFillInTheBlank = computed(() => {
+  return props.q.questionType === QuestionType.FillInTheBlank;
+})
 const isMissingAnswer = computed(() => {
   if (isTextInput.value) {
     return !answerText.value || answerText.value.trimEnd() === '';
@@ -108,7 +111,9 @@ const numberOfStars = computed(() => {
 const fieldName = computed(() => {
   const num = props.num;
   if (isTextInput.value) {
-    return `questions[${num-1}].answerText`;
+    return `questions[${num - 1}].answerText`;
+  } else if (isFillInTheBlank.value) {
+    return `questions[${num-1}].answerTextArray`;
   } else if (isRating.value) {
     return `questions[${num-1}].answerRating`;
   }
@@ -158,6 +163,25 @@ const selectionChanged = (currentAnswer) => {
     });
   });
 }
+
+const fillInTheBlankChangedDebounced = useDebounceFn((textInput, answerId) => fillInTheBlankChanged(textInput, answerId), appConfig.formFieldDebounceInMs)
+
+const fillInTheBlankChanged = (textInput, answerId) => {
+  if(answerOptions.value[answerId]) {
+    const currentAnswer = {
+      questionId: props.q.id,
+      questionType: props.q.questionType,
+      changedAnswerId: answerOptions.value[answerId].id,
+      answerText: textInput,
+    }
+    reportAnswer(currentAnswer).then((reportAnswerPromise) => {
+      emit('fill-in-the-blank-changed', {
+        ...currentAnswer,
+        reportAnswerPromise,
+      });
+    });
+  }
+}
 const ratingChanged = (value) => {
   if (value) {
     const selectedAnswerIds = answerOptions.value.map((a) => a.id);
@@ -178,6 +202,7 @@ const ratingChanged = (value) => {
   }
 }
 const reportAnswer = (answer) => {
+
   if (!isLoading.value) {
     const reportAnswer = () => QuizRunService.reportAnswer(props.quizId, props.quizAttemptId, answer.changedAnswerId, answer.changedAnswerIdSelected, answer.answerText)
     if (QuestionType.isTextInput(props.q.questionType) ) {
@@ -297,6 +322,15 @@ const updateAnswerOrder = (newOrder) => {
           </div>
           <div v-else-if="isMatchingType">
             <QuizRunMatchingComponent :q="q" :name="fieldName" :value="answerOptions" @updateAnswerOrder="updateAnswerOrder" :questionNumber="num" :quizComplete="quizComplete" />
+          </div>
+          <div v-else-if="isFillInTheBlank">
+            <div v-for="(a, index) in q.answerOptions">
+              <SkillsTextInput
+                  :disabled="quizComplete"
+                  @input="(e) => fillInTheBlankChangedDebounced(e, index)"
+                  :placeholder="`Fill in blank ${index + 1}`"
+                  :name="`${fieldName}[${index}]`" />
+            </div>
           </div>
           <div v-else>
             <div v-if="isMultipleChoice" class="text-secondary italic small" data-cy="multipleChoiceMsg">(Select <b>all</b> that apply)</div>
