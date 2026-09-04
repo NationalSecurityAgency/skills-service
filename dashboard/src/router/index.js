@@ -103,6 +103,16 @@ import TaggedSkills from "@/components/skills/tags/TaggedSkills.vue";
 
 const FullDependencyGraph = defineAsyncComponent(() => import('@/components/skills/dependencies/FullDependencyGraph.vue'))
 
+const redirectToSkillsDisplayIfRequested = (to) => {
+  if (to.query.skillsClientDisplayHostPath) {
+    return {
+      path: to.query.skillsClientDisplayHostPath,
+      query: { skillsClientDisplayPath: to.path },
+    }
+  }
+  return to.name === 'NotFoundPage' ? true : { name: 'NotFoundPage' };
+}
+
 const routes = [
   {
     path: '/',
@@ -964,6 +974,9 @@ const routes = [
     path: '/not-found',
     name: 'NotFoundPage',
     component: NotFoundPage,
+    beforeEnter: (to, from) => {
+      return redirectToSkillsDisplayIfRequested(to)
+    },
     props: true,
     meta: {
       requiresAuth: false,
@@ -974,8 +987,9 @@ const routes = [
   },
   { path: '/:pathMatch(.*)*',
     name: '404',
-    redirect: {
-      name: 'NotFoundPage',
+    component: NotFoundPage,
+    beforeEnter: (to, from) => {
+      return redirectToSkillsDisplayIfRequested(to)
     },
     meta: {
       requiresAuth: false,
@@ -1065,6 +1079,70 @@ const constructRouter = () => {
   })
 
   if (isSkillsClient) {
+    const originalResolve = router.resolve;
+
+    router.resolve = function (to, currentLocation) {
+      // Call the original resolver to get the baseline Route Location object
+      const resolved = originalResolve.call(this, to, currentLocation);
+
+      const paramKey = 'skillsClientDisplayHostPath';
+      const isClientDisplayPath = (path) => path?.startsWith(SkillsClientPath.RootUrl);
+      const resolveHostPath = () => {
+        try {
+          if (window.parent && window.parent !== window) {
+            const parentPath = window.parent.location.pathname;
+            if (parentPath && !isClientDisplayPath(parentPath)) {
+              return parentPath;
+            }
+          }
+        } catch {
+          // Parent access can fail in some browser/test contexts.
+        }
+
+        try {
+          if (document.referrer) {
+            const referrerPath = new URL(document.referrer).pathname;
+            if (referrerPath && !isClientDisplayPath(referrerPath)) {
+              return referrerPath;
+            }
+          }
+        } catch {
+          // Ignore malformed referrer.
+        }
+
+        if (resolved.query[paramKey] && !isClientDisplayPath(resolved.query[paramKey])) {
+          return resolved.query[paramKey];
+        }
+
+        log.warn(`unable to determine ${paramKey}`)
+        return null;
+      };
+
+      const paramValue = resolveHostPath();
+      if (paramValue && resolved.query[paramKey] !== paramValue) {
+        const newQuery = {
+          ...resolved.query,
+          [paramKey]: paramValue
+        };
+
+        // `to` can be either a string path or an object; normalize before re-resolving.
+        const locationWithQuery = typeof to === 'string'
+          ? {
+            path: resolved.path,
+            hash: resolved.hash,
+            query: newQuery,
+          }
+          : {
+            ...to,
+            query: newQuery,
+          };
+
+        // Re-resolve with the updated query to correctly regenerate the full href string.
+        return originalResolve.call(this, locationWithQuery, currentLocation);
+      }
+      return resolved;
+    };
+
     router.push('/')
   }
 

@@ -139,6 +139,48 @@ describe('Navigation in skills-client tests', () => {
     cy.wrapIframe().find('[data-cy="myRankPosition"]')
   })
 
+  it('breadcrumb links preserve the host path for new-tab navigation', () => {
+    cy.createProject(1)
+    cy.createSubject(1, 1)
+    cy.createSkill(1, 1,1 )
+    cy.createSkill(1, 1,2 )
+
+    cy.visit('/test-skills-client/proj1?skillsClientDisplayPath=%2Fsubjects%2Fsubj1%2Fskills%2Fskill1')
+    cy.wrapIframe().find('[data-cy="skillsDisplayBreadcrumbBar"] [data-cy="breadcrumbLink-subj1"]').then(($link) => {
+      const href = $link.attr('href')
+      expect(href).to.include('/subjects/subj1')
+      expect(new URL(href, 'http://localhost').searchParams.get('skillsClientDisplayHostPath')).to.eq('/test-skills-client/proj1')
+    })
+  })
+
+  it('subject page skill links preserve the host path for new-tab navigation', () => {
+    cy.createProject(1)
+    cy.createSubject(1, 1)
+    cy.createSkill(1, 1,1 )
+    cy.createSkill(1, 1,2 )
+
+    cy.visit('/test-skills-client/proj1?skillsClientDisplayPath=%2Fsubjects%2Fsubj1')
+    cy.wrapIframe().find('[data-cy="skillProgressTitle"]').first().then(($link) => {
+      const href = $link.attr('href')
+      expect(href).to.include('/subjects/subj1/skills/skill1')
+      expect(new URL(href, 'http://localhost').searchParams.get('skillsClientDisplayHostPath')).to.eq('/test-skills-client/proj1')
+    })
+  })
+
+  it('rank page links preserve the host path for new-tab navigation', () => {
+    cy.createProject(1)
+    cy.createSubject(1, 1)
+    cy.createSkill(1, 1,1 )
+    cy.createSkill(1, 1,2 )
+
+    cy.visit('/test-skills-client/proj1?skillsClientDisplayPath=%2Fsubjects%2Fsubj1%2Frank')
+    cy.wrapIframe().find('[data-cy="skillsDisplayBreadcrumbBar"] [data-cy="breadcrumbLink-Overview"]').then(($link) => {
+      const href = $link.attr('href')
+      expect(href).to.include('/?')
+      expect(new URL(href, 'http://localhost').searchParams.get('skillsClientDisplayHostPath')).to.eq('/test-skills-client/proj1')
+    })
+  })
+
   it('deep link into various pages', () => {
     cy.createProject(1)
     cy.createSubject(1, 1)
