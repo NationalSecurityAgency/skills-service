@@ -962,7 +962,7 @@ class QuizApi_RunQuizSpecs extends DefaultIntSpec {
     def "run quiz with fill in the blank question - pass, all correct"() {
         def quiz = QuizDefFactory.createQuiz(1, "Fancy Description")
         skillsService.createQuizDef(quiz)
-        def question = QuizDefFactory.createFillInTheBlankQuestion(1, 2, 2)
+        def question = QuizDefFactory.createFillInTheBlankQuestion(1, 1, 2)
         def question2 = QuizDefFactory.createFillInTheBlankQuestion(1, 2, 3)
         skillsService.createQuizQuestionDefs([question, question2])
 
@@ -1016,7 +1016,7 @@ class QuizApi_RunQuizSpecs extends DefaultIntSpec {
     def "run quiz with fill in the blank question - fail with one wrong"() {
         def quiz = QuizDefFactory.createQuiz(1, "Fancy Description")
         skillsService.createQuizDef(quiz)
-        def question = QuizDefFactory.createFillInTheBlankQuestion(1, 2, 2)
+        def question = QuizDefFactory.createFillInTheBlankQuestion(1, 1, 2)
         def question2 = QuizDefFactory.createFillInTheBlankQuestion(1, 2, 3)
         skillsService.createQuizQuestionDefs([question, question2])
 
@@ -1063,7 +1063,7 @@ class QuizApi_RunQuizSpecs extends DefaultIntSpec {
     def "run quiz with fill in the blank question - fail with both wrong"() {
         def quiz = QuizDefFactory.createQuiz(1, "Fancy Description")
         skillsService.createQuizDef(quiz)
-        def question = QuizDefFactory.createFillInTheBlankQuestion(1, 2, 2)
+        def question = QuizDefFactory.createFillInTheBlankQuestion(1, 1, 2)
         def question2 = QuizDefFactory.createFillInTheBlankQuestion(1, 2, 3)
         skillsService.createQuizQuestionDefs([question, question2])
 
@@ -1104,6 +1104,55 @@ class QuizApi_RunQuizSpecs extends DefaultIntSpec {
                 [ "answerText": "Answer #1", "isCorrect": "CORRECT"],
                 [ "answerText": "Answer #214", "isCorrect": "WRONG"],
                 [ "answerText": "Answer #3", "isCorrect": "CORRECT"],
+        ]
+    }
+
+    def "fill in the blank question ignores randomized answers"() {
+        def quiz = QuizDefFactory.createQuiz(1, "Fancy Description")
+        skillsService.createQuizDef(quiz)
+        def question = QuizDefFactory.createFillInTheBlankQuestion(1, 1, 9)
+        skillsService.createQuizQuestionDefs([question])
+
+        skillsService.saveQuizSettings(quiz.quizId, [
+                [setting: QuizSettings.RandomizeAnswers.setting, value: 'true'],
+        ])
+
+        when:
+        def quizAttempt =  skillsService.startQuizAttempt(quiz.quizId).body
+        skillsService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizAttempt.questions[0].answerOptions[0].id, [answerText: 'Answer #1'])
+        skillsService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizAttempt.questions[0].answerOptions[1].id, [answerText: 'Answer #2'])
+        skillsService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizAttempt.questions[0].answerOptions[2].id, [answerText: 'Answer #3'])
+        skillsService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizAttempt.questions[0].answerOptions[3].id, [answerText: 'Answer #4'])
+        skillsService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizAttempt.questions[0].answerOptions[4].id, [answerText: 'Answer #5'])
+        skillsService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizAttempt.questions[0].answerOptions[5].id, [answerText: 'Answer #6'])
+        skillsService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizAttempt.questions[0].answerOptions[6].id, [answerText: 'Answer #7'])
+        skillsService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizAttempt.questions[0].answerOptions[7].id, [answerText: 'Answer #8'])
+        skillsService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizAttempt.questions[0].answerOptions[8].id, [answerText: 'Answer #9'])
+
+        def gradedQuizAttempt = skillsService.completeQuizAttempt(quiz.quizId, quizAttempt.id).body
+        def quizHistoryRes = skillsService.getQuizAttemptResult(quiz.quizId, quizAttempt.id)
+        then:
+        gradedQuizAttempt.passed == true
+        gradedQuizAttempt.needsGrading == false
+        gradedQuizAttempt.numQuestionsGotWrong == 0
+        gradedQuizAttempt.numQuestionsNeedGrading == 0
+
+        quizHistoryRes.questions.size() == 1
+        def q1 = quizHistoryRes.questions[0]
+        q1.questionType == QuizQuestionType.FillInTheBlank.toString()
+        q1.question == question.question
+        q1.isCorrect == true
+        q1.needsGrading == false
+        q1.answers.answer == [
+                [ "answerText": "Answer #1", "isCorrect": "CORRECT"],
+                [ "answerText": "Answer #2", "isCorrect": "CORRECT"],
+                [ "answerText": "Answer #3", "isCorrect": "CORRECT"],
+                [ "answerText": "Answer #4", "isCorrect": "CORRECT"],
+                [ "answerText": "Answer #5", "isCorrect": "CORRECT"],
+                [ "answerText": "Answer #6", "isCorrect": "CORRECT"],
+                [ "answerText": "Answer #7", "isCorrect": "CORRECT"],
+                [ "answerText": "Answer #8", "isCorrect": "CORRECT"],
+                [ "answerText": "Answer #9", "isCorrect": "CORRECT"],
         ]
     }
 }
