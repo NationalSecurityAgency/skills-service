@@ -16,6 +16,7 @@
 package skills.intTests.quiz
 
 import org.springframework.beans.factory.annotation.Autowired
+import skills.controller.exceptions.SkillQuizException
 import skills.intTests.utils.DefaultIntSpec
 import skills.intTests.utils.QuizDefFactory
 import skills.intTests.utils.SkillsClientException
@@ -1155,4 +1156,22 @@ class QuizApi_RunQuizSpecs extends DefaultIntSpec {
                 [ "answerText": "Answer #9", "isCorrect": "CORRECT"],
         ]
     }
+
+    def "can not submit blank fill in the blank answers"() {
+        def quiz = QuizDefFactory.createQuiz(1, "Fancy Description")
+        skillsService.createQuizDef(quiz)
+        def question = QuizDefFactory.createFillInTheBlankQuestion(1, 1, 2)
+        skillsService.createQuizQuestionDefs([question])
+
+        when:
+        def quizAttempt =  skillsService.startQuizAttempt(quiz.quizId).body
+        skillsService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizAttempt.questions[0].answerOptions[0].id, [answerText: 'Answer #1'])
+        skillsService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizAttempt.questions[0].answerOptions[1].id, [answerText: ''])
+
+        then:
+        SkillsClientException ex = thrown(SkillsClientException)
+        ex.message.contains("Can not submit blank entries for Fill in the Blank questions")
+
+    }
+
 }

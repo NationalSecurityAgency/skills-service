@@ -627,6 +627,9 @@ class QuizRunService {
             QuizDef quizDef = getQuizDef(quizId)
             handleReportingTextInputQuestion(quizDef, userId, quizAttemptId, answerDefId, quizReportAnswerReq)
         } else if (answerDefPartialInfo.getQuestionType() == QuizQuestionType.FillInTheBlank) {
+            if(quizReportAnswerReq.answerText.trim() == '') {
+                throw new SkillQuizException("Can not submit blank entries for Fill in the Blank questions", quizId, ErrorCode.BadParam)
+            }
 //            propsBasedValidator.quizValidationMaxStrLength(PublicProps.UiProp.maxTakeQuizInputTextAnswerLength, "Answer", quizReportAnswerReq.answerText, quizId)
             handleReportingFillInTheBlankQuestion(userId, quizAttemptId, answerDefId, quizReportAnswerReq)
         } else if (answerDefPartialInfo.getQuestionType() == QuizQuestionType.Matching) {
