@@ -135,11 +135,6 @@ class SubjAdminService {
             //we need to manually copy subjectId into skillId
             existing.skillId = subjectRequest.subjectId
 
-            Closure<Boolean> alreadyExistLookup = { String uuid ->
-                return skillDefWithExtraRepo.otherSkillsExistInProjectWithAttachmentUUID(existing.projectId, prevSubjId, uuid)
-            }
-            existing.description = attachmentService.copyAttachmentsForIncomingDescription(existing.description, existing.projectId, prevSubjId, null, alreadyExistLookup)
-
             DataIntegrityExceptionHandlers.subjectDataIntegrityViolationExceptionHandler.handle(projectId) {
                 res = skillDefWithExtraRepo.save(existing)
             }
@@ -156,13 +151,12 @@ class SubjAdminService {
             int displayOrder = lastDisplayOrder != null ? lastDisplayOrder + 1 : 1
             String enabled = isEnabledSkillInRequest.toString()
 
-            String description = attachmentService.copyAttachmentsForIncomingDescription(subjectRequest?.description, projectId, subjectRequest.subjectId, null)
             SkillDefWithExtra skillDef = new SkillDefWithExtra(
                     type: SkillDef.ContainerType.Subject,
                     projectId: projectId,
                     skillId: subjectRequest.subjectId,
                     name: subjectRequest?.name,
-                    description: description,
+                    description: subjectRequest?.description,
                     iconClass: subjectRequest?.iconClass ?: "fa fa-question-circle",
                     projRefId: projDef.id,
                     displayOrder: displayOrder,
@@ -177,7 +171,10 @@ class SubjAdminService {
 
             log.debug("Created [{}]", res)
         }
-        attachmentService.updateAttachmentsAttrsBasedOnUuidsInMarkdown(res.description, res.projectId, null, res.skillId)
+        AttachmentService.CopyAttachmentRes copyAttachmentRes = attachmentService.updateAttachmentsAttrsBasedOnUuidsInMarkdown(res.description, res.projectId, null, origSubjectId)
+        if (copyAttachmentRes.updated) {
+            skillDefWithExtraRepo.updateDescriptionByProjectIdAndSkillId(res.projectId, res.skillId, copyAttachmentRes.markdown)
+        }
 
         userActionsHistoryService.saveUserAction(new UserActionInfo(
                 action: existing ? DashboardAction.Edit : DashboardAction.Create,

@@ -168,11 +168,6 @@ class ProjAdminService {
         ProjDefParent savedProjDef
         if (isEdit) {
             Props.copy(projectRequest, projectDefinition)
-            if (projectDefinition.description) {
-                Closure<Boolean> existElsewhereInProjLookup = { String uuid -> return attachmentService.doesAttachmentExistInProjectAndLinkedToASkillId(uuid, originalProjectId) }
-                description = attachmentService.copyAttachmentsForIncomingDescription(projectDefinition.description, originalProjectId, null, null, existElsewhereInProjLookup)
-                projectDefinition.description = description
-            }
             log.debug("Updating [{}]", projectDefinition)
 
             DataIntegrityExceptionHandlers.dataIntegrityViolationExceptionHandler.handle(projectDefinition.projectId) {
@@ -211,7 +206,10 @@ class ProjAdminService {
 
             savedProjDef = projDef
         }
-        attachmentService.updateAttachmentsAttrsBasedOnUuidsInMarkdown(description, projectDefinition.projectId, null, null)
+        AttachmentService.CopyAttachmentRes copyRes = attachmentService.updateAttachmentsAttrsBasedOnUuidsInMarkdown(description, originalProjectId, null, null)
+        if (copyRes.updated) {
+            projDefWithDescriptionRepo.updateDescription(projectDefinition.projectId, copyRes.markdown)
+        }
 
         Map actionAttributes
         if (isEdit) {

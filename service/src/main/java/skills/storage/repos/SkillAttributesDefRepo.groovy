@@ -18,7 +18,6 @@ package skills.storage.repos
 import org.springframework.data.jpa.repository.Query
 import org.springframework.data.repository.CrudRepository
 import org.springframework.lang.Nullable
-import skills.services.attributes.SlidesAttrs
 import skills.storage.model.SkillAttributesDef
 
 interface SkillAttributesDefRepo extends CrudRepository<SkillAttributesDef, Long> {

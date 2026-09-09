@@ -426,6 +426,10 @@ class QuizDefService {
             }
             log.debug("Saved [{}]", quizDefWithDescription)
         } else {
+            if (quizDefRequest.description && attachmentService.findAttachmentUuids(quizDefRequest.description)) {
+                throw new SkillQuizException("Attachments in the description are not allowed when creating a new quiz", newQuizId, ErrorCode.BadParam)
+            }
+
             quizDefWithDescription = new QuizDefWithDescription(quizId: newQuizId, name: quizDefRequest.name,
                     description: quizDefRequest.description, type: QuizDefParent.QuizType.valueOf(quizDefRequest.type))
             log.debug("Created project [{}]", quizDefWithDescription)
@@ -444,7 +448,11 @@ class QuizDefService {
 
             accessSettingsStorageService.addQuizDefUserRoleForUser(userId, newQuizId, RoleName.ROLE_QUIZ_ADMIN)
         }
-        attachmentService.updateAttachmentsAttrsBasedOnUuidsInMarkdown(quizDefRequest.description, null, quizDefWithDescription.quizId, null)
+        AttachmentService.CopyAttachmentReq copyAttachmentReq = new AttachmentService.CopyAttachmentReq(markdown: quizDefRequest.description, quizId: quizDefWithDescription.quizId, originalQuizId: originalQuizId)
+        AttachmentService.CopyAttachmentRes copyRes = attachmentService.updateAttachmentsAttrsBasedOnUuidsInMarkdown(copyAttachmentReq)
+        if (copyRes.updated) {
+            quizDefWithDescRepo.updateDescription(quizDefWithDescription.quizId, copyRes.markdown)
+        }
 
         if (quizDefRequest.enableProtectedUserCommunity) {
             quizSettingsService.saveSettings(quizDefWithDescription.quizId, [new QuizSettingsRequest(setting: QuizSettings.UserCommunityOnlyQuiz.setting, value: Boolean.TRUE.toString())], false)
@@ -556,10 +564,6 @@ class QuizDefService {
 
         boolean isEdit = existingQuestionId != null
 
-        Closure<Boolean> shouldCopyUuid = { String uuid ->
-            quizDefRepo.otherQuestionsExistInQuizWithAttachmentUUID(quizDef.quizId, existingQuestionId ?: -1, uuid)
-        }
-        questionDefRequest.question = attachmentService.copyAttachmentsForIncomingDescription(questionDefRequest.question, null, null, quizDef.quizId, shouldCopyUuid)
         if (isEdit) {
             def existingQuestion = getQuestionDef(quizId, existingQuestionId)
             if(existingQuestion.questionType == QuizQuestionType.TextInput && questionDefRequest.questionType !== existingQuestion.questionType) {
@@ -578,7 +582,14 @@ class QuizDefService {
 
         addSavedQuestionUserAction(quizDef.quizId, savedQuestion, savedAnswers, isEdit)
 
-        attachmentService.updateAttachmentsAttrsBasedOnUuidsInMarkdown(savedQuestion.question, null, quizDef.quizId, null)
+        AttachmentService.CopyAttachmentReq copyAttachmentReq = new AttachmentService.CopyAttachmentReq(markdown: savedQuestion.question, quizId: quizDef.quizId, questionId: savedQuestion.id)
+        AttachmentService.CopyAttachmentRes copyRes = attachmentService.updateAttachmentsAttrsBasedOnUuidsInMarkdown(copyAttachmentReq)
+        if (copyRes.updated) {
+            quizDefWithDescRepo.updateDescription(quizDefWithDescription.quizId, copyRes.markdown)
+        }
+        if (copyRes.updated) {
+            quizQuestionRepo.updateQuestion(savedQuestion.id, copyRes.markdown)
+        }
 
         return convert(savedQuestion, savedAnswers)
     }

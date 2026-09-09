@@ -240,9 +240,6 @@ class SkillsAdminService {
                 throw new SkillException("Cannot enable Skill [${originalSkillId}] because it's SkillsGroup [${groupId}] is disabled", skillRequest.projectId, skillRequest.skillId, ErrorCode.BadParam)
             }
         }
-        Closure<Boolean> alreadyExistLookup = { String uuid ->
-            return skillDefWithExtraRepo.otherSkillsExistInProjectWithAttachmentUUID(skillRequest.projectId, skillRequest.skillId, uuid)
-        }
         if (isEdit) {
             validateImportedSkillUpdate(skillRequest, skillDefinition)
             // for updates, use the existing value if it is not set on the skillRequest (null or empty String)
@@ -313,10 +310,6 @@ class SkillsAdminService {
             }
 
             Props.copy(skillRequest, skillDefinition, "childSkills", 'version', 'selfReportType')
-            if (!isReplicationRequest) {
-                description = attachmentService.copyAttachmentsForIncomingDescription(description, skillRequest.projectId, skillRequest.skillId, null, alreadyExistLookup)
-                skillDefinition.description = description
-            }
 
             skillApprovalService.modifyApprovalsWhenSelfReportingTypeChanged(skillDefinition, selfReportingType)
             skillDefinition.selfReportingType = selfReportingType;
@@ -336,9 +329,6 @@ class SkillsAdminService {
                 }
             }
 
-            if (!isSkillCatalogImport) {
-                description = attachmentService.copyAttachmentsForIncomingDescription(description, skillRequest.projectId, skillRequest.skillId, null, alreadyExistLookup)
-            }
 
             skillDefinition = new SkillDefWithExtra(
                     skillId: skillRequest.skillId,
@@ -390,7 +380,10 @@ class SkillsAdminService {
             }
         }
         if (!isSkillCatalogImport) {
-            attachmentService.updateAttachmentsAttrsBasedOnUuidsInMarkdown(description, savedSkill.projectId, null, savedSkill.skillId)
+            AttachmentService.CopyAttachmentRes copyRes = attachmentService.updateAttachmentsAttrsBasedOnUuidsInMarkdown(description, savedSkill.projectId, null, originalSkillId, savedSkill.skillId)
+            if (copyRes.updated) {
+                skillDefWithExtraRepo.updateDescriptionByProjectIdAndSkillId(savedSkill.projectId, savedSkill.skillId, copyRes.markdown)
+            }
         }
 
         if (isSkillsGroupChild) {

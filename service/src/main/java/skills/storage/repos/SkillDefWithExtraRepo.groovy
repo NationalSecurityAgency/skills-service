@@ -16,14 +16,11 @@
 package skills.storage.repos
 
 import org.springframework.data.jpa.repository.JpaRepository
+import org.springframework.data.jpa.repository.Modifying
 import org.springframework.data.jpa.repository.Query
-import org.springframework.data.repository.CrudRepository
 import org.springframework.data.repository.PagingAndSortingRepository
 import org.springframework.data.repository.query.Param
 import org.springframework.lang.Nullable
-import skills.skillLoading.model.SkillBadgeSummary
-import skills.storage.model.SimpleBadgeRes
-import skills.storage.model.SkillDef
 import skills.storage.model.SkillDef.ContainerType
 import skills.storage.model.SkillDefWithExtra
 import skills.storage.model.SkillRelDef
@@ -246,4 +243,12 @@ interface SkillDefWithExtraRepo extends JpaRepository<SkillDefWithExtra, Integer
              and s.type = :type
            """)
     Long findIdByProjectIdIsNullAndSkillIdIgnoreCaseAndType(@Param("skillId") String skillId, @Param("type") ContainerType type);
+
+    @Modifying
+    @Query("UPDATE SkillDefWithExtra s SET s.description = :description WHERE s.projectId = :projectId AND s.skillId = :skillId")
+    void updateDescriptionByProjectIdAndSkillId(@Param("projectId") String projectId, @Param("skillId") String skillId, @Param("description") String description);
+
+    @Modifying
+    @Query("UPDATE SkillDefWithExtra s SET s.description = :description WHERE s.projectId is null AND s.skillId = :skillId")
+    void updateDescriptionBySkillIdAndProjectIdIsNull(@Param("skillId") String skillId, @Param("description") String description);
 }

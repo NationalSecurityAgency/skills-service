@@ -103,4 +103,8 @@ interface QuizQuestionDefRepo extends JpaRepository<QuizQuestionDef, Long> {
 
     @Query('''SELECT s FROM QuizQuestionDef s''')
     Stream<QuizQuestionDef> streamAll()
+
+    @Modifying
+    @Query('''update QuizQuestionDef set question = ?2 where id = ?1''')
+    void updateQuestion(Integer id, String question)
 }
