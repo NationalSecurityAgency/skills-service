@@ -925,5 +925,48 @@ class QuizDefManagementSpecs extends DefaultIntSpec {
         q2StatusUpdated.data.hasPendingGrades == false
         q3StatusUpdated.data.hasPendingGrades == true
     }
+
+    def "add FillInTheBlank question to quiz"() {
+        def quiz = QuizDefFactory.createQuiz(1)
+        def newQuiz = skillsService.createQuizDef(quiz)
+
+        def question = QuizDefFactory.createFillInTheBlankQuestion(1, 1, 2)
+
+        when:
+        def newQuestion = skillsService.createQuizQuestionDef(question)
+
+        then:
+        newQuestion.body.id
+        newQuestion.body.question == question.question
+        newQuestion.body.answerHint == question.answerHint
+        newQuestion.body.questionType == QuizQuestionType.FillInTheBlank.toString()
+        newQuestion.body.answers.size() == 2
+        newQuestion.body.answers[0].id
+        newQuestion.body.answers[1].id
+        newQuestion.body.answers.answer == question.answers.answer
+    }
+
+
+    def "FillInTheBlank question choices are sanitized"() {
+        def quiz = QuizDefFactory.createQuiz(1)
+        skillsService.createQuizDef(quiz)
+
+        def question = QuizDefFactory.createFillInTheBlankQuestion(1, 1, 2)
+        question.answers[0].answer = "sanitized <script>alert('xss')</script> answer1 ampersand & less than < greater than >"
+        question.answers[1].answer = "sanitized <script>alert('xss')</script> answer2 ampersand & less than < greater than >"
+
+        when:
+        def newQuestion = skillsService.createQuizQuestionDef(question)
+        def qDefs = skillsService.getQuizQuestionDefs(quiz.quizId)
+
+        then:
+        newQuestion.body.id
+        newQuestion.body.question == question.question
+        newQuestion.body.answerHint == question.answerHint
+        newQuestion.body.questionType == QuizQuestionType.FillInTheBlank.toString()
+        newQuestion.body.answers.size() == 2
+        newQuestion.body.answers.answer == ["sanitized  answer1 ampersand & less than < greater than >", "sanitized  answer2 ampersand & less than < greater than >"]
+        qDefs.questions.answers.answer == [["sanitized  answer1 ampersand & less than < greater than >", "sanitized  answer2 ampersand & less than < greater than >"]]
+    }
 }
 
