@@ -100,8 +100,12 @@ import SkillTagsPage from "@/components/skills/tags/SkillTagsPage.vue";
 import SingleSkillTagPage from "@/components/skills/tags/SingleSkillTagPage.vue";
 import SkillTagUsers from "@/components/skills/tags/SkillTagUsers.vue";
 import TaggedSkills from "@/components/skills/tags/TaggedSkills.vue";
+import { useSkillsDisplayParentFrameState } from '@/skills-display/stores/UseSkillsDisplayParentFrameState.js'
 
 const FullDependencyGraph = defineAsyncComponent(() => import('@/components/skills/dependencies/FullDependencyGraph.vue'))
+
+let initialized = false;
+let parentFrame = null;
 
 const redirectToSkillsDisplayIfRequested = (to) => {
   if (to.query.skillsClientDisplayHostPath) {
@@ -1079,6 +1083,10 @@ const constructRouter = () => {
   })
 
   if (isSkillsClient) {
+    if (!initialized) {
+      parentFrame = useSkillsDisplayParentFrameState()
+      initialized = true
+    }
     const originalResolve = router.resolve;
 
     router.resolve = function (to, currentLocation) {
@@ -1088,32 +1096,9 @@ const constructRouter = () => {
       const paramKey = 'skillsClientDisplayHostPath';
       const isClientDisplayPath = (path) => path?.startsWith(SkillsClientPath.RootUrl);
       const resolveHostPath = () => {
-        try {
-          if (window.parent && window.parent !== window) {
-            const parentPath = window.parent.location.pathname;
-            if (parentPath && !isClientDisplayPath(parentPath)) {
-              return parentPath;
-            }
-          }
-        } catch {
-          // Parent access can fail in some browser/test contexts.
+        if (parentFrame.options && parentFrame.options[paramKey] && !isClientDisplayPath(parentFrame.options[paramKey])) {
+          return parentFrame.options[paramKey];
         }
-
-        try {
-          if (document.referrer) {
-            const referrerPath = new URL(document.referrer).pathname;
-            if (referrerPath && !isClientDisplayPath(referrerPath)) {
-              return referrerPath;
-            }
-          }
-        } catch {
-          // Ignore malformed referrer.
-        }
-
-        if (resolved.query[paramKey] && !isClientDisplayPath(resolved.query[paramKey])) {
-          return resolved.query[paramKey];
-        }
-
         log.warn(`unable to determine ${paramKey}`)
         return null;
       };

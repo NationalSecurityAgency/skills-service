@@ -41,7 +41,8 @@ const options = {
   projectId,
   authenticator: authenticator,
   serviceUrl: serviceUrl,
-  autoScrollStrategy: 'top-of-page'
+  autoScrollStrategy: 'top-of-page',
+  skillsClientDisplayHostPath: window.location.pathname
 }
 
 if (isSummaryOnly) {
