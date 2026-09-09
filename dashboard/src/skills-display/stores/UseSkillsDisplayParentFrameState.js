@@ -32,6 +32,12 @@ export const useSkillsDisplayParentFrameState = defineStore('skillsDisplayParent
 
     return options.value && Object.keys(options.value).length > 0;
   })
+  const parentOrigin = computed(() => {
+    return parentFrame.value?.parentOrigin;
+  })
+  const parentPath = computed(() => {
+    return options.value?.parentPath || '/skilltree';
+  })
   const setAuthToken = (token) => {
     axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
     if (log.isTraceEnabled()) {
@@ -47,5 +53,7 @@ export const useSkillsDisplayParentFrameState = defineStore('skillsDisplayParent
     serviceUrl,
     options,
     isLastViewedScrollSupported,
+    parentOrigin,
+    parentPath
   }
 })

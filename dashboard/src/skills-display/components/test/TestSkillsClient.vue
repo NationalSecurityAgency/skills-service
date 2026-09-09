@@ -42,7 +42,7 @@ const options = {
   authenticator: authenticator,
   serviceUrl: serviceUrl,
   autoScrollStrategy: 'top-of-page',
-  skillsClientDisplayHostPath: window.location.pathname
+  parentPath: window.location.pathname
 }
 
 if (isSummaryOnly) {
