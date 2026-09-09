@@ -958,4 +958,152 @@ class QuizApi_RunQuizSpecs extends DefaultIntSpec {
                 "This is questions #6",
         ]
     }
+
+    def "run quiz with fill in the blank question - pass, all correct"() {
+        def quiz = QuizDefFactory.createQuiz(1, "Fancy Description")
+        skillsService.createQuizDef(quiz)
+        def question = QuizDefFactory.createFillInTheBlankQuestion(1, 2, 2)
+        def question2 = QuizDefFactory.createFillInTheBlankQuestion(1, 2, 3)
+        skillsService.createQuizQuestionDefs([question, question2])
+
+        when:
+        def quizAttempt =  skillsService.startQuizAttempt(quiz.quizId).body
+        skillsService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizAttempt.questions[0].answerOptions[0].id, [answerText: 'Answer #1'])
+        skillsService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizAttempt.questions[0].answerOptions[1].id, [answerText: 'Answer #2'])
+
+        skillsService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizAttempt.questions[1].answerOptions[0].id, [answerText: 'Answer #1'])
+        skillsService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizAttempt.questions[1].answerOptions[1].id, [answerText: 'Answer #2'])
+        skillsService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizAttempt.questions[1].answerOptions[2].id, [answerText: 'Answer #3'])
+
+        def gradedQuizAttempt = skillsService.completeQuizAttempt(quiz.quizId, quizAttempt.id).body
+        def quizHistoryRes = skillsService.getQuizAttemptResult(quiz.quizId, quizAttempt.id)
+        then:
+        gradedQuizAttempt.passed == true
+        gradedQuizAttempt.needsGrading == false
+        gradedQuizAttempt.numQuestionsGotWrong == 0
+        gradedQuizAttempt.numQuestionsNeedGrading == 0
+        gradedQuizAttempt.gradedQuestions.questionId == quizAttempt.questions.id
+        gradedQuizAttempt.gradedQuestions.isCorrect == [true, true]
+        gradedQuizAttempt.gradedQuestions[0].selectedAnswerIds == [quizAttempt.questions[0].answerOptions[0].id, quizAttempt.questions[0].answerOptions[1].id]
+        gradedQuizAttempt.gradedQuestions[0].selectedAnswerIds == gradedQuizAttempt.gradedQuestions[0].correctAnswerIds.sort()
+
+        gradedQuizAttempt.gradedQuestions[1].selectedAnswerIds == [quizAttempt.questions[1].answerOptions[0].id, quizAttempt.questions[1].answerOptions[1].id, quizAttempt.questions[1].answerOptions[2].id]
+        gradedQuizAttempt.gradedQuestions[1].selectedAnswerIds == gradedQuizAttempt.gradedQuestions[1].correctAnswerIds.sort()
+
+        quizHistoryRes.questions.size() == 2
+        def q1 = quizHistoryRes.questions[0]
+        def q2 = quizHistoryRes.questions[1]
+        q1.questionType == QuizQuestionType.FillInTheBlank.toString()
+        q1.question == question.question
+        q1.isCorrect == true
+        q1.needsGrading == false
+        q1.answers.answer == [
+                [ "answerText": "Answer #1", "isCorrect": "CORRECT"],
+                [ "answerText": "Answer #2", "isCorrect": "CORRECT"],
+        ]
+
+        q2.questionType == QuizQuestionType.FillInTheBlank.toString()
+        q2.question == question2.question
+        q2.isCorrect == true
+        q2.needsGrading == false
+        q2.answers.answer == [
+                [ "answerText": "Answer #1", "isCorrect": "CORRECT"],
+                [ "answerText": "Answer #2", "isCorrect": "CORRECT"],
+                [ "answerText": "Answer #3", "isCorrect": "CORRECT"],
+        ]
+    }
+
+    def "run quiz with fill in the blank question - fail with one wrong"() {
+        def quiz = QuizDefFactory.createQuiz(1, "Fancy Description")
+        skillsService.createQuizDef(quiz)
+        def question = QuizDefFactory.createFillInTheBlankQuestion(1, 2, 2)
+        def question2 = QuizDefFactory.createFillInTheBlankQuestion(1, 2, 3)
+        skillsService.createQuizQuestionDefs([question, question2])
+
+        when:
+        def quizAttempt =  skillsService.startQuizAttempt(quiz.quizId).body
+        skillsService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizAttempt.questions[0].answerOptions[0].id, [answerText: 'Answer #1'])
+        skillsService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizAttempt.questions[0].answerOptions[1].id, [answerText: 'Answer #2'])
+
+        skillsService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizAttempt.questions[1].answerOptions[0].id, [answerText: 'Answer #1'])
+        skillsService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizAttempt.questions[1].answerOptions[1].id, [answerText: 'Answer #214'])
+        skillsService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizAttempt.questions[1].answerOptions[2].id, [answerText: 'Answer #3'])
+
+        def gradedQuizAttempt = skillsService.completeQuizAttempt(quiz.quizId, quizAttempt.id).body
+        def quizHistoryRes = skillsService.getQuizAttemptResult(quiz.quizId, quizAttempt.id)
+        then:
+        gradedQuizAttempt.passed == false
+        gradedQuizAttempt.needsGrading == false
+        gradedQuizAttempt.numQuestionsGotWrong == 1
+        gradedQuizAttempt.numQuestionsNeedGrading == 0
+
+        quizHistoryRes.questions.size() == 2
+        def q1 = quizHistoryRes.questions[0]
+        def q2 = quizHistoryRes.questions[1]
+        q1.questionType == QuizQuestionType.FillInTheBlank.toString()
+        q1.question == question.question
+        q1.isCorrect == true
+        q1.needsGrading == false
+        q1.answers.answer == [
+                [ "answerText": "Answer #1", "isCorrect": "CORRECT"],
+                [ "answerText": "Answer #2", "isCorrect": "CORRECT"],
+        ]
+
+        q2.questionType == QuizQuestionType.FillInTheBlank.toString()
+        q2.question == question2.question
+        q2.isCorrect == false
+        q2.needsGrading == false
+        q2.answers.answer == [
+                [ "answerText": "Answer #1", "isCorrect": "CORRECT"],
+                [ "answerText": "Answer #214", "isCorrect": "WRONG"],
+                [ "answerText": "Answer #3", "isCorrect": "CORRECT"],
+        ]
+    }
+
+    def "run quiz with fill in the blank question - fail with both wrong"() {
+        def quiz = QuizDefFactory.createQuiz(1, "Fancy Description")
+        skillsService.createQuizDef(quiz)
+        def question = QuizDefFactory.createFillInTheBlankQuestion(1, 2, 2)
+        def question2 = QuizDefFactory.createFillInTheBlankQuestion(1, 2, 3)
+        skillsService.createQuizQuestionDefs([question, question2])
+
+        when:
+        def quizAttempt =  skillsService.startQuizAttempt(quiz.quizId).body
+        skillsService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizAttempt.questions[0].answerOptions[0].id, [answerText: 'Answer #1'])
+        skillsService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizAttempt.questions[0].answerOptions[1].id, [answerText: 'Answer #255'])
+
+        skillsService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizAttempt.questions[1].answerOptions[0].id, [answerText: 'Answer #1'])
+        skillsService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizAttempt.questions[1].answerOptions[1].id, [answerText: 'Answer #214'])
+        skillsService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizAttempt.questions[1].answerOptions[2].id, [answerText: 'Answer #3'])
+
+        def gradedQuizAttempt = skillsService.completeQuizAttempt(quiz.quizId, quizAttempt.id).body
+        def quizHistoryRes = skillsService.getQuizAttemptResult(quiz.quizId, quizAttempt.id)
+        then:
+        gradedQuizAttempt.passed == false
+        gradedQuizAttempt.needsGrading == false
+        gradedQuizAttempt.numQuestionsGotWrong == 2
+        gradedQuizAttempt.numQuestionsNeedGrading == 0
+
+        quizHistoryRes.questions.size() == 2
+        def q1 = quizHistoryRes.questions[0]
+        def q2 = quizHistoryRes.questions[1]
+        q1.questionType == QuizQuestionType.FillInTheBlank.toString()
+        q1.question == question.question
+        q1.isCorrect == false
+        q1.needsGrading == false
+        q1.answers.answer == [
+                [ "answerText": "Answer #1", "isCorrect": "CORRECT"],
+                [ "answerText": "Answer #255", "isCorrect": "WRONG"],
+        ]
+
+        q2.questionType == QuizQuestionType.FillInTheBlank.toString()
+        q2.question == question2.question
+        q2.isCorrect == false
+        q2.needsGrading == false
+        q2.answers.answer == [
+                [ "answerText": "Answer #1", "isCorrect": "CORRECT"],
+                [ "answerText": "Answer #214", "isCorrect": "WRONG"],
+                [ "answerText": "Answer #3", "isCorrect": "CORRECT"],
+        ]
+    }
 }
