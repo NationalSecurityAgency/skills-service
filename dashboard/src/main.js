@@ -93,13 +93,12 @@ import defineSkillTreePreset from "@/theme/StPrimeVueThemePreset.js";
 
 log.setLevel('info')
 
-const pinia = createPinia()
-
 const app = createApp(App)
-const router = constructRouter()
-
-app.use(router)
+const pinia = createPinia()
 app.use(pinia)
+
+const router = constructRouter()
+app.use(router)
 app.use(PrimeVue, {
     theme: {
         preset: defineSkillTreePreset(),

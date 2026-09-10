@@ -100,18 +100,9 @@ import SkillTagsPage from "@/components/skills/tags/SkillTagsPage.vue";
 import SingleSkillTagPage from "@/components/skills/tags/SingleSkillTagPage.vue";
 import SkillTagUsers from "@/components/skills/tags/SkillTagUsers.vue";
 import TaggedSkills from "@/components/skills/tags/TaggedSkills.vue";
+import { useSkillsDisplayParentFrameState } from '@/skills-display/stores/UseSkillsDisplayParentFrameState.js'
 
 const FullDependencyGraph = defineAsyncComponent(() => import('@/components/skills/dependencies/FullDependencyGraph.vue'))
-
-const redirectToSkillsDisplayIfRequested = (to) => {
-  if (to.query.skillsClientDisplayHostPath) {
-    return {
-      path: to.query.skillsClientDisplayHostPath,
-      query: { skillsClientDisplayPath: to.path },
-    }
-  }
-  return to.name === 'NotFoundPage' ? true : { name: 'NotFoundPage' };
-}
 
 const routes = [
   {
@@ -974,9 +965,6 @@ const routes = [
     path: '/not-found',
     name: 'NotFoundPage',
     component: NotFoundPage,
-    beforeEnter: (to, from) => {
-      return redirectToSkillsDisplayIfRequested(to)
-    },
     props: true,
     meta: {
       requiresAuth: false,
@@ -987,9 +975,8 @@ const routes = [
   },
   { path: '/:pathMatch(.*)*',
     name: '404',
-    component: NotFoundPage,
-    beforeEnter: (to, from) => {
-      return redirectToSkillsDisplayIfRequested(to)
+    redirect: {
+      name: 'NotFoundPage',
     },
     meta: {
       requiresAuth: false,
@@ -1079,75 +1066,31 @@ const constructRouter = () => {
   })
 
   if (isSkillsClient) {
+    // override resolve to build the proper deep links to the parent for when users right-click and copy URL or open in new tab/window
     const originalResolve = router.resolve;
-
     router.resolve = function (to, currentLocation) {
       // Call the original resolver to get the baseline Route Location object
       const resolved = originalResolve.call(this, to, currentLocation);
-
-      const paramKey = 'skillsClientDisplayHostPath';
-      const isClientDisplayPath = (path) => path?.startsWith(SkillsClientPath.RootUrl);
-      const resolveHostPath = () => {
-        try {
-          if (window.parent && window.parent !== window) {
-            const parentPath = window.parent.location.pathname;
-            if (parentPath && !isClientDisplayPath(parentPath)) {
-              return parentPath;
-            }
-          }
-        } catch {
-          // Parent access can fail in some browser/test contexts.
-        }
-
-        try {
-          if (document.referrer) {
-            const referrerPath = new URL(document.referrer).pathname;
-            if (referrerPath && !isClientDisplayPath(referrerPath)) {
-              return referrerPath;
-            }
-          }
-        } catch {
-          // Ignore malformed referrer.
-        }
-
-        if (resolved.query[paramKey] && !isClientDisplayPath(resolved.query[paramKey])) {
-          return resolved.query[paramKey];
-        }
-
-        log.warn(`unable to determine ${paramKey}`)
-        return null;
-      };
-
-      const paramValue = resolveHostPath();
-      if (paramValue && resolved.query[paramKey] !== paramValue) {
-        const newQuery = {
-          ...resolved.query,
-          [paramKey]: paramValue
-        };
-
-        // `to` can be either a string path or an object; normalize before re-resolving.
-        const locationWithQuery = typeof to === 'string'
-          ? {
-            path: resolved.path,
-            hash: resolved.hash,
-            query: newQuery,
-          }
-          : {
-            ...to,
-            query: newQuery,
-          };
-
-        // Re-resolve with the updated query to correctly regenerate the full href string.
-        return originalResolve.call(this, locationWithQuery, currentLocation);
+      // do not modify if it's an external link or already fully qualified
+      if (resolved.href.startsWith('http')) {
+        return resolved
       }
-      return resolved;
+
+      // Return a modified object where the native browser 'href' property is overwritten
+      const parentState = useSkillsDisplayParentFrameState()
+      const deepLink = `${parentState.parentOrigin}${parentState.parentPath}?skillsClientDisplayPath=${encodeURIComponent(resolved.href)}`
+      return new Proxy(resolved, {
+        get(target, prop) {
+          if (prop === 'href') {
+            return deepLink
+          }
+          return target[prop]
+        }
+      })
     };
 
     router.push('/')
   }
-
-  log.trace(`Constructed router for path [${window?.location?.pathname}] isSkillsClient: [${isSkillsClient}]`)
-
   return router
 }
 
