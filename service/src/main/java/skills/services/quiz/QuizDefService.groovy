@@ -585,9 +585,6 @@ class QuizDefService {
         AttachmentService.CopyAttachmentReq copyAttachmentReq = new AttachmentService.CopyAttachmentReq(markdown: savedQuestion.question, quizId: quizDef.quizId, questionId: savedQuestion.id)
         AttachmentService.CopyAttachmentRes copyRes = attachmentService.updateAttachmentsAttrsBasedOnUuidsInMarkdown(copyAttachmentReq)
         if (copyRes.updated) {
-            quizDefWithDescRepo.updateDescription(quizDefWithDescription.quizId, copyRes.markdown)
-        }
-        if (copyRes.updated) {
             quizQuestionRepo.updateQuestion(savedQuestion.id, copyRes.markdown)
         }
 

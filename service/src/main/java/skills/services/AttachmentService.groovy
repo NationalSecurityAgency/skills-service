@@ -226,7 +226,8 @@ class AttachmentService {
 
         String quizId
         String originalQuizId
-        Integer questionId
+        Integer questionId = -1
+        Integer attemptId = -1
     }
 
     @Transactional
@@ -263,12 +264,11 @@ class AttachmentService {
                     boolean onlyDestSkillId = !isSkillIdMissing && attachmentReq.originalSkillId && (!attachmentReq.projectId && !attachmentReq.quizId)
                     boolean isOnlyDestSkillIdDifferent = onlyDestSkillId && (attachment.quizId || attachment.projectId || (attachment.skillId && !attachment.skillId?.equalsIgnoreCase(attachmentReq.originalSkillId)))
 
-
                     String quizIdToCompare = attachmentReq.originalQuizId ?: attachmentReq.quizId
                     boolean isQuizDifferent = attachmentReq.quizId && attachment.quizId && quizIdToCompare != attachment.quizId
-                    if (!isQuizDifferent && attachmentReq.quizId && attachmentReq.questionId) {
+                    if (!isQuizDifferent && attachmentReq.quizId) {
                         isQuizDifferent = attachmentRepo.isAttachmentUsedInAnotherQuestion(attachment.uuid, attachmentReq.questionId)
-                           || attachmentRepo.isAttachmentInQuizDescription(attachment.uuid)
+                           || ((attachmentReq.questionId > -1 || attachmentReq.attemptId > -1) && attachmentRepo.isAttachmentInQuizDescription(attachment.uuid))
                             || attachmentRepo.isAttachmentInAnotherQuizTextInputAnswer(attachment.uuid, -1)
                     }
 

@@ -58,3 +58,5 @@ service/src/main/resources/public/**
 /e2e-tests/mochawesome-report/**
 /e2e-tests/mochawesome.json
 /.ai/
+
+AGENTS.md

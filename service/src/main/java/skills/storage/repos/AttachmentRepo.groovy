@@ -69,7 +69,7 @@ interface AttachmentRepo extends CrudRepository<Attachment, Integer> {
     @Query(value = '''select count(id) > 0
             from user_quiz_answer_attempt
             where
-                convert_from(lo_get(CAST(answer as oid)), 'UTF8') like CONCAT('%(/api/download/', :uuid, ')%')
+               answer like CONCAT('%(/api/download/', :uuid, ')%')
                and id <> :answerId
               ''', nativeQuery = true)
     Boolean isAttachmentInAnotherQuizTextInputAnswer(@Param("uuid") String attachmentUUID, @Param("answerId") Integer answerId)

@@ -21,9 +21,9 @@ import skills.intTests.utils.QuizDefFactory
 import skills.intTests.utils.SkillsClientException
 import skills.services.quiz.QuizQuestionType
 import skills.storage.model.Attachment
+import spock.lang.IgnoreRest
 
 class QuizCopyMarkdownWithAttachmentsSpecs extends CopyIntSpec {
-
 
     def "new quiz creation does not allow markdown with attachments"() {
         def quiz = QuizDefFactory.createQuiz(1)
