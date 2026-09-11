@@ -33,7 +33,6 @@ const props = defineProps({
   },
   numberOfBlanks: {
     type: Number,
-    required: true,
     default: 0,
   }
 })
@@ -41,31 +40,34 @@ const props = defineProps({
 onMounted(() => {
   if(props.numberOfBlanks === 0) {
     replace([])
-  } else if( props.numberOfBlanks > 0) {
-    const existingFields = fields.value.map(item => ({
-      id: item.value.id,
-      answer: item.value.answer,
-      isCorrect: item.value.isCorrect,
-    }))
-    replace([])
+  } else {
+    const answers = [];
 
     for(let x = 0; x < props.numberOfBlanks; x++) {
-      if(existingFields[x]) {
-        push(existingFields[x]);
+      if(fields.value[x]) {
+        answers.push({
+          id: fields.value[x].value.id,
+          answer: fields.value[x].value.answer,
+          isCorrect: fields.value[x].value.isCorrect
+        });
       } else {
-        push({
+        answers.push({
           id: null,
           answer: '',
-          isCorrect: true,
+          isCorrect: true
         })
       }
     }
+
+    replace(answers);
   }
 })
 
 watch(() => props.numberOfBlanks, (newValue, oldValue) => {
   if(oldValue < newValue) {
-    for(let x = oldValue; x < newValue; x++) {
+    const itemsToAdd = newValue - oldValue;
+
+    for(let x = 0; x < itemsToAdd; x++) {
       push({
         id: null,
         answer: '',
@@ -73,7 +75,8 @@ watch(() => props.numberOfBlanks, (newValue, oldValue) => {
       })
     }
   } else if(oldValue > newValue) {
-    for(let x = newValue; x < oldValue; x++) {
+    const itemsToRemove = oldValue - newValue
+    for (let x = 0; x < itemsToRemove; x++) {
       remove(fields.value.length - 1)
     }
   }
@@ -125,8 +128,9 @@ defineExpose( {
 </script>
 
 <template>
-  <div v-if="model && model.length > 0" class="mt-2">
+  <div v-if="model" class="mt-2">
     <div v-for="(answer, index) in fields" :key="answer.key" class="flex flex-wrap items-center gap-0" :data-cy="`answer-${index}`">
+      ({{index + 1}}):
       <SelectCorrectAnswer
           v-if="isQuizType && !QuestionType.isFillInTheBlank(questionType)"
           :id="`answers[${index}].isCorrect`"

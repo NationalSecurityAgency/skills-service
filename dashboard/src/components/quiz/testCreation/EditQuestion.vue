@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <script setup>
-import {computed, nextTick, onMounted, ref} from 'vue'
+import {computed, nextTick, onMounted, ref, watch} from 'vue'
 import {array, boolean, object, string} from 'yup'
 import {useRoute} from 'vue-router';
 import {useAppConfig} from '@/common-components/stores/UseAppConfig.js'
@@ -281,8 +281,25 @@ const allAnswersFilledIn = (value) => {
   if(!isQuestionTypeFillInTheBlank.value) {
     return true;
   }
-  const emptyAnswers = value.filter((a) => (!a.answer || a.answer.trim().length === 0))
-  return emptyAnswers.length === 0;
+  if(value) {
+    const emptyAnswers = value.filter((a) => (!a.answer || a.answer.trim().length === 0))
+    return emptyAnswers.length === 0;
+  } else {
+    return false;
+  }
+}
+
+const mustHaveBlanks = (value) => {
+  if(!isQuestionTypeFillInTheBlank.value) {
+    return true;
+  }
+
+  if(value) {
+    return value.length > 0;
+  }
+  else {
+    return false;
+  }
 }
 
 const noRepeatAnswers = (value) => {
@@ -328,6 +345,7 @@ const schema = object({
       .test('matchesMustNotBeBlank', 'Answers must include both a term and a value', (value) => matchesMustNotBeBlank(value))
       .test('noRepeatAnswers', 'Answers can not contain duplicate terms or values', (value) => noRepeatAnswers(value))
       .test('allAnswersFilledIn', 'All answers must be filled in', (value) => allAnswersFilledIn(value))
+      .test('mustHaveBlanks', 'Question must have blank fields', (value) => mustHaveBlanks(value))
   ,
 })
 const initialQuestionData = {
@@ -443,12 +461,12 @@ const numberOfBlanks = computed(() => {
   if(isQuestionTypeFillInTheBlank.value) {
     const fieldValues = skillsInputFormDialogRef.value.getFieldValues()
     const question = fieldValues.question.replace(/\\_/g, '_');
-    const numBlanks = question.match(/_{2,}/g)?.length || 0;
-    return numBlanks;
+    return question.match(/_{2,}/g)?.length || 0;
   } else {
     return 0;
   }
 })
+
 </script>
 
 <template>
@@ -487,6 +505,9 @@ const numberOfBlanks = computed(() => {
           @question-generated="onQuestionGenerated"
       />
 
+      <Message v-if="numberOfBlanks === 0 && isQuestionTypeFillInTheBlank" :closable="false">
+        Insert blanks in your question by using underscores (___) where answers should go.
+      </Message>
       <markdown-editor
           ref="markdownEditorRef"
           id="quizDescription"
@@ -576,8 +597,8 @@ const numberOfBlanks = computed(() => {
             <span v-if="numberOfBlanks === 0">
               Add spaces to the question text to create answer options below.
             </span>
-            <span v-else>Add acceptable matches for each space above.</span>
-             Answer options can support multiple answers separated by a colon (;):
+            <span v-else>Provide the correct answers for each blank.</span>
+             Use a <b>semicolon (;)</b> to separate multiple acceptable options:
           </span>
         </div>
         <ConfigureAnswers
@@ -585,7 +606,7 @@ const numberOfBlanks = computed(() => {
             ref="answersRef"
             v-model="props.questionDef.answers"
             :quiz-type="props.questionDef.quizType"
-            :question-type="questionType.selectedType.id "
+            :question-type="questionType.selectedType.id"
             :class="{ 'p-invalid': answersErrorMessage }"
             :aria-invalid="!!answersErrorMessage"
             aria-errormessage="answersError"
@@ -596,7 +617,7 @@ const numberOfBlanks = computed(() => {
             ref="answersRef"
             v-model="props.questionDef.answers"
             :quiz-type="props.questionDef.quizType"
-            :question-type="questionType.selectedType.id "
+            :question-type="questionType.selectedType.id"
             :number-of-blanks="numberOfBlanks"
             :class="{ 'p-invalid': answersErrorMessage }"
             :aria-invalid="!!answersErrorMessage"
