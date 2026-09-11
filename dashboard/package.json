@@ -75,7 +75,7 @@
     "rollup-plugin-visualizer": "7.0.1",
     "tailwindcss": "4.2.4",
     "vite": "8.0.16",
-    "vitest": "4.1.5",
+    "vitest": "4.1.11",
     "vue-eslint-parser": "10.4.0"
   }
 }
