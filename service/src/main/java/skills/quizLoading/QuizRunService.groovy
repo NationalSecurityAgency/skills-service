@@ -937,10 +937,10 @@ class QuizRunService {
                 List<UserQuizAnswerAttempt> attempt = quizAttemptAnswerRepo.findAllByUserQuizAttemptRefIdAndQuizAnswerDefinitionRefIdIn(quizAttemptId, selectedIds.toSet())
                 if(attempt) {
                     attempt.each{ answerAttempt ->
-                        def questionToCompare = quizAnswerDefs.find{it.id == answerAttempt.quizAnswerDefinitionRefId }
+                        QuizAnswerDef questionToCompare = quizAnswerDefs.find{it.id == answerAttempt.quizAnswerDefinitionRefId }
                         if(questionToCompare) {
-                            def possibleAnswers = questionToCompare.answer.split(/;/)
-                            answerAttempt.status = possibleAnswers.find{ it.trim() == answerAttempt.answer.trim() } ? UserQuizAnswerAttempt.QuizAnswerStatus.CORRECT :  UserQuizAnswerAttempt.QuizAnswerStatus.WRONG
+                            String[] possibleAnswers = questionToCompare.answer.split(/;/)
+                            answerAttempt.status = possibleAnswers.find{ it.trim().toLowerCase() == answerAttempt.answer.trim().toLowerCase() } ? UserQuizAnswerAttempt.QuizAnswerStatus.CORRECT :  UserQuizAnswerAttempt.QuizAnswerStatus.WRONG
                         } else {
                             answerAttempt.status =  UserQuizAnswerAttempt.QuizAnswerStatus.WRONG
                         }
