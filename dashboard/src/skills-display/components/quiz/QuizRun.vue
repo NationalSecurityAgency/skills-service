@@ -604,7 +604,7 @@ const onResize = (newWidth) => {
             </div>
           </SkillsOverlay>
 
-          <QuizRunValidationWarnings v-if="!meta.valid && !quizResult?.gradedRes?.needsGrading" :errors-to-show="errorsToShow" />
+          <QuizRunValidationWarnings v-if="!meta.valid && meta.touched && !quizResult?.gradedRes?.needsGrading" :errors-to-show="errorsToShow" />
 
           <div v-if="!quizResult" class="text-left mt-8 flex flex-wrap">
             <SkillsOverlay :show="isCompleting" opacity="0.6">
