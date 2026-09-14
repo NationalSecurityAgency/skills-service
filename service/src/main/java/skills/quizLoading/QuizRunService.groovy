@@ -648,7 +648,11 @@ class QuizRunService {
     private void handleReportingTextInputQuestion(QuizDef quizDef, String userId, Integer quizAttemptId, Integer answerDefId, QuizReportAnswerReq quizReportAnswerReq) {
         UserQuizAnswerAttempt existingAnswerAttempt = quizAttemptAnswerRepo.findByUserQuizAttemptRefIdAndQuizAnswerDefinitionRefId(quizAttemptId, answerDefId)
         String answerText = quizReportAnswerReq.getAnswerText()
-        AttachmentService.CopyAttachmentReq copyAttachmentReq = new AttachmentService.CopyAttachmentReq(markdown: answerText, quizId: quizDef.quizId, attemptId: quizAttemptId)
+        AttachmentService.CopyAttachmentReq copyAttachmentReq = new AttachmentService.CopyAttachmentReq(
+                markdown: answerText,
+                quizId: quizDef.quizId,
+                attemptId: quizAttemptId,
+                answerAttemptId: existingAnswerAttempt?.id ?: -1)
         if (existingAnswerAttempt) {
             if (quizReportAnswerReq.isSelected) {
                 AttachmentService.CopyAttachmentRes copyRes = attachmentService.updateAttachmentsAttrsBasedOnUuidsInMarkdown(copyAttachmentReq)

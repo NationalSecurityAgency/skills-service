@@ -22,7 +22,7 @@ import spock.lang.IgnoreRest
 
 class QuizCopyMarkdownWithAttachmentsTextInputAnswersSpecs extends CopyIntSpec {
 
-    def "from another project: question -> answer"() {
+    def "from another quiz: question -> answer"() {
         def quiz1 = QuizDefFactory.createQuiz(1)
         skillsService.createQuizDef(quiz1)
 
@@ -64,7 +64,7 @@ class QuizCopyMarkdownWithAttachmentsTextInputAnswersSpecs extends CopyIntSpec {
         !newAttachments[0].skillId
     }
 
-    def "from another project: quiz -> answer"() {
+    def "from another quiz: quiz -> answer"() {
         def quiz1 = QuizDefFactory.createQuiz(1)
         skillsService.createQuizDef(quiz1)
 
@@ -105,7 +105,7 @@ class QuizCopyMarkdownWithAttachmentsTextInputAnswersSpecs extends CopyIntSpec {
         !newAttachments[0].skillId
     }
 
-    def "from another project: answer -> answer"() {
+    def "from another quiz: answer -> answer"() {
         def quiz1 = QuizDefFactory.createQuiz(1)
         skillsService.createQuizDef(quiz1)
 
@@ -148,7 +148,7 @@ class QuizCopyMarkdownWithAttachmentsTextInputAnswersSpecs extends CopyIntSpec {
         !newAttachments[0].skillId
     }
 
-    def "from same project: question -> answer"() {
+    def "from same quiz: question -> answer"() {
         def quiz1 = QuizDefFactory.createQuiz(1)
         skillsService.createQuizDef(quiz1)
 
@@ -187,7 +187,7 @@ class QuizCopyMarkdownWithAttachmentsTextInputAnswersSpecs extends CopyIntSpec {
         !newAttachments[0].skillId
     }
 
-    def "from same project: quiz -> answer"() {
+    def "from same quiz: quiz -> answer"() {
         def quiz1 = QuizDefFactory.createQuiz(1)
         skillsService.createQuizDef(quiz1)
 
@@ -225,135 +225,131 @@ class QuizCopyMarkdownWithAttachmentsTextInputAnswersSpecs extends CopyIntSpec {
         !newAttachments[0].skillId
     }
 
-//     TODO: Implement these:
-//    def "from same project: answer -> answer"() {
-//        def quiz1 = QuizDefFactory.createQuiz(1)
-//        skillsService.createQuizDef(quiz1)
-//
-//        def attachment1Href = attachFileForQuizAndReturnHref(quiz1.quizId)
-//
-//        def question = QuizDefFactory.createTextInputQuestion(1, 1)
-//        skillsService.createQuizQuestionDef(question)
-//
-//        def quiz1QuestionAttempt = skillsService.startQuizAttempt(quiz1.quizId).body
-//        skillsService.reportQuizAnswer(quiz1.quizId, quiz1QuestionAttempt.id, quiz1QuestionAttempt.questions[0].answerOptions[0].id, [isSelected: true, answerText:  "Here is a [Link](${attachment1Href})".toString()])
-//
-//        def question2 = QuizDefFactory.createTextInputQuestion(1, 2)
-//        question2.id = skillsService.createQuizQuestionDef(question2).body.id
-//
-//        when:
-//        def quizAttempt = skillsService.startQuizAttempt(quiz1.quizId).body
-//        skillsService.reportQuizAnswer(quiz1.quizId, quizAttempt.id, quizAttempt.questions[1].answerOptions[0].id, [isSelected: true, answerText:  "Here is a [Link](${attachment1Href})".toString()])
-//
-//        def questionsRes = skillsService.getQuizAttemptResult(quiz1.quizId, quiz1QuestionAttempt.id)
-//        def quiz2Res = skillsService.getQuizAttemptResult(quiz2.quizId, quizAttempt.id)
-//        List<Attachment> attachments = attachmentRepo.findAll()
-//        then:
-//        questionsRes.questions[0].answers[0].answer == "Here is a [Link](${attachment1Href})"
-//
-//        attachments.size() == 2
-//        Attachment originalAttachment1 = attachments.find {  attachment1Href.contains(it.uuid)}
-//        originalAttachment1.quizId == quiz1.quizId
-//        !originalAttachment1.projectId
-//        !originalAttachment1.skillId
-//
-//        List<Attachment> newAttachments = attachments.findAll {!attachment1Href.contains(it.uuid) }
-//
-//        newAttachments.size() == 1
-//        quiz2Res.questions[0].answers[0].answer == "Here is a [Link](/api/download/${newAttachments[0].uuid})"
-//        newAttachments[0].quizId == quiz2.quizId
-//        !newAttachments[0].projectId
-//        !newAttachments[0].skillId
-//    }
-//
-//
-//    def "editing the same question does not produce duplicate attachments"() {
-//        def quiz1 = QuizDefFactory.createQuiz(1)
-//        skillsService.createQuizDef(quiz1)
-//
-//        def attachment1Href = attachFileForQuizAndReturnHref(quiz1.quizId)
-//        def attachment2Href = attachFileForQuizAndReturnHref(quiz1.quizId)
-//
-//        def question = QuizDefFactory.createTextInputQuestion(1, 1)
-//        question.question = "Here is a [Link](${attachment1Href})\n\nHere is a [Link](${attachment2Href})".toString()
-//        question.id = skillsService.createQuizQuestionDef(question).body.id
-//
-//        when:
-//        def quiz1Res = skillsService.getQuizQuestionDefs(quiz1.quizId)
-//        List<Attachment> attachments = attachmentRepo.findAll()
-//
-//        skillsService.updateQuizQuestionDef(question)
-//        skillsService.updateQuizQuestionDef(question)
-//        skillsService.updateQuizQuestionDef(question)
-//
-//        def quiz1ResAfter = skillsService.getQuizQuestionDefs(quiz1.quizId)
-//        List<Attachment> attachmentsAfter = attachmentRepo.findAll()
-//
-//        then:
-//        quiz1Res.questions[0].question == "Here is a [Link](${attachment1Href})\n\nHere is a [Link](${attachment2Href})".toString()
-//        quiz1ResAfter.questions[0].question == "Here is a [Link](${attachment1Href})\n\nHere is a [Link](${attachment2Href})".toString()
-//
-//        attachments.uuid.sort() == attachmentsAfter.uuid.sort()
-//    }
-//
-//    def "from another project: question -> question; edit question - multiple attachments"() {
-//        def quiz1 = QuizDefFactory.createQuiz(1)
-//        skillsService.createQuizDef(quiz1)
-//
-//        def attachment1Href = attachFileForQuizAndReturnHref(quiz1.quizId)
-//        def attachment2Href = attachFileForQuizAndReturnHref(quiz1.quizId)
-//
-//        def question1 = QuizDefFactory.createTextInputQuestion(1, 1)
-//        question1.question = "Here is a [Link](${attachment1Href})\n\nHere is a [Link](${attachment2Href})".toString()
-//        skillsService.createQuizQuestionDef(question1)
-//
-//        def quiz2 = QuizDefFactory.createQuiz(2)
-//        skillsService.createQuizDef(quiz2)
-//
-//        def question2 = QuizDefFactory.createTextInputQuestion(2, 2)
-//        question2.id = skillsService.createQuizQuestionDef(question2).body.id
-//
-//        when:
-//        question2.question = "Here is a [Link](${attachment1Href})\n\nHere is a [Link](${attachment2Href})".toString()
-//        skillsService.updateQuizQuestionDef(question2)
-//
-//        def quiz1Res = skillsService.getQuizQuestionDefs(quiz1.quizId)
-//        def quiz2Res = skillsService.getQuizQuestionDefs(quiz2.quizId)
-//        List<Attachment> attachments = attachmentRepo.findAll()
-//
-//        // should not create new attachments
-//        question2.question = quiz2Res.questions[0].question
-//        skillsService.updateQuizQuestionDef(question2)
-//        skillsService.updateQuizQuestionDef(question2)
-//        List<Attachment> attachments1 = attachmentRepo.findAll()
-//        then:
-//        quiz1Res.questions[0].question == "Here is a [Link](${attachment1Href})\n\nHere is a [Link](${attachment2Href})".toString()
-//
-//        attachments.size() == 4
-//        List<Attachment> originalAttachments = attachments.findAll {  attachment1Href.contains(it.uuid) || attachment2Href.contains(it.uuid)}
-//        originalAttachments.size() == 2
-//        originalAttachments[0].quizId == quiz1.quizId
-//        !originalAttachments[0].projectId
-//        !originalAttachments[0].skillId
-//        originalAttachments[1].quizId == quiz1.quizId
-//        !originalAttachments[1].projectId
-//        !originalAttachments[1].skillId
-//
-//
-//        List<Attachment> newAttachments = attachments.findAll {!attachment1Href.contains(it.uuid) && !attachment2Href.contains(it.uuid) }
-//
-//        newAttachments.size() == 2
-//        question2.question.contains("Here is a [Link](/api/download/${newAttachments[0].uuid})")
-//        question2.question.contains("Here is a [Link](/api/download/${newAttachments[1].uuid})")
-//        newAttachments[0].quizId == quiz2.quizId
-//        !newAttachments[0].projectId
-//        !newAttachments[0].skillId
-//        newAttachments[1].quizId == quiz2.quizId
-//        !newAttachments[1].projectId
-//        !newAttachments[1].skillId
-//
-//        attachments1.uuid.sort() == attachments.uuid.sort()
-//    }
+    def "from same quiz: answer -> answer"() {
+        def quiz1 = QuizDefFactory.createQuiz(1)
+        skillsService.createQuizDef(quiz1)
+
+        def attachment1Href = attachFileForQuizAndReturnHref(quiz1.quizId)
+
+        def question1 = QuizDefFactory.createTextInputQuestion(1, 1)
+        question1.id = skillsService.createQuizQuestionDef(question1).body.id
+
+        def question2 = QuizDefFactory.createTextInputQuestion(1, 2)
+        question2.id = skillsService.createQuizQuestionDef(question2).body.id
+
+        def quizAttempt = skillsService.startQuizAttempt(quiz1.quizId).body
+        skillsService.reportQuizAnswer(quiz1.quizId, quizAttempt.id, quizAttempt.questions[0].answerOptions[0].id, [isSelected: true, answerText:  "Here is a [Link](${attachment1Href})".toString()])
+
+        when:
+        skillsService.reportQuizAnswer(quiz1.quizId, quizAttempt.id, quizAttempt.questions[1].answerOptions[0].id, [isSelected: true, answerText:  "Here is a [Link](${attachment1Href})".toString()])
+
+        def quiz1Res = skillsService.getQuizAttemptResult(quiz1.quizId, quizAttempt.id)
+        List<Attachment> attachments = attachmentRepo.findAll()
+
+        then:
+        quiz1Res.questions[0].answers[0].answer == "Here is a [Link](${attachment1Href})"
+
+        attachments.size() == 2
+        Attachment originalAttachment1 = attachments.find {  attachment1Href.contains(it.uuid)}
+        originalAttachment1.quizId == quiz1.quizId
+        !originalAttachment1.projectId
+        !originalAttachment1.skillId
+
+        List<Attachment> newAttachments = attachments.findAll {!attachment1Href.contains(it.uuid) }
+
+        newAttachments.size() == 1
+        quiz1Res.questions[1].answers[0].answer == "Here is a [Link](/api/download/${newAttachments[0].uuid})"
+        newAttachments[0].quizId == quiz1.quizId
+        !newAttachments[0].projectId
+        !newAttachments[0].skillId
+    }
+
+    def "reporting same answer multiple times does not produce duplicate attachments"() {
+        def quiz1 = QuizDefFactory.createQuiz(1)
+        skillsService.createQuizDef(quiz1)
+
+        def attachment1Href = attachFileForQuizAndReturnHref(quiz1.quizId)
+
+        def question1 = QuizDefFactory.createTextInputQuestion(1, 1)
+        question1.id = skillsService.createQuizQuestionDef(question1).body.id
+
+        def quizAttempt = skillsService.startQuizAttempt(quiz1.quizId).body
+        skillsService.reportQuizAnswer(quiz1.quizId, quizAttempt.id, quizAttempt.questions[0].answerOptions[0].id, [isSelected: true, answerText:  "Here is a [Link](${attachment1Href})".toString()])
+
+        when:
+        def quiz1Res = skillsService.getQuizAttemptResult(quiz1.quizId, quizAttempt.id)
+        List<Attachment> attachments = attachmentRepo.findAll()
+        skillsService.reportQuizAnswer(quiz1.quizId, quizAttempt.id, quizAttempt.questions[0].answerOptions[0].id, [isSelected: true, answerText:  "Here is a [Link](${attachment1Href})".toString()])
+
+        def quiz1ResAfter = skillsService.getQuizAttemptResult(quiz1.quizId, quizAttempt.id)
+        List<Attachment> attachmentsAfter = attachmentRepo.findAll()
+
+        then:
+        quiz1Res.questions[0].answers[0].answer == "Here is a [Link](${attachment1Href})"
+        quiz1ResAfter.questions[0].answers[0].answer == "Here is a [Link](${attachment1Href})"
+
+        attachments.size() == 1
+        attachment1Href.contains(attachments[0].uuid)
+        attachments[0].quizId == quiz1.quizId
+        !attachments[0].projectId
+        !attachments[0].skillId
+
+        attachmentsAfter.size() == 1
+        attachment1Href.contains(attachmentsAfter[0].uuid)
+        attachmentsAfter[0].quizId == quiz1.quizId
+        !attachmentsAfter[0].projectId
+        !attachmentsAfter[0].skillId
+    }
+
+    def "from another quiz: question -> answer - multiple attachments"() {
+        def quiz1 = QuizDefFactory.createQuiz(1)
+        skillsService.createQuizDef(quiz1)
+
+        def attachment1Href = attachFileForQuizAndReturnHref(quiz1.quizId)
+        def attachment2Href = attachFileForQuizAndReturnHref(quiz1.quizId)
+
+        def question1 = QuizDefFactory.createTextInputQuestion(1, 1)
+        question1.question = "Here is a [Link](${attachment1Href})\nHere is a [Link](${attachment2Href})".toString()
+        skillsService.createQuizQuestionDef(question1)
+
+        def quiz2 = QuizDefFactory.createQuiz(2)
+        skillsService.createQuizDef(quiz2)
+
+        def question2 = QuizDefFactory.createTextInputQuestion(2, 2)
+        question2.id = skillsService.createQuizQuestionDef(question2).body.id
+
+        when:
+        def quizAttempt = skillsService.startQuizAttempt(quiz2.quizId).body
+        skillsService.reportQuizAnswer(quiz2.quizId, quizAttempt.id, quizAttempt.questions[0].answerOptions[0].id, [isSelected: true, answerText:  "Here is a [Link](${attachment1Href})\nHere is a [Link](${attachment2Href})".toString()])
+
+        def quiz1Res = skillsService.getQuizQuestionDefs(quiz1.quizId)
+        def quiz2Res = skillsService.getQuizAttemptResult(quiz2.quizId, quizAttempt.id)
+        List<Attachment> attachments = attachmentRepo.findAll()
+
+        then:
+        quiz1Res.questions[0].question == "Here is a [Link](${attachment1Href})\nHere is a [Link](${attachment2Href})".toString()
+
+        attachments.size() == 4
+        List<Attachment> originalAttachments = attachments.findAll {  attachment1Href.contains(it.uuid) || attachment2Href.contains(it.uuid)}
+        originalAttachments.size() == 2
+        originalAttachments.each {
+            assert it.quizId == quiz1.quizId
+            assert !it.projectId
+            assert !it.skillId
+        }
+        originalAttachments.collect { "/api/download/${it.uuid}"}.sort() == [attachment1Href, attachment2Href].sort()
+
+        List<Attachment> newAttachments = attachments.findAll {!attachment1Href.contains(it.uuid) && !attachment2Href.contains(it.uuid)}
+
+        newAttachments.size() == 2
+        quiz2Res.questions[0].answers[0].answer.contains(newAttachments[0].uuid)
+        quiz2Res.questions[0].answers[0].answer.contains(newAttachments[1].uuid)
+        newAttachments.each {
+            assert it.quizId == quiz2.quizId
+            assert !it.projectId
+            assert !it.skillId
+        }
+    }
 //
 //    todo: add a test to copy from a project
 

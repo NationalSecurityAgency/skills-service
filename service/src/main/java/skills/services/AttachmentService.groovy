@@ -228,6 +228,7 @@ class AttachmentService {
         String originalQuizId
         Integer questionId = -1
         Integer attemptId = -1
+        Integer answerAttemptId = -1
     }
 
     @Transactional
@@ -269,7 +270,7 @@ class AttachmentService {
                     if (!isQuizDifferent && attachmentReq.quizId) {
                         isQuizDifferent = attachmentRepo.isAttachmentUsedInAnotherQuestion(attachment.uuid, attachmentReq.questionId)
                            || ((attachmentReq.questionId > -1 || attachmentReq.attemptId > -1) && attachmentRepo.isAttachmentInQuizDescription(attachment.uuid))
-                            || attachmentRepo.isAttachmentInAnotherQuizTextInputAnswer(attachment.uuid, -1)
+                            || attachmentRepo.isAttachmentInAnotherQuizTextInputAnswer(attachment.uuid, attachmentReq.answerAttemptId)
                     }
 
                     if (isProjDifferent || isQuizDifferent || isSkillDifferent || isOnlyDestSkillIdDifferent) {
