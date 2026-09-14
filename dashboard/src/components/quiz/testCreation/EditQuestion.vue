@@ -215,51 +215,53 @@ const atLeastOneCorrectAnswer = (value) => {
   return numCorrect >= 1;
 }
 const atLeastTwoAnswersFilledIn = (value) => {
-  if (value === undefined) {
-    return false
-  }
   if (!isDirty.value || isQuestionTypeTextInput.value || isQuestionTypeRatingInput.value || isQuestionTypeMatching.value || isQuestionTypeFillInTheBlank.value) {
     return true;
   }
+  if (value === undefined) {
+    return false
+  }
+
   const numWithContent = value.filter((a) => (a.answer && a.answer.trim().length > 0)).length;
   return numWithContent >= 2;
 }
 const correctAnswersMustHaveText = (value) => {
-  if (value === undefined) {
-    return false
-  }
   if (isSurveyType.value || !isDirty.value || isQuestionTypeTextInput.value || isQuestionTypeRatingInput.value || isQuestionTypeMatching.value || isQuestionTypeFillInTheBlank.value) {
     return true;
+  }
+  if (value === undefined) {
+    return false
   }
   const correctWithoutText = value.filter((a) => (a.isCorrect && (!a.answer || a.answer.trim().length === 0))).length;
   return correctWithoutText === 0;
 }
 const maxNumAnswers = (value) => {
-  if (isQuestionTypeTextInput.value || isQuestionTypeRatingInput.value) {
+  if (isQuestionTypeTextInput.value || isQuestionTypeRatingInput.value || isQuestionTypeFillInTheBlank.value) {
     return true;
   }
   return value && value.length <= appConfig.maxAnswersPerQuizQuestion;
 }
 const singleChoiceQuestionsMustHave1Answer = (value) => {
+  if (isSurveyType.value || !isDirty.value || !QuestionType.isSingleChoice(questionType.value.selectedType.id) || isQuestionTypeFillInTheBlank.value) {
+    return true;
+  }
   if (value === undefined) {
     return false
-  }
-  if (isSurveyType.value || !isDirty.value || !QuestionType.isSingleChoice(questionType.value.selectedType.id)) {
-    return true;
   }
   const numCorrect = value.filter((a) => (a.isCorrect)).length;
   return numCorrect === 1;
 }
 const multipleChoiceQuestionsMustHaveAtLeast2Answer = (value) => {
+  if (isSurveyType.value || !isDirty.value || !QuestionType.isMultipleChoice(questionType.value.selectedType.id) || isQuestionTypeFillInTheBlank.value) {
+    return true;
+  }
   if (value === undefined) {
     return false
-  }
-  if (isSurveyType.value || !isDirty.value || !QuestionType.isMultipleChoice(questionType.value.selectedType.id)) {
-    return true;
   }
   const numCorrect = value.filter((a) => (a.isCorrect)).length;
   return numCorrect >= 2;
 }
+
 const matchesMustNotBeBlank = (value) => {
   if(!isQuestionTypeMatching.value) {
     return true;
@@ -293,7 +295,6 @@ const mustHaveBlanks = (value) => {
   if(!isQuestionTypeFillInTheBlank.value) {
     return true;
   }
-
   if(value) {
     return value.length > 0;
   }
@@ -344,8 +345,8 @@ const schema = object({
       .test('multipleChoiceQuestionsMustHaveAtLeast2Answer', 'Multiple Answers Question must have at least 2 correct answers', (value) => multipleChoiceQuestionsMustHaveAtLeast2Answer(value))
       .test('matchesMustNotBeBlank', 'Answers must include both a term and a value', (value) => matchesMustNotBeBlank(value))
       .test('noRepeatAnswers', 'Answers can not contain duplicate terms or values', (value) => noRepeatAnswers(value))
-      .test('allAnswersFilledIn', 'All answers must be filled in', (value) => allAnswersFilledIn(value))
       .test('mustHaveBlanks', 'Question must have blank fields', (value) => mustHaveBlanks(value))
+      .test('allAnswersFilledIn', 'All answers must be filled in', (value) => allAnswersFilledIn(value))
   ,
 })
 const initialQuestionData = {
