@@ -627,9 +627,10 @@ class QuizRunService {
             QuizDef quizDef = getQuizDef(quizId)
             handleReportingTextInputQuestion(quizDef, userId, quizAttemptId, answerDefId, quizReportAnswerReq)
         } else if (answerDefPartialInfo.getQuestionType() == QuizQuestionType.FillInTheBlank) {
-            if(quizReportAnswerReq.answerText.trim() == '') {
-                throw new SkillQuizException("Can not submit blank entries for Fill in the Blank questions", quizId, ErrorCode.BadParam)
-            }
+//            if(quizReportAnswerReq.answerText.trim() == '') {
+//                throw new SkillQuizException("Can not submit blank entries for Fill in the Blank questions", quizId, ErrorCode.BadParam)
+                // quizAttemptAnswerRepo.delete(existingAnswerAttempt)
+//            }
 //            propsBasedValidator.quizValidationMaxStrLength(PublicProps.UiProp.maxTakeQuizInputTextAnswerLength, "Answer", quizReportAnswerReq.answerText, quizId)
             handleReportingFillInTheBlankQuestion(userId, quizAttemptId, answerDefId, quizReportAnswerReq)
         } else if (answerDefPartialInfo.getQuestionType() == QuizQuestionType.Matching) {
@@ -661,7 +662,7 @@ class QuizRunService {
     private void handleReportingFillInTheBlankQuestion(String userId, Integer quizAttemptId, Integer answerDefId, QuizReportAnswerReq quizReportAnswerReq) {
         UserQuizAnswerAttempt existingAnswerAttempt = quizAttemptAnswerRepo.findByUserQuizAttemptRefIdAndQuizAnswerDefinitionRefId(quizAttemptId, answerDefId)
         if (existingAnswerAttempt) {
-            if (quizReportAnswerReq.isSelected) {
+            if (quizReportAnswerReq.isSelected && quizReportAnswerReq.getAnswerText().trim() != '') {
                 existingAnswerAttempt.answer = quizReportAnswerReq.getAnswerText()
                 quizAttemptAnswerRepo.save(existingAnswerAttempt)
             } else {
