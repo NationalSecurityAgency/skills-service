@@ -252,28 +252,41 @@ class AttachmentService {
                 Attachment attachment = attachmentRepo.findByUuid(uuid)
 
                 if (attachment) {
-                    boolean isProjDifferent = attachmentReq.projectId && attachment.projectId && attachmentReq.projectId != attachment.projectId
-                    boolean isSkillIdMissing = !attachment.quizId && attachment.projectId && attachment.projectId == attachmentReq.projectId && !attachment.skillId && attachmentReq.originalSkillId
-                    if (isSkillIdMissing) {
+                    boolean isFromProj = StringUtils.isNotBlank(attachment.projectId)
+                    boolean isFromGb = StringUtils.isNotBlank(attachment.skillId) && !isFromProj
+                    boolean isFromQuiz =  StringUtils.isNotBlank(attachment.quizId)
+
+                    boolean isToProj = StringUtils.isNotBlank(attachmentReq.projectId)
+                    boolean isToGb = StringUtils.isNotBlank(attachmentReq.newSkillId) && !isToProj
+                    boolean isToQuiz =  StringUtils.isNotBlank(attachmentReq.quizId)
+
+                    boolean isBetweenDomains = (isFromProj && (isToGb || isToQuiz))
+                            || (isFromGb && (isToQuiz || isToProj)
+                            || (isFromQuiz) && (isToGb || isToProj))
+
+
+                    boolean isProjDifferent = isToProj && isFromProj && attachmentReq.projectId != attachment.projectId
+                    boolean isSkillIdMissing = !isFromQuiz && isToProj && isFromProj && attachment.projectId == attachmentReq.projectId && !attachment.skillId && attachmentReq.originalSkillId
+                    if (!isBetweenDomains && isSkillIdMissing) {
                         // check if the attachment is used by another non-skill description
                         if (attachmentRepo.isAttachmentUsedInProjDesc(attachment.uuid)) {
                             isSkillIdMissing = false
                         }
                     }
 
-                    boolean isSkillDifferent = !isSkillIdMissing && attachmentReq.projectId && attachment.skillId != attachmentReq.originalSkillId
+                    boolean isSkillDifferent = !isSkillIdMissing && isToProj && attachment.skillId != attachmentReq.originalSkillId
                     boolean onlyDestSkillId = !isSkillIdMissing && attachmentReq.originalSkillId && (!attachmentReq.projectId && !attachmentReq.quizId)
                     boolean isOnlyDestSkillIdDifferent = onlyDestSkillId && (attachment.quizId || attachment.projectId || (attachment.skillId && !attachment.skillId?.equalsIgnoreCase(attachmentReq.originalSkillId)))
 
                     String quizIdToCompare = attachmentReq.originalQuizId ?: attachmentReq.quizId
-                    boolean isQuizDifferent = attachmentReq.quizId && attachment.quizId && quizIdToCompare != attachment.quizId
-                    if (!isQuizDifferent && attachmentReq.quizId) {
+                    boolean isQuizDifferent = isFromQuiz && isToQuiz && quizIdToCompare != attachment.quizId
+                    if (!isBetweenDomains && !isQuizDifferent && isToQuiz) {
                         isQuizDifferent = attachmentRepo.isAttachmentUsedInAnotherQuestion(attachment.uuid, attachmentReq.questionId)
                            || ((attachmentReq.questionId > -1 || attachmentReq.attemptId > -1) && attachmentRepo.isAttachmentInQuizDescription(attachment.uuid))
                             || attachmentRepo.isAttachmentInAnotherQuizTextInputAnswer(attachment.uuid, attachmentReq.answerAttemptId)
                     }
 
-                    if (isProjDifferent || isQuizDifferent || isSkillDifferent || isOnlyDestSkillIdDifferent) {
+                    if (isBetweenDomains || isProjDifferent || isQuizDifferent || isSkillDifferent || isOnlyDestSkillIdDifferent) {
                         // skill id will be updated later in the stack
                         // cannot set it here as skill was not saved yet
                         Attachment newAttachment = copyAttachmentWithNewUuid(attachment, attachmentReq.projectId, attachmentReq.quizId, newSkillId)

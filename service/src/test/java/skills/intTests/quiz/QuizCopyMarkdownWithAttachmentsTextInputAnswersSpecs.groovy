@@ -20,6 +20,10 @@ import skills.intTests.utils.QuizDefFactory
 import skills.storage.model.Attachment
 import spock.lang.IgnoreRest
 
+import static skills.intTests.utils.SkillsFactory.createProject
+import static skills.intTests.utils.SkillsFactory.createSkills
+import static skills.intTests.utils.SkillsFactory.createSubject
+
 class QuizCopyMarkdownWithAttachmentsTextInputAnswersSpecs extends CopyIntSpec {
 
     def "from another quiz: question -> answer"() {
@@ -350,7 +354,50 @@ class QuizCopyMarkdownWithAttachmentsTextInputAnswersSpecs extends CopyIntSpec {
             assert !it.skillId
         }
     }
-//
-//    todo: add a test to copy from a project
+
+    def "from a project: skill -> answer"() {
+        def p1 = createProject(1)
+        def p1subj1 = createSubject(1, 1)
+        skillsService.createProjectAndSubjectAndSkills(p1, p1subj1, null)
+
+        def attachment1Href = attachFileAndReturnHref(p1.projectId)
+
+        def p1Skills = createSkills(2, 1, 1, 100)
+        p1Skills[0].description = "Here is a [Link](${attachment1Href})".toString()
+        skillsService.createSkills(p1Skills)
+
+        def quiz1 = QuizDefFactory.createQuiz(1)
+        skillsService.createQuizDef(quiz1)
+
+        def question1 = QuizDefFactory.createTextInputQuestion(1, 1)
+        question1.id = skillsService.createQuizQuestionDef(question1).body.id
+
+
+        when:
+        def quizAttempt = skillsService.startQuizAttempt(quiz1.quizId).body
+        skillsService.reportQuizAnswer(quiz1.quizId, quizAttempt.id, quizAttempt.questions[0].answerOptions[0].id, [isSelected: true, answerText:  "Here is a [Link](${attachment1Href})".toString()])
+
+        def skillRes = skillsService.getSkill(p1Skills[0])
+        def quiz1Res = skillsService.getQuizAttemptResult(quiz1.quizId, quizAttempt.id)
+        List<Attachment> attachments = attachmentRepo.findAll()
+
+        then:
+        skillRes.description == "Here is a [Link](${attachment1Href})"
+
+        attachments.size() == 2
+        Attachment originalAttachment1 = attachments.find {  attachment1Href.contains(it.uuid)}
+        !originalAttachment1.quizId
+        originalAttachment1.projectId == p1.projectId
+        originalAttachment1.skillId == p1Skills[0].skillId
+
+        List<Attachment> newAttachments = attachments.findAll {!attachment1Href.contains(it.uuid) }
+
+        newAttachments.size() == 1
+        quiz1Res.questions[0].answers[0].answer == "Here is a [Link](/api/download/${newAttachments[0].uuid})"
+        newAttachments[0].quizId == quiz1.quizId
+        !newAttachments[0].projectId
+        !newAttachments[0].skillId
+    }
+
 
 }
