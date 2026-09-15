@@ -15,15 +15,15 @@
  */
 package skills.intTests.quiz
 
-
 import skills.intTests.copyProject.CopyIntSpec
 import skills.intTests.utils.QuizDefFactory
 import skills.storage.model.Attachment
-import spock.lang.IgnoreRest
+
+import static skills.intTests.utils.SkillsFactory.*
 
 class QuizCopyMarkdownWithAttachmentsTextInputSpecs extends CopyIntSpec {
 
-    def "from another project: question -> question; edit question"() {
+    def "from another quiz: question -> question; edit question"() {
         def quiz1 = QuizDefFactory.createQuiz(1)
         skillsService.createQuizDef(quiz1)
 
@@ -72,7 +72,7 @@ class QuizCopyMarkdownWithAttachmentsTextInputSpecs extends CopyIntSpec {
         attachments1.uuid.sort() == attachments.uuid.sort()
     }
 
-    def "from another project: question -> question; new question"() {
+    def "from another quiz: question -> question; new question"() {
         def quiz1 = QuizDefFactory.createQuiz(1)
         skillsService.createQuizDef(quiz1)
 
@@ -120,7 +120,7 @@ class QuizCopyMarkdownWithAttachmentsTextInputSpecs extends CopyIntSpec {
         attachments1.uuid.sort() == attachments.uuid.sort()
     }
 
-    def "from another project: quiz -> question; edit question"() {
+    def "from another quiz: quiz -> question; edit question"() {
         def quiz1 = QuizDefFactory.createQuiz(1)
         skillsService.createQuizDef(quiz1)
 
@@ -168,7 +168,7 @@ class QuizCopyMarkdownWithAttachmentsTextInputSpecs extends CopyIntSpec {
         attachments1.uuid.sort() == attachments.uuid.sort()
     }
 
-    def "from another project: quiz -> question; new question"() {
+    def "from another quiz: quiz -> question; new question"() {
         def quiz1 = QuizDefFactory.createQuiz(1)
         skillsService.createQuizDef(quiz1)
 
@@ -215,7 +215,7 @@ class QuizCopyMarkdownWithAttachmentsTextInputSpecs extends CopyIntSpec {
         attachments1.uuid.sort() == attachments.uuid.sort()
     }
 
-    def "from another project: answer -> question; edit question"() {
+    def "from another quiz: answer -> question; edit question"() {
         def quiz1 = QuizDefFactory.createQuiz(1)
         skillsService.createQuizDef(quiz1)
 
@@ -266,7 +266,7 @@ class QuizCopyMarkdownWithAttachmentsTextInputSpecs extends CopyIntSpec {
         attachments1.uuid.sort() == attachments.uuid.sort()
     }
 
-    def "from another project: answer -> question; new question"() {
+    def "from another quiz: answer -> question; new question"() {
         def quiz1 = QuizDefFactory.createQuiz(1)
         skillsService.createQuizDef(quiz1)
 
@@ -316,7 +316,7 @@ class QuizCopyMarkdownWithAttachmentsTextInputSpecs extends CopyIntSpec {
         attachments1.uuid.sort() == attachments.uuid.sort()
     }
 
-    def "from same project: question -> question; edit question"() {
+    def "from same quiz: question -> question; edit question"() {
         def quiz1 = QuizDefFactory.createQuiz(1)
         skillsService.createQuizDef(quiz1)
 
@@ -362,7 +362,7 @@ class QuizCopyMarkdownWithAttachmentsTextInputSpecs extends CopyIntSpec {
         attachments1.uuid.sort() == attachments.uuid.sort()
     }
 
-    def "from same project: question -> question; new question"() {
+    def "from same quiz: question -> question; new question"() {
         def quiz1 = QuizDefFactory.createQuiz(1)
         skillsService.createQuizDef(quiz1)
 
@@ -406,7 +406,7 @@ class QuizCopyMarkdownWithAttachmentsTextInputSpecs extends CopyIntSpec {
         attachments1.uuid.sort() == attachments.uuid.sort()
     }
 
-    def "from same project: quiz -> question; edit question"() {
+    def "from same quiz: quiz -> question; edit question"() {
         def quiz1 = QuizDefFactory.createQuiz(1)
         skillsService.createQuizDef(quiz1)
 
@@ -451,7 +451,7 @@ class QuizCopyMarkdownWithAttachmentsTextInputSpecs extends CopyIntSpec {
         attachments1.uuid.sort() == attachments.uuid.sort()
     }
 
-    def "from same project: quiz -> question; new question"() {
+    def "from same quiz: quiz -> question; new question"() {
         def quiz1 = QuizDefFactory.createQuiz(1)
         skillsService.createQuizDef(quiz1)
 
@@ -495,7 +495,7 @@ class QuizCopyMarkdownWithAttachmentsTextInputSpecs extends CopyIntSpec {
         attachments1.uuid.sort() == attachments.uuid.sort()
     }
 
-    def "from same project: answer -> question; edit question"() {
+    def "from same quiz: answer -> question; edit question"() {
         def quiz1 = QuizDefFactory.createQuiz(1)
         skillsService.createQuizDef(quiz1)
 
@@ -543,7 +543,7 @@ class QuizCopyMarkdownWithAttachmentsTextInputSpecs extends CopyIntSpec {
         attachments1.uuid.sort() == attachments.uuid.sort()
     }
 
-    def "from same project: answer -> question; new question"() {
+    def "from same quiz: answer -> question; new question"() {
         def quiz1 = QuizDefFactory.createQuiz(1)
         skillsService.createQuizDef(quiz1)
 
@@ -619,7 +619,7 @@ class QuizCopyMarkdownWithAttachmentsTextInputSpecs extends CopyIntSpec {
         attachments.uuid.sort() == attachmentsAfter.uuid.sort()
     }
 
-    def "from another project: question -> question; edit question - multiple attachments"() {
+    def "from another quiz: question -> question; edit question - multiple attachments"() {
         def quiz1 = QuizDefFactory.createQuiz(1)
         skillsService.createQuizDef(quiz1)
 
@@ -674,6 +674,148 @@ class QuizCopyMarkdownWithAttachmentsTextInputSpecs extends CopyIntSpec {
         newAttachments[1].quizId == quiz2.quizId
         !newAttachments[1].projectId
         !newAttachments[1].skillId
+
+        attachments1.uuid.sort() == attachments.uuid.sort()
+    }
+
+    def "from project: skill -> question; new question"() {
+        def p1 = createProject(1)
+        def p1subj1 = createSubject(1, 1)
+        skillsService.createProjectAndSubjectAndSkills(p1, p1subj1, null)
+
+        def attachment1Href = attachFileAndReturnHref(p1.projectId)
+
+        def p1Skills = createSkills(2, 1, 1, 100)
+        p1Skills[0].description = "Here is a [Link](${attachment1Href})".toString()
+        skillsService.createSkills(p1Skills)
+
+        def quiz1 = QuizDefFactory.createQuiz(1)
+        skillsService.createQuizDef(quiz1)
+        def question2 = QuizDefFactory.createTextInputQuestion(1, 2)
+
+        when:
+        question2.question = "Here is a [Link](${attachment1Href})".toString()
+        question2.id = skillsService.createQuizQuestionDef(question2).body.id
+
+        def skillRes = skillsService.getSkill(p1Skills[0])
+        def quiz1QuestionDefRes = skillsService.getQuizQuestionDefs(quiz1.quizId)
+        List<Attachment> attachments = attachmentRepo.findAll()
+
+        // should not create new attachments
+        question2.question = quiz1QuestionDefRes.questions[0].question
+        skillsService.updateQuizQuestionDef(question2)
+        skillsService.updateQuizQuestionDef(question2)
+        List<Attachment> attachments1 = attachmentRepo.findAll()
+        then:
+        skillRes.description == "Here is a [Link](${attachment1Href})"
+
+        attachments.size() == 2
+        Attachment originalAttachment1 = attachments.find {  attachment1Href.contains(it.uuid)}
+        !originalAttachment1.quizId
+        originalAttachment1.projectId == p1.projectId
+        originalAttachment1.skillId == p1Skills[0].skillId
+
+        List<Attachment> newAttachments = attachments.findAll {!attachment1Href.contains(it.uuid) }
+
+        newAttachments.size() == 1
+        question2.question == "Here is a [Link](/api/download/${newAttachments[0].uuid})"
+        newAttachments[0].quizId == quiz1.quizId
+        !newAttachments[0].projectId
+        !newAttachments[0].skillId
+
+        attachments1.uuid.sort() == attachments.uuid.sort()
+    }
+
+    def "from project: project -> question; edit question"() {
+        def p1 = createProject(1)
+        def p1subj1 = createSubject(1, 1)
+        skillsService.createProjectAndSubjectAndSkills(p1, p1subj1, null)
+
+        def attachment1Href = attachFileAndReturnHref(p1.projectId)
+
+        p1.description = "Here is a [Link](${attachment1Href})".toString()
+        skillsService.updateProject(p1)
+
+        def quiz1 = QuizDefFactory.createQuiz(1)
+        skillsService.createQuizDef(quiz1)
+        def question2 = QuizDefFactory.createTextInputQuestion(1, 2)
+        question2.id = skillsService.createQuizQuestionDef(question2).body.id
+
+        when:
+        question2.question = "Here is a [Link](${attachment1Href})".toString()
+        skillsService.updateQuizQuestionDef(question2)
+
+        def projRes = skillsService.getProjectDescription(p1.projectId)
+        def quiz1QuestionDefRes = skillsService.getQuizQuestionDefs(quiz1.quizId)
+        List<Attachment> attachments = attachmentRepo.findAll()
+
+        // should not create new attachments
+        question2.question = quiz1QuestionDefRes.questions[0].question
+        skillsService.updateQuizQuestionDef(question2)
+        skillsService.updateQuizQuestionDef(question2)
+        List<Attachment> attachments1 = attachmentRepo.findAll()
+        then:
+        projRes.description == "Here is a [Link](${attachment1Href})"
+
+        attachments.size() == 2
+        Attachment originalAttachment1 = attachments.find {  attachment1Href.contains(it.uuid)}
+        !originalAttachment1.quizId
+        originalAttachment1.projectId == p1.projectId
+        !originalAttachment1.skillId
+
+        List<Attachment> newAttachments = attachments.findAll {!attachment1Href.contains(it.uuid) }
+
+        newAttachments.size() == 1
+        question2.question == "Here is a [Link](/api/download/${newAttachments[0].uuid})"
+        newAttachments[0].quizId == quiz1.quizId
+        !newAttachments[0].projectId
+        !newAttachments[0].skillId
+
+        attachments1.uuid.sort() == attachments.uuid.sort()
+    }
+
+    def "from Global Badge: gb -> question; new question"() {
+        def badge = createBadge(1, 1)
+        skillsService.createGlobalBadge(badge)
+
+        def attachment1Href = attachFileForGlobalBadgeAndReturnHref(badge.badgeId)
+
+        badge.description = "Here is a [Link](${attachment1Href})".toString()
+        skillsService.updateGlobalBadge(badge)
+
+        def quiz1 = QuizDefFactory.createQuiz(1)
+        skillsService.createQuizDef(quiz1)
+        def question2 = QuizDefFactory.createTextInputQuestion(1, 2)
+
+        when:
+        question2.question = "Here is a [Link](${attachment1Href})".toString()
+        question2.id = skillsService.createQuizQuestionDef(question2).body.id
+
+        def badgeRes = skillsService.getGlobalBadge(badge.badgeId)
+        def quiz1QuestionDefRes = skillsService.getQuizQuestionDefs(quiz1.quizId)
+        List<Attachment> attachments = attachmentRepo.findAll()
+
+        // should not create new attachments
+        question2.question = quiz1QuestionDefRes.questions[0].question
+        skillsService.updateQuizQuestionDef(question2)
+        skillsService.updateQuizQuestionDef(question2)
+        List<Attachment> attachments1 = attachmentRepo.findAll()
+        then:
+        badgeRes.description == "Here is a [Link](${attachment1Href})"
+
+        attachments.size() == 2
+        Attachment originalAttachment1 = attachments.find {  attachment1Href.contains(it.uuid)}
+        !originalAttachment1.quizId
+        !originalAttachment1.projectId
+        originalAttachment1.skillId == badge.badgeId
+
+        List<Attachment> newAttachments = attachments.findAll {!attachment1Href.contains(it.uuid) }
+
+        newAttachments.size() == 1
+        question2.question == "Here is a [Link](/api/download/${newAttachments[0].uuid})"
+        newAttachments[0].quizId == quiz1.quizId
+        !newAttachments[0].projectId
+        !newAttachments[0].skillId
 
         attachments1.uuid.sort() == attachments.uuid.sort()
     }

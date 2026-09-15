@@ -21,7 +21,8 @@ import skills.intTests.utils.QuizDefFactory
 import skills.intTests.utils.SkillsClientException
 import skills.services.quiz.QuizQuestionType
 import skills.storage.model.Attachment
-import spock.lang.IgnoreRest
+
+import static skills.intTests.utils.SkillsFactory.*
 
 class QuizCopyMarkdownWithAttachmentsSpecs extends CopyIntSpec {
 
@@ -36,7 +37,6 @@ class QuizCopyMarkdownWithAttachmentsSpecs extends CopyIntSpec {
         e.httpStatus == HttpStatus.BAD_REQUEST
         e.message.contains("Attachments in the description are not allowed when creating a new quiz")
     }
-
 
     def "paste markdown with attachment to another quiz: by editing a quiz"() {
         def quiz = QuizDefFactory.createQuiz(1)
@@ -283,7 +283,121 @@ class QuizCopyMarkdownWithAttachmentsSpecs extends CopyIntSpec {
         !attachmentsAfter[0].projectId
     }
 
+    def "paste attachment from project: skill -> quiz"() {
+        def p1 = createProject(1)
+        def p1subj1 = createSubject(1, 1)
+        skillsService.createProjectAndSubjectAndSkills(p1, p1subj1, null)
 
+        def attachment1Href = attachFileAndReturnHref(p1.projectId)
 
+        def p1Skills = createSkills(2, 1, 1, 100)
+        p1Skills[0].description = "Here is a [Link](${attachment1Href})".toString()
+        skillsService.createSkills(p1Skills)
+
+        def quiz = QuizDefFactory.createQuiz(1)
+        skillsService.createQuizDef(quiz)
+
+        when:
+        quiz.description = "Here is a [Link](${attachment1Href})".toString()
+        skillsService.createQuizDef(quiz, quiz.quizId)
+
+        def skillRes = skillsService.getSkill(p1Skills[0])
+        def quizRes = skillsService.getQuizDef(quiz.quizId)
+        List<Attachment> attachments = attachmentRepo.findAll()
+
+        then:
+        skillRes.description == "Here is a [Link](${attachment1Href})"
+
+        attachments.size() == 2
+        Attachment originalAttachment1 = attachments.find {  attachment1Href.contains(it.uuid)}
+        !originalAttachment1.quizId
+        originalAttachment1.projectId == p1.projectId
+        originalAttachment1.skillId == p1Skills[0].skillId
+
+        List<Attachment> newAttachments = attachments.findAll {!attachment1Href.contains(it.uuid) }
+
+        newAttachments.size() == 1
+        quizRes.description == "Here is a [Link](/api/download/${newAttachments[0].uuid})".toString()
+        newAttachments[0].quizId == quiz.quizId
+        !newAttachments[0].projectId
+        !newAttachments[0].skillId
+    }
+
+    def "paste attachment from project: project -> quiz"() {
+        def p1 = createProject(1)
+        def p1subj1 = createSubject(1, 1)
+        skillsService.createProjectAndSubjectAndSkills(p1, p1subj1, null)
+
+        def attachment1Href = attachFileAndReturnHref(p1.projectId)
+
+        p1.description = "Here is a [Link](${attachment1Href})".toString()
+        skillsService.updateProject(p1)
+
+        def quiz = QuizDefFactory.createQuiz(1)
+        skillsService.createQuizDef(quiz)
+
+        when:
+        quiz.description = "Here is a [Link](${attachment1Href})".toString()
+        skillsService.createQuizDef(quiz, quiz.quizId)
+
+        def projRes = skillsService.getProjectDescription(p1.projectId)
+        def quizRes = skillsService.getQuizDef(quiz.quizId)
+        List<Attachment> attachments = attachmentRepo.findAll()
+
+        then:
+        projRes.description == "Here is a [Link](${attachment1Href})"
+
+        attachments.size() == 2
+        Attachment originalAttachment1 = attachments.find {  attachment1Href.contains(it.uuid)}
+        !originalAttachment1.quizId
+        originalAttachment1.projectId == p1.projectId
+        !originalAttachment1.skillId
+
+        List<Attachment> newAttachments = attachments.findAll {!attachment1Href.contains(it.uuid) }
+
+        newAttachments.size() == 1
+        quizRes.description == "Here is a [Link](/api/download/${newAttachments[0].uuid})".toString()
+        newAttachments[0].quizId == quiz.quizId
+        !newAttachments[0].projectId
+        !newAttachments[0].skillId
+    }
+
+    def "paste attachment from Global Badge: gb -> quiz"() {
+        def badge = createBadge(1, 1)
+        skillsService.createGlobalBadge(badge)
+
+        def attachment1Href = attachFileForGlobalBadgeAndReturnHref(badge.badgeId)
+
+        badge.description = "Here is a [Link](${attachment1Href})".toString()
+        skillsService.updateGlobalBadge(badge)
+
+        def quiz = QuizDefFactory.createQuiz(1)
+        skillsService.createQuizDef(quiz)
+
+        when:
+        quiz.description = "Here is a [Link](${attachment1Href})".toString()
+        skillsService.createQuizDef(quiz, quiz.quizId)
+
+        def badgeRes = skillsService.getGlobalBadge(badge.badgeId)
+        def quizRes = skillsService.getQuizDef(quiz.quizId)
+        List<Attachment> attachments = attachmentRepo.findAll()
+
+        then:
+        badgeRes.description == "Here is a [Link](${attachment1Href})"
+
+        attachments.size() == 2
+        Attachment originalAttachment1 = attachments.find {  attachment1Href.contains(it.uuid)}
+        !originalAttachment1.quizId
+        !originalAttachment1.projectId
+        originalAttachment1.skillId == badge.badgeId
+
+        List<Attachment> newAttachments = attachments.findAll {!attachment1Href.contains(it.uuid) }
+
+        newAttachments.size() == 1
+        quizRes.description == "Here is a [Link](/api/download/${newAttachments[0].uuid})".toString()
+        newAttachments[0].quizId == quiz.quizId
+        !newAttachments[0].projectId
+        !newAttachments[0].skillId
+    }
 }
 

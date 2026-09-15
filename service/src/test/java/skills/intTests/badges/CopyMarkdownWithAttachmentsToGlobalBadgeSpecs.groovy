@@ -17,15 +17,13 @@ package skills.intTests.badges
 
 import org.springframework.http.HttpStatus
 import skills.intTests.copyProject.CopyIntSpec
+import skills.intTests.utils.QuizDefFactory
 import skills.intTests.utils.SkillsClientException
 import skills.storage.model.Attachment
-import skills.storage.model.SkillDef
-import spock.lang.IgnoreRest
 
 import static skills.intTests.utils.SkillsFactory.*
 
 class CopyMarkdownWithAttachmentsToGlobalBadgeSpecs extends CopyIntSpec {
-
 
     def "new global badge creation does not allow markdown with attachments"() {
         def p1 = createBadge(1)
@@ -39,7 +37,7 @@ class CopyMarkdownWithAttachmentsToGlobalBadgeSpecs extends CopyIntSpec {
         e.message.contains("Attachments in the description are not allowed when creating a new global badge")
     }
 
-    def "paste markdown with attachment from a project"() {
+    def "paste markdown with attachment from a project: skill -> gb"() {
         def p1 = createProject(1)
         def p1subj1 = createSubject(1, 1)
         skillsService.createProjectAndSubjectAndSkills(p1, p1subj1, null)
@@ -83,6 +81,56 @@ class CopyMarkdownWithAttachmentsToGlobalBadgeSpecs extends CopyIntSpec {
 
         List<Attachment> newAttachments = attachments.findAll {
             !attachment1Href.contains(it.uuid) && !attachment2Href.contains(it.uuid)
+        }
+
+        assert newAttachments.size() == 1
+        updatedGlobalBadge.description == "Here is a [Link](/api/download/${newAttachments[0].uuid})".toString()
+
+        !newAttachments[0].projectId
+        newAttachments[0].skillId == updatedGlobalBadge.badgeId
+        !newAttachments[0].quizId
+
+        attachments1.uuid.sort() == attachments.uuid.sort()
+    }
+
+    def "paste markdown with attachment from a project: project -> gb"() {
+        def p1 = createProject(1)
+        def p1subj1 = createSubject(1, 1)
+        skillsService.createProjectAndSubjectAndSkills(p1, p1subj1, null)
+
+        def attachment1Href = attachFileAndReturnHref(p1.projectId)
+        p1.description = "Here is a [Link](${attachment1Href})".toString()
+        skillsService.updateProject(p1)
+
+        def badge = createBadge(1)
+        skillsService.createGlobalBadge(badge)
+
+        when:
+        badge.description = "Here is a [Link](${attachment1Href})".toString()
+        skillsService.updateGlobalBadge(badge)
+
+        def projRes = skillsService.getProjectDescription(p1.projectId)
+
+        def updatedGlobalBadge = skillsService.getGlobalBadge(badge.badgeId)
+
+        List<Attachment> attachments = attachmentRepo.findAll()
+
+        // should not create new attachments
+        badge.description = updatedGlobalBadge.description
+        skillsService.updateGlobalBadge(badge)
+        skillsService.updateGlobalBadge(badge)
+        List<Attachment> attachments1 = attachmentRepo.findAll()
+        then:
+        projRes.description == "Here is a [Link](${attachment1Href})"
+
+        attachments.size() == 2
+        Attachment originalAttachment1 = attachments.find {  attachment1Href.contains(it.uuid)}
+        !originalAttachment1.quizId
+        originalAttachment1.projectId == p1.projectId
+        !originalAttachment1.skillId
+
+        List<Attachment> newAttachments = attachments.findAll {
+            !attachment1Href.contains(it.uuid)
         }
 
         assert newAttachments.size() == 1
@@ -153,8 +201,7 @@ class CopyMarkdownWithAttachmentsToGlobalBadgeSpecs extends CopyIntSpec {
         attachments1.uuid.sort() == attachments.uuid.sort()
     }
 
-
-    def "paste markdown with attachment from a another global badge"() {
+    def "paste markdown with attachment from global badge: gb -> gb"() {
         def badge = createBadge(1, 1)
         skillsService.createGlobalBadge(badge)
 
@@ -237,5 +284,105 @@ class CopyMarkdownWithAttachmentsToGlobalBadgeSpecs extends CopyIntSpec {
         attachmentsAfter[0].skillId == badgeResAfter.badgeId
         !attachmentsAfter[0].quizId
         attachment1Href.contains(attachmentsAfter[0].uuid)
+    }
+
+    def "paste markdown with attachment from a quiz: quiz -> gb"() {
+        def quiz = QuizDefFactory.createQuiz(1)
+        skillsService.createQuizDef(quiz)
+
+        def attachment1Href = attachFileForQuizAndReturnHref(quiz.quizId)
+        quiz.description =  "Here is a [Link](${attachment1Href})".toString()
+        skillsService.createQuizDef(quiz, quiz.quizId)
+
+        def badge = createBadge(1)
+        skillsService.createGlobalBadge(badge)
+
+        when:
+        badge.description = "Here is a [Link](${attachment1Href})".toString()
+        skillsService.updateGlobalBadge(badge)
+
+        def quiz1Res = skillsService.getQuizDef(quiz.quizId)
+
+        def updatedGlobalBadge = skillsService.getGlobalBadge(badge.badgeId)
+
+        List<Attachment> attachments = attachmentRepo.findAll()
+
+        // should not create new attachments
+        badge.description = updatedGlobalBadge.description
+        skillsService.updateGlobalBadge(badge)
+        skillsService.updateGlobalBadge(badge)
+        List<Attachment> attachments1 = attachmentRepo.findAll()
+        then:
+        quiz1Res.description == "Here is a [Link](${attachment1Href})"
+
+        attachments.size() == 2
+        Attachment originalAttachment1 = attachments.find {  attachment1Href.contains(it.uuid)}
+        originalAttachment1.quizId == quiz.quizId
+        !originalAttachment1.projectId
+        !originalAttachment1.skillId
+
+        List<Attachment> newAttachments = attachments.findAll {
+            !attachment1Href.contains(it.uuid)
+        }
+
+        newAttachments.size() == 1
+        updatedGlobalBadge.description == "Here is a [Link](/api/download/${newAttachments[0].uuid})".toString()
+
+        !newAttachments[0].projectId
+        newAttachments[0].skillId == updatedGlobalBadge.badgeId
+        !newAttachments[0].quizId
+
+        attachments1.uuid.sort() == attachments.uuid.sort()
+    }
+
+    def "paste markdown with attachment from a quiz: question -> gb"() {
+        def quiz1 = QuizDefFactory.createQuiz(1)
+        skillsService.createQuizDef(quiz1)
+
+        def attachment1Href = attachFileForQuizAndReturnHref(quiz1.quizId)
+
+        def question1 = QuizDefFactory.createTextInputQuestion(1, 1)
+        question1.question = "Here is a [Link](${attachment1Href})".toString()
+        skillsService.createQuizQuestionDef(question1)
+
+        def badge = createBadge(1)
+        skillsService.createGlobalBadge(badge)
+
+        when:
+        badge.description = "Here is a [Link](${attachment1Href})".toString()
+        skillsService.updateGlobalBadge(badge)
+
+        def quiz1Res = skillsService.getQuizQuestionDefs(quiz1.quizId)
+
+        def updatedGlobalBadge = skillsService.getGlobalBadge(badge.badgeId)
+
+        List<Attachment> attachments = attachmentRepo.findAll()
+
+        // should not create new attachments
+        badge.description = updatedGlobalBadge.description
+        skillsService.updateGlobalBadge(badge)
+        skillsService.updateGlobalBadge(badge)
+        List<Attachment> attachments1 = attachmentRepo.findAll()
+        then:
+        quiz1Res.questions[0].question == "Here is a [Link](${attachment1Href})"
+
+        attachments.size() == 2
+        Attachment originalAttachment1 = attachments.find {  attachment1Href.contains(it.uuid)}
+        originalAttachment1.quizId == quiz1.quizId
+        !originalAttachment1.projectId
+        !originalAttachment1.skillId
+
+        List<Attachment> newAttachments = attachments.findAll {
+            !attachment1Href.contains(it.uuid)
+        }
+
+        assert newAttachments.size() == 1
+        updatedGlobalBadge.description == "Here is a [Link](/api/download/${newAttachments[0].uuid})".toString()
+
+        !newAttachments[0].projectId
+        newAttachments[0].skillId == updatedGlobalBadge.badgeId
+        !newAttachments[0].quizId
+
+        attachments1.uuid.sort() == attachments.uuid.sort()
     }
 }
