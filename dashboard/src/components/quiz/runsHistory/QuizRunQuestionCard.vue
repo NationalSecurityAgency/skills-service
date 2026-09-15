@@ -165,7 +165,7 @@ const onGradeOverridden = (res) => {
           <div v-if="isFillInTheBlankType">
             <div v-for="(a, index) in question.answers" :key="a.id" class="flex mt-1 pl-1 flex-row items-baseline">
               <i v-if="a.answer.isCorrect === 'CORRECT'" class="far text-primary fa-check-square" style="font-size: 1.3rem;"></i>
-              <i v-else class="fa fa-ban text-red-500" style="font-size: 1.1rem;"></i>
+              <i v-if="a.answer.isCorrect === 'WRONG'" class="fa fa-ban text-red-500" style="font-size: 1.1rem;"></i>
               {{ a.answer.answerText }}
             </div>
           </div>
