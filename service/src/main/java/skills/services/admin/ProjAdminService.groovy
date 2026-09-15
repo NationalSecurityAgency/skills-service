@@ -253,7 +253,7 @@ class ProjAdminService {
 
         CustomValidationResult customValidationResult = customValidator.validate(projectRequest)
         if (!customValidationResult.valid) {
-            throw new SkillException(customValidationResult.msg)
+            throw new SkillException(customValidationResult.msg, ErrorCode.ParagraphValidationFailed)
         }
     }
 

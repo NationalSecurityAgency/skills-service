@@ -314,19 +314,20 @@ class AttachmentService {
         return []
     }
 
-    CustomValidationResult validateIfAttachmentsAreAllowedToBeCopied(String description, String projectId, String quizId) {
+    CustomValidationResult validateIfAttachmentsAreAllowedToBeCopied(String description, String projectId, String quizId, String globalBadgeId) {
         if (projectId && quizId) {
             throw new IllegalStateException("must not supply both projectId[${projectId}] and quizId[${quizId}]")
         }
 
-        if (userCommunityService.isUserCommunityConfigured() && description && (projectId || quizId)) {
+        if (userCommunityService.isUserCommunityConfigured() && description && (projectId || quizId || globalBadgeId)) {
             def matcher = UUID_PATTERN.matcher(description)
 
             boolean foundMatch = matcher.find()
             if (foundMatch) {
                 Boolean isDestProjNotUC = projectId ? !userCommunityService.isUserCommunityOnlyProject(projectId) : false
                 Boolean isDestQuizNotUC = quizId ? !userCommunityService.isUserCommunityOnlyQuiz(quizId) : false
-                boolean destinationIsNonUC = (isDestProjNotUC || isDestQuizNotUC)
+                Boolean isDestGbNotUC = globalBadgeId ? !userCommunityService.isUserCommunityOnlyGlobalBadge(globalBadgeId) : false
+                boolean destinationIsNonUC = (isDestProjNotUC || isDestQuizNotUC || isDestGbNotUC)
 
                 if (destinationIsNonUC) {
                     do {
@@ -335,12 +336,13 @@ class AttachmentService {
 
                         Attachment attachment = attachmentRepo.findByUuid(uuid)
                         if (attachment?.projectId && userCommunityService.isUserCommunityOnlyProject(attachment.projectId)) {
-                            String linkName = extractNameFromDownloadLink(fullMatch)
-                            return new CustomValidationResult(valid: false, msg: "Attachment [$linkName] is not allowed to be copied to this project")
+                            return createLinkNotAllowedValidationRes(fullMatch)
                         }
                         if (attachment?.quizId && userCommunityService.isUserCommunityOnlyQuiz(attachment.quizId)) {
-                            String linkName = extractNameFromDownloadLink(fullMatch)
-                            return new CustomValidationResult(valid: false, msg: "Attachment [$linkName] is not allowed to be copied to this quiz")
+                            return createLinkNotAllowedValidationRes(fullMatch)
+                        }
+                        if (attachment?.skillId && !attachment?.projectId && !attachment?.quizId && userCommunityService.isUserCommunityOnlyGlobalBadge(attachment.skillId)) {
+                            return createLinkNotAllowedValidationRes(fullMatch)
                         }
                         foundMatch = matcher.find()
                     } while( foundMatch)
@@ -349,6 +351,11 @@ class AttachmentService {
         }
         // Return valid result as placeholder - implement your actual validation
         return CustomValidationResult.valid()
+    }
+
+    private CustomValidationResult createLinkNotAllowedValidationRes(String fullMatch) {
+        String linkName = extractNameFromDownloadLink(fullMatch)
+        return new CustomValidationResult(valid: false, msg: "Attachment [$linkName] is not allowed to be copied")
     }
 
     private String extractNameFromDownloadLink(String downloadLink) {

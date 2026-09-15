@@ -144,7 +144,7 @@ class CustomValidator {
 
     CustomValidationResult validate(GlobalBadgeRequest globalBadgeRequest) {
         Boolean isUserCommunityOnlyGlobalBadge = userCommunityService.isUserCommunityOnlyGlobalBadge(globalBadgeRequest.badgeId)
-        CustomValidationResult validationResult = validateDescription(globalBadgeRequest.description, null, isUserCommunityOnlyGlobalBadge)
+        CustomValidationResult validationResult = validateDescription(globalBadgeRequest.description, null, isUserCommunityOnlyGlobalBadge, null, globalBadgeRequest.badgeId)
         if (!validationResult.valid) {
             return validationResult
         }
@@ -194,9 +194,9 @@ class CustomValidator {
         String message
     }
 
-    CustomValidationResult validateDescription(String description, String projectId=null, Boolean utilizeUserCommunityParagraphPatternByDefault = false, String quizId = null) {
-        if(projectId || quizId) {
-            CustomValidationResult attachmentValRes = attachmentService.validateIfAttachmentsAreAllowedToBeCopied(description, projectId, quizId)
+    CustomValidationResult validateDescription(String description, String projectId=null, Boolean utilizeUserCommunityParagraphPatternByDefault = false, String quizId = null, String globalBadgeId = null) {
+        if(projectId || quizId || globalBadgeId) {
+            CustomValidationResult attachmentValRes = attachmentService.validateIfAttachmentsAreAllowedToBeCopied(description, projectId, quizId, globalBadgeId)
             if (!attachmentValRes.isValid()) {
                 return attachmentValRes
             }

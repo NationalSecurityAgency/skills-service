@@ -42,7 +42,7 @@ class CustomValidationController {
     ValidationResult validateDescription(@RequestBody Map<String,String> body){
         String dMsg = "validateDescription: projId=[{}], quizId=[{}], Description:\n-----------------\n{}\n-----------------"
         log.debug(dMsg, body.projectId, body.quizId, body.value)
-        CustomValidationResult vr = customValidator.validateDescription(body.value, body.projectId, shouldUseProtectedCommunityValidator(body), body.quizId)
+        CustomValidationResult vr = customValidator.validateDescription(body.value, body.projectId, shouldUseProtectedCommunityValidator(body), body.quizId, body.globalBadgeId)
         ValidationResult validationResult = new ValidationResult(vr.valid, vr.msg, vr.validationFailedDetails)
         return validationResult
     }

@@ -1547,8 +1547,8 @@ class SkillsService {
         return checkCustomDescriptionValidation(description, null, useProtectedCommunityValidator, quizId)
     }
 
-    def checkCustomDescriptionValidation(String description, String projectId = null, Boolean useProtectedCommunityValidator = null, String quizId = null){
-        return wsHelper.apiPost("/validation/description", [value: description, projectId: projectId, useProtectedCommunityValidator: useProtectedCommunityValidator, quizId: quizId])
+    def checkCustomDescriptionValidation(String description, String projectId = null, Boolean useProtectedCommunityValidator = null, String quizId = null, String globalBadgeId = null){
+        return wsHelper.apiPost("/validation/description", [value: description, projectId: projectId, useProtectedCommunityValidator: useProtectedCommunityValidator, quizId: quizId, globalBadgeId: globalBadgeId])
     }
 
     def checkCustomNameValidation(String description){
