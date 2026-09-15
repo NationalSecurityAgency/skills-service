@@ -15,13 +15,15 @@
  */
 import { useAppConfig } from '@/common-components/stores/UseAppConfig.js'
 import { useAuthState } from '@/stores/UseAuthState.js'
+import { useSkillsDisplayInfo } from '@/skills-display/UseSkillsDisplayInfo.js'
 
 export const useInceptionConfigurer = () => {
 
   const appConfig = useAppConfig()
   const authState = useAuthState()
+  const skillsDisplayInfo = useSkillsDisplayInfo()
   function configure() {
-    if (authState.userInfo && !appConfig.needToBootstrap) {
+    if (authState.userInfo && !appConfig.needToBootstrap && !skillsDisplayInfo.isSkillsClientPath()) {
       authState.configureSkillsClientForInception()
     }
   }
