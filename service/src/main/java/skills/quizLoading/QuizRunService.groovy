@@ -623,10 +623,6 @@ class QuizRunService {
             QuizDef quizDef = getQuizDef(quizId)
             handleReportingTextInputQuestion(quizDef, userId, quizAttemptId, answerDefId, quizReportAnswerReq)
         } else if (answerDefPartialInfo.getQuestionType() == QuizQuestionType.FillInTheBlank) {
-//            if(quizReportAnswerReq.answerText.trim() == '') {
-//                throw new SkillQuizException("Can not submit blank entries for Fill in the Blank questions", quizId, ErrorCode.BadParam)
-                // quizAttemptAnswerRepo.delete(existingAnswerAttempt)
-//            }
 //            propsBasedValidator.quizValidationMaxStrLength(PublicProps.UiProp.maxTakeQuizInputTextAnswerLength, "Answer", quizReportAnswerReq.answerText, quizId)
             handleReportingFillInTheBlankQuestion(userId, quizAttemptId, answerDefId, quizReportAnswerReq)
         } else if (answerDefPartialInfo.getQuestionType() == QuizQuestionType.Matching) {
@@ -659,7 +655,7 @@ class QuizRunService {
         UserQuizAnswerAttempt existingAnswerAttempt = quizAttemptAnswerRepo.findByUserQuizAttemptRefIdAndQuizAnswerDefinitionRefId(quizAttemptId, answerDefId)
         if (existingAnswerAttempt) {
             if (quizReportAnswerReq.isSelected && quizReportAnswerReq.getAnswerText().trim() != '') {
-                existingAnswerAttempt.answer = quizReportAnswerReq.getAnswerText()
+                existingAnswerAttempt.answer = quizReportAnswerReq.getAnswerText().trim()
                 quizAttemptAnswerRepo.save(existingAnswerAttempt)
             } else {
                 quizAttemptAnswerRepo.delete(existingAnswerAttempt)
@@ -670,7 +666,7 @@ class QuizRunService {
                     quizAnswerDefinitionRefId: answerDefId,
                     userId: userId,
                     status: UserQuizAnswerAttempt.QuizAnswerStatus.NEEDS_GRADING,
-                    answer: quizReportAnswerReq.getAnswerText(),
+                    answer: quizReportAnswerReq.getAnswerText().trim(),
             )
             quizAttemptAnswerRepo.save(newAnswerAttempt)
         }
@@ -938,6 +934,9 @@ class QuizRunService {
                 List<UserQuizAnswerAttempt> attempt = quizAttemptAnswerRepo.findAllByUserQuizAttemptRefIdAndQuizAnswerDefinitionRefIdIn(quizAttemptId, selectedIds.toSet())
                 if(attempt) {
                     attempt.each{ answerAttempt ->
+                        if(answerAttempt.answer.trim() == "") {
+                            throw new SkillQuizException("Can not submit blank entries for Fill in the Blank questions", quizId, ErrorCode.BadParam)
+                        }
                         QuizAnswerDef questionToCompare = quizAnswerDefs.find{it.id == answerAttempt.quizAnswerDefinitionRefId }
                         if(questionToCompare) {
                             String[] possibleAnswers = questionToCompare.answer.split(/;/)
