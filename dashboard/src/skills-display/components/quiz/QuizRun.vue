@@ -96,6 +96,10 @@ const ratingSelected = (value) => {
 const getQuestionNumFromPath = (path) => {
   return Number(path.split('[').pop().split(']')[0]) + 1;
 }
+const allBlanksFilled = (value) => {
+  const unansweredQuestions = value.filter((q) => q.trim() === '')
+  return unansweredQuestions.length === 0;
+}
 
 const validateFunCache = new Map()
 
@@ -167,6 +171,14 @@ const schema = object({
                       .test('customAnswerValidator',"", async (value, context) => {
                         return await createValidateAnswerFn(value, context)
                       }),
+                }),
+            'answerTextArray': array()
+                .when('questionType', {
+                  is:  QuestionType.FillInTheBlank,
+                  then: (sch) => sch
+                      .required()
+                      .test('mustBeFilledIn', 'All blanks must be filled in', (value) => allBlanksFilled(value))
+                      .label('Answers')
                 }),
             'answerRating': number()
                 .when('questionType', {
@@ -349,6 +361,13 @@ const startQuizAttempt = () => {
               // eslint-disable-next-line no-param-reassign
               answerOptions[0].answerText = enteredTextObj.answerText;
             }
+          } else if (enteredText && q.questionType === QuestionType.FillInTheBlank) {
+            enteredText.map((answer) => {
+              let currentAnswer = answerOptions.find((a) => a.id === answer.answerId);
+              if(currentAnswer) {
+                currentAnswer.answerOption = answer.answerText;
+              }
+            })
           } else if (enteredText && q.questionType === QuestionType.Matching) {
             enteredText.map((existingAnswer) => {
               let selectedAnswer = answerOptions.find((it) => it.id === existingAnswer.answerId)
@@ -370,11 +389,13 @@ const startQuizAttempt = () => {
 const initializeFormData = (copy) => {
   const formQuestions = copy.questions.map((q) => {
     const answerRating = q.questionType === QuestionType.Rating ? q.answerOptions.find((a) => a.selected) : 0
+
     return {
       questionType: q.questionType,
       quizAnswers: q.answerOptions.map((a) => ({ ...a, selected: a.selected ? a.selected : false })),
       answerText: q.questionType === QuestionType.TextInput ? (q.answerOptions[0]?.answerText || '') : '',
       answerRating: answerRating ? Number(answerRating.answerOption) : 0,
+      answerTextArray: q.answerOptions.map((a) => a.answerOption),
     }
   })
   checkIfAnswerChangedForValidation.reset()
@@ -578,11 +599,12 @@ const onResize = (newWidth) => {
                   @selected-answer="updateSelectedAnswers"
                   @answer-matched="updateMatchedAnswer"
                   :quizComplete="!!quizResult"
-                  @answer-text-changed="updateSelectedAnswers"/>
+                  @answer-text-changed="updateSelectedAnswers"
+                  @fill-in-the-blank-changed="updateSelectedAnswers"/>
             </div>
           </SkillsOverlay>
 
-          <QuizRunValidationWarnings v-if="!meta.valid && !quizResult?.gradedRes?.needsGrading" :errors-to-show="errorsToShow" />
+          <QuizRunValidationWarnings v-if="!meta.valid && meta.touched && !quizResult?.gradedRes?.needsGrading" :errors-to-show="errorsToShow" />
 
           <div v-if="!quizResult" class="text-left mt-8 flex flex-wrap">
             <SkillsOverlay :show="isCompleting" opacity="0.6">
