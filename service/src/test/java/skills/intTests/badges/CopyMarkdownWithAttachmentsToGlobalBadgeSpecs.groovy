@@ -385,4 +385,31 @@ class CopyMarkdownWithAttachmentsToGlobalBadgeSpecs extends CopyIntSpec {
 
         attachments1.uuid.sort() == attachments.uuid.sort()
     }
+
+    def "attachments are moved after global badge is deleted"() {
+        def badge = createBadge(1, 1)
+        skillsService.createGlobalBadge(badge)
+
+        def attachment1Href = attachFileForGlobalBadgeAndReturnHref(badge.badgeId)
+
+        badge.description = "Here is a [Link](${attachment1Href})".toString()
+        skillsService.updateGlobalBadge(badge)
+
+        def badge2 = createBadge(1, 2)
+        skillsService.createGlobalBadge(badge2)
+
+        def attachment2Href = attachFileForGlobalBadgeAndReturnHref(badge2.badgeId)
+
+        badge2.description = "Here is a [Link](${attachment2Href})".toString()
+        skillsService.updateGlobalBadge(badge2)
+
+        when:
+        List<Attachment> attachments = attachmentRepo.findAll()
+        skillsService.deleteGlobalBadge(badge.badgeId)
+        List<Attachment> attachments1 = attachmentRepo.findAll()
+
+        then:
+        attachments.collect { "/api/download/${it.uuid}".toString() }.sort() == [attachment1Href, attachment2Href].sort()
+        attachments1.collect { "/api/download/${it.uuid}".toString() }.sort() == [attachment2Href].sort()
+    }
 }

@@ -399,5 +399,45 @@ class QuizCopyMarkdownWithAttachmentsSpecs extends CopyIntSpec {
         !newAttachments[0].projectId
         !newAttachments[0].skillId
     }
+
+    def "deleting quiz removes associated attachment"() {
+        def quiz = QuizDefFactory.createQuiz(1)
+        skillsService.createQuizDef(quiz)
+
+        List<String> q1AttachmentsHrefs = (1..3).collect { attachFileForQuizAndReturnHref(quiz.quizId)}
+
+        quiz.description =  "Here is a [Link](${q1AttachmentsHrefs[0]})".toString()
+        skillsService.createQuizDef(quiz, quiz.quizId)
+
+        def question1 = QuizDefFactory.createTextInputQuestion(1, 1)
+        question1.question =  "Here is a [Link](${q1AttachmentsHrefs[1]})".toString()
+        question1.id = skillsService.createQuizQuestionDef(question1).body.id
+
+        def quizAttempt = skillsService.startQuizAttempt(quiz.quizId).body
+        skillsService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizAttempt.questions[0].answerOptions[0].id, [isSelected: true, answerText:  "Here is a [Link](${q1AttachmentsHrefs[2]})".toString()])
+
+        def quiz2 = QuizDefFactory.createQuiz(2)
+        skillsService.createQuizDef(quiz2)
+
+        List<String> q2AttachmentsHrefs = (1..3).collect { attachFileForQuizAndReturnHref(quiz2.quizId)}
+
+        quiz2.description =  "Here is a [Link](${q2AttachmentsHrefs[0]})".toString()
+        skillsService.createQuizDef(quiz2, quiz2.quizId)
+
+        def quiz2question1 = QuizDefFactory.createTextInputQuestion(2, 1)
+        quiz2question1.question =  "Here is a [Link](${q2AttachmentsHrefs[1]})".toString()
+        quiz2question1.id = skillsService.createQuizQuestionDef(quiz2question1).body.id
+
+        def quiz2quizAttempt = skillsService.startQuizAttempt(quiz2.quizId).body
+        skillsService.reportQuizAnswer(quiz2.quizId, quiz2quizAttempt.id, quiz2quizAttempt.questions[0].answerOptions[0].id, [isSelected: true, answerText:  "Here is a [Link](${q2AttachmentsHrefs[2]})".toString()])
+
+        when:
+        List<Attachment> attachments = attachmentRepo.findAll()
+        skillsService.removeQuizDef(quiz.quizId)
+        List<Attachment> attachments1 = attachmentRepo.findAll()
+        then:
+        attachments.collect { "/api/download/${it.uuid}".toString() }.sort() == [q1AttachmentsHrefs, q2AttachmentsHrefs].flatten().sort()
+        attachments1.collect { "/api/download/${it.uuid}".toString() }.sort() == q2AttachmentsHrefs.sort()
+    }
 }
 

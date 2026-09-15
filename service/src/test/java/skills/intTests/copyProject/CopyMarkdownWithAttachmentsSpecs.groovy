@@ -2281,5 +2281,338 @@ class CopyMarkdownWithAttachmentsSpecs extends CopyIntSpec {
 
         attachments1.uuid.sort() == attachments.uuid.sort()
     }
+
+    def "deleting the project removes associated attachments"() {
+        def p1 = createProject(1)
+        skillsService.createProject(p1)
+
+        List<String> p1AttachmentsHrefs = (1..7).collect { attachFileAndReturnHref(p1.projectId)}
+        p1.description = "Here is a [Link](${p1AttachmentsHrefs[0]})".toString()
+        skillsService.updateProject(p1)
+
+        def p1subj1 = createSubject(1, 1)
+        p1subj1.description = "Here is a [Link](${p1AttachmentsHrefs[1]})".toString()
+        skillsService.createSubject(p1subj1)
+
+        def p1Skills = createSkills(3, 1, 1, 100)
+        p1Skills.each { it.selfReportingType = SkillDef.SelfReportingType.Approval }
+        p1Skills[0].description = "Here is a [Link](${p1AttachmentsHrefs[2]})".toString()
+        p1Skills[1].description = "Here is a [Link](${p1AttachmentsHrefs[3]})".toString()
+        skillsService.createSkills(p1Skills)
+
+        def badge = createBadge(1, 1)
+        badge.description = "Here is a [Link](${p1AttachmentsHrefs[4]})".toString()
+        skillsService.createBadge(badge)
+
+        def group = createSkillsGroup(1, 1, 11)
+        group.description = "Here is a [Link](${p1AttachmentsHrefs[5]})".toString()
+        skillsService.createSkill(group)
+
+        String justification =  "Here is a [Link](${p1AttachmentsHrefs[6]})".toString()
+        skillsService.addSkill(p1Skills[0], skillsService.userName, new Date(), justification)
+
+        def p2 = createProject(2)
+        skillsService.createProject(p2)
+
+        List<String> p2AttachmentsHrefs = (1..7).collect { attachFileAndReturnHref(p2.projectId)}
+        p2.description = "Here is a [Link](${p2AttachmentsHrefs[0]})".toString()
+        skillsService.updateProject(p2)
+
+        def p2subj1 = createSubject(2, 1)
+        p2subj1.description = "Here is a [Link](${p2AttachmentsHrefs[1]})".toString()
+        skillsService.createSubject(p2subj1)
+
+        def p2Skills = createSkills(3, 2, 1, 100)
+        p2Skills.each { it.selfReportingType = SkillDef.SelfReportingType.Approval }
+        p2Skills[0].description = "Here is a [Link](${p2AttachmentsHrefs[2]})".toString()
+        p2Skills[1].description = "Here is a [Link](${p2AttachmentsHrefs[3]})".toString()
+        skillsService.createSkills(p2Skills)
+
+        def p2Badge = createBadge(2, 1)
+        p2Badge.description = "Here is a [Link](${p2AttachmentsHrefs[4]})".toString()
+        skillsService.createBadge(p2Badge)
+
+        def p2Group = createSkillsGroup(2, 1, 11)
+        p2Group.description = "Here is a [Link](${p2AttachmentsHrefs[5]})".toString()
+        skillsService.createSkill(p2Group)
+
+        skillsService.addSkill(p2Skills[0], skillsService.userName, new Date(), "Here is a [Link](${p2AttachmentsHrefs[6]})".toString())
+
+        when:
+        List<Attachment> attachments = attachmentRepo.findAll()
+        skillsService.deleteProject(p1.projectId)
+        List<Attachment> attachments1 = attachmentRepo.findAll()
+        then:
+        attachments.collect { "/api/download/${it.uuid}".toString() }.sort() == [p1AttachmentsHrefs, p2AttachmentsHrefs].flatten().sort()
+        attachments1.collect { "/api/download/${it.uuid}".toString() }.sort() == p2AttachmentsHrefs.sort()
+    }
+
+    def "deleting a skill removes associated attachments"() {
+        def p1 = createProject(1)
+        skillsService.createProject(p1)
+
+        List<String> p1AttachmentsHrefs = (1..7).collect { attachFileAndReturnHref(p1.projectId)}
+        p1.description = "Here is a [Link](${p1AttachmentsHrefs[0]})".toString()
+        skillsService.updateProject(p1)
+
+        def p1subj1 = createSubject(1, 1)
+        p1subj1.description = "Here is a [Link](${p1AttachmentsHrefs[1]})".toString()
+        skillsService.createSubject(p1subj1)
+
+        def p1Skills = createSkills(3, 1, 1, 100)
+        p1Skills.each { it.selfReportingType = SkillDef.SelfReportingType.Approval }
+        p1Skills[0].description = "Here is a [Link](${p1AttachmentsHrefs[2]})".toString()
+        p1Skills[1].description = "Here is a [Link](${p1AttachmentsHrefs[3]})".toString()
+        skillsService.createSkills(p1Skills)
+
+        def badge = createBadge(1, 1)
+        badge.description = "Here is a [Link](${p1AttachmentsHrefs[4]})".toString()
+        skillsService.createBadge(badge)
+
+        def group = createSkillsGroup(1, 1, 11)
+        group.description = "Here is a [Link](${p1AttachmentsHrefs[5]})".toString()
+        skillsService.createSkill(group)
+
+        String justification =  "Here is a [Link](${p1AttachmentsHrefs[6]})".toString()
+        skillsService.addSkill(p1Skills[0], skillsService.userName, new Date(), justification)
+
+        def p2 = createProject(2)
+        skillsService.createProject(p2)
+
+        List<String> p2AttachmentsHrefs = (1..7).collect { attachFileAndReturnHref(p2.projectId)}
+        p2.description = "Here is a [Link](${p2AttachmentsHrefs[0]})".toString()
+        skillsService.updateProject(p2)
+
+        def p2subj1 = createSubject(2, 1)
+        p2subj1.description = "Here is a [Link](${p2AttachmentsHrefs[1]})".toString()
+        skillsService.createSubject(p2subj1)
+
+        def p2Skills = createSkills(3, 2, 1, 100)
+        p2Skills.each { it.selfReportingType = SkillDef.SelfReportingType.Approval }
+        p2Skills[0].description = "Here is a [Link](${p2AttachmentsHrefs[2]})".toString()
+        p2Skills[1].description = "Here is a [Link](${p2AttachmentsHrefs[3]})".toString()
+        skillsService.createSkills(p2Skills)
+
+        def p2Badge = createBadge(2, 1)
+        p2Badge.description = "Here is a [Link](${p2AttachmentsHrefs[4]})".toString()
+        skillsService.createBadge(p2Badge)
+
+        def p2Group = createSkillsGroup(2, 1, 11)
+        p2Group.description = "Here is a [Link](${p2AttachmentsHrefs[5]})".toString()
+        skillsService.createSkill(p2Group)
+
+        skillsService.addSkill(p2Skills[0], skillsService.userName, new Date(), "Here is a [Link](${p2AttachmentsHrefs[6]})".toString())
+
+        when:
+        List<Attachment> attachments = attachmentRepo.findAll()
+        skillsService.deleteSkill(p1Skills[0])
+        List<Attachment> attachments1 = attachmentRepo.findAll()
+        then:
+        attachments.collect { "/api/download/${it.uuid}".toString() }.sort() == [p1AttachmentsHrefs, p2AttachmentsHrefs].flatten().sort()
+        // skill and its submitted approval request is removed
+        List<String> withoutRemovedAttachments = p1AttachmentsHrefs.findAll { it != p1AttachmentsHrefs[2] && it != p1AttachmentsHrefs[6]}
+        attachments1.collect { "/api/download/${it.uuid}".toString() }.sort() == [withoutRemovedAttachments, p2AttachmentsHrefs].flatten().sort()
+    }
+
+    def "deleting a subject removes associated attachments"() {
+        def p1 = createProject(1)
+        skillsService.createProject(p1)
+
+        List<String> p1AttachmentsHrefs = (1..7).collect { attachFileAndReturnHref(p1.projectId)}
+        p1.description = "Here is a [Link](${p1AttachmentsHrefs[0]})".toString()
+        skillsService.updateProject(p1)
+
+        def p1subj1 = createSubject(1, 1)
+        p1subj1.description = "Here is a [Link](${p1AttachmentsHrefs[1]})".toString()
+        skillsService.createSubject(p1subj1)
+
+        def p1Skills = createSkills(3, 1, 1, 100)
+        p1Skills.each { it.selfReportingType = SkillDef.SelfReportingType.Approval }
+        p1Skills[0].description = "Here is a [Link](${p1AttachmentsHrefs[2]})".toString()
+        p1Skills[1].description = "Here is a [Link](${p1AttachmentsHrefs[3]})".toString()
+        skillsService.createSkills(p1Skills)
+
+        def badge = createBadge(1, 1)
+        badge.description = "Here is a [Link](${p1AttachmentsHrefs[4]})".toString()
+        skillsService.createBadge(badge)
+
+        def group = createSkillsGroup(1, 1, 11)
+        group.description = "Here is a [Link](${p1AttachmentsHrefs[5]})".toString()
+        skillsService.createSkill(group)
+
+        String justification =  "Here is a [Link](${p1AttachmentsHrefs[6]})".toString()
+        skillsService.addSkill(p1Skills[0], skillsService.userName, new Date(), justification)
+
+        def p2 = createProject(2)
+        skillsService.createProject(p2)
+
+        List<String> p2AttachmentsHrefs = (1..7).collect { attachFileAndReturnHref(p2.projectId)}
+        p2.description = "Here is a [Link](${p2AttachmentsHrefs[0]})".toString()
+        skillsService.updateProject(p2)
+
+        def p2subj1 = createSubject(2, 1)
+        p2subj1.description = "Here is a [Link](${p2AttachmentsHrefs[1]})".toString()
+        skillsService.createSubject(p2subj1)
+
+        def p2Skills = createSkills(3, 2, 1, 100)
+        p2Skills.each { it.selfReportingType = SkillDef.SelfReportingType.Approval }
+        p2Skills[0].description = "Here is a [Link](${p2AttachmentsHrefs[2]})".toString()
+        p2Skills[1].description = "Here is a [Link](${p2AttachmentsHrefs[3]})".toString()
+        skillsService.createSkills(p2Skills)
+
+        def p2Badge = createBadge(2, 1)
+        p2Badge.description = "Here is a [Link](${p2AttachmentsHrefs[4]})".toString()
+        skillsService.createBadge(p2Badge)
+
+        def p2Group = createSkillsGroup(2, 1, 11)
+        p2Group.description = "Here is a [Link](${p2AttachmentsHrefs[5]})".toString()
+        skillsService.createSkill(p2Group)
+
+        skillsService.addSkill(p2Skills[0], skillsService.userName, new Date(), "Here is a [Link](${p2AttachmentsHrefs[6]})".toString())
+
+        when:
+        List<Attachment> attachments = attachmentRepo.findAll()
+        skillsService.deleteSubject(p1Skills[0])
+        List<Attachment> attachments1 = attachmentRepo.findAll()
+        then:
+        attachments.collect { "/api/download/${it.uuid}".toString() }.sort() == [p1AttachmentsHrefs, p2AttachmentsHrefs].flatten().sort()
+        // only project and badge is kept
+        attachments1.collect { "/api/download/${it.uuid}".toString() }.sort() == [p1AttachmentsHrefs[0], p1AttachmentsHrefs[4], p2AttachmentsHrefs].flatten().sort()
+    }
+
+    def "deleting a badge removes associated attachments"() {
+        def p1 = createProject(1)
+        skillsService.createProject(p1)
+
+        List<String> p1AttachmentsHrefs = (1..7).collect { attachFileAndReturnHref(p1.projectId)}
+        p1.description = "Here is a [Link](${p1AttachmentsHrefs[0]})".toString()
+        skillsService.updateProject(p1)
+
+        def p1subj1 = createSubject(1, 1)
+        p1subj1.description = "Here is a [Link](${p1AttachmentsHrefs[1]})".toString()
+        skillsService.createSubject(p1subj1)
+
+        def p1Skills = createSkills(3, 1, 1, 100)
+        p1Skills.each { it.selfReportingType = SkillDef.SelfReportingType.Approval }
+        p1Skills[0].description = "Here is a [Link](${p1AttachmentsHrefs[2]})".toString()
+        p1Skills[1].description = "Here is a [Link](${p1AttachmentsHrefs[3]})".toString()
+        skillsService.createSkills(p1Skills)
+
+        def badge = createBadge(1, 1)
+        badge.description = "Here is a [Link](${p1AttachmentsHrefs[4]})".toString()
+        skillsService.createBadge(badge)
+
+        def group = createSkillsGroup(1, 1, 11)
+        group.description = "Here is a [Link](${p1AttachmentsHrefs[5]})".toString()
+        skillsService.createSkill(group)
+
+        String justification =  "Here is a [Link](${p1AttachmentsHrefs[6]})".toString()
+        skillsService.addSkill(p1Skills[0], skillsService.userName, new Date(), justification)
+
+        def p2 = createProject(2)
+        skillsService.createProject(p2)
+
+        List<String> p2AttachmentsHrefs = (1..7).collect { attachFileAndReturnHref(p2.projectId)}
+        p2.description = "Here is a [Link](${p2AttachmentsHrefs[0]})".toString()
+        skillsService.updateProject(p2)
+
+        def p2subj1 = createSubject(2, 1)
+        p2subj1.description = "Here is a [Link](${p2AttachmentsHrefs[1]})".toString()
+        skillsService.createSubject(p2subj1)
+
+        def p2Skills = createSkills(3, 2, 1, 100)
+        p2Skills.each { it.selfReportingType = SkillDef.SelfReportingType.Approval }
+        p2Skills[0].description = "Here is a [Link](${p2AttachmentsHrefs[2]})".toString()
+        p2Skills[1].description = "Here is a [Link](${p2AttachmentsHrefs[3]})".toString()
+        skillsService.createSkills(p2Skills)
+
+        def p2Badge = createBadge(2, 1)
+        p2Badge.description = "Here is a [Link](${p2AttachmentsHrefs[4]})".toString()
+        skillsService.createBadge(p2Badge)
+
+        def p2Group = createSkillsGroup(2, 1, 11)
+        p2Group.description = "Here is a [Link](${p2AttachmentsHrefs[5]})".toString()
+        skillsService.createSkill(p2Group)
+
+        skillsService.addSkill(p2Skills[0], skillsService.userName, new Date(), "Here is a [Link](${p2AttachmentsHrefs[6]})".toString())
+
+        when:
+        List<Attachment> attachments = attachmentRepo.findAll()
+        skillsService.removeBadge(badge)
+        List<Attachment> attachments1 = attachmentRepo.findAll()
+        then:
+        attachments.collect { "/api/download/${it.uuid}".toString() }.sort() == [p1AttachmentsHrefs, p2AttachmentsHrefs].flatten().sort()
+        // skill and its submitted approval request is removed
+        List<String> withoutRemovedAttachments = p1AttachmentsHrefs.findAll { it != p1AttachmentsHrefs[4]}
+        attachments1.collect { "/api/download/${it.uuid}".toString() }.sort() == [withoutRemovedAttachments, p2AttachmentsHrefs].flatten().sort()
+    }
+
+    def "deleting a group removes associated attachments"() {
+        def p1 = createProject(1)
+        skillsService.createProject(p1)
+
+        List<String> p1AttachmentsHrefs = (1..7).collect { attachFileAndReturnHref(p1.projectId)}
+        p1.description = "Here is a [Link](${p1AttachmentsHrefs[0]})".toString()
+        skillsService.updateProject(p1)
+
+        def p1subj1 = createSubject(1, 1)
+        p1subj1.description = "Here is a [Link](${p1AttachmentsHrefs[1]})".toString()
+        skillsService.createSubject(p1subj1)
+
+        def p1Skills = createSkills(3, 1, 1, 100)
+        p1Skills.each { it.selfReportingType = SkillDef.SelfReportingType.Approval }
+        p1Skills[0].description = "Here is a [Link](${p1AttachmentsHrefs[2]})".toString()
+        p1Skills[1].description = "Here is a [Link](${p1AttachmentsHrefs[3]})".toString()
+
+        def badge = createBadge(1, 1)
+        badge.description = "Here is a [Link](${p1AttachmentsHrefs[4]})".toString()
+        skillsService.createBadge(badge)
+
+        def group = createSkillsGroup(1, 1, 11)
+        group.description = "Here is a [Link](${p1AttachmentsHrefs[5]})".toString()
+        skillsService.createSkill(group)
+        skillsService.assignSkillToSkillsGroup(group.skillId, p1Skills[0])
+        skillsService.assignSkillToSkillsGroup(group.skillId, p1Skills[1])
+
+        String justification =  "Here is a [Link](${p1AttachmentsHrefs[6]})".toString()
+        skillsService.addSkill(p1Skills[0], skillsService.userName, new Date(), justification)
+
+        def p2 = createProject(2)
+        skillsService.createProject(p2)
+
+        List<String> p2AttachmentsHrefs = (1..7).collect { attachFileAndReturnHref(p2.projectId)}
+        p2.description = "Here is a [Link](${p2AttachmentsHrefs[0]})".toString()
+        skillsService.updateProject(p2)
+
+        def p2subj1 = createSubject(2, 1)
+        p2subj1.description = "Here is a [Link](${p2AttachmentsHrefs[1]})".toString()
+        skillsService.createSubject(p2subj1)
+
+        def p2Skills = createSkills(3, 2, 1, 100)
+        p2Skills.each { it.selfReportingType = SkillDef.SelfReportingType.Approval }
+        p2Skills[0].description = "Here is a [Link](${p2AttachmentsHrefs[2]})".toString()
+        p2Skills[1].description = "Here is a [Link](${p2AttachmentsHrefs[3]})".toString()
+        skillsService.createSkills(p2Skills)
+
+        def p2Badge = createBadge(2, 1)
+        p2Badge.description = "Here is a [Link](${p2AttachmentsHrefs[4]})".toString()
+        skillsService.createBadge(p2Badge)
+
+        def p2Group = createSkillsGroup(2, 1, 11)
+        p2Group.description = "Here is a [Link](${p2AttachmentsHrefs[5]})".toString()
+        skillsService.createSkill(p2Group)
+
+        skillsService.addSkill(p2Skills[0], skillsService.userName, new Date(), "Here is a [Link](${p2AttachmentsHrefs[6]})".toString())
+
+        when:
+        List<Attachment> attachments = attachmentRepo.findAll()
+        skillsService.deleteSkill(group)
+        List<Attachment> attachments1 = attachmentRepo.findAll()
+        then:
+        attachments.collect { "/api/download/${it.uuid}".toString() }.sort() == [p1AttachmentsHrefs, p2AttachmentsHrefs].flatten().sort()
+
+        // only project, subject and badge is left after group is removed
+        attachments1.collect { "/api/download/${it.uuid}".toString() }.sort() == [ p1AttachmentsHrefs[0],  p1AttachmentsHrefs[1], p1AttachmentsHrefs[4], p2AttachmentsHrefs].flatten().sort()
+    }
 }
 
