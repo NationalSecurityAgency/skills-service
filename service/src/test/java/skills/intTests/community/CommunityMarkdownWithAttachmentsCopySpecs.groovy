@@ -15,10 +15,13 @@
  */
 package skills.intTests.community
 
+import org.springframework.beans.factory.annotation.Autowired
+import skills.controller.exceptions.SkillException
 import skills.intTests.copyProject.CopyIntSpec
 import skills.intTests.utils.QuizDefFactory
 import skills.intTests.utils.SkillsClientException
 import skills.intTests.utils.SkillsService
+import skills.services.AttachmentService
 import skills.storage.model.Attachment
 import skills.storage.model.SkillDef
 
@@ -128,7 +131,7 @@ class CommunityMarkdownWithAttachmentsCopySpecs extends CopyIntSpec {
         then:
         SkillsClientException exception = thrown(SkillsClientException)
         exception.message.contains("errorCode:AccessDenied")
-        exception.message.contains("Not authorized to copy the attachment")
+        exception.message.contains("Not allowed to copy attachments with uuid")
     }
 
     def "not allowed to copy from UC-GlobalBadge to non-UC-proj"() {
@@ -335,7 +338,7 @@ class CommunityMarkdownWithAttachmentsCopySpecs extends CopyIntSpec {
             assert false, "Expected SkillsClientException"
             return false
         } catch (SkillsClientException exception) {
-            assert (exception.message.contains("errorCode:AccessDenied") && exception.message.contains("Not allowed to copy attachments to non-UC"))
+            assert (exception.message.contains("errorCode:AccessDenied") && exception.message.contains("Not allowed to copy attachments with uuid"))
                     || (
                     (exception.message.contains("errorCode:BadParam") || exception.message.contains("errorCode:ParagraphValidationFailed"))
                             && exception.message.contains("Attachment [Link] is not allowed to be copied")
@@ -403,5 +406,123 @@ class CommunityMarkdownWithAttachmentsCopySpecs extends CopyIntSpec {
         newAttachments[0].projectId == p2.projectId
 
         attachments1.uuid.sort() == attachments.uuid.sort()
+    }
+
+    @Autowired
+    AttachmentService attachmentService
+
+    def "AttachmentService: not allowed to copy from UC-proj to non-UC proj, quiz and global-badge"() {
+        List<String> users = getRandomUsers(2)
+        SkillsService pristineDragonsUser = createService(users[1])
+        SkillsService rootUser = createRootSkillService()
+        rootUser.saveUserTag(pristineDragonsUser.userName, 'dragons', ['DivineDragon'])
+
+        def p1 = createProject(1)
+        p1.enableProtectedUserCommunity = true
+        def p1subj1 = createSubject(1, 1)
+        pristineDragonsUser.createProjectAndSubjectAndSkills(p1, p1subj1, null)
+
+        def attachment1Href = attachFileAndReturnHref(p1.projectId,  'Test is a test', pristineDragonsUser)
+
+        def p2 = createProject(2)
+        def p2Subj1 = createSubject(2, 1)
+        def p2Skill2 = createSkill(2, 1, 2, 0, 1000)
+        pristineDragonsUser.createProjectAndSubjectAndSkills(p2, p2Subj1, [p2Skill2])
+
+        def quiz = QuizDefFactory.createQuiz(1)
+        skillsService.createQuizDef(quiz)
+
+        def badge = createBadge(1, 1)
+        skillsService.createGlobalBadge(badge)
+
+        when:
+        List<Attachment> attachments = attachmentRepo.findAll()
+        Attachment attachment = attachments.find {  attachment1Href.contains(it.uuid)}
+
+        then:
+        expectAttachmentServiceAccessDenied { attachmentService.copyAttachmentWithNewUuid(attachment, p2.projectId, null, null) }
+        expectAttachmentServiceAccessDenied { attachmentService.copyAttachmentWithNewUuid(attachment, p2.projectId, null, p2Skill2.skillId) }
+        expectAttachmentServiceAccessDenied { attachmentService.copyAttachmentWithNewUuid(attachment, null, quiz.quizId, null) }
+        expectAttachmentServiceAccessDenied { attachmentService.copyAttachmentWithNewUuid(attachment, null, null, badge.badgeId) }
+    }
+
+    def "AttachmentService: not allowed to copy from UC-quiz to non-UC proj, quiz and global-badge"() {
+        List<String> users = getRandomUsers(2)
+        SkillsService pristineDragonsUser = createService(users[1])
+        SkillsService rootUser = createRootSkillService()
+        rootUser.saveUserTag(pristineDragonsUser.userName, 'dragons', ['DivineDragon'])
+
+        def quizUC = QuizDefFactory.createQuiz(11)
+        quizUC.enableProtectedUserCommunity = true
+        pristineDragonsUser.createQuizDef(quizUC)
+
+        def attachment1Href = attachFileForQuizAndReturnHref(quizUC.quizId, "some text", pristineDragonsUser)
+
+        def p2 = createProject(2)
+        def p2Subj1 = createSubject(2, 1)
+        def p2Skill2 = createSkill(2, 1, 2, 0, 1000)
+        pristineDragonsUser.createProjectAndSubjectAndSkills(p2, p2Subj1, [p2Skill2])
+
+        def quiz = QuizDefFactory.createQuiz(1)
+        skillsService.createQuizDef(quiz)
+
+        def badge = createBadge(1, 1)
+        skillsService.createGlobalBadge(badge)
+
+        when:
+        List<Attachment> attachments = attachmentRepo.findAll()
+        Attachment attachment = attachments.find {  attachment1Href.contains(it.uuid)}
+
+        then:
+        expectAttachmentServiceAccessDenied { attachmentService.copyAttachmentWithNewUuid(attachment, p2.projectId, null, null) }
+        expectAttachmentServiceAccessDenied { attachmentService.copyAttachmentWithNewUuid(attachment, p2.projectId, null, p2Skill2.skillId) }
+        expectAttachmentServiceAccessDenied { attachmentService.copyAttachmentWithNewUuid(attachment, null, quiz.quizId, null) }
+        expectAttachmentServiceAccessDenied { attachmentService.copyAttachmentWithNewUuid(attachment, null, null, badge.badgeId) }
+    }
+
+    def "AttachmentService: not allowed to copy from UC-global-badge to non-UC proj, quiz and global-badge"() {
+        List<String> users = getRandomUsers(2)
+        SkillsService pristineDragonsUser = createService(users[1])
+        SkillsService rootUser = createRootSkillService()
+        rootUser.saveUserTag(pristineDragonsUser.userName, 'dragons', ['DivineDragon'])
+
+        def badgeUC = createBadge(1, 15)
+        badgeUC.enableProtectedUserCommunity = true
+        pristineDragonsUser.createGlobalBadge(badgeUC)
+
+        def attachment1Href = attachFileForGlobalBadgeAndReturnHref(badgeUC.badgeId, 'some value', pristineDragonsUser)
+
+        def p2 = createProject(2)
+        def p2Subj1 = createSubject(2, 1)
+        def p2Skill2 = createSkill(2, 1, 2, 0, 1000)
+        pristineDragonsUser.createProjectAndSubjectAndSkills(p2, p2Subj1, [p2Skill2])
+
+        def quiz = QuizDefFactory.createQuiz(1)
+        skillsService.createQuizDef(quiz)
+
+        def badge = createBadge(1, 1)
+        skillsService.createGlobalBadge(badge)
+
+        when:
+        List<Attachment> attachments = attachmentRepo.findAll()
+        Attachment attachment = attachments.find {  attachment1Href.contains(it.uuid)}
+
+        then:
+        expectAttachmentServiceAccessDenied { attachmentService.copyAttachmentWithNewUuid(attachment, p2.projectId, null, null) }
+        expectAttachmentServiceAccessDenied { attachmentService.copyAttachmentWithNewUuid(attachment, p2.projectId, null, p2Skill2.skillId) }
+        expectAttachmentServiceAccessDenied { attachmentService.copyAttachmentWithNewUuid(attachment, null, quiz.quizId, null) }
+        expectAttachmentServiceAccessDenied { attachmentService.copyAttachmentWithNewUuid(attachment, null, null, badge.badgeId) }
+    }
+
+    private boolean expectAttachmentServiceAccessDenied(Closure endpointCall) {
+        try {
+            endpointCall.call()
+            assert false, "Expected SkillsClientException"
+            return false
+        } catch (SkillException exception) {
+            assert exception.message.contains("Not allowed to copy attachments with uuid")
+        }
+
+        return true
     }
 }

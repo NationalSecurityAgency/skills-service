@@ -101,17 +101,20 @@ class AttachmentService {
         )
     }
 
-    void validateUCRules(Attachment attachment, String newProjectId, String newQuizId, String newSkillId) {
+    private void validateUCRules(Attachment attachment, String newProjectId, String newQuizId, String newSkillId) {
         if (userCommunityService.isUserCommunityConfigured()) {
-            boolean isAttachmentFromUC = false
+            boolean isFromUC = false
             if (attachment.projectId) {
-                isAttachmentFromUC = userCommunityService.isUserCommunityOnlyProject(attachment.projectId)
+                isFromUC = userCommunityService.isUserCommunityOnlyProject(attachment.projectId)
             }
-            if (!isAttachmentFromUC && attachment.quizId) {
-                isAttachmentFromUC = userCommunityService.isUserCommunityOnlyQuiz(attachment.quizId)
+            if (!isFromUC && attachment.quizId) {
+                isFromUC = userCommunityService.isUserCommunityOnlyQuiz(attachment.quizId)
+            }
+            if (!isFromUC && attachment.skillId && !attachment.projectId) {
+                isFromUC = userCommunityService.isUserCommunityOnlyGlobalBadge(attachment.skillId)
             }
 
-            if (isAttachmentFromUC && !newProjectId && !newQuizId && !newSkillId) {
+            if (isFromUC && !newProjectId && !newQuizId && !newSkillId) {
                 log.warn("Cannot copy attachment with uuid=[${attachment.uuid}], projectId=[${attachment.projectId}] quizId=[${attachment.quizId}] to a non-UC destination")
                 throw new SkillException("Not authorized to copy the attachment", ErrorCode.AccessDenied)
             }
@@ -119,25 +122,22 @@ class AttachmentService {
             boolean toUC = false
             if (newProjectId) {
                 toUC = userCommunityService.isUserCommunityOnlyProject(newProjectId)
-
-                if (newProjectId && attachment.projectId && attachment.projectId != newProjectId) {
-                    if (isAttachmentFromUC && !toUC) {
-                        throw new SkillException("Not allowed to copy attachments to non-UC project[${newProjectId}]", newProjectId, null, ErrorCode.AccessDenied)
-                    }
-                }
             }
-            if (newQuizId) {
+            if (!toUC && !newProjectId && newSkillId) {
+                toUC = userCommunityService.isUserCommunityOnlyGlobalBadge(newSkillId)
+            }
+            if (!toUC && newQuizId) {
                 toUC = userCommunityService.isUserCommunityOnlyQuiz(newQuizId)
-
-                if (isAttachmentFromUC && !toUC) {
-                    throw new SkillException("Not allowed to copy attachments to non-UC quiz:[${newQuizId}]", ErrorCode.AccessDenied)
-                }
             }
 
-            if (toUC || isAttachmentFromUC) {
+            if (isFromUC && !toUC) {
+                throw new SkillException("Not allowed to copy attachments with uuid=[${attachment.uuid}]", null, null, ErrorCode.AccessDenied)
+            }
+
+            if (toUC || isFromUC) {
                 String userId = userInfoService.getCurrentUserId();
                 if (!userCommunityService.isUserCommunityMember(userId)) {
-                    log.warn("User attempted to copy attachment with uuid=[${attachment.uuid}] from projectId=[${attachment.projectId}] to projectId=[${newProjectId}] but user is not UC member")
+                    log.warn("User attempted to copy attachment with uuid=[${attachment.uuid}] from projectId=[${attachment.projectId}],skillId=[${attachment.skillId}],quizId=[${attachment.quizId}] TO projectId=[${newProjectId}],skillId=[${newSkillId}]quizId=[${newQuizId}] but user is not UC member")
                     throw new SkillException("Not authorized to copy the attachment", ErrorCode.AccessDenied)
                 }
             }
