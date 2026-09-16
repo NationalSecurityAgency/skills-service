@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <script setup>
-import {computed, nextTick, onMounted, ref} from 'vue'
+import {computed, nextTick, onMounted, ref, watch} from 'vue'
 import {array, boolean, object, string} from 'yup'
 import {useRoute} from 'vue-router';
 import {useAppConfig} from '@/common-components/stores/UseAppConfig.js'
@@ -29,6 +29,7 @@ import MatchingQuestion from "@/components/quiz/testCreation/MatchingQuestion.vu
 import GenerateSingleQuestionDialog
   from "@/common-components/utilities/learning-conent-gen/GenerateSingleQuestionDialog.vue";
 import QuestionTypeDropDown from "@/components/quiz/testCreation/QuestionTypeDropDown.vue";
+import ConfigureBlanks from "@/components/quiz/testCreation/ConfigureBlanks.vue";
 
 const model = defineModel()
 const props = defineProps({
@@ -68,11 +69,13 @@ onMounted(() => {
   if (props.isEdit || props.isCopy) {
     questionType.value.selectedType = questionType.value.options.find((o) => o.id === props.questionDef.questionType)
     if (props.isEdit) {
-      loadingComponent.value = true;
-      QuizService.getGradingStatus(props.questionDef.quizId, props.questionDef.id).then((gradingStatus) => {
-        editTypeDisabled.value = gradingStatus.data.hasPendingGrades;
-        loadingComponent.value = false;
-      })
+      if(props.questionDef.questionType === QuestionType.TextInput) {
+        loadingComponent.value = true;
+        QuizService.getGradingStatus(props.questionDef.quizId, props.questionDef.id).then((gradingStatus) => {
+          editTypeDisabled.value = gradingStatus.data.hasPendingGrades;
+          loadingComponent.value = false;
+        })
+      }
     }
   }
   if (isQuizType.value && props.questionDef.answerHint) {
@@ -142,6 +145,12 @@ if (QuizType.isSurvey(props.questionDef.quizType)) {
     description: 'Match terms',
     id: QuestionType.Matching,
     icon: 'fas fa-diagram-project',
+  },
+  {
+    label: 'Fill In the Blank',
+    description: 'Fill in the blanks',
+    id: QuestionType.FillInTheBlank,
+    icon: 'fas fa-arrows-down-to-line'
   })
 }
 
@@ -174,6 +183,9 @@ const isQuestionTypeMultipleChoice = computed(() => {
 const isQuestionTypeSingleChoice = computed(() => {
   return questionType.value.selectedType && questionType.value.selectedType.id === QuestionType.SingleChoice;
 })
+const isQuestionTypeFillInTheBlank = computed(() => {
+  return questionType.value.selectedType && questionType.value.selectedType.id === QuestionType.FillInTheBlank;
+})
 const quizType = computed(() => {
   return props.questionDef.quizType;
 })
@@ -193,7 +205,7 @@ const quizId = computed(() => {
 const isDirty = ref(false)
 const answersErrorMessage = ref('')
 const atLeastOneCorrectAnswer = (value) => {
-  if (isSurveyType.value || !isDirty.value || isQuestionTypeTextInput.value || isQuestionTypeRatingInput.value || isQuestionTypeMatching.value) {
+  if (isSurveyType.value || !isDirty.value || isQuestionTypeTextInput.value || isQuestionTypeRatingInput.value || isQuestionTypeMatching.value || isQuestionTypeFillInTheBlank.value) {
     return true;
   }
   if (value === undefined) {
@@ -203,51 +215,53 @@ const atLeastOneCorrectAnswer = (value) => {
   return numCorrect >= 1;
 }
 const atLeastTwoAnswersFilledIn = (value) => {
+  if (!isDirty.value || isQuestionTypeTextInput.value || isQuestionTypeRatingInput.value || isQuestionTypeMatching.value || isQuestionTypeFillInTheBlank.value) {
+    return true;
+  }
   if (value === undefined) {
     return false
   }
-  if (!isDirty.value || isQuestionTypeTextInput.value || isQuestionTypeRatingInput.value || isQuestionTypeMatching.value) {
-    return true;
-  }
+
   const numWithContent = value.filter((a) => (a.answer && a.answer.trim().length > 0)).length;
   return numWithContent >= 2;
 }
 const correctAnswersMustHaveText = (value) => {
+  if (isSurveyType.value || !isDirty.value || isQuestionTypeTextInput.value || isQuestionTypeRatingInput.value || isQuestionTypeMatching.value || isQuestionTypeFillInTheBlank.value) {
+    return true;
+  }
   if (value === undefined) {
     return false
-  }
-  if (isSurveyType.value || !isDirty.value || isQuestionTypeTextInput.value || isQuestionTypeRatingInput.value || isQuestionTypeMatching.value) {
-    return true;
   }
   const correctWithoutText = value.filter((a) => (a.isCorrect && (!a.answer || a.answer.trim().length === 0))).length;
   return correctWithoutText === 0;
 }
 const maxNumAnswers = (value) => {
-  if (isQuestionTypeTextInput.value || isQuestionTypeRatingInput.value) {
+  if (isQuestionTypeTextInput.value || isQuestionTypeRatingInput.value || isQuestionTypeFillInTheBlank.value) {
     return true;
   }
   return value && value.length <= appConfig.maxAnswersPerQuizQuestion;
 }
 const singleChoiceQuestionsMustHave1Answer = (value) => {
+  if (isSurveyType.value || !isDirty.value || !QuestionType.isSingleChoice(questionType.value.selectedType.id) || isQuestionTypeFillInTheBlank.value) {
+    return true;
+  }
   if (value === undefined) {
     return false
-  }
-  if (isSurveyType.value || !isDirty.value || !QuestionType.isSingleChoice(questionType.value.selectedType.id)) {
-    return true;
   }
   const numCorrect = value.filter((a) => (a.isCorrect)).length;
   return numCorrect === 1;
 }
 const multipleChoiceQuestionsMustHaveAtLeast2Answer = (value) => {
+  if (isSurveyType.value || !isDirty.value || !QuestionType.isMultipleChoice(questionType.value.selectedType.id) || isQuestionTypeFillInTheBlank.value) {
+    return true;
+  }
   if (value === undefined) {
     return false
-  }
-  if (isSurveyType.value || !isDirty.value || !QuestionType.isMultipleChoice(questionType.value.selectedType.id)) {
-    return true;
   }
   const numCorrect = value.filter((a) => (a.isCorrect)).length;
   return numCorrect >= 2;
 }
+
 const matchesMustNotBeBlank = (value) => {
   if(!isQuestionTypeMatching.value) {
     return true;
@@ -264,6 +278,31 @@ const matchesMustNotBeBlank = (value) => {
   })
   return emptyAnswers.length === 0;
 }
+
+const allAnswersFilledIn = (value) => {
+  if(!isQuestionTypeFillInTheBlank.value) {
+    return true;
+  }
+  if(value) {
+    const emptyAnswers = value.filter((a) => (!a.answer || a.answer.trim().length === 0))
+    return emptyAnswers.length === 0;
+  } else {
+    return false;
+  }
+}
+
+const mustHaveBlanks = (value) => {
+  if(!isQuestionTypeFillInTheBlank.value) {
+    return true;
+  }
+  if(value) {
+    return value.length > 0;
+  }
+  else {
+    return false;
+  }
+}
+
 const noRepeatAnswers = (value) => {
   if(!isQuestionTypeMatching.value) {
     return true;
@@ -306,6 +345,8 @@ const schema = object({
       .test('multipleChoiceQuestionsMustHaveAtLeast2Answer', 'Multiple Answers Question must have at least 2 correct answers', (value) => multipleChoiceQuestionsMustHaveAtLeast2Answer(value))
       .test('matchesMustNotBeBlank', 'Answers must include both a term and a value', (value) => matchesMustNotBeBlank(value))
       .test('noRepeatAnswers', 'Answers can not contain duplicate terms or values', (value) => noRepeatAnswers(value))
+      .test('mustHaveBlanks', 'Question must have blank fields', (value) => mustHaveBlanks(value))
+      .test('allAnswersFilledIn', 'All answers must be filled in', (value) => allAnswersFilledIn(value))
   ,
 })
 const initialQuestionData = {
@@ -416,6 +457,17 @@ const startAiAssistant = () => {
   }
   showGenQDialog.value = true
 }
+
+const numberOfBlanks = computed(() => {
+  if(isQuestionTypeFillInTheBlank.value) {
+    const fieldValues = skillsInputFormDialogRef.value.getFieldValues()
+    const question = fieldValues.question.replace(/\\_/g, '_');
+    return question.match(/_{2,}/g)?.length || 0;
+  } else {
+    return 0;
+  }
+})
+
 </script>
 
 <template>
@@ -454,6 +506,9 @@ const startAiAssistant = () => {
           @question-generated="onQuestionGenerated"
       />
 
+      <Message v-if="numberOfBlanks === 0 && isQuestionTypeFillInTheBlank" :closable="false">
+        Insert blanks in your question by using underscores (___) where answers should go.
+      </Message>
       <markdown-editor
           ref="markdownEditorRef"
           id="quizDescription"
@@ -539,17 +594,36 @@ const startAiAssistant = () => {
               class="text-secondary">Check one correct answer on the left:</span>
           <span
             v-if="isQuestionTypeMatching" class="text-secondary">Add pairs of terms and their matching values:</span>
+          <span v-if="isQuestionTypeFillInTheBlank" class="text-secondary">
+            <span v-if="numberOfBlanks === 0">
+              Add spaces to the question text to create answer options below.
+            </span>
+            <span v-else>Provide the correct answers for each blank.</span>
+             Use a <b>semicolon (;)</b> to separate multiple acceptable options:
+          </span>
         </div>
         <ConfigureAnswers
-            v-if="!isQuestionTypeMatching && props.questionDef.quizType"
+            v-if="!isQuestionTypeMatching && !isQuestionTypeFillInTheBlank && props.questionDef.quizType"
             ref="answersRef"
             v-model="props.questionDef.answers"
             :quiz-type="props.questionDef.quizType"
-            :question-type="questionType.selectedType.id "
+            :question-type="questionType.selectedType.id"
             :class="{ 'p-invalid': answersErrorMessage }"
             :aria-invalid="!!answersErrorMessage"
             aria-errormessage="answersError"
               aria-describedby="answersError" />
+
+        <ConfigureBlanks
+            v-if="isQuestionTypeFillInTheBlank && props.questionDef.quizType"
+            ref="answersRef"
+            v-model="props.questionDef.answers"
+            :quiz-type="props.questionDef.quizType"
+            :question-type="questionType.selectedType.id"
+            :number-of-blanks="numberOfBlanks"
+            :class="{ 'p-invalid': answersErrorMessage }"
+            :aria-invalid="!!answersErrorMessage"
+            aria-errormessage="answersError"
+            aria-describedby="answersError" />
 
         <matching-question ref="answersRef" v-model="props.questionDef.answers" v-if="isQuestionTypeMatching" />
 
