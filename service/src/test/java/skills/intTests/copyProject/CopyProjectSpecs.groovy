@@ -15,24 +15,20 @@
  */
 package skills.intTests.copyProject
 
-import org.springframework.beans.factory.annotation.Autowired
+
 import org.springframework.core.io.ClassPathResource
 import org.springframework.core.io.Resource
-import skills.intTests.utils.DefaultIntSpec
 import skills.intTests.utils.QuizDefFactory
 import skills.intTests.utils.SkillsFactory
 import skills.intTests.utils.SkillsService
 import skills.services.admin.skillReuse.SkillReuseIdUtil
 import skills.services.settings.Settings
 import skills.skillLoading.RankingLoader
-import skills.storage.model.LevelDef
 import skills.storage.model.Attachment
+import skills.storage.model.LevelDef
 import skills.storage.model.QuizDefParent
 import skills.storage.model.SkillDef
 import skills.storage.model.auth.RoleName
-import skills.storage.repos.LevelDefRepo
-
-import skills.storage.repos.AttachmentRepo
 import skills.utils.GroovyToJavaByteUtils
 
 import static skills.intTests.utils.SkillsFactory.*

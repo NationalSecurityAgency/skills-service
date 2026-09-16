@@ -763,6 +763,7 @@ describe('Quiz CRUD Tests', () => {
         cy.get('[data-cy="idInputValue"]').should('have.value', 'MyFirstQuiz')
 
         cy.get('.toastui-editor-mode-switch').contains('Markdown').click()
+        cy.get('.toastui-editor-md-tab-container .tab-item.active').contains('Write')
 
         cy.get('[data-cy="saveDialogBtn"]').should('be.enabled')
         cy.typeInMarkdownEditor('[data-cy="markdownEditorInput"]', attachmentMarkdown, true);
@@ -773,6 +774,7 @@ describe('Quiz CRUD Tests', () => {
         cy.get('[data-cy="editQuizButton_quiz1"]').click()
         cy.get('[data-cy="idInputValue"]').should('have.value', 'quiz1')
         cy.get('.toastui-editor-mode-switch').contains('Markdown').click()
+        cy.get('.toastui-editor-md-tab-container .tab-item.active').contains('Write')
         cy.typeInMarkdownEditor('[data-cy="markdownEditorInput"]', attachmentMarkdown, true);
         cy.wait(2000)
         cy.get('[data-cy="descriptionError"]').should('not.be.visible')

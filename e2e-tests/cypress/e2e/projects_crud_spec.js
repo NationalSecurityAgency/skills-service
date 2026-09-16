@@ -280,6 +280,7 @@ describe('Projects Admin Management Tests', () => {
         cy.get('[data-cy=projectName]').type('Proj1');
 
         cy.get('.toastui-editor-mode-switch').contains('Markdown').click()
+        cy.get('.toastui-editor-md-tab-container .tab-item.active').contains('Write')
 
         cy.get('[data-cy="saveDialogBtn"]').should('be.enabled')
         cy.typeInMarkdownEditor('[data-cy="markdownEditorInput"]', attachmentMarkdown, true);
@@ -291,6 +292,7 @@ describe('Projects Admin Management Tests', () => {
         cy.get('[data-cy="editProjBtn"]').click()
         cy.get('[data-cy="idInputValue"]').should('have.value', 'proj2')
         cy.get('.toastui-editor-mode-switch').contains('Markdown').click()
+        cy.get('.toastui-editor-md-tab-container .tab-item.active').contains('Write')
         cy.typeInMarkdownEditor('[data-cy="markdownEditorInput"]', attachmentMarkdown, true);
         cy.wait(2000)
         cy.get('[data-cy="descriptionError"]').should('not.be.visible')
