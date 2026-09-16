@@ -29,6 +29,7 @@ import skills.storage.model.Attachment
 import skills.storage.model.SkillDef
 import skills.storage.model.auth.RoleName
 import skills.storage.repos.AttachmentRepo
+import spock.lang.IgnoreRest
 
 import java.nio.file.Files
 

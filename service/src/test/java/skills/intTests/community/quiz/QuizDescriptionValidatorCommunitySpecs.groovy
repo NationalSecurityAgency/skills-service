@@ -124,16 +124,17 @@ class QuizDescriptionValidatorCommunitySpecs extends DefaultIntSpec {
         def communityValid = pristineDragonsUser.checkCustomDescriptionValidationWithQuizId(notValidDefault, q1.quizId, true)
         def communityInvalidValid = pristineDragonsUser.checkCustomDescriptionValidationWithQuizId(notValidProtectedCommunity, q1.quizId, true)
 
-        def communityValidP2 = pristineDragonsUser.checkCustomDescriptionValidationWithQuizId(notValidProtectedCommunity, q2.quizId, true)
-        def communityInvalidValidP2 = pristineDragonsUser.checkCustomDescriptionValidationWithQuizId(notValidDefault, q2.quizId,true)
+        // useProtectedCommunityValidator overrides the quiz's config - only for validation purposes
+        def communityInvalidValidP2 = pristineDragonsUser.checkCustomDescriptionValidationWithQuizId(notValidProtectedCommunity, q2.quizId, true)
+        def communityValidP2 = pristineDragonsUser.checkCustomDescriptionValidationWithQuizId(notValidDefault, q2.quizId,true)
         then:
         communityValid.body.valid
         !communityInvalidValid.body.valid
         communityInvalidValid.body.msg == notValidProtectedCommunityErrMsg
 
-        communityValidP2.body.valid
         !communityInvalidValidP2.body.valid
-        communityInvalidValidP2.body.msg == notValidDefaultErrMsg
+        communityInvalidValidP2.body.msg == notValidProtectedCommunityErrMsg
+        communityValidP2.body.valid
     }
 
     def "quiz paragraph custom validation on create - UC quiz fails"(){

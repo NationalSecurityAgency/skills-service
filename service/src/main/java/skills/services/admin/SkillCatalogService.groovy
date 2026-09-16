@@ -231,7 +231,7 @@ class SkillCatalogService {
         if (doesSkillNameAlreadyExistInCatalog(skillDef.name)) {
             throw new SkillException("Skill name [${skillDef.name}] already exists in the catalog. Duplicate skill names are not allowed", projectId, skillId, ErrorCode.SkillAlreadyInCatalog)
         }
-        CustomValidationResult validationResult = customValidator.validateDescription(skillDef.description, skillDef.projectId)
+        CustomValidationResult validationResult = customValidator.validateDescription(new CustomValidator.ValidateDescReq(description:skillDef.description, projectId: skillDef.projectId))
         if (!validationResult.isValid()) {
             throw new SkillException("Skill description is invalid", null, skillDef.projectId, skillDef.skillId, ErrorCode.ParagraphValidationFailed)
         }

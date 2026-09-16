@@ -433,4 +433,96 @@ describe('Community Global Badge Creation Tests', () => {
         cy.wait('@saveSkill')
     });
 
+    it('validate that copied Markdown with an attachment from UC project is not allowed in non-UC global badge', () => {
+        cy.createProject(1, {enableProtectedUserCommunity: true})
+        cy.createSubject(1, 1);
+
+        cy.createGlobalBadge(1, {enableProtectedUserCommunity: false})
+
+        cy.viewport(1200,1500)
+
+        cy.visit('/administrator/projects/proj1/subjects/subj1');
+        cy.get('[data-cy=newSkillButton]').click();
+        cy.get('[data-cy=skillName]').type('skill1');
+
+        cy.get(`button[aria-label="Attach files"]`).click({force: true})
+        cy.get('input[type=file]').selectFile('cypress/attachments/test-pdf.pdf', { force: true })
+
+        cy.get('.toastui-editor-mode-switch').contains('Markdown').click()
+        cy.get('.toastui-editor-md-tab-container .tab-item.active').contains('Write')
+        cy.get('.toastui-editor-md-container.toastui-editor-md-tab-style').invoke('text').as('markdownToPaste');
+
+        cy.get('@markdownToPaste').then((markdown) => {
+            cy.log(`Markdown to copy is: ${markdown}`);
+
+            cy.get('[data-cy="markdownEditorInput"]').type('hi\n')
+            cy.get('[data-cy="saveDialogBtn"]').should('be.enabled')
+            cy.get('[data-cy="saveDialogBtn"]').click()
+            cy.get('[data-cy="editSkillButton_skill1Skill"]')
+
+            cy.visit('/administrator/globalBadges')
+            cy.get('[data-cy="badgeCard-globalBadge1"] [data-cy="editBtn"]').click()
+            cy.get(`[data-pc-name="dialog"] [data-cy="markdownEditorInput"]`).should('be.visible')
+
+            cy.get('.toastui-editor-mode-switch').contains('Markdown').click()
+            cy.get('.toastui-editor-md-tab-container .tab-item.active').contains('Write')
+
+            cy.get('[data-cy="markdownEditorInput"]').type('hi\n')
+            cy.get('[data-cy="saveDialogBtn"]').should('be.enabled')
+            cy.get('[data-cy="markdownEditorInput"]').type(markdown)
+            cy.get('[data-cy="descriptionError"]').contains('Attachment [test-pdf.pdf] is not allowed to be copied')
+            cy.get('[data-cy="saveDialogBtn"]').should('be.disabled')
+        })
+    });
+
+    it('validate that copied Markdown with an attachment from UC quiz is not allowed in non-UC global badge', () => {
+        cy.createQuizDef(1, {enableProtectedUserCommunity: true})
+        cy.createTextInputQuestionDef(1, 1)
+
+        cy.createGlobalBadge(1, {enableProtectedUserCommunity: false})
+
+        cy.viewport(1200,1500)
+
+        cy.visit('/administrator/quizzes/quiz1')
+        cy.get('[data-cy="editQuestionButton_1"]')
+        cy.get('[data-cy="btn_Questions"]').click()
+
+        cy.get('[data-cy="answerTypeSelector"]').click()
+        cy.get('[data-cy="selectionItem_SingleChoice"]').click()
+        cy.get('[data-cy="answer-0"] [data-cy="answerText"]').type('1')
+        cy.get('[data-cy="answer-1"] [data-cy="answerText"]').type('4')
+        cy.get('[data-cy="answer-1"] [data-cy="selectCorrectAnswer"]').click()
+
+        cy.get(`button[aria-label="Attach files"]`).click({force: true})
+        cy.get('input[type=file]').selectFile('cypress/attachments/test-pdf.pdf', { force: true })
+
+        cy.get('.toastui-editor-mode-switch').contains('Markdown').click()
+        cy.get('.toastui-editor-md-tab-container .tab-item.active').contains('Write')
+        cy.get('.toastui-editor-md-container.toastui-editor-md-tab-style').invoke('text').as('markdownToPaste');
+
+        cy.get('@markdownToPaste').then((markdown) => {
+            cy.log(`Markdown to copy is: ${markdown}`);
+
+            cy.get('[data-cy="saveDialogBtn"]').should('be.enabled')
+            cy.get('[data-cy="saveDialogBtn"]').click()
+            cy.get('[data-cy="editQuestionButton_2"]')
+
+            cy.visit('/administrator/globalBadges/globalBadge1')
+            cy.get('[data-cy="subTitle"]').contains('ID: globalBadge1')
+            cy.get('[data-cy="btn_edit-badge"]').click()
+            cy.get(`[data-pc-name="dialog"] [data-cy="markdownEditorInput"]`).should('be.visible')
+
+            cy.get('.toastui-editor-mode-switch').contains('Markdown').click()
+            cy.get('.toastui-editor-md-tab-container .tab-item.active').contains('Write')
+
+            cy.get('[data-cy="markdownEditorInput"]').type('hi\n')
+            cy.get('[data-cy="saveDialogBtn"]').should('be.enabled')
+            cy.get('[data-cy="markdownEditorInput"]').type(markdown)
+            cy.get('[data-cy="descriptionError"]').contains('Attachment [test-pdf.pdf] is not allowed to be copied')
+            cy.get('[data-cy="saveDialogBtn"]').should('be.disabled')
+        })
+    });
+
 });
+
+

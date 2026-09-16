@@ -34,12 +34,13 @@ export const useDescriptionValidatorService = () => {
         return axios.post('/api/validation/description', body).then((result) => result.data);
     }
 
-    const validateDescriptionWithIdsProvided = (description, projectId = null, quizId = null, useProtectedCommunityValidator = null) => {
+    const validateDescriptionWithIdsProvided = (description, projectId = null, quizId = null, useProtectedCommunityValidator = null, globalBadgeId = null) => {
         const body = {
             value: description,
             projectId,
             useProtectedCommunityValidator,
             quizId,
+            globalBadgeId
         }
         return axios.post('/api/validation/description', body).then((result) => result.data);
     }

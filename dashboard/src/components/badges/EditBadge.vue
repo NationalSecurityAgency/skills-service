@@ -88,7 +88,15 @@ const checkDescription = useDebounceFn((value, testContext) => {
   if (!value || value.trim().length === 0 || !appConfig.paragraphValidationRegex) {
     return true
   }
-  return descriptionValidatorService.validateDescription(value, !props.global, props.global ? enableProtectedUserCommunity.value : null, false).then((result) => {
+  const validateGlobal = () => {
+    const globalBadgeId = props.isEdit ? props.badge.badgeId : null
+    return descriptionValidatorService.validateDescriptionWithIdsProvided(value, null, null, enableProtectedUserCommunity.value, globalBadgeId)
+  }
+  const validateProjBadge = () => {
+    return descriptionValidatorService.validateDescription(value, true, null, false)
+  }
+  const selectedValidateFunc =  props.global ? validateGlobal : validateProjBadge
+  return selectedValidateFunc().then((result) => {
     if (result.valid) {
       return true
     }

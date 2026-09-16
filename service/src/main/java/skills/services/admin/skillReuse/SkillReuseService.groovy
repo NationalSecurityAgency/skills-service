@@ -164,7 +164,7 @@ class SkillReuseService {
             SkillDefWithExtra skillToReuse = skillDefAccessor.getSkillDefWithExtra(projectId, skillId)
             validateSkillIsNotDisabled(skillToReuse)
 
-            CustomValidationResult customValidationResult = customValidator.validateDescription(skillToReuse.description, skillToReuse.projectId)
+            CustomValidationResult customValidationResult = customValidator.validateDescription(new CustomValidator.ValidateDescReq(description:skillToReuse.description, projectId: skillToReuse.projectId))
             if (!customValidationResult.valid) {
                 String msg = "Failed to reuse a skill due to the paragraph validation: msg=[${customValidationResult.msg}]"
                 throw new SkillException(msg, skillToReuse.projectId, skillToReuse.skillId, ErrorCode.ParagraphValidationFailed)
@@ -172,7 +172,7 @@ class SkillReuseService {
 
             SkillVideoAttrs videoAttrs = skillAttributeService.getVideoAttrs(skillToReuse.projectId, skillToReuse.skillId)
             if (StringUtils.isNotBlank(videoAttrs?.transcript)) {
-                customValidationResult = customValidator.validateDescription(videoAttrs.transcript, skillToReuse.projectId)
+                customValidationResult = customValidator.validateDescription(new CustomValidator.ValidateDescReq(description:videoAttrs.transcript, projectId: skillToReuse.projectId))
                 if (!customValidationResult.isValid()) {
                     String msg = "Video transcript validation failed: msg=[${customValidationResult.msg}]"
                     throw new SkillException(msg, skillToReuse.projectId, skillToReuse.skillId, ErrorCode.ParagraphValidationFailed)

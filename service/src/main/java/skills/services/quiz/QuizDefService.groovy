@@ -252,17 +252,21 @@ class QuizDefService {
     QuizDefWithDescAndAttrs copyQuizDef(String originalQuizId, String newQuizId, QuizDefRequest quizDefRequest, String userId) {
         QuizDefWithDescAndAttrs quizDefWithDescription = retrieveAndValidateQuizDefWithAttrs(originalQuizId, newQuizId, quizDefRequest)
 
-        String description = attachmentService.copyAttachmentsForIncomingDescription(quizDefRequest.description, null, null, null)
-        Map slidesAttachmentRes = handleSlideAttachment(quizDefWithDescription)
+        Map slidesAttachmentRes = handleSlideAttachment(quizDefWithDescription, newQuizId)
 
         quizDefWithDescription = new QuizDefWithDescAndAttrs(quizId: newQuizId, name: quizDefRequest.name,
-                description: description, type: QuizDefParent.QuizType.valueOf(quizDefRequest.type), attributes: slidesAttachmentRes.quizAttributesAsStr)
+                description: quizDefRequest.description, type: QuizDefParent.QuizType.valueOf(quizDefRequest.type), attributes: slidesAttachmentRes.quizAttributesAsStr)
         log.debug("Created quiz [{}]", quizDefWithDescription)
 
         DataIntegrityExceptionHandlers.dataIntegrityViolationExceptionHandler.handle(null, null, quizDefWithDescription.quizId) {
             quizDefWithDescription = quizDefWithDescAndAttrsRepo.save(quizDefWithDescription)
         }
-        attachmentService.updateAttachmentsAttrsBasedOnUuidsInMarkdown(quizDefWithDescription.description, null, quizDefWithDescription.quizId, null)
+        AttachmentService.CopyAttachmentReq copyAttachmentReq = new AttachmentService.CopyAttachmentReq(markdown: quizDefRequest.description, quizId: quizDefWithDescription.quizId)
+        AttachmentService.CopyAttachmentRes copyRes = attachmentService.updateAttachmentsAttrsBasedOnUuidsInMarkdown(copyAttachmentReq)
+        if (copyRes.updated) {
+            quizDefWithDescRepo.updateDescription(quizDefWithDescription.quizId, copyRes.markdown)
+            log.debug("Updated description to [{}]", copyRes.markdown)
+        }
         if (slidesAttachmentRes.attachment) {
             Attachment slidesAttachment = slidesAttachmentRes.attachment
             slidesAttachment.quizId = quizDefWithDescription.quizId
@@ -272,7 +276,7 @@ class QuizDefService {
         return quizDefWithDescription
     }
 
-    Map handleSlideAttachment(QuizDefWithDescAndAttrs quizDefWithDescription) {
+    Map handleSlideAttachment(QuizDefWithDescAndAttrs quizDefWithDescription, String newQuizId) {
         String quizAttributesAsStr = quizDefWithDescription.attributes
         Attachment slidesAttachment = null
         if (quizAttributesAsStr) {
@@ -280,7 +284,7 @@ class QuizDefService {
             SlidesAttrs slidesAttrs = quizAttrs.slidesAttrs
             if (slidesAttrs && slidesAttrs.internallyHostedAttachmentUuid) {
                 Attachment attachment = attachmentService.getAttachment(slidesAttrs.internallyHostedAttachmentUuid)
-                Attachment newAttachment = attachmentService.constructNewAttachmentWithNewUuid(attachment)
+                Attachment newAttachment = attachmentService.constructNewAttachmentWithNewUuid(attachment, null, newQuizId)
                 slidesAttrs.url = slidesAttrs.url.replaceAll(attachment.uuid, newAttachment.uuid)
                 slidesAttrs.internallyHostedAttachmentUuid = newAttachment.uuid
 
@@ -341,8 +345,7 @@ class QuizDefService {
             SkillVideoAttrs videoAttrs = questionAttrs?.videoConf
             String transcript = videoAttrs?.transcript
             if (StringUtils.isNotBlank(transcript)) {
-                CustomValidationResult validationResult = customValidator.validateDescription(transcript,
-                        null, false, fromQuestionDef.quizId)
+                CustomValidationResult validationResult = customValidator.validateDescription(new CustomValidator.ValidateDescReq(description:transcript, quizId: fromQuestionDef.quizId))
                 if (!validationResult.valid) {
                     String msg = "Video transcript validation failed for questionId=[${fromQuestionDef.id}], fullMessage=[${validationResult.msg}]"
                     throw new SkillQuizException(msg, null, fromQuestionDef.quizId, fromQuestionDef.id, ErrorCode.ParagraphValidationFailed)
@@ -365,11 +368,9 @@ class QuizDefService {
 
     private validateQuestions(List<QuizQuestionDef> questionDefList, String originalQuizId) {
         questionDefList.forEach { QuizQuestionDef question ->
-            CustomValidationResult validationResult = customValidator.validateDescription(question.question,
-                    null, false, originalQuizId)
+            CustomValidationResult validationResult = customValidator.validateDescription(new CustomValidator.ValidateDescReq(description:question.question, quizId: originalQuizId))
             if (validationResult.valid && StringUtils.isNotBlank(question.answerHint)) {
-                validationResult = customValidator.validateDescription(question.answerHint,
-                        null, false, originalQuizId)
+                validationResult = customValidator.validateDescription(new CustomValidator.ValidateDescReq(description:question.answerHint, quizId: originalQuizId))
             }
             if (!validationResult.valid) {
                 String msg = "Validation failed for questionId=[${question.id}], fullMessage=[${validationResult.msg}]"
@@ -1288,11 +1289,11 @@ class QuizDefService {
         propsBasedValidator.quizValidationMaxStrLength(PublicProps.UiProp.maxQuizAnswerHintLength, "Answer Hint", questionDefRequest.answerHint, quizDef.quizId)
         int numQuestions = quizQuestionRepo.countByQuizId(quizDef.quizId)
         propsBasedValidator.quizValidationMaxIntValue(PublicProps.UiProp.maxQuestionsPerQuiz, "Number of Questions", numQuestions + 1, quizDef.quizId)
-        CustomValidationResult customValidationResult = customValidator.validateDescription(questionDefRequest.question, null, null, quizDef.quizId)
+        CustomValidationResult customValidationResult = customValidator.validateDescription(new CustomValidator.ValidateDescReq(description:questionDefRequest.question, quizId: quizDef.quizId))
         if (!customValidationResult.valid) {
             throw new SkillQuizException("Question: ${customValidationResult.msg}", quizId, ErrorCode.BadParam)
         }
-        customValidationResult = customValidator.validateDescription(questionDefRequest.answerHint, null, null, quizDef.quizId)
+        customValidationResult = customValidator.validateDescription(new CustomValidator.ValidateDescReq(description:questionDefRequest.answerHint, quizId: quizDef.quizId))
         if (!customValidationResult.valid) {
             throw new SkillQuizException("Answer Hint: ${customValidationResult.msg}", quizId, ErrorCode.BadParam)
         }
