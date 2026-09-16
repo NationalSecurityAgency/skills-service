@@ -1059,6 +1059,27 @@ routes.push({
 const isSkillsClient = SkillsClientPath.isSkillsClientIframePath()
 const history = isSkillsClient ? createMemoryHistory(import.meta.env.BASE_URL) : createWebHistory(import.meta.env.BASE_URL)
 const actualRoutes = isSkillsClient ? [createSkillsClientRoutes(createSkillsDisplayChildRoutes(PathAppendValues.SkillsClient, true))] : routes
+const normalizeParentPath = (value) => {
+  if (!value) {
+    return '/'
+  }
+
+  let path = value.trim()
+  try {
+    if (/^[a-zA-Z][a-zA-Z\d+\-.]*:/.test(path)) {
+      path = new URL(path).pathname
+    }
+  } catch {
+    return '/'
+  }
+
+  if (!path.startsWith('/')) {
+    path = `/${path}`
+  }
+  path = path.split('?')[0].split('#')[0]
+  return path || '/'
+}
+
 const constructRouter = () => {
   const router =  createRouter({
     history,
@@ -1078,7 +1099,9 @@ const constructRouter = () => {
 
       // Return a modified object where the native browser 'href' property is overwritten
       const parentState = useSkillsDisplayParentFrameState()
-      const deepLink = `${parentState.parentOrigin}${parentState.parentPath}?skillsClientDisplayPath=${encodeURIComponent(resolved.href)}`
+      const deepLinkUrl = new URL(normalizeParentPath(parentState.parentPath), parentState.parentOrigin)
+      deepLinkUrl.searchParams.set('skillsClientDisplayPath', resolved.href)
+      const deepLink = deepLinkUrl.toString()
       return new Proxy(resolved, {
         get(target, prop) {
           if (prop === 'href') {
