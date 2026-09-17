@@ -35,12 +35,15 @@ import skills.storage.accessors.SkillDefAccessor
 import skills.storage.model.SkillDef
 import skills.storage.model.SkillRelDef
 import skills.storage.repos.SkillDefRepo
+import skills.storage.repos.SkillEventsSupportRepo
 import skills.storage.repos.SkillRelDefRepo
 import skills.storage.repos.SkillShareDefRepo
 import skills.utils.InputSanitizer
 import skills.utils.Props
 
 import java.util.concurrent.atomic.AtomicInteger
+
+import static skills.storage.repos.SkillEventsSupportRepo.*
 
 @Service
 @Slf4j
@@ -81,6 +84,9 @@ class SkillsDepsService {
 
     @Autowired
     SkillsAdminService skillsAdminService
+
+    @Autowired
+    SkillEventsSupportRepo skillEventsSupportRepo
 
 
     @Transactional(readOnly = true)
@@ -173,8 +179,8 @@ class SkillsDepsService {
 
     @Profile
     @Transactional(readOnly = true)
-    SkillsGraphRes getDependentSkillsGraph(String projectId) {
-        List<GraphSkillDefEdge> edges = loadGraphEdges(projectId, SkillRelDef.RelationshipType.Dependence)
+    SkillsGraphRes getDependentSkillsGraph(String projectId, String userId=null) {
+        List<GraphSkillDefEdge> edges = loadGraphEdges(projectId, SkillRelDef.RelationshipType.Dependence, userId)
         return convertToSkillsGraphRes(edges)
     }
 
@@ -203,6 +209,7 @@ class SkillsDepsService {
             graphRes.id = it.value
             graphRes.projectName = it.key.projectName
             graphRes.containedSkills = it.key.containedSkills
+            graphRes.achieved = it.key.achieved
             return graphRes
         }
         SkillsGraphRes res = new SkillsGraphRes(nodes: nodes, edges: edgesRes)
@@ -250,7 +257,12 @@ class SkillsDepsService {
     }
 
     @Profile
-    List<GraphSkillDefEdge> loadGraphEdges(String projectId, SkillRelDef.RelationshipType type) {
+    List<GraphSkillDefEdge> loadGraphEdges(String projectId, SkillRelDef.RelationshipType type, String userId=null) {
+
+        List<TinyUserAchievement> achievedSkillsAndBadges = []
+        if (userId) {
+            achievedSkillsAndBadges = skillEventsSupportRepo.findTinyUserAchievementsForSkillsAndBadgesByUserIdAndProjectId(userId, projectId)
+        }
         List<Object[]> edges = skillRelDefRepo.getGraph(projectId, type)
 
         return edges.collect({
@@ -268,10 +280,11 @@ class SkillsDepsService {
                     totalPoints: it[8],
                     type: it[9],
                     containedSkills: null,
+                    achieved: achievedSkillsAndBadges.find({ua -> ua.skillRefId == it[0] }) != null
             )
 
             if(it[9] == SkillDef.ContainerType.Badge) {
-                from.containedSkills = getSkillsForLearningPathItem(projectId, it[6], it[2])
+                from.containedSkills = getSkillsForLearningPathItem(projectId, it[6], it[2], achievedSkillsAndBadges)
             }
 
             SkillDefGraphRes to = new SkillDefGraphRes(
@@ -286,10 +299,11 @@ class SkillsDepsService {
                     totalPoints: it[18],
                     type: it[19],
                     containedSkills: null,
+                    achieved: achievedSkillsAndBadges.find({ ua -> ua.skillRefId == it[10] }) != null
             )
 
             if(it[18] == SkillDef.ContainerType.Badge) {
-                to.containedSkills = getSkillsForLearningPathItem(projectId, it[16], it[12])
+                to.containedSkills = getSkillsForLearningPathItem(projectId, it[16], it[12], achievedSkillsAndBadges)
             }
 
             new GraphSkillDefEdge(from: from, to: to)
@@ -297,7 +311,7 @@ class SkillsDepsService {
         })
     }
 
-    private List<SkillDefGraphRes> getSkillsForLearningPathItem(String projectId, String projectName, String skillId) {
+    private List<SkillDefGraphRes> getSkillsForLearningPathItem(String projectId, String projectName, String skillId, List<TinyUserAchievement> achievedSkillsAndBadges) {
         List<SkillDefPartialRes> badgeSkills = skillsAdminService.getSkillsByProjectSkillAndType(projectId, skillId, SkillDef.ContainerType.Badge, SkillRelDef.RelationshipType.BadgeRequirement)
         List<SkillDefGraphRes> skills = badgeSkills.collect{res -> new SkillDefGraphRes(
                 id: null,
@@ -310,6 +324,7 @@ class SkillsDepsService {
                 pointIncrement: res.pointIncrement,
                 totalPoints: res.totalPoints,
                 type: res.type,
+                achieved: achievedSkillsAndBadges.find({ it.skillId == res.skillId }) != null
         ) }
         return skills
     }

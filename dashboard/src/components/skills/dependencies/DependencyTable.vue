@@ -24,6 +24,7 @@ import { useResponsiveBreakpoints } from '@/components/utils/misc/UseResponsiveB
 import {useDialogMessages} from "@/components/utils/modal/UseDialogMessages.js";
 import { useSkillOverviewRouteUtil } from '@/components/skills/UseSkillOverviewRouteUtil.js'
 import SkillType from "@/common-components/utilities/SkillType.js";
+import { useRoute } from 'vue-router'
 
 const dialogMessages = useDialogMessages()
 const projConfig = useProjConfig();
@@ -31,8 +32,10 @@ const props = defineProps(['isLoading', 'data'])
 const emit = defineEmits(['update', 'panToNode'])
 const announcer = useSkillsAnnouncer()
 const skillRouteUtil = useSkillOverviewRouteUtil()
+const route = useRoute();
 
-const isReadOnlyProj = computed(() => projConfig.isReadOnlyProj);
+const isAdminPage = computed(() => route.path.includes('/administrator/'));
+const isReadOnlyProj = computed(() => projConfig.isReadOnlyProj || !isAdminPage.value);
 
 const learningPaths = ref([])
 const isProcessing = ref(true)
@@ -105,6 +108,14 @@ const removeLearningPath = (data) => {
 }
 
 const getUrl = (item) => {
+  if (isAdminPage.value) {
+    return getAdminUrl(item)
+  } else {
+    return skillRouteUtil.toRouteProps(item.projectId, item.subjectId, item.skillId, item.type, item.groupId).path
+  }
+}
+
+const getAdminUrl = (item) => {
   let url = `/administrator/projects/${encodeURIComponent(item.projectId)}`
   if (SkillType.isSkill(item.type)) {
     const routeProps = skillRouteUtil.toRouteProps(item.projectId, item.subjectId, item.skillId, item.type, item.groupId)

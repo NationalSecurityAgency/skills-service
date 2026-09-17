@@ -24,6 +24,7 @@ import QuizPage from '@/skills-display/components/quiz/QuizPage.vue'
 import SkillsGroupPage from "@/skills-display/components/skill/SkillsGroupPage.vue";
 import SkillTagPage from '@/skills-display/components/skill/tags/SkillTagPage.vue'
 import SkillTagsPage from '@/skills-display/components/skill/tags/SkillTagsPage.vue'
+import FullDependencyGraph from "@/common-components/dependency/FullDependencyGraph.vue"
 
 const createSkillsDisplayChildRoutes = (appendToName, startWithSlash = false) => {
 
@@ -153,6 +154,17 @@ const createSkillsDisplayChildRoutes = (appendToName, startWithSlash = false) =>
     name: `skillsGroupDetails${appendToName}`,
     meta: {
       title: `${groupPlaceholder} Details`
+    }
+  }, {
+    name: `projectLearningPathPage${appendToName}`,
+    path: `${prependToPath}learning-path`,
+    component: FullDependencyGraph,
+    meta: {
+      requiresAuth: true,
+      nonAdmin: true,
+      announcer: {
+        message: 'Learning Path'
+      }
     }
   }, {
     name: `skillTagsPage${appendToName}`,

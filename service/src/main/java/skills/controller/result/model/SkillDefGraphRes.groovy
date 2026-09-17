@@ -30,5 +30,6 @@ class SkillDefGraphRes {
     Integer pointIncrement
     Integer totalPoints
     SkillDef.ContainerType type
+    Boolean achieved
     List<SkillDefGraphRes> containedSkills
 }

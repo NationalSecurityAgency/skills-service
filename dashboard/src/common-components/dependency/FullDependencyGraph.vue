@@ -21,8 +21,8 @@ import { Network } from 'vis-network';
 import { DataSet } from 'vis-data';
 import SubPageHeader from "@/components/utils/pages/SubPageHeader.vue";
 import PrerequisiteSelector from '@/components/skills/dependencies/PrerequisiteSelector.vue';
-import SkillsService from '@/components/skills/SkillsService';
-import GraphUtils from '@/components/skills/dependencies/GraphUtils';
+import SkillsService from '@/components/skills/SkillsService.js';
+import GraphUtils from '@/components/skills/dependencies/GraphUtils.js';
 import GraphLegend from '@/components/skills/dependencies/GraphLegend.vue';
 import NoContent2 from "@/components/utils/NoContent2.vue";
 import DependencyTable from "@/components/skills/dependencies/DependencyTable.vue";
@@ -38,12 +38,17 @@ import AccordionContent from 'primevue/accordioncontent';
 import dagre from "@dagrejs/dagre"
 import GraphControls from "@/components/skills/dependencies/GraphControls.vue";
 import SkillsOverlay from "@/components/utils/SkillsOverlay.vue";
+import { useSkillsDisplayService } from '@/skills-display/services/UseSkillsDisplayService.js';
+import { useSkillsDisplayThemeState } from '@/skills-display/stores/UseSkillsDisplayThemeState.js'
 
 const dialogMessages = useDialogMessages()
 const projConfig = useProjConfig();
 const route = useRoute();
 const themeHelper = useThemesHelper()
-const isReadOnlyProj = computed(() => projConfig.isReadOnlyProj);
+const themeState = useSkillsDisplayThemeState()
+const isAdminPage = computed(() => route.path.includes('/administrator/'));
+const isReadOnlyProj = computed(() => projConfig.isReadOnlyProj || !isAdminPage.value);
+const skillsDisplayService = useSkillsDisplayService();
 const graphTemplate = useTemplateRef('fullDepsSkillsGraphContainer')
 const { isFullscreen, enter, exit, toggle } = useFullscreen(graphTemplate)
 
@@ -202,7 +207,11 @@ const loadGraphDataAndUpdateGraph = (addedNode = null) => {
 }
 
 const loadGraphDataAndCreateGraph = (addedNode = null) => {
-  SkillsService.getDependentSkillsGraphForProject(route.params.projectId).then((response) => {
+  const graphLoadRequest = isAdminPage.value
+    ? SkillsService.getDependentSkillsGraphForProject(route.params.projectId)
+    : skillsDisplayService.getSkillDependenciesGraphForProject();
+
+  graphLoadRequest.then((response) => {
     graph.value = response;
     data.value = [];
     createGraph(addedNode);
@@ -321,6 +330,11 @@ const buildNode = (node) => {
   };
   if(themeHelper.isDarkTheme) {
     newNode.font.color = '#f5f9ff'
+  }
+  const isAchieved = !!node.achieved;
+  if (isAchieved) {
+    newNode.font.color = themeState.graphAchievedColor
+    newNode.label = `${newNode.label} <b>✓</b>`
   }
 
   if (isCrossProject) {
@@ -455,7 +469,7 @@ const computedHeight = computed(() => {
 
 <template>
   <div id="full-dependent-skills-graph" ref="fullDepsSkillsGraph">
-    <sub-page-header title="Learning Path"/>
+    <sub-page-header title="Learning Path" class="m-5"/>
 
     <prerequisite-selector v-if="!isReadOnlyProj && !isFullscreen" :project-id="route.params.projectId" :disabled="isLoading"
                            @beforeUpdate="beforeUpdate" @update="handleUpdate" :selected-from-skills="selectedFromSkills"

@@ -54,6 +54,8 @@ interface SkillEventsSupportRepo extends CrudRepository<SkillDef, Long> {
     static interface TinyUserAchievement {
         @Nullable
         Integer getSkillRefId()
+        @Nullable
+        String getSkillId()
         Integer getLevel()
     }
 
@@ -244,6 +246,20 @@ interface SkillEventsSupportRepo extends CrudRepository<SkillDef, Long> {
             ua.skillRefId is null and
             ua.projectId = ?2 ''')
     List<TinyUserAchievement> findTinyUserAchievementsByUserIdAndProjectId(String userId, String projectId)
+
+    @Query('''SELECT 
+        ua.skillRefId as skillRefId,
+        ua.skillId as skillId,
+        ua.level as level
+        from UserAchievement ua 
+        JOIN SkillDef sd ON
+            ua.projectId = sd.projectId
+            AND ua.skillRefId = sd.id
+        where 
+            ua.userId = ?1
+            AND ua.projectId = ?2
+            AND sd.type IN ('Skill', 'Badge')''')
+    List<TinyUserAchievement> findTinyUserAchievementsForSkillsAndBadgesByUserIdAndProjectId(String userId, String projectId)
 
     @Query('''SELECT l from LevelDef l, ProjDef p 
         where
