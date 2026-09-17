@@ -31,6 +31,7 @@ import skills.controller.exceptions.ErrorCode
 import skills.controller.exceptions.SkillException
 import skills.controller.exceptions.SkillsValidator
 import skills.controller.result.model.UploadAttachmentResult
+import skills.services.admin.InviteOnlyProjectService
 import skills.services.admin.UserCommunityService
 import skills.storage.model.Attachment
 import skills.storage.repos.AttachmentRepo
@@ -55,6 +56,9 @@ class AttachmentService {
 
     @Autowired
     UserCommunityService userCommunityService
+
+    @Autowired
+    InviteOnlyProjectService inviteOnlyProjectService
 
     @Value('${skills.config.allowedAttachmentMimeTypes}')
     List<MediaType> allowedAttachmentMimeTypes;
@@ -144,8 +148,27 @@ class AttachmentService {
         }
     }
 
+    private void validateCurrentUserCanReadSourceAttachment(Attachment attachment) {
+        if (attachment.projectId &&
+                inviteOnlyProjectService.isInviteOnlyProject(attachment.projectId)) {
+            String userId = userInfoService.getCurrentUserId()
+
+            boolean canAccess = inviteOnlyProjectService.isPrivateProjRoleOrAdminRole(attachment.projectId, userId)
+                    || userInfoService.isCurrentUserASuperDuperUser()
+
+            if (!canAccess) {
+                log.warn("User [{}] attempted to copy an attachment uuid=[{}] from inaccessible project [{}]",
+                        userId, attachment.uuid, attachment.projectId
+                )
+                throw new SkillException("Not authorized to copy the attachment", ErrorCode.AccessDenied)
+            }
+        }
+    }
+
+
     @Transactional
     Attachment copyAttachmentWithNewUuid(Attachment attachment, String newProjectId = null, String newQuizId = null, String skillId = null) {
+        validateCurrentUserCanReadSourceAttachment(attachment)
         validateUCRules(attachment, newProjectId, newQuizId, skillId)
         Attachment res = constructNewAttachmentWithNewUuid(attachment, newProjectId, newQuizId, skillId)
         persistAttachment(res)

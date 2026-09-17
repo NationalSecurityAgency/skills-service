@@ -23,6 +23,7 @@ import skills.intTests.utils.EmailUtils
 import skills.intTests.utils.SkillsClientException
 import skills.intTests.utils.SkillsFactory
 import skills.intTests.utils.SkillsService
+import skills.intTests.utils.QuizDefFactory
 import skills.services.admin.InviteOnlyProjectService
 import skills.storage.model.Attachment
 import skills.storage.model.auth.RoleName
@@ -642,6 +643,99 @@ class InviteOnlyAccessSpec extends InviteOnlyBaseSpec {
         then:
         def err = thrown(SkillsClientException)
         err.httpStatus == HttpStatus.FORBIDDEN
+    }
+
+    def "cannot copy attachment from inaccessible invite-only project to another project"() {
+        def sourceProj = SkillsFactory.createProject(91)
+        skillsService.createProject(sourceProj)
+        def attachment = skillsService.uploadAttachment('test-pdf.pdf', 'Test is a test', sourceProj.projectId)
+        skillsService.changeSetting(sourceProj.projectId, "invite_only", [projectId: sourceProj.projectId, setting: "invite_only", value: "true"])
+
+        def user = getRandomUsers(1, true)[0]
+        SkillsService otherUser = createService(user)
+        def destProj = SkillsFactory.createProject(92)
+        otherUser.createProject(destProj)
+
+        when:
+        destProj.description = "Here is a [Link](${attachment.href})".toString()
+        otherUser.updateProject(destProj, destProj.projectId)
+
+        then:
+        SkillsClientException err = thrown(SkillsClientException)
+        err.message.contains("errorCode:AccessDenied")
+        err.message.contains("explanation:Not authorized to copy the attachment")
+        attachmentRepo.findAll().toList()*.uuid == [attachment.uuid]
+    }
+
+    def "cannot copy attachment from inaccessible invite-only project to quiz"() {
+        def sourceProj = SkillsFactory.createProject(91)
+        skillsService.createProject(sourceProj)
+        def attachment = skillsService.uploadAttachment('test-pdf.pdf', 'Test is a test', sourceProj.projectId)
+        skillsService.changeSetting(sourceProj.projectId, "invite_only", [projectId: sourceProj.projectId, setting: "invite_only", value: "true"])
+
+        def user = getRandomUsers(1, true)[0]
+        SkillsService otherUser = createService(user)
+        def quiz = QuizDefFactory.createQuiz(92)
+        otherUser.createQuizDef(quiz)
+
+        when:
+        quiz.description = "Here is a [Link](${attachment.href})".toString()
+        otherUser.createQuizDef(quiz, quiz.quizId)
+
+        then:
+        SkillsClientException err = thrown(SkillsClientException)
+        err.message.contains("errorCode:AccessDenied")
+        err.message.contains("explanation:Not authorized to copy the attachment")
+        attachmentRepo.findAll().toList()*.uuid == [attachment.uuid]
+    }
+
+    def "cannot copy attachment from inaccessible invite-only project to global badge"() {
+        def sourceProj = SkillsFactory.createProject(91)
+        skillsService.createProject(sourceProj)
+        def attachment = skillsService.uploadAttachment('test-pdf.pdf', 'Test is a test', sourceProj.projectId)
+        skillsService.changeSetting(sourceProj.projectId, "invite_only", [projectId: sourceProj.projectId, setting: "invite_only", value: "true"])
+
+        def user = getRandomUsers(1, true)[0]
+        SkillsService otherUser = createService(user)
+        def badge = SkillsFactory.createBadge(92, 1)
+        otherUser.createGlobalBadge(badge)
+
+        when:
+        badge.description = "Here is a [Link](${attachment.href})".toString()
+        otherUser.updateGlobalBadge(badge)
+
+        then:
+        SkillsClientException err = thrown(SkillsClientException)
+        err.message.contains("errorCode:AccessDenied")
+        err.message.contains("explanation:Not authorized to copy the attachment")
+        attachmentRepo.findAll().toList()*.uuid == [attachment.uuid]
+    }
+
+    def "can copy attachment from invite-only project after accepting invite"() {
+        def sourceProj = SkillsFactory.createProject(91)
+        skillsService.createProject(sourceProj)
+        def attachment = skillsService.uploadAttachment('test-pdf.pdf', 'Test is a test', sourceProj.projectId)
+        skillsService.changeSetting(sourceProj.projectId, "invite_only", [projectId: sourceProj.projectId, setting: "invite_only", value: "true"])
+
+        def user = getRandomUsers(1, true)[0]
+        SkillsService otherUser = createService(user)
+        skillsService.inviteUsersToProject(sourceProj.projectId, [validityDuration: "PT5M", recipients: [EmailUtils.generateEmaillAddressFor(user)]])
+        WaitFor.wait { greenMail.getReceivedMessages().length > 0 }
+        otherUser.joinProject(sourceProj.projectId, extractInviteFromEmail(EmailUtils.getEmail(greenMail, 0).html))
+
+        def destProj = SkillsFactory.createProject(92)
+        otherUser.createProject(destProj)
+
+        when:
+        destProj.description = "Here is a [Link](${attachment.href})".toString()
+        otherUser.updateProject(destProj, destProj.projectId)
+
+        then:
+        List<Attachment> attachments = attachmentRepo.findAll().toList()
+        attachments.size() == 2
+        attachments.find { it.uuid == attachment.uuid }.projectId == sourceProj.projectId
+        Attachment copiedAttachment = attachments.find { it.uuid != attachment.uuid }
+        copiedAttachment.projectId == destProj.projectId
     }
 
     def "able to download attachment after invite was accepted"() {
