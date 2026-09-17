@@ -594,6 +594,25 @@ describe('Quiz CRUD Tests', () => {
         ], 5);
     });
 
+    it('copies a quiz with an attachment in its description', function () {
+        const attachmentMarkdown = '[test-pdf.pdf](/api/download/8ab81f77-3484-4f5a-ae58-ae4e7143b449)'
+        cy.createQuizDef(1, { name: 'Quiz 1' });
+        cy.updatedQuizDef(1, { name: 'Quiz 1', description: attachmentMarkdown });
+
+        cy.visit('/administrator/quizzes/')
+        cy.get('[data-cy="copyQuizButton_quizId1"]').click()
+
+        cy.get('[data-cy="quizName"]').should('have.value', 'Copy of Quiz 1')
+        cy.get('[data-cy="descriptionError"]').should('not.be.visible')
+        cy.get('[data-cy="saveDialogBtn"]').should('be.enabled')
+        cy.clickSaveDialogBtn()
+
+        cy.validateTable(quizTableSelector, [
+            [{ colIndex: 0, value: 'Quiz 1' }, { colIndex: 1, value: 'Quiz' }],
+            [{ colIndex: 0, value: 'Copy of Quiz 1' }, { colIndex: 1, value: 'Quiz' }],
+        ], 5);
+    });
+
     it('copy a quiz and a survey with questions', function () {
         cy.createQuizDef(1, { name: 'Quiz 1' });
         cy.createSurveyDef(2, { name: 'Survey 1' });
@@ -781,4 +800,3 @@ describe('Quiz CRUD Tests', () => {
         cy.get('[data-cy="saveDialogBtn"]').should('be.enabled')
     });
 });
-

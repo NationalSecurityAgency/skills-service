@@ -156,7 +156,7 @@ const schema = object({
   'description': string()
       .max(appConfig.descriptionMaxLength)
       .test('descriptionValidation', 'Description is invalid', (value, testContext) => checkDescription(value, testContext))
-      .test('noAttachmetsForNewQuiz', 'Attachments can only be added when editing an existing quiz', (value, testContext) => props.isEdit || descriptionValidatorService.attachmentsNotAllowed(value, testContext))
+      .test('noAttachmetsForNewQuiz', 'Attachments can only be added when editing an existing quiz', (value, testContext) => props.isEdit || props.isCopy || descriptionValidatorService.attachmentsNotAllowed(value, testContext))
       .label('Description')
 })
 

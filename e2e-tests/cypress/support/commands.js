@@ -412,6 +412,15 @@ Cypress.Commands.add("createQuizDef", (quizNum = 1, overrideProps = {}) => {
     }, overrideProps));
 });
 
+Cypress.Commands.add("updatedQuizDef", (quizNum = 1, overrideProps = {}) => {
+    cy.request('POST', `/admin/quiz-definitions/quiz${quizNum}`, Object.assign({
+        quizId: `quizId${quizNum}`,
+        name: `This is quiz ${quizNum}`,
+        type: 'Quiz',
+        description: `What a cool quiz #${quizNum}! Thank you for taking it!`
+    }, overrideProps));
+});
+
 Cypress.Commands.add("createSurveyDef", (surveyNum = 1, overrideProps = {}) => {
     cy.request('POST', `/app/quiz-definitions/quiz${surveyNum}`, Object.assign({
         quizId: `quiz${surveyNum}`,
