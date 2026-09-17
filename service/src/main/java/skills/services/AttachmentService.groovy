@@ -15,6 +15,7 @@
  */
 package skills.services
 
+import groovy.transform.ToString
 import groovy.util.logging.Slf4j
 import org.apache.commons.lang3.StringUtils
 import org.hibernate.engine.jdbc.proxy.BlobProxy
@@ -211,9 +212,13 @@ class AttachmentService {
     String copyAttachmentsForIncomingDescription(String description, String projectId, String skillId, String quizId, boolean doNotSaveSkillId = false) {
         String res = description
         if (description) {
-            List<String> uuidsToHandle = findAttachmentUuids(description)
-            uuidsToHandle?.each { String uuid ->
-                Attachment attachment = attachmentRepo.findByUuid(uuid)
+            List<String> attachmentUuids = findAttachmentUuids(description)
+            Map<String, Attachment> attachmentsByUuid =
+                    attachmentRepo.findByUuidIn(attachmentUuids).collectEntries {
+                        [(it.uuid): it]
+                    }
+            attachmentUuids?.each { String uuid ->
+                Attachment attachment = attachmentsByUuid[uuid]
                 if (attachment) {
                     boolean isProjDifferent = projectId && attachment.projectId && projectId != attachment.projectId
                     boolean isQuizDifferent = quizId && attachment.quizId && quizId != attachment.quizId
@@ -225,10 +230,10 @@ class AttachmentService {
                         // skill id will be updated later in the stack
                         // cannot set it here as skill was not saved yet
                         Attachment newAttachment = copyAttachmentWithNewUuid(attachment, projectId, quizId, doNotSaveSkillId ? null : skillId)
-                        res = res.replace("(/api/download/${uuid})", "(/api/download/${newAttachment.uuid})")
+                        res = res.replace("(/api/download/${attachment.uuid})", "(/api/download/${newAttachment.uuid})")
                     }
                 } else {
-                    log.warn("updateAttachmentsInIncomingDescription: failed to find attachment with uuid: [${uuid}]. method params are projectId: [${projectId}], skillId: [${skillId}]")
+                    log.warn("updateAttachmentsInIncomingDescription: failed to find attachment with uuid: [${uuid}]. method params are projectId=[${projectId}], skillId=[${skillId}], quizId=[${quizId}]")
                 }
             }
         }
@@ -240,6 +245,7 @@ class AttachmentService {
         boolean updated = false
         String markdown = ""
     }
+    @ToString(includeNames = true)
     static class CopyAttachmentReq {
         String markdown
 
@@ -270,10 +276,13 @@ class AttachmentService {
         String newSkillId = attachmentReq.newSkillId ?: attachmentReq.originalSkillId
         CopyAttachmentRes res = new CopyAttachmentRes(markdown: attachmentReq.markdown)
         if (res.markdown) {
-            List<String> uuids = findAttachmentUuids(res.markdown)
-            uuids?.each { uuid ->
-                Attachment attachment = attachmentRepo.findByUuid(uuid)
-
+            List<String> attachmentUuids = findAttachmentUuids(res.markdown)
+            Map<String, Attachment> attachmentsByUuid =
+                    attachmentRepo.findByUuidIn(attachmentUuids).collectEntries {
+                        [(it.uuid): it]
+                    }
+            attachmentUuids?.each { String uuid ->
+                Attachment attachment = attachmentsByUuid[uuid]
                 if (attachment) {
                     boolean isFromProj = StringUtils.isNotBlank(attachment.projectId)
                     boolean isFromGb = StringUtils.isNotBlank(attachment.skillId) && !isFromProj
@@ -313,7 +322,7 @@ class AttachmentService {
                         // skill id will be updated later in the stack
                         // cannot set it here as skill was not saved yet
                         Attachment newAttachment = copyAttachmentWithNewUuid(attachment, attachmentReq.projectId, attachmentReq.quizId, newSkillId)
-                        res.markdown = res.markdown.replace("(/api/download/${uuid})", "(/api/download/${newAttachment.uuid})")
+                        res.markdown = res.markdown.replace("(/api/download/${attachment.uuid})", "(/api/download/${newAttachment.uuid})")
                         res.updated = true
                     }
 
@@ -323,6 +332,8 @@ class AttachmentService {
                         attachment.setSkillId(newSkillId)
                         persistAttachment(attachment)
                     }
+                } else {
+                    log.warn("updateAttachmentsAttrsBasedOnUuidsInMarkdown: failed to find attachment with uuid=[${uuid}], attachmentReq=[${attachmentReq}]")
                 }
             }
         }
@@ -332,7 +343,7 @@ class AttachmentService {
 
     List<String> findAttachmentUuids(String description) {
         if (description) {
-            return UUID_PATTERN.matcher(description).findAll().collect { it[1] }
+            return UUID_PATTERN.matcher(description).findAll().collect { it[1] }.unique()
         }
         return []
     }

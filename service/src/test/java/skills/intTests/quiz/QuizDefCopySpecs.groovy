@@ -796,6 +796,38 @@ class QuizDefCopySpecs extends DefaultIntSpec {
         copiedQuestions[0].question.contains(newAttachments[1].uuid)
     }
 
+    def "copy quiz - repeated attachment links in question create only one destination attachment"() {
+        def quiz = QuizDefFactory.createQuiz(1)
+        skillsService.createQuizDef(quiz)
+
+        def uploadedAttachment = skillsService.uploadAttachment('test-pdf.pdf', 'Text in a file', null, null, quiz.quizId)
+        String questionWithRepeatedAttachment = (1..3).collect {
+            "[File${it}.pdf](${uploadedAttachment.href})"
+        }.join("\n")
+
+        def question = QuizDefFactory.createChoiceQuestion(1, 1, 5, QuizQuestionType.MultipleChoice)
+        question.question = questionWithRepeatedAttachment
+        skillsService.createQuizQuestionDef(question)
+
+        when:
+        def copiedQuiz = skillsService.copyQuiz(quiz.quizId, [quizId: 'newQuizCopy', name: 'Copy of Quiz', description: '', type: quiz.type]).body
+        def copiedQuestion = skillsService.getQuizQuestionDefs(copiedQuiz.quizId).questions[0]
+        List<Attachment> attachments = attachmentRepo.findAll().toList()
+
+        then:
+        attachments.size() == 2
+        Attachment originalAttachment = attachments.find { it.uuid == uploadedAttachment.uuid }
+        originalAttachment.quizId == quiz.quizId
+
+        Attachment copiedAttachment = attachments.find { it.uuid != originalAttachment.uuid }
+        copiedAttachment.quizId == copiedQuiz.quizId
+        !copiedAttachment.projectId
+        !copiedAttachment.skillId
+        copiedQuestion.question == (1..3).collect {
+            "[File${it}.pdf](/api/download/${copiedAttachment.uuid})"
+        }.join("\n")
+    }
+
     def "a single question is copied via UI - attachments in question description are duplicated"() {
         def quiz = QuizDefFactory.createQuiz(1)
         skillsService.createQuizDef(quiz)

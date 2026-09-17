@@ -368,6 +368,37 @@ class CopyMarkdownWithAttachmentsSpecs extends CopyIntSpec {
         attachments1.uuid.sort() == attachments.uuid.sort()
     }
 
+    def "repeated attachment links copied to another project create only one destination attachment"() {
+        def p1 = createProject(1)
+        skillsService.createProject(p1)
+        def attachmentHref = attachFileAndReturnHref(p1.projectId)
+
+        def p2 = createProject(2)
+        skillsService.createProject(p2)
+        String description = (1..3).collect { "[Link${it}](${attachmentHref})" }.join("\n")
+
+        when:
+        p2.description = description
+        skillsService.updateProject(p2, p2.projectId)
+
+        then:
+        List<Attachment> attachments = attachmentRepo.findAll().toList()
+        attachments.size() == 2
+
+        Attachment originalAttachment = attachments.find { attachmentHref.contains(it.uuid) }
+        originalAttachment.projectId == p1.projectId
+
+        Attachment copiedAttachment = attachments.find { it.uuid != originalAttachment.uuid }
+        copiedAttachment.projectId == p2.projectId
+        !copiedAttachment.quizId
+        !copiedAttachment.skillId
+
+        def copiedProject = skillsService.getProjectDescription(p2.projectId)
+        copiedProject.description == (1..3).collect {
+            "[Link${it}](/api/download/${copiedAttachment.uuid})"
+        }.join("\n")
+    }
+
     def "paste markdown with attachment to another project: by editing a subject"() {
         def p1 = createProject(1)
         def p1subj1 = createSubject(1, 1)
@@ -2615,4 +2646,3 @@ class CopyMarkdownWithAttachmentsSpecs extends CopyIntSpec {
         attachments1.collect { "/api/download/${it.uuid}".toString() }.sort() == [ p1AttachmentsHrefs[0],  p1AttachmentsHrefs[1], p1AttachmentsHrefs[4], p2AttachmentsHrefs].flatten().sort()
     }
 }
-

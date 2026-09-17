@@ -28,6 +28,8 @@ interface AttachmentRepo extends CrudRepository<Attachment, Integer> {
     @Nullable
     Attachment findByUuid(String uuid)
 
+    List<Attachment> findByUuidIn(List<String> uuid)
+
     @Modifying
     Integer deleteByUuid(String uuid)
 
