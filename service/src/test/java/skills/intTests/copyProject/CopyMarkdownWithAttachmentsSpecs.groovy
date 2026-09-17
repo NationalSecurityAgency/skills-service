@@ -313,6 +313,41 @@ class CopyMarkdownWithAttachmentsSpecs extends CopyIntSpec {
         attachmentsAfter.uuid == attachmentsBefore.uuid
     }
 
+    def "pasting a skill attachment into project description creates a copy"() {
+        def p1 = createProject(1)
+        def p1subj1 = createSubject(1, 1)
+        skillsService.createProjectAndSubjectAndSkills(p1, p1subj1, null)
+
+        def attachmentHref = attachFileAndReturnHref(p1.projectId)
+        def skill = createSkill(1, 1, 1, 0, 1, 100)
+        skill.description = "Here is a [Link](${attachmentHref})".toString()
+        skillsService.createSkill(skill)
+
+        when:
+        p1.description = skill.description
+        skillsService.updateProject(p1)
+
+        def projectDescription = skillsService.getProjectDescription(p1.projectId)
+        List<Attachment> attachments = attachmentRepo.findAll()
+
+        then:
+        attachments.size() == 2
+        projectDescription.description != skill.description
+
+        Attachment sourceAttachment = attachments.find { attachmentHref.contains(it.uuid) }
+        sourceAttachment.projectId == p1.projectId
+        sourceAttachment.skillId == skill.skillId
+        !sourceAttachment.quizId
+
+        Attachment copiedAttachment = attachments.find { projectDescription.description.contains(it.uuid) }
+        copiedAttachment.uuid != sourceAttachment.uuid
+        copiedAttachment.projectId == p1.projectId
+        !projectDescription.description.contains(sourceAttachment.uuid)
+        projectDescription.description.contains(copiedAttachment.uuid)
+        !copiedAttachment.skillId
+        !copiedAttachment.quizId
+    }
+
     def "paste markdown with attachment to another project: to a new subject"() {
         def p1 = createProject(1)
         def p1subj1 = createSubject(1, 1)
