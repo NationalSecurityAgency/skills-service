@@ -63,6 +63,9 @@ class CopyMarkdownWithAttachmentsSpecs extends CopyIntSpec {
         def copyProj = skillsService.getProjectDescription(p2.projectId)
 
         List<Attachment> attachments = attachmentRepo.findAll()
+        def rootService = createRootSkillService()
+        def actions = rootService.getUserActionsForEverything()
+        def editAction = rootService.getUserActionAttributes(actions.data[0].id)
 
         // should not create new attachments
         p2.description = copyProj.description
@@ -85,6 +88,7 @@ class CopyMarkdownWithAttachmentsSpecs extends CopyIntSpec {
 
         assert newAttachments.size() == 1
         copyProj.description == "Here is a [Link](/api/download/${newAttachments[0].uuid})".toString()
+        editAction.description == copyProj.description
         newAttachments[0].projectId == p2.projectId
 
         attachments1.uuid.sort() == attachments.uuid.sort()

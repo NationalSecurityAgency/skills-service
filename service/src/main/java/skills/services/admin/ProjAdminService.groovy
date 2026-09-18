@@ -209,6 +209,7 @@ class ProjAdminService {
         AttachmentService.CopyAttachmentRes copyRes = attachmentService.updateAttachmentsAttrsBasedOnUuidsInMarkdown(description, originalProjectId, null, null)
         if (copyRes.updated) {
             projDefWithDescriptionRepo.updateDescription(projectDefinition.projectId, copyRes.markdown)
+            projectDefinition.description = copyRes.markdown
         }
 
         Map actionAttributes
