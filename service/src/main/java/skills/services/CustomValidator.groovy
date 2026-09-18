@@ -19,17 +19,6 @@ import callStack.profiler.Profile
 import groovy.util.logging.Slf4j
 import jakarta.annotation.PostConstruct
 import org.apache.commons.lang3.StringUtils
-import org.commonmark.Extension
-import org.commonmark.ext.gfm.tables.TableBlock
-import org.commonmark.ext.gfm.tables.TableHead
-import org.commonmark.ext.gfm.tables.TablesExtension
-import org.commonmark.node.*
-import org.commonmark.parser.IncludeSourceSpans
-import org.commonmark.parser.Parser
-import org.commonmark.renderer.markdown.MarkdownRenderer
-import org.commonmark.renderer.text.TextContentRenderer
-import org.jsoup.Jsoup
-import org.jsoup.nodes.Element
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
@@ -40,7 +29,6 @@ import skills.controller.request.model.*
 import skills.controller.result.model.ModifiedDescription
 import skills.services.admin.UserCommunityService
 
-import java.util.concurrent.atomic.AtomicBoolean
 import java.util.regex.Matcher
 import java.util.regex.Pattern
 
@@ -74,6 +62,9 @@ class CustomValidator {
 
     @Autowired
     UserInfoService userInfoService
+
+    @Autowired
+    AttachmentService attachmentService
 
     private String paragraphValidationMsg
     private String userCommunityParagraphValidationMsg
@@ -128,7 +119,7 @@ class CustomValidator {
     }
 
     CustomValidationResult validate(ProjectRequest projectRequest) {
-        CustomValidationResult validationResult = validateDescription(projectRequest.description, projectRequest.projectId)
+        CustomValidationResult validationResult = validateDescription(new CustomValidator.ValidateDescReq(description:projectRequest.description, projectId: projectRequest.projectId))
         if (!validationResult.valid) {
             return validationResult
         }
@@ -142,7 +133,7 @@ class CustomValidator {
     }
 
     CustomValidationResult validate(QuizDefRequest quizDefRequest) {
-        CustomValidationResult validationResult = validateDescription(quizDefRequest.description, null, false, quizDefRequest.quizId)
+        CustomValidationResult validationResult = validateDescription(new CustomValidator.ValidateDescReq(description:quizDefRequest.description, quizId: quizDefRequest.quizId))
         if (!validationResult.valid) {
             return validationResult
         }
@@ -152,8 +143,7 @@ class CustomValidator {
     }
 
     CustomValidationResult validate(GlobalBadgeRequest globalBadgeRequest) {
-        Boolean isUserCommunityOnlyGlobalBadge = userCommunityService.isUserCommunityOnlyGlobalBadge(globalBadgeRequest.badgeId)
-        CustomValidationResult validationResult = validateDescription(globalBadgeRequest.description, null, isUserCommunityOnlyGlobalBadge)
+        CustomValidationResult validationResult = validateDescription(new CustomValidator.ValidateDescReq(description:globalBadgeRequest.description, globalBadgeId: globalBadgeRequest.badgeId))
         if (!validationResult.valid) {
             return validationResult
         }
@@ -176,7 +166,7 @@ class CustomValidator {
     }
 
     private CustomValidationResult validateDescriptionAndName(String description, String name, String projectId=null) {
-        CustomValidationResult validationResult = validateDescription(description, projectId)
+        CustomValidationResult validationResult = validateDescription(new CustomValidator.ValidateDescReq(description:description, projectId: projectId))
         if (!validationResult.valid) {
             return validationResult
         }
@@ -185,9 +175,12 @@ class CustomValidator {
         return validationResult
     }
 
-    private boolean shouldUseCommunityValidation(String projectId = null, Boolean utilizeUserCommunityParagraphPatternByDefault = false, String quizId) {
+    private boolean shouldUseCommunityValidation(String projectId, String quizId, String globalBadgeId, Boolean utilizeUserCommunityParagraphPatternByDefault) {
         if (!this.userCommunityParagraphPattern) {
             return false
+        }
+        if (utilizeUserCommunityParagraphPatternByDefault != null && utilizeUserCommunityParagraphPatternByDefault == true) {
+            return true
         }
         if (projectId) {
             return userCommunityService.isUserCommunityOnlyProject(projectId)
@@ -195,7 +188,10 @@ class CustomValidator {
         if (quizId) {
             return userCommunityService.isUserCommunityOnlyQuiz(quizId)
         }
-        return (boolean)utilizeUserCommunityParagraphPatternByDefault
+        if (globalBadgeId) {
+            return userCommunityService.isUserCommunityOnlyGlobalBadge(globalBadgeId)
+        }
+        return false
     }
 
     static class ValidationPattern {
@@ -203,11 +199,46 @@ class CustomValidator {
         String message
     }
 
-    private ValidationPattern getValidationPattern(String projectId = null, Boolean utilizeUserCommunityParagraphPatternByDefault = false, String quizId = null) {
+    static class ValidateDescReq {
+        String description
+        String projectId=null
+
+        String quizId = null
+        String globalBadgeId = null
+
+        // Important: Use with caution as it will override the validator
+        // This is really only applicable to the validate endpoint and
+        // not other code should be changing this variable
+        Boolean utilizeUserCommunityParagraphPatternByDefault = false
+    }
+
+    CustomValidationResult validateDescriptionStr(String description) {
+        return validateDescription(new ValidateDescReq(description: description))
+    }
+
+    CustomValidationResult validateDescription(ValidateDescReq validateDescReq) {
+        String description = validateDescReq.description
+        if(validateDescReq.projectId || validateDescReq.quizId || validateDescReq.globalBadgeId) {
+            CustomValidationResult attachmentValRes = attachmentService.validateIfAttachmentsAreAllowedToBeCopied(description, validateDescReq.projectId, validateDescReq.quizId, validateDescReq.globalBadgeId)
+            if (!attachmentValRes.isValid()) {
+                return attachmentValRes
+            }
+        }
+
+        ParagraphValidator.InternalValidationResult result = new ParagraphValidator(new ParagraphValidator.InternalValidationRequest(
+                description: description,
+                validationPattern: getValidationPattern(validateDescReq.projectId, validateDescReq.quizId, validateDescReq.globalBadgeId, validateDescReq.utilizeUserCommunityParagraphPatternByDefault),
+                forceValidationPattern: forceValidationPattern,
+        )).validateMarkdown()
+
+        return new CustomValidationResult(valid: result.isValid, msg: result.validationMsg, validationFailedDetails: result.validationFailedDetails ?: null)
+    }
+
+    private ValidationPattern getValidationPattern(String projectId, String quizId, String globalBadgeId, Boolean utilizeUserCommunityParagraphPatternByDefault) {
         Pattern paragraphPatternToUse = this.paragraphPattern
         String paragraphValidationMsgToUse = this.paragraphValidationMsg
 
-        if (shouldUseCommunityValidation(projectId, utilizeUserCommunityParagraphPatternByDefault, quizId)) {
+        if (shouldUseCommunityValidation(projectId, quizId, globalBadgeId, utilizeUserCommunityParagraphPatternByDefault)) {
             paragraphPatternToUse = this.userCommunityParagraphPattern
             paragraphValidationMsgToUse = this.userCommunityParagraphValidationMsg ?: this.paragraphValidationMsg
 
@@ -220,36 +251,24 @@ class CustomValidator {
         return new ValidationPattern(pattern: paragraphPatternToUse, message: paragraphValidationMsgToUse)
     }
 
-    CustomValidationResult validateDescription(String description, String projectId=null, Boolean utilizeUserCommunityParagraphPatternByDefault = false, String quizId = null) {
-        ParagraphValidator.InternalValidationResult result = new ParagraphValidator(new ParagraphValidator.InternalValidationRequest(
-                description: description,
-                projectId: projectId,
-                validationPattern: getValidationPattern(projectId, utilizeUserCommunityParagraphPatternByDefault, quizId),
-                forceValidationPattern: forceValidationPattern,
-                utilizeUserCommunityParagraphPatternByDefault: utilizeUserCommunityParagraphPatternByDefault,
-                quizId: quizId)).validateMarkdown()
-        return new CustomValidationResult(valid: result.isValid, msg: result.validationMsg, validationFailedDetails: result.validationFailedDetails ?: null)
-    }
-
-    ModifiedDescription addPrefixToInvalidParagraphs(String description, String prefix, String projectId=null, Boolean utilizeUserCommunityParagraphPatternByDefault = false, String quizId = null) {
+    ModifiedDescription addPrefixToInvalidParagraphs(String description, String prefix, String projectId=null, Boolean utilizeUserCommunityParagraphPatternByDefault = false, String quizId = null, String globalBadgeId = null) {
         assert prefix
         ParagraphValidator.InternalValidationResult result = new ParagraphValidator(new ParagraphValidator.InternalValidationRequest(
                 description: description,
-                prefix: prefix, projectId: projectId,
-                validationPattern: getValidationPattern(projectId, utilizeUserCommunityParagraphPatternByDefault, quizId),
+                prefix: prefix,
+                validationPattern: getValidationPattern(projectId, quizId, globalBadgeId, utilizeUserCommunityParagraphPatternByDefault),
                 forceValidationPattern: forceValidationPattern,
-                utilizeUserCommunityParagraphPatternByDefault: utilizeUserCommunityParagraphPatternByDefault,
-                quizId: quizId)).validateMarkdown()
+        )).validateMarkdown()
         return new ModifiedDescription(newDescription: result.newDescription)
     }
 
     CustomValidationResult validateEmailBodyAndSubject(ContactUsersRequest contactUsersRequest) {
-        CustomValidationResult res = validateDescription(contactUsersRequest.emailBody, null)
+        CustomValidationResult res = validateDescription(new CustomValidator.ValidateDescReq(description:contactUsersRequest.emailBody))
         if (!res.valid) {
             res.msg = "Custom validation failed: msg=[${res.msg}] for email's body"
             return res
         }
-        res = validateDescription(contactUsersRequest.emailSubject, null)
+        res = validateDescription(new CustomValidator.ValidateDescReq(description:contactUsersRequest.emailSubject))
         if (!res.valid) {
             res.msg = "Custom validation failed: msg=[${res.msg}] for email's subject'"
             return res

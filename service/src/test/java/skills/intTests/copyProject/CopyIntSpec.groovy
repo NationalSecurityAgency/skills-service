@@ -37,4 +37,20 @@ class CopyIntSpec extends DefaultIntSpec {
         String attachmentHref = result.href
         return attachmentHref
     }
+
+    def attachFileForGlobalBadgeAndReturnHref(String globalBadgeId, String contents = 'Test is a test', SkillsService skillsServiceToUse = skillsService) {
+        String filename = 'test-pdf.pdf'
+        Resource resource = GroovyToJavaByteUtils.toByteArrayResource(contents, filename)
+        def result = skillsServiceToUse.uploadAttachment(resource, null, globalBadgeId, null)
+        String attachmentHref = result.href
+        return attachmentHref
+    }
+
+    def attachFileForQuizAndReturnHref(String quizId, String contents = 'Test is a test', SkillsService skillsServiceToUse = skillsService) {
+        String filename = 'test-pdf.pdf'
+        Resource resource = GroovyToJavaByteUtils.toByteArrayResource(contents, filename)
+        def result = skillsServiceToUse.uploadAttachment(resource, null, null, quizId)
+        String attachmentHref = result.href
+        return attachmentHref
+    }
 }

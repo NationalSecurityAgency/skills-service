@@ -157,6 +157,7 @@ class BadgeAdminService {
         boolean identifyEligibleUsers = false
         final boolean isEdit = skillDefinition
         final boolean isIdUpdate = skillDefinition && !skillDefinition.skillId.equalsIgnoreCase(badgeRequest.badgeId)
+        final boolean isGlobalBadge = type == SkillDef.ContainerType.GlobalBadge
         String previousBadgeId = isEdit ? skillDefinition.skillId : null;
 
         if (isEdit) {
@@ -173,7 +174,14 @@ class BadgeAdminService {
             }
             Props.copy(badgeRequest, skillDefinition)
             skillDefinition.skillId = badgeRequest.badgeId
+
+            if (isGlobalBadge && isEdit && originalBadgeId != skillDefinition.skillId) {
+                attachmentService.updateGlobalBadgeId(previousBadgeId, skillDefinition.skillId)
+            }
         } else {
+            if (isGlobalBadge && badgeRequest?.description && attachmentService.findAttachmentUuids(badgeRequest?.description)) {
+                throw new SkillException("Attachments in the description are not allowed when creating a new global badge", ErrorCode.BadParam)
+            }
             ProjDef projDef
             if (type == SkillDef.ContainerType.Badge) {
                 projDef = projDefAccessor.getProjDef(projectId)
@@ -204,20 +212,30 @@ class BadgeAdminService {
         DataIntegrityExceptionHandlers.badgeDataIntegrityViolationExceptionHandler.handle(projectId) {
             savedSkill = skillDefWithExtraRepo.saveAndFlush(skillDefinition)
         }
-        if (savedSkill && type == SkillDef.ContainerType.GlobalBadge && !isEdit) {
+        if (savedSkill && isGlobalBadge && !isEdit) {
             String userId = userInfoService.getCurrentUserId()
             accessSettingsStorageService.addGlobalBadgeAdminUserRoleForUser(userId, savedSkill.skillId, RoleName.ROLE_GLOBAL_BADGE_ADMIN)
         }
-        if (savedSkill && type == SkillDef.ContainerType.GlobalBadge && isEdit && isIdUpdate) {
+        if (savedSkill && isGlobalBadge && isEdit && isIdUpdate) {
             accessSettingsStorageService.updateGlobalBadgeIdForBadgeAdmins(originalBadgeId, savedSkill.skillId)
             userAchievedRepo.updateSkillIdForSkillRefId(savedSkill.skillId, savedSkill.id)
         }
 
-        if (savedSkill && type == SkillDef.ContainerType.GlobalBadge && badgeRequest.enableProtectedUserCommunity) {
+        if (savedSkill && isGlobalBadge && badgeRequest.enableProtectedUserCommunity) {
             settingsService.saveSetting(new SkillSettingsRequest(skillRefId: savedSkill.id, setting: Settings.USER_COMMUNITY_ONLY_PROJECT.settingName, value: Boolean.TRUE.toString()))
         }
 
-        attachmentService.updateAttachmentsAttrsBasedOnUuidsInMarkdown(savedSkill?.description, savedSkill.projectId, null, savedSkill.skillId)
+        AttachmentService.CopyAttachmentRes copyAttachmentRes = attachmentService.updateAttachmentsAttrsBasedOnUuidsInMarkdown(savedSkill?.description, savedSkill.projectId, null,
+                isGlobalBadge ? savedSkill.skillId : originalBadgeId,
+                savedSkill.skillId)
+        if (copyAttachmentRes.updated) {
+            if (isGlobalBadge) {
+                skillDefWithExtraRepo.updateDescriptionBySkillIdAndProjectIdIsNull(savedSkill.skillId, copyAttachmentRes.markdown)
+            } else {
+                skillDefWithExtraRepo.updateDescriptionByProjectIdAndSkillId(savedSkill.projectId, savedSkill.skillId, copyAttachmentRes.markdown)
+            }
+            savedSkill.description = copyAttachmentRes.markdown
+        }
 
         if(savedSkill && badgeRequest.awardAttrs && type == SkillDef.ContainerType.Badge) {
             skillAttributeService.saveBadgeBonusAwardAttrs(projectId, badgeRequest.badgeId, badgeRequest.awardAttrs)
@@ -236,7 +254,7 @@ class BadgeAdminService {
             awardBadgeToUsersMeetingRequirements(savedSkill)
         }
 
-        saveUserDashboardAction(savedSkill, badgeRequest, isEdit, type == SkillDef.ContainerType.GlobalBadge, previousBadgeId)
+        saveUserDashboardAction(savedSkill, badgeRequest, isEdit, isGlobalBadge, previousBadgeId)
         log.debug("Saved [{}]", savedSkill)
     }
 

@@ -115,13 +115,14 @@ class SelfReportingService {
     SkillEventsService.AppliedCheckRes requestApproval(String userId, SkillDefMin skillDefinition, Date performedOn, String requestMsg) {
 
         if (StringUtils.isNotBlank(requestMsg)) {
-            CustomValidationResult customValidationResult = customValidator.validateDescription(requestMsg, skillDefinition.projectId)
+            CustomValidationResult customValidationResult = customValidator.validateDescription(new CustomValidator.ValidateDescReq(description:requestMsg, projectId: skillDefinition.projectId))
             if (!customValidationResult.valid) {
                 String msg = "Custom validation failed: msg=[${customValidationResult.msg}], type=[selfReportApprovalMsg], requestMsg=[${requestMsg}], userId=${userId}, performedOn=[${performedOn}]]"
                 throw new SkillException(msg, skillDefinition.projectId, skillDefinition.skillId, ErrorCode.BadParam)
             }
 
-            attachmentService.updateAttachmentsAttrsBasedOnUuidsInMarkdown(requestMsg, skillDefinition.projectId, null, skillDefinition.skillId)
+            AttachmentService.CopyAttachmentRes copyAttachmentRes = attachmentService.updateAttachmentsAttrsBasedOnUuidsInMarkdown(requestMsg, skillDefinition.projectId, null, skillDefinition.skillId)
+            requestMsg = copyAttachmentRes.updated ? copyAttachmentRes.markdown : requestMsg
         }
         validateSufficientPoints(skillDefinition, userId)
 

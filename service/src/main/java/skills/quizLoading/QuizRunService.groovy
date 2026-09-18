@@ -16,6 +16,7 @@
 package skills.quizLoading
 
 import callStack.profiler.Profile
+import skills.services.AttachmentService
 import tools.jackson.databind.ObjectMapper
 import groovy.json.JsonSlurper
 import groovy.transform.Canonical
@@ -116,6 +117,9 @@ class QuizRunService {
 
     @Autowired
     UserQuizAnswerAttemptRepo quizAttemptAnswerRepo
+
+    @Autowired
+    AttachmentService attachmentService
 
     @Autowired
     UserQuizQuestionAttemptRepo quizAttemptQuestionRepo
@@ -606,7 +610,7 @@ class QuizRunService {
                 propsBasedValidator.quizValidationMaxStrLength(PublicProps.UiProp.maxTakeQuizInputTextAnswerLength,
                         "Answer", quizReportAnswerReq.answerText, quizId)
                 QuizValidator.isNotBlank(quizReportAnswerReq.getAnswerText(), "answerText", quizId)
-                CustomValidationResult customValidationResult = validator.validateDescription(quizReportAnswerReq.getAnswerText(), null, null, quizId)
+                CustomValidationResult customValidationResult = validator.validateDescription(new CustomValidator.ValidateDescReq(description:quizReportAnswerReq.getAnswerText(), quizId: quizId))
                 if (!customValidationResult.valid) {
                     throw new SkillQuizException("answerText is invalid: ${customValidationResult.msg}", quizId, ErrorCode.BadParam)
                 }
@@ -643,23 +647,42 @@ class QuizRunService {
 
     private void handleReportingTextInputQuestion(QuizDef quizDef, String userId, Integer quizAttemptId, Integer answerDefId, QuizReportAnswerReq quizReportAnswerReq) {
         UserQuizAnswerAttempt existingAnswerAttempt = quizAttemptAnswerRepo.findByUserQuizAttemptRefIdAndQuizAnswerDefinitionRefId(quizAttemptId, answerDefId)
+        String answerText = quizReportAnswerReq.getAnswerText()
+        AttachmentService.CopyAttachmentReq copyAttachmentReq = new AttachmentService.CopyAttachmentReq(
+                markdown: answerText,
+                quizId: quizDef.quizId,
+                attemptId: quizAttemptId,
+                answerAttemptId: existingAnswerAttempt?.id ?: -1)
         if (existingAnswerAttempt) {
             if (quizReportAnswerReq.isSelected) {
-                existingAnswerAttempt.answer = quizReportAnswerReq.getAnswerText()
+                AttachmentService.CopyAttachmentRes copyRes = attachmentService.updateAttachmentsAttrsBasedOnUuidsInMarkdown(copyAttachmentReq)
+                if (copyRes.updated) {
+                    answerText = copyRes.markdown
+                }
+                existingAnswerAttempt.answer = answerText
                 quizAttemptAnswerRepo.save(existingAnswerAttempt)
             } else {
                 quizAttemptAnswerRepo.delete(existingAnswerAttempt)
             }
         } else if (quizReportAnswerReq.isSelected) {
+            AttachmentService.CopyAttachmentRes copyRes = attachmentService.updateAttachmentsAttrsBasedOnUuidsInMarkdown(copyAttachmentReq)
+            if (copyRes.updated) {
+                answerText = copyRes.markdown
+            }
             UserQuizAnswerAttempt newAnswerAttempt = new UserQuizAnswerAttempt(
                     userQuizAttemptRefId: quizAttemptId,
                     quizAnswerDefinitionRefId: answerDefId,
                     userId: userId,
                     status: quizDef.type == QuizDefParent.QuizType.Quiz ? UserQuizAnswerAttempt.QuizAnswerStatus.NEEDS_GRADING : UserQuizAnswerAttempt.QuizAnswerStatus.CORRECT,
-                    answer: quizReportAnswerReq.getAnswerText(),
+                    answer: answerText,
             )
-            quizAttemptAnswerRepo.save(newAnswerAttempt)
+
+            quizAttemptAnswerRepo.saveAndFlush(newAnswerAttempt)
         }
+
+
+
+
     }
 
     private void handleReportingAChoiceBasedQuestion(String userId, Integer attemptId, Integer answerDefId, QuizReportAnswerReq quizReportAnswerReq, QuizAnswerDefRepo.AnswerDefPartialInfo answerDefPartialInfo) {
@@ -708,7 +731,7 @@ class QuizRunService {
 
         propsBasedValidator.quizValidationMaxStrLength(PublicProps.UiProp.maxGraderFeedbackMessageLength, "Feedback", gradeAnswerReq.feedback, quizId)
         if (!aiAssistantGrader) {
-            CustomValidationResult customValidationResult = validator.validateDescription(gradeAnswerReq.feedback, null, null, quizDef.quizId)
+            CustomValidationResult customValidationResult = validator.validateDescription(new CustomValidator.ValidateDescReq(description:gradeAnswerReq.feedback, quizId:  quizDef.quizId))
             if (!customValidationResult.valid) {
                 throw new SkillQuizException("Feedback is invalid: ${customValidationResult.msg}", quizId, ErrorCode.BadParam)
             }

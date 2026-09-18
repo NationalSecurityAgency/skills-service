@@ -222,9 +222,9 @@ class QuizDefService {
 
         lockingService.lockQuizDefs()
 
-        String userId = userIdParam ?: userInfoService.getCurrentUserId()
-        QuizDefWithDescAndAttrs quizDefWithDescription = copyQuizDef(originalQuizId, newQuizId, quizDefRequest, userId)
-        validateUserCommunityProps(quizDefRequest, quizDefWithDescription)
+        Boolean enableProtectedUserCommunity = userCommunityService.isUserCommunityOnlyQuiz(originalQuizId) ?: quizDefRequest.enableProtectedUserCommunity
+        QuizDefWithDescAndAttrs quizDefWithDescription = copyQuizDef(originalQuizId, newQuizId, quizDefRequest, enableProtectedUserCommunity)
+        validateUserCommunityProps(quizDefRequest.quizId, quizDefWithDescription, enableProtectedUserCommunity)
 
         log.debug("Copied [{}]", quizDefWithDescription)
         userActionsHistoryService.saveUserAction(new UserActionInfo(
@@ -237,7 +237,10 @@ class QuizDefService {
         ))
 
         copyQuestions(originalQuizId, newQuizId)
-        quizSettingsService.copySettings(originalQuizId, newQuizId, quizDefRequest.enableProtectedUserCommunity)
+
+        // QuizSettings.UserCommunityOnlyQuiz setting, if needed, was copied in copyQuizDef method
+        quizSettingsService.copySettings(originalQuizId, newQuizId, [QuizSettings.UserCommunityOnlyQuiz])
+        String userId = userIdParam ?: userInfoService.getCurrentUserId()
         accessSettingsStorageService.addQuizDefUserRoleForUser(userId, newQuizId, RoleName.ROLE_QUIZ_ADMIN)
 
         CustomValidationResult customValidationResult = customValidator.validate(quizDefRequest)
@@ -249,20 +252,30 @@ class QuizDefService {
         return convert(updatedDef)
     }
 
-    QuizDefWithDescAndAttrs copyQuizDef(String originalQuizId, String newQuizId, QuizDefRequest quizDefRequest, String userId) {
+    QuizDefWithDescAndAttrs copyQuizDef(String originalQuizId, String newQuizId, QuizDefRequest quizDefRequest, Boolean enableProtectedUserCommunity) {
         QuizDefWithDescAndAttrs quizDefWithDescription = retrieveAndValidateQuizDefWithAttrs(originalQuizId, newQuizId, quizDefRequest)
 
-        String description = attachmentService.copyAttachmentsForIncomingDescription(quizDefRequest.description, null, null, null)
-        Map slidesAttachmentRes = handleSlideAttachment(quizDefWithDescription)
+        Map slidesAttachmentRes = handleSlideAttachment(quizDefWithDescription, newQuizId)
 
         quizDefWithDescription = new QuizDefWithDescAndAttrs(quizId: newQuizId, name: quizDefRequest.name,
-                description: description, type: QuizDefParent.QuizType.valueOf(quizDefRequest.type), attributes: slidesAttachmentRes.quizAttributesAsStr)
+                description: quizDefRequest.description, type: QuizDefParent.QuizType.valueOf(quizDefRequest.type), attributes: slidesAttachmentRes.quizAttributesAsStr)
         log.debug("Created quiz [{}]", quizDefWithDescription)
 
         DataIntegrityExceptionHandlers.dataIntegrityViolationExceptionHandler.handle(null, null, quizDefWithDescription.quizId) {
             quizDefWithDescription = quizDefWithDescAndAttrsRepo.save(quizDefWithDescription)
         }
-        attachmentService.updateAttachmentsAttrsBasedOnUuidsInMarkdown(quizDefWithDescription.description, null, quizDefWithDescription.quizId, null)
+        if (enableProtectedUserCommunity) {
+            quizSettingsService.saveSettings(quizDefWithDescription.quizId, [
+                    new QuizSettingsRequest(value: Boolean.TRUE.toString(), setting: QuizSettings.UserCommunityOnlyQuiz.setting)
+            ], false)
+        }
+        AttachmentService.CopyAttachmentReq copyAttachmentReq = new AttachmentService.CopyAttachmentReq(markdown: quizDefRequest.description, quizId: quizDefWithDescription.quizId)
+        AttachmentService.CopyAttachmentRes copyRes = attachmentService.updateAttachmentsAttrsBasedOnUuidsInMarkdown(copyAttachmentReq)
+        if (copyRes.updated) {
+            quizDefWithDescRepo.updateDescription(quizDefWithDescription.quizId, copyRes.markdown)
+            quizDefWithDescription.description = copyRes.markdown
+            log.debug("Updated description to [{}]", copyRes.markdown)
+        }
         if (slidesAttachmentRes.attachment) {
             Attachment slidesAttachment = slidesAttachmentRes.attachment
             slidesAttachment.quizId = quizDefWithDescription.quizId
@@ -272,7 +285,7 @@ class QuizDefService {
         return quizDefWithDescription
     }
 
-    Map handleSlideAttachment(QuizDefWithDescAndAttrs quizDefWithDescription) {
+    Map handleSlideAttachment(QuizDefWithDescAndAttrs quizDefWithDescription, String newQuizId) {
         String quizAttributesAsStr = quizDefWithDescription.attributes
         Attachment slidesAttachment = null
         if (quizAttributesAsStr) {
@@ -280,7 +293,9 @@ class QuizDefService {
             SlidesAttrs slidesAttrs = quizAttrs.slidesAttrs
             if (slidesAttrs && slidesAttrs.internallyHostedAttachmentUuid) {
                 Attachment attachment = attachmentService.getAttachment(slidesAttrs.internallyHostedAttachmentUuid)
-                Attachment newAttachment = attachmentService.constructNewAttachmentWithNewUuid(attachment)
+                // Access to the source quiz is enforced by the copy endpoint. Slides are owned by that quiz,
+                // so constructing their replacement directly avoids redundant attachment-level authorization.
+                Attachment newAttachment = attachmentService.constructNewAttachmentWithNewUuid(attachment, null, newQuizId)
                 slidesAttrs.url = slidesAttrs.url.replaceAll(attachment.uuid, newAttachment.uuid)
                 slidesAttrs.internallyHostedAttachmentUuid = newAttachment.uuid
 
@@ -320,7 +335,7 @@ class QuizDefService {
             List<QuizAnswerDef> answers = quizAnswerRepo.findAllByQuestionRefId(fromQuestionDef.id)
 
             List<QuizAnswerDef> newAnswersDefTmp = answers.collect { QuizAnswerDef fromAnswerDef ->
-               return new QuizAnswerDef(
+                return new QuizAnswerDef(
                         quizId: savedQuestion.quizId,
                         questionRefId: savedQuestion.id,
                         answer: fromAnswerDef.answer,
@@ -341,8 +356,7 @@ class QuizDefService {
             SkillVideoAttrs videoAttrs = questionAttrs?.videoConf
             String transcript = videoAttrs?.transcript
             if (StringUtils.isNotBlank(transcript)) {
-                CustomValidationResult validationResult = customValidator.validateDescription(transcript,
-                        null, false, fromQuestionDef.quizId)
+                CustomValidationResult validationResult = customValidator.validateDescription(new CustomValidator.ValidateDescReq(description: transcript, quizId: fromQuestionDef.quizId))
                 if (!validationResult.valid) {
                     String msg = "Video transcript validation failed for questionId=[${fromQuestionDef.id}], fullMessage=[${validationResult.msg}]"
                     throw new SkillQuizException(msg, null, fromQuestionDef.quizId, fromQuestionDef.id, ErrorCode.ParagraphValidationFailed)
@@ -365,11 +379,9 @@ class QuizDefService {
 
     private validateQuestions(List<QuizQuestionDef> questionDefList, String originalQuizId) {
         questionDefList.forEach { QuizQuestionDef question ->
-            CustomValidationResult validationResult = customValidator.validateDescription(question.question,
-                    null, false, originalQuizId)
+            CustomValidationResult validationResult = customValidator.validateDescription(new CustomValidator.ValidateDescReq(description: question.question, quizId: originalQuizId))
             if (validationResult.valid && StringUtils.isNotBlank(question.answerHint)) {
-                validationResult = customValidator.validateDescription(question.answerHint,
-                        null, false, originalQuizId)
+                validationResult = customValidator.validateDescription(new CustomValidator.ValidateDescReq(description: question.answerHint, quizId: originalQuizId))
             }
             if (!validationResult.valid) {
                 String msg = "Validation failed for questionId=[${question.id}], fullMessage=[${validationResult.msg}]"
@@ -411,7 +423,7 @@ class QuizDefService {
         lockingService.lockQuizDefs()
 
         QuizDefWithDescription quizDefWithDescription = retrieveAndValidateQuizDef(originalQuizId, newQuizId, quizDefRequest)
-        validateUserCommunityProps(quizDefRequest, quizDefWithDescription)
+        validateUserCommunityProps(quizDefWithDescription?.quizId ?: quizDefRequest.quizId, quizDefWithDescription, quizDefRequest.enableProtectedUserCommunity)
         final boolean isEdit = quizDefWithDescription
         String previousQuizId = quizDefWithDescription?.quizId
         String previousQuizName = quizDefWithDescription?.name
@@ -426,6 +438,10 @@ class QuizDefService {
             }
             log.debug("Saved [{}]", quizDefWithDescription)
         } else {
+            if (quizDefRequest.description && attachmentService.findAttachmentUuids(quizDefRequest.description)) {
+                throw new SkillQuizException("Attachments in the description are not allowed when creating a new quiz", newQuizId, ErrorCode.BadParam)
+            }
+
             quizDefWithDescription = new QuizDefWithDescription(quizId: newQuizId, name: quizDefRequest.name,
                     description: quizDefRequest.description, type: QuizDefParent.QuizType.valueOf(quizDefRequest.type))
             log.debug("Created project [{}]", quizDefWithDescription)
@@ -444,7 +460,12 @@ class QuizDefService {
 
             accessSettingsStorageService.addQuizDefUserRoleForUser(userId, newQuizId, RoleName.ROLE_QUIZ_ADMIN)
         }
-        attachmentService.updateAttachmentsAttrsBasedOnUuidsInMarkdown(quizDefRequest.description, null, quizDefWithDescription.quizId, null)
+        AttachmentService.CopyAttachmentReq copyAttachmentReq = new AttachmentService.CopyAttachmentReq(markdown: quizDefRequest.description, quizId: quizDefWithDescription.quizId, originalQuizId: originalQuizId)
+        AttachmentService.CopyAttachmentRes copyRes = attachmentService.updateAttachmentsAttrsBasedOnUuidsInMarkdown(copyAttachmentReq)
+        if (copyRes.updated) {
+            quizDefWithDescRepo.updateDescription(quizDefWithDescription.quizId, copyRes.markdown)
+            quizDefWithDescription.description = copyRes.markdown
+        }
 
         if (quizDefRequest.enableProtectedUserCommunity) {
             quizSettingsService.saveSettings(quizDefWithDescription.quizId, [new QuizSettingsRequest(setting: QuizSettings.UserCommunityOnlyQuiz.setting, value: Boolean.TRUE.toString())], false)
@@ -453,7 +474,7 @@ class QuizDefService {
         Map actionAttributes
         if (isEdit) {
             actionAttributes = [
-                    id: quizDefWithDescription.id,
+                    id         : quizDefWithDescription.id,
                     description: quizDefWithDescription.description
             ]
             if (previousQuizId != quizDefWithDescription.quizId) {
@@ -471,11 +492,11 @@ class QuizDefService {
             }
         } else {
             actionAttributes = [
-                    id: quizDefWithDescription.id,
-                    name: quizDefWithDescription.name,
-                    quizId: quizDefWithDescription.quizId,
+                    id         : quizDefWithDescription.id,
+                    name       : quizDefWithDescription.name,
+                    quizId     : quizDefWithDescription.quizId,
                     description: quizDefWithDescription.description,
-                    quizType: quizDefWithDescription.type
+                    quizType   : quizDefWithDescription.type
             ]
         }
         userActionsHistoryService.saveUserAction(new UserActionInfo(
@@ -522,7 +543,7 @@ class QuizDefService {
                 itemId: quizDef.quizId,
                 quizId: quizDef.quizId,
                 actionAttributes: [
-                        question: quizQuestionDef.question?.toString(),
+                        question    : quizQuestionDef.question?.toString(),
                         questionType: quizQuestionDef.type?.toString()
                 ],
         ))
@@ -556,16 +577,12 @@ class QuizDefService {
 
         boolean isEdit = existingQuestionId != null
 
-        Closure<Boolean> shouldCopyUuid = { String uuid ->
-            quizDefRepo.otherQuestionsExistInQuizWithAttachmentUUID(quizDef.quizId, existingQuestionId ?: -1, uuid)
-        }
-        questionDefRequest.question = attachmentService.copyAttachmentsForIncomingDescription(questionDefRequest.question, null, null, quizDef.quizId, shouldCopyUuid)
         if (isEdit) {
             def existingQuestion = getQuestionDef(quizId, existingQuestionId)
-            if(existingQuestion.questionType == QuizQuestionType.TextInput && questionDefRequest.questionType !== existingQuestion.questionType) {
+            if (existingQuestion.questionType == QuizQuestionType.TextInput && questionDefRequest.questionType !== existingQuestion.questionType) {
                 // find questions awaiting grading
                 boolean hasOutstandingGrades = hasUngradedQuestions(existingQuestion.id)
-                if(hasOutstandingGrades) {
+                if (hasOutstandingGrades) {
                     throw new SkillQuizException("Not allowed to change a question's QuestionType when there are attempts awaiting grading", quizDef.quizId, ErrorCode.InternalError)
                 }
             }
@@ -578,7 +595,12 @@ class QuizDefService {
 
         addSavedQuestionUserAction(quizDef.quizId, savedQuestion, savedAnswers, isEdit)
 
-        attachmentService.updateAttachmentsAttrsBasedOnUuidsInMarkdown(savedQuestion.question, null, quizDef.quizId, null)
+        AttachmentService.CopyAttachmentReq copyAttachmentReq = new AttachmentService.CopyAttachmentReq(markdown: savedQuestion.question, quizId: quizDef.quizId, questionId: savedQuestion.id)
+        AttachmentService.CopyAttachmentRes copyRes = attachmentService.updateAttachmentsAttrsBasedOnUuidsInMarkdown(copyAttachmentReq)
+        if (copyRes.updated) {
+            quizQuestionRepo.updateQuestion(savedQuestion.id, copyRes.markdown)
+            savedQuestion.question = copyRes.markdown
+        }
 
         return convert(savedQuestion, savedAnswers)
     }
@@ -589,13 +611,13 @@ class QuizDefService {
 
     void addSavedQuestionUserAction(String quizId, QuizQuestionDef savedQuestion, List<QuizAnswerDef> savedAnswers, boolean isEdit = false) {
         Map actionAttributes = [
-                question: savedQuestion.question,
+                question    : savedQuestion.question,
                 questionType: savedQuestion.type,
         ]
 
-        savedAnswers.sort (false, {it.displayOrder}).eachWithIndex { QuizAnswerDef q, Integer index ->
-            actionAttributes["Answer${index+1}:text"] = q.answer
-            actionAttributes["Answer${index+1}:isCorrectAnswer"] = q.isCorrectAnswer
+        savedAnswers.sort(false, { it.displayOrder }).eachWithIndex { QuizAnswerDef q, Integer index ->
+            actionAttributes["Answer${index + 1}:text"] = q.answer
+            actionAttributes["Answer${index + 1}:isCorrectAnswer"] = q.isCorrectAnswer
         }
 
         userActionsHistoryService.saveUserAction(new UserActionInfo(
@@ -668,7 +690,7 @@ class QuizDefService {
     }
 
     @Profile
-    private  List<QuizAnswerDef> updateQuizQuestionAnswerDefs(QuizQuestionDef savedQuestion, QuizQuestionDefRequest questionDefRequest) {
+    private List<QuizAnswerDef> updateQuizQuestionAnswerDefs(QuizQuestionDef savedQuestion, QuizQuestionDefRequest questionDefRequest) {
         boolean isTextInputQuestion = questionDefRequest.questionType == QuizQuestionType.TextInput
         boolean isRating = questionDefRequest.questionType == QuizQuestionType.Rating
         boolean isMatchingQuestion = questionDefRequest.questionType == QuizQuestionType.Matching
@@ -699,15 +721,15 @@ class QuizDefService {
             }
             savedAnswers = quizAnswerRepo.saveAllAndFlush(answerDefs)
         } else if (isMatchingQuestion) {
-            if(existingAnswerDefs.size() > 0) {
-                List<Integer> requestedIds = questionDefRequest.answers.collect{ it.id }
+            if (existingAnswerDefs.size() > 0) {
+                List<Integer> requestedIds = questionDefRequest.answers.collect { it.id }
                 List<Integer> existingIds = existingAnswerDefs.collect { it.id }
                 List<Integer> idsToRemove = existingIds - requestedIds
                 quizAnswerRepo.deleteAllById(idsToRemove)
             }
             List<QuizAnswerDef> answerDefs = questionDefRequest.answers.withIndex().collect { QuizAnswerDefRequest answerDefRequest, int index ->
                 QuizAnswerDef answerDef = existingAnswerDefs.find { it.id == answerDefRequest.id }
-                if(answerDef) {
+                if (answerDef) {
                     answerDef.multiPartAnswer = JsonOutput.toJson(answerDefRequest.multiPartAnswer)
                     answerDef.displayOrder = index + 1
                     return answerDef
@@ -765,7 +787,7 @@ class QuizDefService {
                 displayOrder: displayOrder,
         )
         QuizQuestionDef savedQuestion = quizQuestionRepo.saveAndFlush(questionDef)
-        return  savedQuestion
+        return savedQuestion
     }
 
     @Profile
@@ -779,10 +801,10 @@ class QuizDefService {
     }
 
     @Transactional
-    void setDisplayOrder(String quizId, Integer questionId,  ActionPatchRequest patchRequest) {
+    void setDisplayOrder(String quizId, Integer questionId, ActionPatchRequest patchRequest) {
         QuizDef quizDef = findQuizDef(quizId)
         lockingService.lockQuizDef(quizDef.quizId)
-        if(ActionPatchRequest.ActionType.NewDisplayOrderIndex == patchRequest.action) {
+        if (ActionPatchRequest.ActionType.NewDisplayOrderIndex == patchRequest.action) {
             List<QuizQuestionDefRepo.DisplayOrder> currentDisplayOrder = quizQuestionRepo.getQuestionsDisplayOrder(quizDef.quizId)
             QuizQuestionDefRepo.DisplayOrder theItemToMove = currentDisplayOrder.find { it.getId() == questionId }
             QuizValidator.isTrue(theItemToMove != null, "Provide question id [${questionId}] is not valid", quizId)
@@ -791,20 +813,20 @@ class QuizDefService {
             int newIndex = Math.min(patchRequest.newDisplayOrderIndex, currentDisplayOrder.size() - 1)
             mutableDisplayOrder.add(newIndex, theItemToMove)
 
-            mutableDisplayOrder.eachWithIndex{ QuizQuestionDefRepo.DisplayOrder entry, int i ->
+            mutableDisplayOrder.eachWithIndex { QuizQuestionDefRepo.DisplayOrder entry, int i ->
                 quizQuestionRepo.updateDisplayOrder(entry.getId(), i)
             }
         }
     }
 
     void deleteVideoAttrs(String quizId, Integer questionId) {
-      quizQuestionRepo.deleteVideoAttrs(quizId, questionId)
+        quizQuestionRepo.deleteVideoAttrs(quizId, questionId)
     }
 
     @Transactional
     SkillVideoAttrs getVideoAttributesForQuestion(String quizId, Integer questionId) {
         String attributes = quizQuestionRepo.getVideoAttributes(quizId, questionId)
-        if(attributes) {
+        if (attributes) {
             SkillVideoAttrs res = mapper.readValue(attributes, SkillVideoAttrs.class)
             return res
         }
@@ -812,6 +834,7 @@ class QuizDefService {
     }
 
     static final ObjectMapper mapper = new ObjectMapper()
+
     @Transactional
     void saveVideoAttributesForQuestion(String quizId, Integer questionId, SkillVideoAttrs videoAttrs) {
         quizQuestionRepo.saveVideoAttributes(quizId, questionId, mapper.writeValueAsString(videoAttrs))
@@ -821,12 +844,12 @@ class QuizDefService {
     QuizQuestionsResult getQuestionDefs(String quizId) {
         QuizDef quizDef = findQuizDef(quizId)
         List<QuizQuestionDef> dbQuestionDefs = quizQuestionRepo.findAllByQuizIdIgnoreCase(quizId)
-        if (!dbQuestionDefs){
+        if (!dbQuestionDefs) {
             return new QuizQuestionsResult(quizType: quizDef.type, questions: [])
         }
 
         List<QuizAnswerDef> dbAnswersDef = quizAnswerRepo.findAllByQuizIdIgnoreCase(quizId)
-        Map<Integer, List<QuizAnswerDef>> byQuizId = dbAnswersDef.groupBy {it.questionRefId }
+        Map<Integer, List<QuizAnswerDef>> byQuizId = dbAnswersDef.groupBy { it.questionRefId }
 
         List<QuizQuestionDefResult> questions = dbQuestionDefs.collect { QuizQuestionDef quizQuestionDef ->
             List<QuizAnswerDef> quizAnswerDefs = byQuizId[quizQuestionDef.id]
@@ -866,11 +889,11 @@ class QuizDefService {
         long count = quizRunsPage.getTotalElements()
         List<UserQuizAttemptRepo.QuizRun> quizRuns = quizRunsPage.getContent()
 
-        List<Integer> quizAttemptIds = quizRuns.collect { it.attemptId}
+        List<Integer> quizAttemptIds = quizRuns.collect { it.attemptId }
         List<UserQuizAnswerAttemptRepo.QuestionAIGradingStatus> qAIGradingStatusList = userQuizAnswerAttemptRepo.findQuestionAiGradingStatus(quizAttemptIds)
-        Map<Integer, List<UserQuizAnswerAttemptRepo.QuestionAIGradingStatus>> qGradingByAttemptId = qAIGradingStatusList?.groupBy { it.quizAttemptId}
+        Map<Integer, List<UserQuizAnswerAttemptRepo.QuestionAIGradingStatus>> qGradingByAttemptId = qAIGradingStatusList?.groupBy { it.quizAttemptId }
         List<QuizRunResult> quizRunResultList = quizRuns.collect {
-            List<UserQuizAnswerAttemptRepo.QuestionAIGradingStatus> qGradingList =  qGradingByAttemptId.get(it.attemptId)
+            List<UserQuizAnswerAttemptRepo.QuestionAIGradingStatus> qGradingList = qGradingByAttemptId.get(it.attemptId)
             List<QuizRunResult.QuestionAiGradingStatus> aiGradingStatus = !qGradingList ? null : qGradingList.collect { UserQuizAnswerAttemptRepo.QuestionAIGradingStatus qGrading ->
                 Integer attemptCount = qGrading.getAiGradingAttemptCount() ?: 0
                 AiGradingStatusResult aiGradingStatusResult = createAiGradingStatusResult(qGrading.getStatus(), attemptCount)
@@ -939,9 +962,9 @@ class QuizDefService {
                 action: DashboardAction.Delete, item: DashboardItem.QuizAttempt,
                 itemId: quizDef1.quizId, quizId: quizDef1.quizId,
                 actionAttributes: [
-                        attemptStarted: userQuizAttempt.started,
+                        attemptStarted  : userQuizAttempt.started,
                         attemptCompleted: userQuizAttempt.completed,
-                        status: userQuizAttempt.status,
+                        status          : userQuizAttempt.status,
                 ]
         ))
         userQuizAttemptRepo.delete(userQuizAttempt)
@@ -968,7 +991,7 @@ class QuizDefService {
         List<UserQuizAttemptRepo.QuizCounts> quizCounts = userQuizAttemptRepo.getUserQuizAttemptCounts(quizId, startDate, endDate)
 
         int totalNumAttempts = quizCounts ? quizCounts.collect { it.getNumAttempts() }.sum() : 0
-        UserQuizAttemptRepo.QuizCounts passedQuizCounts = quizCounts.find{
+        UserQuizAttemptRepo.QuizCounts passedQuizCounts = quizCounts.find {
             UserQuizAttempt.QuizAttemptStatus.PASSED == it.getStatus()
         }
         UserQuizAttemptRepo.QuizCounts failedQuizCounts = quizCounts.find {
@@ -988,8 +1011,8 @@ class QuizDefService {
         List<UserQuizQuestionAttemptRepo.IdAndStatusCount> questionIdAndStatusCounts = userQuizQuestionAttemptRepo.getUserQuizQuestionAttemptCounts(quizId, startDate, endDate)
         List<UserQuizQuestionAttemptRepo.IdAndStatusCount> answerIdAndStatusCounts = userQuizQuestionAttemptRepo.getUserQuizAnswerAttemptCounts(quizId, startDate, endDate)
 
-        Map<Integer, List<UserQuizQuestionAttemptRepo.IdAndStatusCount>> byQuestionId = questionIdAndStatusCounts.groupBy { it.getId()}
-        Map<Integer, List<UserQuizQuestionAttemptRepo.IdAndStatusCount>> byAnswerId = answerIdAndStatusCounts.groupBy { it.getId()}
+        Map<Integer, List<UserQuizQuestionAttemptRepo.IdAndStatusCount>> byQuestionId = questionIdAndStatusCounts.groupBy { it.getId() }
+        Map<Integer, List<UserQuizQuestionAttemptRepo.IdAndStatusCount>> byAnswerId = answerIdAndStatusCounts.groupBy { it.getId() }
 
         List<QuizQuestionMetricsResult> questions = questionDefResults.collect { QuizQuestionDefResult questionDefResult ->
             List<UserQuizQuestionAttemptRepo.IdAndStatusCount> questionStatusCounts = byQuestionId[questionDefResult.id]
@@ -1006,7 +1029,7 @@ class QuizDefService {
                         List<UserQuizQuestionAttemptRepo.IdAndStatusCount> answerStatusCounts = byAnswerId[quizAnswerDefResult.id]
                         UserQuizQuestionAttemptRepo.IdAndStatusCount answerCorrectCount = answerStatusCounts?.find { it.getStatus() == UserQuizAnswerAttempt.QuizAnswerStatus.CORRECT.toString() }
                         UserQuizQuestionAttemptRepo.IdAndStatusCount answerWrongCount = answerStatusCounts?.find { it.getStatus() == UserQuizAnswerAttempt.QuizAnswerStatus.WRONG.toString() }
-                        int numAnswered = answerStatusCounts ? answerStatusCounts.collect{ it.getCount() }.sum() : 0
+                        int numAnswered = answerStatusCounts ? answerStatusCounts.collect { it.getCount() }.sum() : 0
                         new QuizAnswerMetricsResult(
                                 id: quizAnswerDefResult.id,
                                 answer: quizAnswerDefResult.answer,
@@ -1040,7 +1063,7 @@ class QuizDefService {
                 question: InputSanitizer.unsanitizeForMarkdown(savedQuestion.question),
                 answerHint: savedQuestion.answerHint,
                 questionType: savedQuestion.type,
-                answers: savedAnswers.collect { convert (it)}.sort { it.displayOrder},
+                answers: savedAnswers.collect { convert(it) }.sort { it.displayOrder },
                 displayOrder: savedQuestion.displayOrder,
                 attributes: qAttrs,
         )
@@ -1080,7 +1103,7 @@ class QuizDefService {
             throw new SkillQuizException("User [${currentUser.username}] does not have access to quiz [${quizAttemptId}]", quizDef.quizId, ErrorCode.AccessDenied)
         }
 
-        UserGradedQuizQuestionsResult res =  getAttemptGradedResult(quizDef, userQuizAttempt, false)
+        UserGradedQuizQuestionsResult res = getAttemptGradedResult(quizDef, userQuizAttempt, false)
         res.associatedSkills = quizAssociatedSkillsService.getAssociatedSkills([quizDef.quizId])
         return res
     }
@@ -1109,10 +1132,10 @@ class QuizDefService {
         boolean shouldHideQuestions = quizSettingsRepo.findBySettingAndQuizRefId(QuizSettings.HideCorrectAnswersOnCompletedQuiz.setting, quizDef.id)?.isEnabled()
 
         List<QuizQuestionDef> dbQuestionDefs = quizQuestionRepo.findQuestionDefsForSpecificQuizAttempt(userQuizAttempt.id)
-        List<QuizAnswerDef> dbAnswersDef = quizAnswerRepo.findAllByQuestionRefIdIn(dbQuestionDefs.collect({it.id}))
+        List<QuizAnswerDef> dbAnswersDef = quizAnswerRepo.findAllByQuestionRefIdIn(dbQuestionDefs.collect({ it.id }))
         List<UserQuizQuestionAttempt> questionAttempts = userQuizQuestionAttemptRepo.findAllByUserQuizAttemptRefId(userQuizAttempt.id)
-        Map<Integer, List<QuizAnswerDef>> byQuestionId = dbAnswersDef.groupBy {it.questionRefId }
-        Map<Integer, List<UserQuizAnswerGradedRepo.GradedInfo>> manuallyGradedAnswersByAnswerAttemptId = manuallyGradedAnswers.groupBy {it.answerAttemptId }
+        Map<Integer, List<QuizAnswerDef>> byQuestionId = dbAnswersDef.groupBy { it.questionRefId }
+        Map<Integer, List<UserQuizAnswerGradedRepo.GradedInfo>> manuallyGradedAnswersByAnswerAttemptId = manuallyGradedAnswers.groupBy { it.answerAttemptId }
 
         List<UserGradedQuizQuestionResult> questions = dbQuestionDefs
                 .sort { it.displayOrder }
@@ -1145,9 +1168,9 @@ class QuizDefService {
 
                         def answer
                         def isSelected = foundSelected != null
-                        if(isTextInput) {
+                        if (isTextInput) {
                             answer = foundSelected?.answerText
-                        } else if(isMatching) {
+                        } else if (isMatching) {
                             def originalAnswer = jsonSlurper.parseText(answerDef.multiPartAnswer)
                             originalAnswer.answer = originalAnswer.value
                             originalAnswer.value = foundSelected?.answerText
@@ -1173,9 +1196,9 @@ class QuizDefService {
                         )
                     }
 
-                    UserQuizQuestionAttempt userQuizQuestionAttempt = questionAttempts.find { it.quizQuestionDefinitionRefId == questionDef.id}
+                    UserQuizQuestionAttempt userQuizQuestionAttempt = questionAttempts.find { it.quizQuestionDefinitionRefId == questionDef.id }
                     boolean isCorrect = false
-                    if (isSurvey ) {
+                    if (isSurvey) {
                         isCorrect = true
                     } else {
                         if (questionDef.type == QuizQuestionType.Matching) {
@@ -1187,7 +1210,7 @@ class QuizDefService {
                         }
                     }
 
-                    boolean needsGrading = answers.find {it.needsGrading } != null
+                    boolean needsGrading = answers.find { it.needsGrading } != null
                     return new UserGradedQuizQuestionResult(
                             id: questionDef.id,
                             questionNum: index + 1,
@@ -1280,11 +1303,11 @@ class QuizDefService {
         propsBasedValidator.quizValidationMaxStrLength(PublicProps.UiProp.maxQuizAnswerHintLength, "Answer Hint", questionDefRequest.answerHint, quizDef.quizId)
         int numQuestions = quizQuestionRepo.countByQuizId(quizDef.quizId)
         propsBasedValidator.quizValidationMaxIntValue(PublicProps.UiProp.maxQuestionsPerQuiz, "Number of Questions", numQuestions + 1, quizDef.quizId)
-        CustomValidationResult customValidationResult = customValidator.validateDescription(questionDefRequest.question, null, null, quizDef.quizId)
+        CustomValidationResult customValidationResult = customValidator.validateDescription(new CustomValidator.ValidateDescReq(description: questionDefRequest.question, quizId: quizDef.quizId))
         if (!customValidationResult.valid) {
             throw new SkillQuizException("Question: ${customValidationResult.msg}", quizId, ErrorCode.BadParam)
         }
-        customValidationResult = customValidator.validateDescription(questionDefRequest.answerHint, null, null, quizDef.quizId)
+        customValidationResult = customValidator.validateDescription(new CustomValidator.ValidateDescReq(description: questionDefRequest.answerHint, quizId: quizDef.quizId))
         if (!customValidationResult.valid) {
             throw new SkillQuizException("Answer Hint: ${customValidationResult.msg}", quizId, ErrorCode.BadParam)
         }
@@ -1293,7 +1316,7 @@ class QuizDefService {
             QuizValidator.isNotNull(questionDefRequest.answers, "answers", quizId)
             QuizValidator.isTrue(questionDefRequest.answers.size() >= 2, "Must have at least 2 answers", quizId)
             questionDefRequest.answers.each {
-                if(questionDefRequest.questionType != QuizQuestionType.Matching) {
+                if (questionDefRequest.questionType != QuizQuestionType.Matching) {
                     QuizValidator.isNotBlank(it.answer, "answers.answer", quizId, true)
                     propsBasedValidator.quizValidationMaxStrLength(PublicProps.UiProp.maxQuizTextAnswerLength, "Answer", it.answer, quizDef.quizId)
                 } else {
@@ -1329,7 +1352,7 @@ class QuizDefService {
     List<LabelCountItem> getUserTagCounts(String quizId, String userTag, Date startDate, Date endDate) {
         PageRequest pageRequest = PageRequest.of(0, 20, DESC, "tagCount")
         List<UserQuizAttemptRepo.TagValueCount> tagValueCounts = userQuizAttemptRepo.getUserTagCounts(quizId, userTag, startDate, endDate, pageRequest)
-        return tagValueCounts?.collect { new LabelCountItem(value: it.tagValue, count: it.tagCount)}
+        return tagValueCounts?.collect { new LabelCountItem(value: it.tagValue, count: it.tagCount) }
     }
 
     @Transactional(readOnly = true)
@@ -1362,13 +1385,13 @@ class QuizDefService {
         List<DayCountItem> items = ZeroFillDayCountItemUtil.zeroFillDailyGaps(now, previousDate, true)
         if (items) {
             items.forEach({ item ->
-                if(item.day >= startDate && item.day <= endDate) {
-                    res.add(new TimestampCountItem( value: item.day.time, count: item.count))
+                if (item.day >= startDate && item.day <= endDate) {
+                    res.add(new TimestampCountItem(value: item.day.time, count: item.count))
                 }
             })
         }
 
-        return res.sort{ it.value }
+        return res.sort { it.value }
     }
 
     @Transactional()
@@ -1412,6 +1435,7 @@ class QuizDefService {
 
 
     Set<String> availableQuizTypes = QuizDefParent.QuizType.values().collect({ it.toString() }).toSet()
+
     private void validateQuizDefRequest(String quizId, QuizDefRequest quizDefRequest) {
         IdFormatValidator.validate(quizId)
         propsBasedValidator.quizValidationMaxStrLength(PublicProps.UiProp.maxIdLength, "QuizId", quizId, quizId)
@@ -1425,7 +1449,7 @@ class QuizDefService {
         }
 
         QuizValidator.isNotBlank(quizDefRequest.type, "Type")
-        if (!availableQuizTypes.contains(quizDefRequest.type)){
+        if (!availableQuizTypes.contains(quizDefRequest.type)) {
             throw new SkillQuizException("Not supported quiz type [${quizDefRequest.type}] please select one from ${availableQuizTypes}", quizId, ErrorCode.BadParam)
         }
 
@@ -1436,10 +1460,9 @@ class QuizDefService {
 
 
     @Profile
-    private void validateUserCommunityProps(QuizDefRequest quizDefRequest, QuizDefParent quizDef) {
-        String quizId = quizDef?.quizId ?: quizDefRequest.quizId
-        if (quizDefRequest.enableProtectedUserCommunity != null) {
-            if (quizDefRequest.enableProtectedUserCommunity) {
+    private void validateUserCommunityProps(String quizId, QuizDefParent existingQuizDef, Boolean enableProtectedUserCommunity) {
+        if (enableProtectedUserCommunity != null) {
+            if (enableProtectedUserCommunity) {
                 String userId = userInfoService.currentUserId
                 if (!userCommunityService.isUserCommunityMember(userId)) {
                     throw new SkillQuizException("User [${userId}] is not allowed to set [enableProtectedUserCommunity] to true", quizId, ErrorCode.AccessDenied)
@@ -1450,8 +1473,8 @@ class QuizDefService {
                     String reasons = enableProjValidationRes.unmetRequirements.join("\n")
                     throw new SkillQuizException("Not Allowed to set [enableProtectedUserCommunity] to true. Reasons are:\n${reasons}", quizId, ErrorCode.AccessDenied)
                 }
-            } else if (quizDef){
-                QuizValidator.isTrue(!userCommunityService.isUserCommunityOnlyQuiz(quizDef.id), "Once quiz [enableProtectedUserCommunity=true] it cannot be flipped to false", quizId)
+            } else if (existingQuizDef) {
+                QuizValidator.isTrue(!userCommunityService.isUserCommunityOnlyQuiz(existingQuizDef.id), "Once quiz [enableProtectedUserCommunity=true] it cannot be flipped to false", quizId)
             }
         }
     }

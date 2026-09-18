@@ -15,6 +15,7 @@
  */
 package skills.storage.repos
 
+import org.springframework.data.jpa.repository.Modifying
 import org.springframework.data.jpa.repository.Query
 import org.springframework.data.repository.CrudRepository
 import org.springframework.lang.Nullable
@@ -30,4 +31,8 @@ interface QuizDefWithDescRepo extends CrudRepository<QuizDefWithDescription, Lon
 
     @Query('''SELECT s FROM QuizDefWithDescription s''')
     Stream<QuizDefWithDescription> streamAll()
+
+    @Modifying
+    @Query('''update QuizDefWithDescription set description = ?2 where quizId = ?1''')
+    void updateDescription(String projectId, String description)
 }

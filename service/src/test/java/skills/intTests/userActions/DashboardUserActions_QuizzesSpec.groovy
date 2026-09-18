@@ -41,16 +41,22 @@ class DashboardUserActions_QuizzesSpec  extends DefaultIntSpec {
         String originalName = quiz.name
         when:
         skillsService.createQuizDef(quiz)
+        def sourceQuiz = QuizDefFactory.createQuiz(2)
+        skillsService.createQuizDef(sourceQuiz)
+        def attachmentHref = skillsService.uploadAttachment('test-pdf.pdf', 'test content', null, null, sourceQuiz.quizId).href
         String prevQuizName = quiz.name
         quiz.name = "Cool New Name"
-        quiz.description = "Important Update"
+        quiz.description = "[Important Update](${attachmentHref})".toString()
         skillsService.createQuizDef(quiz, quiz.quizId)
+        def updatedQuiz = skillsService.getQuizDef(quiz.quizId)
         skillsService.removeQuizDef(quiz.quizId)
 
         then:
-        def res = rootService.getUserActionsForEverything()
+        def res = rootService.getUserActionsForQuiz(quiz.quizId)
         def createAction = rootService.getUserActionAttributes(res.data[2].id)
-        def editAction = rootService.getUserActionAttributes(res.data[1].id)
+        def editActions = rootService.getUserActionsForQuiz(quiz.quizId, 10, 1, "created", false,
+                DashboardItem.Quiz, '', quiz.quizId, DashboardAction.Edit)
+        def editAction = rootService.getUserActionAttributes(editActions.data[0].id)
         def deleteAction = rootService.getUserActionAttributes(res.data[0].id)
         then:
         res.count == 3
@@ -84,7 +90,7 @@ class DashboardUserActions_QuizzesSpec  extends DefaultIntSpec {
         editAction.id == res.data[1].itemRefId
         editAction.newName == quiz.name
         editAction.previousName == prevQuizName
-        editAction.description == "Important Update"
+        editAction.description == updatedQuiz.description
 
         !deleteAction.id
     }

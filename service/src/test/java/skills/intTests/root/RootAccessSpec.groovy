@@ -130,7 +130,7 @@ class RootAccessSpec extends DefaultIntSpec {
     }
 
     def 'verify retrieving non-root users as a root user'() {
-        SkillsService otherUser = createService(getRandomUsers(1).first())
+        SkillsService otherUser = createService("userrolespecsuser1")
         when:
         def result = rootSkillsService.getNonRootUsers(otherUser.userName)
 

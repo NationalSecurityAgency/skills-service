@@ -329,12 +329,6 @@ class SkillsAdminService {
                 }
             }
 
-            if (!isSkillCatalogImport) {
-                Closure<Boolean> alreadyExistLookup = { String uuid ->
-                    return skillDefWithExtraRepo.otherSkillsExistInProjectWithAttachmentUUID(skillRequest.projectId, skillRequest.skillId, uuid)
-                }
-                description = attachmentService.copyAttachmentsForIncomingDescription(description, skillRequest.projectId, skillRequest.skillId, null, alreadyExistLookup)
-            }
 
             skillDefinition = new SkillDefWithExtra(
                     skillId: skillRequest.skillId,
@@ -386,7 +380,11 @@ class SkillsAdminService {
             }
         }
         if (!isSkillCatalogImport) {
-            attachmentService.updateAttachmentsAttrsBasedOnUuidsInMarkdown(description, savedSkill.projectId, null, savedSkill.skillId)
+            AttachmentService.CopyAttachmentRes copyRes = attachmentService.updateAttachmentsAttrsBasedOnUuidsInMarkdown(description, savedSkill.projectId, null, originalSkillId, savedSkill.skillId)
+            if (copyRes.updated) {
+                skillDefWithExtraRepo.updateDescriptionByProjectIdAndSkillId(savedSkill.projectId, savedSkill.skillId, copyRes.markdown)
+                tempSaved.description = copyRes.markdown
+            }
         }
 
         if (isSkillsGroupChild) {

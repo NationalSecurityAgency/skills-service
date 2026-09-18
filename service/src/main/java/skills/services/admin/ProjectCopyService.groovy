@@ -316,14 +316,14 @@ class ProjectCopyService {
 
         if (!validationErrors) {
             validLoop: for (SkillIdAndName skillToCheck : itemsToCopy) {
-                CustomValidationResult validationResult = customValidator.validateDescription(skillToCheck.description, origProjId)
+                CustomValidationResult validationResult = customValidator.validateDescription(new CustomValidator.ValidateDescReq(description:skillToCheck.description, projectId: origProjId))
                 if (!validationResult.isValid()) {
                     validationErrors.add("The skill [${skillToCheck.skillName}] has a description that doesn\'t meet the validation requirements. Please fix and try again.".toString())
                 }
 
                 SkillVideoAttrs videoAttrs = skillAttributeService.getVideoAttrs(origProjId, skillToCheck.skillId)
                 if (StringUtils.isNotBlank(videoAttrs?.transcript)) {
-                    validationResult = customValidator.validateDescription(videoAttrs.transcript, origProjId)
+                    validationResult = customValidator.validateDescription(new CustomValidator.ValidateDescReq(description:videoAttrs.transcript, projectId:  origProjId))
                     if (!validationResult.isValid()) {
                         validationErrors.add("The skill [${skillToCheck.skillName}] has a video trascript that doesn\'t meet the validation requirements. Please fix and try again.".toString())
                     }
@@ -410,8 +410,7 @@ class ProjectCopyService {
             ProjDef fromProject = loadProject(originalProjectId)
             validate(projectRequest)
 
-            ProjDef toProj = saveToProject(projectRequest, originalProjectId)
-            saveProjectSettings(fromProject, toProj)
+            ProjDef toProj = saveToProject(projectRequest, fromProject)
 
             CustomValidationResult customValidationResult = customValidator.validate(projectRequest)
             if (!customValidationResult.valid) {
@@ -811,7 +810,7 @@ class ProjectCopyService {
         if (attributesDef.type == SkillAttributesDef.SkillAttributesType.Video) {
             SkillVideoAttrs videoAttrs = skillAttributeService.convertAttrs(attributesDef, SkillVideoAttrs.class)
             if (StringUtils.isNotBlank(videoAttrs.transcript)) {
-                CustomValidationResult validationResult = customValidator.validateDescription(videoAttrs.transcript, fromSkill.projectId)
+                CustomValidationResult validationResult = customValidator.validateDescription(new CustomValidator.ValidateDescReq(description:videoAttrs.transcript, projectId: fromSkill.projectId))
                 if (!validationResult.valid) {
                     String msg = "Video transcript validation failed, fullMessage=[${validationResult.msg}]"
                     throw new SkillException(msg, null, fromSkill.projectId, fromSkill.skillId, ErrorCode.ParagraphValidationFailed)
@@ -838,12 +837,13 @@ class ProjectCopyService {
 
 
     @Profile
-    private ProjDef saveToProject(ProjectRequest projectRequest, String originalProjectId) {
+    private ProjDef saveToProject(ProjectRequest projectRequest, ProjDef fromProject) {
         try {
             projectRequest.description = null  // any description in the request should be ignored
             projAdminService.saveProject(null, projectRequest)
             ProjDef toProj = projDefRepo.findByProjectId(projectRequest.projectId)
-            String description = projDefWithDescriptionRepo.getDescriptionByProjectId(originalProjectId)
+            saveProjectSettings(fromProject, toProj)
+            String description = projDefWithDescriptionRepo.getDescriptionByProjectId(fromProject.projectId)
             description = handleAttachmentsInDescription(description, toProj.projectId)
             projectRequest.description = description
             // re-run validation with updated description
@@ -854,7 +854,7 @@ class ProjectCopyService {
             projDefWithDescriptionRepo.updateDescription(toProj.projectId, description)
             return toProj
         } catch (Throwable t) {
-            handleItemFailure(t, 'project', originalProjectId)
+            handleItemFailure(t, 'project', fromProject.projectId)
         }
     }
 

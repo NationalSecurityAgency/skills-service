@@ -26,14 +26,17 @@ class ClientAbortExceptionSpecs extends DefaultIntSpec {
     def "client disconnects causing clientAbortException"() {
         setup:
         LoggerHelper loggerHelper = new LoggerHelper(RestExceptionHandler.class)
+        String expectedMessage = "GET uri=/public/longRunningEndpoint, ClientAbortException - client prematurely closed the connection"
 
         when:
         int responseCode = disconnectEarly('/public/longRunningEndpoint')
-        WaitFor.wait { loggerHelper.hasLogMsgStartsWith("GET uri=/public/longRunningEndpoint,") }
 
         then:
         responseCode == 200
-        loggerHelper.logEvents.find { it.level == Level.WARN && it.message == "GET uri=/public/longRunningEndpoint, ClientAbortException - client prematurely closed the connection" }
+        WaitFor.wait { loggerHelper.logEvents.any { it.level == Level.WARN && it.message == expectedMessage } }
+
+        cleanup:
+        loggerHelper.stop()
     }
 
     private int disconnectEarly(String path) throws IOException {

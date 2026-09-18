@@ -25,10 +25,13 @@ import skills.intTests.utils.SkillsClientException
 import skills.intTests.utils.SkillsService
 import skills.quizLoading.QuizSettings
 import skills.services.quiz.QuizQuestionType
+import skills.services.userActions.DashboardAction
+import skills.services.userActions.DashboardItem
 import skills.storage.model.Attachment
 import skills.storage.model.SkillDef
 import skills.storage.model.auth.RoleName
 import skills.storage.repos.AttachmentRepo
+import spock.lang.IgnoreRest
 
 import java.nio.file.Files
 
@@ -725,6 +728,10 @@ class QuizDefCopySpecs extends DefaultIntSpec {
 
         def originalQuiz = skillsService.getQuizDef(quiz.quizId)
         def copiedQuizRes = skillsService.getQuizDef(copiedQuiz.quizId)
+        def rootService = createRootSkillService()
+        def actions = rootService.getUserActionsForQuiz(copiedQuiz.quizId, 10, 1, "created", false,
+                DashboardItem.Quiz, '', copiedQuiz.quizId, DashboardAction.Create)
+        def createAction = rootService.getUserActionAttributes(actions.data[0].id)
         List<Attachment> attachments_t2 = attachmentRepo.findAll().toList()
         List<Attachment> newAttachments = attachments_t2.findAll {
             !attachments_t1.find { Attachment inner -> inner.uuid == it.uuid}
@@ -744,6 +751,7 @@ class QuizDefCopySpecs extends DefaultIntSpec {
         newAttachments.quizId == [copiedQuizRes.quizId, copiedQuizRes.quizId]
         copiedQuizRes.description.contains(newAttachments[0].uuid)
         copiedQuizRes.description.contains(newAttachments[1].uuid)
+        createAction.description == copiedQuizRes.description
     }
 
     def "copy quiz - attachments in question description are duplicated"() {
@@ -793,6 +801,38 @@ class QuizDefCopySpecs extends DefaultIntSpec {
         newAttachments.quizId == [copiedQuiz.quizId, copiedQuiz.quizId]
         copiedQuestions[0].question.contains(newAttachments[0].uuid)
         copiedQuestions[0].question.contains(newAttachments[1].uuid)
+    }
+
+    def "copy quiz - repeated attachment links in question create only one destination attachment"() {
+        def quiz = QuizDefFactory.createQuiz(1)
+        skillsService.createQuizDef(quiz)
+
+        def uploadedAttachment = skillsService.uploadAttachment('test-pdf.pdf', 'Text in a file', null, null, quiz.quizId)
+        String questionWithRepeatedAttachment = (1..3).collect {
+            "[File${it}.pdf](${uploadedAttachment.href})"
+        }.join("\n")
+
+        def question = QuizDefFactory.createChoiceQuestion(1, 1, 5, QuizQuestionType.MultipleChoice)
+        question.question = questionWithRepeatedAttachment
+        skillsService.createQuizQuestionDef(question)
+
+        when:
+        def copiedQuiz = skillsService.copyQuiz(quiz.quizId, [quizId: 'newQuizCopy', name: 'Copy of Quiz', description: '', type: quiz.type]).body
+        def copiedQuestion = skillsService.getQuizQuestionDefs(copiedQuiz.quizId).questions[0]
+        List<Attachment> attachments = attachmentRepo.findAll().toList()
+
+        then:
+        attachments.size() == 2
+        Attachment originalAttachment = attachments.find { it.uuid == uploadedAttachment.uuid }
+        originalAttachment.quizId == quiz.quizId
+
+        Attachment copiedAttachment = attachments.find { it.uuid != originalAttachment.uuid }
+        copiedAttachment.quizId == copiedQuiz.quizId
+        !copiedAttachment.projectId
+        !copiedAttachment.skillId
+        copiedQuestion.question == (1..3).collect {
+            "[File${it}.pdf](/api/download/${copiedAttachment.uuid})"
+        }.join("\n")
     }
 
     def "a single question is copied via UI - attachments in question description are duplicated"() {

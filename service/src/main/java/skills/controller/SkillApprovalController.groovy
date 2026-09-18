@@ -100,7 +100,7 @@ class SkillApprovalController {
         SkillsValidator.isTrue(approveRequest?.skillApprovalIds?.size() > 0, "Must supply [skillApprovalIds]", projectId)
 
         if (StringUtils.isNoneBlank(approveRequest.approvalMessage)) {
-            CustomValidationResult customValidationResult = customValidator.validateDescription(approveRequest.approvalMessage, projectId)
+            CustomValidationResult customValidationResult = customValidator.validateDescription(new CustomValidator.ValidateDescReq(description: approveRequest.approvalMessage, projectId: projectId))
             if (!customValidationResult.valid) {
                 String msg = "Custom validation failed: msg=[${customValidationResult.msg}], type=[skillApprovalApprove], approvalMsg=[${approveRequest.approvalMessage}], skillApprovalIds=${approveRequest.skillApprovalIds}]"
                 throw new SkillException(msg, projectId, null, ErrorCode.BadParam)
@@ -119,7 +119,7 @@ class SkillApprovalController {
         SkillsValidator.isTrue(rejectRequest?.skillApprovalIds?.size() > 0, "Must supply [skillApprovalIds]", projectId)
 
         if (StringUtils.isNoneBlank(rejectRequest.rejectionMessage)) {
-            CustomValidationResult customValidationResult = customValidator.validateDescription(rejectRequest.rejectionMessage, projectId)
+            CustomValidationResult customValidationResult = customValidator.validateDescription(new CustomValidator.ValidateDescReq(description:rejectRequest.rejectionMessage, projectId:  projectId))
             if (!customValidationResult.valid) {
                 String msg = "Custom validation failed: msg=[${customValidationResult.msg}], type=[skillApprovalRejection], rejectionMsg=[${rejectRequest.rejectionMessage}], skillApprovalIds=${rejectRequest.skillApprovalIds}]"
                 throw new SkillException(msg, projectId, null, ErrorCode.BadParam)

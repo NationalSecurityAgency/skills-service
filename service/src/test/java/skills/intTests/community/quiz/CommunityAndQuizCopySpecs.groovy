@@ -19,14 +19,17 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.core.io.ClassPathResource
 import org.springframework.core.io.Resource
 import org.springframework.jdbc.core.JdbcTemplate
-import skills.intTests.utils.DefaultIntSpec
+import skills.intTests.copyProject.CopyIntSpec
 import skills.intTests.utils.QuizDefFactory
 import skills.intTests.utils.SkillsClientException
 import skills.intTests.utils.SkillsService
 import skills.quizLoading.QuizSettings
+import skills.storage.model.Attachment
 import skills.storage.model.QuizSetting
 
-class CommunityAndQuizCopySpecs extends DefaultIntSpec {
+import java.nio.file.Files
+
+class CommunityAndQuizCopySpecs extends CopyIntSpec {
 
     @Autowired
     JdbcTemplate jdbcTemplate
@@ -41,6 +44,26 @@ class CommunityAndQuizCopySpecs extends DefaultIntSpec {
         then:
         SkillsClientException e = thrown(SkillsClientException)
         e.getMessage().contains("User [${skillsService.userName}] is not allowed to set [enableProtectedUserCommunity] to true")
+    }
+
+    def "failed UC copy rolls back the destination quiz, setting, and attachment"() {
+        def q1 = QuizDefFactory.createQuiz(1)
+        skillsService.createQuizDef(q1)
+        String attachmentHref = attachFileForQuizAndReturnHref(q1.quizId)
+        q1.description = "Here is a [Link](${attachmentHref})".toString()
+        skillsService.createQuizDef(q1, q1.quizId)
+        long settingsCountBefore = quizSettingsRepo.count()
+
+        when:
+        def copy = [quizId: 'newQuizCopy', name: 'Copy of Quiz', description: q1.description, type: q1.type, enableProtectedUserCommunity: true]
+        skillsService.copyQuiz(q1.quizId, copy)
+
+        then:
+        SkillsClientException e = thrown(SkillsClientException)
+        e.message.contains('errorCode:AccessDenied')
+        !quizDefRepo.findByQuizIdIgnoreCase(copy.quizId)
+        quizSettingsRepo.count() == settingsCountBefore
+        !(attachmentRepo.findAll() as List).find { it.quizId == copy.quizId }
     }
 
     def "copying quiz should copy the community"() {
@@ -68,6 +91,140 @@ class CommunityAndQuizCopySpecs extends DefaultIntSpec {
         then:
         copiedQuizDef.quizId == copy.quizId
         copiedQuizDef.userCommunity == 'Divine Dragon'
+    }
+
+    def "copying UC-protected quiz with #requestedCommunityLabel should copy its description attachment"() {
+        List<String> users = getRandomUsers(2)
+
+        SkillsService pristineDragonsUser = createService(users[1])
+        SkillsService rootUser = createRootSkillService()
+        rootUser.saveUserTag(pristineDragonsUser.userName, 'dragons', ['DivineDragon'])
+
+        def q1 = QuizDefFactory.createQuiz(1)
+        q1.enableProtectedUserCommunity = true
+        pristineDragonsUser.createQuizDef(q1)
+        String attachmentHref = attachFileForQuizAndReturnHref(q1.quizId, 'Test is a test', pristineDragonsUser)
+
+        q1.description = "Here is a [Link](${attachmentHref})".toString()
+        pristineDragonsUser.createQuizDef(q1, q1.quizId)
+
+        when:
+        def copy = [quizId: 'newQuizCopy', name: 'Copy of Quiz', description: q1.description, type: q1.type]
+        if (requestedCommunity != null) {
+            copy.enableProtectedUserCommunity = requestedCommunity
+        }
+        pristineDragonsUser.copyQuiz(q1.quizId, copy)
+
+        def copiedQuizDef = pristineDragonsUser.getQuizDef(copy.quizId)
+        List<Attachment> attachments = attachmentRepo.findAll() as List
+        Attachment copiedAttachment = attachments.find { it.quizId == copy.quizId }
+
+        then:
+        copiedQuizDef.userCommunity == 'Divine Dragon'
+        attachments.size() == 2
+        copiedAttachment.quizId == copy.quizId
+        copiedQuizDef.description == "Here is a [Link](/api/download/${copiedAttachment.uuid})"
+
+        where:
+        requestedCommunity | requestedCommunityLabel
+        true               | 'community enabled'
+        false              | 'community disabled'
+        null               | 'community omitted'
+    }
+
+    def "copying UC-protected quiz should copy question attachments"() {
+        List<String> users = getRandomUsers(2)
+
+        SkillsService pristineDragonsUser = createService(users[1])
+        SkillsService rootUser = createRootSkillService()
+        rootUser.saveUserTag(pristineDragonsUser.userName, 'dragons', ['DivineDragon'])
+
+        def q1 = QuizDefFactory.createQuiz(1)
+        q1.enableProtectedUserCommunity = true
+        pristineDragonsUser.createQuizDef(q1)
+        String attachmentHref = attachFileForQuizAndReturnHref(q1.quizId, 'Question attachment', pristineDragonsUser)
+        def question = QuizDefFactory.createChoiceQuestion(1, 1, 2)
+        question.question = "Question [Link](${attachmentHref})".toString()
+        pristineDragonsUser.createQuizQuestionDef(question)
+
+        when:
+        def copy = [quizId: 'newQuizCopy', name: 'Copy of Quiz', description: '', type: q1.type]
+        pristineDragonsUser.copyQuiz(q1.quizId, copy)
+
+        def copiedQuizDef = pristineDragonsUser.getQuizDef(copy.quizId)
+        def copiedQuestion = pristineDragonsUser.getQuizQuestionDefs(copy.quizId).questions.first()
+        List<Attachment> attachments = attachmentRepo.findAll() as List
+        Attachment copiedAttachment = attachments.find { it.quizId == copy.quizId }
+
+        then:
+        copiedQuizDef.userCommunity == 'Divine Dragon'
+        attachments.size() == 2
+        copiedAttachment.quizId == copy.quizId
+        copiedQuestion.question == "Question [Link](/api/download/${copiedAttachment.uuid})"
+    }
+
+    def "copying UC-protected quiz copies ordinary settings exactly once"() {
+        List<String> users = getRandomUsers(2)
+
+        SkillsService pristineDragonsUser = createService(users[1])
+        SkillsService rootUser = createRootSkillService()
+        rootUser.saveUserTag(pristineDragonsUser.userName, 'dragons', ['DivineDragon'])
+
+        def q1 = QuizDefFactory.createQuiz(1)
+        q1.enableProtectedUserCommunity = true
+        pristineDragonsUser.createQuizDef(q1)
+        pristineDragonsUser.createQuizQuestionDefs(QuizDefFactory.createChoiceQuestions(1, 3, 2))
+        pristineDragonsUser.saveQuizSettings(q1.quizId, [
+                [setting: QuizSettings.QuizTimeLimit.setting, value: 300],
+                [setting: QuizSettings.QuizLength.setting, value: 10],
+                [setting: QuizSettings.MinNumQuestionsToPass.setting, value: 3],
+        ])
+
+        when:
+        def copy = [quizId: 'newQuizCopy', name: 'Copy of Quiz', description: '', type: q1.type]
+        pristineDragonsUser.copyQuiz(q1.quizId, copy)
+        Integer copiedQuizRefId = quizDefRepo.findByQuizIdIgnoreCase(copy.quizId).id
+        List<QuizSetting> copiedSettings = quizSettingsRepo.findAll().findAll { it.quizRefId == copiedQuizRefId }
+
+        then:
+        copiedSettings.size() == 5
+        copiedSettings.count { it.setting == QuizSettings.UserCommunityOnlyQuiz.setting && it.value == 'true' } == 1
+        copiedSettings.count { it.setting == QuizSettings.QuizTimeLimit.setting && it.value == '300' } == 1
+        copiedSettings.count { it.setting == QuizSettings.QuizLength.setting && it.value == '10' } == 1
+        copiedSettings.count { it.setting == QuizSettings.MinNumQuestionsToPass.setting && it.value == '3' } == 1
+    }
+
+    def "copying UC-protected quiz copies internally hosted slides"() {
+        List<String> users = getRandomUsers(2)
+
+        SkillsService pristineDragonsUser = createService(users[1])
+        SkillsService rootUser = createRootSkillService()
+        rootUser.saveUserTag(pristineDragonsUser.userName, 'dragons', ['DivineDragon'])
+
+        def q1 = QuizDefFactory.createQuiz(1)
+        q1.enableProtectedUserCommunity = true
+        pristineDragonsUser.createQuizDef(q1)
+        Resource pdfSlides = new ClassPathResource('/testSlides/test-slides-1.pdf')
+        pristineDragonsUser.saveQuizSlidesAttributes(q1.quizId, [file: pdfSlides, width: 111])
+        def originalQuizInfo = pristineDragonsUser.getQuizInfo(q1.quizId)
+
+        when:
+        def copy = [quizId: 'newQuizCopy', name: 'Copy of Quiz', description: '', type: q1.type]
+        pristineDragonsUser.copyQuiz(q1.quizId, copy)
+        def copiedQuizDef = pristineDragonsUser.getQuizDef(copy.quizId)
+        def copiedQuizInfo = pristineDragonsUser.getQuizInfo(copy.quizId)
+        List<Attachment> attachments = attachmentRepo.findAll() as List
+        Attachment copiedSlides = attachments.find { it.quizId == copy.quizId }
+
+        then:
+        copiedQuizDef.userCommunity == 'Divine Dragon'
+        attachments.size() == 2
+        copiedSlides
+        originalQuizInfo.slidesSummary.url != copiedQuizInfo.slidesSummary.url
+        copiedQuizInfo.slidesSummary.url.contains(copiedSlides.uuid)
+        copiedQuizInfo.slidesSummary.width == 111.0
+        copiedQuizInfo.slidesSummary.type == 'application/pdf'
+        pristineDragonsUser.downloadAttachment(copiedQuizInfo.slidesSummary.url).file.bytes == Files.readAllBytes(pdfSlides.getFile().toPath())
     }
 
     def "cannot disable community when copying a quiz"() {
@@ -128,7 +285,7 @@ class CommunityAndQuizCopySpecs extends DefaultIntSpec {
         originalQuizDef.quizId == q1.quizId
         originalQuizDef.userCommunity == 'All Dragons'
 
-        List<QuizSetting> ucSettings = quizSettingsRepo.findAll().findAll({ it.setting == QuizSettings.UserCommunityOnlyQuiz.setting})
+        List<QuizSetting> ucSettings = quizSettingsRepo.findAll().findAll({ it.setting == QuizSettings.UserCommunityOnlyQuiz.setting })
         ucSettings.size() == 1
         ucSettings[0].value == "true"
         ucSettings[0].quizRefId == quizDefRepo.findByQuizIdIgnoreCase(copy.quizId).id
@@ -153,10 +310,10 @@ class CommunityAndQuizCopySpecs extends DefaultIntSpec {
         pristineDragonsUser.createQuizQuestionDefs(q2Questions)
 
         when:
-        def copy = [quizId: 'newQuizCopy',
-                    name: 'Copy of Quiz',
-                    description: "This is a jabberwocky description that is not allowed in non-uc projects",
-                    type: q1.type,
+        def copy = [quizId                      : 'newQuizCopy',
+                    name                        : 'Copy of Quiz',
+                    description                 : "This is a jabberwocky description that is not allowed in non-uc projects",
+                    type                        : q1.type,
                     enableProtectedUserCommunity: true]
         pristineDragonsUser.copyQuiz(q1.quizId, copy)
         def copiedQuizDef = pristineDragonsUser.getQuizDef(copy.quizId)
@@ -190,10 +347,10 @@ class CommunityAndQuizCopySpecs extends DefaultIntSpec {
         pristineDragonsUser.createQuizQuestionDefs(q2Questions)
 
         when:
-        def copy = [quizId: 'newQuizCopy',
-                    name: 'Copy of Quiz',
-                    description: "divinedragon is not allowed in uc projects",
-                    type: q1.type,
+        def copy = [quizId                      : 'newQuizCopy',
+                    name                        : 'Copy of Quiz',
+                    description                 : "divinedragon is not allowed in uc projects",
+                    type                        : q1.type,
                     enableProtectedUserCommunity: true]
         pristineDragonsUser.copyQuiz(q1.quizId, copy)
         then:
@@ -220,10 +377,10 @@ class CommunityAndQuizCopySpecs extends DefaultIntSpec {
         pristineDragonsUser.createQuizQuestionDefs(q2Questions)
 
         when:
-        def copy = [quizId: 'newQuizCopy',
-                    name: 'Copy of Quiz',
+        def copy = [quizId     : 'newQuizCopy',
+                    name       : 'Copy of Quiz',
                     description: "divinedragon is not allowed in uc projects",
-                    type: q1.type]
+                    type       : q1.type]
         pristineDragonsUser.copyQuiz(q1.quizId, copy)
         def copiedQuizDef = pristineDragonsUser.getQuizDef(copy.quizId)
         def originalQuizDef = pristineDragonsUser.getQuizDef(q1.quizId)
@@ -256,8 +413,8 @@ class CommunityAndQuizCopySpecs extends DefaultIntSpec {
 
         when:
         def copy = [quizId: 'newQuizCopy',
-                    name: 'Copy of Quiz',
-                    type: q1.type]
+                    name  : 'Copy of Quiz',
+                    type  : q1.type]
         pristineDragonsUser.copyQuiz(q1.quizId, copy)
         def copiedQuizDef = pristineDragonsUser.getQuizDef(copy.quizId)
         def originalQuizDef = pristineDragonsUser.getQuizDef(q1.quizId)
@@ -290,8 +447,8 @@ class CommunityAndQuizCopySpecs extends DefaultIntSpec {
         def origQuestionDefs = pristineDragonsUser.getQuizQuestionDefs(q1.quizId)
         when:
         def copy = [quizId: 'newQuizCopy',
-                    name: 'Copy of Quiz',
-                    type: q1.type]
+                    name  : 'Copy of Quiz',
+                    type  : q1.type]
         pristineDragonsUser.copyQuiz(q1.quizId, copy)
         then:
         def exception = thrown(SkillsClientException)
@@ -314,9 +471,9 @@ class CommunityAndQuizCopySpecs extends DefaultIntSpec {
 
         def origQuestionDefs = pristineDragonsUser.getQuizQuestionDefs(q1.quizId)
         pristineDragonsUser.saveSkillVideoAttributes(q1.quizId, origQuestionDefs.questions[1].id?.toString(), [
-                videoUrl: "http://some.url",
+                videoUrl  : "http://some.url",
                 transcript: "jabberwocky",
-                captions: "captions",
+                captions  : "captions",
         ], true)
 
         jdbcTemplate.execute("DELETE FROM quiz_settings qs USING quiz_definition qd WHERE qs.quiz_ref_id = qd.id " +
@@ -325,8 +482,8 @@ class CommunityAndQuizCopySpecs extends DefaultIntSpec {
 
         when:
         def copy = [quizId: 'newQuizCopy',
-                    name: 'Copy of Quiz',
-                    type: q1.type]
+                    name  : 'Copy of Quiz',
+                    type  : q1.type]
         pristineDragonsUser.copyQuiz(q1.quizId, copy)
         then:
         def exception = thrown(SkillsClientException)
@@ -350,9 +507,9 @@ class CommunityAndQuizCopySpecs extends DefaultIntSpec {
         def origQuestionDefs = pristineDragonsUser.getQuizQuestionDefs(q1.quizId)
         Resource video = new ClassPathResource("/testVideos/create-quiz.mp4")
         pristineDragonsUser.saveSkillVideoAttributes(q1.quizId, origQuestionDefs.questions[1].id?.toString(), [
-                file: video,
+                file      : video,
                 transcript: "jabberwocky",
-                captions: "captions",
+                captions  : "captions",
         ], true)
 
         jdbcTemplate.execute("DELETE FROM quiz_settings qs USING quiz_definition qd WHERE qs.quiz_ref_id = qd.id " +
@@ -360,8 +517,8 @@ class CommunityAndQuizCopySpecs extends DefaultIntSpec {
 
         when:
         def copy = [quizId: 'newQuizCopy',
-                    name: 'Copy of Quiz',
-                    type: q1.type]
+                    name  : 'Copy of Quiz',
+                    type  : q1.type]
         pristineDragonsUser.copyQuiz(q1.quizId, copy)
         then:
         def exception = thrown(SkillsClientException)

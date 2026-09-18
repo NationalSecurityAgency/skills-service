@@ -74,13 +74,12 @@ class QuizSettingsService {
     UserAttrsRepo userAttrsRepo
 
     @Transactional
-    void copySettings(String fromQuizId, String toQuizId, boolean enableProtectedUserCommunity) {
+    void copySettings(String fromQuizId, String toQuizId, List<QuizSettings> settingsToExclude = null) {
         List<QuizSettingsRes> fromSettings = getSettings(fromQuizId, false)
         List<QuizSettingsRequest> toSettings = new ArrayList<QuizSettingsRequest>()
 
-        if (enableProtectedUserCommunity) {
-            fromSettings = fromSettings.findAll { it.setting != QuizSettings.UserCommunityOnlyQuiz.setting }
-            toSettings.add(new QuizSettingsRequest(value: Boolean.TRUE.toString(), setting: QuizSettings.UserCommunityOnlyQuiz.setting))
+        if (settingsToExclude) {
+            fromSettings = fromSettings.findAll { QuizSettingsRes setRes ->  !settingsToExclude.find { it.setting == setRes.setting } }
         }
         fromSettings.forEach( setting -> {
             QuizSettingsRequest request = new QuizSettingsRequest(value: setting.value, setting: setting.setting)

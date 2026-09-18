@@ -15,6 +15,7 @@
  */
 package skills.services
 
+import groovy.transform.ToString
 import groovy.util.logging.Slf4j
 import org.apache.commons.lang3.StringUtils
 import org.hibernate.engine.jdbc.proxy.BlobProxy
@@ -27,8 +28,12 @@ import org.springframework.util.unit.DataSize
 import org.springframework.web.multipart.MultipartFile
 import skills.auth.UserInfoService
 import skills.controller.exceptions.AttachmentValidator
+import skills.controller.exceptions.ErrorCode
+import skills.controller.exceptions.SkillException
 import skills.controller.exceptions.SkillsValidator
 import skills.controller.result.model.UploadAttachmentResult
+import skills.services.admin.InviteOnlyProjectService
+import skills.services.admin.UserCommunityService
 import skills.storage.model.Attachment
 import skills.storage.repos.AttachmentRepo
 import skills.storage.repos.SkillDefWithExtraRepo
@@ -49,6 +54,12 @@ class AttachmentService {
 
     @Autowired
     SkillDefWithExtraRepo skillDefWithExtraRepo
+
+    @Autowired
+    UserCommunityService userCommunityService
+
+    @Autowired
+    InviteOnlyProjectService inviteOnlyProjectService
 
     @Value('${skills.config.allowedAttachmentMimeTypes}')
     List<MediaType> allowedAttachmentMimeTypes;
@@ -95,14 +106,82 @@ class AttachmentService {
         )
     }
 
+    private void validateUCRules(Attachment attachment, String newProjectId, String newQuizId, String newSkillId) {
+        if (userCommunityService.isUserCommunityConfigured()) {
+            boolean isFromUC = false
+            if (attachment.projectId) {
+                isFromUC = userCommunityService.isUserCommunityOnlyProject(attachment.projectId)
+            }
+            if (!isFromUC && attachment.quizId) {
+                isFromUC = userCommunityService.isUserCommunityOnlyQuiz(attachment.quizId)
+            }
+            if (!isFromUC && attachment.skillId && !attachment.projectId) {
+                isFromUC = userCommunityService.isUserCommunityOnlyGlobalBadge(attachment.skillId)
+            }
+
+            if (isFromUC && !newProjectId && !newQuizId && !newSkillId) {
+                log.warn("Cannot copy attachment with uuid=[${attachment.uuid}], projectId=[${attachment.projectId}] quizId=[${attachment.quizId}] to a non-UC destination")
+                throw new SkillException("Not authorized to copy the attachment", ErrorCode.AccessDenied)
+            }
+
+            boolean toUC = false
+            if (newProjectId) {
+                toUC = userCommunityService.isUserCommunityOnlyProject(newProjectId)
+            }
+            if (!toUC && !newProjectId && newSkillId) {
+                toUC = userCommunityService.isUserCommunityOnlyGlobalBadge(newSkillId)
+            }
+            if (!toUC && newQuizId) {
+                toUC = userCommunityService.isUserCommunityOnlyQuiz(newQuizId)
+            }
+
+            if (isFromUC && !toUC) {
+                throw new SkillException("Not allowed to copy attachments with uuid=[${attachment.uuid}]", null, null, ErrorCode.AccessDenied)
+            }
+
+            if (toUC || isFromUC) {
+                String userId = userInfoService.getCurrentUserId();
+                if (!userCommunityService.isUserCommunityMember(userId)) {
+                    log.warn("User attempted to copy attachment with uuid=[${attachment.uuid}] from projectId=[${attachment.projectId}],skillId=[${attachment.skillId}],quizId=[${attachment.quizId}] TO projectId=[${newProjectId}],skillId=[${newSkillId}]quizId=[${newQuizId}] but user is not UC member")
+                    throw new SkillException("Not authorized to copy the attachment", ErrorCode.AccessDenied)
+                }
+            }
+        }
+    }
+
+    private void validateCurrentUserCanReadSourceAttachment(Attachment attachment) {
+        if (attachment.projectId &&
+                inviteOnlyProjectService.isInviteOnlyProject(attachment.projectId)) {
+            String userId = userInfoService.getCurrentUserId()
+
+            boolean canAccess = inviteOnlyProjectService.isPrivateProjRoleOrAdminRole(attachment.projectId, userId)
+                    || userInfoService.isCurrentUserASuperDuperUser()
+
+            if (!canAccess) {
+                log.warn("User [{}] attempted to copy an attachment uuid=[{}] from inaccessible project [{}]",
+                        userId, attachment.uuid, attachment.projectId
+                )
+                throw new SkillException("Not authorized to copy the attachment", ErrorCode.AccessDenied)
+            }
+        }
+    }
+
+
     @Transactional
     Attachment copyAttachmentWithNewUuid(Attachment attachment, String newProjectId = null, String newQuizId = null, String skillId = null) {
+        validateCurrentUserCanReadSourceAttachment(attachment)
+        validateUCRules(attachment, newProjectId, newQuizId, skillId)
         Attachment res = constructNewAttachmentWithNewUuid(attachment, newProjectId, newQuizId, skillId)
         persistAttachment(res)
         return res
     }
 
-    static Attachment constructNewAttachmentWithNewUuid(Attachment attachment, String newProjectId = null, String newQuizId = null, String skillId = null) {
+    static Attachment constructNewAttachmentWithNewUuid(Attachment attachment, String newProjectId = null, String newQuizId = null, String newSkillId = null) {
+        boolean isAtLeastOneIdPresent = !StringUtils.isBlank(newProjectId) || !StringUtils.isBlank(newQuizId) || !StringUtils.isBlank(newSkillId);
+        if (!isAtLeastOneIdPresent) {
+            throw new SkillException("Must provide projectId, quizId or skillId when creating a new attachment from another attachment uuid=[${attachment?.uuid}]", ErrorCode.BadParam)
+        }
+
         String uuid = UUID.randomUUID().toString()
         Attachment res = new Attachment(
                 filename: attachment.filename,
@@ -110,9 +189,9 @@ class AttachmentService {
                 uuid: uuid,
                 size: attachment.size,
                 userId: attachment.userId,
-                projectId: newProjectId ?: attachment.projectId,
-                quizId: newProjectId ? null : (newQuizId ?: attachment.quizId), // then now a quiz for sure
-                skillId: skillId ?: (newProjectId ? null : attachment.skillId), // if a new project then skillId may not exist
+                projectId: newProjectId,
+                quizId: newQuizId,
+                skillId: newSkillId,
                 content: attachment.content
         )
         return res
@@ -130,23 +209,31 @@ class AttachmentService {
     }
 
     @Transactional
-    String copyAttachmentsForIncomingDescription(String description, String projectId, String skillId, String quizId, Closure<Boolean> shouldCopyUuid = { String uuid -> return true }) {
+    String copyAttachmentsForIncomingDescription(String description, String projectId, String skillId, String quizId, boolean doNotSaveSkillId = false) {
         String res = description
         if (description) {
-            List<String> uuidsToHandle = findAttachmentUuids(description)
-            uuidsToHandle?.each { String uuid ->
-                Attachment attachment = attachmentRepo.findByUuid(uuid)
+            List<String> attachmentUuids = findAttachmentUuids(description)
+            Map<String, Attachment> attachmentsByUuid =
+                    attachmentRepo.findByUuidIn(attachmentUuids).collectEntries {
+                        [(it.uuid): it]
+                    }
+            attachmentUuids?.each { String uuid ->
+                Attachment attachment = attachmentsByUuid[uuid]
                 if (attachment) {
-                    // check to see if this attachment already exist  which can happen when an item is being copied
-                    boolean otherExist = shouldCopyUuid.call(uuid)
-                    if (otherExist) {
+                    boolean isProjDifferent = projectId && attachment.projectId && projectId != attachment.projectId
+                    boolean isQuizDifferent = quizId && attachment.quizId && quizId != attachment.quizId
+                    boolean isSkillDifferent = projectId && attachment.skillId != skillId
+                    boolean onlyDestSkillId = skillId && (!projectId && !quizId)
+                    boolean isOnlyDestSkillIdDifferent = onlyDestSkillId && (attachment.quizId || attachment.projectId || (attachment.skillId && attachment.skillId?.equalsIgnoreCase(skillId)))
+
+                    if (isProjDifferent || isQuizDifferent || isSkillDifferent || isOnlyDestSkillIdDifferent) {
                         // skill id will be updated later in the stack
                         // cannot set it here as skill was not saved yet
-                        Attachment newAttachment = copyAttachmentWithNewUuid(attachment, projectId, quizId)
-                        res = res.replace("(/api/download/${uuid})", "(/api/download/${newAttachment.uuid})")
+                        Attachment newAttachment = copyAttachmentWithNewUuid(attachment, projectId, quizId, doNotSaveSkillId ? null : skillId)
+                        res = res.replace("(/api/download/${attachment.uuid})", "(/api/download/${newAttachment.uuid})")
                     }
                 } else {
-                    log.warn("updateAttachmentsInIncomingDescription: failed to find attachment with uuid: [${uuid}]. method params are projectId: [${projectId}], skillId: [${skillId}]")
+                    log.warn("updateAttachmentsInIncomingDescription: failed to find attachment with uuid: [${uuid}]. method params are projectId=[${projectId}], skillId=[${skillId}], quizId=[${quizId}]")
                 }
             }
         }
@@ -154,47 +241,173 @@ class AttachmentService {
         return res
     }
 
-    @Transactional
-    void updateAttachmentsAttrsBasedOnUuidsInMarkdown(String description, String projectId, String quizId, String skillId) {
-        if (description) {
-            List<String> uuids = findAttachmentUuids(description)
-            uuids?.each { uuid ->
-                Attachment attachment = attachmentRepo.findByUuid(uuid)
-                if (!attachment) {
-                    throw new IllegalStateException("Failed to find attachment with uuid: [${uuid}]. method params are projectId: [${projectId}], quizId: [${quizId}], skillId: [${skillId}]")
-                }
-                boolean changed = false
-                if (attachment.projectId != projectId) {
-                    attachment.setProjectId(projectId)
-                    changed = true
-                }
-                if (attachment.quizId != quizId) {
-                    attachment.setQuizId(quizId)
-                    changed = true
-                }
+    static class CopyAttachmentRes {
+        boolean updated = false
+        String markdown = ""
+    }
+    @ToString(includeNames = true)
+    static class CopyAttachmentReq {
+        String markdown
 
-                // only override if skill is not already set
-                // this can happen if user copy-and-pasted description
-                if (!attachment.skillId && skillId) {
-                    attachment.setSkillId(skillId)
-                    changed = true
-                }
-                if (changed) {
-                    persistAttachment(attachment)
+        String projectId
+        String originalSkillId
+        String newSkillId
+
+        String quizId
+        String originalQuizId
+        Integer questionId = -1
+        Integer attemptId = -1
+        Integer answerAttemptId = -1
+    }
+
+    @Transactional
+    CopyAttachmentRes updateAttachmentsAttrsBasedOnUuidsInMarkdown(String markdown, String projectId, String quizId, String originalSkillId, String newSkillId = null) {
+        return updateAttachmentsAttrsBasedOnUuidsInMarkdown(new CopyAttachmentReq(
+                markdown: markdown,
+                projectId: projectId,
+                quizId: quizId,
+                originalSkillId: originalSkillId,
+                newSkillId: newSkillId
+        ))
+    }
+
+    @Transactional
+    CopyAttachmentRes updateAttachmentsAttrsBasedOnUuidsInMarkdown(CopyAttachmentReq attachmentReq) {
+        String newSkillId = attachmentReq.newSkillId ?: attachmentReq.originalSkillId
+        CopyAttachmentRes res = new CopyAttachmentRes(markdown: attachmentReq.markdown)
+        if (res.markdown) {
+            List<String> attachmentUuids = findAttachmentUuids(res.markdown)
+            Map<String, Attachment> attachmentsByUuid =
+                    attachmentRepo.findByUuidIn(attachmentUuids).collectEntries {
+                        [(it.uuid): it]
+                    }
+            attachmentUuids?.each { String uuid ->
+                Attachment attachment = attachmentsByUuid[uuid]
+                if (attachment) {
+                    boolean isFromProj = StringUtils.isNotBlank(attachment.projectId)
+                    boolean isFromGb = StringUtils.isNotBlank(attachment.skillId) && !isFromProj
+                    boolean isFromQuiz =  StringUtils.isNotBlank(attachment.quizId)
+
+                    boolean isToProj = StringUtils.isNotBlank(attachmentReq.projectId)
+                    boolean isToGb = StringUtils.isNotBlank(attachmentReq.newSkillId) && !isToProj
+                    boolean isToQuiz =  StringUtils.isNotBlank(attachmentReq.quizId)
+
+                    boolean isBetweenDomains = (isFromProj && (isToGb || isToQuiz))
+                            || (isFromGb && (isToQuiz || isToProj)
+                            || (isFromQuiz) && (isToGb || isToProj))
+
+
+                    boolean isProjDifferent = isToProj && isFromProj && attachmentReq.projectId != attachment.projectId
+                    boolean isSkillIdMissing = !isFromQuiz && isToProj && isFromProj && attachment.projectId == attachmentReq.projectId && !attachment.skillId && attachmentReq.originalSkillId
+                    if (!isBetweenDomains && isSkillIdMissing) {
+                        // check if the attachment is used by another non-skill description
+                        if (attachmentRepo.isAttachmentUsedInProjDesc(attachment.uuid)) {
+                            isSkillIdMissing = false
+                        }
+                    }
+
+                    boolean isSkillDifferent = !isSkillIdMissing && isToProj && attachment.skillId != attachmentReq.originalSkillId
+                    boolean onlyDestSkillId = !isSkillIdMissing && attachmentReq.originalSkillId && (!attachmentReq.projectId && !attachmentReq.quizId)
+                    boolean isOnlyDestSkillIdDifferent = onlyDestSkillId && (attachment.quizId || attachment.projectId || (attachment.skillId && !attachment.skillId?.equalsIgnoreCase(attachmentReq.originalSkillId)))
+
+                    String quizIdToCompare = attachmentReq.originalQuizId ?: attachmentReq.quizId
+                    boolean isQuizDifferent = isFromQuiz && isToQuiz && quizIdToCompare != attachment.quizId
+                    if (!isBetweenDomains && !isQuizDifferent && isToQuiz) {
+                        isQuizDifferent = attachmentRepo.isAttachmentUsedInAnotherQuestion(attachment.uuid, attachmentReq.questionId)
+                           || ((attachmentReq.questionId > -1 || attachmentReq.attemptId > -1) && attachmentRepo.isAttachmentInQuizDescription(attachment.uuid))
+                            || attachmentRepo.isAttachmentInAnotherQuizTextInputAnswer(attachment.uuid, attachmentReq.answerAttemptId)
+                    }
+
+                    if (isBetweenDomains || isProjDifferent || isQuizDifferent || isSkillDifferent || isOnlyDestSkillIdDifferent) {
+                        // skill id will be updated later in the stack
+                        // cannot set it here as skill was not saved yet
+                        Attachment newAttachment = copyAttachmentWithNewUuid(attachment, attachmentReq.projectId, attachmentReq.quizId, newSkillId)
+                        res.markdown = res.markdown.replace("(/api/download/${attachment.uuid})", "(/api/download/${newAttachment.uuid})")
+                        res.updated = true
+                    }
+
+                    // only override if skill is not already set
+                    // this can happen if user copy-and-pasted description
+                    if (isSkillIdMissing) {
+                        attachment.setSkillId(newSkillId)
+                        persistAttachment(attachment)
+                    }
+                } else {
+                    log.warn("updateAttachmentsAttrsBasedOnUuidsInMarkdown: failed to find attachment with uuid=[${uuid}], attachmentReq=[${attachmentReq}]")
                 }
             }
         }
+
+        return res
     }
 
     List<String> findAttachmentUuids(String description) {
         if (description) {
-            return UUID_PATTERN.matcher(description).findAll().collect { it[1] }
+            return UUID_PATTERN.matcher(description).findAll().collect { it[1] }.unique()
         }
         return []
+    }
+
+    CustomValidationResult validateIfAttachmentsAreAllowedToBeCopied(String description, String projectId, String quizId, String globalBadgeId) {
+        if (projectId && quizId) {
+            throw new IllegalStateException("must not supply both projectId[${projectId}] and quizId[${quizId}]")
+        }
+
+        if (userCommunityService.isUserCommunityConfigured() && description && (projectId || quizId || globalBadgeId)) {
+            def matcher = UUID_PATTERN.matcher(description)
+
+            boolean foundMatch = matcher.find()
+            if (foundMatch) {
+                Boolean isDestProjNotUC = projectId ? !userCommunityService.isUserCommunityOnlyProject(projectId) : false
+                Boolean isDestQuizNotUC = quizId ? !userCommunityService.isUserCommunityOnlyQuiz(quizId) : false
+                Boolean isDestGbNotUC = globalBadgeId ? !userCommunityService.isUserCommunityOnlyGlobalBadge(globalBadgeId) : false
+                boolean destinationIsNonUC = (isDestProjNotUC || isDestQuizNotUC || isDestGbNotUC)
+
+                if (destinationIsNonUC) {
+                    do {
+                        String fullMatch = matcher.group(0)
+                        String uuid = matcher.group(1)
+
+                        Attachment attachment = attachmentRepo.findByUuid(uuid)
+                        if (attachment?.projectId && userCommunityService.isUserCommunityOnlyProject(attachment.projectId)) {
+                            return createLinkNotAllowedValidationRes(fullMatch)
+                        }
+                        if (attachment?.quizId && userCommunityService.isUserCommunityOnlyQuiz(attachment.quizId)) {
+                            return createLinkNotAllowedValidationRes(fullMatch)
+                        }
+                        if (attachment?.skillId && !attachment?.projectId && !attachment?.quizId && userCommunityService.isUserCommunityOnlyGlobalBadge(attachment.skillId)) {
+                            return createLinkNotAllowedValidationRes(fullMatch)
+                        }
+                        foundMatch = matcher.find()
+                    } while( foundMatch)
+                }
+            }
+        }
+        // Return valid result as placeholder - implement your actual validation
+        return CustomValidationResult.valid()
+    }
+
+    private CustomValidationResult createLinkNotAllowedValidationRes(String fullMatch) {
+        String linkName = extractNameFromDownloadLink(fullMatch)
+        return new CustomValidationResult(valid: false, msg: "Attachment [$linkName] is not allowed to be copied")
+    }
+
+    private String extractNameFromDownloadLink(String downloadLink) {
+        // Extract the link name by removing the markdown link syntax
+        // Format: [<name>](/api/download/<uuid>)
+        String linkName = downloadLink.replaceFirst(/\[/, "").replaceFirst(/\](.*)/, "")
+        return linkName
     }
 
     void persistAttachment(Attachment attachment) {
         attachmentRepo.save(attachment)
     }
 
+    boolean doesAttachmentExistInProjectAndLinkedToASkillId(String attachmentUuid, String projectId) {
+        return attachmentRepo.existsByUuidAndProjectIdIgnoreCaseAndSkillIdNotNull(attachmentUuid, projectId)
+    }
+
+    int updateGlobalBadgeId(String oldGlobalBadgeId, String newGlobalBadgeId) {
+        return attachmentRepo.updateAttachmentsSkillIdWhereProjectIsNull(oldGlobalBadgeId, newGlobalBadgeId)
+    }
 }

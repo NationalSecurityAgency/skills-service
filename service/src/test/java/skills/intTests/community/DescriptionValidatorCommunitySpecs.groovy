@@ -120,16 +120,17 @@ class DescriptionValidatorCommunitySpecs extends DefaultIntSpec {
         def communityValid = pristineDragonsUser.checkCustomDescriptionValidation(notValidDefault, p1.projectId, true)
         def communityInvalidValid = pristineDragonsUser.checkCustomDescriptionValidation(notValidProtectedCommunity, p1.projectId, true)
 
-        def communityValidP2 = pristineDragonsUser.checkCustomDescriptionValidation(notValidProtectedCommunity, p2.projectId, true)
-        def communityInvalidValidP2 = pristineDragonsUser.checkCustomDescriptionValidation(notValidDefault, p2.projectId,true)
+        // useProtectedCommunityValidator overrides the project's config - only for validation purposes
+        def communityInvalidP2 = pristineDragonsUser.checkCustomDescriptionValidation(notValidProtectedCommunity, p2.projectId, true)
+        def communityValidP2 = pristineDragonsUser.checkCustomDescriptionValidation(notValidDefault, p2.projectId,true)
         then:
         communityValid.body.valid
         !communityInvalidValid.body.valid
         communityInvalidValid.body.msg == "May not contain divinedragon word"
 
+        !communityInvalidP2.body.valid
+        communityInvalidP2.body.msg == "May not contain divinedragon word"
         communityValidP2.body.valid
-        !communityInvalidValidP2.body.valid
-        communityInvalidValidP2.body.msg == "paragraphs may not contain jabberwocky"
     }
 
     def "project paragraph custom validation on create"(){

@@ -28,6 +28,8 @@ interface AttachmentRepo extends CrudRepository<Attachment, Integer> {
     @Nullable
     Attachment findByUuid(String uuid)
 
+    List<Attachment> findByUuidIn(List<String> uuid)
+
     @Modifying
     Integer deleteByUuid(String uuid)
 
@@ -41,4 +43,40 @@ interface AttachmentRepo extends CrudRepository<Attachment, Integer> {
                           @Param("start") long start,
                           @Param("length") long length)
 
+
+    boolean existsByUuidAndProjectIdIgnoreCaseAndSkillIdNotNull(String uuid, String projectId)
+
+    @Query(value = '''select count(id) > 0
+            from project_definition
+            where
+                convert_from(lo_get(CAST(description as oid)), 'UTF8') like CONCAT('%(/api/download/', :uuid, ')%')
+              ''', nativeQuery = true)
+    Boolean isAttachmentUsedInProjDesc(@Param("uuid") String attachmentUUID)
+
+    @Query(value = '''select count(id) > 0
+            from quiz_question_definition
+            where
+                question like CONCAT('%(/api/download/', :uuid, ')%')
+                and id <> :questionId
+              ''', nativeQuery = true)
+    Boolean isAttachmentUsedInAnotherQuestion(@Param("uuid") String attachmentUUID, @Param("questionId") Integer questionId)
+
+    @Query(value = '''select count(id) > 0
+            from quiz_definition
+            where
+                convert_from(lo_get(CAST(description as oid)), 'UTF8') like CONCAT('%(/api/download/', :uuid, ')%')
+              ''', nativeQuery = true)
+    Boolean isAttachmentInQuizDescription(@Param("uuid") String attachmentUUID)
+
+    @Query(value = '''select count(id) > 0
+            from user_quiz_answer_attempt
+            where
+               answer like CONCAT('%(/api/download/', :uuid, ')%')
+               and id <> :answerId
+              ''', nativeQuery = true)
+    Boolean isAttachmentInAnotherQuizTextInputAnswer(@Param("uuid") String attachmentUUID, @Param("answerId") Integer answerId)
+
+    @Modifying
+    @Query("UPDATE Attachment u SET u.skillId = :newSkillId WHERE u.skillId = :oldSkillId and u.projectId is null")
+    int updateAttachmentsSkillIdWhereProjectIsNull(@Param("oldSkillId")  String oldSkillId, @Param("newSkillId") String newSkillId)
 }

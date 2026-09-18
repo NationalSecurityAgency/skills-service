@@ -163,6 +163,7 @@ class ProjAdminService {
         final boolean isEdit = projectDefinition
         String previousName = projectDefinition?.name
         String previousProjId = projectDefinition?.projectId
+        String description = projectRequest.description
 
         ProjDefParent savedProjDef
         if (isEdit) {
@@ -175,12 +176,16 @@ class ProjAdminService {
             log.debug("Saved [{}]", projectDefinition)
             savedProjDef = projectDefinition
         } else {
+            if (description && attachmentService.findAttachmentUuids(description)) {
+                throw new SkillException("Attachments in the description are not allowed when creating a new project", projectRequest.projectId, null, ErrorCode.BadParam)
+            }
+
             // TODO: temp hack around since user is not yet defined when Inception project is created
             // This will be addressed in ticket #139
             String clientSecret = new ClientSecretGenerator().generateClientSecret()
 
             projectDefinition = new ProjDefWithDescription(projectId: projectRequest.projectId, name: projectRequest.name,
-                    clientSecret: clientSecret, description: projectRequest.description)
+                    clientSecret: clientSecret, description: description)
             log.debug("Created project [{}]", projectDefinition)
 
             if (!userInfoService.isCurrentUserASuperDuperUser()) {
@@ -201,7 +206,11 @@ class ProjAdminService {
 
             savedProjDef = projDef
         }
-        attachmentService.updateAttachmentsAttrsBasedOnUuidsInMarkdown(projectRequest.description, projectDefinition.projectId, null, null)
+        AttachmentService.CopyAttachmentRes copyRes = attachmentService.updateAttachmentsAttrsBasedOnUuidsInMarkdown(description, originalProjectId, null, null)
+        if (copyRes.updated) {
+            projDefWithDescriptionRepo.updateDescription(projectDefinition.projectId, copyRes.markdown)
+            projectDefinition.description = copyRes.markdown
+        }
 
         Map actionAttributes
         if (isEdit) {
@@ -245,7 +254,7 @@ class ProjAdminService {
 
         CustomValidationResult customValidationResult = customValidator.validate(projectRequest)
         if (!customValidationResult.valid) {
-            throw new SkillException(customValidationResult.msg)
+            throw new SkillException(customValidationResult.msg, ErrorCode.ParagraphValidationFailed)
         }
     }
 

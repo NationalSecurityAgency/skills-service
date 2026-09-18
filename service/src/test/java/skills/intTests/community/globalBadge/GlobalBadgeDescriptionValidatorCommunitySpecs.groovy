@@ -20,7 +20,6 @@ import skills.intTests.utils.SkillsClientException
 import skills.intTests.utils.SkillsService
 
 import static skills.intTests.utils.SkillsFactory.createBadge
-import static skills.intTests.utils.SkillsFactory.createProject
 
 class GlobalBadgeDescriptionValidatorCommunitySpecs extends DefaultIntSpec {
 
@@ -29,21 +28,34 @@ class GlobalBadgeDescriptionValidatorCommunitySpecs extends DefaultIntSpec {
     String notValidProtectedCommunity = "has divinedragon"
     String notValidProtectedCommunityErrMsg = "May not contain divinedragon word"
 
-    def "description validator for community"() {
+     def "description validator for community"() {
         List<String> users = getRandomUsers(2)
 
         SkillsService pristineDragonsUser = createService(users[1])
         SkillsService rootUser = createRootSkillService()
         rootUser.saveUserTag(pristineDragonsUser.userName, 'dragons', ['DivineDragon'])
 
-        when:
-        def defaultResValid = skillsService.checkCustomDescriptionValidation(notValidProtectedCommunity)
-        def defaultResInValid = skillsService.checkCustomDescriptionValidation(notValidDefault)
+         def b1 = createBadge(1, 1)
+         b1.enableProtectedUserCommunity = true
+         pristineDragonsUser.createGlobalBadge(b1)
 
+         def b2 = createBadge(1, 2)
+         pristineDragonsUser.createGlobalBadge(b2)
+
+        when:
+        def communityValid = pristineDragonsUser.checkCustomDescriptionValidation(notValidDefault, null, false, null, b1.badgeId)
+        def communityInvalidValid = pristineDragonsUser.checkCustomDescriptionValidation(notValidProtectedCommunity, null, false, null, b1.badgeId)
+
+        def defaultResValid = pristineDragonsUser.checkCustomDescriptionValidation(notValidProtectedCommunity, null, false, null, b2.badgeId)
+        def defaultResInvalid = pristineDragonsUser.checkCustomDescriptionValidation(notValidDefault, null, false, null, b2.badgeId)
         then:
+        communityValid.body.valid
+        !communityInvalidValid.body.valid
+        communityInvalidValid.body.msg == notValidProtectedCommunityErrMsg
+
         defaultResValid.body.valid
-        !defaultResInValid.body.valid
-        defaultResInValid.body.msg == notValidDefaultErrMsg
+        !defaultResInvalid.body.valid
+        defaultResInvalid.body.msg == notValidDefaultErrMsg
     }
 
     def "description validator for community with useProtectedCommunityValidator"() {
@@ -53,24 +65,28 @@ class GlobalBadgeDescriptionValidatorCommunitySpecs extends DefaultIntSpec {
         SkillsService rootUser = createRootSkillService()
         rootUser.saveUserTag(pristineDragonsUser.userName, 'dragons', ['DivineDragon'])
 
-        def p1 = createProject(1)
-        p1.enableProtectedUserCommunity = true
-        pristineDragonsUser.createProject(p1)
+        def b1 = createBadge(1, 1)
+        b1.enableProtectedUserCommunity = true
+        pristineDragonsUser.createGlobalBadge(b1)
+
+        def b2 = createBadge(1,2)
+        pristineDragonsUser.createGlobalBadge(b2)
 
         when:
-        def communityValid = pristineDragonsUser.checkCustomDescriptionValidation(notValidDefault, null, true, null)
-        def communityInvalidValid = pristineDragonsUser.checkCustomDescriptionValidation(notValidProtectedCommunity, null, true, null)
+        def communityValid = pristineDragonsUser.checkCustomDescriptionValidation(notValidDefault, null, true, null, b1.badgeId)
+        def communityInvalidValid = pristineDragonsUser.checkCustomDescriptionValidation(notValidProtectedCommunity, null, true, null, b1.badgeId)
 
-        def defaultResValid = pristineDragonsUser.checkCustomDescriptionValidation(notValidProtectedCommunity, null, false, null)
-        def defaultResInvalid = pristineDragonsUser.checkCustomDescriptionValidation(notValidDefault, null, false, null)
+        // useProtectedCommunityValidator overrides the gb's config - only for validation purposes
+        def overriddenValid = pristineDragonsUser.checkCustomDescriptionValidation(notValidProtectedCommunity, null, true, null, b2.badgeId)
+        def overriddenInvalid = pristineDragonsUser.checkCustomDescriptionValidation(notValidDefault, null, true, null, b2.badgeId)
         then:
         communityValid.body.valid
         !communityInvalidValid.body.valid
         communityInvalidValid.body.msg == notValidProtectedCommunityErrMsg
 
-        defaultResValid.body.valid
-        !defaultResInvalid.body.valid
-        defaultResInvalid.body.msg == notValidDefaultErrMsg
+        !overriddenValid.body.valid
+        overriddenValid.body.msg == notValidProtectedCommunityErrMsg
+        overriddenInvalid.body.valid
     }
 
     def "global badge paragraph custom validation on create - UC global badge fails"(){

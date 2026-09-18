@@ -360,6 +360,41 @@ describe('Badges Tests', () => {
             .should('not.be.visible');
     })
 
+    describe('new badge attachment validation', () => {
+        const attachmentMarkdown = '[test-pdf.pdf](/api/download/8ab81f77-3484-4f5a-ae58-ae4e7143b449)'
+
+        it('rejects attachment links for new global badges', () => {
+            cy.visit('/administrator/globalBadges');
+            cy.get('[data-cy="btn_Global Badges"]').click();
+            cy.get('[data-cy="name"]').type('Global Badge');
+            cy.get('[data-cy="saveDialogBtn"]').should('be.enabled');
+            cy.get('.toastui-editor-mode-switch').contains('Markdown').click();
+
+            cy.typeInMarkdownEditor('[data-cy="markdownEditorInput"]', attachmentMarkdown, true);
+
+            cy.get('[data-cy="descriptionError"]')
+                .contains('Attachments can only be added when editing an existing global badge')
+                .should('be.visible');
+            cy.get('[data-cy="saveDialogBtn"]').should('be.disabled');
+        });
+
+        it('allows attachment links for new project badges', () => {
+            cy.visit('/administrator/projects/proj1/badges');
+            cy.wait('@loadBadges');
+            cy.get('[data-cy="btn_Badges"]').click();
+            cy.get('[data-cy="name"]').type('Project Badge');
+            cy.get('[data-cy="saveDialogBtn"]').should('be.enabled');
+            cy.get('.toastui-editor-mode-switch').contains('Markdown').click();
+
+            cy.typeInMarkdownEditor('[data-cy="markdownEditorInput"]', attachmentMarkdown, true);
+
+            cy.get('[data-cy="descriptionError"]').should('not.be.visible');
+            cy.get('[data-cy="saveDialogBtn"]').should('be.enabled');
+            cy.get('[data-cy="saveDialogBtn"]').click();
+            cy.get('[data-cy="manageBtn_ProjectBadgeBadge"]').should('be.visible');
+        });
+    });
+
     it('badge validation - help url', () => {
         cy.intercept('POST', '/api/validation/url')
             .as('customUrlValidation');

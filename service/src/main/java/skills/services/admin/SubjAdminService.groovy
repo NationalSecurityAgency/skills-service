@@ -127,7 +127,6 @@ class SubjAdminService {
         if (existing && isExistingEnabled && !isEnabledSkillInRequest) {
             throw new SkillException("Cannot disable an existing enabled Subject. SubjectId=[${origSubjectId}]", projectId, null, ErrorCode.BadParam)
         }
-
         String prevSubjId = existing?.skillId
 
         SkillDefWithExtra res
@@ -135,6 +134,7 @@ class SubjAdminService {
             Props.copy(subjectRequest, existing)
             //we need to manually copy subjectId into skillId
             existing.skillId = subjectRequest.subjectId
+
             DataIntegrityExceptionHandlers.subjectDataIntegrityViolationExceptionHandler.handle(projectId) {
                 res = skillDefWithExtraRepo.save(existing)
             }
@@ -150,6 +150,7 @@ class SubjAdminService {
             Integer lastDisplayOrder = skillDefRepo.calculateHighestDisplayOrderByProjectIdAndType(projectId, SkillDef.ContainerType.Subject)
             int displayOrder = lastDisplayOrder != null ? lastDisplayOrder + 1 : 1
             String enabled = isEnabledSkillInRequest.toString()
+
             SkillDefWithExtra skillDef = new SkillDefWithExtra(
                     type: SkillDef.ContainerType.Subject,
                     projectId: projectId,
@@ -170,7 +171,11 @@ class SubjAdminService {
 
             log.debug("Created [{}]", res)
         }
-        attachmentService.updateAttachmentsAttrsBasedOnUuidsInMarkdown(res.description, res.projectId, null, res.skillId)
+        AttachmentService.CopyAttachmentRes copyAttachmentRes = attachmentService.updateAttachmentsAttrsBasedOnUuidsInMarkdown(res.description, res.projectId, null, origSubjectId)
+        if (copyAttachmentRes.updated) {
+            skillDefWithExtraRepo.updateDescriptionByProjectIdAndSkillId(res.projectId, res.skillId, copyAttachmentRes.markdown)
+            res.description = copyAttachmentRes.markdown
+        }
 
         userActionsHistoryService.saveUserAction(new UserActionInfo(
                 action: existing ? DashboardAction.Edit : DashboardAction.Create,

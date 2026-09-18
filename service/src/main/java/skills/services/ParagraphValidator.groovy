@@ -39,9 +39,6 @@ class ParagraphValidator {
     static class InternalValidationRequest {
         String description
         String prefix // if provided description will be regenerated and prefix will be added to invalid paragraphs
-        String projectId = null
-        Boolean utilizeUserCommunityParagraphPatternByDefault = false
-        String quizId = null
 
         CustomValidator.ValidationPattern validationPattern
         Pattern forceValidationPattern
