@@ -25,6 +25,8 @@ import skills.intTests.utils.SkillsClientException
 import skills.intTests.utils.SkillsService
 import skills.quizLoading.QuizSettings
 import skills.services.quiz.QuizQuestionType
+import skills.services.userActions.DashboardAction
+import skills.services.userActions.DashboardItem
 import skills.storage.model.Attachment
 import skills.storage.model.SkillDef
 import skills.storage.model.auth.RoleName
@@ -726,6 +728,10 @@ class QuizDefCopySpecs extends DefaultIntSpec {
 
         def originalQuiz = skillsService.getQuizDef(quiz.quizId)
         def copiedQuizRes = skillsService.getQuizDef(copiedQuiz.quizId)
+        def rootService = createRootSkillService()
+        def actions = rootService.getUserActionsForQuiz(copiedQuiz.quizId, 10, 1, "created", false,
+                DashboardItem.Quiz, '', copiedQuiz.quizId, DashboardAction.Create)
+        def createAction = rootService.getUserActionAttributes(actions.data[0].id)
         List<Attachment> attachments_t2 = attachmentRepo.findAll().toList()
         List<Attachment> newAttachments = attachments_t2.findAll {
             !attachments_t1.find { Attachment inner -> inner.uuid == it.uuid}
@@ -745,6 +751,7 @@ class QuizDefCopySpecs extends DefaultIntSpec {
         newAttachments.quizId == [copiedQuizRes.quizId, copiedQuizRes.quizId]
         copiedQuizRes.description.contains(newAttachments[0].uuid)
         copiedQuizRes.description.contains(newAttachments[1].uuid)
+        createAction.description == copiedQuizRes.description
     }
 
     def "copy quiz - attachments in question description are duplicated"() {

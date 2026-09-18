@@ -273,6 +273,7 @@ class QuizDefService {
         AttachmentService.CopyAttachmentRes copyRes = attachmentService.updateAttachmentsAttrsBasedOnUuidsInMarkdown(copyAttachmentReq)
         if (copyRes.updated) {
             quizDefWithDescRepo.updateDescription(quizDefWithDescription.quizId, copyRes.markdown)
+            quizDefWithDescription.description = copyRes.markdown
             log.debug("Updated description to [{}]", copyRes.markdown)
         }
         if (slidesAttachmentRes.attachment) {
@@ -463,6 +464,7 @@ class QuizDefService {
         AttachmentService.CopyAttachmentRes copyRes = attachmentService.updateAttachmentsAttrsBasedOnUuidsInMarkdown(copyAttachmentReq)
         if (copyRes.updated) {
             quizDefWithDescRepo.updateDescription(quizDefWithDescription.quizId, copyRes.markdown)
+            quizDefWithDescription.description = copyRes.markdown
         }
 
         if (quizDefRequest.enableProtectedUserCommunity) {
