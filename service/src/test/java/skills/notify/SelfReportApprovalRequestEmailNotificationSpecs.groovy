@@ -110,11 +110,12 @@ class SelfReportApprovalRequestEmailNotificationSpecs extends DefaultIntSpec {
         then:
         greenMail.getReceivedMessages().subject == (1..3).collect { "SkillTree Points Requested"}
         Set<String> allUniqueRecipients = EmailUtils.getAllUniqueRecipients(greenMail)
-        assert allUniqueRecipients.find {it.contains(users[3])}, "Expected to find user ${users[3]} in email recipients"
-        assert allUniqueRecipients.find {it.contains(users[4])}, "Expected to find user ${users[4]} in email recipients"
-        assert !allUniqueRecipients.find {it.contains(users[0])}, "Expected NOT to find user ${users[0]} in email recipients"
-        assert !allUniqueRecipients.find {it.contains(users[1])}, "Expected NOT to find user ${users[1]} in email recipients"
-        assert !allUniqueRecipients.find {it.contains(users[2])}, "Expected NOT to find user ${users[2]} in email recipients"
+        List<String> userEmails = users.collect { userAttrsRepo.findByUserIdIgnoreCase(it).email }
+        assert allUniqueRecipients.contains(userEmails[3]), "Expected to find user ${users[3]} in email recipients"
+        assert allUniqueRecipients.contains(userEmails[4]), "Expected to find user ${users[4]} in email recipients"
+        assert !allUniqueRecipients.contains(userEmails[0]), "Expected NOT to find user ${users[0]} in email recipients"
+        assert !allUniqueRecipients.contains(userEmails[1]), "Expected NOT to find user ${users[1]} in email recipients"
+        assert !allUniqueRecipients.contains(userEmails[2]), "Expected NOT to find user ${users[2]} in email recipients"
     }
 
     def "Project Error is created if a project has no subscribed project administrators"() {
