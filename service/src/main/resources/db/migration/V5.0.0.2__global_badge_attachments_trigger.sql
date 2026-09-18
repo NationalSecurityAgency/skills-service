@@ -42,5 +42,5 @@ END;
 $$ LANGUAGE plpgsql;
 
 CREATE TRIGGER trg_attachments_skillId_validation
-    BEFORE INSERT OR UPDATE ON skill_definition
+    BEFORE UPDATE OF skill_id ON skill_definition
     FOR EACH ROW EXECUTE FUNCTION f_check_skillId_was_updated_in_attachments();

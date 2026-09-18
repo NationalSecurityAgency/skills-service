@@ -286,6 +286,29 @@ class CopyMarkdownWithAttachmentsToGlobalBadgeSpecs extends CopyIntSpec {
         attachment1Href.contains(attachmentsAfter[0].uuid)
     }
 
+    def "cannot change global badge id before updating its attachment skill id"() {
+        def badge = createBadge(1, 1)
+        skillsService.createGlobalBadge(badge)
+        attachFileForGlobalBadgeAndReturnHref(badge.badgeId)
+
+        when:
+        runInTransaction {
+            entityManager.createNativeQuery('''
+                UPDATE skill_definition
+                SET skill_id = :newBadgeId
+                WHERE project_id IS NULL AND skill_id = :oldBadgeId
+            ''')
+                    .setParameter('newBadgeId', 'newBadgeId')
+                    .setParameter('oldBadgeId', badge.badgeId)
+                    .executeUpdate()
+        }
+
+        then:
+        Exception exception = thrown()
+        exception.find { it.message?.contains("Violation - cannot update skill_id[${badge.badgeId} -> newBadgeId]") }
+        skillsService.getGlobalBadge(badge.badgeId)
+    }
+
     def "paste markdown with attachment from a quiz: quiz -> gb"() {
         def quiz = QuizDefFactory.createQuiz(1)
         skillsService.createQuizDef(quiz)
