@@ -270,7 +270,8 @@ class AccessSettingsController {
     private PageRequest createPagingRequestWithValidation(String projectId, int limit, int page, String orderBy, Boolean ascending, String type='Project') {
         SkillsValidator.isNotBlank(projectId, "${type} Id")
         SkillsValidator.isTrue(limit <= 200, "Cannot ask for more than 200 items, provided=[${limit}]", projectId)
-        SkillsValidator.isTrue(page >= 0, "Cannot provide negative page. provided =[${page}]", projectId)
+        SkillsValidator.isTrue(limit > 0, "Limit must be greater than 0, provided=[${limit}]", projectId)
+        SkillsValidator.isTrue(page >= 1, "Page must be 1 or greater (pages are 1-based), provided=[${page}]", projectId)
         PageRequest pageRequest = PageRequest.of(page - 1, limit, ascending ? ASC : DESC, orderBy)
 
         return pageRequest

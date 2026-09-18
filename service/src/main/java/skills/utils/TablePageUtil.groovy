@@ -28,12 +28,14 @@ class TablePageUtil {
     static PageRequest createPagingRequestWithValidation(String projectId, int limit, int page, String orderBy, Boolean ascending, Boolean useUnsafeSort=false) {
         SkillsValidator.isNotBlank(projectId, "Project Id")
         SkillsValidator.isTrue(limit <= 200, "Cannot ask for more than 200 items, provided=[${limit}]", projectId)
-        SkillsValidator.isTrue(page >= 0, "Cannot provide negative page. provided =[${page}]", projectId)
+        SkillsValidator.isTrue(limit > 0, "Limit must be greater than 0, provided=[${limit}]", projectId)
+        SkillsValidator.isTrue(page >= 1, "Page must be 1 or greater (pages are 1-based), provided=[${page}]", projectId)
         return createPagingRequest(limit, page, orderBy, ascending, useUnsafeSort)
     }
     static PageRequest createPagingRequestWithValidation(int limit, int page, String orderBy, Boolean ascending, Boolean useUnsafeSort=false) {
         SkillsValidator.isTrue(limit <= 200, "Cannot ask for more than 200 items, provided=[${limit}]")
-        SkillsValidator.isTrue(page >= 0, "Cannot provide negative page. provided =[${page}]")
+        SkillsValidator.isTrue(limit > 0, "Limit must be greater than 0, provided=[${limit}]")
+        SkillsValidator.isTrue(page >= 1, "Page must be 1 or greater (pages are 1-based), provided=[${page}]")
         return createPagingRequest(limit, page, orderBy, ascending, useUnsafeSort)
     }
     static PageRequest createPagingRequest(int limit, int page, String orderBy, Boolean ascending, Boolean useUnsafeSort=false) {
@@ -49,9 +51,9 @@ class TablePageUtil {
 
     static PageRequest validateAndConstructQuizPageRequest(int limit, int page, String orderBy, Boolean ascending, int maxLimit = 500, int maxPage = 10000) {
         QuizValidator.isTrue(limit > 0, '[limit] must be > 0')
-        QuizValidator.isTrue(limit <= maxLimit, '[limit] must be <= 500')
-        QuizValidator.isTrue(page >= 0, '[page] must be >= 0')
-        QuizValidator.isTrue(page < maxPage, '[page] must be < 10000')
+        QuizValidator.isTrue(limit <= maxLimit, "[limit] must be <= ${maxLimit}")
+        QuizValidator.isTrue(page >= 1, '[page] must be >= 1')
+        QuizValidator.isTrue(page < maxPage, "[page] must be < ${maxPage}")
         PageRequest pageRequest = PageRequest.of(page - 1, limit, ascending ? ASC : DESC, orderBy)
         return pageRequest
     }
