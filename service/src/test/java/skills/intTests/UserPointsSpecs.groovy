@@ -25,6 +25,8 @@ import skills.intTests.utils.SkillsFactory
 import skills.intTests.utils.SkillsService
 import spock.lang.IgnoreIf
 
+import java.time.Instant
+
 import static skills.intTests.utils.SkillsFactory.*
 
 class UserPointsSpecs extends DefaultIntSpec {
@@ -197,8 +199,8 @@ class UserPointsSpecs extends DefaultIntSpec {
         results.data.size() == 1
 
         def result2User = results.data.find { it -> it.userId == sampleUserIds.get(0).toLowerCase() }
-        result2User.lastUpdated == threeDaysAgo.toInstant().toString()
-        result2User.firstUpdated == threeDaysAgo.toInstant().toString()
+        Instant.parse(result2User.lastUpdated) == threeDaysAgo.toInstant()
+        Instant.parse(result2User.firstUpdated) == threeDaysAgo.toInstant()
     }
 
     def 'get badge users returns correct firstUpdated and lastUpdated date'() {
