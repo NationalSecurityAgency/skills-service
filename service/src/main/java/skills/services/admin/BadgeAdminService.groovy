@@ -234,6 +234,7 @@ class BadgeAdminService {
             } else {
                 skillDefWithExtraRepo.updateDescriptionByProjectIdAndSkillId(savedSkill.projectId, savedSkill.skillId, copyAttachmentRes.markdown)
             }
+            savedSkill.description = copyAttachmentRes.markdown
         }
 
         if(savedSkill && badgeRequest.awardAttrs && type == SkillDef.ContainerType.Badge) {

@@ -63,6 +63,9 @@ class CopyMarkdownWithAttachmentsToGlobalBadgeSpecs extends CopyIntSpec {
         def updatedGlobalBadge = skillsService.getGlobalBadge(badge.badgeId)
 
         List<Attachment> attachments = attachmentRepo.findAll()
+        def rootService = createRootSkillService()
+        def actions = rootService.getUserActionsForEverything()
+        def editAction = rootService.getUserActionAttributes(actions.data[0].id)
 
         // should not create new attachments
         badge.description = updatedGlobalBadge.description
@@ -85,6 +88,7 @@ class CopyMarkdownWithAttachmentsToGlobalBadgeSpecs extends CopyIntSpec {
 
         assert newAttachments.size() == 1
         updatedGlobalBadge.description == "Here is a [Link](/api/download/${newAttachments[0].uuid})".toString()
+        editAction.description == updatedGlobalBadge.description
 
         !newAttachments[0].projectId
         newAttachments[0].skillId == updatedGlobalBadge.badgeId
