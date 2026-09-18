@@ -150,6 +150,7 @@ const schema = object({
   'description': string()
       .max(appConfig.descriptionMaxLength)
       .test('descriptionValidation', 'Description is invalid', (value, testContext) => checkDescription(value, testContext))
+      .test('noAttachmentsForNewGlobalBadges', 'Attachments can only be added when editing an existing global badge', (value) => !props.global || props.isEdit || descriptionValidatorService.attachmentsNotAllowed(value))
       .label('Badge Description'),
   'helpUrl': string()
       .urlValidator()
