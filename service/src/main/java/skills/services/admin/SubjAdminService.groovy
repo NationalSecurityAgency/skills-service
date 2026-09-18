@@ -174,6 +174,7 @@ class SubjAdminService {
         AttachmentService.CopyAttachmentRes copyAttachmentRes = attachmentService.updateAttachmentsAttrsBasedOnUuidsInMarkdown(res.description, res.projectId, null, origSubjectId)
         if (copyAttachmentRes.updated) {
             skillDefWithExtraRepo.updateDescriptionByProjectIdAndSkillId(res.projectId, res.skillId, copyAttachmentRes.markdown)
+            res.description = copyAttachmentRes.markdown
         }
 
         userActionsHistoryService.saveUserAction(new UserActionInfo(
