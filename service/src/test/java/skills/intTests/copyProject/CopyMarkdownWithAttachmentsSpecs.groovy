@@ -18,6 +18,8 @@ package skills.intTests.copyProject
 import org.springframework.http.HttpStatus
 import skills.intTests.utils.QuizDefFactory
 import skills.intTests.utils.SkillsClientException
+import skills.services.userActions.DashboardAction
+import skills.services.userActions.DashboardItem
 import skills.storage.model.Attachment
 import skills.storage.model.SkillDef
 
@@ -802,6 +804,10 @@ class CopyMarkdownWithAttachmentsSpecs extends CopyIntSpec {
         def copyProjSkill2 = skillsService.getSkill([projectId: p2.projectId, subjectId: p1subj1.subjectId, skillId: p1Skills[1].skillId])
 
         List<Attachment> attachments = attachmentRepo.findAll()
+        def rootService = createRootSkillService()
+        def actions = rootService.getUserActionsForEverything(10, 1, "created", false, p2.projectId,
+                DashboardItem.Skill, '', '', p2Skills[0].skillId, DashboardAction.Edit)
+        def editAction = rootService.getUserActionAttributes(actions.data[0].id)
         skillsService.updateSkill(copyProjSkill1, copyProjSkill1.skillId)
         skillsService.updateSkill(copyProjSkill1, copyProjSkill1.skillId)
         skillsService.updateSkill(copyProjSkill2, copyProjSkill2.skillId)
@@ -825,6 +831,7 @@ class CopyMarkdownWithAttachmentsSpecs extends CopyIntSpec {
         List<String> copiedDescriptions = newAttachments.collect( {"Here is a [Link](/api/download/${it.uuid})".toString() })
         copiedDescriptions.contains(copyProjSkill1.description)
         copiedDescriptions.contains(copyProjSkill2.description)
+        editAction.description == copyProjSkill1.description
 
         newAttachments.each {
             assert it.projectId == p2.projectId

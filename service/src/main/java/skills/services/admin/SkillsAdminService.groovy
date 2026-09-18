@@ -383,6 +383,7 @@ class SkillsAdminService {
             AttachmentService.CopyAttachmentRes copyRes = attachmentService.updateAttachmentsAttrsBasedOnUuidsInMarkdown(description, savedSkill.projectId, null, originalSkillId, savedSkill.skillId)
             if (copyRes.updated) {
                 skillDefWithExtraRepo.updateDescriptionByProjectIdAndSkillId(savedSkill.projectId, savedSkill.skillId, copyRes.markdown)
+                tempSaved.description = copyRes.markdown
             }
         }
 
