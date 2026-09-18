@@ -383,7 +383,7 @@ class CopyMarkdownWithAttachmentsSpecs extends CopyIntSpec {
         List<Attachment> attachments = attachmentRepo.findAll()
         def rootService = createRootSkillService()
         def actions = rootService.getUserActionsForEverything(10, 1, "created", false, p2.projectId,
-                DashboardItem.Subject, '', '', p2subj1.subjectId, DashboardAction.Edit)
+                DashboardItem.Subject, '', '', p2subj1.subjectId, DashboardAction.Create)
         def editAction = rootService.getUserActionAttributes(actions.data[0].id)
 
         skillsService.updateSubject(copySubj)
