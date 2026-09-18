@@ -98,7 +98,7 @@ import SkillTagsPage from '@/components/skills/tags/SkillTagsPage.vue'
 import SingleSkillTagPage from '@/components/skills/tags/SingleSkillTagPage.vue'
 import SkillTagUsers from '@/components/skills/tags/SkillTagUsers.vue'
 import TaggedSkills from '@/components/skills/tags/TaggedSkills.vue'
-import FullDependencyGraph from '@/common-components/dependency/FullDependencyGraph.vue'
+import FullDependencyGraph from '@/components/skills/dependencies/FullDependencyGraph.vue'
 import { useSkillsDisplayParentFrameState } from '@/skills-display/stores/UseSkillsDisplayParentFrameState.js'
 
 const routes = [

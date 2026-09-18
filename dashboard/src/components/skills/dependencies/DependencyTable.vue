@@ -19,23 +19,21 @@ import { useSkillsAnnouncer } from '@/common-components/utilities/UseSkillsAnnou
 import SkillsService from '@/components/skills/SkillsService'
 import NoContent2 from '@/components/utils/NoContent2.vue'
 import Column from 'primevue/column'
-import { useProjConfig } from '@/stores/UseProjConfig.js'
 import { useResponsiveBreakpoints } from '@/components/utils/misc/UseResponsiveBreakpoints.js'
 import {useDialogMessages} from "@/components/utils/modal/UseDialogMessages.js";
-import { useSkillOverviewRouteUtil } from '@/components/skills/UseSkillOverviewRouteUtil.js'
-import SkillType from "@/common-components/utilities/SkillType.js";
-import { useRoute } from 'vue-router'
+import { useDependencyNavigation } from '@/common-components/dependency/UseDependencyNavigation.js'
+import { RouterLink } from 'vue-router'
 
 const dialogMessages = useDialogMessages()
-const projConfig = useProjConfig();
-const props = defineProps(['isLoading', 'data'])
+const props = defineProps({
+  isLoading: Boolean,
+  data: Object,
+  editable: { type: Boolean, default: false },
+  mode: { type: String, default: 'admin' },
+})
 const emit = defineEmits(['update', 'panToNode'])
 const announcer = useSkillsAnnouncer()
-const skillRouteUtil = useSkillOverviewRouteUtil()
-const route = useRoute();
-
-const isAdminPage = computed(() => route.path.includes('/administrator/'));
-const isReadOnlyProj = computed(() => projConfig.isReadOnlyProj || !isAdminPage.value);
+const dependencyNavigation = useDependencyNavigation()
 
 const learningPaths = ref([])
 const isProcessing = ref(true)
@@ -107,25 +105,7 @@ const removeLearningPath = (data) => {
   })
 }
 
-const getUrl = (item) => {
-  if (isAdminPage.value) {
-    return getAdminUrl(item)
-  } else {
-    return skillRouteUtil.toRouteProps(item.projectId, item.subjectId, item.skillId, item.type, item.groupId).path
-  }
-}
-
-const getAdminUrl = (item) => {
-  let url = `/administrator/projects/${encodeURIComponent(item.projectId)}`
-  if (SkillType.isSkill(item.type)) {
-    const routeProps = skillRouteUtil.toRouteProps(item.projectId, item.subjectId, item.skillId, item.type, item.groupId)
-    url = routeProps.path
-  } else if (SkillType.isBadge(item.type)) {
-    url += `/badges/${encodeURIComponent(item.skillId)}`
-  }
-
-  return url
-}
+const getRoute = (item) => dependencyNavigation.getRoute(item, props.mode === 'skills-display')
 
 const sortTable = (criteria) => {
   sortField.value = criteria.sortField
@@ -162,21 +142,21 @@ const jumpToNode = (value) => {
           striped-rows>
           <Column field="fromItem" header="From" sortable :class="{'flex': isFlex }">
             <template #body="slotProps">
-              <a :href="getUrl(slotProps.data.fromNode)" :data-cy="`fromNodeLink_${slotProps.data.fromNode.skillId}`">{{ slotProps.data.fromItem }}</a>
+              <RouterLink :to="getRoute(slotProps.data.fromNode)" :data-cy="`fromNodeLink_${slotProps.data.fromNode.skillId}`">{{ slotProps.data.fromItem }}</RouterLink>
             </template>
           </Column>
           <Column field="toItem" header="To" sortable :class="{'flex': isFlex }">
             <template #body="slotProps">
-              <a :href="getUrl(slotProps.data.toNode)" :data-cy="`toNodeLink_${slotProps.data.toNode.skillId}`">{{ slotProps.data.toItem }}</a>
+              <RouterLink :to="getRoute(slotProps.data.toNode)" :data-cy="`toNodeLink_${slotProps.data.toNode.skillId}`">{{ slotProps.data.toItem }}</RouterLink>
             </template>
           </Column>
-          <Column field="edit" header="View Route" v-if="!isReadOnlyProj" :class="{'flex': isFlex }">
+          <Column field="edit" header="View Route" v-if="editable" :class="{'flex': isFlex }">
             <template #body="slotProps">
               <SkillsButton @click="jumpToNode(slotProps.data)" variant="outline-info" size="small" class="text-info mr-2" icon="fa fa-network-wired"
                             :aria-label="`View route of ${slotProps.data.fromItem} to ${slotProps.data.toItem} in graph`" title="View route in graph"></SkillsButton>
             </template>
           </Column>
-          <Column field="edit" header="Edit" v-if="!isReadOnlyProj" :class="{'flex': isFlex }">
+          <Column field="edit" header="Edit" v-if="editable" :class="{'flex': isFlex }">
             <template #body="slotProps">
               <SkillsButton @click="removeLearningPath(slotProps.data)"
                       variant="outline-info" size="small" class="text-info" icon="fa fa-trash"
