@@ -463,7 +463,8 @@ class RootController {
 
     private static PageRequest createPagingRequest(int limit, int page, String orderBy, Boolean ascending) {
         SkillsValidator.isTrue(limit <= 200, "Cannot ask for more than 200 items, provided=[${limit}]")
-        SkillsValidator.isTrue(page >= 0, "Cannot provide negative page. provided =[${page}]")
+        SkillsValidator.isTrue(limit > 0, "Limit must be greater than 0, provided=[${limit}]")
+        SkillsValidator.isTrue(page >= 1, "Page must be 1 or greater (pages are 1-based), provided=[${page}]")
         PageRequest pageRequest = PageRequest.of(page - 1, limit, ascending ? ASC : DESC, orderBy)
 
         return pageRequest
