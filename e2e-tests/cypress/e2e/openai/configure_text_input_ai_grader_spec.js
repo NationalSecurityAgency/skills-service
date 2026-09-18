@@ -24,6 +24,10 @@ import {
 
 describe('Configure Text Input AI Grader Tests', () => {
 
+    beforeEach(() => {
+        cy.intercept('GET', '/admin/quiz-definitions/*/questions/*/textInputAiGradingConf').as('getTextInputAiGradingAttrs');
+    });
+
     it('quiz page only shows AI Grader Links if enableOpenAIIntegration property is configured', () => {
         cy.createQuizDef(1);
         cy.createQuizQuestionDef(1, 1)
@@ -106,6 +110,7 @@ describe('Configure Text Input AI Grader Tests', () => {
         cy.get('[data-cy="ai-grader-question-4"]')
 
         cy.get('[data-cy="ai-grader-question-3"]').click()
+        cy.wait('@getTextInputAiGradingAttrs')
         cy.get('[data-cy="aiGraderEnabled"]').click()
         cy.get('[data-cy="answerForGrading"]').type('The answer')
         cy.get('[data-cy="saveGraderSettingsBtn"]').should('be.enabled')
@@ -136,6 +141,7 @@ describe('Configure Text Input AI Grader Tests', () => {
                 const questions = response.body.questions
                 cy.visit(`/administrator/quizzes/quiz1/questions/${questions[0].id}/ai-grader`);
                 cy.wait('@getConfig')
+                cy.wait('@getTextInputAiGradingAttrs')
 
                 cy.get('[data-cy="aiGraderEnabled"]').click()
                 cy.get('[data-cy="answerForGrading"]').type('fancy answer')
@@ -146,6 +152,7 @@ describe('Configure Text Input AI Grader Tests', () => {
                 cy.get('[data-cy="gradingInstructionsWarningMessage"]').should('not.exist')
 
                 cy.visit(`/administrator/quizzes/quiz1/questions/${questions[0].id}/ai-grader`);
+                cy.wait('@getTextInputAiGradingAttrs')
                 cy.get('[data-cy="aiGraderEnabled"] [data-pc-section="input"]').should('be.checked')
                 cy.get('[data-cy="answerForGrading"]').should('have.value', 'fancy answer')
                 cy.get('[data-cy="minConfidenceLevelInput"] [data-pc-name="pcinputtext"]').should('have.value', '33')
@@ -153,6 +160,33 @@ describe('Configure Text Input AI Grader Tests', () => {
             })
     });
 
+    it('grader attributes configured - validation should enable the save button', () => {
+        cy.intercept('GET', '/public/config', (req) => {
+            req.reply((res) => {
+                const conf = res.body;
+                conf.enableOpenAIIntegration = true;
+                res.send(conf);
+            });
+        }).as('getConfig');
+        cy.createQuizDef(1);
+        cy.createTextInputQuestionDef(1, 1)
+
+        cy.request(`/admin/quiz-definitions/quiz1/questions`)
+            .then((response) => {
+                const questionId = response.body.questions[0].id
+                cy.saveQuizTextInputAiGraderConfigs(1, questionId, 'Loaded grading instructions', 73)
+                cy.visit(`/administrator/quizzes/quiz1/questions/${questionId}/ai-grader`);
+                cy.wait('@getConfig')
+                cy.wait('@getTextInputAiGradingAttrs')
+
+                cy.get('[data-cy="answerForGrading"]')
+                    .should('have.value', 'Loaded grading instructions')
+                    .type(' updated')
+                cy.get('[data-cy="minConfidenceLevelInput"] [data-pc-name="pcinputtext"]')
+                    .should('have.value', '73')
+                cy.get('[data-cy="saveGraderSettingsBtn"]').should('be.enabled')
+            })
+    });
 
     it('show warning message', () => {
         cy.fixture('vars.json').then((vars) => {
@@ -185,6 +219,7 @@ describe('Configure Text Input AI Grader Tests', () => {
                 const questions = response.body.questions
                 cy.visit(`/administrator/quizzes/quiz1/questions/${questions[0].id}/ai-grader`);
                 cy.wait('@getConfig')
+                cy.wait('@getTextInputAiGradingAttrs')
 
                 cy.get('[data-cy="aiGraderEnabled"]').click()
                 cy.get('[data-cy="gradingInstructionsWarningMessage"]').contains('Friendly Reminder: Only safe descriptions for All Dragons')
@@ -195,6 +230,7 @@ describe('Configure Text Input AI Grader Tests', () => {
                 const questions = response.body.questions
                 cy.visit(`/administrator/quizzes/quiz2/questions/${questions[0].id}/ai-grader`);
                 cy.wait('@getConfig')
+                cy.wait('@getTextInputAiGradingAttrs')
 
                 cy.get('[data-cy="aiGraderEnabled"]').click()
                 cy.get('[data-cy="gradingInstructionsWarningMessage"]').contains('Friendly Reminder: Only safe descriptions for Divine Dragon')
@@ -218,6 +254,7 @@ describe('Configure Text Input AI Grader Tests', () => {
                 const questions = response.body.questions
                 cy.visit(`/administrator/quizzes/quiz1/questions/${questions[0].id}/ai-grader`);
                 cy.wait('@getConfig')
+                cy.wait('@getTextInputAiGradingAttrs')
 
                 cy.get('[data-cy="aiGraderEnabled"]').click()
                 cy.get('[data-cy="answerForGrading"]').type('a')
@@ -250,6 +287,7 @@ describe('Configure Text Input AI Grader Tests', () => {
                 const questions = response.body.questions
                 cy.visit(`/administrator/quizzes/quiz1/questions/${questions[0].id}/ai-grader`);
                 cy.wait('@getConfig')
+                cy.wait('@getTextInputAiGradingAttrs')
 
                 cy.get('[data-cy="aiGraderEnabled"]').click()
                 cy.get('[data-cy="answerForGrading"]').type('a')
@@ -286,6 +324,7 @@ describe('Configure Text Input AI Grader Tests', () => {
             .then((response) => {
                 const questions = response.body.questions
                 cy.visit(`/administrator/quizzes/quiz1/questions/${questions[0].id}/ai-grader`);
+                cy.wait('@getTextInputAiGradingAttrs')
 
                 cy.get('[data-cy="aiNotEnabled"]')
                 cy.get('[data-cy="aiGraderEnabled"]').should('not.exist')
@@ -309,6 +348,7 @@ describe('Configure Text Input AI Grader Tests', () => {
                 const questions = response.body.questions
                 cy.visit(`/administrator/quizzes/quiz1/questions/${questions[0].id}/ai-grader`);
                 cy.wait('@getConfig')
+                cy.wait('@getTextInputAiGradingAttrs')
 
                 cy.get('[data-cy="aiGraderEnabled"]').click()
                 cy.get('[data-cy="answerForGrading"]').type('fancy answer')
@@ -375,6 +415,7 @@ describe('Configure Text Input AI Grader Tests', () => {
                 const questions = response.body.questions
                 cy.visit(`/administrator/quizzes/quiz1/questions/${questions[0].id}/ai-grader`);
                 cy.wait('@getConfig')
+                cy.wait('@getTextInputAiGradingAttrs')
 
                 cy.get('[data-cy="aiGraderEnabled"]').click()
                 cy.get('[data-cy="answerForGrading"]').type('a')
@@ -411,6 +452,7 @@ describe('Configure Text Input AI Grader Tests', () => {
                 const questions = response.body.questions
                 cy.visit(`/administrator/quizzes/quiz1/questions/${questions[0].id}/ai-grader`);
                 cy.wait('@getConfig')
+                cy.wait('@getTextInputAiGradingAttrs')
 
                 cy.get('[data-cy="aiGraderEnabled"]').click()
                 cy.get('[data-cy="answerForGrading"]').type('a')

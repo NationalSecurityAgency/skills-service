@@ -75,8 +75,12 @@ const loadTextInputAiGradingAttrs = () => {
   return QuizService.getTextInputAiGradingAttrs(route.params.quizId, route.params.questionId)
       .then((response) => {
         graderEnabled.value = response.enabled
-        setFieldValue('answerUsedForGrading', response.correctAnswer)
-        setFieldValue('minimumConfidenceLevel', response.minimumConfidenceLevel)
+        resetForm({
+          values: {
+            answerUsedForGrading: response.correctAnswer ?? '',
+            minimumConfidenceLevel: response.minimumConfidenceLevel,
+          },
+        })
       })
 }
 
