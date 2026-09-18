@@ -89,7 +89,8 @@ class QuizCopyMarkdownWithAttachmentsTextInputSpecs extends CopyIntSpec {
 
         when:
         question2.question = "Here is a [Link](${attachment1Href})".toString()
-        question2.id = skillsService.createQuizQuestionDef(question2).body.id
+        def createResponse = skillsService.createQuizQuestionDef(question2).body
+        question2.id = createResponse.id
 
         def quiz1Res = skillsService.getQuizQuestionDefs(quiz1.quizId)
         def quiz2Res = skillsService.getQuizQuestionDefs(quiz2.quizId)
@@ -112,6 +113,7 @@ class QuizCopyMarkdownWithAttachmentsTextInputSpecs extends CopyIntSpec {
         List<Attachment> newAttachments = attachments.findAll {!attachment1Href.contains(it.uuid) }
 
         newAttachments.size() == 1
+        createResponse.question == "Here is a [Link](/api/download/${newAttachments[0].uuid})"
         question2.question == "Here is a [Link](/api/download/${newAttachments[0].uuid})"
         newAttachments[0].quizId == quiz2.quizId
         !newAttachments[0].projectId
