@@ -54,8 +54,8 @@ class CopySkillsToAnotherProjGroupAttributesSpecs extends CopyIntSpec {
         def originalSkill1 = skillsService.getSkill([projectId: p1.projectId, subjectId: p1subj1.subjectId, skillId: skill1.skillId])
         def originalSkill2 = skillsService.getSkill([projectId: p1.projectId, subjectId: p1subj1.subjectId, skillId: skill2.skillId])
 
-        def copiedSkill1 = skillsService.getSkill([projectId: p2.projectId, subjectId: p1subj1.subjectId, skillId: skill1.skillId])
-        def copiedSkill2 = skillsService.getSkill([projectId: p2.projectId, subjectId: p1subj1.subjectId, skillId: skill2.skillId])
+        def copiedSkill1 = skillsService.getSkill([projectId: p2.projectId, subjectId: p2subj1.subjectId, skillId: skill1.skillId])
+        def copiedSkill2 = skillsService.getSkill([projectId: p2.projectId, subjectId: p2subj1.subjectId, skillId: skill2.skillId])
         then:
         copiedSkill1.skillId == originalSkill1.skillId
         copiedSkill1.projectId == p2.projectId
@@ -152,9 +152,9 @@ class CopySkillsToAnotherProjGroupAttributesSpecs extends CopyIntSpec {
         def originalSkill2 = skillsService.getSkill([projectId: p1.projectId, subjectId: p1subj1.subjectId, skillId: skill2.skillId])
         def originalSkill3 = skillsService.getSkill([projectId: p1.projectId, subjectId: p1subj1.subjectId, skillId: skill3.skillId])
 
-        def copiedSkill1 = skillsService.getSkill([projectId: p2.projectId, subjectId: p1subj1.subjectId, skillId: skill1.skillId])
-        def copiedSkill2 = skillsService.getSkill([projectId: p2.projectId, subjectId: p1subj1.subjectId, skillId: skill2.skillId])
-        def copiedSkill3 = skillsService.getSkill([projectId: p2.projectId, subjectId: p1subj1.subjectId, skillId: skill3.skillId])
+        def copiedSkill1 = skillsService.getSkill([projectId: p2.projectId, subjectId: p2subj1.subjectId, skillId: skill1.skillId])
+        def copiedSkill2 = skillsService.getSkill([projectId: p2.projectId, subjectId: p2subj1.subjectId, skillId: skill2.skillId])
+        def copiedSkill3 = skillsService.getSkill([projectId: p2.projectId, subjectId: p2subj1.subjectId, skillId: skill3.skillId])
         then:
         copiedSkill1.skillId == originalSkill1.skillId
         copiedSkill1.projectId == p2.projectId
