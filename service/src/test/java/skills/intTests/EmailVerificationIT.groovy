@@ -142,6 +142,22 @@ class EmailVerificationIT extends Specification {
     }
 
     @IgnoreIf({ env["SPRING_PROFILES_ACTIVE"] == "pki" })
+    def "public account-state lookup endpoints are not exposed"() {
+        RestTemplate restTemplate = new RestTemplate()
+        restTemplate.errorHandler = new NoOpResponseErrorHandler()
+
+        when:
+        ResponseEntity<String> userExistsResponse = restTemplate.getForEntity(
+                "http://localhost:${localPort}/userExists/test@skills.org".toString(), String)
+        ResponseEntity<String> emailVerifiedResponse = restTemplate.getForEntity(
+                "http://localhost:${localPort}/userEmailIsVerified/test@skills.org".toString(), String)
+
+        then:
+        userExistsResponse.statusCode == HttpStatus.NOT_FOUND
+        emailVerifiedResponse.statusCode == HttpStatus.NOT_FOUND
+    }
+
+    @IgnoreIf({ env["SPRING_PROFILES_ACTIVE"] == "pki" })
     def "when configured headers and footer is included in the verify email"() {
         def createUser = { String userName ->
             return skillsServiceFactory.createService(

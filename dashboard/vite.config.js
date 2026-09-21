@@ -88,7 +88,6 @@ export default defineConfig({
       '^/isFeatureSupported$' : proxyConf,
       '^/resendEmailVerification/' : proxyConf,
       '^/verifyEmail$' : proxyConf,
-      '^/userEmailIsVerified/' : proxyConf,
       '^/skills-websocket/info' : proxyConf,
       '^/skills-websocket/.*/websocket$' : {
         target: 'ws://localhost:8080',
