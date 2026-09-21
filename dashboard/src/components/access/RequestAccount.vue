@@ -18,7 +18,6 @@ import { computed, onBeforeMount, ref } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useForm } from 'vee-validate';
 import { useAppConfig } from '@/common-components/stores/UseAppConfig.js';
-import { useDebounceFn } from '@vueuse/core';
 import { useAuthState } from '@/stores/UseAuthState.js';
 import * as yup from 'yup';
 import { string } from 'yup';
@@ -34,6 +33,7 @@ const emailVerificationInfo = useEmailVerificationInfo()
 
 const isRootAccount = route.meta.isRootAccount;
 const createInProgress = ref(false);
+const createError = ref('');
 const oAuthProviders = ref([]);
 
 const oAuthOnly = computed(() => {
@@ -57,6 +57,7 @@ onBeforeMount(() => {
 
 const login = (firstName, lastName, email, password) => {
   createInProgress.value = true;
+  createError.value = '';
   authState.signup({isRootAccount, firstName, lastName, email, password}).then(() => {
     authState.configureSkillsClientForInception()
         .then(() => {
@@ -73,32 +74,22 @@ const login = (firstName, lastName, email, password) => {
             router.push({name: pageName});
           }
         });
+  }).catch((error) => {
+    createError.value = error.response?.data?.errorCode === 'UserAlreadyExists'
+      ? 'An account with this email already exists. Sign in or reset your password.'
+      : 'Unable to create your account. Please try again.';
+  }).finally(() => {
+    createInProgress.value = false;
   });
 }
 const oAuth2Login = (registrationId) => {
   createInProgress.value = true;
   authState.oAuth2Login(registrationId);
 }
-const uniqueEmail = useDebounceFn(async (value, context) => {
-  if (!value) {
-    return true;
-  }
-  try {
-    await yup.string().email().validate(value);
-    const isUnique = await AccessService.userWithEmailExists(value);
-    if (isUnique) {
-      return true
-    }
-    return context.createError({message: 'This email address is already used for another account'});
-  } catch ({message}) {
-    return context.createError({message});
-  }
-}, appConfig.formFieldDebounceInMs)
-
 const schema = yup.object().shape({
   firstName: string().required().max(appConfig.maxFirstNameLength).label('First Name'),
   lastName: string().required().max(appConfig.maxFirstNameLength).label('Last Name'),
-  email: string().required().email().min(appConfig.minUsernameLength).test((value, context) => uniqueEmail(value, context)).label('Email'),
+  email: string().required().email().min(appConfig.minUsernameLength).label('Email'),
   password: string().required().min(appConfig.minPasswordLength).max(appConfig.maxPasswordLength).label('Password'),
   passwordConfirmation: string().required().oneOf([yup.ref('password')], 'Passwords must match').label('Confirm Password'),
 })
@@ -214,6 +205,10 @@ const onSubmit = handleSubmit((values) => {
                               data-cy="createAccountButton">
                 </SkillsButton>
               </div>
+              <Message v-if="createError"
+                       severity="error"
+                       :closable="false"
+                       data-cy="createAccountError">{{ createError }}</Message>
               <div v-if="createInProgress && isRootAccount" class="mt-2 text-center">
                 Bootstrapping! May take a second...
               </div>

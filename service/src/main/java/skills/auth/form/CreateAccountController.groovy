@@ -141,12 +141,6 @@ class CreateAccountController {
         userAuthService.grantRoot(request.getUserPrincipal().name)
     }
 
-    @Conditional(SecurityMode.FormOrSAML2Auth)
-    @GetMapping('userExists/{user}')
-    boolean userExists(@PathVariable('user') String user) {
-        return userAuthService.userExists(user)
-    }
-
     @Conditional(SecurityMode.FormAuth)
     @GetMapping("/app/oAuthProviders")
     List<OAuth2Provider> getOAuthProviders() {

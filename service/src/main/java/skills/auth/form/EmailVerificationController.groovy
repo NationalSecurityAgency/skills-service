@@ -29,8 +29,6 @@ import skills.controller.exceptions.SkillException
 import skills.controller.exceptions.SkillsValidator
 import skills.controller.result.model.RequestResult
 import skills.services.PasswordManagementService
-import skills.services.UserAttrsService
-import skills.storage.model.UserAttrs
 import skills.storage.model.auth.UserToken
 
 import static skills.services.PasswordManagementService.VERIFY_EMAIL_TOKEN_TYPE
@@ -47,20 +45,12 @@ class EmailVerificationController {
     @Autowired
     UserAuthService userAuthService
 
-    @Autowired
-    UserAttrsService userAttrsService
-
-    @GetMapping('userEmailIsVerified/{email}')
-    boolean userEmailIsVerified(@PathVariable('email') String email) {
-        UserAttrs userAttrs = userAttrsService.findByUserId(email)
-        return userAttrs == null ? true : Boolean.valueOf(userAttrs.emailVerified)
-    }
-
     // used to send a secondary email after the initial account creation email verification was sent
     @PostMapping("resendEmailVerification/{userId}")
     RequestResult resendEmailVerification(@PathVariable("userId") String userId) {
         if (!userAuthService.userExists(userId)) {
-            throw new SkillException("No user account exists for the specified userId [${userId}]")
+            log.info("ignoring email verification request for an unknown user")
+            return RequestResult.success()
         }
         passwordMangementService.createEmailVerificationTokenAndNotifyUser(userId)
        return RequestResult.success()

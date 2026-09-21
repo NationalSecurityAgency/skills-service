@@ -1564,11 +1564,6 @@ class SkillsService {
         return wsHelper.adminPut(getAddProjectAdminUrl(projectId, userId))
     }
 
-    boolean doesUserExist(String username, boolean validateCert=true) {
-        username = getUserId(username, validateCert)
-        return wsHelper.rootContextGet("/userExists/${username}")
-    }
-
     boolean doesSubjectNameExist(String projectId, String subjectName) {
 //        String encoded = URLEncoder.encode(subjectName, StandardCharsets.UTF_8.toString())
         return wsHelper.adminPost("/projects/${projectId}/subjectNameExists", [name:subjectName])?.body
@@ -1607,7 +1602,7 @@ class SkillsService {
     }
 
     def requestPasswordReset(String userId) {
-        return wsHelper.post("/resetPassword", "", ["userId", userId])
+        return wsHelper.rootContextUpload("resetPassword", [userId: userId])
     }
 
     def saveAiPromptSettings(List<Map> settings) {
@@ -2661,4 +2656,3 @@ class SkillsService {
     }
 
 }
-

@@ -95,12 +95,12 @@ class PortalWebSecurityHelper {
                                   "/app/oAuthProviders", "/login*", "/login/**",
                                   "/performLogin", "/createAccount",
                                   "/createRootAccount", '/grantFirstRoot',
-                                  '/userExists/**', "/app/userInfo",
+                                  "/app/userInfo",
                                   "/app/users/validExistingDashboardUserId/*", "/app/oAuthProviders",
                                   "/index.html", "index.html", "/public/**",
                                   "/skills-websocket/**", "/requestPasswordReset",
                                   "/resetPassword/**", "/performPasswordReset",
-                                  "/resendEmailVerification/**", "/verifyEmail", "/userEmailIsVerified/*","/saml2/**"]
+                                  "/resendEmailVerification/**", "/verifyEmail", "/saml2/**"]
         RequestMatcher permitAllMatcher = new OrRequestMatcher(
                 permitAllPatterns.collect { String pattern ->
                     String normalizedPattern = StringUtils.hasText(pattern) && !pattern.startsWith('/') ? "/${pattern}" : pattern

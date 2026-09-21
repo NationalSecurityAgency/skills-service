@@ -95,6 +95,23 @@ class PasswordResetSpec extends DefaultIntSpec {
         msg.fromEmail[0] == "resetspec@skilltreetests"
     }
 
+    @IgnoreIf({ env["SPRING_PROFILES_ACTIVE"] == "pki" })
+    def "password reset request does not disclose whether the user exists"() {
+        createService("existing@skills.org", "somepassword")
+
+        when:
+        def missingResult = rootSkillsService.requestPasswordReset("missing@skills.org")
+        def existingResult = rootSkillsService.requestPasswordReset("existing@skills.org")
+
+        then:
+        missingResult.success
+        existingResult == missingResult
+        WaitFor.wait { greenMail.getReceivedMessages().length == 1 }
+        waitForAsyncTasksCompletion.waitForAllScheduleTasks()
+        greenMail.getReceivedMessages().length == 1
+        EmailUtils.getEmail(greenMail).recipients == ["existing@skills.org"]
+    }
+
     @IgnoreIf({env["SPRING_PROFILES_ACTIVE"] == "pki" })
     def "when configured headers and footer is included in the password reset email"() {
         SkillsService rootSkillsService = createRootSkillService()

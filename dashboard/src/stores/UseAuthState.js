@@ -74,7 +74,7 @@ export const useAuthState = defineStore('authState', () => {
     const signup = (authData) => {
         const url = authData.isRootAccount ? '/createRootAccount' : '/createAccount'
         return axios
-          .put(url, authData)
+          .put(url, authData, { handleError: false })
           .then((result) => {
               if (result) {
                   handleLogin(result)

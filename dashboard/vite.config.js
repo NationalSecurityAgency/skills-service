@@ -81,7 +81,6 @@ export default defineConfig({
       '^/oauth2$': proxyConf,
       '^/login$': proxyConf,
       '^/root/': proxyConf,
-      '^/userExists': proxyConf,
       '^/public/': proxyConf,
       '^/metrics/' : proxyConf,
       '^/resetPassword$' : proxyConf,
@@ -111,4 +110,3 @@ export default defineConfig({
     }
   }
 })
-

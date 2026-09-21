@@ -21,10 +21,20 @@ import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.web.server.LocalServerPort
+import org.springframework.http.HttpEntity
+import org.springframework.http.HttpHeaders
+import org.springframework.http.MediaType
+import org.springframework.http.ResponseEntity
 import org.springframework.http.HttpStatus
 import org.springframework.jdbc.core.JdbcTemplate
+import org.springframework.util.LinkedMultiValueMap
+import org.springframework.util.MultiValueMap
+import org.springframework.web.client.NoOpResponseErrorHandler
+import org.springframework.web.client.RestTemplate
 import skills.SpringBootApp
 import skills.intTests.utils.*
+import skills.storage.model.auth.UserToken
+import skills.storage.repos.PasswordResetTokenRepo
 import skills.utils.WaitFor
 import spock.lang.IgnoreIf
 import spock.lang.Specification
@@ -50,6 +60,9 @@ class EmailVerificationIT extends Specification {
 
     @Autowired
     JdbcTemplate jdbcTemplate
+
+    @Autowired
+    PasswordResetTokenRepo tokenRepo
 
     GreenMail greenMail
 
@@ -103,6 +116,29 @@ class EmailVerificationIT extends Specification {
 
         emailRes.plainText.contains("Hi Skills Test,")
         emailRes.plainText.contains("We're happy you created a SkillTree account! Please use the link below to confirm your email address so you can start exploring SkillTree.")
+    }
+
+    @IgnoreIf({ env["SPRING_PROFILES_ACTIVE"] == "pki" })
+    def "resend verification does not disclose whether the user exists"() {
+        SkillsService existingUser = skillsServiceFactory.createService(
+                "existing@user.org",
+                'aaaaaaaa',
+                "Skills",
+                "Test",
+                "http://localhost:${localPort}".toString())
+        WaitFor.wait { greenMail.getReceivedMessages().length == 1 }
+        greenMail.purgeEmailFromAllMailboxes()
+
+        when:
+        def existingResult = existingUser.wsHelper.rawPost("resendEmailVerification/existing@user.org", null)
+        def missingResult = existingUser.wsHelper.rawPost("resendEmailVerification/missing@user.org", null)
+
+        then:
+        existingResult.success
+        missingResult.success
+        missingResult.body == existingResult.body
+        WaitFor.wait { greenMail.getReceivedMessages().length == 1 }
+        EmailUtils.getEmail(greenMail).recipients == ["existing@user.org"]
     }
 
     @IgnoreIf({ env["SPRING_PROFILES_ACTIVE"] == "pki" })
@@ -178,6 +214,96 @@ class EmailVerificationIT extends Specification {
         then:
         projects == []
         userInfo.first == "Skills"
+    }
+
+    @IgnoreIf({ env["SPRING_PROFILES_ACTIVE"] == "pki" })
+    def "email verification token cannot be used twice"() {
+        SkillsService user = skillsServiceFactory.createService(
+                "first@user.org",
+                'aaaaaaaa',
+                "Skills",
+                "Test",
+                "http://localhost:${localPort}".toString())
+        WaitFor.wait { greenMail.getReceivedMessages().length == 1 }
+        def (email, token) = getTokenFromEmail(EmailUtils.getEmail(greenMail).html)
+
+        when:
+        user.verifyEmail(email, token)
+        def secondResult = user.wsHelper.rawPost('verifyEmail', [email: email, token: token], HttpStatus.BAD_REQUEST, false)
+
+        then:
+        secondResult.statusCode == HttpStatus.BAD_REQUEST
+        secondResult.body.explanation == 'The supplied email verification token does not exist or is not for the specified user.'
+    }
+
+    @IgnoreIf({ env["SPRING_PROFILES_ACTIVE"] == "pki" })
+    def "expired email verification token can be replaced and the new token used"() {
+        SkillsService user = skillsServiceFactory.createService(
+                "first@user.org",
+                'aaaaaaaa',
+                "Skills",
+                "Test",
+                "http://localhost:${localPort}".toString())
+        WaitFor.wait { greenMail.getReceivedMessages().length == 1 }
+        def (email, expiredToken) = getTokenFromEmail(EmailUtils.getEmail(greenMail).html)
+        UserToken storedToken = tokenRepo.findByToken(expiredToken)
+        storedToken.expires = new Date() - 1
+        tokenRepo.save(storedToken)
+        greenMail.purgeEmailFromAllMailboxes()
+
+        when:
+        def expiredResult = user.wsHelper.rawPost('verifyEmail', [email: email, token: expiredToken], HttpStatus.BAD_REQUEST, false)
+
+        then:
+        expiredResult.statusCode == HttpStatus.BAD_REQUEST
+        expiredResult.body.errorCode == 'UserTokenExpired'
+        expiredResult.body.explanation == 'Your email verification code has expired.'
+
+        when:
+        def resendResult = user.wsHelper.rawPost("resendEmailVerification/${email}", null)
+        WaitFor.wait { greenMail.getReceivedMessages().length == 1 }
+        def (resentEmail, replacementToken) = getTokenFromEmail(EmailUtils.getEmail(greenMail).html)
+        def verifyResult = user.wsHelper.rawPost('verifyEmail', [email: resentEmail, token: replacementToken])
+
+        then:
+        resendResult.success
+        replacementToken != expiredToken
+        verifyResult.success
+
+        when:
+        SkillsService verifiedUser = skillsServiceFactory.createService(
+                "first@user.org",
+                'aaaaaaaa',
+                "Skills",
+                "Test",
+                "http://localhost:${localPort}".toString())
+
+        then:
+        verifiedUser.getProjects() == []
+    }
+
+    @IgnoreIf({ env["SPRING_PROFILES_ACTIVE"] == "pki" })
+    def "unverified user login does not disclose account state"() {
+        skillsServiceFactory.createService(
+                "unverified@user.org",
+                'aaaaaaaa',
+                "Skills",
+                "Test",
+                "http://localhost:${localPort}".toString())
+
+        when:
+        ResponseEntity<String> unverifiedResponse = login('unverified@user.org', 'aaaaaaaa')
+        ResponseEntity<String> invalidCredentialsResponse = login('unverified@user.org', 'wrong-password')
+        ResponseEntity<String> missingUserResponse = login('missing@user.org', 'aaaaaaaa')
+
+        then:
+        unverifiedResponse.statusCode == HttpStatus.UNAUTHORIZED
+        invalidCredentialsResponse.statusCode == HttpStatus.UNAUTHORIZED
+        missingUserResponse.statusCode == HttpStatus.UNAUTHORIZED
+        unverifiedResponse.body == invalidCredentialsResponse.body
+        unverifiedResponse.body == missingUserResponse.body
+        unverifiedResponse.headers.location == invalidCredentialsResponse.headers.location
+        unverifiedResponse.headers.location == missingUserResponse.headers.location
     }
 
     @IgnoreIf({ env["SPRING_PROFILES_ACTIVE"] == "pki" })
@@ -319,6 +445,20 @@ class EmailVerificationIT extends Specification {
         String userEmail = url.tokenize('/')[4]
         String token = url.tokenize('/')[3]
         return [userEmail, token]
+    }
+
+    private ResponseEntity<String> login(String username, String password) {
+        HttpHeaders headers = new HttpHeaders()
+        headers.contentType = MediaType.APPLICATION_FORM_URLENCODED
+        MultiValueMap<String, String> form = new LinkedMultiValueMap<>()
+        form.add('username', username)
+        form.add('password', password)
+        RestTemplate restTemplate = new RestTemplate()
+        restTemplate.errorHandler = new NoOpResponseErrorHandler()
+        restTemplate.postForEntity(
+                "http://localhost:${localPort}/performLogin".toString(),
+                new HttpEntity<>(form, headers),
+                String)
     }
 
 

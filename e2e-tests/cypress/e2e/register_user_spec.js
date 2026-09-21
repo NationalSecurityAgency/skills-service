@@ -50,6 +50,33 @@ describe('Register Dashboard Users', () => {
             .should('be.visible');
     });
 
+    it('handles registration for an existing account', () => {
+        const existingEmail = 'existing@skills.org';
+        cy.register(existingEmail, 'password', false);
+
+        cy.visit('/request-account');
+        cy.get('[data-cy="requestAccountFirstName"]')
+            .type('Robert');
+        cy.get('[data-cy="requestAccountLastName"]')
+            .type('Smith');
+        cy.get('[data-cy="requestAccountEmail"]')
+            .type(existingEmail);
+        cy.get('[data-cy="requestAccountPassword"]')
+            .type('password');
+        cy.get('[data-cy="requestAccountConfirmPassword"]')
+            .type('password');
+        cy.get('[data-cy="createAccountButton"]')
+            .click();
+
+        cy.get('[data-cy="createAccountError"]')
+            .should('be.visible')
+            .and('contain.text', 'An account with this email already exists. Sign in or reset your password.');
+        cy.get('[data-cy="createAccountButton"]')
+            .should('be.enabled');
+        cy.contains('Sign in')
+            .should('be.visible');
+    });
+
     it('register dashboard user redirects to previous page', () => {
         cy.visit('/settings');
         cy.contains('Don\'t have a SkillTree account');
@@ -184,22 +211,6 @@ describe('Register Dashboard Users', () => {
         cy.contains('Create Account').should('be.enabled');
         cy.contains('The Email field must be a valid email').should('not.exist')
          */
-
-        // email already taken
-        cy.get('[data-cy="requestAccountEmail"]')
-            .clear()
-            .type('skills@skills.org');
-        cy.contains('This email address is already used for another account');
-        cy.contains('Create Account')
-            .should('be.disabled');
-
-        cy.get('[data-cy="requestAccountEmail"]')
-            .clear()
-            .type('skills1@skills.org');
-        cy.contains('Create Account')
-            .should('be.enabled');
-        cy.contains('This email address is already used for another account')
-            .should('not.exist');
 
         // valid email
         cy.get('[data-cy="requestAccountEmail"]')

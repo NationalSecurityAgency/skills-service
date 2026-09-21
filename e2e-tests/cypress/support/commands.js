@@ -1068,6 +1068,7 @@ Cypress.Commands.add("getFooterFromEmail", (wait=true) => {
 
 Cypress.Commands.add("getEmails", (expectAtLeastNumEmails = 1) => {
     const emailUrl = 'http://localhost:1080/email';
+    cy.waitForBackendAsyncTasksToComplete()
     cy.waitUntil(() => cy.request(emailUrl).then((response) => response.body && response.body.length >= expectAtLeastNumEmails), {
         errorMsg: `Timed out after 2 minutes while attempting to find at least ${expectAtLeastNumEmails} emails in the test SMTP server (${emailUrl}).`,
         timeout: 120000, // waits up to 2 minutes
