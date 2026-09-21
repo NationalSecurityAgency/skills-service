@@ -17,6 +17,7 @@ package skills.intTests.metrics.global
 
 import groovy.json.JsonOutput
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.http.HttpStatus
 import org.springframework.jdbc.core.JdbcTemplate
 import skills.intTests.utils.DefaultIntSpec
 import skills.intTests.utils.QuizDefFactory
@@ -422,4 +423,28 @@ class GlobalQuizRunsSpecs extends DefaultIntSpec {
         return quizAttempt
     }
 
+    def "not allowed to request 0 page"() {
+        when:
+        skillsService.getGlobalQuizRuns('', '', 10, 0)
+        then:
+        SkillsClientException e = thrown(SkillsClientException)
+        e.httpStatus == HttpStatus.BAD_REQUEST
+        e.resBody.contains('"errorCode":"BadParam"')
+        e.resBody.contains("[page] must be >= 1")
+    }
+
+    def "limit must be between 1 and 500 - limit: #limit"() {
+        when:
+        skillsService.getGlobalQuizRuns('', '', limit, 1)
+        then:
+        SkillsClientException e = thrown(SkillsClientException)
+        e.httpStatus == HttpStatus.BAD_REQUEST
+        e.resBody.contains('"errorCode":"BadParam"')
+        e.resBody.contains(expectedMsg)
+
+        where:
+        limit | expectedMsg
+        0     | "[limit] must be > 0"
+        501   | "[limit] must be <= 500"
+    }
 }
