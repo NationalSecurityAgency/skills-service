@@ -270,7 +270,7 @@ class AdminSkillInfoSpecs extends DefaultIntSpec {
 
         then:
         SkillsClientException e = thrown(SkillsClientException)
-        e.resBody.contains("Skill [Fake] doesn't exist.")
+        e.resBody.contains("Skill [Fake] doesn't exist under Subject [${proj1_subj.subjectId}].")
         e.httpStatus == HttpStatus.NOT_FOUND
     }
 
