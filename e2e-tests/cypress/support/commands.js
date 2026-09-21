@@ -1334,8 +1334,6 @@ Cypress.Commands.add('loginBySingleSignOn', (projId = 'proj1') => {
                 cy.log('Skills token request failed, authenticating with OAuth provider...');
                 cy.request({
                     url: 'http://localhost:8080/oauth2/authorization/hydra',
-                    qs: { skillsRedirectUri: baseUrl, },
-                    // qs: { skillsRedirectUri: `${baseUrl}${homePage}` },
                 }).then((resp) => {
                     expect(resp.status).to.eq(200)
 

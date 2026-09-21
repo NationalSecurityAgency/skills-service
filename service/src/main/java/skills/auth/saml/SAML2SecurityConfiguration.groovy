@@ -54,8 +54,6 @@ import java.security.spec.PKCS8EncodedKeySpec
 /** Supports Single Identity Provider Only **/
 class SAML2SecurityConfiguration{
 
-    public static final String SKILLS_REDIRECT_URI = 'skillsRedirectUri'
-
     @Value('${spring.security.saml2.metadata-location}')
     String assertingPartyMetadataLocation;
 

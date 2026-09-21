@@ -32,9 +32,6 @@ import org.springframework.security.config.http.SessionCreationPolicy
 import org.springframework.security.core.Authentication
 import org.springframework.security.core.userdetails.UserDetailsService
 import org.springframework.security.crypto.password.PasswordEncoder
-import org.springframework.security.oauth2.client.web.AuthorizationRequestRepository
-import org.springframework.security.oauth2.client.web.HttpSessionOAuth2AuthorizationRequestRepository
-import org.springframework.security.oauth2.core.endpoint.OAuth2AuthorizationRequest
 import org.springframework.security.web.SecurityFilterChain
 import org.springframework.security.web.authentication.AuthenticationFailureHandler
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationFailureHandler
@@ -57,8 +54,6 @@ import skills.auth.form.oauth2.OAuthUtils
 @Slf4j
 class FormSecurityConfiguration {
 
-    public static final String SKILLS_REDIRECT_URI = 'skillsRedirectUri'
-
     @Autowired
     private PortalWebSecurityHelper portalWebSecurityHelper
 
@@ -73,12 +68,6 @@ class FormSecurityConfiguration {
 
     @Autowired
     private RestAuthenticationSuccessHandler restAuthenticationSuccessHandler
-
-    @Autowired
-    private SkillsClientOAuth2AuthenticationSuccessHandler oauthAuthenticationSuccessHandler
-
-    @Autowired
-    private SkillsClientOAuth2AuthorizationRequestRepository skillsClientOAuth2AuthorizationRequestRepository
 
     @Autowired
     private RestLogoutSuccessHandler restLogoutSuccessHandler
@@ -107,13 +96,10 @@ class FormSecurityConfiguration {
                        .loginProcessingUrl("/performLogin")
                        .successHandler(restAuthenticationSuccessHandler)
                        .failureHandler(restAuthenticationFailureHandler))
-               .logout((logout) -> logout.logoutSuccessHandler(restLogoutSuccessHandler))
-               .oauth2Login((oauth2Login) -> oauth2Login
-                       .loginPage("/skills-login")
-                       .successHandler(oauthAuthenticationSuccessHandler)
-                       .failureHandler(restAuthenticationFailureHandler)
-                       .authorizationEndpoint((authorizationEndpoint) -> authorizationEndpoint
-                               .authorizationRequestRepository(skillsClientOAuth2AuthorizationRequestRepository)))
+                .logout((logout) -> logout.logoutSuccessHandler(restLogoutSuccessHandler))
+                .oauth2Login((oauth2Login) -> oauth2Login
+                        .loginPage("/skills-login")
+                        .failureHandler(restAuthenticationFailureHandler))
 
         http.build()
     }
@@ -177,19 +163,6 @@ class FormSecurityConfiguration {
     }
 
     @Component
-    static final class SkillsClientOAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationSuccessHandler {
-        @Override
-        protected String determineTargetUrl(HttpServletRequest request, HttpServletResponse response) {
-            String targetUrl = request.getSession(false).getAttribute(SKILLS_REDIRECT_URI)
-            if (targetUrl) {
-                return targetUrl
-            } else {
-                return super.determineTargetUrl(request, response)
-            }
-        }
-    }
-
-    @Component
     static final class RestLogoutSuccessHandler extends HttpStatusReturningLogoutSuccessHandler {
         RestLogoutSuccessHandler() {
             super(HttpStatus.OK)
@@ -199,29 +172,6 @@ class FormSecurityConfiguration {
         void onLogoutSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException {
             writeNullJson(response)
             super.onLogoutSuccess(request, response, authentication)
-        }
-    }
-
-    @Component
-    static final class SkillsClientOAuth2AuthorizationRequestRepository implements AuthorizationRequestRepository<OAuth2AuthorizationRequest> {
-        @Delegate
-        HttpSessionOAuth2AuthorizationRequestRepository httpSessionOAuth2AuthorizationRequestRepository = new HttpSessionOAuth2AuthorizationRequestRepository()
-
-        @Override
-        void saveAuthorizationRequest(OAuth2AuthorizationRequest authorizationRequest, HttpServletRequest request, HttpServletResponse response) {
-            httpSessionOAuth2AuthorizationRequestRepository.saveAuthorizationRequest(authorizationRequest, request, response)
-            String skillsRedirectUri = request.getParameter(SKILLS_REDIRECT_URI)
-            if (skillsRedirectUri) {
-                request.getSession(false).setAttribute(SKILLS_REDIRECT_URI, skillsRedirectUri)
-            }
-        }
-        @Override
-        OAuth2AuthorizationRequest removeAuthorizationRequest(HttpServletRequest request, HttpServletResponse response) {
-            return httpSessionOAuth2AuthorizationRequestRepository.removeAuthorizationRequest(request, response)
-        }
-
-        OAuth2AuthorizationRequest loadAuthorizationRequest(HttpServletRequest request) {
-            return httpSessionOAuth2AuthorizationRequestRepository.loadAuthorizationRequest(request)
         }
     }
 
