@@ -133,7 +133,7 @@ describe('Client Display Prerequisites Badges Tests', () => {
         cy.get('[data-cy="skillProgress_index-1"]').should('not.exist')
     });
 
-    it.only('view prerequisites on badge page', function() {
+    it('view prerequisites on badge page', function() {
         cy.createSkill(1, 1, 1)
         cy.createSkill(1, 1, 2)
         cy.createSkill(1, 1, 3)
