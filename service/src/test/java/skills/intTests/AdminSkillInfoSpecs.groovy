@@ -274,6 +274,25 @@ class AdminSkillInfoSpecs extends DefaultIntSpec {
         e.httpStatus == HttpStatus.NOT_FOUND
     }
 
+    def "get skill returns 404 when skill does not belong to subject"() {
+        def proj = SkillsFactory.createProject(1)
+        def subject1 = SkillsFactory.createSubject(1, 1)
+        def subject2 = SkillsFactory.createSubject(1, 2)
+        def skill = SkillsFactory.createSkill(1, 1)
+        skillsService.createProject(proj)
+        skillsService.createSubject(subject1)
+        skillsService.createSubject(subject2)
+        skillsService.createSkill(skill)
+
+        when:
+        skillsService.getSkill([projectId: proj.projectId, subjectId: subject2.subjectId, skillId: skill.skillId])
+
+        then:
+        SkillsClientException e = thrown(SkillsClientException)
+        e.resBody.contains("Skill [${skill.skillId}] doesn't exist under Subject [${subject2.subjectId}].")
+        e.httpStatus == HttpStatus.NOT_FOUND
+    }
+
     def "get all skills for a subject with badge info"() {
         def proj1 = SkillsFactory.createProject(1)
         def proj1_subj = SkillsFactory.createSubject(1, 1)

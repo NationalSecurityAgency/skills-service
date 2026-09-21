@@ -43,6 +43,24 @@ interface SkillDefWithExtraRepo extends JpaRepository<SkillDefWithExtra, Integer
     SkillDefWithExtra findByProjectIdAndSkillIdIgnoreCaseAndTypeIn(@Nullable String id, String skillId, List<ContainerType> type)
 
     @Nullable
+    @Query('''select skill
+        from SkillDefWithExtra skill
+        join SkillRelDef rel on rel.child.id = skill.id
+        join SkillDefWithExtra subject on rel.parent.id = subject.id
+        where skill.projectId = :projectId
+          and lower(skill.skillId) = lower(:skillId)
+          and skill.type in :types
+          and subject.projectId = :projectId
+          and lower(subject.skillId) = lower(:subjectId)
+          and subject.type = 'Subject'
+          and rel.type in ('RuleSetDefinition', 'GroupSkillToSubject')''')
+    SkillDefWithExtra findByProjectIdAndSubjectIdAndSkillIdIgnoreCaseAndTypeIn(
+            @Param('projectId') String projectId,
+            @Param('subjectId') String subjectId,
+            @Param('skillId') String skillId,
+            @Param('types') List<ContainerType> types)
+
+    @Nullable
     SkillDefWithExtra findByProjectIdAndSkillId(String id, String skillId)
 
     @Nullable

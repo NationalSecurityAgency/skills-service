@@ -923,9 +923,10 @@ class SkillsAdminService {
 
     @Transactional(readOnly = true)
     SkillDefRes getSkill(String projectId, String subjectId, String skillId) {
-        SkillDefWithExtra res = skillDefWithExtraRepo.findByProjectIdAndSkillIdIgnoreCaseAndTypeIn(projectId, skillId, [SkillDef.ContainerType.Skill, SkillDef.ContainerType.SkillsGroup])
+        SkillDefWithExtra res = skillDefWithExtraRepo.findByProjectIdAndSubjectIdAndSkillIdIgnoreCaseAndTypeIn(
+                projectId, subjectId, skillId, [SkillDef.ContainerType.Skill, SkillDef.ContainerType.SkillsGroup])
         if (!res) {
-            throw new SkillException("Skill [${skillId}] doesn't exist.", projectId, null, ErrorCode.SkillNotFound)
+            throw new SkillException("Skill [${skillId}] doesn't exist under Subject [${subjectId}].", projectId, null, ErrorCode.SkillNotFound)
         }
 
         SkillDefRes finalRes = convertToSkillDefRes(res)
