@@ -17,7 +17,7 @@ limitations under the License.
 import {useUserProgressSummaryState} from '@/skills-display/stores/UseUserProgressSummaryState.js'
 import CircleProgress from '@/skills-display/components/progress/CircleProgress.vue'
 import {useSkillsDisplayThemeState} from '@/skills-display/stores/UseSkillsDisplayThemeState.js'
-import {computed} from 'vue'
+import {computed, onMounted, ref} from 'vue'
 import {useNumberFormat} from '@/common-components/filter/UseNumberFormat.js'
 import SkillLevel from '@/skills-display/components/progress/MySkillLevel.vue'
 import {useSkillsDisplaySubjectState} from '@/skills-display/stores/UseSkillsDisplaySubjectState.js'
@@ -25,6 +25,8 @@ import {useSkillsDisplayAttributesState} from '@/skills-display/stores/UseSkills
 import VerticalProgressBar from '@/skills-display/components/progress/VerticalProgressBar.vue'
 import AchievementCelebration from "@/skills-display/components/progress/celebration/AchievementCelebration.vue";
 import {usePluralize} from "@/components/utils/misc/UsePluralize.js";
+import {useSkillsDisplayService} from '@/skills-display/services/UseSkillsDisplayService.js'
+import {useSkillsDisplayInfo} from '@/skills-display/UseSkillsDisplayInfo.js'
 
 const props = defineProps({
   isSubject: {
@@ -42,10 +44,15 @@ const themeState = useSkillsDisplayThemeState()
 const attributes = useSkillsDisplayAttributesState()
 const pluralize = usePluralize()
 const numFormat = useNumberFormat()
+const skillsDisplayService = useSkillsDisplayService()
+const skillsDisplayInfo = useSkillsDisplayInfo()
+const learningPathProgress = ref({ achieved: 0, total: 0 })
 
 const totalSkills = computed(() => userProgress.value?.totalSkills || 0)
 const skillsAchieved = computed(() => userProgress.value?.skillsAchieved || 0)
 const skillsPercentAchieved = computed(() => totalSkills.value > 0 ? Math.round((skillsAchieved.value / totalSkills.value) * 100) : 0)
+const hasLearningPath = computed(() => learningPathProgress.value.total > 0)
+const learningPathPercent = computed(() => Math.round((learningPathProgress.value.achieved / learningPathProgress.value.total) * 100))
 
 const isLevelComplete = computed(() => userProgress.value.levelTotalPoints === -1)
 const levelStats = computed(() => {
@@ -53,6 +60,20 @@ const levelStats = computed(() => {
     title: isLevelComplete.value ? `${attributes.levelDisplayName} Progress` : `${attributes.levelDisplayName} ${userProgress.value.skillsLevel + 1} Progress`,
     nextLevel: userProgress.value.skillsLevel + 1,
     pointsTillNextLevel: userProgress.value.levelTotalPoints - userProgress.value.levelPoints,
+  }
+})
+
+onMounted(() => {
+  if (!props.isSubject) {
+    skillsDisplayService.getSkillDependenciesGraphForProject().then((graph) => {
+      if (graph?.edges?.length > 0) {
+        const pathNodes = graph.nodes || []
+        learningPathProgress.value = {
+          achieved: pathNodes.filter((node) => node.achieved).length,
+          total: pathNodes.length,
+        }
+      }
+    })
   }
 })
 </script>
@@ -108,18 +129,47 @@ const levelStats = computed(() => {
           </circle-progress>
         </div>
       </div>
-      <div class="mt-9 mx-8 mb-4 flex justify-center sd-theme-achieved-skills-progress" data-cy="achievedSkillsProgress">
-        <div class="w-11/12">
-        <div class="flex mb-1" :aria-label="`Achieved ${skillsAchieved} out of ${totalSkills} skills`">
-          <div class="flex-1 text-lg font-medium">Achieved {{ attributes.skillDisplayNamePlural }}</div>
-          <div><span class="text-orange-700 dark:text-orange-400 font-medium sd-theme-primary-color" data-cy="numAchievedSkills">{{skillsAchieved}}</span> / <span data-cy="numTotalSkills">{{totalSkills}}</span></div>
-        </div>
-        <vertical-progress-bar
-          :total-progress="skillsPercentAchieved"
-          :barSize="8"
-          :disable-daily-color="true"
-          :aria-label="`Achieved ${skillsAchieved} out of ${totalSkills} skills`"
-        />
+      <div class="mt-9 mx-4 mb-4 flex justify-center sd-theme-achieved-skills-progress" data-cy="achievedSkillsProgress">
+        <div class="w-11/12 flex flex-col md:flex-row gap-4 items-stretch">
+          <div
+            v-if="hasLearningPath"
+            class="rounded-lg border border-surface-200 dark:border-surface-700 px-4 py-2 flex items-center gap-3 md:w-96 text-left shadow-sm">
+            <circle-progress
+              class="shrink-0"
+              :diameter="48"
+              :total-completed-points="learningPathProgress.achieved"
+              :total-possible-points="learningPathProgress.total">
+              <template #center>
+                <div class="text-xs font-semibold sd-theme-primary-color" data-cy="learningPathPercent">{{ learningPathPercent }}%</div>
+              </template>
+            </circle-progress>
+            <div class="flex-1 min-w-0" :aria-label="`Achieved ${learningPathProgress.achieved} out of ${learningPathProgress.total} learning path items`">
+              <div class="font-semibold whitespace-nowrap text-blue-600 dark:text-blue-800 "><i class="fas fa-route mr-2" aria-hidden="true" />Learning Path</div>
+              <div class="text-sm whitespace-nowrap" >
+                <span class="text-orange-700 dark:text-orange-400 sd-theme-primary-color" data-cy="numAchievedLearningPathItems">{{ learningPathProgress.achieved }}</span> / <span data-cy="numTotalLearningPathItems">{{ learningPathProgress.total }}</span>
+              </div>
+            </div>
+            <RouterLink
+              :to="{ name: skillsDisplayInfo.getContextSpecificRouteName('projectLearningPathPage'), params: { projectId: attributes.projectId } }"
+              class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded border border-green-600 text-green-700 dark:text-green-400 px-3 py-2 text-sm font-medium no-underline hover:bg-green-50 dark:hover:bg-green-950/30"
+              data-cy="viewLearningPathLink"
+              aria-label="View project learning path">
+              <span>View Path</span>
+              <i class="fas fa-arrow-right" aria-hidden="true" />
+            </RouterLink>
+          </div>
+          <div class="flex-1 rounded-lg border border-surface-200 dark:border-surface-700 px-4 py-3 shadow-sm">
+            <div class="flex mb-1" :aria-label="`Achieved ${skillsAchieved} out of ${totalSkills} skills`">
+              <div class="flex-1 text-lg font-medium"><i class="fas fa-check-circle mr-2" aria-hidden="true" />Achieved {{ attributes.skillDisplayNamePlural }}</div>
+              <div><span class="text-orange-700 dark:text-orange-400 font-medium sd-theme-primary-color" data-cy="numAchievedSkills">{{skillsAchieved}}</span> / <span data-cy="numTotalSkills">{{totalSkills}}</span></div>
+            </div>
+            <vertical-progress-bar
+              :total-progress="skillsPercentAchieved"
+              :barSize="8"
+              :disable-daily-color="true"
+              :aria-label="`Achieved ${skillsAchieved} out of ${totalSkills} skills`"
+            />
+          </div>
         </div>
       </div>
     </template>
