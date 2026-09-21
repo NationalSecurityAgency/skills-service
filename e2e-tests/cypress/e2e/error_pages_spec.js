@@ -153,7 +153,7 @@ describe('Error Pages Tests', () => {
         cy.get('[data-cy=errExplanation]')
             .should('be.visible');
         cy.get('[data-cy=errExplanation]')
-            .contains('Skill [skill1] doesn\'t exist.');
+            .contains('Skill [skill1] doesn\'t exist under Subject [subj1].');
     });
 
     it('Badge Not Found', () => {
