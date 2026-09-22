@@ -67,6 +67,9 @@ class OpenAIService {
     @Value('#{"${skills.openai.gradingModelTemperature:0.0}"}')
     Double gradingModelTemperature
 
+    @Value('#{"${skills.openai.logPromptAndResponseText:false}"}')
+    Boolean logPromptAndResponseText
+
     String systemMsg
 
     String textInputQuestionGradingMsg
@@ -218,7 +221,11 @@ class OpenAIService {
                 ?.replace('{{ studentAnswer }}', studentAnswer)
                 ?.replace('{{ correctAnswer }}', correctAnswer)
                 ?.replace('{{ minimumConfidenceLevel }}', minimumConfidenceLevel.toString())
-        log.debug("Prompt: {}", promptStr)
+        if (logPromptAndResponseText) {
+            log.debug("Prompt: {}", promptStr)
+        } else {
+            log.debug("Submitting text input answer for AI grading. Model=[{}]", gradingModel)
+        }
         List<Message> messages = [
                 new UserMessage(promptStr)
         ]
@@ -242,19 +249,25 @@ class OpenAIService {
             throw new SkillException("Failed to get response from OpenAI")
         }
         String res = (String) genList.get(0).getOutput().getText()
-        log.debug("LLM Response: {}", res)
+        if (logPromptAndResponseText) {
+            log.debug("LLM Response: {}", res)
+        }
         try {
             // Parse JSON response into TextInputAIGradingResult
             def jsonSlurper = new JsonSlurper()
             def parsedResponse = jsonSlurper.parseText(extractJsonFromResponse(res))
-            assert parsedResponse.confidenceLevel != null && parsedResponse.confidenceLevel instanceof Integer, "invalid or missing confidenceLevel [${parsedResponse.confidenceLevel}]"
-            assert parsedResponse.gradingDecisionReason instanceof String, "invalid or missing gradingDecisionReason [${parsedResponse.gradingDecisionReason}]"
+            assert parsedResponse.confidenceLevel != null && parsedResponse.confidenceLevel instanceof Integer, "invalid or missing confidenceLevel"
+            assert parsedResponse.gradingDecisionReason instanceof String, "invalid or missing gradingDecisionReason"
             return new TextInputAIGradingResult(
                     confidenceLevel: parsedResponse.confidenceLevel as Integer,
                     gradingDecisionReason: parsedResponse.gradingDecisionReason
             )
         } catch (Throwable e) {
-            log.error("Failed to parse JSON response from LLM: {}", res, e)
+            if (logPromptAndResponseText) {
+                log.error("Failed to parse JSON response from LLM: {}", res, e)
+            } else {
+                log.error("Failed to parse JSON response from LLM. Model=[{}], ResponseLength=[{}]", gradingModel, res?.length(), e)
+            }
             throw new SkillException("Failed to parse LLM response: ${e.message}", e)
         }
     }
