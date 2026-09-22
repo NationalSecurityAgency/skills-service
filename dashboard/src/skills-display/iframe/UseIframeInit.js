@@ -54,9 +54,6 @@ export const useIframeInit = () => {
     const handshake = new Postmate.Model({
       updateAuthenticationToken(authToken) {
         parentState.setAuthToken(authToken)
-        if (log.isTraceEnabled()) {
-          log.trace(`UseIframeInit.js: updateAuthenticationToken: ${authToken}`)
-        }
         updatedAuthToken.value = true
       },
       updateVersion(newVersion) {

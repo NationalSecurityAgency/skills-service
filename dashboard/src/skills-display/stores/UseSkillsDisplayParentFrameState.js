@@ -16,10 +16,8 @@
 import { defineStore } from 'pinia'
 import { computed, ref } from 'vue'
 import axios from 'axios';
-import { useLog } from '@/components/utils/misc/useLog.js'
 
 export const useSkillsDisplayParentFrameState = defineStore('skillsDisplayParentFrameState', () => {
-  const log = useLog()
   const authToken = ref('')
   const isAuthenticating = ref(false)
   const parentFrame = ref(null)
@@ -40,9 +38,6 @@ export const useSkillsDisplayParentFrameState = defineStore('skillsDisplayParent
   })
   const setAuthToken = (token) => {
     axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
-    if (log.isTraceEnabled()) {
-      log.trace(`UseSkillsDisplayParentFrameState.js: axios.defaults.headers.common['Authorization'] = Bearer ${token}`)
-    }
     authToken.value = token
   }
   return {
