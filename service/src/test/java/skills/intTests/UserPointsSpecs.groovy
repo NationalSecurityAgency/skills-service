@@ -16,6 +16,7 @@
 package skills.intTests
 
 import org.apache.commons.lang3.RandomStringUtils
+import org.springframework.http.HttpStatus
 import org.joda.time.DateTime
 import org.joda.time.format.DateTimeFormat
 import org.joda.time.format.DateTimeFormatter
@@ -2131,4 +2132,20 @@ class UserPointsSpecs extends DefaultIntSpec {
         descPage2.data[0].skillsAchieved == 2
         descPage2.data[1].skillsAchieved == 1
     }
+    def "project users reject invalid paging - limit: #limit, page: #page"() {
+        when:
+        skillsService.getProjectUsers(projId, limit, page)
+
+        then:
+        SkillsClientException e = thrown(SkillsClientException)
+        e.httpStatus == HttpStatus.BAD_REQUEST
+        e.resBody.contains('"errorCode":"BadParam"')
+        e.resBody.contains(expectedMessage)
+
+        where:
+        limit | page | expectedMessage
+        10    | 0    | "Page must be 1 or greater (pages are 1-based), provided=[0]"
+        0     | 1    | "Limit must be greater than 0, provided=[0]"
+    }
+
 }
