@@ -1148,9 +1148,9 @@ class SkillsService {
         wsHelper.get(url.toString(), "api", null, false)
     }
 
-    def getPerformedSkills(String userId, String project, String query = '', String orderBy = "performedOn") {
+    def getPerformedSkills(String userId, String project, String query = '', String orderBy = "performedOn", int limit = 10, int page = 1) {
         userId = getUsername(userId)
-        return wsHelper.adminGet("${getProjectUrl(project)}/performedSkills/${userId}?query=${query}&limit=10&ascending=0&page=1&byColumn=0&orderBy=${orderBy}".toString())
+        return wsHelper.adminGet("${getProjectUrl(project)}/performedSkills/${userId}?query=${query}&limit=${limit}&ascending=0&page=${page}&byColumn=0&orderBy=${orderBy}".toString())
     }
 
     def getUserInfoForProject(String projectId, String userId){

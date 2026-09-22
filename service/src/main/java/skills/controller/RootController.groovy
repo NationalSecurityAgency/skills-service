@@ -50,6 +50,7 @@ import skills.storage.model.auth.RoleName
 import skills.storage.repos.UserTagRepo
 import skills.tasks.executors.ExpireUserAchievementsTaskExecutor
 import skills.utils.InputSanitizer
+import skills.utils.TablePageUtil
 
 import java.nio.charset.StandardCharsets
 import java.security.MessageDigest
@@ -413,7 +414,7 @@ class RootController {
                                     @RequestParam(required=false) String quizFilter,
                                     @RequestParam(required=false) String itemIdFilter,
                                     @RequestParam(required=false) String actionFilter) {
-        PageRequest pageRequest = PageRequest.of(page - 1, limit, ascending ? ASC : DESC, orderBy)
+        PageRequest pageRequest = TablePageUtil.createPagingRequestWithLowerBoundValidation(limit, page, orderBy, ascending)
         return userActionsHistoryService.getUsersActions(pageRequest,
                 null,
                 null,

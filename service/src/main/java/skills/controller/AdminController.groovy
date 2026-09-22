@@ -1115,7 +1115,7 @@ class AdminController {
         SkillsValidator.isNotBlank(projectId, "Project Id")
         SkillsValidator.isNotBlank(userId, "User Id", projectId)
 
-        PageRequest pageRequest = PageRequest.of(page - 1, limit, ascending ? ASC : DESC, orderBy)
+        PageRequest pageRequest = TablePageUtil.createPagingRequestWithLowerBoundValidation(projectId, limit, page, orderBy, ascending)
         return userAdminService.loadUserPerformedSkillsPage(projectId, userId?.toLowerCase(), query, pageRequest)
     }
 
@@ -1147,7 +1147,7 @@ class AdminController {
         SkillsValidator.isTrue(minimumPoints >=0, "Minimum Points is less than 0", projectId)
         SkillsValidator.isTrue(maximumPoints <=100, "Maximum Points is greater than 100", projectId)
 
-        PageRequest pageRequest = PageRequest.of(page - 1, limit, ascending ? ASC : DESC, orderBy)
+        PageRequest pageRequest = TablePageUtil.createPagingRequestWithLowerBoundValidation(projectId, limit, page, orderBy, ascending)
         return adminUsersService.loadUsersPageForProject(projectId, query, pageRequest, minimumPoints, maximumPoints, userTagFilter, includeImported)
     }
 
@@ -1975,7 +1975,7 @@ class AdminController {
                                     @RequestParam(required=false) String userFilter,
                                     @RequestParam(required=false) String itemIdFilter,
                                     @RequestParam(required=false) String actionFilter) {
-        PageRequest pageRequest = PageRequest.of(page - 1, limit, ascending ? ASC : DESC, orderBy)
+        PageRequest pageRequest = TablePageUtil.createPagingRequestWithLowerBoundValidation(projectId, limit, page, orderBy, ascending)
         return userActionsHistoryService.getUsersActions(pageRequest,
                 projectId,
                 null,
