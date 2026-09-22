@@ -164,9 +164,8 @@ const selectionChanged = (currentAnswer) => {
   });
 }
 
-const fillInTheBlankChangedDebounced = useDebounceFn((textInput, answerId) => fillInTheBlankChanged(textInput, answerId), appConfig.formFieldDebounceInMs)
-
-const fillInTheBlankChanged = (textInput, answerId) => {
+const answerTimeout = ref([]);
+const fillInTheBlankChangedDebounced = (textInput, answerId) => {
   if(answerOptions.value[answerId]) {
     const currentAnswer = {
       questionId: props.q.id,
@@ -174,14 +173,26 @@ const fillInTheBlankChanged = (textInput, answerId) => {
       changedAnswerId: answerOptions.value[answerId].id,
       answerText: textInput,
     }
-    reportAnswer(currentAnswer).then((reportAnswerPromise) => {
-      emit('fill-in-the-blank-changed', {
-        ...currentAnswer,
-        reportAnswerPromise,
-      });
+
+    const reportAnswerPromise = new Promise((resolve) => {
+      if(answerTimeout.value[answerId]) {
+        clearTimeout(answerTimeout.value[answerId]);
+      }
+
+      answerTimeout.value[answerId] = setTimeout(async () => {
+        await reportAnswer(currentAnswer)
+        resolve()
+      }, appConfig.formFieldDebounceInMs)
+    })
+
+    emit('fill-in-the-blank-changed', {
+      ...currentAnswer,
+      reportAnswerPromise,
     });
   }
+
 }
+
 const ratingChanged = (value) => {
   if (value) {
     const selectedAnswerIds = answerOptions.value.map((a) => a.id);

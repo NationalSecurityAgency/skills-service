@@ -404,13 +404,13 @@ const initializeFormData = (copy) => {
 const updateSelectedAnswers = (questionSelectedAnswer) => {
   isAttemptAlreadyInProgress.value = true;
   if (questionSelectedAnswer.reportAnswerPromise) {
-    reportAnswerPromises.value.push(questionSelectedAnswer.reportAnswerPromise);
+    reportAnswerPromises.value[questionSelectedAnswer.questionId] = questionSelectedAnswer.reportAnswerPromise;
   }
 }
 const updateMatchedAnswer = (matchedAnswer) => {
   isAttemptAlreadyInProgress.value = true;
   if (matchedAnswer.reportAnswerPromise) {
-    reportAnswerPromises.value.push(matchedAnswer.reportAnswerPromise);
+    reportAnswerPromises.value[matchedAnswer.questionId] = matchedAnswer.reportAnswerPromise;
   }
 }
 const completeTestRun = () => {
@@ -419,7 +419,8 @@ const completeTestRun = () => {
 }
 const submitTestRun = handleSubmit((values) => {
   isCompleting.value = true;
-  Promise.all(reportAnswerPromises.value)
+  const existingPromises = Object.values(reportAnswerPromises.value)
+  Promise.all(existingPromises)
     .then(() => {
       reportTestRunToBackend()
         .finally(() => {
@@ -487,7 +488,8 @@ const cancelQuizAttempt = () => {
 }
 const saveAndCloseThisRun = () => {
   isCompleting.value = true;
-  Promise.all(reportAnswerPromises.value)
+  const existingPromises = Object.values(reportAnswerPromises)
+  Promise.all(existingPromises)
       .then(() => {
         emit('cancelled');
         isCompleting.value = false;
