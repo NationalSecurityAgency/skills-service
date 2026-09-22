@@ -107,3 +107,5 @@ drop table IF EXISTS web_notifications_ack CASCADE;
 drop table IF EXISTS web_notifications CASCADE;
 
 drop function IF EXISTS f_select_lock_and_insert;
+
+DROP FUNCTION IF EXISTS f_check_skillId_was_updated_in_attachments;

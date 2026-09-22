@@ -74,6 +74,50 @@ class SingleSkillSummarySpec extends DefaultIntSpec {
         summary2.subjectId == proj1_subj2.subjectId
     }
 
+    def "subject-scoped skill summary rejects a skill from another subject"() {
+        def proj = SkillsFactory.createProject(1)
+        def subject1 = SkillsFactory.createSubject(1, 1)
+        def subject2 = SkillsFactory.createSubject(1, 2)
+        def skill = SkillsFactory.createSkill(1, 1)
+        skillsService.createProject(proj)
+        skillsService.createSubject(subject1)
+        skillsService.createSubject(subject2)
+        skillsService.createSkill(skill)
+
+        when:
+        skillsService.getSingleSkillSummaryWithSubject("user1", proj.projectId, subject2.subjectId, skill.skillId)
+
+        then:
+        SkillsClientException e = thrown(SkillsClientException)
+        e.httpStatus == HttpStatus.NOT_FOUND
+        e.resBody.contains("Skill definition with id [${skill.skillId}] doesn't exist under Subject [${subject2.subjectId}]")
+    }
+
+    def "subject-scoped skill summary validates a skills group subject relationship"() {
+        def proj = SkillsFactory.createProject(1)
+        def subject1 = SkillsFactory.createSubject(1, 1)
+        def subject2 = SkillsFactory.createSubject(1, 2)
+        def group = SkillsFactory.createSkillsGroup(1, 1, 1)
+        skillsService.createProject(proj)
+        skillsService.createSubject(subject1)
+        skillsService.createSubject(subject2)
+        skillsService.createSkill(group)
+
+        when:
+        def summary = skillsService.getSingleSkillSummaryWithSubject("user1", proj.projectId, subject1.subjectId, group.skillId)
+
+        then:
+        summary.skillId == group.skillId
+
+        when:
+        skillsService.getSingleSkillSummaryWithSubject("user1", proj.projectId, subject2.subjectId, group.skillId)
+
+        then:
+        SkillsClientException e = thrown(SkillsClientException)
+        e.httpStatus == HttpStatus.NOT_FOUND
+        e.resBody.contains("Skill definition with id [${group.skillId}] doesn't exist under Subject [${subject2.subjectId}]")
+    }
+
     def "load single skill summary with some users points"() {
         def proj1 = SkillsFactory.createProject(1)
         def proj1_subj = SkillsFactory.createSubject(1, 1)

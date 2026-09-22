@@ -566,7 +566,10 @@ class SkillsLoader {
     @Transactional(readOnly = true)
     SkillSummary loadSkillSummary(String projectId, String userId, String crossProjectId, String skillId, String subjectId) {
         ProjDef projDef = getProjDef(userId, crossProjectId ?: projectId)
-        SkillDefWithExtra skillDef = getSkillDefWithExtra(userId, crossProjectId ?: projectId, skillId, [ContainerType.Skill, ContainerType.SkillsGroup])
+        String skillProjectId = crossProjectId ?: projectId
+        SkillDefWithExtra skillDef = subjectId && !crossProjectId ?
+                getSkillDefWithExtra(userId, skillProjectId, subjectId, skillId, [ContainerType.Skill, ContainerType.SkillsGroup]) :
+                getSkillDefWithExtra(userId, skillProjectId, skillId, [ContainerType.Skill, ContainerType.SkillsGroup])
 
         String skillSubjectId = skillRelDefRepo.findSubjectSkillIdByChildId(skillDef.id)
 
@@ -1612,6 +1615,26 @@ class SkillsLoader {
     private SkillDefWithExtra getSkillDefWithExtra(String userId, String projectId, String skillId, List<ContainerType> containerTypes) {
         SkillDefWithExtra skillDef = skillDefWithExtraRepo.findByProjectIdAndSkillIdIgnoreCaseAndTypeIn(projectId, skillId, containerTypes)
 
+        return validateSkillDefWithExtra(userId, projectId, skillId, skillDef)
+    }
+
+    private SkillDefWithExtra getSkillDefWithExtra(String userId, String projectId, String subjectId, String skillId, List<ContainerType> containerTypes) {
+        SkillDefWithExtra skillDef = skillDefWithExtraRepo.findByProjectIdAndSubjectIdAndSkillIdIgnoreCaseAndTypeIn(
+                projectId, subjectId, skillId, containerTypes)
+
+        if (!skillDef) {
+            throw new SkillExceptionBuilder()
+                    .msg("Skill definition with id [${skillId}] doesn't exist under Subject [${subjectId}]")
+                    .userId(userId)
+                    .projectId(projectId)
+                    .skillId(skillId)
+                    .errorCode(ErrorCode.SkillNotFound)
+                    .build()
+        }
+        return validateSkillDefWithExtra(userId, projectId, skillId, skillDef)
+    }
+
+    private SkillDefWithExtra validateSkillDefWithExtra(String userId, String projectId, String skillId, SkillDefWithExtra skillDef) {
         if (!skillDef) {
             throw new SkillExceptionBuilder()
                     .msg("Skill definition with id [${skillId}] doesn't exist")

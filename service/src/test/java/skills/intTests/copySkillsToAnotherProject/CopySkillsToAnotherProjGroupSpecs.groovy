@@ -391,7 +391,7 @@ class CopySkillsToAnotherProjGroupSpecs extends CopyIntSpec {
         skillsService.copySkillDefsIntoAnotherProjectSkillGroup(p1.projectId, p1Skills.collect { it.skillId as String }, p2.projectId, p2subj1.subjectId, destGroup.skillId)
 
         def origProjSkill = skillsService.getSkill([projectId: p1.projectId, subjectId: p1subj1.subjectId, skillId: p1Skills[0].skillId])
-        def copyProjSkill = skillsService.getSkill([projectId: p2.projectId, subjectId: p1subj1.subjectId, skillId: p1Skills[0].skillId])
+        def copyProjSkill = skillsService.getSkill([projectId: p2.projectId, subjectId: p2subj1.subjectId, skillId: p1Skills[0].skillId])
 
         List<Attachment> attachments = attachmentRepo.findAll()
         then:
@@ -452,10 +452,10 @@ class CopySkillsToAnotherProjGroupSpecs extends CopyIntSpec {
         def origProjSkill3 = skillsService.getSkill([projectId: p1.projectId, subjectId: p1subj2.subjectId, skillId: p1Subj2Skills[0].skillId])
         def origProjSkill4 = skillsService.getSkill([projectId: p1.projectId, subjectId: p1subj2.subjectId, skillId: p1Subj2Skills[1].skillId])
 
-        def copyProjSkill1 = skillsService.getSkill([projectId: p2.projectId, subjectId: p1subj1.subjectId, skillId: p1Skills[0].skillId])
-        def copyProjSkill2 = skillsService.getSkill([projectId: p2.projectId, subjectId: p1subj1.subjectId, skillId: p1Skills[1].skillId])
-        def copyProjSkill3 = skillsService.getSkill([projectId: p2.projectId, subjectId: p1subj2.subjectId, skillId: p1Subj2Skills[0].skillId])
-        def copyProjSkill4 = skillsService.getSkill([projectId: p2.projectId, subjectId: p1subj2.subjectId, skillId: p1Subj2Skills[1].skillId])
+        def copyProjSkill1 = skillsService.getSkill([projectId: p2.projectId, subjectId: p2subj1.subjectId, skillId: p1Skills[0].skillId])
+        def copyProjSkill2 = skillsService.getSkill([projectId: p2.projectId, subjectId: p2subj1.subjectId, skillId: p1Skills[1].skillId])
+        def copyProjSkill3 = skillsService.getSkill([projectId: p2.projectId, subjectId: p2subj1.subjectId, skillId: p1Subj2Skills[0].skillId])
+        def copyProjSkill4 = skillsService.getSkill([projectId: p2.projectId, subjectId: p2subj1.subjectId, skillId: p1Subj2Skills[1].skillId])
 
         List<Attachment> attachments = attachmentRepo.findAll()
         then:

@@ -435,7 +435,7 @@ class CopyProjectsSkillsSpecs extends DefaultIntSpec {
         def copiedGroup3Skills = skillsService.getSkillsForGroup(projToCopy.projectId, group3.skillId)
 
         def originalReusedSkillInSubj2 = skillsService.getSkill([projectId: p1.projectId, subjectId: p1subj1.subjectId, skillId: p1Skills[1].skillId])
-        def copiedReusedSkillInSubj2 = skillsService.getSkill([projectId: projToCopy.projectId, subjectId: p1subj1.subjectId, skillId: SkillReuseIdUtil.addTag(p1Skills[1].skillId, 0)])
+        def copiedReusedSkillInSubj2 = skillsService.getSkill([projectId: projToCopy.projectId, subjectId: p1subj2.subjectId, skillId: SkillReuseIdUtil.addTag(p1Skills[1].skillId, 0)])
 
         println JsonOutput.prettyPrint(JsonOutput.toJson(copiedReusedSkillInGroup1))
         then:
