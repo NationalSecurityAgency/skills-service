@@ -239,7 +239,12 @@ skills:
     client:
       loggingEnabled: false
       loggingLevel: DEBUG
+      loggingMaxMessageLength: 2000
+      loggingMaxRequestsPerMinute: 60
+      loggingMaxTrackedClients: 10000
   profiles:
     active: default
 db-scheduler:
   threads: 3
+
+
