@@ -96,7 +96,7 @@ class RestTemplateWrapper extends RestTemplate {
                     List<java.net.HttpCookie> parsedCookies = java.net.HttpCookie.parse(setCookieHeader)
                     parsedCookies.each { java.net.HttpCookie cookie ->
                         cookiesByName.put(cookie.name, cookie.value)
-                        if (!xsrfToken && cookie.name == "XSRF-TOKEN") {
+                        if (cookie.name == "XSRF-TOKEN") {
                             xsrfToken = cookie.value
                             log.debug("Response: [{}], set xsrfToken to [{}]", request.URI, xsrfToken)
                         }
@@ -160,20 +160,19 @@ class RestTemplateWrapper extends RestTemplate {
     void auth(String skillsServiceUrl, String username, String password, String firstName, String lastName, String email=null) {
         if(!this.pkiAuth) {
             boolean accountCreated = createAccount(skillsServiceUrl, username, password, firstName, lastName, email)
+            HttpHeaders headers = new HttpHeaders()
+            headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED)
+            MultiValueMap<String, String> params = new LinkedMultiValueMap<>()
+            params.add('username', username)
+            params.add('password', password)
+
+            HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<>(params, headers)
+            authResponse = restTemplate.postForEntity(skillsServiceUrl + '/performLogin', request, String.class)
+
             if (!accountCreated) {
-                HttpHeaders headers = new HttpHeaders()
-                headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED)
-                MultiValueMap<String, String> params = new LinkedMultiValueMap<>()
-                params.add('username', username)
-                params.add('password', password)
-
-                HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<>(params, headers)
-                authResponse = restTemplate.postForEntity(skillsServiceUrl + '/performLogin', request, String.class)
-
                 assert authResponse.statusCode == HttpStatus.OK, 'authentication failed: ' + authResponse.statusCode
-
-                authenticationToken = authResponse.getHeaders().getFirst(AUTH_HEADER)
             }
+            authenticationToken = authResponse.getHeaders().getFirst(AUTH_HEADER)
         } else {
             restTemplate.getForEntity("${skillsServiceUrl}/app/users/validExistingDashboardUserId/{userId}", String, username)
         }

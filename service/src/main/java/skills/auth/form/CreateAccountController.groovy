@@ -43,6 +43,7 @@ import skills.controller.exceptions.ErrorCode
 import skills.controller.exceptions.SkillException
 import skills.controller.exceptions.SkillsValidator
 import skills.controller.result.model.OAuth2Provider
+import skills.controller.result.model.RequestResult
 import skills.services.PasswordManagementService
 
 import jakarta.servlet.http.HttpServletRequest
@@ -86,21 +87,32 @@ class CreateAccountController {
 
     @Conditional(SecurityMode.FormAuth)
     @PutMapping("createAccount")
-    void createAppUser(@RequestBody UserInfo userInfo, HttpServletRequest request, HttpServletResponse response) {
+    RequestResult createAppUser(@RequestBody UserInfo userInfo, HttpServletRequest request, HttpServletResponse response) {
         if (oAuthOnly || authMode == AuthMode.PKI) {
             throw new SkillException("Username/Password account creation is disabled for this installation of the SkillTree", null, null, ErrorCode.AccessDenied)
         }
-        String password = userInfo.password
         if (verifyEmailAddresses) {
             userInfo.emailVerified = false
         }
-        userInfo = createUser(userInfo)
+        String userId = userInfo.username ?: userInfo.email
+        if (userAuthService.userExists(userId)) {
+            log.info("ignoring account creation request for an existing user")
+            return RequestResult.success()
+        }
+        try {
+            userInfo = createUser(userInfo)
+        } catch (SkillException e) {
+            if (e.errorCode == ErrorCode.UserAlreadyExists) {
+                log.info("ignoring concurrent account creation request for an existing user")
+                return RequestResult.success()
+            }
+            throw e
+        }
 
         if (verifyEmailAddresses) {
             passwordManagementService.createEmailVerificationTokenAndNotifyUser(userInfo.username)
-        } else {
-            autoLoginService.autologin(userInfo, password, request, response)
         }
+        return RequestResult.success()
     }
 
     @Conditional(SecurityMode.FormAuth)

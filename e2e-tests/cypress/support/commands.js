@@ -334,6 +334,13 @@ Cypress.Commands.add("register", (user, pass, grantRoot, usernameForDisplay = nu
                         usernameForDisplay,
                     }).then((innerResponse) => {
                         requestStatus = innerResponse.status;
+                        cy.request({
+                            method: 'POST',
+                            url: '/performLogin',
+                            form: true,
+                            body: { username: user, password: pass },
+                            failOnStatusCode: false,
+                        });
                     });
                 } else {
                     cy.log(`Creating app user [${user}]`)

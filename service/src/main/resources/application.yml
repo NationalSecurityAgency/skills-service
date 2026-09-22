@@ -118,6 +118,11 @@ skills:
   clientLibVersion: @maven.build.timestamp@
   openai:
     host: null
+  authorization:
+    # Enable to fully prevent User Enumeration by ensuring unverified email addresses cannot trigger
+    # account-dependent behavior that reveals whether an address is registered. Otherwise, an attacker can
+    # use a two-request oracle, comparing requests for known and tested addresses to infer account existence.
+    verifyEmailAddresses: false
   config:
     # Changing this to a larger value once events have been compacted into WEEKLY events will cause
     # those WEEKLY events which are now newer than the compactDailyEventsOlderThan to no longer be visible in the system
@@ -238,5 +243,3 @@ skills:
     active: default
 db-scheduler:
   threads: 3
-
-

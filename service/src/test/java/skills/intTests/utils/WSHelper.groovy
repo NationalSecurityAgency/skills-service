@@ -417,11 +417,9 @@ class WSHelper {
     private def multipartPost(String endpoint, Map params, boolean throwException = false){
         HttpHeaders headers = new HttpHeaders()
         headers.setContentType(MediaType.MULTIPART_FORM_DATA)
-
-        //TEMP
-
-
-
+        if (restTemplateWrapper.authenticationToken) {
+            headers.set(RestTemplateWrapper.AUTH_HEADER, restTemplateWrapper.authenticationToken)
+        }
         MultiValueMap<String, Object> body = new LinkedMultiValueMap<>()
         params.each { key, val ->
             if (val instanceof File) {

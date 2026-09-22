@@ -20,7 +20,7 @@ import { useForm } from 'vee-validate';
 import { useAppConfig } from '@/common-components/stores/UseAppConfig.js';
 import * as yup from 'yup';
 import { string } from 'yup';
-import Logo1 from '@/components/brand/Logo1.vue';
+import AccessPageCard from '@/components/access/AccessPageCard.vue';
 import AccessService from '@/components/access/AccessService.js';
 
 const route = useRoute()
@@ -75,72 +75,61 @@ const onSubmit = handleSubmit((values) => {
 </script>
 
 <template>
-  <div>
-    <div class="pt-10">
-      <div class="max-w-md lg:max-w-xl mx-auto">
-        <h1 class="sr-only">Reset Password For SkillTree Dashboard</h1>
-        <div class="text-center ">
-          <logo1 class="mb-4" />
-          <Message :closable="false">Reset Password For SkillTree Dashboard</Message>
-        </div>
-        <Card class="mt-4 text-left ">
-          <template #content>
-            <form @submit="onSubmit">
-              <div class="flex flex-col gap-2">
-                <SkillsTextInput
-                    label="Email Address"
-                    size="small"
-                    autocomplete="username"
-                    :is-required="true"
-                    :disabled="resetInProgress"
-                    @keyup.enter="onSubmit"
-                    placeholder="Enter email"
-                    data-cy="resetPasswordEmail"
-                    id="email"
-                    name="email"/>
-                <SkillsTextInput
-                    label="New Password"
-                    size="small"
-                    type="password"
-                    autocomplete="new-password"
-                    :is-required="true"
-                    :disabled="resetInProgress"
-                    @keyup.enter="onSubmit"
-                    placeholder="Enter new password"
-                    data-cy="resetPasswordNewPassword"
-                    id="password"
-                    name="password"/>
-                <SkillsTextInput
-                    label="Confirm New Password"
-                    size="small"
-                    type="password"
-                    autocomplete="new-password"
-                    :is-required="true"
-                    :disabled="resetInProgress"
-                    @keyup.enter="onSubmit"
-                    placeholder="Confirm new password"
-                    data-cy="resetPasswordConfirm"
-                    id="passwordConfirmation"
-                    name="passwordConfirmation"/>
-              </div>
-              <small class="text-danger text-red-500" v-if="remoteError" data-cy="resetError" role="alert">{{ remoteError }}</small>
-              <div class="flex justify-end mt-2">
-                <SkillsButton variant="outline-success"
-                              type="submit"
-                              label="Reset Password"
-                              icon="fas fa-arrow-circle-right"
-                              :disabled="!meta.valid || resetInProgress || remoteError"
-                              data-cy="resetPasswordSubmit">
-                </SkillsButton>
-              </div>
-            </form>
-          </template>
-        </Card>
+  <AccessPageCard icon="fas fa-key" labelled-by="reset-password-title">
+    <p class="mb-2 text-xs font-bold uppercase tracking-[0.12em] text-blue-600">Secure your account</p>
+    <h1 id="reset-password-title" class="m-0 text-[clamp(1.5rem,4vw,2rem)] leading-[1.2] text-gray-900">
+      Choose a new password
+    </h1>
+    <p class="mx-auto mb-7 mt-4 max-w-108 leading-[1.7] text-gray-600">
+      Confirm your account email and enter the new password you would like to use.
+    </p>
+
+    <form class="text-left" @submit="onSubmit">
+      <div class="flex flex-col gap-2">
+        <SkillsTextInput
+          id="email"
+          label="Email Address"
+          size="small"
+          autocomplete="username"
+          :is-required="true"
+          :disabled="resetInProgress"
+          placeholder="Enter email"
+          data-cy="resetPasswordEmail"
+          name="email" />
+        <SkillsTextInput
+          id="password"
+          label="New Password"
+          size="small"
+          type="password"
+          autocomplete="new-password"
+          :is-required="true"
+          :disabled="resetInProgress"
+          placeholder="Enter new password"
+          data-cy="resetPasswordNewPassword"
+          name="password" />
+        <SkillsTextInput
+          id="passwordConfirmation"
+          label="Confirm New Password"
+          size="small"
+          type="password"
+          autocomplete="new-password"
+          :is-required="true"
+          :disabled="resetInProgress"
+          placeholder="Confirm new password"
+          data-cy="resetPasswordConfirm"
+          name="passwordConfirmation" />
       </div>
-    </div>
-  </div>
+      <small v-if="remoteError" class="text-red-700" data-cy="resetError" role="alert">{{ remoteError }}</small>
+      <div class="mt-4 flex justify-end">
+        <SkillsButton
+          variant="outline-success"
+          type="submit"
+          label="Reset Password"
+          icon="fas fa-arrow-circle-right"
+          :loading="resetInProgress"
+          :disabled="!meta.valid || resetInProgress || remoteError"
+          data-cy="resetPasswordSubmit" />
+      </div>
+    </form>
+  </AccessPageCard>
 </template>
-
-<style scoped>
-
-</style>

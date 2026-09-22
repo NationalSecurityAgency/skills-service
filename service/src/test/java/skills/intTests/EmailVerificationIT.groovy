@@ -35,6 +35,8 @@ import skills.SpringBootApp
 import skills.intTests.utils.*
 import skills.storage.model.auth.UserToken
 import skills.storage.repos.PasswordResetTokenRepo
+import skills.storage.repos.UserAttrsRepo
+import skills.storage.repos.UserRepo
 import skills.utils.WaitFor
 import spock.lang.IgnoreIf
 import spock.lang.Specification
@@ -63,6 +65,12 @@ class EmailVerificationIT extends Specification {
 
     @Autowired
     PasswordResetTokenRepo tokenRepo
+
+    @Autowired
+    UserRepo userRepo
+
+    @Autowired
+    UserAttrsRepo userAttrsRepo
 
     GreenMail greenMail
 
@@ -142,19 +150,44 @@ class EmailVerificationIT extends Specification {
     }
 
     @IgnoreIf({ env["SPRING_PROFILES_ACTIVE"] == "pki" })
-    def "public account-state lookup endpoints are not exposed"() {
-        RestTemplate restTemplate = new RestTemplate()
-        restTemplate.errorHandler = new NoOpResponseErrorHandler()
+    def "account creation does not disclose whether an account exists"() {
+        String existingEmail = 'existing@user.org'
+        SkillsService existingUser = skillsServiceFactory.createService(
+                existingEmail,
+                'original-password',
+                'Original',
+                'User',
+                "http://localhost:${localPort}".toString())
+        WaitFor.wait { greenMail.getReceivedMessages().length == 1 }
+        String originalPassword = userRepo.findByUserId(existingEmail).password
+        def originalAttrs = userAttrsRepo.findByUserIdIgnoreCase(existingEmail)
+        greenMail.purgeEmailFromAllMailboxes()
 
         when:
-        ResponseEntity<String> userExistsResponse = restTemplate.getForEntity(
-                "http://localhost:${localPort}/userExists/test@skills.org".toString(), String)
-        ResponseEntity<String> emailVerifiedResponse = restTemplate.getForEntity(
-                "http://localhost:${localPort}/userEmailIsVerified/test@skills.org".toString(), String)
+        ResponseEntity<String> newResponse = createAccount('new@user.org', 'New', 'User', 'new-password')
+        ResponseEntity<String> existingResponse = createAccount(existingEmail.toUpperCase(), 'Changed', 'Name', 'changed-password')
 
         then:
-        userExistsResponse.statusCode == HttpStatus.NOT_FOUND
-        emailVerifiedResponse.statusCode == HttpStatus.NOT_FOUND
+        newResponse.statusCode == HttpStatus.OK
+        existingResponse.statusCode == HttpStatus.OK
+        newResponse.body == existingResponse.body
+        newResponse.headers.getFirst(HttpHeaders.LOCATION) == existingResponse.headers.getFirst(HttpHeaders.LOCATION)
+        !newResponse.headers.getFirst(RestTemplateWrapper.AUTH_HEADER)
+        !existingResponse.headers.getFirst(RestTemplateWrapper.AUTH_HEADER)
+        userRepo.findByUserId(existingEmail).password == originalPassword
+        userAttrsRepo.findByUserIdIgnoreCase(existingEmail).firstName == originalAttrs.firstName
+        userAttrsRepo.findByUserIdIgnoreCase(existingEmail).lastName == originalAttrs.lastName
+        WaitFor.wait { greenMail.getReceivedMessages().length == 1 }
+        EmailUtils.getEmail(greenMail).recipients == ['new@user.org']
+
+        when:
+        ResponseEntity<String> newUserLogin = login('new@user.org', 'new-password')
+        ResponseEntity<String> existingUserLogin = login(existingEmail, 'changed-password')
+
+        then:
+        newUserLogin.statusCode == HttpStatus.UNAUTHORIZED
+        existingUserLogin.statusCode == HttpStatus.UNAUTHORIZED
+        login(existingEmail, 'original-password').statusCode == HttpStatus.UNAUTHORIZED
     }
 
     @IgnoreIf({ env["SPRING_PROFILES_ACTIVE"] == "pki" })
@@ -474,6 +507,16 @@ class EmailVerificationIT extends Specification {
         restTemplate.postForEntity(
                 "http://localhost:${localPort}/performLogin".toString(),
                 new HttpEntity<>(form, headers),
+                String)
+    }
+
+    private ResponseEntity<String> createAccount(String email, String firstName, String lastName, String password) {
+        RestTemplate restTemplate = new RestTemplate()
+        restTemplate.errorHandler = new NoOpResponseErrorHandler()
+        restTemplate.exchange(
+                "http://localhost:${localPort}/createAccount".toString(),
+                org.springframework.http.HttpMethod.PUT,
+                new HttpEntity<>([email: email, firstName: firstName, lastName: lastName, password: password]),
                 String)
     }
 
