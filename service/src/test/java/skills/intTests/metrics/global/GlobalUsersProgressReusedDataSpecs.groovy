@@ -17,6 +17,7 @@ package skills.intTests.metrics.global
 
 import groovy.transform.Canonical
 import groovy.transform.ToString
+import org.springframework.http.HttpStatus
 import skills.intTests.utils.SkillsClientException
 import spock.lang.IgnoreIf
 
@@ -896,6 +897,26 @@ class GlobalUsersProgressReusedDataSpecs extends GlobalReusedDataBaseIntSpec {
         assert row.numBadgesEarned == toValidate.numBadgesEarned
         assert row.numGlobalBadgesEarned == toValidate.numGlobalBadgesEarned
         assert row.userTag == toValidate.userTag
+    }
+
+    def "not allowed to request 0 page"() {
+        when:
+        admins[0].getGlobalUserProgressMetrics("", 10, 0, "numBadgesEarned", true)
+        then:
+        SkillsClientException e = thrown(SkillsClientException)
+        e.httpStatus == HttpStatus.BAD_REQUEST
+        e.resBody.contains('"errorCode":"BadParam"')
+        e.resBody.contains("Page must be 1 or greater (pages are 1-based), provided=[0]")
+    }
+
+    def "limit must be greater than 0"() {
+        when:
+        admins[0].getGlobalUserProgressMetrics("", 0, 1, "numBadgesEarned", true)
+        then:
+        SkillsClientException e = thrown(SkillsClientException)
+        e.httpStatus == HttpStatus.BAD_REQUEST
+        e.resBody.contains('"errorCode":"BadParam"')
+        e.resBody.contains("Limit must be greater than 0, provided=[0]")
     }
 }
 

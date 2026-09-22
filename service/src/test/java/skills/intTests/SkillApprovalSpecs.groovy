@@ -1539,4 +1539,55 @@ class SkillApprovalSpecs extends DefaultIntSpec {
         tableResultFiltered.data.collect{ it.skillName } == [ skillToFilter ]
 
     }
+
+    def "approvals endpoints: not allowed to request 0 page"() {
+        def proj = SkillsFactory.createProject()
+        skillsService.createProject(proj)
+
+        when:
+        skillsService.getApprovals(proj.projectId, 10, 0, 'requestedOn', false)
+
+        then:
+        SkillsClientException ske = thrown(SkillsClientException)
+        ske.httpStatus == HttpStatus.BAD_REQUEST
+        ske.resBody.contains('"errorCode":"BadParam"')
+        ske.resBody.contains('Page must be 1 or greater (pages are 1-based), provided=[0]')
+
+        when:
+        skillsService.getApprovalsHistory(proj.projectId, 10, 0, 'requestedOn', false)
+
+        then:
+        SkillsClientException historyEx = thrown(SkillsClientException)
+        historyEx.httpStatus == HttpStatus.BAD_REQUEST
+        historyEx.resBody.contains('"errorCode":"BadParam"')
+        historyEx.resBody.contains('Page must be 1 or greater (pages are 1-based), provided=[0]')
+    }
+
+    def "approvals endpoints: limit must be between 1 and 200 - limit: #limit"() {
+        def proj = SkillsFactory.createProject()
+        skillsService.createProject(proj)
+
+        when:
+        skillsService.getApprovals(proj.projectId, limit, 1, 'requestedOn', false)
+
+        then:
+        SkillsClientException ske = thrown(SkillsClientException)
+        ske.httpStatus == HttpStatus.BAD_REQUEST
+        ske.resBody.contains('"errorCode":"BadParam"')
+        ske.resBody.contains(expectedMsg)
+
+        when:
+        skillsService.getApprovalsHistory(proj.projectId, limit, 1, 'requestedOn', false)
+
+        then:
+        SkillsClientException historyEx = thrown(SkillsClientException)
+        historyEx.httpStatus == HttpStatus.BAD_REQUEST
+        historyEx.resBody.contains('"errorCode":"BadParam"')
+        historyEx.resBody.contains(expectedMsg)
+
+        where:
+        limit | expectedMsg
+        0     | "Limit must be greater than 0, provided=[0]"
+        201   | "Cannot ask for more than 200 items, provided=[201]"
+    }
 }

@@ -15,6 +15,7 @@
  */
 package skills.intTests
 
+import org.springframework.http.HttpStatus
 import skills.intTests.utils.DefaultIntSpec
 import skills.intTests.utils.SkillsClientException
 import skills.intTests.utils.SkillsFactory
@@ -267,5 +268,57 @@ class UserRoleSpecs extends DefaultIntSpec {
         then:
         SkillsClientException skillsClientException = thrown()
         skillsClientException.message.contains("User is already part of an Admin Group and cannot be added as a local admin")
+    }
+
+    def "not allowed to request 0 page"() {
+        def proj = SkillsFactory.createProject(1)
+        skillsService.createProject(proj)
+
+        when:
+        skillsService.getUserRolesForProject(proj.projectId, [RoleName.ROLE_PROJECT_ADMIN, RoleName.ROLE_PROJECT_APPROVER], 10, page)
+
+        then:
+        SkillsClientException ske = thrown(SkillsClientException)
+        ske.httpStatus == HttpStatus.BAD_REQUEST
+        ske.resBody.contains('"errorCode":"BadParam"')
+        ske.resBody.contains("Page must be 1 or greater (pages are 1-based), provided=[${page}]")
+
+        where:
+        page << [0, -1]
+    }
+
+    def "limit must be between 1 and 200 - limit: #limit"() {
+        def proj = SkillsFactory.createProject(1)
+        skillsService.createProject(proj)
+
+        when:
+        skillsService.getUserRolesForProject(proj.projectId, [RoleName.ROLE_PROJECT_ADMIN, RoleName.ROLE_PROJECT_APPROVER], limit, 1)
+
+        then:
+        SkillsClientException ske = thrown(SkillsClientException)
+        ske.httpStatus == HttpStatus.BAD_REQUEST
+        ske.resBody.contains('"errorCode":"BadParam"')
+        ske.resBody.contains(expectedMsg)
+
+        where:
+        limit | expectedMsg
+        0     | "Limit must be greater than 0, provided=[0]"
+        -1    | "Limit must be greater than 0, provided=[-1]"
+        201   | "Cannot ask for more than 200 items, provided=[201]"
+    }
+
+    def "min and max limit boundaries are allowed"() {
+        def proj = SkillsFactory.createProject(1)
+        skillsService.createProject(proj)
+
+        when:
+        def minRes = skillsService.getUserRolesForProject(proj.projectId, [RoleName.ROLE_PROJECT_ADMIN, RoleName.ROLE_PROJECT_APPROVER], 1, 1)
+        def maxRes = skillsService.getUserRolesForProject(proj.projectId, [RoleName.ROLE_PROJECT_ADMIN, RoleName.ROLE_PROJECT_APPROVER], 200, 1)
+
+        then:
+        minRes.count >= 1
+        minRes.data.size() == 1
+        maxRes.count == minRes.count
+        maxRes.data.size() == maxRes.count
     }
 }

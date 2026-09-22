@@ -17,6 +17,7 @@ package skills.intTests.badges
 
 
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.http.HttpStatus
 import skills.intTests.utils.DefaultIntSpec
 import skills.intTests.utils.SkillsClientException
 import skills.intTests.utils.SkillsService
@@ -1319,5 +1320,33 @@ class GlobalBadgeSpecs extends DefaultIntSpec {
 
         then:
         results
+    }
+
+    def "global badge users: not allowed to request 0 page"() {
+        def badge = createBadge()
+        skillsService.createGlobalBadge(badge)
+
+        when:
+        skillsService.getGlobalBadgeUsers(badge.badgeId, 10, 0)
+
+        then:
+        SkillsClientException ske = thrown(SkillsClientException)
+        ske.httpStatus == HttpStatus.BAD_REQUEST
+        ske.resBody.contains('"errorCode":"BadParam"')
+        ske.resBody.contains('Page must be 1 or greater (pages are 1-based), provided=[0]')
+    }
+
+    def "global badge users: limit must be greater than 0"() {
+        def badge = createBadge()
+        skillsService.createGlobalBadge(badge)
+
+        when:
+        skillsService.getGlobalBadgeUsers(badge.badgeId, 0, 1)
+
+        then:
+        SkillsClientException ske = thrown(SkillsClientException)
+        ske.httpStatus == HttpStatus.BAD_REQUEST
+        ske.resBody.contains('"errorCode":"BadParam"')
+        ske.resBody.contains('Limit must be greater than 0, provided=[0]')
     }
 }

@@ -30,6 +30,7 @@ import skills.storage.model.ProjDef
 import skills.storage.model.SkillDef
 import skills.storage.model.UserAchievement
 import skills.storage.model.UserPoints
+import skills.storage.model.auth.RoleName
 import skills.storage.repos.ProjDefRepo
 import skills.storage.repos.SkillDefRepo
 import skills.storage.repos.UserAchievedLevelRepo
@@ -911,6 +912,33 @@ class RootAccessSpec extends DefaultIntSpec {
         user3SubjectSummary.skills[0].children.find { it.skillId = childSkillId2 }
         user3SubjectSummary.skills[0].children.find { it.skillId = childSkillId2 }.points == 100
         user3SubjectSummary.skills[0].children.find { it.skillId = childSkillId2 }.totalPoints == 100
+    }
+
+    def "get users with role: not allowed to request 0 page"() {
+        when:
+        rootSkillsService.getUsersWithRole(RoleName.ROLE_SUPER_DUPER_USER.toString(), 10, 0)
+
+        then:
+        SkillsClientException ske = thrown(SkillsClientException)
+        ske.httpStatus == HttpStatus.BAD_REQUEST
+        ske.resBody.contains('"errorCode":"BadParam"')
+        ske.resBody.contains('Page must be 1 or greater (pages are 1-based), provided=[0]')
+    }
+
+    def "get users with role: limit must be between 1 and 200 - limit: #limit"() {
+        when:
+        rootSkillsService.getUsersWithRole(RoleName.ROLE_SUPER_DUPER_USER.toString(), limit, 1)
+
+        then:
+        SkillsClientException ske = thrown(SkillsClientException)
+        ske.httpStatus == HttpStatus.BAD_REQUEST
+        ske.resBody.contains('"errorCode":"BadParam"')
+        ske.resBody.contains(expectedMsg)
+
+        where:
+        limit | expectedMsg
+        0     | "Limit must be greater than 0, provided=[0]"
+        201   | "Cannot ask for more than 200 items, provided=[201]"
     }
 }
 
