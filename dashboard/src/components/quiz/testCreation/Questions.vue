@@ -144,7 +144,9 @@ function questionDefSaved(questionDef) {
       });
     } else {
       // is new
-      questions.value.push(questionDef)
+      if(!questionDef.isCopyToAnotherQuiz) {
+        questions.value.push(questionDef)
+      }
     }
     if (questions.value && questions.value.length === 1) {
       enableDropAndDrop();
