@@ -77,6 +77,12 @@ class SecurityConfiguration {
     @Value('#{"${skills.authorization.allowUrlEncodedBackSlash:false}"}')
     Boolean allowUrlEncodedBackSlash
 
+    @Value('${skills.authorization.corsAllowedOriginPatterns:*}')
+    List<String> corsAllowedOriginPatterns
+
+    @Value('#{"${skills.authorization.corsConf.allowCredentials}"}')
+    Boolean corsConfAllowCredentials
+
     @Component
     @Configuration
     @Order(99)
@@ -135,11 +141,18 @@ class SecurityConfiguration {
     CorsConfigurationSource corsConfigurationSource() {
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource()
         CorsConfiguration configuration = new CorsConfiguration()
-        configuration.setAllowedOriginPatterns(['*'])
-        configuration.setAllowCredentials(true)
+        List<String> allowedOriginPatterns = corsAllowedOriginPatterns.collect { it.trim() }.findAll { it }
+        configuration.setAllowedOriginPatterns(allowedOriginPatterns)
+        // by default allow credentials for PKI auth mode, otherwise don't allow credentials (requires token)
+        boolean allowCredentials = corsConfAllowCredentials == null ? (authMode == AuthMode.PKI) : corsConfAllowCredentials
+        log.info("Configuring CORS with allowed origin patterns: [${corsAllowedOriginPatterns}], allowCredentials: [${allowCredentials}]")
+        configuration.setAllowCredentials(allowCredentials)
         configuration.setAllowedMethods([HttpMethod.GET.name(), HttpMethod.HEAD.name(), HttpMethod.POST.name(), HttpMethod.PUT.name(), HttpMethod.DELETE.name()])
         configuration.applyPermitDefaultValues()
-        source.registerCorsConfiguration('/**', configuration)
+        if (configuration.getAllowCredentials() && allowedOriginPatterns.contains('*')) {
+            log.warn('Credentialed CORS requests to /api/** are allowed from all origins; configure skills.authorization.corsAllowedOriginPatterns to restrict access')
+        }
+        source.registerCorsConfiguration('/api/**', configuration)
         return source
     }
 
