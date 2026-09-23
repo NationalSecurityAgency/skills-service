@@ -23,7 +23,7 @@ import { useRoute } from 'vue-router'
 import { useSkillsAnnouncer } from '@/common-components/utilities/UseSkillsAnnouncer.js'
 import SubPageHeader from '@/components/utils/pages/SubPageHeader.vue'
 import EditSkill from '@/components/skills/EditSkill.vue'
-import { SkillsReporter } from '@skilltree/skills-client-js'
+import { useInceptionStore } from '@/stores/UseInceptionStore.js'
 import EditSkillGroup from '@/components/skills/skillsGroup/EditSkillGroup.vue'
 import ImportFromCatalogDialog from '@/components/skills/catalog/ImportFromCatalogDialog.vue'
 import { useFinalizeInfoState } from '@/stores/UseFinalizeInfoState.js'
@@ -119,16 +119,16 @@ provide('createOrUpdateSkill', createOrUpdateSkill)
 
 const reportSkills = (origExistingSkill, createdSkill) => {
   if (createdSkill.pointIncrementInterval <= 0) {
-    SkillsReporter.reportSkill('CreateSkillDisabledTimeWindow')
+    useInceptionStore().reportSkill('CreateSkillDisabledTimeWindow')
   }
   if (createdSkill.numMaxOccurrencesIncrementInterval > 1) {
-    SkillsReporter.reportSkill('CreateSkillMaxOccurrencesWithinTimeWindow')
+    useInceptionStore().reportSkill('CreateSkillMaxOccurrencesWithinTimeWindow')
   }
   if (createdSkill.helpUrl) {
-    SkillsReporter.reportSkill('CreateSkillHelpUrl')
+    useInceptionStore().reportSkill('CreateSkillHelpUrl')
   }
   if (createdSkill.groupId) {
-    SkillsReporter.reportSkill('CreateSkillGroup')
+    useInceptionStore().reportSkill('CreateSkillGroup')
   }
   if (
     (!origExistingSkill &&
@@ -136,13 +136,13 @@ const reportSkills = (origExistingSkill, createdSkill) => {
     (origExistingSkill &&
       createdSkill?.iconClass?.toLowerCase() !== origExistingSkill?.iconClass?.toLowerCase())
   ) {
-    SkillsReporter.reportSkill('ConfigureSkillIcon')
+    useInceptionStore().reportSkill('ConfigureSkillIcon')
   }
   if (
     createdSkill.quizId &&
     (!origExistingSkill?.quizId || origExistingSkill?.quizId !== createdSkill.quizId)
   ) {
-    SkillsReporter.reportSkill('SkillQuizOrSurvey')
+    useInceptionStore().reportSkill('SkillQuizOrSurvey')
   }
 }
 
@@ -164,9 +164,9 @@ const skillCreatedOrUpdated = (skill) => {
     skills.splice(existingIndex, 1, createdSkill)
   } else {
     skills.push(createdSkill)
-    SkillsReporter.reportSkill('CreateSkill')
+    useInceptionStore().reportSkill('CreateSkill')
     if (!skill.enabled) {
-      SkillsReporter.reportSkill('CreateSkillInitiallyHidden')
+      useInceptionStore().reportSkill('CreateSkillInitiallyHidden')
     }
   }
   if (skill.groupId) {

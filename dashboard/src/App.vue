@@ -14,37 +14,36 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <script setup>
-import { computed, onBeforeMount, onMounted, ref, watch } from 'vue'
-import { RouterView, useRoute } from 'vue-router'
+import {computed, onBeforeMount, onMounted, ref, watch} from 'vue'
+import {RouterView, useRoute} from 'vue-router'
 import DashboardHeader from '@/components/header/DashboardHeader.vue'
 import SkillsSpinner from '@/components/utils/SkillsSpinner.vue'
-import { useCustomGlobalValidators } from '@/validators/UseCustomGlobalValidators.js'
-import { useInceptionConfigurer } from '@/components/utils/UseInceptionConfigurer.js'
-import { useThemesHelper } from '@/components/header/UseThemesHelper.js'
-import { useAppConfig } from '@/common-components/stores/UseAppConfig.js'
-import { useAuthState } from '@/stores/UseAuthState.js'
-import { useAppInfoState } from '@/stores/UseAppInfoState.js'
-import { useAccessState } from '@/stores/UseAccessState.js'
+import {useCustomGlobalValidators} from '@/validators/UseCustomGlobalValidators.js'
+import {useThemesHelper} from '@/components/header/UseThemesHelper.js'
+import {useAppConfig} from '@/common-components/stores/UseAppConfig.js'
+import {useAuthState} from '@/stores/UseAuthState.js'
+import {useAppInfoState} from '@/stores/UseAppInfoState.js'
+import {useAccessState} from '@/stores/UseAccessState.js'
 import ConfirmDialog from 'primevue/confirmdialog'
-import { useGlobalNavGuards } from '@/router/UseGlobalNavGuards.js'
-import { useErrorHandling } from '@/interceptors/UseErrorHandling.js'
+import {useGlobalNavGuards} from '@/router/UseGlobalNavGuards.js'
+import {useErrorHandling} from '@/interceptors/UseErrorHandling.js'
 import CustomizableHeader from '@/components/customization/CustomizableHeader.vue'
 import CustomizableFooter from '@/components/customization/CustomizableFooter.vue'
-import { useSkillsDisplayInfo } from '@/skills-display/UseSkillsDisplayInfo.js'
-import { useSkillsDisplayAttributesState } from '@/skills-display/stores/UseSkillsDisplayAttributesState.js'
-import { useIframeInit } from '@/skills-display/iframe/UseIframeInit.js'
+import {useSkillsDisplayInfo} from '@/skills-display/UseSkillsDisplayInfo.js'
+import {useSkillsDisplayAttributesState} from '@/skills-display/stores/UseSkillsDisplayAttributesState.js'
+import {useIframeInit} from '@/skills-display/iframe/UseIframeInit.js'
 import NewSoftwareVersion from '@/components/header/NewSoftwareVersion.vue'
-import { usePageVisitService } from '@/components/utils/services/UsePageVisitService.js'
-import { invoke, until } from '@vueuse/core'
+import {usePageVisitService} from '@/components/utils/services/UsePageVisitService.js'
+import {invoke, until} from '@vueuse/core'
 import DashboardFooter from '@/components/header/DashboardFooter.vue'
-import { useUserAgreementInterceptor } from '@/interceptors/UseUserAgreementInterceptor.js'
+import {useUserAgreementInterceptor} from '@/interceptors/UseUserAgreementInterceptor.js'
 import PkiAppBootstrap from '@/components/access/PkiAppBootstrap.vue'
 import ScrollToTop from '@/common-components/utilities/ScrollToTop.vue'
 import IconManagerService from '@/components/utils/iconPicker/IconManagerService.js'
 import log from 'loglevel';
 import {useUserPreferences} from "@/stores/UseUserPreferences.js";
 import {useMatomoSupport} from "@/stores/UseMatomoSupport.js";
-import { useAiPromptState } from '@/common-components/utilities/learning-conent-gen/UseAiPromptState.js'
+import {useAiPromptState} from '@/common-components/utilities/learning-conent-gen/UseAiPromptState.js'
 
 const authState = useAuthState()
 const appInfoState = useAppInfoState()
@@ -74,11 +73,9 @@ const addCustomIconCSSForClientDisplay = () => {
     IconManagerService.refreshCustomIconCss(skillsDisplayAttributes.projectId, null)
   }
 }
-const inceptionConfigurer = useInceptionConfigurer()
 const pageVisitService = usePageVisitService()
 const userPreferences = useUserPreferences()
 const loadUserAndDisplayInfo = () => {
-  inceptionConfigurer.configure()
   pageVisitService.reportPageVisit(route.path, route.fullPath)
   const loadRoot = accessState.loadIsRoot()
   const loadEmailEnabled = appInfoState.loadEmailEnabled()
@@ -144,7 +141,6 @@ const loadConfigs = () => {
     restoreSessionIfAvailable().finally(() => {
       skillsDisplayAttributes.loadConfigStateIfNeeded().then(() => {
 
-        inceptionConfigurer.configure()
         if (!skillsDisplayInfo.isSkillsClientPath()) {
           globalNavGuards.addNavGuards()
         }

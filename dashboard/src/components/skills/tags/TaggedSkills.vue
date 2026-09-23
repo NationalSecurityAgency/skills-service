@@ -16,7 +16,7 @@ limitations under the License.
 <script setup>
 
 import SubPageHeader from "@/components/utils/pages/SubPageHeader.vue";
-import { SkillsReporter } from '@skilltree/skills-client-js'
+import { useInceptionStore } from '@/stores/UseInceptionStore.js'
 import {useSingleSkillTagState} from "@/stores/UseSingleSkillTagState.js";
 import {computed, nextTick, onMounted, ref} from "vue";
 import {useStorage} from "@vueuse/core";
@@ -100,7 +100,7 @@ const skillAdded = (newItem) => {
         addingSkillToTag.value = false;
       }).then(() => {
         focusOnSkillsSelector()
-        SkillsReporter.reportSkill('AddOrModifyTags')
+        useInceptionStore().reportSkill('AddOrModifyTags')
         announcer.polite(`Skill "${newItem.name}" was added to Tag "${tagValue}"`)
       })
 }
@@ -132,7 +132,7 @@ const doRemoveSkill = (skill) => {
           }
       ).finally(() => {
         focusOnSkillsSelector()
-        SkillsReporter.reportSkill('AddOrModifyTags')
+        useInceptionStore().reportSkill('AddOrModifyTags')
         announcer.polite(`Skill "${skill.skillName}" was removed from Tag "${skillTagState.skillTag.tagValue}"!`)
       })
 }

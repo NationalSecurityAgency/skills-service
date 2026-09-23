@@ -32,7 +32,7 @@ import {object, string} from "yup";
 import {useForm} from "vee-validate";
 import {useDebounceFn} from "@vueuse/core";
 import ExistingUserInput from "@/components/utils/ExistingUserInput.vue";
-import { SkillsReporter } from '@skilltree/skills-client-js'
+import { useInceptionStore } from '@/stores/UseInceptionStore.js'
 import {useDialogMessages} from "@/components/utils/modal/UseDialogMessages.js";
 
 const model = defineModel()
@@ -137,7 +137,7 @@ const saveEvents = () => {
     usersToAdd.value = '';
     results.value = result.results;
     savingEvents.value = false;
-    SkillsReporter.reportSkill('ManuallyAddSkillEvent')
+    useInceptionStore().reportSkill('ManuallyAddSkillEvent')
   })
 
 }

@@ -16,7 +16,7 @@ limitations under the License.
 <script setup>
 import { computed, nextTick, onMounted, ref, defineAsyncComponent } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
-import { SkillsReporter } from '@skilltree/skills-client-js'
+import { useInceptionStore } from '@/stores/UseInceptionStore.js'
 import * as yup from 'yup';
 import { string } from 'yup';
 import { useForm } from 'vee-validate';
@@ -249,7 +249,7 @@ const saveSettings = () => {
     announcer.polite('Video settings were saved');
     setupPreview();
     if (isSkill) {
-      SkillsReporter.reportSkill('SkillAudioVideo')
+      useInceptionStore().reportSkill('SkillAudioVideo')
     }
   }, (error) => {
     loading.value.video = false;

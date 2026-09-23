@@ -14,39 +14,22 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <script setup>
-import { onMounted, ref } from 'vue'
-import { SkillsLevelJS, SkillsConfiguration } from '@skilltree/skills-client-js'
+import { onMounted } from 'vue'
+import { useInceptionStore } from '@/stores/UseInceptionStore.js'
 
-const isConfigurationInitialized = ref(false)
+const inceptionStore = useInceptionStore()
 
 onMounted(() => {
-  SkillsConfiguration.afterConfigure()
-    .then(() => {
-      const skillsLevel = new SkillsLevelJS('Inception')
-      if (document.querySelector('#skills-level-container')) {
-        skillsLevel.attachTo(document.querySelector('#skills-level-container'))
-      }
-
-    }).finally(() => {
-    isConfigurationInitialized.value = true
-  })
+  inceptionStore.loadUserLevel()
 })
 
 </script>
 
 <template>
   <router-link to="/administrator/skills/Inception" aria-label="Dashboard Skills" tabindex="-1">
-    <Button v-show="isConfigurationInitialized"
-            outlined
-            icon="fas fa-trophy"
-            label="Dashboard Skills"
-            severity="info">
-      <i class="fas fa-trophy mr-1" aria-hidden="true"></i>
-      <span id="skills-level-container" />
+    <Button v-show="inceptionStore.userLevel !== null" outlined>
+      <i class="fas fa-trophy" aria-hidden="true"></i>
+      <div>Level {{ inceptionStore.userLevel }}</div>
     </Button>
   </router-link>
 </template>
-
-<style scoped>
-
-</style>

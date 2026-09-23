@@ -25,7 +25,7 @@ import Badge from '@/components/badges/Badge.vue'
 import SkillsSpinner from '@/components/utils/SkillsSpinner.vue'
 import {useDialogMessages} from "@/components/utils/modal/UseDialogMessages.js";
 import IconManagerService from '@/components/utils/iconPicker/IconManagerService.js'
-import { SkillsReporter } from '@skilltree/skills-client-js'
+import { useInceptionStore } from '@/stores/UseInceptionStore.js'
 import { useCommunityLabels } from '@/components/utils/UseCommunityLabels.js'
 
 const dialogMessages = useDialogMessages()
@@ -107,7 +107,7 @@ const saveBadge = (updatedBadge) => {
 
   const { isEdit } = updatedBadge;
   if (!isEdit) {
-    SkillsReporter.reportSkill('CreateGlobalBadge');
+    useInceptionStore().reportSkill('CreateGlobalBadge');
   }
 
   loadBadges().then(() => {

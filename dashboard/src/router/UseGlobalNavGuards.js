@@ -22,7 +22,7 @@ import { useAppInfoState } from '@/stores/UseAppInfoState.js'
 import { useAppConfig } from '@/common-components/stores/UseAppConfig.js'
 import { useProjectInfo } from '@/common-components/stores/UseCurrentProjectInfo.js'
 import { useQuizInfo } from '@/common-components/stores/UseCurrentQuizInfo.js';
-import { SkillsConfiguration, SkillsReporter } from '@skilltree/skills-client-js'
+import { useInceptionStore } from '@/stores/UseInceptionStore.js'
 import { useProjConfig } from '@/stores/UseProjConfig.js'
 import IconManagerService from '@/components/utils/iconPicker/IconManagerService.js'
 import { useAccessState } from '@/stores/UseAccessState.js'
@@ -35,6 +35,7 @@ import { useQuizSummaryState } from '@/stores/UseQuizSummaryState.js';
 export const useGlobalNavGuards = () => {
 
   const quizConfig = useQuizConfig()
+  const inceptionStore = useInceptionStore()
   const pageVisitService = usePageVisitService()
   const authState = useAuthState()
   const appInfoState = useAppInfoState()
@@ -164,10 +165,8 @@ export const useGlobalNavGuards = () => {
     router.afterEach((to, from) => {
 
       log.debug(`GlobalNavGuard: afterEach nav to:${to.path}`)
-      if (to.meta.reportSkillId) {
-        SkillsConfiguration.afterConfigure().then(() => {
-          SkillsReporter.reportSkill(to.meta.reportSkillId)
-        })
+      if (to.meta.reportSkillId && isLoggedIn()) {
+        inceptionStore.reportSkill(to.meta.reportSkillId)
       }
       if (isPki() || isLoggedIn()) {
         pageVisitService.reportPageVisit(to.path, to.fullPath)

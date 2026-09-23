@@ -24,7 +24,7 @@ import { useAppConfig } from '@/common-components/stores/UseAppConfig.js'
 import { useResponsiveBreakpoints } from '@/components/utils/misc/UseResponsiveBreakpoints.js'
 import SkillToImportInfo from '@/components/skills/catalog/SkillToImportInfo.vue'
 import { useStorage } from '@vueuse/core'
-import { SkillsReporter } from '@skilltree/skills-client-js'
+import { useInceptionStore } from '@/stores/UseInceptionStore.js'
 import { useSubjectsState } from '@/stores/UseSubjectsState.js'
 import { useSubjectSkillsState } from '@/stores/UseSubjectSkillsState.js'
 import SkillsSpinner from '@/components/utils/SkillsSpinner.vue'
@@ -147,7 +147,7 @@ const doImport = () => {
         const commonActionsAfterImport = () => {
           subjectState.loadSubjectDetailsState()
           finalizeState.loadInfo()
-          SkillsReporter.reportSkill('ImportSkillfromCatalog')
+          useInceptionStore().reportSkill('ImportSkillfromCatalog')
         }
         if (props.groupId && props.groupId.length > 0) {
           return CatalogService.bulkImportIntoGroup(route.params.projectId, route.params.subjectId, props.groupId, projAndSkillIds)

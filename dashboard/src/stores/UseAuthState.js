@@ -20,6 +20,7 @@ import axios from 'axios'
 import { SkillsConfiguration } from '@skilltree/skills-client-js'
 import { useAppConfig } from '@/common-components/stores/UseAppConfig.js'
 import { useAppInfoState } from '@/stores/UseAppInfoState.js'
+import { useInceptionStore } from '@/stores/UseInceptionStore.js'
 
 
 export const useAuthState = defineStore('authState', () => {
@@ -33,6 +34,7 @@ export const useAuthState = defineStore('authState', () => {
     const router = useRouter()
     const appConfig = useAppConfig()
     const appInfoState = useAppInfoState()
+    const inceptionStore = useInceptionStore()
 
     const setAuthUser = (authData) => {
         localAuth.value = true
@@ -51,6 +53,7 @@ export const useAuthState = defineStore('authState', () => {
         restoringSessionState.value = value
     }
     const clearAuthData = () => {
+        inceptionStore.reset()
         userInfoState.value = null
         localAuth.value = false
         oAuthAuth.value = false
