@@ -50,6 +50,8 @@ const currentScaleOptions = ref([3, 4, 5, 6, 7, 8, 9, 10])
 const answersRef = ref(null)
 const showHint = ref(false)
 const editTypeDisabled = ref(false);
+const quizDefs = ref([]);
+const selectedQuiz = ref(null);
 
 const modalTitle = computed(() => {
   if( props.isEdit ) {
@@ -76,6 +78,17 @@ onMounted(() => {
           loadingComponent.value = false;
         })
       }
+    }
+    if (props.isCopy) {
+      QuizService.getQuizDefs().then((quizzes) => {
+        quizDefs.value = quizzes.map((quiz) =>  {
+          return {
+            label: quiz.name,
+            id: quiz.quizId
+          };
+        });
+        selectedQuiz.value = props.questionDef.quizId
+      })
     }
   }
   if (isQuizType.value && props.questionDef.answerHint) {
@@ -404,6 +417,18 @@ const saveQuestionDef = (values) => {
             isEdit: props.isEdit,
           }
         });
+  } else if (props.isCopy) {
+    return QuizService.saveQuizQuestionDef(selectedQuiz.value, questionToSave)
+        .then((updatedQuizQuestionDef) => {
+          updatedQuizQuestionDef.quizId = selectedQuiz.value
+          if(selectedQuiz.value !== props.questionDef.quizId) {
+            updatedQuizQuestionDef.isCopyToAnotherQuiz = true
+          }
+          return {
+            ...updatedQuizQuestionDef,
+            isEdit: props.isEdit,
+          }
+        });
   } else {
     return QuizService.saveQuizQuestionDef(quizId.value, questionToSave)
         .then((updatedQuizQuestionDef) => {
@@ -511,9 +536,19 @@ const numberOfBlanks = computed(() => {
           @question-generated="onQuestionGenerated"
       />
 
+      <div class="mb-2 flex flex-col gap-1" v-if="isCopy">
+        <span class="font-bold text-primary">Copy Question To:</span>
+        <Select
+            v-model="selectedQuiz"
+            :options="quizDefs"
+            optionLabel="label"
+            optionValue="id"
+            data-cy="quizzes-to-copy" />
+      </div>
       <Message v-if="numberOfBlanks === 0 && isQuestionTypeFillInTheBlank" :closable="false">
         Insert blanks in your question by using underscores (___) where answers should go.
       </Message>
+
       <markdown-editor
           ref="markdownEditorRef"
           id="quizDescription"
