@@ -80,7 +80,7 @@ class SecurityConfiguration {
     @Value('${skills.authorization.corsAllowedOriginPatterns:*}')
     List<String> corsAllowedOriginPatterns
 
-    @Value('#{"${skills.authorization.corsConf.allowCredentials}"}')
+    @Value('${skills.authorization.corsConf.allowCredentials:#{null}}')
     Boolean corsConfAllowCredentials
 
     @Component
@@ -145,7 +145,7 @@ class SecurityConfiguration {
         configuration.setAllowedOriginPatterns(allowedOriginPatterns)
         // by default allow credentials for PKI auth mode, otherwise don't allow credentials (requires token)
         boolean allowCredentials = corsConfAllowCredentials == null ? (authMode == AuthMode.PKI) : corsConfAllowCredentials
-        log.info("Configuring CORS with allowed origin patterns: [${corsAllowedOriginPatterns}], allowCredentials: [${allowCredentials}]")
+        log.war("Configuring CORS with allowed origin patterns: [${corsAllowedOriginPatterns}], allowCredentials: [${allowCredentials}]")
         configuration.setAllowCredentials(allowCredentials)
         configuration.setAllowedMethods([HttpMethod.GET.name(), HttpMethod.HEAD.name(), HttpMethod.POST.name(), HttpMethod.PUT.name(), HttpMethod.DELETE.name()])
         configuration.applyPermitDefaultValues()
