@@ -145,7 +145,7 @@ class SecurityConfiguration {
         configuration.setAllowedOriginPatterns(allowedOriginPatterns)
         // by default allow credentials for PKI auth mode, otherwise don't allow credentials (requires token)
         boolean allowCredentials = corsConfAllowCredentials == null ? (authMode == AuthMode.PKI) : corsConfAllowCredentials
-        log.war("Configuring CORS with allowed origin patterns: [${corsAllowedOriginPatterns}], allowCredentials: [${allowCredentials}]")
+        log.info("Configuring CORS with allowed origin patterns: [${corsAllowedOriginPatterns}], allowCredentials: [${allowCredentials}]")
         configuration.setAllowCredentials(allowCredentials)
         configuration.setAllowedMethods([HttpMethod.GET.name(), HttpMethod.HEAD.name(), HttpMethod.POST.name(), HttpMethod.PUT.name(), HttpMethod.DELETE.name()])
         configuration.applyPermitDefaultValues()
