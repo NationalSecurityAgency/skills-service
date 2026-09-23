@@ -47,6 +47,7 @@ class SecurityConfigurationSpec extends Specification {
 
         expect:
         getConfiguration(securityConfiguration, '/api/projects').allowCredentials == expectedAllowCredentials
+        getConfiguration(securityConfiguration, '/app/userInfo').allowCredentials == expectedAllowCredentials
 
         where:
         authMode       || expectedAllowCredentials
@@ -65,6 +66,7 @@ class SecurityConfigurationSpec extends Specification {
 
         expect:
         getConfiguration(securityConfiguration, '/api/projects').allowCredentials == configuredAllowCredentials
+        getConfiguration(securityConfiguration, '/app/userInfo').allowCredentials == configuredAllowCredentials
 
         where:
         authMode      | configuredAllowCredentials
@@ -87,13 +89,18 @@ class SecurityConfigurationSpec extends Specification {
         configuration.checkOrigin('https://untrusted.example') == null
     }
 
-    def "CORS configuration is limited to API endpoints"() {
+    def "CORS configuration is limited to supported cross-origin endpoints"() {
         given:
         SecurityConfiguration securityConfiguration = new SecurityConfiguration(corsAllowedOriginPatterns: ['*'])
         CorsConfigurationSource source = securityConfiguration.corsConfigurationSource()
 
         expect:
-        source.getCorsConfiguration(new MockHttpServletRequest('GET', '/api/projects')) != null
+        source.getCorsConfiguration(new MockHttpServletRequest('GET', '/api/projects')).allowCredentials == false
+        source.getCorsConfiguration(new MockHttpServletRequest('GET', '/public/status')).allowCredentials == false
+        source.getCorsConfiguration(new MockHttpServletRequest('GET', '/public/clientDisplay/config')).allowCredentials == false
+        source.getCorsConfiguration(new MockHttpServletRequest('GET', '/public/log')).allowCredentials == false
+        source.getCorsConfiguration(new MockHttpServletRequest('GET', '/public/isAlive')) == null
+        source.getCorsConfiguration(new MockHttpServletRequest('GET', '/app/userInfo')).allowCredentials == false
         source.getCorsConfiguration(new MockHttpServletRequest('GET', '/app/projects')) == null
     }
 

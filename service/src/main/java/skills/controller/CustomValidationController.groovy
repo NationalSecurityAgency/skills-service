@@ -26,7 +26,6 @@ import skills.services.CustomValidationResult
 import skills.services.CustomValidator
 import skills.utils.InputSanitizer
 
-@CrossOrigin(allowCredentials = "true", originPatterns = ['*'])
 @RestController
 @RequestMapping("/api/validation")
 @Slf4j

@@ -27,6 +27,7 @@ import org.springframework.security.core.userdetails.UserDetailsService
 import org.springframework.security.web.SecurityFilterChain
 import org.springframework.security.web.context.NullSecurityContextRepository
 import org.springframework.security.web.context.SecurityContextRepository
+import org.springframework.web.cors.CorsConfigurationSource
 import org.springframework.stereotype.Component
 import skills.auth.PortalWebSecurityHelper
 import skills.auth.SecurityMode
@@ -53,13 +54,20 @@ class PkiSecurityConfiguration {
                 .userDetailsService(pkiUserDetailsService())
     }
 
+    // PKI mode uses the first matching security filter chain, not every matching chain:
+    // Order | Configuration            | Matches
+    // 102   | ApiSecurityConfiguration  | /api/** (including preflight requests)
+    // 103   | PkiSecurityConfiguration  | All remaining requests
+    // FORM and OAuth-specific chains are inactive in PKI mode. Both PKI chains use
+    // X.509 authentication, stateless sessions, and the shared CORS source. This fallback
+    // chain handles the configured /app and /public CORS endpoints.
     @Bean('pkiSecurityFilterChain')
     @Order(103)
-    SecurityFilterChain filterChain(HttpSecurity http, SecurityContextRepository securityContextRepository) throws Exception {
+    SecurityFilterChain filterChain(HttpSecurity http, SecurityContextRepository securityContextRepository, CorsConfigurationSource corsConfigurationSource) throws Exception {
         log.info("Configuring PKI authorization mode")
 
         // Portal endpoints config
-        portalWebSecurityHelper.configureHttpSecurity(http)
+        portalWebSecurityHelper.configureHttpSecurity(http.cors((cors) -> cors.configurationSource(corsConfigurationSource)))
         http
                 .x509((x509) -> x509.subjectPrincipalRegex(/(.*)/))
                 .securityContext((securityContext) -> securityContext.securityContextRepository(securityContextRepository))

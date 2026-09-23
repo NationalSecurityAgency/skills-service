@@ -40,6 +40,7 @@ import org.springframework.security.web.authentication.logout.HttpStatusReturnin
 import org.springframework.security.web.context.DelegatingSecurityContextRepository
 import org.springframework.security.web.context.RequestAttributeSecurityContextRepository
 import org.springframework.security.web.context.SecurityContextRepository
+import org.springframework.web.cors.CorsConfigurationSource
 import org.springframework.stereotype.Component
 import skills.auth.PortalWebSecurityHelper
 import skills.auth.SecurityConfiguration
@@ -79,13 +80,25 @@ class FormSecurityConfiguration {
     @Lazy
     SecurityContextRepository securityContextRepository
 
+    @Autowired
+    CorsConfigurationSource corsConfigurationSource
+
+    // FORM mode uses the first matching security filter chain, not every matching chain:
+    // Order | Configuration            | Matches
+    // 100   | AuthorizationServerConfig | OAuth authorization-server endpoints
+    // 101   | ResourceServerConfig      | Requests containing bearer/access tokens
+    // 102   | ApiSecurityConfiguration  | /api/** (including token-free preflight requests)
+    // 103   | FormSecurityConfiguration | All remaining requests
+    // Each applicable chain enables the shared CORS source independently. This fallback
+    // chain handles the configured /app and /public CORS endpoints; API requests normally
+    // select an earlier chain and never reach this one.
     @Bean('formSecurityFilterChain')
     @Order(103)
     SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         log.info("Configuring FORM authorization mode")
 
         // Portal endpoints config
-        portalWebSecurityHelper.configureHttpSecurity(http)
+        portalWebSecurityHelper.configureHttpSecurity(http.cors((cors) -> cors.configurationSource(corsConfigurationSource)))
                .sessionManagement((sessionManagement) -> sessionManagement.sessionCreationPolicy(SessionCreationPolicy.ALWAYS))
                .securityContext((securityContext) -> securityContext.securityContextRepository(securityContextRepository))
                .exceptionHandling((exceptionHandling) -> exceptionHandling

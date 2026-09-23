@@ -31,6 +31,7 @@ import org.springframework.security.saml2.provider.service.registration.RelyingP
 import org.springframework.security.saml2.provider.service.registration.RelyingPartyRegistrationRepository
 import org.springframework.security.saml2.provider.service.registration.RelyingPartyRegistrations
 import org.springframework.security.web.SecurityFilterChain
+import org.springframework.web.cors.CorsConfigurationSource
 import org.springframework.security.saml2.provider.service.authentication.OpenSaml5AuthenticationProvider
 import org.springframework.security.saml2.provider.service.authentication.Saml2Authentication;
 import org.springframework.security.saml2.provider.service.authentication.Saml2AuthenticatedPrincipal;
@@ -81,7 +82,7 @@ class SAML2SecurityConfiguration{
 
 
      @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception   {
+    public SecurityFilterChain filterChain(HttpSecurity http, CorsConfigurationSource corsConfigurationSource) throws Exception   {
 
          OpenSaml5AuthenticationProvider authenticationProvider = new OpenSaml5AuthenticationProvider();
          authenticationProvider.setResponseAuthenticationConverter(responseToken -> {
@@ -94,7 +95,7 @@ class SAML2SecurityConfiguration{
              return new Saml2Authentication(principal,authentication.getSaml2Response(),userInfo.getAuthorities());
          });
 
-         portalWebSecurityHelper.configureHttpSecurity(http);
+         portalWebSecurityHelper.configureHttpSecurity(http.cors((cors) -> cors.configurationSource(corsConfigurationSource)));
          http.saml2Login(saml2 -> saml2
                  .authenticationManager(new ProviderManager(authenticationProvider))
                  .relyingPartyRegistrationRepository(relyingPartyRegistrationRepository())

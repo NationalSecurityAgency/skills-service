@@ -67,7 +67,6 @@ class ClientLoggingController {
 //    Logger.OFF = defineLogLevel(99, 'OFF');
 
     @DBUpgradeSafe
-    @CrossOrigin(originPatterns = ['*'])
     @RequestMapping(value = "/log", method = [RequestMethod.PUT, RequestMethod.POST])
     @ResponseBody
     boolean writeLog(@RequestBody LogMessage logMessage, HttpServletRequest request) {

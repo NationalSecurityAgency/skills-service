@@ -80,13 +80,13 @@ class SecurityConfiguration {
     @Value('${skills.authorization.corsAllowedOriginPatterns:*}')
     List<String> corsAllowedOriginPatterns
 
-    @Value('${skills.authorization.corsConf.allowCredentials:#{null}}')
+    @Value('${skills.authorization.corsConf.allowCredentials:false}')
     Boolean corsConfAllowCredentials
 
     @Component
     @Configuration
     @Order(99)
-    static class CorsSecurityConfiguration {
+    static class ApiSecurityConfiguration {
 
         @Value('#{securityConfig.authMode}}')
         AuthMode authMode = AuthMode.DEFAULT_AUTH_MODE
@@ -140,20 +140,35 @@ class SecurityConfiguration {
     @Bean
     CorsConfigurationSource corsConfigurationSource() {
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource()
-        CorsConfiguration configuration = new CorsConfiguration()
         List<String> allowedOriginPatterns = corsAllowedOriginPatterns.collect { it.trim() }.findAll { it }
+
+        CorsConfiguration apiAndAppConfiguration = buildCorsConfiguration(allowedOriginPatterns)
+        boolean allowCredentials = corsConfAllowCredentials
+        log.info("Configuring CORS with allowed origin patterns: [${allowedOriginPatterns}], API allowCredentials: [${corsConfAllowCredentials}]")
+        apiAndAppConfiguration.setAllowCredentials(corsConfAllowCredentials)
+        source.registerCorsConfiguration('/api/**', apiAndAppConfiguration)
+        source.registerCorsConfiguration('/app/userInfo', apiAndAppConfiguration)
+
+        if (corsConfAllowCredentials && allowedOriginPatterns.contains('*')) {
+            log.warn('CORS allows any origin to read credentialed responses from /api/** and /app/userInfo. ' +
+                    'Set skills.authorization.corsAllowedOriginPatterns to trusted origins to restrict access.')
+        }
+
+        CorsConfiguration publicConfiguration = buildCorsConfiguration(allowedOriginPatterns)
+        publicConfiguration.setAllowCredentials(false)
+        source.registerCorsConfiguration('/public/log', publicConfiguration)
+        source.registerCorsConfiguration('/public/status', publicConfiguration)
+        source.registerCorsConfiguration('/public/clientDisplay/config', publicConfiguration)
+
+        return source
+    }
+
+    private static CorsConfiguration buildCorsConfiguration(List<String> allowedOriginPatterns) {
+        CorsConfiguration configuration = new CorsConfiguration()
         configuration.setAllowedOriginPatterns(allowedOriginPatterns)
-        // by default allow credentials for PKI auth mode, otherwise don't allow credentials (requires token)
-        boolean allowCredentials = corsConfAllowCredentials == null ? (authMode == AuthMode.PKI) : corsConfAllowCredentials
-        log.info("Configuring CORS with allowed origin patterns: [${corsAllowedOriginPatterns}], allowCredentials: [${allowCredentials}]")
-        configuration.setAllowCredentials(allowCredentials)
         configuration.setAllowedMethods([HttpMethod.GET.name(), HttpMethod.HEAD.name(), HttpMethod.POST.name(), HttpMethod.PUT.name(), HttpMethod.DELETE.name()])
         configuration.applyPermitDefaultValues()
-        if (configuration.getAllowCredentials() && allowedOriginPatterns.contains('*')) {
-            log.warn('Credentialed CORS requests to /api/** are allowed from all origins; configure skills.authorization.corsAllowedOriginPatterns to restrict access')
-        }
-        source.registerCorsConfiguration('/api/**', configuration)
-        return source
+        return configuration
     }
 
     @Bean

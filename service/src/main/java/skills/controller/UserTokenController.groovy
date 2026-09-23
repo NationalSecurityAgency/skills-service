@@ -104,7 +104,6 @@ class UserTokenController {
      */
     @RequestMapping(value = CURRENT_USER_TOKEN_ENDPOINT, method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
-    @CrossOrigin(allowCredentials = 'true', originPatterns = ['*'])
     void getSelfUserToken(HttpServletRequest request, HttpServletResponse response, @PathVariable("projectId") String projectId) {
         Object authentication = SecurityContextHolder.getContext().getAuthentication();
         String userId
