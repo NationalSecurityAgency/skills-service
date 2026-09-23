@@ -143,7 +143,6 @@ class SecurityConfiguration {
         List<String> allowedOriginPatterns = corsAllowedOriginPatterns.collect { it.trim() }.findAll { it }
 
         CorsConfiguration apiAndAppConfiguration = buildCorsConfiguration(allowedOriginPatterns)
-        boolean allowCredentials = corsConfAllowCredentials
         log.info("Configuring CORS with allowed origin patterns: [${allowedOriginPatterns}], API allowCredentials: [${corsConfAllowCredentials}]")
         apiAndAppConfiguration.setAllowCredentials(corsConfAllowCredentials)
         source.registerCorsConfiguration('/api/**', apiAndAppConfiguration)

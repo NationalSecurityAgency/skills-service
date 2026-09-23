@@ -71,6 +71,9 @@ class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
     @Value('${skills.authorization.authMode:#{T(skills.auth.AuthMode).DEFAULT_AUTH_MODE}}')
     AuthMode authMode
 
+    @Value('${skills.authorization.corsAllowedOriginPatterns:*}')
+    List<String> corsAllowedOriginPatterns
+
     @Autowired
     ChainedChannelInterceptor chainedChannelInterceptor
 
@@ -130,7 +133,7 @@ class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
     @Override
     void registerStompEndpoints(StompEndpointRegistry registry) {
         registry.addEndpoint('/skills-websocket')
-                .setAllowedOriginPatterns("*")
+                .setAllowedOriginPatterns(corsAllowedOriginPatterns.collect { it.trim() }.findAll { it } as String[])
                 .withSockJS()
     }
 
