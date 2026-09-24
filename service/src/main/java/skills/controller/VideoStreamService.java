@@ -34,11 +34,14 @@ import skills.storage.repos.AttachmentRepo;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 @Service
 public class VideoStreamService {
 
     private static final int BUFFER_SIZE = 1024 * 8; // 8KB buffer
+    private static final Pattern SINGLE_BYTE_RANGE = Pattern.compile("bytes=([0-9]*)-([0-9]*)");
     private static final Logger log = LoggerFactory.getLogger(VideoStreamService.class);
     @Autowired
     AttachmentRepo attachmentRepo;
@@ -54,6 +57,9 @@ public class VideoStreamService {
 
     @PostConstruct
     protected void init() {
+        if (videoStreamDefaultChunkSize <= 0 || videoStreamMaxOptimizedDbFetchSize <= 0) {
+            throw new IllegalStateException("Video stream chunk sizes must be positive");
+        }
         if (videoStreamDefaultChunkSize > videoStreamMaxOptimizedDbFetchSize) {
             throw new IllegalStateException(String.format(
                     "videoStreamDefaultChunkSize (%d) must be less than or equal to videoStreamMaxOptimizedDbFetchSize (%d)",
@@ -78,42 +84,42 @@ public class VideoStreamService {
             long start = 0;
             long end = fileSize - 1;
 
-            // 2. Handle range requests
-            if (rangeHeader != null && rangeHeader.startsWith("bytes=")) {
-                // Parse the range header
-                String rangeValue = rangeHeader.substring(6).trim();
-                String[] ranges = rangeValue.split("-");
-
-                try {
-                    start = Long.parseLong(ranges[0]);
-                    if (ranges.length > 1) {
-                        end = Long.parseLong(ranges[1]);
-                    } else {
-                        // If end is not specified, use a reasonable default chunk
-                        end = start + videoStreamDefaultChunkSize - 1;
-                    }
-                    // Ensure we don't go past the end of the file
-                    if (end >= fileSize) {
-                        end = fileSize - 1;
-                    }
-
-                    // Set partial content status and headers
-                    response.setStatus(HttpStatus.PARTIAL_CONTENT.value());
-                    response.setHeader("Content-Range",
-                            String.format("bytes %d-%d/%d", start, end, fileSize));
-
-                } catch (NumberFormatException e) {
-                    // If range is invalid, just return the full content
-                    start = 0;
-                    end = fileSize - 1;
+            // Ignore malformed/unsupported ranges, but reject valid unsatisfiable ranges.
+            ByteRange range = parseRange(rangeHeader);
+            if (range != null) {
+                boolean suffix = range.start() == null;
+                if (fileSize == 0 || (suffix ? range.end() == 0 : range.start() >= fileSize)) {
+                    response.setStatus(HttpStatus.REQUESTED_RANGE_NOT_SATISFIABLE.value());
+                    response.setHeader("Content-Range", "bytes */" + fileSize);
+                    response.setContentLengthLong(0);
+                    return;
                 }
+
+                if (suffix) {
+                    start = fileSize - Math.min(range.end(), fileSize);
+                } else {
+                    start = range.start();
+                    // Bound the length before adding to start to avoid long overflow.
+                    end = range.end() == null
+                            ? start + Math.min(videoStreamDefaultChunkSize, fileSize - start) - 1
+                            : Math.min(range.end(), fileSize - 1);
+                }
+
+                response.setStatus(HttpStatus.PARTIAL_CONTENT.value());
+                response.setHeader("Content-Range",
+                        String.format("bytes %d-%d/%d", start, end, fileSize));
+            } else {
+                response.setStatus(HttpStatus.OK.value());
             }
 
             long contentLength = end - start + 1;
             response.setContentLengthLong(contentLength);
+            if (contentLength == 0) {
+                return;
+            }
 
             // 3A. if chunks are small enough load them into memory only selectin the bytes for this chunk
-            if (contentLength <= videoStreamMaxOptimizedDbFetchSize) {
+            if (contentLength <= videoStreamMaxOptimizedDbFetchSize && contentLength <= Integer.MAX_VALUE) {
                 byte[] chunk = attachmentRepo.fetchFileChunk(attachment.getUuid(), start, contentLength);
                 try (OutputStream outputStream = response.getOutputStream()) {
                     outputStream.write(chunk, 0, chunk.length);
@@ -144,8 +150,8 @@ public class VideoStreamService {
                     long remaining = contentLength;
                     int read;
 
-                    while ((read = inputStream.read(buffer, 0,
-                            (int) Math.min(buffer.length, remaining))) != -1 && remaining > 0) {
+                    while (remaining > 0 && (read = inputStream.read(buffer, 0,
+                            (int) Math.min(buffer.length, remaining))) != -1) {
                         outputStream.write(buffer, 0, read);
                         remaining -= read;
                         outputStream.flush();
@@ -160,6 +166,30 @@ public class VideoStreamService {
             }
         } catch (Exception e) {
             throw new SkillException("Failed to stream video [" + attachment.getUuid() + "]", e);
+        }
+    }
+
+    // A missing start denotes a suffix length in end; a missing end denotes an open range.
+    private record ByteRange(Long start, Long end) { }
+
+    private ByteRange parseRange(String header) {
+        if (header == null) {
+            return null;
+        }
+        Matcher matcher = SINGLE_BYTE_RANGE.matcher(header.trim());
+        if (!matcher.matches() || (matcher.group(1).isEmpty() && matcher.group(2).isEmpty())) {
+            return null;
+        }
+        try {
+            Long start = matcher.group(1).isEmpty() ? null : Long.parseLong(matcher.group(1));
+            Long end = matcher.group(2).isEmpty() ? null : Long.parseLong(matcher.group(2));
+            if (start != null && end != null && end < start) {
+                return null;
+            }
+            return new ByteRange(start, end);
+        } catch (NumberFormatException e) {
+            // Numbers outside the supported long range follow the malformed-header policy.
+            return null;
         }
     }
 }
