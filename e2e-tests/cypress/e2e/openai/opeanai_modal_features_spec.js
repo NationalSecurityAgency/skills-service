@@ -27,6 +27,48 @@ import {
 
 describe('AI Features Tests', () => {
 
+    it('handles AI usage limits gracefully and allows a successful retry', () => {
+        const limitMessage = 'AI usage limit reached. Please try again later or contact your administrator.'
+        cy.intercept('GET', '/public/config', (req) => {
+            req.reply((res) => {
+                res.body.enableOpenAIIntegration = true
+                res.send(res.body)
+            })
+        })
+        cy.intercept({ method: 'POST', url: '/openai/chat', times: 1 }, {
+            statusCode: 429,
+            headers: { 'Content-Type': 'application/json', 'Retry-After': '1' },
+            body: { success: false, errorCode: 'BadParam', explanation: limitMessage },
+        })
+
+        cy.createProject(1)
+        cy.createSubject(1, 1)
+        cy.createSkill(1, 1, 1)
+        cy.visit('/administrator/projects/proj1/subjects/subj1/skills/skill1')
+        cy.get('[data-cy="editSkillButton_skill1"]').click()
+        cy.get('[data-cy="aiButton"]').click()
+        cy.get('[data-cy="aiMsg-0"]').contains(newDescWelcomeMsg).should('be.visible')
+
+        cy.get('[data-cy="instructionsInput"]').type('Learn chess{enter}')
+        cy.get('[data-cy="aiMsg-2"] [data-cy="finalSegment"]')
+            .should('be.visible').and('contain.text', limitMessage).and('not.contain.text', completedMsg)
+        cy.get('[data-cy="aiMsg-2"] [data-cy="generatedSegment"]').should('not.exist')
+        cy.get('[data-cy="useGenValueBtn-2"]').should('not.exist')
+        cy.get('[data-cy="addPrefixBtn"]').should('not.exist')
+        cy.get('[data-cy="instructionsInput"]').should('be.enabled').and('have.focus')
+        cy.get('[data-cy="sendAndStopBtn"]').should('be.disabled')
+
+        cy.get('[data-cy="instructionsInput"]').type('Learn chess')
+        cy.get('[data-cy="sendAndStopBtn"]').should('be.enabled').click()
+        cy.get('[data-cy="userMsg-3"]').should('contain.text', 'Learn chess')
+        cy.get('[data-cy="aiMsg-4"] [data-cy="generatedSegment"]')
+            .should('be.visible').and('contain.text', chessGenValue)
+        cy.get('[data-cy="aiMsg-4"] [data-cy="finalSegment"]')
+            .should('be.visible').and('contain.text', completedMsg)
+        cy.get('[data-cy="useGenValueBtn-4"]').should('be.enabled')
+        cy.get('[data-cy="instructionsInput"]').should('be.enabled').and('have.focus')
+    });
+
     it('handle if generation never starts and eventually times out', () => {
         cy.intercept('GET', '/public/config', (req) => {
             req.reply((res) => {
@@ -82,7 +124,8 @@ describe('AI Features Tests', () => {
             cy.get('[data-cy="aiMsg-2"] [data-cy="origSegment"]').contains(message)
         })
         cy.wait('@openaiStream', { timeout: 40000 })
-        cy.get('[data-cy="aiMsg-2"] [data-cy="finalSegment"]').contains(errMsg)
+        cy.get('[data-cy="aiMsg-2"] [data-cy="finalSegment"]')
+            .should('be.visible').and('contain.text', 'The AI provider timed out. Please try again.')
         cy.get('[data-cy="useGenValueBtn-2"]').should('not.exist')
         cy.get(`[data-cy="addPrefixBtn"]`).should('not.exist')
         cy.get('[data-cy="instructionsInput"]').should('have.focus')
@@ -259,6 +302,3 @@ describe('AI Features Tests', () => {
     });
 
 });
-
-
-

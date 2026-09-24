@@ -148,6 +148,7 @@ class OpenAIChatConfig {
                 .apiKey(openAiKey ?: 'NoKeyProvided')
                 .streamUsage(streamUsage)
                 .timeout(Duration.ofSeconds(timeoutInSecs))
+                .maxRetries(0)
                 .build()
         // Construct the model via its builder pattern
         OpenAiChatModel.Builder modelBuilder = OpenAiChatModel.builder().options(chatOptions)

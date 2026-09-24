@@ -84,9 +84,13 @@ class OpenAIService {
     @Autowired(required = false)
     OpenAiChatModel chatModel;
 
+    @Autowired
+    OpenAIUsageLimitsProperties usageLimits
+
     static class AvailableModels {
         List<AvailableModel> models
     }
+
     static class AvailableModel {
         String model
         Date created
@@ -94,7 +98,7 @@ class OpenAIService {
 
     AvailableModels getAvailableModels() {
         if (!openAiHost) {
-            throw new UnsupportedOperationException("ai support is not configured" )
+            throw new UnsupportedOperationException("ai support is not configured")
         }
 
         String url = String.join("/", openAiBaseUrl, modelsEndpoint)
@@ -118,6 +122,9 @@ class OpenAIService {
                         created: parsedModel.created ? new Date(parsedModel.created) : null
                 )
             }
+            if (usageLimits.allowedModels) {
+                models = models.findAll { usageLimits.allowedModels.contains(it.model) }
+            }
 
             return new AvailableModels(models: models)
         } catch (Exception e) {
@@ -127,32 +134,23 @@ class OpenAIService {
 
     Flux<String> streamChat(AiChatRequest genDescRequest) {
         if (!openAiHost) {
-            throw new UnsupportedOperationException("ai support is not configured" )
+            throw new UnsupportedOperationException("ai support is not configured")
         }
         if (!systemMsg) {
-            throw new UnsupportedOperationException("ai systemMsg is not configured" )
+            throw new UnsupportedOperationException("ai systemMsg is not configured")
         }
         if (!chatModel) {
-            throw new IllegalStateException("chatModel was not injected" )
+            throw new IllegalStateException("chatModel was not injected")
         }
         long startTime = System.currentTimeMillis()
-        boolean isFirstMessage = genDescRequest.messages.size() == 1
-        List<Message> messages = isFirstMessage ? [new SystemMessage(systemMsg)] : []
-        messages.addAll(genDescRequest.messages.collect { msg ->
-            if (msg.role == AiChatRequest.Role.User) {
-                return new UserMessage(msg.content)
-            } else if (msg.role == AiChatRequest.Role.Assistant) {
-                return new AssistantMessage(msg.content)
-            } else {
-                throw new IllegalArgumentException("Invalid role: " + msg.role)
-            }
-        })
+        List<Message> messages = createChatMessages(genDescRequest)
 
         Prompt prompt = new Prompt(
                 messages,
                 OpenAiChatOptions.builder()
                         .model(genDescRequest.model)
                         .temperature(genDescRequest.modelTemperature)
+                        .maxCompletionTokens(usageLimits.maxOutputTokens)
                         .build()
         )
         List<ChatResponse> collectedResponses = Collections.synchronizedList([] as List<ChatResponse>)
@@ -191,30 +189,34 @@ class OpenAIService {
                         log.warn("Failed to collect chat usage. Total runtime: [${totalRuntimeMs}]")
                     }
                 }
-            }.doOnError { Throwable t ->
-                if (t instanceof HttpClientErrorException) {
-                    log.error("OpenAI client error in streamChat. Model=[${genDescRequest.model}], Status=[${((HttpClientErrorException)t).statusCode.value()}]", t)
-                } else if (t instanceof HttpServerErrorException) {
-                    log.error("OpenAI server error in streamChat. Model=[${genDescRequest.model}], Status=[${((HttpServerErrorException)t).statusCode.value()}]", t)
-                } else {
-                    log.error("Error in streamChat. Model=[${genDescRequest.model}]", t)
-                }
             }
         } catch (Throwable e) {
-            log.error("Failed to call OpenAI for streaming chat. Model=[{}]", genDescRequest.model, e)
-            throw new SkillException("Failed to stream chat from OpenAI: ${e.message}", e)
+            throw e
         }
+    }
+
+    private List<Message> createChatMessages(AiChatRequest request) {
+        List<Message> messages = request.messages.size() == 1 ? [new SystemMessage(systemMsg)] : []
+        messages.addAll(request.messages.collect { msg ->
+            if (msg.role == AiChatRequest.Role.User) {
+                return new UserMessage(msg.content)
+            } else if (msg.role == AiChatRequest.Role.Assistant) {
+                return new AssistantMessage(msg.content)
+            }
+            throw new IllegalArgumentException('Invalid role: ' + msg.role)
+        })
+        return messages
     }
 
     TextInputAIGradingResult gradeTextInputQuizAnswer(String question, String correctAnswer, Integer minimumConfidenceLevel, String studentAnswer) {
         if (!openAiHost) {
-            throw new UnsupportedOperationException("ai support is not configured" )
+            throw new UnsupportedOperationException("ai support is not configured")
         }
         if (!gradingModel) {
-            throw new UnsupportedOperationException("ai grading model is not configured" )
+            throw new UnsupportedOperationException("ai grading model is not configured")
         }
         if (!chatModel) {
-            throw new IllegalStateException("chatModel was not injected" )
+            throw new IllegalStateException("chatModel was not injected")
         }
         String promptStr = textInputQuestionGradingMsg
                 ?.replace('{{ question }}', question)
@@ -243,7 +245,7 @@ class OpenAIService {
             log.error("Failed to call OpenAI for text input grading. Model=[{}]", gradingModel, e)
             throw new SkillException("Failed to grade text input answer from OpenAI: ${e.message}", e)
         }
-        
+
         List<Generation> genList = chatResponse.getResults()
         if (!genList) {
             throw new SkillException("Failed to get response from OpenAI")

@@ -22,6 +22,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.web.server.LocalServerPort
 import org.springframework.core.io.ClassPathResource
 import org.springframework.core.io.Resource
+import org.springframework.core.io.buffer.DefaultDataBufferFactory
 import org.springframework.http.*
 import org.springframework.http.client.reactive.ReactorClientHttpConnector
 import org.springframework.util.LinkedMultiValueMap
@@ -29,6 +30,7 @@ import org.springframework.util.MultiValueMap
 import org.springframework.util.ResourceUtils
 import org.springframework.web.client.RestTemplate
 import org.springframework.web.reactive.function.client.WebClient
+import org.springframework.web.reactive.function.BodyInserters
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
 import reactor.netty.http.client.HttpClient
@@ -137,6 +139,26 @@ class DefaultAiIntSpec extends DefaultIntSpec {
                     .block()
 
             return collectedResponses
+        }
+
+        ResponseEntity<String> exchange(Object request) {
+            return client.post().uri(chatUrl).accept(MediaType.TEXT_EVENT_STREAM)
+                    .bodyValue(request)
+                    .exchangeToMono { it.toEntity(String) }
+                    .block(Duration.ofSeconds(30))
+        }
+
+        Flux<String> stream(AiChatRequest request) {
+            return client.post().uri(chatUrl).accept(MediaType.TEXT_EVENT_STREAM)
+                    .bodyValue(request).retrieve().bodyToFlux(String)
+        }
+
+        ResponseEntity<String> exchangeRaw(String json, boolean chunked) {
+            def request = client.post().uri(chatUrl).accept(MediaType.TEXT_EVENT_STREAM)
+            byte[] bytes = json.getBytes(java.nio.charset.StandardCharsets.UTF_8)
+            def withBody = chunked ? request.body(BodyInserters.fromDataBuffers(
+                    Flux.just(new DefaultDataBufferFactory().wrap(bytes)))) : request.bodyValue(bytes)
+            return withBody.exchangeToMono { it.toEntity(String) }.block(Duration.ofSeconds(30))
         }
 
         private String getCookie() {
