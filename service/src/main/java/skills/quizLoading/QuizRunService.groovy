@@ -955,19 +955,27 @@ class QuizRunService {
                 isCorrect = status == UserQuizQuestionAttempt.QuizQuestionStatus.CORRECT
             } else if (quizQuestionDef.type == QuizQuestionType.FillInTheBlank) {
                 List<UserQuizAnswerAttempt> attempt = quizAttemptAnswerRepo.findAllByUserQuizAttemptRefIdAndQuizAnswerDefinitionRefIdIn(quizAttemptId, selectedIds.toSet())
+                Set<Integer> answeredIds = attempt.collect { it.quizAnswerDefinitionRefId }.toSet()
+                boolean hasMissingAnswers = quizAnswerDefs.any { !answeredIds.contains(it.id) }
+                boolean hasBlankAnswers = attempt.any { StringUtils.isBlank(it.answer) }
+                if (hasMissingAnswers || hasBlankAnswers) {
+                    throw new SkillQuizException("Can not submit blank entries for Fill in the Blank questions", quizId, ErrorCode.BadParam)
+                }
+
                 if(attempt) {
                     attempt.each{ answerAttempt ->
-                        if(answerAttempt.answer.trim() == "") {
-                            throw new SkillQuizException("Can not submit blank entries for Fill in the Blank questions", quizId, ErrorCode.BadParam)
-                        }
                         QuizAnswerDef questionToCompare = quizAnswerDefs.find{it.id == answerAttempt.quizAnswerDefinitionRefId }
                         if(questionToCompare) {
-                            String[] possibleAnswers = questionToCompare.answer.split(/;/)
+                            String[] possibleAnswers = InputSanitizer.unsanitizeEscapedHtml(questionToCompare.answer).split(/;/)
                             answerAttempt.status = possibleAnswers.find{ it.trim().toLowerCase() == answerAttempt.answer.trim().toLowerCase() } ? UserQuizAnswerAttempt.QuizAnswerStatus.CORRECT :  UserQuizAnswerAttempt.QuizAnswerStatus.WRONG
                         } else {
                             answerAttempt.status =  UserQuizAnswerAttempt.QuizAnswerStatus.WRONG
                         }
                     }
+                    correctIds = attempt
+                            .findAll { it.status == UserQuizAnswerAttempt.QuizAnswerStatus.CORRECT }
+                            .collect { it.quizAnswerDefinitionRefId }
+                            .sort()
                     status = attempt.find{answer -> answer.status == UserQuizAnswerAttempt.QuizAnswerStatus.WRONG } ? UserQuizQuestionAttempt.QuizQuestionStatus.WRONG : UserQuizQuestionAttempt.QuizQuestionStatus.CORRECT
                 } else {
                     status = UserQuizQuestionAttempt.QuizQuestionStatus.WRONG

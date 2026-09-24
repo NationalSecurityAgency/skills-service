@@ -164,33 +164,53 @@ const selectionChanged = (currentAnswer) => {
   });
 }
 
-const answerTimeout = ref([]);
-const fillInTheBlankChangedDebounced = (textInput, answerId) => {
-  if(answerOptions.value[answerId]) {
-    const currentAnswer = {
-      questionId: props.q.id,
-      questionType: props.q.questionType,
-      changedAnswerId: answerOptions.value[answerId].id,
-      answerText: textInput,
-    }
-
-    const reportAnswerPromise = new Promise((resolve) => {
-      if(answerTimeout.value[answerId]) {
-        clearTimeout(answerTimeout.value[answerId]);
-      }
-
-      answerTimeout.value[answerId] = setTimeout(async () => {
-        await reportAnswer(currentAnswer)
-        resolve()
-      }, appConfig.formFieldDebounceInMs)
-    })
-
-    emit('fill-in-the-blank-changed', {
-      ...currentAnswer,
-      reportAnswerPromise,
-    });
+const blankSaveStates = new Map()
+const fillInTheBlankChangedDebounced = (textInput, answerIndex) => {
+  const answer = answerOptions.value[answerIndex]
+  if (!answer || isLoading.value || props.quizComplete) {
+    return
   }
 
+  const currentAnswer = {
+    questionId: props.q.id,
+    questionType: props.q.questionType,
+    changedAnswerId: answer.id,
+    answerText: textInput,
+  }
+  let state = blankSaveStates.get(answer.id)
+  if (!state) {
+    state = { timer: null, pending: null, inFlight: Promise.resolve() }
+    blankSaveStates.set(answer.id, state)
+  }
+  clearTimeout(state.timer)
+
+  if (!state.pending) {
+    const pending = {}
+    pending.promise = new Promise((resolve, reject) => {
+      pending.resolve = resolve
+      pending.reject = reject
+    })
+    // Observe early failures while preserving rejection for the parent's await.
+    pending.promise.catch(() => {})
+    state.pending = pending
+  }
+
+  const pending = state.pending
+  pending.answer = currentAnswer
+  state.timer = setTimeout(() => {
+    state.timer = null
+    state.pending = null
+    const save = () => reportAnswer(pending.answer)
+    // A later edit waits for an in-flight save, and can retry after a failure.
+    const request = state.inFlight.then(save, save)
+    state.inFlight = request
+    request.then(pending.resolve, pending.reject)
+  }, appConfig.formFieldDebounceInMs)
+
+  emit('fill-in-the-blank-changed', {
+    ...currentAnswer,
+    reportAnswerPromise: pending.promise,
+  })
 }
 
 const ratingChanged = (value) => {

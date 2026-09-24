@@ -1322,7 +1322,19 @@ class QuizDefService {
             throw new SkillQuizException("Answer Hint: ${customValidationResult.msg}", quizId, ErrorCode.BadParam)
         }
 
-        if (questionDefRequest.questionType != QuizQuestionType.TextInput && questionDefRequest.questionType != QuizQuestionType.Rating && questionDefRequest.questionType != QuizQuestionType.FillInTheBlank) {
+        if (questionDefRequest.questionType == QuizQuestionType.FillInTheBlank) {
+            QuizValidator.isNotNull(questionDefRequest.answers, "answers", quizId)
+            QuizValidator.isTrue(!questionDefRequest.answers.isEmpty(), "Must have at least 1 answer", quizId)
+            questionDefRequest.answers.each { answer ->
+                QuizValidator.isNotNull(answer, "answers entry", quizId)
+                QuizValidator.isNotBlank(answer.answer, "answers.answer", quizId, true)
+                propsBasedValidator.quizValidationMaxStrLength(PublicProps.UiProp.maxQuizTextAnswerLength, "Answer", answer.answer, quizId)
+
+                String normalizedAnswer = InputSanitizer.unsanitizeEscapedHtml(InputSanitizer.sanitize(answer.answer))
+                QuizValidator.isTrue(normalizedAnswer.split(';', -1).every { it.trim() },
+                        "Each acceptable answer option must contain text", quizId)
+            }
+        } else if (questionDefRequest.questionType != QuizQuestionType.TextInput && questionDefRequest.questionType != QuizQuestionType.Rating) {
             QuizValidator.isNotNull(questionDefRequest.answers, "answers", quizId)
             QuizValidator.isTrue(questionDefRequest.answers.size() >= 2, "Must have at least 2 answers", quizId)
             questionDefRequest.answers.each {

@@ -74,7 +74,8 @@ const isCompleting = ref(false);
 const quizInfo = ref({});
 const quizResult = ref(null);
 const quizAttemptId = ref(null);
-const reportAnswerPromises = ref([]);
+const reportAnswerPromises = ref({});
+const saveError = ref('');
 const splashScreen = ref({
   show: false,
 });
@@ -404,7 +405,8 @@ const initializeFormData = (copy) => {
 const updateSelectedAnswers = (questionSelectedAnswer) => {
   isAttemptAlreadyInProgress.value = true;
   if (questionSelectedAnswer.reportAnswerPromise) {
-    reportAnswerPromises.value[questionSelectedAnswer.questionId] = questionSelectedAnswer.reportAnswerPromise;
+    const key = QuestionType.isFillInTheBlank(questionSelectedAnswer.questionType) ? `answer:${questionSelectedAnswer.changedAnswerId}` : `question:${questionSelectedAnswer.questionId}`
+    reportAnswerPromises.value[key] = questionSelectedAnswer.reportAnswerPromise;
   }
 }
 const updateMatchedAnswer = (matchedAnswer) => {
@@ -417,27 +419,33 @@ const completeTestRun = () => {
   isAttemptAlreadyInProgress.value = true;
   submitTestRun()
 }
+const handleSaveError = (error) => {
+  saveError.value = error?.response?.data?.explanation || 'Unable to save your quiz. Please review your answers and try again.'
+  announcer.polite(saveError.value)
+}
 const submitTestRun = handleSubmit((values) => {
   isCompleting.value = true;
+  saveError.value = '';
   const existingPromises = Object.values(reportAnswerPromises.value)
-  Promise.all(existingPromises)
+  return Promise.all(existingPromises)
+    .then(() => reportTestRunToBackend())
     .then(() => {
-      reportTestRunToBackend()
-        .finally(() => {
-          destroyDateTimer();
-          isCompleting.value = false;
-          if (!isSurveyType.value) {
-            nextTick(() => {
-              const element = document.getElementById('quizRunCompletionSummary');
-              element.scrollIntoView({ behavior: 'smooth' });
-            });
-          }
-          let announceMsg = `Completed ${quizInfo.value.quizType}`;
-          if (!isSurveyType.value) {
-            announceMsg = `${announceMsg}. ${!quizResult.value.gradedRes.passed ? 'Failed' : 'Successfully passed'} quiz.`;
-          }
-          announcer.polite(announceMsg);
+      destroyDateTimer();
+      if (!isSurveyType.value) {
+        nextTick(() => {
+          const element = document.getElementById('quizRunCompletionSummary');
+          element?.scrollIntoView({ behavior: 'smooth' });
         });
+      }
+      let announceMsg = `Completed ${quizInfo.value.quizType}`;
+      if (!isSurveyType.value) {
+        announceMsg = `${announceMsg}. ${!quizResult.value.gradedRes.passed ? 'Failed' : 'Successfully passed'} quiz.`;
+      }
+      announcer.polite(announceMsg);
+    })
+    .catch(handleSaveError)
+    .finally(() => {
+      isCompleting.value = false;
     });
 })
 const reportTestRunToBackend = () => {
@@ -488,10 +496,14 @@ const cancelQuizAttempt = () => {
 }
 const saveAndCloseThisRun = () => {
   isCompleting.value = true;
-  const existingPromises = Object.values(reportAnswerPromises)
-  Promise.all(existingPromises)
+  saveError.value = '';
+  const existingPromises = Object.values(reportAnswerPromises.value)
+  return Promise.all(existingPromises)
       .then(() => {
         emit('cancelled');
+      })
+      .catch(handleSaveError)
+      .finally(() => {
         isCompleting.value = false;
       });
 }
@@ -607,6 +619,7 @@ const onResize = (newWidth) => {
           </SkillsOverlay>
 
           <QuizRunValidationWarnings v-if="!meta.valid && meta.touched && !quizResult?.gradedRes?.needsGrading" :errors-to-show="errorsToShow" />
+          <Message v-if="saveError" severity="error" :closable="false" data-cy="quizSaveError">{{ saveError }}</Message>
 
           <div v-if="!quizResult" class="text-left mt-8 flex flex-wrap">
             <SkillsOverlay :show="isCompleting" opacity="0.6">
