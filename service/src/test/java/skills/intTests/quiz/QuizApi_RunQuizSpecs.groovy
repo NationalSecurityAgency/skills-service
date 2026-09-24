@@ -1258,6 +1258,87 @@ class QuizApi_RunQuizSpecs extends DefaultIntSpec {
         ]
     }
 
+    def "fill in the blank grades HTML-escaped definitions: #configuredAnswer with response #submittedAnswer"() {
+        def quiz = QuizDefFactory.createQuiz(1)
+        skillsService.createQuizDef(quiz)
+        def question = QuizDefFactory.createFillInTheBlankQuestion(1, 1, 1)
+        question.answers[0].answer = configuredAnswer
+        skillsService.createQuizQuestionDef(question)
+
+        when:
+        def quizAttempt = skillsService.startQuizAttempt(quiz.quizId).body
+        skillsService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizAttempt.questions[0].answerOptions[0].id,
+                [answerText: submittedAnswer])
+        def gradedQuizAttempt = skillsService.completeQuizAttempt(quiz.quizId, quizAttempt.id).body
+        def quizHistoryRes = skillsService.getQuizAttemptResult(quiz.quizId, quizAttempt.id)
+
+        then:
+        gradedQuizAttempt.passed == expectedCorrect
+        gradedQuizAttempt.needsGrading == false
+        gradedQuizAttempt.numQuestionsGotWrong == (expectedCorrect ? 0 : 1)
+        quizHistoryRes.questions.size() == 1
+        quizHistoryRes.questions[0].isCorrect == expectedCorrect
+        quizHistoryRes.questions[0].answers.answer == [
+                [answerText: submittedAnswer.trim(), isCorrect: expectedCorrect ? 'CORRECT' : 'WRONG']
+        ]
+
+        where:
+        configuredAnswer       | submittedAnswer | expectedCorrect
+        'A & B'                | 'A & B'         | true
+        '1 < 2'                | '1 < 2'         | true
+        '3 > 2'                | '3 > 2'         | true
+        'A & B; A and B'       | 'A & B'         | true
+        'A & B; A and B'       | 'A and B'       | true
+        '1 < 2; 3 > 2'         | '1 < 2'         | true
+        '1 < 2; 3 > 2'         | '3 > 2'         | true
+        '  A & B ; A and B  '  | '  a & b  '     | true
+        '  A & B ; A and B  '  | '  a AND b  '   | true
+        'A & B'                | 'B'             | false
+        '1 < 2'                | '2'             | false
+        '3 > 2'                | '2'             | false
+        'A & B; A and B'       | 'A & C'         | false
+    }
+
+    def "fill in the blank returns correct answer ids from grading: #correctIndexes"() {
+        def quiz = QuizDefFactory.createQuiz(1)
+        skillsService.createQuizDef(quiz)
+        skillsService.saveQuizSettings(quiz.quizId, [
+                [setting: QuizSettings.AlwaysShowCorrectAnswers.setting, value: 'true'],
+        ])
+        def question = QuizDefFactory.createFillInTheBlankQuestion(1, 1, 3)
+        // These flags deliberately differ from the submitted answers' correctness.
+        question.answers[0].isCorrect = false
+        question.answers[1].isCorrect = true
+        question.answers[2].isCorrect = false
+        skillsService.createQuizQuestionDef(question)
+
+        when:
+        def quizAttempt = skillsService.startQuizAttempt(quiz.quizId).body
+        def answerOptions = quizAttempt.questions[0].answerOptions
+        answerOptions.eachWithIndex { answer, index ->
+            String answerText = correctIndexes.contains(index) ? "Answer #${index + 1}" : 'Incorrect answer'
+            skillsService.reportQuizAnswer(quiz.quizId, quizAttempt.id, answer.id, [answerText: answerText])
+        }
+        def gradedQuizAttempt = skillsService.completeQuizAttempt(quiz.quizId, quizAttempt.id).body
+
+        then:
+        gradedQuizAttempt.passed == expectedCorrect
+        gradedQuizAttempt.numQuestionsGotWrong == (expectedCorrect ? 0 : 1)
+        gradedQuizAttempt.gradedQuestions.size() == 1
+        def gradedQuestion = gradedQuizAttempt.gradedQuestions[0]
+        gradedQuestion.questionId == quizAttempt.questions[0].id
+        gradedQuestion.isCorrect == expectedCorrect
+        gradedQuestion.status == (expectedCorrect ? 'CORRECT' : 'WRONG')
+        gradedQuestion.selectedAnswerIds.sort() == answerOptions.id.sort()
+        gradedQuestion.correctAnswerIds == correctIndexes.collect { answerOptions[it].id }.sort()
+
+        where:
+        correctIndexes | expectedCorrect
+        [0, 2]         | false
+        []             | false
+        [0, 1, 2]      | true
+    }
+
     def "can not complete a quiz with blank fill in the blank answers"() {
         def quiz = QuizDefFactory.createQuiz(1, "Fancy Description")
         skillsService.createQuizDef(quiz)

@@ -947,6 +947,81 @@ class QuizDefManagementSpecs extends DefaultIntSpec {
     }
 
 
+    def "FillInTheBlank rejects invalid answers on create and update: #isUpdate, case #iterationIndex"() {
+        def quiz = QuizDefFactory.createQuiz(1)
+        skillsService.createQuizDef(quiz)
+        def question = QuizDefFactory.createFillInTheBlankQuestion(1, 1, 1)
+        def original = isUpdate ? skillsService.createQuizQuestionDef(question).body : null
+        if (isUpdate) {
+            question.id = original.id
+            question.question = 'This update must not be saved'
+        }
+        question.answers = invalidAnswers
+
+        when:
+        if (isUpdate) {
+            skillsService.updateQuizQuestionDef(question)
+        } else {
+            skillsService.createQuizQuestionDef(question)
+        }
+
+        then:
+        SkillsClientException ex = thrown(SkillsClientException)
+        ex.httpStatus == HttpStatus.BAD_REQUEST
+        def questions = skillsService.getQuizQuestionDefs(quiz.quizId).questions
+        questions.size() == (isUpdate ? 1 : 0)
+        if (isUpdate) {
+            assert questions[0].question == original.question
+            assert questions[0].answers == original.answers
+        }
+
+        where:
+        [isUpdate, invalidAnswers] << [[false, true], [
+                null,
+                [],
+                [null],
+                [[answer: null, isCorrect: true]],
+                [[answer: '', isCorrect: true]],
+                [[answer: '   ', isCorrect: true]],
+                [[answer: '<script>alert(1)</script>', isCorrect: true]],
+                [[answer: ';;', isCorrect: true]],
+                [[answer: 'Paris;;London', isCorrect: true]],
+                [[answer: 'Paris;', isCorrect: true]],
+                [[answer: ';Paris', isCorrect: true]],
+                [[answer: 'Paris;   ;London', isCorrect: true]],
+                [[answer: 'Paris;<script>alert(1)</script>', isCorrect: true]],
+                [[answer: 'a' * 2001, isCorrect: true]],
+        ]].combinations()
+    }
+
+    def "FillInTheBlank accepts valid answers on create and update: case #iterationIndex"() {
+        def quiz = QuizDefFactory.createQuiz(1)
+        skillsService.createQuizDef(quiz)
+        def question = QuizDefFactory.createFillInTheBlankQuestion(1, 1, 1)
+        question.answers[0].answer = answerText
+
+        when:
+        def created = skillsService.createQuizQuestionDef(question).body
+
+        then:
+        created.answers.size() == 1
+        created.answers[0].answer == answerText
+
+        when:
+        created.quizId = quiz.quizId
+        created.question = 'Updated question ___'
+        skillsService.updateQuizQuestionDef(created)
+        def updated = skillsService.getQuizQuestionDef(quiz.quizId, created.id)
+
+        then:
+        updated.question == created.question
+        updated.answers.size() == 1
+        updated.answers[0].answer == answerText
+
+        where:
+        answerText << ['Paris', 'Paris;London', 'A & B;A and B', '1 < 2;3 > 2', 'a' * 2000]
+    }
+
     def "FillInTheBlank question choices are sanitized"() {
         def quiz = QuizDefFactory.createQuiz(1)
         skillsService.createQuizDef(quiz)
@@ -969,4 +1044,3 @@ class QuizDefManagementSpecs extends DefaultIntSpec {
         qDefs.questions.answers.answer == [["sanitized  answer1 ampersand & less than < greater than >", "sanitized  answer2 ampersand & less than < greater than >"]]
     }
 }
-

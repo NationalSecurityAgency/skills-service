@@ -236,6 +236,40 @@ describe('Skills Display Run Quizzes With Fill In the Blank Questions', () => {
         cy.get('[data-cy="quizCompletion"]').contains('Congrats!! You just earned 150 points for Very Great Skill 1 skill by passing the quiz.')
 
     });
-});
+    it('waits for every blank to save before completing the quiz', () => {
+        cy.createQuizDef(1);
+        cy.createFillInTheBlankQuestionDef(1, 1);
+        cy.createProject(1);
+        cy.createSubject(1, 1);
+        cy.createSkill(1, 1, 1, { selfReportingType: 'Quiz', quizId: 'quiz1', pointIncrement: '150', numPerformToCompletion: 1 });
+        cy.cdVisit('/subjects/subj1/skills/skill1/quizzes/quiz1');
+        cy.get('[data-cy="startQuizAttempt"]').click();
 
+        let releaseFirstAnswer;
+        const firstAnswerReady = new Cypress.Promise((resolve) => { releaseFirstAnswer = resolve; });
+        let completionRequested = false;
+        cy.intercept('POST', '/api/quizzes/quiz1/attempt/*/answers/*', (req) => {
+            if (req.body.answerText === 'Question 1 - First Answer') {
+                return firstAnswerReady.then(() => req.continue());
+            }
+            if (req.body.answerText === 'Question 1 - Third Answer') {
+                req.alias = 'lastBlankSaved';
+            }
+        });
+        cy.intercept('POST', '/api/quizzes/quiz1/attempt/*/complete', () => {
+            completionRequested = true;
+        });
+        cy.get('[data-cy="questions[0].answerTextArray[0]"]').type('Question 1 - First Answer');
+        cy.get('[data-cy="questions[0].answerTextArray[1]"]').type('Question 1 - Second Answer');
+        cy.get('[data-cy="questions[0].answerTextArray[2]"]').type('Question 1 - Third Answer');
+        cy.wait('@lastBlankSaved');
+        cy.get('[data-cy="completeQuizBtn"]').click();
+        cy.get('[data-cy="completeQuizBtn"]').should('be.disabled').then(() => {
+            expect(completionRequested).to.equal(false);
+            releaseFirstAnswer();
+        });
+        cy.get('[data-cy="quizCompletion"]').should('contain.text', 'Congrats!!');
+    });
+
+});
 
