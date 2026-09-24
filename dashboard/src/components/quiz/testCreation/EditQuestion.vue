@@ -50,7 +50,6 @@ const answersRef = ref(null)
 const showHint = ref(false)
 const editTypeDisabled = ref(false);
 const quizDefs = ref([]);
-const selectedQuiz = ref(null);
 
 const modalTitle = computed(() => {
   if( props.isEdit ) {
@@ -77,14 +76,15 @@ onMounted(() => {
       })
     }
     if (props.isCopy) {
+      loadingComponent.value = true;
       QuizService.getQuizDefs().then((quizzes) => {
-        quizDefs.value = quizzes.map((quiz) =>  {
+        quizDefs.value = quizzes.filter((quiz) => quiz.type === props.questionDef.quizType).map((quiz) =>  {
           return {
             label: quiz.name,
             id: quiz.quizId
           };
         });
-        selectedQuiz.value = props.questionDef.quizId
+        loadingComponent.value = false;
       })
     }
   }
@@ -290,6 +290,7 @@ const noRepeatAnswers = (value) => {
 }
 
 const schema = object({
+  'selectedQuiz': props.isCopy ? string().required().label('Copy Question To') : string().nullable(),
   'questionType': object()
       .required()
       .label('Type'),
@@ -322,6 +323,7 @@ const schema = object({
   ,
 })
 const initialQuestionData = {
+  selectedQuiz: props.isCopy ? quizId.value : undefined,
   questionType: props.isEdit || props.isCopy ? questionType.value.options.find((o) => o.id === props.questionDef.questionType) : questionType.value.selectedType,
   question: props.questionDef.question || '',
   answerHint: props.questionDef.answerHint || '',
@@ -332,7 +334,7 @@ const initialQuestionData = {
 const close = () => { model.value = false }
 
 const saveQuestionDef = (values) => {
-  const { question, answerHint, answers, currentScaleValue } = values
+  const { question, answerHint, answers, currentScaleValue, selectedQuiz } = values
   let processedAnswers = answers
   let { questionType : { id : questionType } } = values
 
@@ -372,10 +374,10 @@ const saveQuestionDef = (values) => {
           }
         });
   } else if (props.isCopy) {
-    return QuizService.saveQuizQuestionDef(selectedQuiz.value, questionToSave)
+    return QuizService.saveQuizQuestionDef(selectedQuiz, questionToSave)
         .then((updatedQuizQuestionDef) => {
-          updatedQuizQuestionDef.quizId = selectedQuiz.value
-          if(selectedQuiz.value !== props.questionDef.quizId) {
+          updatedQuizQuestionDef.quizId = selectedQuiz
+          if(selectedQuiz !== props.questionDef.quizId) {
             updatedQuizQuestionDef.isCopyToAnotherQuiz = true
           }
           return {
@@ -481,9 +483,10 @@ const startAiAssistant = () => {
 
       <div class="mb-2 flex flex-col gap-1" v-if="isCopy">
         <span class="font-bold text-primary">Copy Question To:</span>
-        <Select
-            v-model="selectedQuiz"
+        <SkillsDropDown
+            name="selectedQuiz"
             :options="quizDefs"
+            aria-label="Copy Question To"
             optionLabel="label"
             optionValue="id"
             data-cy="quizzes-to-copy" />
