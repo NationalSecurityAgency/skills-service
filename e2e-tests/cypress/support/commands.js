@@ -710,6 +710,25 @@ Cypress.Commands.add("createSurveyMultipleChoiceQuestionDef", (quizNum = 1, ques
     }, overrideProps));
 });
 
+
+Cypress.Commands.add("createFillInTheBlankQuestionDef", (quizNum = 1, questionNum = 1, overrideProps = {}) => {
+    cy.request('POST', `/admin/quiz-definitions/quiz${quizNum}/create-question`, Object.assign({
+        quizId: `quizId${quizNum}`,
+        question: `This is a question # ${questionNum}`,
+        questionType: 'FillInTheBlank',
+        answers: [{
+            answer: `Question ${questionNum} - First Answer`,
+            isCorrect: false,
+        }, {
+            answer: `Question ${questionNum} - Second Answer`,
+            isCorrect: false,
+        }, {
+            answer: `Question ${questionNum} - Third Answer`,
+            isCorrect: false,
+        }]
+    }, overrideProps));
+});
+
 Cypress.Commands.add("createTextInputQuestionDef", (quizNum = 1, questionNum = 1, overrideProps = {}) => {
     cy.request('POST', `/admin/quiz-definitions/quiz${quizNum}/create-question`, Object.assign({
         quizId: `quizId${quizNum}`,

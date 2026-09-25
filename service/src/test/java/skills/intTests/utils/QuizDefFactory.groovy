@@ -69,6 +69,26 @@ class QuizDefFactory {
         ]
     }
 
+    static createFillInTheBlankQuestion(int quizNumber = 1, int questionsNumber = 1, int numberOfAnswers = 2) {
+        String question = "This is questions #${questionsNumber}".toString()
+        String answerHint = "This is a hint for question #${questionsNumber}".toString()
+
+        List answers = numberOfAnswers > 0 ? (1..numberOfAnswers).collect {
+            return [
+                    answer: "Answer #${it}".toString(),
+                    isCorrect: true,
+            ]
+        } : []
+
+        return [
+                quizId  : getDefaultQuizId(quizNumber),
+                question: question,
+                answerHint: answerHint,
+                questionType: QuizQuestionType.FillInTheBlank.toString(),
+                answers: answers,
+        ]
+    }
+
     static createChoiceQuestion(int quizNumber = 1, int questionsNumber = 1, int numberOfAnswers = 2, QuizQuestionType questionType = QuizQuestionType.SingleChoice, QuizType quizType = QuizType.Quiz) {
         String question = "This is questions #${questionsNumber}".toString()
         String answerHint = "This is a hint for question #${questionsNumber}".toString()

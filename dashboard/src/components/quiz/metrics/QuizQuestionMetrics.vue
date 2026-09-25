@@ -126,6 +126,9 @@ const isMatching = computed(() => {
 const isRating = computed(() => {
   return props.q.questionType === 'Rating'
 })
+const isFillInTheBlank = computed(() => {
+  return props.q.questionType === 'FillInTheBlank'
+})
 
 const questionCorrectChartRef = ref()
 watch(() => responsive.sm.value, (newValue) => {
@@ -143,7 +146,20 @@ watch(() => responsive.sm.value, (newValue) => {
 
 const tableFields = []
 
-if(!isMatching.value) {
+if(isFillInTheBlank.value) {
+  tableFields.push({
+    key: 'answer',
+    label: 'Answer',
+    sortable: false,
+    imageClass: `fas fa-check-double ${colors.getTextClass(0)}`
+  })
+  tableFields.push({
+    key: 'numAnsweredCorrect',
+    label: '# of Times Correct',
+    sortable: false,
+    imageClass: `fas fa-user-check ${colors.getTextClass(1)}`
+  })
+} else if(!isMatching.value) {
   tableFields.push({
     key: 'answer',
     label: 'Answer',
@@ -200,8 +216,8 @@ onMounted(() => {
   answers.value = props.q.answers.map((a) => ({
     ...a,
     selected: a.selected ? a.selected : false,
-    percent: (totalNumUsers > 0 ? Math.trunc(((isMatching.value ? a.numAnsweredCorrect : a.numAnswered) / totalNumUsers) * 100) : 0),
-    percentWrong: (totalNumUsers > 0 ? Math.trunc(((isMatching.value ? a.numAnsweredWrong : a.numAnswered) / totalNumUsers) * 100) : 0),
+    percent: (totalNumUsers > 0 ? Math.trunc(((isMatching.value || isFillInTheBlank.value ? a.numAnsweredCorrect : a.numAnswered) / totalNumUsers) * 100) : 0),
+    percentWrong: (totalNumUsers > 0 ? Math.trunc(((isMatching.value || isFillInTheBlank.value ? a.numAnsweredWrong : a.numAnswered) / totalNumUsers) * 100) : 0),
     multiPartAnswer: a.multiPartAnswer ? a.multiPartAnswer : null
   }))
   if (isRating.value) {
@@ -296,7 +312,7 @@ const removeExpanderClass = (rowData) => {
         </template>
         <template #body="slotProps">
           <div v-if="slotProps.field === 'answer'" :data-cy="`row${slotProps.index}-colAnswer`">
-            <CheckSelector v-if="!isSurvey" v-model="slotProps.data.isCorrect" :read-only="true" font-size="1.5rem"
+            <CheckSelector v-if="!isSurvey && !isFillInTheBlank" v-model="slotProps.data.isCorrect" :read-only="true" font-size="1.5rem"
                            :data-cy="`checkbox-${slotProps.data.isCorrect}`" />
             {{ slotProps.data[col.key] }}
           </div>
@@ -319,6 +335,7 @@ const removeExpanderClass = (rowData) => {
       <template #expansion="slotProps">
         <QuizAnswerHistory :answer-def-id="slotProps.data.id"
                            :is-survey="isSurvey"
+                           :question-type="q.questionType"
                            :data-cy="`row${slotProps.index}-answerHistory`"
                            :dateRange="dateRange"
                            class="mb-6" />
@@ -332,6 +349,10 @@ const removeExpanderClass = (rowData) => {
 
     <div v-if="!isSurvey && isMatching" class="bg-surface-100 dark:bg-surface-700 p-2 text-sm" data-cy="matchingQuestionWarning">
       *** All matches must be correct for the question to be counted as <span class="text-primary uppercase">correct</span> ***
+    </div>
+
+    <div v-if="!isSurvey && isFillInTheBlank" class="bg-surface-100 dark:bg-surface-700 p-2 text-sm" data-cy="fillInTheBlankQuestionWarning">
+      *** All answers must be correct for the question to be counted as <span class="text-primary uppercase">correct</span> ***
     </div>
 
     <QuizAnswerHistory v-if="isTextInput || isMatching"

@@ -74,7 +74,8 @@ const isCompleting = ref(false);
 const quizInfo = ref({});
 const quizResult = ref(null);
 const quizAttemptId = ref(null);
-const reportAnswerPromises = ref([]);
+const reportAnswerPromises = ref({});
+const saveError = ref('');
 const splashScreen = ref({
   show: false,
 });
@@ -95,6 +96,10 @@ const ratingSelected = (value) => {
 }
 const getQuestionNumFromPath = (path) => {
   return Number(path.split('[').pop().split(']')[0]) + 1;
+}
+const allBlanksFilled = (value) => {
+  const unansweredQuestions = value.filter((q) => q.trim() === '')
+  return unansweredQuestions.length === 0;
 }
 
 const validateFunCache = new Map()
@@ -167,6 +172,14 @@ const schema = object({
                       .test('customAnswerValidator',"", async (value, context) => {
                         return await createValidateAnswerFn(value, context)
                       }),
+                }),
+            'answerTextArray': array()
+                .when('questionType', {
+                  is:  QuestionType.FillInTheBlank,
+                  then: (sch) => sch
+                      .required()
+                      .test('mustBeFilledIn', 'All blanks must be filled in', (value) => allBlanksFilled(value))
+                      .label('Answers')
                 }),
             'answerRating': number()
                 .when('questionType', {
@@ -349,6 +362,13 @@ const startQuizAttempt = () => {
               // eslint-disable-next-line no-param-reassign
               answerOptions[0].answerText = enteredTextObj.answerText;
             }
+          } else if (enteredText && q.questionType === QuestionType.FillInTheBlank) {
+            enteredText.map((answer) => {
+              let currentAnswer = answerOptions.find((a) => a.id === answer.answerId);
+              if(currentAnswer) {
+                currentAnswer.answerOption = answer.answerText;
+              }
+            })
           } else if (enteredText && q.questionType === QuestionType.Matching) {
             enteredText.map((existingAnswer) => {
               let selectedAnswer = answerOptions.find((it) => it.id === existingAnswer.answerId)
@@ -370,11 +390,13 @@ const startQuizAttempt = () => {
 const initializeFormData = (copy) => {
   const formQuestions = copy.questions.map((q) => {
     const answerRating = q.questionType === QuestionType.Rating ? q.answerOptions.find((a) => a.selected) : 0
+
     return {
       questionType: q.questionType,
       quizAnswers: q.answerOptions.map((a) => ({ ...a, selected: a.selected ? a.selected : false })),
       answerText: q.questionType === QuestionType.TextInput ? (q.answerOptions[0]?.answerText || '') : '',
       answerRating: answerRating ? Number(answerRating.answerOption) : 0,
+      answerTextArray: q.answerOptions.map((a) => a.answerOption),
     }
   })
   checkIfAnswerChangedForValidation.reset()
@@ -383,39 +405,47 @@ const initializeFormData = (copy) => {
 const updateSelectedAnswers = (questionSelectedAnswer) => {
   isAttemptAlreadyInProgress.value = true;
   if (questionSelectedAnswer.reportAnswerPromise) {
-    reportAnswerPromises.value.push(questionSelectedAnswer.reportAnswerPromise);
+    const key = QuestionType.isFillInTheBlank(questionSelectedAnswer.questionType) ? `answer:${questionSelectedAnswer.changedAnswerId}` : `question:${questionSelectedAnswer.questionId}`
+    reportAnswerPromises.value[key] = questionSelectedAnswer.reportAnswerPromise;
   }
 }
 const updateMatchedAnswer = (matchedAnswer) => {
   isAttemptAlreadyInProgress.value = true;
   if (matchedAnswer.reportAnswerPromise) {
-    reportAnswerPromises.value.push(matchedAnswer.reportAnswerPromise);
+    reportAnswerPromises.value[matchedAnswer.questionId] = matchedAnswer.reportAnswerPromise;
   }
 }
 const completeTestRun = () => {
   isAttemptAlreadyInProgress.value = true;
   submitTestRun()
 }
+const handleSaveError = (error) => {
+  saveError.value = error?.response?.data?.explanation || 'Unable to save your quiz. Please review your answers and try again.'
+  announcer.polite(saveError.value)
+}
 const submitTestRun = handleSubmit((values) => {
   isCompleting.value = true;
-  Promise.all(reportAnswerPromises.value)
+  saveError.value = '';
+  const existingPromises = Object.values(reportAnswerPromises.value)
+  return Promise.all(existingPromises)
+    .then(() => reportTestRunToBackend())
     .then(() => {
-      reportTestRunToBackend()
-        .finally(() => {
-          destroyDateTimer();
-          isCompleting.value = false;
-          if (!isSurveyType.value) {
-            nextTick(() => {
-              const element = document.getElementById('quizRunCompletionSummary');
-              element.scrollIntoView({ behavior: 'smooth' });
-            });
-          }
-          let announceMsg = `Completed ${quizInfo.value.quizType}`;
-          if (!isSurveyType.value) {
-            announceMsg = `${announceMsg}. ${!quizResult.value.gradedRes.passed ? 'Failed' : 'Successfully passed'} quiz.`;
-          }
-          announcer.polite(announceMsg);
+      destroyDateTimer();
+      if (!isSurveyType.value) {
+        nextTick(() => {
+          const element = document.getElementById('quizRunCompletionSummary');
+          element?.scrollIntoView({ behavior: 'smooth' });
         });
+      }
+      let announceMsg = `Completed ${quizInfo.value.quizType}`;
+      if (!isSurveyType.value) {
+        announceMsg = `${announceMsg}. ${!quizResult.value.gradedRes.passed ? 'Failed' : 'Successfully passed'} quiz.`;
+      }
+      announcer.polite(announceMsg);
+    })
+    .catch(handleSaveError)
+    .finally(() => {
+      isCompleting.value = false;
     });
 })
 const reportTestRunToBackend = () => {
@@ -466,9 +496,14 @@ const cancelQuizAttempt = () => {
 }
 const saveAndCloseThisRun = () => {
   isCompleting.value = true;
-  Promise.all(reportAnswerPromises.value)
+  saveError.value = '';
+  const existingPromises = Object.values(reportAnswerPromises.value)
+  return Promise.all(existingPromises)
       .then(() => {
         emit('cancelled');
+      })
+      .catch(handleSaveError)
+      .finally(() => {
         isCompleting.value = false;
       });
 }
@@ -578,11 +613,13 @@ const onResize = (newWidth) => {
                   @selected-answer="updateSelectedAnswers"
                   @answer-matched="updateMatchedAnswer"
                   :quizComplete="!!quizResult"
-                  @answer-text-changed="updateSelectedAnswers"/>
+                  @answer-text-changed="updateSelectedAnswers"
+                  @fill-in-the-blank-changed="updateSelectedAnswers"/>
             </div>
           </SkillsOverlay>
 
-          <QuizRunValidationWarnings v-if="!meta.valid && !quizResult?.gradedRes?.needsGrading" :errors-to-show="errorsToShow" />
+          <QuizRunValidationWarnings v-if="!meta.valid && meta.touched && !quizResult?.gradedRes?.needsGrading" :errors-to-show="errorsToShow" />
+          <Message v-if="saveError" severity="error" :closable="false" data-cy="quizSaveError">{{ saveError }}</Message>
 
           <div v-if="!quizResult" class="text-left mt-8 flex flex-wrap">
             <SkillsOverlay :show="isCompleting" opacity="0.6">
