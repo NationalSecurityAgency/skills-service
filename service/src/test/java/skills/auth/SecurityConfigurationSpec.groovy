@@ -27,7 +27,8 @@ class SecurityConfigurationSpec extends Specification {
         given:
         SecurityConfiguration securityConfiguration = new SecurityConfiguration(
                 authMode: AuthMode.DEFAULT_AUTH_MODE,
-                corsAllowedOriginPatterns: ['*'])
+                corsAllowedOriginPatterns: ['*'],
+                corsConfAllowCredentials: false)
 
         when:
         CorsConfiguration configuration = getConfiguration(securityConfiguration, '/api/projects')
@@ -39,21 +40,19 @@ class SecurityConfigurationSpec extends Specification {
     }
 
     @Unroll
-    def "CORS allowCredentials defaults to #expectedAllowCredentials for #authMode auth mode"() {
+    def "CORS allowCredentials uses the configured default for #authMode auth mode"() {
         given:
         SecurityConfiguration securityConfiguration = new SecurityConfiguration(
                 authMode: authMode,
-                corsAllowedOriginPatterns: ['*'])
+                corsAllowedOriginPatterns: ['*'],
+                corsConfAllowCredentials: false)
 
         expect:
-        getConfiguration(securityConfiguration, '/api/projects').allowCredentials == expectedAllowCredentials
-        getConfiguration(securityConfiguration, '/app/userInfo').allowCredentials == expectedAllowCredentials
+        getConfiguration(securityConfiguration, '/api/projects').allowCredentials == false
+        getConfiguration(securityConfiguration, '/app/userInfo').allowCredentials == false
 
         where:
-        authMode       || expectedAllowCredentials
-        AuthMode.FORM  || false
-        AuthMode.SAML2 || false
-        AuthMode.PKI   || true
+        authMode << [AuthMode.FORM, AuthMode.SAML2, AuthMode.PKI]
     }
 
     @Unroll
@@ -77,7 +76,8 @@ class SecurityConfigurationSpec extends Specification {
     def "CORS honors configured origin patterns"() {
         given:
         SecurityConfiguration securityConfiguration = new SecurityConfiguration(
-                corsAllowedOriginPatterns: [' https://app.example.com ', 'https://*.customer.example'])
+                corsAllowedOriginPatterns: [' https://app.example.com ', 'https://*.customer.example'],
+                corsConfAllowCredentials: false)
 
         when:
         CorsConfiguration configuration = getConfiguration(securityConfiguration, '/api/projects')
@@ -91,7 +91,9 @@ class SecurityConfigurationSpec extends Specification {
 
     def "CORS configuration is limited to supported cross-origin endpoints"() {
         given:
-        SecurityConfiguration securityConfiguration = new SecurityConfiguration(corsAllowedOriginPatterns: ['*'])
+        SecurityConfiguration securityConfiguration = new SecurityConfiguration(
+                corsAllowedOriginPatterns: ['*'],
+                corsConfAllowCredentials: false)
         CorsConfigurationSource source = securityConfiguration.corsConfigurationSource()
 
         expect:
