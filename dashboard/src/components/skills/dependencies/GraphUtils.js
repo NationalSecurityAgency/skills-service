@@ -21,32 +21,52 @@ export default {
   getTitle(skillItem, isCrossProject) {
     const container = document.createElement('div');
 
-    let crossProjInfo = '';
+    // Treat all API values as text, including names in badge skill lists.
+    const appendField = (label, value) => {
+      const caption = document.createElement('span');
+      caption.style.cssText = 'font-style: italic; color: #444444';
+      caption.textContent = `${label}:`;
+      container.append(caption, document.createTextNode(` ${value}`), document.createElement('br'));
+    };
     if (isCrossProject) {
-      crossProjInfo = `<span style="border-bottom: 1px dotted black; font-weight: bold;"><i class="fas fa-handshake"></i> Cross Project Dependency</span><br/>
-                           <span>Project ID: ${skillItem.projectId}</span><br/>`;
+      const heading = document.createElement('span');
+      heading.style.cssText = 'border-bottom: 1px dotted black; font-weight: bold;';
+      const icon = document.createElement('i');
+      icon.className = 'fas fa-handshake';
+      heading.append(icon, document.createTextNode(' Cross Project Dependency'));
+      const project = document.createElement('span');
+      project.textContent = `Project ID: ${skillItem.projectId}`;
+      container.append(heading, document.createElement('br'), project, document.createElement('br'));
     }
-    let html = `${crossProjInfo}<span style="font-style: italic; color: #444444">Name:</span> ${skillItem.name}<br/>
-                <span style="font-style: italic; color: #444444">ID:</span> ${skillItem.skillId}<br/>`;
+    appendField('Name', skillItem.name);
+    appendField('ID', skillItem.skillId);
     if(skillItem.type === 'Skill') {
-      html += `<span style="font-style: italic; color: #444444">Point Increment:</span> ${skillItem.pointIncrement}<br/>
-      <span style="font-style: italic; color: #444444">Total Points:</span> ${skillItem.totalPoints}<br/>`;
+      appendField('Point Increment', skillItem.pointIncrement);
+      appendField('Total Points', skillItem.totalPoints);
     }
     if(skillItem.type === 'Badge') {
       if(skillItem.containedSkills && skillItem.containedSkills.length > 0) {
         const skillNames = skillItem.containedSkills.map((it) => it.name);
-        html += `<span style="font-style: italic; color: #444444">Skills:</span>`
+        const caption = document.createElement('span');
+        caption.style.cssText = 'font-style: italic; color: #444444';
+        caption.textContent = 'Skills:';
+        container.append(caption);
+        const appendSkill = (name) => {
+          const skill = document.createElement('span');
+          skill.style.padding = '1rem';
+          skill.textContent = name;
+          container.append(document.createElement('br'), skill);
+        };
         for (const [index, skillName] of skillNames.entries()) {
-          html += `<br/><span style="padding: 1rem;">${skillName}</span>`
+          appendSkill(skillName);
           if (index >= 9 && skillNames.length > 11) {
             // stop at 10 and truncate if there's more than 11
-            html += `<br/><span style="padding: 1rem;">and ${skillNames.length-(index+1)} more skills...</span>`
+            appendSkill(`and ${skillNames.length-(index+1)} more skills...`);
             break
           }
         }
       }
     }
-    container.innerHTML = html;
     return container;
   },
   getLabel(skillItem, isCrossProject) {

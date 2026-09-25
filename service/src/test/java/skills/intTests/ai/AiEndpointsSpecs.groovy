@@ -16,14 +16,21 @@
 package skills.intTests.ai
 
 import groovy.util.logging.Slf4j
+import org.springframework.beans.factory.annotation.Autowired
+import skills.services.openai.OpenAIUsageLimitsProperties
 import org.springframework.http.HttpStatus
 import org.springframework.web.client.HttpClientErrorException
 import org.springframework.web.client.RestTemplate
 import skills.controller.request.model.AiChatRequest
 import spock.lang.IgnoreIf
 
+import static com.github.tomakehurst.wiremock.client.WireMock.*
+
 @Slf4j
 class AiEndpointsSpecs extends DefaultAiIntSpec {
+
+    @Autowired
+    OpenAIUsageLimitsProperties limits
 
     def "get available models"() {
         when:
@@ -46,7 +53,9 @@ class AiEndpointsSpecs extends DefaultAiIntSpec {
     def "must be logged in to use chat endpoint"() {
         RestTemplate unauthorized = new RestTemplate()
         when:
-        unauthorized.getForEntity("http://localhost:${localPort}/openai/chat", String)
+        unauthorized.postForEntity("http://localhost:${localPort}/openai/chat", new AiChatRequest(
+                messages: [new AiChatRequest.ChatMessage(role: AiChatRequest.Role.User, content: 'hi')],
+                model: 'model1', modelTemperature: 1.0), String)
         then:
         HttpClientErrorException e = thrown(HttpClientErrorException)
         e.statusCode == HttpStatus.UNAUTHORIZED
@@ -64,6 +73,28 @@ class AiEndpointsSpecs extends DefaultAiIntSpec {
         List<String> response = chatClient.chat(chatRequest)
         then:
         response == ["Hello! " , "How can I help " , "you today?", ""]
+    }
+
+    def 'default limits bound history and output while preserving provider model selection'() {
+        given:
+        ChatClient client = new ChatClient(localPort, certificateRegistry)
+        def request = new AiChatRequest(model: 'model3', modelTemperature: 0d,
+                messages: (1..limits.maxMessages).collect {
+                    new AiChatRequest.ChatMessage(role: AiChatRequest.Role.User, content: 'hi')
+                })
+
+        expect:
+        client.exchange(request).statusCode.value() == 200
+        mockLlmServer.mockServer.verify(1, postRequestedFor(urlEqualTo('/v1/chat/completions'))
+                .withRequestBody(matchingJsonPath('$.model', equalTo('model3')))
+                .withRequestBody(matchingJsonPath('$.max_completion_tokens', equalTo(limits.maxOutputTokens.toString()))))
+
+        when:
+        request.messages.add(new AiChatRequest.ChatMessage(role: AiChatRequest.Role.User, content: 'extra'))
+
+        then:
+        client.exchange(request).statusCode.value() == 400
+        mockLlmServer.mockServer.verify(1, postRequestedFor(urlEqualTo('/v1/chat/completions')))
     }
 
 }

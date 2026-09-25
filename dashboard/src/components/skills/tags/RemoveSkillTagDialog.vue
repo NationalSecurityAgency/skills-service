@@ -17,7 +17,7 @@ limitations under the License.
 import { computed, ref } from 'vue'
 import { object } from 'yup'
 import { useRoute } from 'vue-router'
-import { SkillsReporter } from '@skilltree/skills-client-js'
+import { useInceptionStore } from '@/stores/UseInceptionStore.js'
 import { useSubjectSkillsState } from '@/stores/UseSubjectSkillsState.js'
 import { useFocusState } from '@/stores/UseFocusState.js'
 import SkillsInputFormDialog from '@/components/utils/inputForm/SkillsInputFormDialog.vue'
@@ -66,7 +66,7 @@ const afterDelete = (taggedInfo) => {
   toUpdate.forEach((sk) => {
     sk.tags = sk.tags.filter((tag) => tag.tagId !== taggedInfo.tagId)
   })
-  SkillsReporter.reportSkill('AddOrModifyTags')
+  useInceptionStore().reportSkill('AddOrModifyTags')
   emit('removed-tag', taggedInfo)
   const focusOn = props.groupId ? `group-${props.groupId}_newSkillBtn` : 'newSkillBtn'
   focusState.setElementId(focusOn)

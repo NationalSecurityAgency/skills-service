@@ -118,6 +118,31 @@ skills:
   clientLibVersion: @maven.build.timestamp@
   openai:
     host: null
+    stream:
+      # Request provider token-usage metadata and log it when chat completes.
+      stream-usage: true
+    # Generous starting limits for local testing; tune using AI chat input/usage logs.
+    limits:
+      # Empty permits any model accessible to the configured provider key.
+      allowedModels: []
+      # Entire JSON body in bytes (10 MiB), enforced before deserialization.
+      maxRequestBytes: 10485760
+      # Includes every message in the submitted conversation history.
+      maxMessages: 1000
+      # Character limits count UTF-16 code units in client message content.
+      maxMessageCharacters: 1000000
+      maxTotalMessageCharacters: 5000000
+      # Sent as max_completion_tokens; must be supported by the selected model.
+      maxOutputTokens: 32768
+      requestsPerMinutePerUser: 600
+      # Global rate and concurrency apply per SkillTree instance, not across replicas.
+      requestsPerMinuteGlobal: 6000
+      maxConcurrentRequestsGlobal: 200
+  authorization:
+    # Enable to fully prevent User Enumeration by ensuring unverified email addresses cannot trigger
+    # account-dependent behavior that reveals whether an address is registered. Otherwise, an attacker can
+    # use a two-request oracle, comparing requests for known and tested addresses to infer account existence.
+    verifyEmailAddresses: false
   config:
     # Changing this to a larger value once events have been compacted into WEEKLY events will cause
     # those WEEKLY events which are now newer than the compactDailyEventsOlderThan to no longer be visible in the system
@@ -234,6 +259,9 @@ skills:
     client:
       loggingEnabled: false
       loggingLevel: DEBUG
+      loggingMaxMessageLength: 2000
+      loggingMaxRequestsPerMinute: 60
+      loggingMaxTrackedClients: 10000
   profiles:
     active: default
 db-scheduler:

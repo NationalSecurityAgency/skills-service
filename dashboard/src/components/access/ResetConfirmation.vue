@@ -16,7 +16,7 @@ limitations under the License.
 <script setup>
 import { onMounted, ref, watch } from 'vue';
 import { useRouter } from 'vue-router';
-import Logo1 from '@/components/brand/Logo1.vue';
+import AccessPageCard from '@/components/access/AccessPageCard.vue';
 
 const router = useRouter();
 
@@ -38,35 +38,33 @@ watch(timer, (value) => {
 </script>
 
 <template>
-  <div>
-    <div class="pt-10" data-cy="resetConfirmation">
-      <div class="max-w-md lg:max-w-xl mx-auto" >
-        <h1 class="sr-only">Password Successfully Reset</h1>
-        <div class="text-center">
-          <logo1 class="mb-4" />
-          <Message :closable="false" severity="success">Password Successfully Reset!</Message>
-        </div>
-        <Card class="mt-4 text-left">
-          <template #content>
-            <p>Your password has been successfully reset! You will be forwarded to the login page in {{ timer }} seconds.</p>
-            <div class="flex justify-center mt-2">
-              <router-link :to="{ name: 'Login' }" tabindex="-1">
-                <SkillsButton icon="fas fa-sign-in-alt"
-                              outlined
-                              size="small"
-                              data-cy="loginPage"
-                              id="loginPageBtn"
-                              label="Return to Login Page">
-                </SkillsButton>
-              </router-link>
-            </div>
-          </template>
-        </Card>
-      </div>
+  <AccessPageCard
+    data-cy="resetConfirmation"
+    icon="fas fa-lock-open"
+    labelled-by="reset-confirmation-title">
+    <p class="mb-2 text-xs font-bold uppercase tracking-[0.12em] text-blue-600">Password updated</p>
+    <h1 id="reset-confirmation-title" class="m-0 text-[clamp(1.5rem,4vw,2rem)] leading-[1.2] text-gray-900">
+      Password successfully reset
+    </h1>
+    <p class="mx-auto mb-0 mt-4 max-w-108 leading-[1.7] text-gray-600">
+      Your password has been successfully reset. You can now sign in with your new password.
+    </p>
+
+    <div class="my-7 flex items-center gap-3 rounded-xl bg-blue-50 p-4 text-left text-sm leading-6 text-gray-600">
+      <i class="fas fa-clock text-2xl text-blue-600" aria-hidden="true"></i>
+      <span>You will be forwarded to the login page in {{ timer }} seconds.</span>
     </div>
-  </div>
+
+    <div class="text-center">
+      <router-link class="inline-block no-underline" :to="{ name: 'Login' }">
+        <SkillsButton
+          id="loginPageBtn"
+          icon="fas fa-sign-in-alt"
+          outlined
+          size="small"
+          data-cy="loginPage"
+          label="Return to Login Page" />
+      </router-link>
+    </div>
+  </AccessPageCard>
 </template>
-
-<style scoped>
-
-</style>

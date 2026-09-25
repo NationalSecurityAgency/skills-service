@@ -164,7 +164,9 @@ class UserCommunityAuthorizationManager implements AuthorizationManager<RequestA
         String skillId
     }
     private AttachmentExtractRes extractProjectIdForAttachment(HttpServletRequest request) {
-        String url = getRequestUrl(request)
+        // Resolve the same path UUID as the download controller. Query parameters
+        // must not become part of the UUID and bypass attachment authorization.
+        String url = request.getServletPath() + (request.getPathInfo() ?: '')
         Matcher pid = ATTACHMENT_UUID.matcher(url)
         if (pid.matches()) {
             String uuid = pid.group(1)

@@ -40,6 +40,7 @@ import org.springframework.security.web.SecurityFilterChain
 import org.springframework.security.web.context.SecurityContextRepository
 import org.springframework.web.context.request.RequestContextHolder
 import org.springframework.web.context.request.ServletRequestAttributes
+import org.springframework.web.cors.CorsConfigurationSource
 import skills.auth.AuthUtils
 import skills.auth.PortalWebSecurityHelper
 import skills.auth.SecurityMode
@@ -64,9 +65,11 @@ class ResourceServerConfig {
 
     @Bean('resourceServerSecurityFilterChain')
     @Order(101)
-    SecurityFilterChain filterChain(HttpSecurity http, SkillsJwtAuthenticationConverter skillsJwtAuthenticationConverter) throws Exception {
+    SecurityFilterChain filterChain(HttpSecurity http, SkillsJwtAuthenticationConverter skillsJwtAuthenticationConverter,
+                                    CorsConfigurationSource corsConfigurationSource) throws Exception {
         portalWebSecurityHelper.configureHttpSecurity(
-            http.securityContext((securityContext) ->
+            http.cors((cors) -> cors.configurationSource(corsConfigurationSource))
+                .securityContext((securityContext) ->
                 securityContext.securityContextRepository(securityContextRepository)
             ).securityMatcher(oAuthUtils.oAuthRequestedMatcher)
                 .oauth2ResourceServer(oauth2 -> oauth2

@@ -19,7 +19,7 @@ import SkillsService from '@/components/skills/SkillsService.js'
 import SubjectsService from '@/components/subjects/SubjectsService.js'
 import {useRoute, useRouter} from 'vue-router'
 import { useLanguagePluralSupport } from '@/components/utils/misc/UseLanguagePluralSupport.js'
-import { SkillsReporter } from '@skilltree/skills-client-js'
+import { useInceptionStore } from '@/stores/UseInceptionStore.js'
 import NoContent2 from '@/components/utils/NoContent2.vue'
 import { useAppConfig } from '@/common-components/stores/UseAppConfig.js'
 import {useAnnouncer} from "@vue-a11y/announcer";
@@ -164,9 +164,9 @@ const doMoveOrReuse = () => {
 const handleActionCompleting = () => {
   // this.state.reUseComplete = true;
   if (props.isReuseType) {
-    SkillsReporter.reportSkill('ReuseSkill')
+    useInceptionStore().reportSkill('ReuseSkill')
   } else {
-    SkillsReporter.reportSkill('MoveSkill')
+    useInceptionStore().reportSkill('MoveSkill')
   }
   reuseInProgress.value = false
   props.nextStepNavFunction()

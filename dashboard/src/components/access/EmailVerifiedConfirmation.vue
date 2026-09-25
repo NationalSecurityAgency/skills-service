@@ -18,7 +18,7 @@ import { ref, onMounted, watch } from 'vue';
 import { useRouter } from 'vue-router';
 import AccessService from "@/components/access/AccessService.js";
 import LoadingContainer from "@/components/utils/LoadingContainer.vue";
-import Logo1 from "@/components/brand/Logo1.vue";
+import AccessPageCard from '@/components/access/AccessPageCard.vue';
 import {useEmailVerificationInfo} from "@/components/access/UseEmailVerificationInfo.js";
 
 const emailVerificationInfo = useEmailVerificationInfo()
@@ -78,27 +78,32 @@ watch(() => timer.value, (newValue) => {
 
 <template>
   <loading-container :is-loading="loading">
-    <div class="flex justify-center text-center" data-cy="emailConfirmation">
-      <div class="" style="min-width: 20rem;">
-        <div class="mt-8">
-          <logo1 />
-          <div class="h3 mt-6 text-primary">Email Address Successfully Confirmed!</div>
-        </div>
-        <Card>
-          <template #content>
-            <p>Your email address has been confirmed! You will be forwarded to the login page in {{ timer }} seconds.</p>
-            <div class="text-center mt-4">
-              <router-link to="/skills-login" tabindex="-1">
-                <SkillsButton class="p-2" data-cy="loginPage" icon="fas fa-sign-in-alt" label="Return to Login Page"></SkillsButton>
-              </router-link>
-            </div>
-          </template>
-        </Card>
+    <AccessPageCard
+      data-cy="emailConfirmation"
+      icon="fas fa-envelope-circle-check"
+      labelled-by="email-confirmation-title">
+      <p class="mb-2 text-xs font-bold uppercase tracking-[0.12em] text-blue-600">Email verified</p>
+      <h1 id="email-confirmation-title" class="m-0 text-[clamp(1.5rem,4vw,2rem)] leading-[1.2] text-gray-900">
+        Email address confirmed
+      </h1>
+      <p class="mx-auto mb-0 mt-4 max-w-108 leading-[1.7] text-gray-600">
+        Your email address has been confirmed. Your SkillTree account is ready to use.
+      </p>
+
+      <div class="my-7 flex items-center gap-3 rounded-xl bg-blue-50 p-4 text-left text-sm leading-6 text-gray-600">
+        <i class="fas fa-clock text-2xl text-blue-600" aria-hidden="true"></i>
+        <span>You will be forwarded to the login page in {{ timer }} seconds.</span>
       </div>
-    </div>
+
+      <div class="text-center">
+        <router-link class="inline-block no-underline" to="/skills-login">
+          <SkillsButton
+            data-cy="loginPage"
+            icon="fas fa-sign-in-alt"
+            label="Return to Login Page"
+            outlined />
+        </router-link>
+      </div>
+    </AccessPageCard>
   </loading-container>
 </template>
-
-<style scoped>
-
-</style>

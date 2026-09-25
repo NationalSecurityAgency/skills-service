@@ -21,6 +21,45 @@ import skills.intTests.utils.SkillsFactory
 
 class AdminGraphDisplaySpec extends DefaultIntSpec {
 
+    def "graph endpoints preserve sanitization of stored names - #payload"() {
+        def project = SkillsFactory.createProject()
+        project.name = "Project ${payload}".toString()
+        def subject = SkillsFactory.createSubject()
+        def skills = SkillsFactory.createSkills(2)
+        skills[0].name = "Skill ${payload}".toString()
+        skills[1].name = "Contained ${payload}".toString()
+        skillsService.createProjectAndSubjectAndSkills(project, subject, skills)
+        def badge = SkillsFactory.createBadge()
+        badge.name = "Badge ${payload}".toString()
+        skillsService.createBadge(badge)
+        skillsService.assignSkillToBadge([projectId: project.projectId, badgeId: badge.badgeId, skillId: skills[1].skillId])
+        badge.enabled = true
+        skillsService.createBadge(badge)
+        skillsService.addLearningPathPrerequisite(project.projectId, badge.badgeId, skills[0].skillId)
+
+        when:
+        def graph = skillsService.getDependencyGraph(project.projectId)
+        def dependencies = skillsService.getSkillDependencyInfo('user1', project.projectId, skills[1].skillId)
+
+        then:
+        graph.nodes.size() == 2
+        graph.edges.size() == 1
+        graph.nodes.find { it.skillId == skills[0].skillId }.name == "Skill ${sanitized}".trim()
+        def badgeNode = graph.nodes.find { it.skillId == badge.badgeId }
+        badgeNode.name == "Badge ${sanitized}".trim()
+        badgeNode.containedSkills*.name == ["Contained ${sanitized}".trim()]
+        graph.nodes.every { it.projectName == "Project ${sanitized}".trim() }
+        dependencies.dependencies.size() == 1
+        dependencies.dependencies[0].skill.skillName == "Contained ${sanitized}".trim()
+        dependencies.dependencies[0].dependsOn.skillName == "Skill ${sanitized}".trim()
+
+        where:
+        payload                                     | sanitized
+        '<img src=x onerror=alert(1)>'               | ''
+        '<svg onload=alert(1)></svg>'                | ''
+        '&lt;img src=x onerror=alert(1)&gt;'         | '&lt;img src=x onerror=alert(1)&gt;'
+    }
+
     def "empty project graph"() {
         List<Map> skills = SkillsFactory.createSkills(2)
         def subject = SkillsFactory.createSubject()

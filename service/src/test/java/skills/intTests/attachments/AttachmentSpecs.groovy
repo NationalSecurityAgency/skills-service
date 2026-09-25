@@ -113,6 +113,29 @@ class AttachmentSpecs extends DefaultIntSpec {
         results.every { it.success }
     }
 
+    def "ordinary learning attachments are readable by another authenticated user - #suffix"() {
+        Map proj = SkillsFactory.createProject()
+        skillsService.createProject(proj)
+        def quiz = QuizDefFactory.createQuizSurvey()
+        skillsService.createQuizDef(quiz)
+        def badge = SkillsFactory.createBadge()
+        skillsService.createGlobalBadge(badge)
+        String contents = 'Shared learning content'
+        Resource resource = GroovyToJavaByteUtils.toByteArrayResource(contents, 'test-pdf.pdf')
+        def attachments = [
+                skillsService.uploadAttachment(resource, proj.projectId),
+                skillsService.uploadAttachment(resource, null, null, quiz.quizId),
+                skillsService.uploadAttachment(resource, null, badge.badgeId),
+        ]
+        SkillsService learner = createService(getRandomUsers(1)[0])
+
+        expect:
+        attachments.every { learner.downloadAttachmentAsText(it.href + suffix) == contents }
+
+        where:
+        suffix << ['', '?alwaysReturnContentDispositionForPdf=true']
+    }
+
     def "attempt to upload attachment with invalid mime-type"() {
         Map proj = SkillsFactory.createProject()
         skillsService.createProject(proj)

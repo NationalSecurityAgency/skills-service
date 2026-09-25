@@ -123,9 +123,6 @@ export default {
       .get(`/admin/projects/${encodeURIComponent(projectId)}/clientSecret`)
       .then((response) => response.data)
   },
-  userWithEmailExists(email) {
-    return axios.get(`/userExists/${encodeURIComponent(email)}`).then((response) => !response.data)
-  },
   hasRole(roleName) {
     return axios.get(`/app/userInfo/hasRole/${roleName}`).then((response) => response.data)
   },
@@ -158,9 +155,6 @@ export default {
     return axios
       .post(`resendEmailVerification/${encodeURIComponent(userId)}`)
       .then((response) => response.data)
-  },
-  userEmailIsVerified(email) {
-    return axios.get(`/userEmailIsVerified/${email}`).then((response) => response.data)
   },
   sendProjectInvites(projectId, inviteRequest) {
     return axios

@@ -213,7 +213,7 @@ class UserCommunityAuthSpecs extends DefaultIntSpec {
         e.httpStatus == HttpStatus.FORBIDDEN
     }
 
-    def "cannot download attachments associated with a UC protected project if the user does not belong to the user community"() {
+    def "attachment community authorization is enforced with query suffix #suffix"() {
         when:
         List<String> users = getRandomUsers(2)
 
@@ -242,9 +242,14 @@ class UserCommunityAuthSpecs extends DefaultIntSpec {
         def globalBadgeAttachment = pristineDragonsUser.uploadAttachment(resource, null, globalBadge.badgeId)
 
         then:
-        validateForbidden { allDragonsUser.downloadAttachment(projAttachment.href) }
-        validateForbidden { allDragonsUser.downloadAttachment(quizAttachment.href) }
-        validateForbidden { allDragonsUser.downloadAttachment(globalBadgeAttachment.href) }
+        [projAttachment, quizAttachment, globalBadgeAttachment].every { attachment ->
+            assert pristineDragonsUser.downloadAttachmentAsText(attachment.href + suffix) == contents
+            assert validateForbidden { allDragonsUser.downloadAttachment(attachment.href + suffix) }
+            true
+        }
+
+        where:
+        suffix << ['', '?alwaysReturnContentDispositionForPdf=true', '?ignored=value']
     }
 
     def "cannot access group admin endpoints with UC protection enabled if the user does not belong to the user community"() {
@@ -580,4 +585,3 @@ class UserCommunityAuthSpecs extends DefaultIntSpec {
     }
 
 }
-

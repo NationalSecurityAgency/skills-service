@@ -30,7 +30,7 @@ import { useDialogMessages } from '@/components/utils/modal/UseDialogMessages.js
 import { useUpgradeInProgressErrorChecker } from '@/components/utils/errors/UseUpgradeInProgressErrorChecker.js'
 import QuizService from '@/components/quiz/QuizService.js';
 import RemovalValidation from '@/components/utils/modal/RemovalValidation.vue';
-import { SkillsReporter } from '@skilltree/skills-client-js'
+import { useInceptionStore } from '@/stores/UseInceptionStore.js'
 import {useStorage} from "@vueuse/core";
 import {useRouter} from "vue-router";
 
@@ -331,7 +331,7 @@ const completeAddRole = (role) => {
   announcer.polite(`${getRoleDisplay(role)} role was added for ${getUserDisplay({ ...selectedUser.value, firstName: selectedUser.value.first, lastName: selectedUser.value.last })}`);
   emit('role-added', { userId: selectedUser.value.userId, role });
   if (UserRolesUtil.isProjectAdminRole(role)) {
-    SkillsReporter.reportSkill('AddAdmin')
+    useInceptionStore().reportSkill('AddAdmin')
   }
   loadData();
 }

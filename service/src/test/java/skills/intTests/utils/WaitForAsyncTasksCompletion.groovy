@@ -43,6 +43,7 @@ class WaitForAsyncTasksCompletion {
             }
         }
         log.info("All scheduled task completed!")
+        return true
     }
 
     boolean waitFinalizationToCompleteByCheckingStatus(SkillsService skillsService, String projectId, long waitInMs = 30000) {

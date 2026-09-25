@@ -212,7 +212,7 @@ class RestExceptionHandler extends ResponseEntityExceptionHandler {
     protected ResponseEntity<Object> handleResponseStatusException(ResponseStatusException ex, WebRequest webRequest) {
         BasicErrBody body = new BasicErrBody(explanation: ex.message)
         log.error("${buildRequestInfo(webRequest)} ${ex.message}", ex)
-        return new ResponseEntity(body, ex.status);
+        return new ResponseEntity(body, ex.getStatusCode());
     }
 
     /**

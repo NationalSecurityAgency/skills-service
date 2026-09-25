@@ -464,20 +464,6 @@ class ValidationSpecs extends DefaultIntSpec {
     }
 
     @IgnoreIf({env["SPRING_PROFILES_ACTIVE"] == "pki" })
-    def 'test userExists endpoint works correctly'() {
-        when:
-        String existingUser = skillsService.wsHelper.username
-        boolean existingUserExists = skillsService.doesUserExist(existingUser)
-
-        String nonExistingUser = 'nonExistingUser'
-        boolean nonExistingUserExists = skillsService.doesUserExist(nonExistingUser, false)
-
-        then:
-        existingUserExists
-        !nonExistingUserExists
-    }
-
-    @IgnoreIf({env["SPRING_PROFILES_ACTIVE"] == "pki" })
     def 'users password >= 8 chars'() {
         when:
         createService("veryUniqueIda0201", "aaaaaaa")

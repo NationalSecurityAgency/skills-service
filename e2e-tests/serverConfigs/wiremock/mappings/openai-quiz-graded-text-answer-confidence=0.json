@@ -5,7 +5,7 @@
     "urlPath": "/v1/chat/completions",
     "bodyPatterns": [
       { "contains": "LLM Quiz Answer Confidence Assessment Prompt" },
-      { "contains": "**Student's Answer**: answer 0" }
+      { "matchesJsonPath": { "expression": "$.messages[?(@.role == 'user')].content", "contains": "\"studentAnswer\":\"answer 0\"" } }
     ]
   },
   "response": {

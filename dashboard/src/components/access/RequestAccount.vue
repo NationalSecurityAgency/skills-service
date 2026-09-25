@@ -18,11 +18,10 @@ import { computed, onBeforeMount, ref } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useForm } from 'vee-validate';
 import { useAppConfig } from '@/common-components/stores/UseAppConfig.js';
-import { useDebounceFn } from '@vueuse/core';
 import { useAuthState } from '@/stores/UseAuthState.js';
 import * as yup from 'yup';
 import { string } from 'yup';
-import Logo1 from '@/components/brand/Logo1.vue';
+import AccessPageCard from '@/components/access/AccessPageCard.vue';
 import AccessService from '@/components/access/AccessService.js';
 import {useEmailVerificationInfo} from "@/components/access/UseEmailVerificationInfo.js";
 
@@ -34,16 +33,17 @@ const emailVerificationInfo = useEmailVerificationInfo()
 
 const isRootAccount = route.meta.isRootAccount;
 const createInProgress = ref(false);
+const createError = ref('');
 const oAuthProviders = ref([]);
 
 const oAuthOnly = computed(() => {
   return appConfig.oAuthOnly;
 })
-const verifyEmailAddresses = computed(() => {
-  return appConfig.verifyEmailAddresses;
-})
 const isProgressAndRankingEnabled = computed(() => {
   return appConfig.rankingAndProgressViewsEnabled === true || appConfig.rankingAndProgressViewsEnabled === 'true';
+})
+const verifyEmailAddresses = computed(() => {
+  return appConfig.verifyEmailAddresses === true || appConfig.verifyEmailAddresses === 'true';
 })
 
 onBeforeMount(() => {
@@ -55,50 +55,43 @@ onBeforeMount(() => {
   }
 })
 
-const login = (firstName, lastName, email, password) => {
+const createAccount = (firstName, lastName, email, password) => {
   createInProgress.value = true;
+  createError.value = '';
   authState.signup({isRootAccount, firstName, lastName, email, password}).then(() => {
-    authState.configureSkillsClientForInception()
-        .then(() => {
-          if (verifyEmailAddresses.value) {
-            emailVerificationInfo.setEmail(email)
-            router.push({name: 'EmailVerificationSent'});
-          } else if (route.query.redirect) {
-            router.push(route.query.redirect);
-          } else if (!isProgressAndRankingEnabled.value) {
-            router.push({name: 'AdminHomePage'});
-          } else {
-            const defaultHomePage = appConfig.defaultLandingPage;
-            const pageName = defaultHomePage === 'progress' ? 'MyProgressPage' : 'AdminHomePage';
-            router.push({name: pageName});
-          }
-        });
+    if (isRootAccount) {
+        if (route.query.redirect) {
+          router.push(route.query.redirect);
+        } else if (!isProgressAndRankingEnabled.value) {
+          router.push({name: 'AdminHomePage'});
+        } else {
+          const defaultHomePage = appConfig.defaultLandingPage;
+          const pageName = defaultHomePage === 'progress' ? 'MyProgressPage' : 'AdminHomePage';
+          router.push({name: pageName});
+        }
+    } else if (verifyEmailAddresses.value) {
+      router.push({name: 'EmailVerificationSent'});
+    } else {
+      router.push({
+        name: 'Login',
+        ...(route.query?.redirect && { query: { redirect: route.query.redirect } }),
+      });
+    }
+  }).catch((error) => {
+    console.error(error)
+    createError.value = 'Unable to create your account. Please try again.';
+  }).finally(() => {
+    createInProgress.value = false;
   });
 }
 const oAuth2Login = (registrationId) => {
   createInProgress.value = true;
   authState.oAuth2Login(registrationId);
 }
-const uniqueEmail = useDebounceFn(async (value, context) => {
-  if (!value) {
-    return true;
-  }
-  try {
-    await yup.string().email().validate(value);
-    const isUnique = await AccessService.userWithEmailExists(value);
-    if (isUnique) {
-      return true
-    }
-    return context.createError({message: 'This email address is already used for another account'});
-  } catch ({message}) {
-    return context.createError({message});
-  }
-}, appConfig.formFieldDebounceInMs)
-
 const schema = yup.object().shape({
   firstName: string().required().max(appConfig.maxFirstNameLength).label('First Name'),
   lastName: string().required().max(appConfig.maxFirstNameLength).label('Last Name'),
-  email: string().required().email().min(appConfig.minUsernameLength).test((value, context) => uniqueEmail(value, context)).label('Email'),
+  email: string().required().email().min(appConfig.minUsernameLength).label('Email'),
   password: string().required().min(appConfig.minPasswordLength).max(appConfig.maxPasswordLength).label('Password'),
   passwordConfirmation: string().required().oneOf([yup.ref('password')], 'Passwords must match').label('Confirm Password'),
 })
@@ -114,141 +107,126 @@ const { values, meta, handleSubmit, validate, errors } = useForm({
   }
 })
 const onSubmit = handleSubmit((values) => {
-  login(values.firstName, values.lastName, values.email, values.password);
+  createAccount(values.firstName, values.lastName, values.email, values.password);
 });
 </script>
 
 <template>
-  <div>
-    <div class="pt-10">
-      <div class="max-w-md lg:max-w-xl mx-auto" style="min-width: 20rem;">
-        <h1 class="sr-only">SkillTree New Account</h1>
-        <div class="text-center">
-          <logo1 class="mb-4" />
-          <Message :closable="false">New <span v-if="isRootAccount">Root </span>Account</Message>
-        </div>
-        <Card v-if="!oAuthOnly" class="mt-4 text-left">
-          <template #content>
-            <form @submit="onSubmit">
-              <div class="w-full flex flex-col gap-2">
-                <SkillsTextInput
-                    label="First Name"
-                    size="small"
-                    autocomplete="given-name"
-                    :is-required="true"
-                    :disabled="createInProgress"
-                    @keyup.enter="onSubmit"
-                    data-cy="requestAccountFirstName"
-                    id="firstName"
-                    name="firstName">
-                  <template #addOnBefore>
-                    <i class="fas fa-user" aria-hidden="true"></i>
-                  </template>
-                </SkillsTextInput>
-                  <SkillsTextInput
-                      label="Last Name"
-                      size="small"
-                      autocomplete="family-name"
-                      :is-required="true"
-                      :disabled="createInProgress"
-                      @keyup.enter="onSubmit"
-                      data-cy="requestAccountLastName"
-                      id="lastName"
-                      name="lastName">
-                    <template #addOnBefore>
-                      <i class="fas fa-user-tie" aria-hidden="true"></i>
-                    </template>
-                  </SkillsTextInput>
-                  <SkillsTextInput
-                      label="Email"
-                      size="small"
-                      autocomplete="username"
-                      :is-required="true"
-                      :disabled="createInProgress"
-                      @keyup.enter="onSubmit"
-                      data-cy="requestAccountEmail"
-                      id="email"
-                      name="email">
-                    <template #addOnBefore>
-                      <i class="fas fa-envelope" aria-hidden="true"></i>
-                    </template>
-                  </SkillsTextInput>
-                  <SkillsTextInput
-                      label="New Password"
-                      size="small"
-                      type="password"
-                      autocomplete="new-password"
-                      :is-required="true"
-                      :disabled="createInProgress"
-                      @keyup.enter="onSubmit"
-                      data-cy="requestAccountPassword"
-                      id="password"
-                      name="password">
-                    <template #addOnBefore>
-                      <i class="fas fa-key" aria-hidden="true"></i>
-                    </template>
-                  </SkillsTextInput>
-                  <SkillsTextInput
-                      label="Confirm New Password"
-                      size="small"
-                      type="password"
-                      autocomplete="new-password"
-                      :is-required="true"
-                      :disabled="createInProgress"
-                      @keyup.enter="onSubmit"
-                      data-cy="requestAccountConfirmPassword"
-                      id="passwordConfirmation"
-                      name="passwordConfirmation">
-                    <template #addOnBefore>
-                      <i class="fas fa-key" aria-hidden="true"></i>
-                    </template>
-                  </SkillsTextInput>
-              </div>
-              <div class="flex justify-center my-2">
-                <SkillsButton variant="outline-success"
-                              type="submit"
-                              label="Create Account"
-                              icon="fas fa-arrow-circle-right"
-                              :loading="createInProgress"
-                              :disabled="!meta.valid || createInProgress"
-                              data-cy="createAccountButton">
-                </SkillsButton>
-              </div>
-              <div v-if="createInProgress && isRootAccount" class="mt-2 text-center">
-                Bootstrapping! May take a second...
-              </div>
-              <div v-if="!isRootAccount" class="p-1">
-                <hr/>
-                <p class="text-center mt-2"><small>Already have an account?
-                  <strong class="underline"><router-link :to="{ name: 'Login' }">Sign in</router-link></strong></small>
-                </p>
-              </div>
-            </form>
-          </template>
-        </Card>
+  <AccessPageCard icon="fas fa-user-plus" labelled-by="create-account-title">
+    <p class="mb-2 text-xs font-bold uppercase tracking-[0.12em] text-blue-600">Join SkillTree</p>
+    <h1 id="create-account-title" class="m-0 text-[clamp(1.5rem,4vw,2rem)] leading-[1.2] text-gray-900 uppercase">
+      New <span v-if="isRootAccount">Root </span>Account
+    </h1>
+    <p class="mx-auto mb-7 mt-4 max-w-108 leading-[1.7] text-gray-600">
+      Enter your details to create your SkillTree account.
+    </p>
 
-        <Card v-if="oAuthProviders && oAuthProviders.length > 0"
-              class="mt-4"
-              data-cy="oAuthProviders">
-          <template #content>
-            <div v-for="oAuthProvider in oAuthProviders"
-                 :key="oAuthProvider.registrationId"
-                 class="col-span-12 mb-4">
-              <Button
-                  class="w-full text-center"
-                  outlined
-                  :icon="oAuthProvider.iconClass"
-                  :label="`Login via ${ oAuthProvider.clientName }`"
-                  @click="oAuth2Login(oAuthProvider.registrationId)" />
-            </div>
+    <form v-if="!oAuthOnly" class="text-left" @submit="onSubmit">
+      <div class="flex w-full flex-col gap-2">
+        <SkillsTextInput
+          id="firstName"
+          label="First Name"
+          size="small"
+          autocomplete="given-name"
+          :is-required="true"
+          :disabled="createInProgress"
+          data-cy="requestAccountFirstName"
+          name="firstName">
+          <template #addOnBefore>
+            <i class="fas fa-user" aria-hidden="true"></i>
           </template>
-        </Card>
-
+        </SkillsTextInput>
+        <SkillsTextInput
+          id="lastName"
+          label="Last Name"
+          size="small"
+          autocomplete="family-name"
+          :is-required="true"
+          :disabled="createInProgress"
+          data-cy="requestAccountLastName"
+          name="lastName">
+          <template #addOnBefore>
+            <i class="fas fa-user-tie" aria-hidden="true"></i>
+          </template>
+        </SkillsTextInput>
+        <SkillsTextInput
+          id="email"
+          label="Email"
+          size="small"
+          autocomplete="username"
+          :is-required="true"
+          :disabled="createInProgress"
+          data-cy="requestAccountEmail"
+          name="email">
+          <template #addOnBefore>
+            <i class="fas fa-envelope" aria-hidden="true"></i>
+          </template>
+        </SkillsTextInput>
+        <SkillsTextInput
+          id="password"
+          label="New Password"
+          size="small"
+          type="password"
+          autocomplete="new-password"
+          :is-required="true"
+          :disabled="createInProgress"
+          data-cy="requestAccountPassword"
+          name="password">
+          <template #addOnBefore>
+            <i class="fas fa-key" aria-hidden="true"></i>
+          </template>
+        </SkillsTextInput>
+        <SkillsTextInput
+          id="passwordConfirmation"
+          label="Confirm New Password"
+          size="small"
+          type="password"
+          autocomplete="new-password"
+          :is-required="true"
+          :disabled="createInProgress"
+          data-cy="requestAccountConfirmPassword"
+          name="passwordConfirmation">
+          <template #addOnBefore>
+            <i class="fas fa-key" aria-hidden="true"></i>
+          </template>
+        </SkillsTextInput>
       </div>
+      <div class="my-4 flex justify-center">
+        <SkillsButton
+          variant="outline-success"
+          type="submit"
+          label="Create Account"
+          icon="fas fa-arrow-circle-right"
+          :loading="createInProgress"
+          :disabled="!meta.valid || createInProgress"
+          data-cy="createAccountButton" />
+      </div>
+      <Message
+        v-if="createError"
+        severity="error"
+        :closable="false"
+        data-cy="createAccountError">{{ createError }}</Message>
+      <div v-if="createInProgress && isRootAccount" class="mt-2 text-center text-gray-700">
+        Bootstrapping! May take a second...
+      </div>
+      <div v-if="!isRootAccount">
+        <Divider />
+        <p class="mb-0 text-center text-sm text-gray-700">
+          Already have an account?
+          <router-link class="font-semibold text-blue-700 underline" :to="{ name: 'Login' }">Sign in</router-link>
+        </p>
+      </div>
+    </form>
+
+    <div v-if="oAuthProviders && oAuthProviders.length > 0" class="flex flex-col gap-4" data-cy="oAuthProviders">
+      <Button
+        v-for="oAuthProvider in oAuthProviders"
+        :key="oAuthProvider.registrationId"
+        class="w-full text-center"
+        outlined
+        :icon="oAuthProvider.iconClass"
+        :label="`Login via ${ oAuthProvider.clientName }`"
+        @click="oAuth2Login(oAuthProvider.registrationId)" />
     </div>
-  </div>
+  </AccessPageCard>
 </template>
-
-<style scoped>
-
-</style>

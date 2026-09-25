@@ -18,18 +18,24 @@ package skills.intTests
 import com.icegreen.greenmail.util.GreenMail
 import com.icegreen.greenmail.util.ServerSetupTest
 import org.apache.commons.lang3.time.DurationFormatUtils
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpEntity
 import org.springframework.http.HttpHeaders
 import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
+import org.springframework.http.HttpMethod
+import org.springframework.http.HttpStatus
 import org.springframework.util.LinkedMultiValueMap
 import org.springframework.util.MultiValueMap
+import org.springframework.web.client.NoOpResponseErrorHandler
 import org.springframework.web.client.RestTemplate
 import org.springframework.web.client.HttpClientErrorException
 import skills.intTests.utils.DefaultIntSpec
 import skills.intTests.utils.EmailUtils
 import skills.intTests.utils.RestTemplateWrapper
 import skills.intTests.utils.SkillsService
+import skills.storage.repos.UserAttrsRepo
+import skills.storage.repos.UserRepo
 import skills.utils.WaitFor
 import spock.lang.IgnoreIf
 
@@ -42,6 +48,12 @@ class PasswordResetSpec extends DefaultIntSpec {
     GreenMail greenMail = new GreenMail(ServerSetupTest.SMTP)
     SkillsService rootSkillsService
     RestTemplate template = new RestTemplate()
+
+    @Autowired
+    UserRepo userRepo
+
+    @Autowired
+    UserAttrsRepo userAttrsRepo
 
     def setup() {
         greenMail.start()
@@ -95,6 +107,51 @@ class PasswordResetSpec extends DefaultIntSpec {
         msg.fromEmail[0] == "resetspec@skilltreetests"
     }
 
+    @IgnoreIf({ env["SPRING_PROFILES_ACTIVE"] == "pki" })
+    def "password reset request does not disclose whether the user exists"() {
+        createService("existing@skills.org", "somepassword")
+
+        when:
+        def missingResult = rootSkillsService.requestPasswordReset("missing@skills.org")
+        def existingResult = rootSkillsService.requestPasswordReset("existing@skills.org")
+
+        then:
+        missingResult.success
+        existingResult == missingResult
+        WaitFor.wait { greenMail.getReceivedMessages().length == 1 }
+        waitForAsyncTasksCompletion.waitForAllScheduleTasks()
+        greenMail.getReceivedMessages().length == 1
+        EmailUtils.getEmail(greenMail).recipients == ["existing@skills.org"]
+    }
+
+    @IgnoreIf({ env["SPRING_PROFILES_ACTIVE"] == "pki" })
+    def "account creation without email verification does not disclose whether an account exists"() {
+        String existingEmail = 'existing@skills.org'
+        createService(existingEmail, 'original-password', 'Original', 'User')
+        String originalPassword = userRepo.findByUserId(existingEmail).password
+        def originalAttrs = userAttrsRepo.findByUserIdIgnoreCase(existingEmail)
+
+        when:
+        ResponseEntity<String> newResponse = createAccount('new@skills.org', 'New', 'User', 'new-password')
+        ResponseEntity<String> existingResponse = createAccount(existingEmail.toUpperCase(), 'Changed', 'Name', 'changed-password')
+
+        then:
+        newResponse.statusCode == HttpStatus.OK
+        existingResponse.statusCode == HttpStatus.OK
+        newResponse.body == existingResponse.body
+        newResponse.headers.getFirst(HttpHeaders.LOCATION) == existingResponse.headers.getFirst(HttpHeaders.LOCATION)
+        !newResponse.headers.getFirst(RestTemplateWrapper.AUTH_HEADER)
+        !existingResponse.headers.getFirst(RestTemplateWrapper.AUTH_HEADER)
+        userRepo.findByUserId(existingEmail).password == originalPassword
+        userAttrsRepo.findByUserIdIgnoreCase(existingEmail).firstName == originalAttrs.firstName
+        userAttrsRepo.findByUserIdIgnoreCase(existingEmail).lastName == originalAttrs.lastName
+
+        and:
+        login('new@skills.org', 'new-password').statusCode == HttpStatus.OK
+        login(existingEmail, 'changed-password').statusCode == HttpStatus.UNAUTHORIZED
+        login(existingEmail, 'original-password').statusCode == HttpStatus.OK
+    }
+
     @IgnoreIf({env["SPRING_PROFILES_ACTIVE"] == "pki" })
     def "when configured headers and footer is included in the password reset email"() {
         SkillsService rootSkillsService = createRootSkillService()
@@ -129,6 +186,30 @@ class PasswordResetSpec extends DefaultIntSpec {
 
         emailRes.html.contains("<body>\r\n<p>Header attention All Dragons Members</p>\r\n<p>Hi Skills Test,</p>")
         emailRes.html.contains("<p>Footer attention All Dragons Members</p>\r\n</body>")
+    }
+
+    private ResponseEntity<String> createAccount(String email, String firstName, String lastName, String password) {
+        RestTemplate restTemplate = new RestTemplate()
+        restTemplate.errorHandler = new NoOpResponseErrorHandler()
+        restTemplate.exchange(
+                "http://localhost:${localPort}/createAccount".toString(),
+                HttpMethod.PUT,
+                new HttpEntity<>([email: email, firstName: firstName, lastName: lastName, password: password]),
+                String)
+    }
+
+    private ResponseEntity<String> login(String username, String password) {
+        HttpHeaders headers = new HttpHeaders()
+        headers.contentType = MediaType.APPLICATION_FORM_URLENCODED
+        MultiValueMap<String, String> form = new LinkedMultiValueMap<>()
+        form.add('username', username)
+        form.add('password', password)
+        RestTemplate restTemplate = new RestTemplate()
+        restTemplate.errorHandler = new NoOpResponseErrorHandler()
+        restTemplate.postForEntity(
+                "http://localhost:${localPort}/performLogin".toString(),
+                new HttpEntity<>(form, headers),
+                String)
     }
 
 

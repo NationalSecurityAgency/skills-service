@@ -20,6 +20,38 @@ describe('Inception Tests', () => {
     beforeEach(() => {
     });
 
+    it('level button updates when project navigation earns the next Inception level', function () {
+        cy.createProject(1);
+        cy.visit('/administrator/projects/proj1');
+        cy.get('[data-cy="inception-button"]').should('be.visible').and('contain.text', 'Level 0');
+
+        // CreateSkill earns 10 points per report. Leave the user within one
+        // VisitProjectLevels event (10 points) of the current level 1 threshold.
+        cy.request('/api/projects/Inception/summary').then(({ body }) => {
+            expect(body.skillsLevel).to.eq(0);
+            const reports = Math.ceil((body.levelTotalPoints - body.levelPoints) / 10) - 1;
+            Cypress._.times(reports, (index) => {
+                cy.doReportSkill({
+                    project: 'Inception',
+                    skill: 'CreateSkill',
+                    userId: null,
+                    date: `${index + 1} days ago`,
+                });
+            });
+        });
+
+        // Verify the seeded progress is still below level 1 before the UI action.
+        cy.request('/api/projects/Inception/summary').then(({ body }) => {
+            expect(body.skillsLevel).to.eq(0);
+            expect(body.levelTotalPoints - body.levelPoints).to.be.within(1, 10);
+        });
+        cy.get('[data-cy="inception-button"]').should('contain.text', 'Level 0');
+
+        cy.get('[data-cy="nav-Levels"]').click();
+        cy.get('[data-cy="levelsTable"]').should('be.visible');
+        cy.get('[data-cy="inception-button"]').should('be.visible').and('contain.text', 'Level 1');
+    });
+
     it('navigation to dashboard skills', function () {
         cy.suppressChartInitError()
         cy.visit('/administrator/');
@@ -145,4 +177,3 @@ describe('Inception Tests', () => {
     })
 
 });
-

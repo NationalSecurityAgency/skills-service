@@ -33,7 +33,6 @@ import skills.services.VideoCaptionsService
 import skills.services.quiz.QuizDefService
 import skills.utils.TablePageUtil
 
-@CrossOrigin(allowCredentials = "true", originPatterns = ["*"])
 @RestController
 @RequestMapping("/api")
 @AdminOrApproverGetRequestUsersOnlyWhenUserIdSupplied

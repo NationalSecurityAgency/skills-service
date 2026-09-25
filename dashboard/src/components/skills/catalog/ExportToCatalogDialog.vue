@@ -19,7 +19,7 @@ import {useFocusState} from '@/stores/UseFocusState.js'
 import CatalogService from '@/components/skills/catalog/CatalogService.js'
 import {useRoute, useRouter} from 'vue-router'
 import {useAppConfig} from '@/common-components/stores/UseAppConfig.js'
-import {SkillsReporter} from '@skilltree/skills-client-js'
+import { useInceptionStore } from '@/stores/UseInceptionStore.js'
 import SkillsOverlay from '@/components/utils/SkillsOverlay.vue'
 import ScrollPanel from 'primevue/scrollpanel'
 import {useDialogUtils} from "@/components/utils/inputForm/UseDialogUtils.js";
@@ -134,7 +134,7 @@ const handleExport = () => {
   CatalogService.bulkExport(route.params.projectId, skillsFiltered.value.map((skill) => skill.skillId))
     .then(() => {
       state.value.exported = true
-      SkillsReporter.reportSkill('ExporttoCatalog')
+      useInceptionStore().reportSkill('ExporttoCatalog')
     })
     .finally(() => {
       state.value.exporting = false

@@ -17,7 +17,7 @@ limitations under the License.
 import { computed, ref } from 'vue'
 import { boolean, object, string, ValidationError } from 'yup'
 import { useDebounceFn } from '@vueuse/core'
-import { SkillsReporter } from '@skilltree/skills-client-js'
+import { useInceptionStore } from '@/stores/UseInceptionStore.js'
 import InputSanitizer from '@/components/utils/InputSanitizer.js'
 import { useAppConfig } from '@/common-components/stores/UseAppConfig.js'
 import SkillsNameAndIdInput from '@/components/utils/inputForm/SkillsNameAndIdInput.vue'
@@ -140,7 +140,7 @@ const saveAdminGroup = (values) => {
 const onSaved = (savedAdminGroup) => {
   emit('admin-group-saved', savedAdminGroup)
   if (!props.isEdit) {
-    SkillsReporter.reportSkill('CreateAdminGroup')
+    useInceptionStore().reportSkill('CreateAdminGroup')
   }
   close()
 }

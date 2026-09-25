@@ -43,6 +43,7 @@ import skills.controller.exceptions.ErrorCode
 import skills.controller.exceptions.SkillException
 import skills.controller.exceptions.SkillsValidator
 import skills.controller.result.model.OAuth2Provider
+import skills.controller.result.model.RequestResult
 import skills.services.PasswordManagementService
 
 import jakarta.servlet.http.HttpServletRequest
@@ -86,36 +87,49 @@ class CreateAccountController {
 
     @Conditional(SecurityMode.FormAuth)
     @PutMapping("createAccount")
-    void createAppUser(@RequestBody UserInfo userInfo, HttpServletRequest request, HttpServletResponse response) {
+    RequestResult createAppUser(@RequestBody UserInfo userInfo, HttpServletRequest request, HttpServletResponse response) {
         if (oAuthOnly || authMode == AuthMode.PKI) {
             throw new SkillException("Username/Password account creation is disabled for this installation of the SkillTree", null, null, ErrorCode.AccessDenied)
         }
-        String password = userInfo.password
         if (verifyEmailAddresses) {
             userInfo.emailVerified = false
         }
-        userInfo = createUser(userInfo)
+        String userId = userInfo.username ?: userInfo.email
+        if (userAuthService.userExists(userId)) {
+            log.info("ignoring account creation request for an existing user")
+            return RequestResult.success()
+        }
+        try {
+            userInfo = createUser(userInfo)
+        } catch (SkillException e) {
+            if (e.errorCode == ErrorCode.UserAlreadyExists) {
+                log.info("ignoring concurrent account creation request for an existing user")
+                return RequestResult.success()
+            }
+            throw e
+        }
 
         if (verifyEmailAddresses) {
             passwordManagementService.createEmailVerificationTokenAndNotifyUser(userInfo.username)
-        } else {
-            autoLoginService.autologin(userInfo, password, request, response)
         }
+        return RequestResult.success()
     }
 
     @Conditional(SecurityMode.FormAuth)
     @PutMapping("createRootAccount")
     void createRootUser(@RequestBody UserInfo userInfo, HttpServletRequest request, HttpServletResponse response) {
-        SkillsValidator.isTrue(!userAuthService.rootExists(), 'A root user already exists! Granting additional root privileges requires a root user to grant them!')
         String password = userInfo.password
-        // initial root user does not require email verification, email settings need to be configured first
-        userInfo.emailVerified = true
-        userInfo = createUser(userInfo)
-        userAuthService.grantRoot(userInfo.username)
+        prepareUser(userInfo)
+        userInfo = userAuthService.createFirstRoot(userInfo)
         autoLoginService.autologin(userInfo, password, request, response)
     }
 
     private UserInfo createUser(UserInfo userInfo) {
+        prepareUser(userInfo)
+        return userAuthService.createUser(userInfo)
+    }
+
+    private void prepareUser(UserInfo userInfo) {
         String password = userInfo.password
         propsBasedValidator.validateMinStrLength(PublicProps.UiProp.minPasswordLength, "password", password)
         propsBasedValidator.validateMaxStrLength(PublicProps.UiProp.maxPasswordLength, "password", password)
@@ -130,21 +144,13 @@ class CreateAccountController {
         if (!userInfo.usernameForDisplay) {
             userInfo.usernameForDisplay = userInfo.username
         }
-        return userAuthService.createUser(userInfo)
     }
 
     // used only for OAuth and PKI
     @RequestMapping(value = "/grantFirstRoot", method = [RequestMethod.POST, RequestMethod.PUT])
     void grantFirstRoot(HttpServletRequest request) {
-        SkillsValidator.isTrue(!userAuthService.rootExists(), 'A root user already exists! Granting additional root privileges requires a root user to grant them!')
         SkillsValidator.isNotNull(request.getUserPrincipal(), 'Granting the first root user is only available in SAML & PKI modes, but it looks like the request was not made by an authenticated account!')
-        userAuthService.grantRoot(request.getUserPrincipal().name)
-    }
-
-    @Conditional(SecurityMode.FormOrSAML2Auth)
-    @GetMapping('userExists/{user}')
-    boolean userExists(@PathVariable('user') String user) {
-        return userAuthService.userExists(user)
+        userAuthService.grantFirstRoot(request.getUserPrincipal().name)
     }
 
     @Conditional(SecurityMode.FormAuth)

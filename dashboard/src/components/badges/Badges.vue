@@ -16,7 +16,7 @@ limitations under the License.
 <script setup>
 import { computed, nextTick, onMounted, ref } from 'vue'
 import { useRoute } from 'vue-router'
-import { SkillsReporter } from '@skilltree/skills-client-js'
+import { useInceptionStore } from '@/stores/UseInceptionStore.js'
 import Sortable from 'sortablejs'
 import BlockUI from 'primevue/blockui'
 import LoadingContainer from '@/components/utils/LoadingContainer.vue'
@@ -178,9 +178,9 @@ const badgeUpdated = (badge) => {
   emit('badges-changed', badge.badgeId);
   // });
   if (badge.startDate) {
-    SkillsReporter.reportSkill('CreateGem');
+    useInceptionStore().reportSkill('CreateGem');
   } else {
-    SkillsReporter.reportSkill('CreateBadge');
+    useInceptionStore().reportSkill('CreateBadge');
   }
 };
 
@@ -217,7 +217,7 @@ const sortOrderUpdate = (updateEvent) => {
       .finally(() => {
         sortOrder.value.loading = false;
         sortOrder.value.loadingBadgeId = '-1';
-        SkillsReporter.reportSkill('ChangeBadgeDisplayOrder');
+        useInceptionStore().reportSkill('ChangeBadgeDisplayOrder');
       });
 };
 

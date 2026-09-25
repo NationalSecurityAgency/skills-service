@@ -19,6 +19,7 @@ package skills.controller
 import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.MediaType
+import org.springframework.http.codec.ServerSentEvent
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
@@ -27,7 +28,7 @@ import org.springframework.web.bind.annotation.RestController
 import reactor.core.publisher.Flux
 import skills.controller.request.model.AiChatRequest
 import skills.services.openai.OpenAIService
-import skills.controller.exceptions.SkillsValidator
+import skills.services.openai.OpenAIChatFacade
 import skills.settings.AiPromptSettings
 import skills.settings.AiPromptSettingsService
 
@@ -37,24 +38,19 @@ import skills.settings.AiPromptSettingsService
 class OpenAiController {
 
     @Autowired
-    OpenAIService openAIService
+    OpenAIChatFacade openAIChatFacade
 
     @Autowired
     AiPromptSettingsService aiPromptSettingsService
 
     @PostMapping(value = "/chat", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
-    Flux<String> chat(@RequestBody AiChatRequest genDescRequest) {
-        SkillsValidator.isNotNull(genDescRequest.messages, "genDescRequest.messages")
-        SkillsValidator.isTrue(genDescRequest.messages.size() > 0, "genDescRequest.messages must have at least one message")
-        SkillsValidator.isNotBlank(genDescRequest.model, "genDescRequest.model")
-        SkillsValidator.isNotNull(genDescRequest.modelTemperature, "genDescRequest.modelTemperature")
-        SkillsValidator.isTrue(genDescRequest.modelTemperature >= 0 && genDescRequest.modelTemperature <= 2, "genDescRequest.modelTemperature must be >= 0 and <= 2")
-        return openAIService.streamChat(genDescRequest)
+    Flux<ServerSentEvent<String>> chat(@RequestBody AiChatRequest genDescRequest) {
+        return openAIChatFacade.streamChat(genDescRequest)
     }
 
     @GetMapping("/models")
     OpenAIService.AvailableModels getModels() {
-        return openAIService.getAvailableModels()
+        return openAIChatFacade.getModels()
     }
 
     @GetMapping('/getAiPromptSettings')
@@ -63,4 +59,3 @@ class OpenAiController {
     }
 
 }
-

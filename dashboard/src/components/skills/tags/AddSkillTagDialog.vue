@@ -22,7 +22,7 @@ import TabList from 'primevue/tablist';
 import Tab from 'primevue/tab';
 import TabPanels from 'primevue/tabpanels';
 import TabPanel from 'primevue/tabpanel';
-import { SkillsReporter } from '@skilltree/skills-client-js'
+import { useInceptionStore } from '@/stores/UseInceptionStore.js'
 import { useAppConfig } from '@/common-components/stores/UseAppConfig.js'
 import { useSubjectSkillsState } from '@/stores/UseSubjectSkillsState.js'
 import { useFocusState } from '@/stores/UseFocusState.js'
@@ -145,7 +145,7 @@ const afterSave = (taggedInfo) => {
       sk.tags.push({tagId: taggedInfo.tagId, tagValue: taggedInfo.tagValue})
     }
   })
-  SkillsReporter.reportSkill('AddOrModifyTags')
+  useInceptionStore().reportSkill('AddOrModifyTags')
   emit('added-tag', taggedInfo)
   const focusOn = props.groupId ? `group-${props.groupId}_newSkillBtn` : 'newSkillBtn'
   focusState.setElementId(focusOn)

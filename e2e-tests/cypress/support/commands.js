@@ -334,6 +334,13 @@ Cypress.Commands.add("register", (user, pass, grantRoot, usernameForDisplay = nu
                         usernameForDisplay,
                     }).then((innerResponse) => {
                         requestStatus = innerResponse.status;
+                        cy.request({
+                            method: 'POST',
+                            url: '/performLogin',
+                            form: true,
+                            body: { username: user, password: pass },
+                            failOnStatusCode: false,
+                        });
                     });
                 } else {
                     cy.log(`Creating app user [${user}]`)
@@ -1068,6 +1075,7 @@ Cypress.Commands.add("getFooterFromEmail", (wait=true) => {
 
 Cypress.Commands.add("getEmails", (expectAtLeastNumEmails = 1) => {
     const emailUrl = 'http://localhost:1080/email';
+    cy.waitForBackendAsyncTasksToComplete()
     cy.waitUntil(() => cy.request(emailUrl).then((response) => response.body && response.body.length >= expectAtLeastNumEmails), {
         errorMsg: `Timed out after 2 minutes while attempting to find at least ${expectAtLeastNumEmails} emails in the test SMTP server (${emailUrl}).`,
         timeout: 120000, // waits up to 2 minutes
@@ -1334,8 +1342,6 @@ Cypress.Commands.add('loginBySingleSignOn', (projId = 'proj1') => {
                 cy.log('Skills token request failed, authenticating with OAuth provider...');
                 cy.request({
                     url: 'http://localhost:8080/oauth2/authorization/hydra',
-                    qs: { skillsRedirectUri: baseUrl, },
-                    // qs: { skillsRedirectUri: `${baseUrl}${homePage}` },
                 }).then((resp) => {
                     expect(resp.status).to.eq(200)
 
