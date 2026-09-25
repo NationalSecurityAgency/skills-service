@@ -43,6 +43,7 @@ function questionTypeChanged(inputItem) {
       :data-cy="dataCy"
       :disabled="disabled"
       v-model="model"
+      scroll-height="20rem"
       aria-label="Selection Question Type"
       @update:modelValue="questionTypeChanged"
       :isRequired="isRequired"
