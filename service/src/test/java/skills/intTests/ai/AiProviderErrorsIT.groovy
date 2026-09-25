@@ -25,7 +25,12 @@ import skills.services.openai.OpenAIProviderErrors
 
 import static com.github.tomakehurst.wiremock.client.WireMock.*
 
-@TestPropertySource(properties = ['skills.openai.options.timeoutInSecs=1'])
+@TestPropertySource(properties = [
+        'skills.openai.options.timeoutInSecs=1',
+        'skills.authorization.userInfoHealthCheckUri=https://localhost:8191/status',
+        'skills.authorization.userInfoUri=https://localhost:8191/userInfo?dn={dn}',
+        'skills.authorization.userQueryUri=https://localhost:8191/userQuery?query={query}'
+])
 class AiProviderErrorsIT extends DefaultAiIntSpec {
     ChatClient client
 

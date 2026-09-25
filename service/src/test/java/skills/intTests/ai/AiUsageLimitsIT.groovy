@@ -36,7 +36,10 @@ import static com.github.tomakehurst.wiremock.client.WireMock.*
 @TestPropertySource(properties = [
         'skills.openai.limits.requestsPerMinutePerUser=2',
         'skills.openai.limits.requestsPerMinuteGlobal=3',
-        'skills.openai.limits.maxConcurrentRequestsGlobal=1'
+        'skills.openai.limits.maxConcurrentRequestsGlobal=1',
+        'skills.authorization.userInfoHealthCheckUri=https://localhost:8192/status',
+        'skills.authorization.userInfoUri=https://localhost:8192/userInfo?dn={dn}',
+        'skills.authorization.userQueryUri=https://localhost:8192/userQuery?query={query}'
 ])
 class AiUsageLimitsIT extends DefaultAiIntSpec {
     @Autowired
