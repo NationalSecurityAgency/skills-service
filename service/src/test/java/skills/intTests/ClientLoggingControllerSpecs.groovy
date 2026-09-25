@@ -32,10 +32,14 @@ class ClientLoggingControllerSpecs extends DefaultIntSpec {
     UIConfigProperties uiConfigProperties
 
     RestTemplateWrapper anonymousClient
+    String logUrl
     String originalLoggingEnabled
 
     def setup() {
-        anonymousClient = new RestTemplateWrapper()
+        // Reuse the test facade's transport for its PKI client certificate, but do not
+        // reuse its authenticated cookies or authorization headers for this public endpoint.
+        anonymousClient = new RestTemplateWrapper(skillsService.wsHelper.oAuthRestTemplate, isPkiMode)
+        logUrl = "${skillsService.wsHelper.skillsService}/public/log"
         originalLoggingEnabled = uiConfigProperties.client.loggingEnabled
         uiConfigProperties.client.loggingEnabled = 'true'
     }
@@ -109,6 +113,6 @@ class ClientLoggingControllerSpecs extends DefaultIntSpec {
     }
 
     private def postLog(Map payload) {
-        anonymousClient.postForEntity("http://localhost:${localPort}/public/log", payload, String)
+        anonymousClient.postForEntity(logUrl, payload, String)
     }
 }
