@@ -14,13 +14,14 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <script setup>
-import { SkillsDisplayJS } from '@skilltree/skills-client-js'
-import { nextTick, onMounted, computed } from 'vue'
+import { SkillsConfiguration, SkillsDisplayJS } from '@skilltree/skills-client-js'
+import { ref, nextTick, onMounted, computed } from 'vue'
 import { useBrowserLocation } from '@vueuse/core'
 import { useLog } from '@/components/utils/misc/useLog.js'
 import { useRoute } from 'vue-router'
 import { useAppConfig } from '@/common-components/stores/UseAppConfig.js'
 import { useTestThemeUtils } from '@/skills-display/components/test/UseTestThemeUtils.js'
+import SkillsSpinner from "@/components/utils/SkillsSpinner.vue";
 
 const route = useRoute()
 const appConfig = useAppConfig()
@@ -74,8 +75,18 @@ const constructSkillsDisplay = () => {
   })
 }
 
+const loadingClient = ref(true)
 onMounted(() => {
-  constructSkillsDisplay()
+  SkillsConfiguration.configure({
+    serviceUrl,
+    projectId,
+    authenticator
+  })
+  SkillsConfiguration.afterConfigure()
+      .then(() => {
+        loadingClient.value = false;
+        constructSkillsDisplay()
+      })
 })
 
 const isThemeApplied = computed(() => route.query.enableTheme && route.query.enableTheme.toLocaleLowerCase() === 'true')
@@ -83,6 +94,7 @@ const isThemeApplied = computed(() => route.query.enableTheme && route.query.ena
 
 <template>
   <div class="mt-4 p-4" :class="{'themed-applied': isThemeApplied}">
+    <skills-spinner v-if="loadingClient" :is-loading="true" />
     <h1 class="sr-only">Test Skills Client</h1>
     <div id="skills-client-container">
     </div>

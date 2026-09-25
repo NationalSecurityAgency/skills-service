@@ -219,17 +219,23 @@ class OpenAIService {
             throw new IllegalStateException("chatModel was not injected")
         }
         String promptStr = textInputQuestionGradingMsg
-                ?.replace('{{ question }}', question)
-                ?.replace('{{ studentAnswer }}', studentAnswer)
-                ?.replace('{{ correctAnswer }}', correctAnswer)
+                ?.replace('{{ question }}', 'See input JSON field "question".')
+                ?.replace('{{ studentAnswer }}', 'See input JSON field "studentAnswer".')
+                ?.replace('{{ correctAnswer }}', 'See input JSON field "correctAnswer".')
                 ?.replace('{{ minimumConfidenceLevel }}', minimumConfidenceLevel.toString())
+        String inputJson = JsonOutput.toJson([
+                question: question,
+                correctAnswer: correctAnswer,
+                studentAnswer: studentAnswer
+        ])
         if (logPromptAndResponseText) {
             log.debug("Prompt: {}", promptStr)
         } else {
             log.debug("Submitting text input answer for AI grading. Model=[{}]", gradingModel)
         }
         List<Message> messages = [
-                new UserMessage(promptStr)
+                new SystemMessage(promptStr),
+                new UserMessage(inputJson)
         ]
         Prompt prompt = new Prompt(
                 messages,
@@ -258,8 +264,12 @@ class OpenAIService {
             // Parse JSON response into TextInputAIGradingResult
             def jsonSlurper = new JsonSlurper()
             def parsedResponse = jsonSlurper.parseText(extractJsonFromResponse(res))
-            assert parsedResponse.confidenceLevel != null && parsedResponse.confidenceLevel instanceof Integer, "invalid or missing confidenceLevel"
-            assert parsedResponse.gradingDecisionReason instanceof String, "invalid or missing gradingDecisionReason"
+            if (!(parsedResponse instanceof Map) ||
+                    !(parsedResponse.confidenceLevel instanceof Integer) ||
+                    parsedResponse.confidenceLevel < 0 || parsedResponse.confidenceLevel > 100 ||
+                    !(parsedResponse.gradingDecisionReason instanceof String)) {
+                throw new IllegalArgumentException("Invalid AI grading response")
+            }
             return new TextInputAIGradingResult(
                     confidenceLevel: parsedResponse.confidenceLevel as Integer,
                     gradingDecisionReason: parsedResponse.gradingDecisionReason
