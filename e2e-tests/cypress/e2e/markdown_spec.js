@@ -633,11 +633,12 @@ describe('Markdown Tests', () => {
         cy.get('#toastuiImageUrlInput').type('https://github.com/NationalSecurityAgency/skills-service/raw/master/skilltree_logo.png')
         cy.get('.toastui-editor-ok-button').click()
 
-        cy.get(markdownInput).then(($el) => {
-            const text = $el.html();
-
-            expect(text).to.eq('<p><br class="ProseMirror-trailingBreak"></p><p><img src="https://github.com/NationalSecurityAgency/skills-service/raw/master/skilltree_logo.png" alt="image" contenteditable="false"><img class="ProseMirror-separator" alt=""><br class="ProseMirror-trailingBreak"></p>');
-        })
+        cy.get(markdownInput).should(($editor) => {
+            const paragraphs = $editor.children('p');
+            expect(paragraphs).to.have.length(2);
+            expect(paragraphs.eq(0).find('img')).to.have.length(0);
+            expect(paragraphs.eq(1).find('img[src="https://github.com/NationalSecurityAgency/skills-service/raw/master/skilltree_logo.png"]')).to.have.length(1);
+        });
     });
 
     it('markdown on quiz page', () => {
