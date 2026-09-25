@@ -69,6 +69,11 @@ class DefaultAiIntSpec extends DefaultIntSpec {
         mockLlmServer.stop()
     }
 
+    static AiChatRequest chatRequest(List<String> contents = ['hi'], String model = 'model1') {
+        new AiChatRequest(model: model, modelTemperature: 1d,
+                messages: contents.collect { new AiChatRequest.ChatMessage(role: AiChatRequest.Role.User, content: it) })
+    }
+
     static class ChatClient {
 
         String chatUrl

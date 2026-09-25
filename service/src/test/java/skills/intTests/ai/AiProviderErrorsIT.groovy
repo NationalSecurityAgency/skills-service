@@ -42,7 +42,7 @@ class AiProviderErrorsIT extends DefaultAiIntSpec {
                         .withBody('{"error":{"message":"private-provider-detail","type":"insufficient_quota","code":"insufficient_quota"}}')))
 
         when:
-        def response = client.exchange(AiRequestLimitsIT.request())
+        def response = client.exchange(chatRequest())
 
         then:
         response.statusCode.value() == expected
@@ -56,7 +56,7 @@ class AiProviderErrorsIT extends DefaultAiIntSpec {
         mockLlmServer.mockServer.removeStub(stub)
 
         then:
-        client.exchange(AiRequestLimitsIT.request()).statusCode.value() == 200
+        client.exchange(chatRequest()).statusCode.value() == 200
 
         where:
         providerStatus | expected | retryAfter                       | expectedRetry                    | message
@@ -82,7 +82,7 @@ class AiProviderErrorsIT extends DefaultAiIntSpec {
                 .willReturn(aResponse().withStatus(404).withHeader('x-request-id', 'provider-request-404')))
 
         when:
-        def response = client.exchange(AiRequestLimitsIT.request())
+        def response = client.exchange(chatRequest())
 
         then:
         response.statusCode.value() == 502
@@ -111,7 +111,7 @@ class AiProviderErrorsIT extends DefaultAiIntSpec {
                         .withHeader('Retry-After', '7').withBody(body)))
 
         when:
-        def response = client.exchange(AiRequestLimitsIT.request())
+        def response = client.exchange(chatRequest())
 
         then:
         response.statusCode.value() == status
@@ -124,7 +124,7 @@ class AiProviderErrorsIT extends DefaultAiIntSpec {
         mockLlmServer.mockServer.removeStub(failure)
 
         then:
-        client.exchange(AiRequestLimitsIT.request()).statusCode.value() == 200
+        client.exchange(chatRequest()).statusCode.value() == 200
 
         where:
         status | body                                                                                       | explanation
@@ -140,7 +140,7 @@ class AiProviderErrorsIT extends DefaultAiIntSpec {
                         .withBody(MockLlmServer.createStreamMessages().join('\n\n'))))
 
         expect:
-        client.exchange(AiRequestLimitsIT.request()).statusCode.value() == 504
+        client.exchange(chatRequest()).statusCode.value() == 504
     }
 
     def 'model discovery also sanitizes provider failures'() {
@@ -166,7 +166,7 @@ class AiProviderErrorsIT extends DefaultAiIntSpec {
                 .willReturn(ok().withHeader('Content-Type', 'text/event-stream').withChunkedDribbleDelay(2, 100).withBody(body)))
 
         when:
-        def response = client.exchange(AiRequestLimitsIT.request())
+        def response = client.exchange(chatRequest())
 
         then:
         response.statusCode.value() == 200

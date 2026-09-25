@@ -50,11 +50,11 @@ class AiUsageLimitsIT extends DefaultAiIntSpec {
 
     def 'user rate boundary returns 429 and Retry-After then resets'() {
         expect:
-        client.exchange(AiRequestLimitsIT.request()).statusCode.value() == 200
-        client.exchange(AiRequestLimitsIT.request()).statusCode.value() == 200
+        client.exchange(chatRequest()).statusCode.value() == 200
+        client.exchange(chatRequest()).statusCode.value() == 200
 
         when:
-        def response = client.exchange(AiRequestLimitsIT.request())
+        def response = client.exchange(chatRequest())
 
         then:
         response.statusCode.value() == 429
@@ -64,7 +64,7 @@ class AiUsageLimitsIT extends DefaultAiIntSpec {
 
         when:
         limiter.now.addAndGet(TimeUnit.SECONDS.toNanos(59))
-        def beforeReset = client.exchange(AiRequestLimitsIT.request())
+        def beforeReset = client.exchange(chatRequest())
 
         then:
         beforeReset.statusCode.value() == 429
@@ -74,7 +74,7 @@ class AiUsageLimitsIT extends DefaultAiIntSpec {
         limiter.now.addAndGet(TimeUnit.SECONDS.toNanos(1))
 
         then:
-        client.exchange(AiRequestLimitsIT.request()).statusCode.value() == 200
+        client.exchange(chatRequest()).statusCode.value() == 200
     }
 
     def 'users have separate quotas and user rejections do not consume global quota'() {
@@ -84,13 +84,13 @@ class AiUsageLimitsIT extends DefaultAiIntSpec {
         ChatClient other = new ChatClient(localPort, certificateRegistry, user)
 
         expect:
-        client.exchange(AiRequestLimitsIT.request()).statusCode.value() == 200
-        client.exchange(AiRequestLimitsIT.request()).statusCode.value() == 200
-        client.exchange(AiRequestLimitsIT.request()).statusCode.value() == 429
-        other.exchange(AiRequestLimitsIT.request()).statusCode.value() == 200
+        client.exchange(chatRequest()).statusCode.value() == 200
+        client.exchange(chatRequest()).statusCode.value() == 200
+        client.exchange(chatRequest()).statusCode.value() == 429
+        other.exchange(chatRequest()).statusCode.value() == 200
 
         when:
-        def response = other.exchange(AiRequestLimitsIT.request())
+        def response = other.exchange(chatRequest())
 
         then:
         response.statusCode.value() == 429
@@ -100,22 +100,22 @@ class AiUsageLimitsIT extends DefaultAiIntSpec {
 
     def 'invalid input consumes no allowance'() {
         when:
-        4.times { assert client.exchange(AiRequestLimitsIT.request([])).statusCode.value() == 400 }
+        4.times { assert client.exchange(chatRequest([])).statusCode.value() == 400 }
 
         then:
-        client.exchange(AiRequestLimitsIT.request()).statusCode.value() == 200
-        client.exchange(AiRequestLimitsIT.request()).statusCode.value() == 200
+        client.exchange(chatRequest()).statusCode.value() == 200
+        client.exchange(chatRequest()).statusCode.value() == 200
     }
 
     def 'active stream cap rejects immediately and completion releases capacity'() {
         given:
         def slow = slowStream()
         CountDownLatch firstChunk = new CountDownLatch(1)
-        def first = client.stream(AiRequestLimitsIT.request()).doOnNext { firstChunk.countDown() }.collectList().toFuture()
+        def first = client.stream(chatRequest()).doOnNext { firstChunk.countDown() }.collectList().toFuture()
         assert firstChunk.await(10, TimeUnit.SECONDS)
 
         when:
-        def response = client.exchange(AiRequestLimitsIT.request())
+        def response = client.exchange(chatRequest())
 
         then:
         response.statusCode.value() == 429
@@ -127,7 +127,7 @@ class AiUsageLimitsIT extends DefaultAiIntSpec {
         mockLlmServer.mockServer.removeStub(slow)
 
         then:
-        client.exchange(AiRequestLimitsIT.request()).statusCode.value() == 200
+        client.exchange(chatRequest()).statusCode.value() == 200
         mockLlmServer.mockServer.verify(2, postRequestedFor(urlEqualTo('/v1/chat/completions')))
 
         cleanup:
@@ -141,20 +141,20 @@ class AiUsageLimitsIT extends DefaultAiIntSpec {
                         .withBody('{"error":{"message":"unavailable"}}')))
 
         expect:
-        client.exchange(AiRequestLimitsIT.request()).statusCode.value() == 503
+        client.exchange(chatRequest()).statusCode.value() == 503
 
         when:
         mockLlmServer.mockServer.removeStub(failure)
 
         then:
-        client.exchange(AiRequestLimitsIT.request()).statusCode.value() == 200
+        client.exchange(chatRequest()).statusCode.value() == 200
     }
 
     def 'client cancellation releases capacity once disconnect is observed'() {
         given:
         def slow = slowStream()
         CountDownLatch firstChunk = new CountDownLatch(1)
-        def first = client.stream(AiRequestLimitsIT.request()).doOnNext { firstChunk.countDown() }.collectList().toFuture()
+        def first = client.stream(chatRequest()).doOnNext { firstChunk.countDown() }.collectList().toFuture()
         assert firstChunk.await(10, TimeUnit.SECONDS)
 
         when:
@@ -163,7 +163,7 @@ class AiUsageLimitsIT extends DefaultAiIntSpec {
 
         then:
         new PollingConditions(timeout: 10).eventually {
-            assert client.exchange(AiRequestLimitsIT.request()).statusCode.value() == 200
+            assert client.exchange(chatRequest()).statusCode.value() == 200
         }
 
         cleanup:

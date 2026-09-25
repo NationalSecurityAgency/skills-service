@@ -17,7 +17,6 @@ package skills.intTests.ai
 
 import groovy.json.JsonOutput
 import org.springframework.test.context.TestPropertySource
-import skills.controller.request.model.AiChatRequest
 import spock.lang.Unroll
 
 import static com.github.tomakehurst.wiremock.client.WireMock.*
@@ -40,7 +39,7 @@ class AiRequestLimitsIT extends DefaultAiIntSpec {
     @Unroll
     def 'accept configured boundary: #contents'() {
         when:
-        def response = client.exchange(request(contents))
+        def response = client.exchange(chatRequest(contents))
 
         then:
         response.statusCode.value() == 200
@@ -63,17 +62,17 @@ class AiRequestLimitsIT extends DefaultAiIntSpec {
         mockLlmServer.mockServer.verify(0, postRequestedFor(urlEqualTo('/v1/chat/completions')))
 
         where:
-        description       | payload                                                               | reason
-        'model'           | request(['hi'], 'model3')                                              | 'model is not allowed'
-        'model case'      | request(['hi'], 'MODEL1')                                              | 'model is not allowed'
-        'message count'   | request(['1', '2', '3', '4'])                                          | 'message count'
-        'message length'  | request(['12345678901'])                                               | 'message characters'
-        'total length'    | request(['1234567890', '1234567890', '1'])                              | 'total message characters'
-        'null messages'   | [model: 'model1', modelTemperature: 1, messages: null]                  | 'messages'
-        'empty messages'  | request([])                                                           | 'at least one message'
-        'null message'    | [model: 'model1', modelTemperature: 1, messages: [null]]                | 'message'
-        'null content'    | request([null])                                                       | 'message.content'
-        'null role'       | [model: 'model1', modelTemperature: 1, messages: [[content: 'hi']]]     | 'message.role'
+        description       | payload                                                                           | reason
+        'model'           | chatRequest(['hi'], 'model3')                                                     | 'model is not allowed'
+        'model case'      | chatRequest(['hi'], 'MODEL1')                                                     | 'model is not allowed'
+        'message count'   | chatRequest(['1', '2', '3', '4'])                                                 | 'message count'
+        'message length'  | chatRequest(['12345678901'])                                                      | 'message characters'
+        'total length'    | chatRequest(['1234567890', '1234567890', '1'])                                    | 'total message characters'
+        'null messages'   | [model: 'model1', modelTemperature: 1, messages: null]                             | 'messages'
+        'empty messages'  | chatRequest([])                                                                   | 'at least one message'
+        'null message'    | [model: 'model1', modelTemperature: 1, messages: [null]]                           | 'message'
+        'null content'    | chatRequest([null])                                                               | 'message.content'
+        'null role'       | [model: 'model1', modelTemperature: 1, messages: [[content: 'hi']]]                | 'message.role'
         'temperature'     | [model: 'model1', modelTemperature: 3, messages: [[role: 'User', content: 'hi']]] | 'modelTemperature'
     }
 
@@ -111,7 +110,7 @@ class AiRequestLimitsIT extends DefaultAiIntSpec {
 
     def 'allowed alternate model reaches provider unchanged'() {
         expect:
-        client.exchange(request(['hi'], 'model2')).statusCode.value() == 200
+        client.exchange(chatRequest(['hi'], 'model2')).statusCode.value() == 200
         mockLlmServer.mockServer.verify(1, postRequestedFor(urlEqualTo('/v1/chat/completions'))
                 .withRequestBody(matchingJsonPath('$.model', equalTo('model2'))))
     }
@@ -119,10 +118,5 @@ class AiRequestLimitsIT extends DefaultAiIntSpec {
     def 'model discovery only advertises allowed provider models'() {
         expect:
         skillsService.getAiModels().models.model == ['model1', 'model2']
-    }
-
-    static AiChatRequest request(List<String> contents = ['hi'], String model = 'model1') {
-        new AiChatRequest(model: model, modelTemperature: 1d,
-                messages: contents.collect { new AiChatRequest.ChatMessage(role: AiChatRequest.Role.User, content: it) })
     }
 }
