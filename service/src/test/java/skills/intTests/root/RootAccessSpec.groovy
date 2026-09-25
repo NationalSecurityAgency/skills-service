@@ -19,6 +19,7 @@ import groovy.json.JsonOutput
 import org.apache.commons.lang3.RandomStringUtils
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpStatus
+import org.springframework.transaction.support.TransactionTemplate
 import skills.controller.result.model.SettingsResult
 import skills.intTests.utils.DefaultIntSpec
 import skills.intTests.utils.SkillsClientException
@@ -35,6 +36,10 @@ import skills.storage.repos.SkillDefRepo
 import skills.storage.repos.UserAchievedLevelRepo
 import spock.lang.IgnoreIf
 import spock.lang.Requires
+
+import java.util.concurrent.CountDownLatch
+import java.util.concurrent.Executors
+import java.util.concurrent.TimeUnit
 
 import static skills.intTests.utils.SkillsFactory.createSkills
 import static skills.intTests.utils.SkillsFactory.createSubject
@@ -76,6 +81,57 @@ class RootAccessSpec extends DefaultIntSpec {
             rootSkillsService.removeRootRole(nonRootUserId)
             assert !nonRootSkillsService.isRoot()
         }
+    }
+
+    @IgnoreIf({env["SPRING_PROFILES_ACTIVE"] == "pki" && data.createAccounts.any { it } })
+    def 'concurrent bootstrap requests grant only one root - #createAccounts'() {
+        setup:
+        new TransactionTemplate(transactionManager).execute {
+            entityManager.createQuery("delete from UserRole where roleName = skills.storage.model.auth.RoleName.ROLE_SUPER_DUPER_USER").executeUpdate()
+        }
+        def executor = Executors.newFixedThreadPool(2)
+        CountDownLatch ready = new CountDownLatch(2)
+        CountDownLatch start = new CountDownLatch(1)
+        List<SkillsService> clients = [nonRootSkillsService, secondRootSkillService]
+
+        when:
+        def requests = (0..1).collect { int index ->
+            executor.submit({ ->
+                ready.countDown()
+                assert start.await(10, TimeUnit.SECONDS)
+                try {
+                    if (createAccounts[index]) {
+                        clients[index].createRootAccount([
+                                firstName: 'Bootstrap', lastName: 'User',
+                                email: "bootstrap-${UUID.randomUUID()}@email.com".toString(), password: 'aaaaaaaa',
+                        ])
+                    } else {
+                        clients[index].grantRoot()
+                    }
+                    return true
+                } catch (SkillsClientException exception) {
+                    assert exception.httpStatus == HttpStatus.BAD_REQUEST
+                    assert exception.message.contains('root user already exists')
+                    return false
+                }
+            } as java.util.concurrent.Callable<Boolean>)
+        }
+        assert ready.await(10, TimeUnit.SECONDS)
+        start.countDown()
+        def results = requests.collect { it.get(60, TimeUnit.SECONDS) }
+
+        then:
+        results.count { it } == 1
+        new TransactionTemplate(transactionManager).execute {
+            entityManager.createQuery("select count(r) from UserRole r where r.roleName = skills.storage.model.auth.RoleName.ROLE_SUPER_DUPER_USER").singleResult
+        } == 1L
+
+        cleanup:
+        start.countDown()
+        executor.shutdownNow()
+
+        where:
+        createAccounts << [[true, true], [false, false], [true, false]]
     }
 
     def 'prevent a user being created with root privileges if a root account already exists'() {
@@ -913,4 +969,3 @@ class RootAccessSpec extends DefaultIntSpec {
         user3SubjectSummary.skills[0].children.find { it.skillId = childSkillId2 }.totalPoints == 100
     }
 }
-

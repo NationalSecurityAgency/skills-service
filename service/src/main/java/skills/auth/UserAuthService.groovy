@@ -35,6 +35,8 @@ import org.springframework.stereotype.Component
 import org.springframework.transaction.annotation.Transactional
 import skills.auth.AuthUtils.RequestAttributes
 import skills.services.AccessSettingsStorageService
+import skills.services.LockingService
+import skills.controller.exceptions.SkillsValidator
 import skills.services.admin.ProjAdminService
 import skills.services.inception.InceptionProjectService
 import skills.services.settings.SettingsService
@@ -64,6 +66,9 @@ class UserAuthService {
 
     @Autowired
     AccessSettingsStorageService accessSettingsStorageService
+
+    @Autowired
+    LockingService lockingService
 
     @Autowired
     @Lazy
@@ -283,6 +288,30 @@ class UserAuthService {
     @Transactional(readOnly = true)
     boolean rootExists() {
         return accessSettingsStorageService.rootAdminExists()
+    }
+
+    @Transactional
+    UserInfo createFirstRoot(UserInfo userInfo) {
+        lockAndValidateFirstRoot()
+        // Email settings must be configured before verification can be required.
+        userInfo.emailVerified = true
+        UserInfo createdUser = createUser(userInfo)
+        grantRoot(createdUser.username)
+        return createdUser
+    }
+
+    @Transactional
+    void grantFirstRoot(String userId) {
+        lockAndValidateFirstRoot()
+        grantRoot(userId)
+    }
+
+    private void lockAndValidateFirstRoot() {
+        // Reuse the pre-existing global-settings DB lock to serialize both bootstrap paths,
+        // including across app instances. Bootstrap is rare, so sharing this lock avoids a
+        // dedicated lock row with minimal contention. Hold it through the root grant's commit.
+        lockingService.lockGlobalSettings()
+        SkillsValidator.isTrue(!rootExists(), 'A root user already exists! Granting additional root privileges requires a root user to grant them!')
     }
 
     @Transactional

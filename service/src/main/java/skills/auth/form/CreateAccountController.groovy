@@ -118,16 +118,18 @@ class CreateAccountController {
     @Conditional(SecurityMode.FormAuth)
     @PutMapping("createRootAccount")
     void createRootUser(@RequestBody UserInfo userInfo, HttpServletRequest request, HttpServletResponse response) {
-        SkillsValidator.isTrue(!userAuthService.rootExists(), 'A root user already exists! Granting additional root privileges requires a root user to grant them!')
         String password = userInfo.password
-        // initial root user does not require email verification, email settings need to be configured first
-        userInfo.emailVerified = true
-        userInfo = createUser(userInfo)
-        userAuthService.grantRoot(userInfo.username)
+        prepareUser(userInfo)
+        userInfo = userAuthService.createFirstRoot(userInfo)
         autoLoginService.autologin(userInfo, password, request, response)
     }
 
     private UserInfo createUser(UserInfo userInfo) {
+        prepareUser(userInfo)
+        return userAuthService.createUser(userInfo)
+    }
+
+    private void prepareUser(UserInfo userInfo) {
         String password = userInfo.password
         propsBasedValidator.validateMinStrLength(PublicProps.UiProp.minPasswordLength, "password", password)
         propsBasedValidator.validateMaxStrLength(PublicProps.UiProp.maxPasswordLength, "password", password)
@@ -142,15 +144,13 @@ class CreateAccountController {
         if (!userInfo.usernameForDisplay) {
             userInfo.usernameForDisplay = userInfo.username
         }
-        return userAuthService.createUser(userInfo)
     }
 
     // used only for OAuth and PKI
     @RequestMapping(value = "/grantFirstRoot", method = [RequestMethod.POST, RequestMethod.PUT])
     void grantFirstRoot(HttpServletRequest request) {
-        SkillsValidator.isTrue(!userAuthService.rootExists(), 'A root user already exists! Granting additional root privileges requires a root user to grant them!')
         SkillsValidator.isNotNull(request.getUserPrincipal(), 'Granting the first root user is only available in SAML & PKI modes, but it looks like the request was not made by an authenticated account!')
-        userAuthService.grantRoot(request.getUserPrincipal().name)
+        userAuthService.grantFirstRoot(request.getUserPrincipal().name)
     }
 
     @Conditional(SecurityMode.FormAuth)
