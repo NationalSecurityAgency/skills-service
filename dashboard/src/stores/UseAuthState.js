@@ -20,6 +20,7 @@ import axios from 'axios'
 import { useAppConfig } from '@/common-components/stores/UseAppConfig.js'
 import { useAppInfoState } from '@/stores/UseAppInfoState.js'
 import { useInceptionStore } from '@/stores/UseInceptionStore.js'
+import { useSkillsDisplayParentFrameState } from '@/skills-display/stores/UseSkillsDisplayParentFrameState.js'
 
 
 export const useAuthState = defineStore('authState', () => {
@@ -61,6 +62,7 @@ export const useAuthState = defineStore('authState', () => {
         localStorage.removeItem('expirationDate')
         localStorage.removeItem('userInfo')
         delete axios.defaults.headers.common.Authorization
+        useSkillsDisplayParentFrameState().setAuthToken('')
     }
 
     const handleLogin = (result) => {

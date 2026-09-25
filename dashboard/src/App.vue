@@ -121,7 +121,8 @@ onMounted(() => {
   invoke(async () => {
     if (skillsDisplayInfo.isSkillsClientPath()) {
       log.trace('App.vue: skillsDisplayInfo.isSkillsClientPath()=true, waiting for iframe to load')
-      await until(iframeInit.loadedIframe).toBe(true)
+      await until(() => iframeInit.loadedIframe.value || Boolean(iframeInit.initializationError.value)).toBe(true)
+      if (iframeInit.initializationError.value) return
       log.debug('App.vue: skillsDisplayInfo.isSkillsClientPath()=true, loaded iframe!')
     }
     loadConfigs()
@@ -185,13 +186,16 @@ const isDashboardFooter = computed(() => notSkillsClient.value && !isLoadingApp.
 
     <customizable-header v-if="isCustomizableHeader" role="region" aria-label="dynamic customizable header"></customizable-header>
     <div id="skilltree-main-container">
-      <div v-if="isLoadingApp" role="main" class="flex content-center justify-center flex-wrap" style="min-height: 40rem">
+      <div v-if="iframeInit.initializationError.value" role="alert" data-cy="skillsDisplayInitError" class="p-4">
+        {{ iframeInit.initializationError.value }}
+      </div>
+      <div v-else-if="isLoadingApp" role="main" class="flex content-center justify-center flex-wrap" style="min-height: 40rem">
         <div class="flex items-center justify-center m-2">
           <skills-spinner :is-loading="true" class="text-center"/>
           <h1 class="text-sm sr-only">Loading...</h1>
         </div>
       </div>
-      <div v-if="!isLoadingApp" class="m-0">
+      <div v-if="!isLoadingApp && !iframeInit.initializationError.value" class="m-0">
         <pki-app-bootstrap v-if="inBootstrapMode" role="region"/>
 
         <div v-if="!inBootstrapMode" :class="{ 'overall-container' : notSkillsClient, 'sd-theme-background-color': !notSkillsClient }">

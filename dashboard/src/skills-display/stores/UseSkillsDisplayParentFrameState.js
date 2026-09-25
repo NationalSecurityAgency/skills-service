@@ -14,8 +14,9 @@
  * limitations under the License.
  */
 import { defineStore } from 'pinia'
-import { computed, ref } from 'vue'
+import { computed, onScopeDispose, ref } from 'vue'
 import axios from 'axios';
+import { validateSkillsDisplayServiceUrl } from '@/skills-display/iframe/SkillsDisplayServiceUrl.js'
 
 export const useSkillsDisplayParentFrameState = defineStore('skillsDisplayParentFrameState', () => {
   const authToken = ref('')
@@ -37,9 +38,25 @@ export const useSkillsDisplayParentFrameState = defineStore('skillsDisplayParent
     return options.value?.parentPath || '/skilltree';
   })
   const setAuthToken = (token) => {
-    axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
     authToken.value = token
   }
+  const interceptor = axios.interceptors.request.use((config) => {
+    if (!authToken.value) {
+      return config
+    }
+    try {
+      validateSkillsDisplayServiceUrl(serviceUrl.value)
+      // getUri uses Axios's URL/baseURL combination rules, including allowAbsoluteUrls.
+      const destination = new URL(axios.getUri(config), window.location.href)
+      if (destination.origin === window.location.origin && !destination.username && !destination.password) {
+        config.headers.set('Authorization', `Bearer ${authToken.value}`)
+      }
+    } catch {
+      // Invalid or untrusted URLs must never receive the display token.
+    }
+    return config
+  })
+  onScopeDispose(() => axios.interceptors.request.eject(interceptor))
   return {
     authToken,
     setAuthToken,
