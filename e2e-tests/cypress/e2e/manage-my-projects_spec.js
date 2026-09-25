@@ -345,12 +345,10 @@ describe('Manage My Projects Tests', () => {
         cy.enableProdMode(1);
         cy.enableProdMode(2);
 
-        cy.intercept('GET', '/api/projects/Inception/token').as('getToken');
         cy.intercept('GET', '/api/availableForMyProjects').as('loadMyProjects');
 
         cy.visit('/progress-and-rankings/manage-my-projects');
 
-        cy.wait('@getToken');
         cy.wait('@loadMyProjects');
 
         cy.get('[data-cy="searchInput"]')
@@ -359,7 +357,6 @@ describe('Manage My Projects Tests', () => {
             .contains('No results found');
         cy.get('[data-cy="discoverProjectsTable"]')
             .contains('Please modify your search string: [dljlajd]');
-
     });
 
     it('view button is removed when project is added', function () {
