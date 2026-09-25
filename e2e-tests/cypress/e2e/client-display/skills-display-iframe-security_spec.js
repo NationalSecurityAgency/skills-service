@@ -20,8 +20,8 @@ describe('Skills Display iframe destination security', () => {
     cy.createSubject(1, 1);
     cy.createSkill(1, 1, 1);
 
-    // Use the dashboard's installed Postmate version in the actual parent window.
-    cy.readFile('../dashboard/node_modules/postmate/build/postmate.min.js').then((postmate) => {
+    // Use the e2e suite's pinned Postmate build in the actual parent window.
+    cy.readFile('node_modules/postmate/build/postmate.min.js').then((postmate) => {
       cy.intercept('GET', '/__e2e/postmate.js', {
         headers: { 'content-type': 'application/javascript' },
         body: postmate,
