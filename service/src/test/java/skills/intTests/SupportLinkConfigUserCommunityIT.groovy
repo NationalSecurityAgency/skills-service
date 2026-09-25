@@ -33,6 +33,9 @@ import skills.intTests.utils.SkillsService
         'skills.config.ui.supportLink3=https://otherLink.com',
         'skills.config.ui.supportLink3Label=other link',
         'skills.config.ui.supportLink3Icon=fas fa-other',
+        'skills.authorization.userInfoHealthCheckUri=https://localhost:8193/status',
+        'skills.authorization.userInfoUri=https://localhost:8193/userInfo?dn={dn}',
+        'skills.authorization.userQueryUri=https://localhost:8193/userQuery?query={query}',
 ], webEnvironment=SpringBootTest.WebEnvironment.RANDOM_PORT, classes = SpringBootApp)
 class SupportLinkConfigUserCommunityIT extends DefaultIntSpec {
 
@@ -76,4 +79,3 @@ class SupportLinkConfigUserCommunityIT extends DefaultIntSpec {
         pristineDragonsSupportLinks["supportLink3Icon"] == "fas fa-other"
     }
 }
-
