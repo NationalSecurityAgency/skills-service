@@ -423,6 +423,20 @@ describe('Client Display Accessibility tests', () => {
             cy.customLighthouse();
         });
 
+        it(`Learning Path page${darkMode}`, () => {
+            cy.setDarkModeIfNeeded(darkMode)
+
+            cy.cdVisit('/')
+            cy.get('[data-cy="viewLearningPathLink"]').should('be.visible').click()
+            cy.injectAxe()
+            cy.get('[data-cy="skillsTitle"]').should('contain.text', 'Learning Path')
+            cy.get('#dependency-graph canvas').should('be.visible')
+            cy.get('[data-cy="learningPathTable"] [data-cy="fromNodeLink_skill2"]').should('be.visible')
+
+            cy.customA11y()
+            cy.customLighthouse()
+        });
+
       it(`Skill Tags page${darkMode}`, () => {
           cy.setDarkModeIfNeeded(darkMode)
           cy.visit('/test-skills-display/proj1/tags')

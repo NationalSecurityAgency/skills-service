@@ -123,7 +123,7 @@ const jumpToNode = (value) => {
 <template>
   <Card class="mb-4" :pt="{ body: { class: 'p-0!' } }">
     <template #header>
-      <SkillsCardHeader title="Learning Path Routes"></SkillsCardHeader>
+      <SkillsCardHeader title="Learning Path Routes" :title-tag="mode === 'skills-display' ? 'h2' : 'h3'" />
     </template>
     <template #content>
       <div v-if="!isProcessing && learningPaths.length > 0">
