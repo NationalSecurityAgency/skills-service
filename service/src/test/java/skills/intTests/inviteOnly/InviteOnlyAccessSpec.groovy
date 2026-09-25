@@ -608,7 +608,7 @@ class InviteOnlyAccessSpec extends InviteOnlyBaseSpec {
         err.httpStatus == HttpStatus.FORBIDDEN
     }
 
-    def "cannot download attachment from invite only without accepting invite"() {
+    def "cannot download attachment from invite only without accepting invite - #suffix"() {
         def proj = SkillsFactory.createProject(99)
         def subj = SkillsFactory.createSubject(99)
         skillsService.createProject(proj)
@@ -630,7 +630,7 @@ class InviteOnlyAccessSpec extends InviteOnlyBaseSpec {
 
         List<Attachment> attachments = attachmentRepo.findAll()
         assert attachments.size() == 1
-        String url = "/api/download/${attachments[0].uuid}"
+        String url = "/api/download/${attachments[0].uuid}${suffix}"
         SkillsService.FileAndHeaders fileAndHeaders = skillsService.downloadAttachment(url)
         File file = fileAndHeaders.file
         assert file
@@ -643,6 +643,9 @@ class InviteOnlyAccessSpec extends InviteOnlyBaseSpec {
         then:
         def err = thrown(SkillsClientException)
         err.httpStatus == HttpStatus.FORBIDDEN
+
+        where:
+        suffix << ['', '?alwaysReturnContentDispositionForPdf=true']
     }
 
     def "cannot copy attachment from inaccessible invite-only project to another project"() {
