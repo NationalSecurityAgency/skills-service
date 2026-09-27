@@ -28,7 +28,7 @@ class MetricsPagingValidationSpec extends DefaultIntSpec {
 
     String metricsId = "userAchievementsChartBuilder"
 
-    def "malformed numeric metrics paging values return BadParam - #paramId=#invalidValue"() {
+    def "malformed numeric project metrics paging values return BadParam - #paramId=#invalidValue"() {
         def proj = createProject()
         skillsService.createProject(proj)
 
@@ -57,6 +57,33 @@ class MetricsPagingValidationSpec extends DefaultIntSpec {
         MetricsPagingParamsHelper.PROP_CURRENT_PAGE | "abc"
         MetricsPagingParamsHelper.PROP_PAGE_SIZE    | "abc"
         MetricsPagingParamsHelper.PROP_CURRENT_PAGE | "2147483648"
+        MetricsPagingParamsHelper.PROP_PAGE_SIZE    | "2147483648"
+    }
+
+    def "malformed numeric global metrics paging values return BadParam - #paramId=#invalidValue"() {
+        String globalMetricsId = "overallNumUsersPerTagBuilder"
+        Map props = [
+                tagKey: "someVal",
+                (MetricsPagingParamsHelper.PROP_CURRENT_PAGE): "1",
+                (MetricsPagingParamsHelper.PROP_PAGE_SIZE): "5",
+                (MetricsPagingParamsHelper.PROP_SORT_DESC): "true"
+        ]
+        props[paramId] = invalidValue
+
+        when:
+        skillsService.getOverallMetricsData(globalMetricsId, props)
+
+        then:
+        SkillsClientException e = thrown()
+        e.httpStatus == HttpStatus.BAD_REQUEST
+
+        def body = new JsonSlurper().parseText(e.resBody)
+        body.errorCode == "BadParam"
+        body.explanation == "Metrics[${globalMetricsId}]: ${paramId} must be a valid integer. Provided [${invalidValue}]"
+
+        where:
+        paramId                                      | invalidValue
+        MetricsPagingParamsHelper.PROP_CURRENT_PAGE | "abc"
         MetricsPagingParamsHelper.PROP_PAGE_SIZE    | "2147483648"
     }
 }
