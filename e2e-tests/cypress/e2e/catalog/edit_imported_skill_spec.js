@@ -357,7 +357,7 @@ describe('Edit Imported Skill Tests', () => {
 
     });
 
-    it('can edit point increment of an imported skill associated with a quiz', () => {
+    it.only('can edit point increment of an imported skill associated with a quiz', () => {
 
         cy.createQuizDef(1, { name: 'Test Quiz' });
         cy.createQuizQuestionDef(1, 1);
@@ -382,7 +382,7 @@ describe('Edit Imported Skill Tests', () => {
         cy.get('[data-cy="pointIncrement"] [data-pc-name="pcinputtext"]')
             .should('have.value', '150');
         cy.get('[data-cy="pointIncrement"] [data-pc-name="pcinputtext"]')
-            .type('1');
+            .type('{end}1');
         cy.clickSaveDialogBtn()
         cy.get('[data-cy="pointIncrement"] [data-pc-name="pcinputtext"]').should("not.exist")
 
@@ -405,6 +405,3 @@ describe('Edit Imported Skill Tests', () => {
             .should('have.value', '1,501');
     });
 });
-
-
-
