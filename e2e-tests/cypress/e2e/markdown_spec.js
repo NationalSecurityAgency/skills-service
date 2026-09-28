@@ -194,7 +194,7 @@ describe('Markdown Tests', () => {
           .should('not.exist');
     });
 
-    it.only('allows image paste events to continue through the editor', () => {
+    it('allows image paste events to continue through the editor', () => {
         cy.visit('/administrator/projects/proj1/subjects/subj1/');
         cy.get('[data-cy=newSkillButton]')
           .click();
