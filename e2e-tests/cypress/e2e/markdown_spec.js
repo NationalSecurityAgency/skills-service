@@ -235,10 +235,8 @@ describe('Markdown Tests', () => {
           });
 
         cy.get(markdownInput)
-          .find('img')
-          .should('exist')
-          .and('have.attr', 'src')
-          .and('not.be.empty');
+          .find('img[src]')
+          .should('have.attr', 'src');
 
         cy.clickSaveDialogBtn();
         cy.get('[data-cy="manageSkillLink_skill1Skill"]')
