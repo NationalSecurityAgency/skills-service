@@ -357,7 +357,7 @@ describe('Edit Imported Skill Tests', () => {
 
     });
 
-    it.only('can edit point increment of an imported skill associated with a quiz', () => {
+    it('can edit point increment of an imported skill associated with a quiz', () => {
 
         cy.createQuizDef(1, { name: 'Test Quiz' });
         cy.createQuizQuestionDef(1, 1);
