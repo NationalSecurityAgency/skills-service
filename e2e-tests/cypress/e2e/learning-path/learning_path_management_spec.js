@@ -60,6 +60,7 @@ describe('Learning Path Management Validation Tests', () => {
 
     it('Create a simple learning path', () => {
         visitLearningPath()
+        cy.get('[data-cy="fullDepsSkillsGraph"] [data-cy="graphLegend"]').should('be.visible')
 
         // Add Badge1 as a prerequisite for Badge2
         cy.selectSkill('[data-cy="learningPathFromSkillSelector"]', 'badge1')

@@ -49,7 +49,7 @@ describe('Project learning path in skills display', () => {
     cy.get('[data-cy="viewLearningPathLink"]').should('be.visible').click()
     cy.location('pathname').should('eq', '/test-skills-display/proj1/learning-path')
     cy.get('[data-cy="skillsTitle"]').contains('Learning Path')
-    cy.get('[data-cy="fullDepsSkillsGraph"] [data-cy="graphLegend"]').should('be.visible')
+    cy.get('[data-cy="fullDepsSkillsGraph"] [data-cy="graphLegend"]').should('not.exist')
     cy.get('[data-cy="fullDepsSkillsGraph"] [data-cy="learningPathProgressSummary"]').should('be.visible')
     cy.get('[data-cy="learningPathProgressSummary"]').then(($progress) => {
       cy.get('#additionalControls').should(($controls) => {
@@ -143,6 +143,7 @@ describe('Project learning path in skills display', () => {
     cy.addLearningPathItem(1, 1, 2, true, false)
 
     cy.cdVisit('/learning-path')
+    cy.get('[data-cy="graphLegend"]').should('be.visible')
     cy.get('[data-cy="learningPathTable"] [data-cy="fromNodeLink_skill1"]')
       .should('have.attr', 'href', '/test-skills-display/proj1/subjects/subj1/groups/group10/skills/skill1')
       .click()
@@ -163,6 +164,7 @@ describe('Project learning path in skills display', () => {
     cy.addCrossProjectLearningPathItem(2, 2, 1, 1)
 
     cy.cdVisit('/learning-path')
+    cy.get('[data-cy="graphLegend"]').should('not.exist')
     cy.get('[data-cy="learningPathTable"] [data-cy="fromNodeLink_skill2"]')
       .should('have.attr', 'href', '/test-skills-display/proj1/subjects/subj1/skills/skill2/crossProject/proj2/skill2')
       .click()

@@ -59,6 +59,9 @@ let network = null
 
 const isSkillsDisplayMode = computed(() => props.mode === 'skills-display')
 const isAdminMode = computed(() => props.mode === 'admin')
+const showLegend = computed(() => isAdminMode.value || (isSkillsDisplayMode.value &&
+  props.graph?.nodes?.some((node) => node.type === 'Skill') &&
+  props.graph?.nodes?.some((node) => node.type === 'Badge')))
 const legendItems = [
   { label: 'Skill', color: 'lightgreen', iconClass: 'fa-graduation-cap' },
   { label: 'Badge', color: '#88a9fc', iconClass: 'fa-award' },
@@ -269,7 +272,7 @@ defineExpose({ fitNetworkToScreen, panToNode, refresh })
                     </div>
                     <VerticalProgressBar class="mt-2" :total-progress="percentComplete" :bar-size="6" :disable-daily-color="true" :aria-label="`${completedItems} of ${totalItems} items achieved`" data-cy="learningPathProgressBar" />
                   </div>
-                  <GraphLegend class="graph-legend deps-overlay" :items="legendItems" />
+                  <GraphLegend v-if="showLegend" class="graph-legend deps-overlay" :items="legendItems" />
                 </div>
                 <div id="additionalControls" class="flex shrink-0 items-center gap-2">
                   <GraphControls
