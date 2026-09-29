@@ -107,7 +107,11 @@ class DefaultAiIntSpec extends DefaultIntSpec {
                 webClientBuilder.defaultHeader('X-XSRF-TOKEN', csrfToken)
                 webClientBuilder.clientConnector(new ReactorClientHttpConnector())
             } else {
-                webClientBuilder.clientConnector(new ReactorClientHttpConnector(createPkiHttpClient()))
+                HttpClient pkiHttpClient = createPkiHttpClient()
+                String token = getPkiCsrfToken(pkiHttpClient)
+                webClientBuilder.defaultHeader(HttpHeaders.COOKIE, "XSRF-TOKEN=${token}")
+                webClientBuilder.defaultHeader('X-XSRF-TOKEN', token)
+                webClientBuilder.clientConnector(new ReactorClientHttpConnector(pkiHttpClient))
             }
 
             client = webClientBuilder.build()
@@ -202,6 +206,18 @@ class DefaultAiIntSpec extends DefaultIntSpec {
                     ?.split(';')[0]?.substring('XSRF-TOKEN='.length())
             assert csrfToken
             return "${session}; XSRF-TOKEN=${csrfToken}"
+        }
+
+        private String getPkiCsrfToken(HttpClient httpClient) {
+            WebClient tokenClient = WebClient.builder()
+                    .clientConnector(new ReactorClientHttpConnector(httpClient))
+                    .build()
+            ResponseEntity<Void> response = tokenClient.get().uri(chatUrl.replace('/openai/chat', '/public/status'))
+                    .exchangeToMono { it.toBodilessEntity() }.block(Duration.ofSeconds(30))
+            String token = response.headers.get(HttpHeaders.SET_COOKIE)?.find { it.startsWith('XSRF-TOKEN=') }
+                    ?.split(';')[0]?.substring('XSRF-TOKEN='.length())
+            assert token
+            return token
         }
 
         HttpClient createPkiHttpClient() throws Exception {

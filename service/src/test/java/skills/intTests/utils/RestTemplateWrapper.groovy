@@ -63,7 +63,7 @@ class RestTemplateWrapper extends RestTemplate {
         this.pkiAuth = pkiAuth
         this.restTemplate = restTemplate
         setupRestTemplate()
-        List<ClientHttpRequestInterceptor> interceptors = [new StatefulRestTemplateInterceptor(restTemplate.requestFactory)]
+        List<ClientHttpRequestInterceptor> interceptors = [new StatefulRestTemplateInterceptor(restTemplate.requestFactory, pkiAuth)]
         this.restTemplate.setInterceptors(interceptors)
     }
 
@@ -72,10 +72,12 @@ class RestTemplateWrapper extends RestTemplate {
      */
     static class StatefulRestTemplateInterceptor implements ClientHttpRequestInterceptor {
         private final ClientHttpRequestFactory requestFactory
+        private final boolean pkiAuth
         private Map<String, String> cookiesByName = [:]
 
-        StatefulRestTemplateInterceptor(ClientHttpRequestFactory requestFactory) {
+        StatefulRestTemplateInterceptor(ClientHttpRequestFactory requestFactory, boolean pkiAuth) {
             this.requestFactory = requestFactory
+            this.pkiAuth = pkiAuth
         }
 
         @Override
@@ -92,13 +94,20 @@ class RestTemplateWrapper extends RestTemplate {
         }
 
         private boolean needsCsrfToken(HttpRequest request) {
+            String path = request.URI.path
+            boolean clientEndpoint = path == '/public' || path.startsWith('/public/') ||
+                    path == '/api' || path.startsWith('/api/')
+            boolean multipart = request.headers.contentType?.isCompatibleWith(MediaType.MULTIPART_FORM_DATA)
             return !['GET', 'HEAD', 'TRACE', 'OPTIONS'].contains(request.method.name()) &&
+                    !(pkiAuth && clientEndpoint && !multipart) &&
                     !cookiesByName.get('XSRF-TOKEN') &&
                     !request.headers.containsHeader('X-XSRF-TOKEN')
         }
 
         private void refreshCsrfToken(HttpRequest request) throws IOException {
-            URI csrfUri = request.URI.resolve('/app/userInfo')
+            // PKI rejects unauthenticated /app/userInfo even though the CSRF filter
+            // issues a cookie; /public/status reaches the same filter in both modes.
+            URI csrfUri = request.URI.resolve('/public/status')
             ClientHttpRequest csrfRequest = requestFactory.createRequest(csrfUri, HttpMethod.GET)
             addCookiesAndCsrfHeader(csrfRequest.headers)
             ClientHttpResponse csrfResponse = csrfRequest.execute()
