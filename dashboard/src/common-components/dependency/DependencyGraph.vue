@@ -260,7 +260,7 @@ defineExpose({ fitNetworkToScreen, panToNode, refresh })
               <NoContent2
                 icon="fa fa-project-diagram"
                 title="No Learning Path Yet..."
-                message="Here you can view the project's Learning Path, which may consist of skills and badges." />
+                :message="isAdminMode ? `Here you can create and manage the project's Learning Path.` : `Here you can view the project's Learning Path, which may consist of skills and badges.`" />
             </div>
             <div v-else class="w-full px-2" :class="isFullscreen ? 'pt-4' : ''">
               <div class="flex flex-wrap items-start justify-between gap-3">
