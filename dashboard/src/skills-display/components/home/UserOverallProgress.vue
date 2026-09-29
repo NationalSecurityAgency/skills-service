@@ -151,7 +151,7 @@ onMounted(() => {
                 <span>Learning Path</span>
               </div>
               <div class="text-sm whitespace-nowrap">
-                <span class="text-orange-700 dark:text-orange-400 sd-theme-primary-color" data-cy="numAchievedLearningPathItems">{{ learningPathProgress.achieved }}</span> of <span data-cy="numTotalLearningPathItems">{{ learningPathProgress.total }}</span> <span class="ml-0">{{ pluralize.plural(attributes.skillDisplayName, learningPathProgress.total) }} Achieved</span>
+                <span class="text-orange-700 dark:text-orange-400 sd-theme-primary-color" data-cy="numAchievedLearningPathItems">{{ learningPathProgress.achieved }}</span> of <span data-cy="numTotalLearningPathItems">{{ learningPathProgress.total }}</span> <span class="ml-0">{{ pluralize.plural("item", learningPathProgress.total) }} achieved</span>
               </div>
             </div>
             <RouterLink

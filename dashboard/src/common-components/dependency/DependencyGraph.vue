@@ -26,6 +26,7 @@ import SkillsOverlay from '@/components/utils/SkillsOverlay.vue'
 import NoContent2 from '@/components/utils/NoContent2.vue'
 import { useThemesHelper } from '@/components/header/UseThemesHelper.js'
 import { useSkillsDisplayThemeState } from '@/skills-display/stores/UseSkillsDisplayThemeState.js'
+import VerticalProgressBar from '@/skills-display/components/progress/VerticalProgressBar.vue'
 import { useDependencyNavigation } from '@/common-components/dependency/UseDependencyNavigation.js'
 
 const props = defineProps({
@@ -73,6 +74,10 @@ const displayOptions = {
   },
 }
 const hasGraphData = computed(() => !!props.graph?.nodes?.length)
+const showProgress = computed(() => isSkillsDisplayMode.value && (props.graph?.edges?.length || 0) > 0)
+const totalItems = computed(() => showProgress.value ? (props.graph?.nodes?.length || 0) : 0)
+const completedItems = computed(() => showProgress.value ? (props.graph?.nodes?.filter((node) => node.achieved).length || 0) : 0)
+const percentComplete = computed(() => totalItems.value ? Math.round((completedItems.value / totalItems.value) * 100) : 0)
 const containerWidth = computed(() => graphTemplate.value?.offsetWidth || 0)
 const computedHeight = computed(() => {
   if (containerWidth.value > dataWidth.value) {
@@ -244,32 +249,42 @@ defineExpose({ fitNetworkToScreen, panToNode, refresh })
         <div
           id="fullDepsSkillsGraphContainer"
           ref="fullDepsSkillsGraphContainer"
+          class="flex flex-col"
           :style="!isFullscreen && dynamicHeight ? { height: `${computedHeight}px` } : undefined">
           <slot name="fullscreen-header" :is-fullscreen="isFullscreen" />
-          <SkillsOverlay :show="isLoading && isFullscreen" class="h-full">
+          <SkillsOverlay :show="isLoading && isFullscreen" class="flex flex-col flex-1 min-h-0">
             <div v-if="!hasGraphData && !isLoading" class="my-8">
               <NoContent2
                 icon="fa fa-project-diagram"
                 title="No Learning Path Yet..."
                 message="Here you can view the project's Learning Path, which may consist of skills and badges." />
             </div>
-            <div v-else class="relative w-full ml-1">
-              <div class="left-0" :class="isFullscreen ? 'pl-2 pt-4' : ''">
-                <GraphLegend class="graph-legend deps-overlay" :items="legendItems" />
-              </div>
-              <div id="additionalControls" class="absolute right-0 mr-1 gap-2 flex items-center" :class="isFullscreen ? 'pr-2 pt-5' : ''">
-                <GraphControls
-                  :is-fullscreen="isFullscreen"
-                  :enable-zoom="enableZoom"
-                  :enable-animations="enableAnimations"
-                  :horizontal-orientation="horizontalOrientation"
-                  :enable-dynamic-height="dynamicHeight"
-                  :disabled="isLoading"
-                  @toggle-zoom="enableZoom = !enableZoom"
-                  @toggle-orientation="toggleOrientation"
-                  @toggle-animations="enableAnimations = !enableAnimations"
-                  @toggle-dynamic-height="dynamicHeight = !dynamicHeight"
-                  @toggle-fullscreen="toggleFullscreen" />
+            <div v-else class="w-full px-2" :class="isFullscreen ? 'pt-4' : ''">
+              <div class="flex flex-wrap items-start justify-between gap-3">
+                <div class="min-w-0 flex-1">
+                  <div v-if="showProgress" class="mb-4 w-full max-w-xs rounded-lg border border-surface-200 dark:border-surface-700 bg-surface-0 dark:bg-surface-900 px-3 py-2 shadow-sm" data-cy="learningPathProgressSummary">
+                    <div class="flex items-center justify-between gap-4 text-sm">
+                      <span class="text-surface-600 dark:text-surface-300" data-cy="learningPathProgressCount">{{ completedItems }} of {{ totalItems }} items achieved</span>
+                      <span class="shrink-0 font-semibold sd-theme-primary-color" data-cy="learningPathProgressPercent">{{ percentComplete }}%</span>
+                    </div>
+                    <VerticalProgressBar class="mt-2" :total-progress="percentComplete" :bar-size="6" :disable-daily-color="true" :aria-label="`${completedItems} of ${totalItems} items achieved`" data-cy="learningPathProgressBar" />
+                  </div>
+                  <GraphLegend class="graph-legend deps-overlay" :items="legendItems" />
+                </div>
+                <div id="additionalControls" class="flex shrink-0 items-center gap-2">
+                  <GraphControls
+                    :is-fullscreen="isFullscreen"
+                    :enable-zoom="enableZoom"
+                    :enable-animations="enableAnimations"
+                    :horizontal-orientation="horizontalOrientation"
+                    :enable-dynamic-height="dynamicHeight"
+                    :disabled="isLoading"
+                    @toggle-zoom="enableZoom = !enableZoom"
+                    @toggle-orientation="toggleOrientation"
+                    @toggle-animations="enableAnimations = !enableAnimations"
+                    @toggle-dynamic-height="dynamicHeight = !dynamicHeight"
+                    @toggle-fullscreen="toggleFullscreen" />
+                </div>
               </div>
             </div>
             <div id="dependency-graph" ref="dependencyGraph" :style="{ visibility: showGraph ? 'visible' : 'hidden' }" :class="{ fullscreen: isFullscreen }" />
@@ -297,10 +312,9 @@ defineExpose({ fitNetworkToScreen, panToNode, refresh })
 #dependency-graph .vis-button.vis-zoomExtends:after { content: '\f78c'; font-weight: 900; font-size: 30px; }
 .deps-overlay { z-index: 99; }
 :fullscreen, ::backdrop { background-color: rgba(255, 255, 255, 1); }
-#dependency-graph { height: 98%; }
-#dependency-graph.fullscreen { height: 90% !important; }
+#dependency-graph { flex: 1 1 0; min-height: 0; overflow: hidden; }
 .vis-navigation { background-color: white; position: absolute; top: 30px; right: 0; }
 .fullscreen > .vis-network > .vis-navigation { right: 15px !important; }
 #fullDepsSkillsGraphContainer { height: 31.25rem; min-height: 31.25rem; }
-#additionalControls { top: -15px; z-index: 999; }
+#additionalControls { z-index: 999; }
 </style>

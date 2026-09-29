@@ -37,7 +37,7 @@ describe('Project learning path in skills display', () => {
     cy.cdVisit('/')
     cy.get('[data-cy="numAchievedLearningPathItems"]').should('have.text', '1')
     cy.get('[data-cy="numTotalLearningPathItems"]').should('have.text', '3')
-    cy.get('[data-cy="numAchievedLearningPathItems"]').parent().should('contain.text', '1 of 3 Skills Achieved')
+    cy.get('[data-cy="numAchievedLearningPathItems"]').parent().should('contain.text', '1 of 3 items achieved')
     cy.get('[data-cy="learningPathPercent"]').should('have.text', '33%')
     cy.get('[data-cy="numAchievedSkills"]').should('have.text', '1')
     cy.get('[data-cy="numTotalSkills"]').should('have.text', '4')
@@ -49,6 +49,16 @@ describe('Project learning path in skills display', () => {
     cy.get('[data-cy="viewLearningPathLink"]').should('be.visible').click()
     cy.location('pathname').should('eq', '/test-skills-display/proj1/learning-path')
     cy.get('[data-cy="skillsTitle"]').contains('Learning Path')
+    cy.get('[data-cy="fullDepsSkillsGraph"] [data-cy="graphLegend"]').should('be.visible')
+    cy.get('[data-cy="fullDepsSkillsGraph"] [data-cy="learningPathProgressSummary"]').should('be.visible')
+    cy.get('[data-cy="learningPathProgressSummary"]').then(($progress) => {
+      cy.get('#additionalControls').should(($controls) => {
+        expect(Math.abs($progress[0].getBoundingClientRect().top - $controls[0].getBoundingClientRect().top)).to.be.lessThan(1)
+      })
+    })
+    cy.get('[data-cy="learningPathProgressCount"]').should('contain.text', '1 of 3 items achieved')
+    cy.get('[data-cy="learningPathProgressPercent"]').should('have.text', '33%')
+    cy.get('[data-cy="learningPathProgressBar"] [role="progressbar"]').should('have.attr', 'aria-valuenow', '33')
     cy.get('#dependency-graph canvas').should('be.visible')
     cy.get('[data-cy="learningPathTable"] [data-cy="skillsBTableTotalRows"]').should('have.text', '2')
     cy.get('[data-cy="learningPathTable"] [data-cy="sharedSkillsTable-removeBtn"]').should('not.exist')
@@ -70,12 +80,15 @@ describe('Project learning path in skills display', () => {
     cy.cdVisit('/')
     cy.get('[data-cy="numAchievedLearningPathItems"]').should('have.text', '2')
     cy.get('[data-cy="numTotalLearningPathItems"]').should('have.text', '3')
-    cy.get('[data-cy="numAchievedLearningPathItems"]').parent().should('contain.text', '2 of 3 Skills Achieved')
+    cy.get('[data-cy="numAchievedLearningPathItems"]').parent().should('contain.text', '2 of 3 items achieved')
     cy.get('[data-cy="learningPathPercent"]').should('have.text', '67%')
     cy.get('[data-cy="numAchievedSkills"]').should('have.text', '3')
     cy.get('[data-cy="numTotalSkills"]').should('have.text', '4')
 
     cy.get('[data-cy="viewLearningPathLink"]').click()
+    cy.get('[data-cy="learningPathProgressCount"]').should('contain.text', '2 of 3 items achieved')
+    cy.get('[data-cy="learningPathProgressPercent"]').should('have.text', '67%')
+    cy.get('[data-cy="learningPathProgressBar"] [role="progressbar"]').should('have.attr', 'aria-valuenow', '67')
     cy.get('#dependency-graph canvas').should('be.visible')
     cy.get('[data-cy="learningPathTable"] [data-cy="fromNodeLink_skill1"]').should('be.visible')
     cy.get('[data-cy="learningPathTable"] [data-cy="fromNodeLink_skill2"]').should('be.visible')
@@ -83,9 +96,37 @@ describe('Project learning path in skills display', () => {
     cy.get('[data-cy="learningPathTable"] [data-cy="toNodeLink_skill4"]').should('not.exist')
   })
 
+  it('keeps the graph within its card while zooming and dragging', () => {
+    cy.createSkill(1, 1, 1)
+    cy.createSkill(1, 1, 2)
+    cy.addLearningPathItem(1, 1, 2)
+
+    cy.cdVisit('/learning-path')
+    cy.get('#dependency-graph canvas').should('be.visible')
+    cy.get('#dependency-graph').should(($graph) => {
+      const graph = $graph[0].getBoundingClientRect()
+      const card = $graph.closest('[data-cy="fullDepsSkillsGraph"]')[0].getBoundingClientRect()
+      expect(graph.bottom).to.be.at.most(card.bottom)
+    })
+
+    cy.get('#dependency-graph canvas').trigger('wheel', { deltaY: -600, bubbles: true, cancelable: true })
+    cy.get('#dependency-graph canvas').trigger('mousedown', { clientX: 450, clientY: 300, button: 0 })
+      .trigger('mousemove', { clientX: 450, clientY: 650, buttons: 1 })
+      .trigger('mouseup', { clientX: 450, clientY: 650 })
+
+    cy.get('#dependency-graph').should(($graph) => {
+      const graph = $graph[0].getBoundingClientRect()
+      const card = $graph.closest('[data-cy="fullDepsSkillsGraph"]')[0].getBoundingClientRect()
+      expect(graph.bottom).to.be.at.most(card.bottom)
+      expect($graph.css('overflow')).to.eq('hidden')
+    })
+    cy.get('[data-cy="learningPathTable"]').should('be.visible')
+  })
+
   it('shows an empty learning path on a direct visit', () => {
     cy.cdVisit('/learning-path')
     cy.get('[data-cy="skillsTitle"]').contains('Learning Path')
+    cy.get('[data-cy="fullDepsSkillsGraph"] [data-cy="learningPathProgressSummary"]').should('not.exist')
     cy.get('[data-cy="fullDepsSkillsGraph"]').contains('No Learning Path Yet')
     cy.get('[data-cy="learningPathTable"]').should('not.exist')
   })
