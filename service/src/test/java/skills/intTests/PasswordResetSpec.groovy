@@ -72,7 +72,7 @@ class PasswordResetSpec extends DefaultIntSpec {
                 "publicUrl"  : "http://localhost:${localPort}/".toString(),
                 "fromEmail"  : "resetspec@skilltreetests"
         ])
-        template.interceptors.add(new RestTemplateWrapper.StatefulRestTemplateInterceptor())
+        template.interceptors.add(new RestTemplateWrapper.StatefulRestTemplateInterceptor(template.requestFactory))
         template.getForEntity("http://localhost:${localPort}/app/users/validExistingDashboardUserId/randomuser@skills.org", String.class)
     }
 
@@ -191,25 +191,38 @@ class PasswordResetSpec extends DefaultIntSpec {
     private ResponseEntity<String> createAccount(String email, String firstName, String lastName, String password) {
         RestTemplate restTemplate = new RestTemplate()
         restTemplate.errorHandler = new NoOpResponseErrorHandler()
+        HttpHeaders headers = csrfHeaders(restTemplate)
         restTemplate.exchange(
                 "http://localhost:${localPort}/createAccount".toString(),
                 HttpMethod.PUT,
-                new HttpEntity<>([email: email, firstName: firstName, lastName: lastName, password: password]),
+                new HttpEntity<>([email: email, firstName: firstName, lastName: lastName, password: password], headers),
                 String)
     }
 
     private ResponseEntity<String> login(String username, String password) {
-        HttpHeaders headers = new HttpHeaders()
+        RestTemplate restTemplate = new RestTemplate()
+        restTemplate.errorHandler = new NoOpResponseErrorHandler()
+        HttpHeaders headers = csrfHeaders(restTemplate)
         headers.contentType = MediaType.APPLICATION_FORM_URLENCODED
         MultiValueMap<String, String> form = new LinkedMultiValueMap<>()
         form.add('username', username)
         form.add('password', password)
-        RestTemplate restTemplate = new RestTemplate()
-        restTemplate.errorHandler = new NoOpResponseErrorHandler()
         restTemplate.postForEntity(
                 "http://localhost:${localPort}/performLogin".toString(),
                 new HttpEntity<>(form, headers),
                 String)
+    }
+
+    private HttpHeaders csrfHeaders(RestTemplate restTemplate) {
+        ResponseEntity<String> response = restTemplate.getForEntity("http://localhost:${localPort}/app/userInfo".toString(), String)
+        String cookie = response.headers.get(HttpHeaders.SET_COOKIE)?.find { it.startsWith('XSRF-TOKEN=') }
+        assert cookie
+        String token = cookie.split(';')[0].substring('XSRF-TOKEN='.length())
+        assert token
+        HttpHeaders headers = new HttpHeaders()
+        headers.set(HttpHeaders.COOKIE, "XSRF-TOKEN=${token}")
+        headers.set('X-XSRF-TOKEN', token)
+        return headers
     }
 
 

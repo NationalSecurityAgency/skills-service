@@ -87,6 +87,17 @@ class CorsEndpointIT extends DefaultIntSpec {
         given:
         HttpHeaders headers = new HttpHeaders()
         headers.setOrigin('https://trusted.example')
+        if (method == HttpMethod.POST || method == HttpMethod.PUT) {
+            ResponseEntity<String> tokenResponse = skillsService.wsHelper.restTemplateWrapper.exchange(
+                    "${skillsService.wsHelper.skillsService}/app/userInfo".toString(),
+                    HttpMethod.GET, new HttpEntity<>(), String)
+            String csrfCookie = tokenResponse.headers.get(HttpHeaders.SET_COOKIE)?.find { it.startsWith('XSRF-TOKEN=') }
+            assert csrfCookie
+            String token = csrfCookie.split(';')[0].substring('XSRF-TOKEN='.length())
+            assert token
+            headers.set(HttpHeaders.COOKIE, "XSRF-TOKEN=${token}")
+            headers.set('X-XSRF-TOKEN', token)
+        }
         String endpoint = "${skillsService.wsHelper.skillsService}${path}"
         ResponseEntity<String> response = skillsService.wsHelper.restTemplateWrapper.exchange(
                 endpoint, method, new HttpEntity<>(body, headers), String)

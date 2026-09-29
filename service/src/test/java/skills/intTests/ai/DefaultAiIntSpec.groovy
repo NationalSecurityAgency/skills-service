@@ -83,6 +83,7 @@ class DefaultAiIntSpec extends DefaultIntSpec {
         CertificateRegistry certificateRegistry
 
         private String cookieHeader
+        private String csrfToken
         private WebClient client
         private boolean isPki
         ChatClient(int skillsServicePort,
@@ -103,6 +104,7 @@ class DefaultAiIntSpec extends DefaultIntSpec {
             if (!isPki) {
                 cookieHeader = getCookie()
                 webClientBuilder.defaultHeader(HttpHeaders.COOKIE, cookieHeader)
+                webClientBuilder.defaultHeader('X-XSRF-TOKEN', csrfToken)
                 webClientBuilder.clientConnector(new ReactorClientHttpConnector())
             } else {
                 webClientBuilder.clientConnector(new ReactorClientHttpConnector(createPkiHttpClient()))
@@ -167,19 +169,39 @@ class DefaultAiIntSpec extends DefaultIntSpec {
         }
 
         private String getCookie() {
+            RestTemplate authClient = new RestTemplate()
+            ResponseEntity<String> csrfResponse = authClient.getForEntity(
+                    loginUrl.replace('/performLogin', '/app/userInfo'), String.class)
+            String initialToken = csrfResponse.headers.get(HttpHeaders.SET_COOKIE)?.find { it.startsWith('XSRF-TOKEN=') }
+                    ?.split(';')[0]?.substring('XSRF-TOKEN='.length())
+            assert initialToken
+            String initialSession = csrfResponse.headers.get(HttpHeaders.SET_COOKIE)?.find { it.startsWith('JSESSIONID=') }
+                    ?.split(';')[0]
+
             HttpHeaders authHeaders = new HttpHeaders()
             authHeaders.setContentType(MediaType.APPLICATION_FORM_URLENCODED)
+            authHeaders.set(HttpHeaders.COOKIE, ([initialSession, "XSRF-TOKEN=${initialToken}"].findAll { it }).join('; '))
+            authHeaders.set('X-XSRF-TOKEN', initialToken)
             MultiValueMap<String, String> authParams = new LinkedMultiValueMap<>()
             authParams.add('username', username)
             authParams.add('password', password)
 
             HttpEntity<MultiValueMap<String, String>> httpRequest = new HttpEntity<>(authParams, authHeaders)
-            ResponseEntity<String> authResponse = new RestTemplate().postForEntity(loginUrl, httpRequest, String.class)
+            ResponseEntity<String> authResponse = authClient.postForEntity(loginUrl, httpRequest, String.class)
 
             List<String> setCookiesHeaders = authResponse.headers.get(HttpHeaders.SET_COOKIE)
             log.debug("authResponse: [{}]", setCookiesHeaders)
-            String cookieHeader = String.join("; ", setCookiesHeaders)
-            return cookieHeader
+            String session = setCookiesHeaders?.find { it.startsWith('JSESSIONID=') }?.split(';')[0]
+            assert session
+
+            HttpHeaders csrfHeaders = new HttpHeaders()
+            csrfHeaders.set(HttpHeaders.COOKIE, session)
+            ResponseEntity<String> freshTokenResponse = authClient.exchange(
+                    loginUrl.replace('/performLogin', '/app/userInfo'), HttpMethod.GET, new HttpEntity<>(csrfHeaders), String)
+            csrfToken = freshTokenResponse.headers.get(HttpHeaders.SET_COOKIE)?.find { it.startsWith('XSRF-TOKEN=') }
+                    ?.split(';')[0]?.substring('XSRF-TOKEN='.length())
+            assert csrfToken
+            return "${session}; XSRF-TOKEN=${csrfToken}"
         }
 
         HttpClient createPkiHttpClient() throws Exception {

@@ -17,6 +17,9 @@ package skills.intTests.ai
 
 import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.http.HttpEntity
+import org.springframework.http.HttpHeaders
+import org.springframework.http.HttpMethod
 import skills.services.openai.OpenAIUsageLimitsProperties
 import org.springframework.http.HttpStatus
 import org.springframework.web.client.HttpClientErrorException
@@ -52,10 +55,16 @@ class AiEndpointsSpecs extends DefaultAiIntSpec {
     @IgnoreIf({env["SPRING_PROFILES_ACTIVE"] == "pki" })
     def "must be logged in to use chat endpoint"() {
         RestTemplate unauthorized = new RestTemplate()
+        def tokenResponse = unauthorized.getForEntity("http://localhost:${localPort}/app/userInfo", String)
+        String token = tokenResponse.headers.get(HttpHeaders.SET_COOKIE).find { it.startsWith('XSRF-TOKEN=') }
+                .split(';')[0].substring('XSRF-TOKEN='.length())
+        HttpHeaders headers = new HttpHeaders()
+        headers.set(HttpHeaders.COOKIE, "XSRF-TOKEN=${token}")
+        headers.set('X-XSRF-TOKEN', token)
         when:
-        unauthorized.postForEntity("http://localhost:${localPort}/openai/chat", new AiChatRequest(
+        unauthorized.exchange("http://localhost:${localPort}/openai/chat", HttpMethod.POST, new HttpEntity<>(new AiChatRequest(
                 messages: [new AiChatRequest.ChatMessage(role: AiChatRequest.Role.User, content: 'hi')],
-                model: 'model1', modelTemperature: 1.0), String)
+                model: 'model1', modelTemperature: 1.0), headers), String)
         then:
         HttpClientErrorException e = thrown(HttpClientErrorException)
         e.statusCode == HttpStatus.UNAUTHORIZED

@@ -23,6 +23,7 @@ import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.web.server.LocalServerPort
 import org.springframework.http.HttpEntity
 import org.springframework.http.HttpHeaders
+import org.springframework.http.HttpMethod
 import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
 import org.springframework.http.HttpStatus
@@ -497,13 +498,13 @@ class EmailVerificationIT extends Specification {
     }
 
     private ResponseEntity<String> login(String username, String password) {
-        HttpHeaders headers = new HttpHeaders()
+        RestTemplate restTemplate = new RestTemplate()
+        restTemplate.errorHandler = new NoOpResponseErrorHandler()
+        HttpHeaders headers = csrfHeaders(restTemplate)
         headers.contentType = MediaType.APPLICATION_FORM_URLENCODED
         MultiValueMap<String, String> form = new LinkedMultiValueMap<>()
         form.add('username', username)
         form.add('password', password)
-        RestTemplate restTemplate = new RestTemplate()
-        restTemplate.errorHandler = new NoOpResponseErrorHandler()
         restTemplate.postForEntity(
                 "http://localhost:${localPort}/performLogin".toString(),
                 new HttpEntity<>(form, headers),
@@ -513,13 +514,23 @@ class EmailVerificationIT extends Specification {
     private ResponseEntity<String> createAccount(String email, String firstName, String lastName, String password) {
         RestTemplate restTemplate = new RestTemplate()
         restTemplate.errorHandler = new NoOpResponseErrorHandler()
+        HttpHeaders headers = csrfHeaders(restTemplate)
         restTemplate.exchange(
                 "http://localhost:${localPort}/createAccount".toString(),
-                org.springframework.http.HttpMethod.PUT,
-                new HttpEntity<>([email: email, firstName: firstName, lastName: lastName, password: password]),
+                HttpMethod.PUT,
+                new HttpEntity<>([email: email, firstName: firstName, lastName: lastName, password: password], headers),
                 String)
     }
 
-
-
+    private HttpHeaders csrfHeaders(RestTemplate restTemplate) {
+        ResponseEntity<String> response = restTemplate.getForEntity("http://localhost:${localPort}/app/userInfo".toString(), String)
+        String cookie = response.headers.get(HttpHeaders.SET_COOKIE)?.find { it.startsWith('XSRF-TOKEN=') }
+        assert cookie
+        String token = cookie.split(';')[0].substring('XSRF-TOKEN='.length())
+        assert token
+        HttpHeaders headers = new HttpHeaders()
+        headers.set(HttpHeaders.COOKIE, "XSRF-TOKEN=${token}")
+        headers.set('X-XSRF-TOKEN', token)
+        return headers
+    }
 }
