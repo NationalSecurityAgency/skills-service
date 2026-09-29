@@ -16,7 +16,9 @@
 package skills.intTests.userActions
 
 
+import org.springframework.http.HttpStatus
 import skills.intTests.utils.DefaultIntSpec
+import skills.intTests.utils.SkillsClientException
 import skills.intTests.utils.QuizDefFactory
 import skills.intTests.utils.SkillsService
 import skills.services.userActions.DashboardAction
@@ -221,4 +223,22 @@ class DashboardUserActionsSpec extends DefaultIntSpec {
         options1.actionFilterOptions.sort() == [DashboardAction.Delete.toString(), DashboardAction.Create.toString(), DashboardAction.Edit.toString()].sort()
         options1.itemFilterOptions.sort() == [DashboardItem.Project.toString(), DashboardItem.Quiz.toString()].sort()
     }
+    def "root user actions reject invalid paging - limit: #limit, page: #page"() {
+        SkillsService rootService = createRootSkillService()
+
+        when:
+        rootService.getUserActionsForEverything(limit, page, "created", true)
+
+        then:
+        SkillsClientException e = thrown(SkillsClientException)
+        e.httpStatus == HttpStatus.BAD_REQUEST
+        e.resBody.contains('"errorCode":"BadParam"')
+        e.resBody.contains(expectedMessage)
+
+        where:
+        limit | page | expectedMessage
+        10    | 0    | "Page must be 1 or greater (pages are 1-based), provided=[0]"
+        0     | 1    | "Limit must be greater than 0, provided=[0]"
+    }
+
 }

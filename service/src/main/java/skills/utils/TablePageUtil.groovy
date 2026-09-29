@@ -28,12 +28,21 @@ class TablePageUtil {
     static PageRequest createPagingRequestWithValidation(String projectId, int limit, int page, String orderBy, Boolean ascending, Boolean useUnsafeSort=false) {
         SkillsValidator.isNotBlank(projectId, "Project Id")
         SkillsValidator.isTrue(limit <= 200, "Cannot ask for more than 200 items, provided=[${limit}]", projectId)
+        return createPagingRequestWithLowerBoundValidation(projectId, limit, page, orderBy, ascending, useUnsafeSort)
+    }
+
+    static PageRequest createPagingRequestWithValidation(int limit, int page, String orderBy, Boolean ascending, Boolean useUnsafeSort=false) {
+        SkillsValidator.isTrue(limit <= 200, "Cannot ask for more than 200 items, provided=[${limit}]")
+        return createPagingRequestWithLowerBoundValidation(limit, page, orderBy, ascending, useUnsafeSort)
+    }
+
+    static PageRequest createPagingRequestWithLowerBoundValidation(String projectId, int limit, int page, String orderBy, Boolean ascending, Boolean useUnsafeSort=false) {
         SkillsValidator.isTrue(limit > 0, "Limit must be greater than 0, provided=[${limit}]", projectId)
         SkillsValidator.isTrue(page >= 1, "Page must be 1 or greater (pages are 1-based), provided=[${page}]", projectId)
         return createPagingRequest(limit, page, orderBy, ascending, useUnsafeSort)
     }
-    static PageRequest createPagingRequestWithValidation(int limit, int page, String orderBy, Boolean ascending, Boolean useUnsafeSort=false) {
-        SkillsValidator.isTrue(limit <= 200, "Cannot ask for more than 200 items, provided=[${limit}]")
+
+    static PageRequest createPagingRequestWithLowerBoundValidation(int limit, int page, String orderBy, Boolean ascending, Boolean useUnsafeSort=false) {
         SkillsValidator.isTrue(limit > 0, "Limit must be greater than 0, provided=[${limit}]")
         SkillsValidator.isTrue(page >= 1, "Page must be 1 or greater (pages are 1-based), provided=[${page}]")
         return createPagingRequest(limit, page, orderBy, ascending, useUnsafeSort)
@@ -56,6 +65,12 @@ class TablePageUtil {
         QuizValidator.isTrue(page < maxPage, "[page] must be < ${maxPage}")
         PageRequest pageRequest = PageRequest.of(page - 1, limit, ascending ? ASC : DESC, orderBy)
         return pageRequest
+    }
+
+    static PageRequest createQuizPagingRequestWithLowerBoundValidation(int limit, int page, String orderBy, Boolean ascending) {
+        QuizValidator.isTrue(limit > 0, '[limit] must be > 0')
+        QuizValidator.isTrue(page >= 1, '[page] must be >= 1')
+        return PageRequest.of(page - 1, limit, ascending ? ASC : DESC, orderBy)
     }
 
 }

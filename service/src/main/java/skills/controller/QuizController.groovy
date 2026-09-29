@@ -514,7 +514,7 @@ class QuizController {
                                     @RequestParam(required=false) String userFilter,
                                     @RequestParam(required=false) String itemIdFilter,
                                     @RequestParam(required=false) String actionFilter) {
-        PageRequest pageRequest = PageRequest.of(page - 1, limit, ascending ? ASC : DESC, orderBy)
+        PageRequest pageRequest = TablePageUtil.createQuizPagingRequestWithLowerBoundValidation(limit, page, orderBy, ascending)
         return userActionsHistoryService.getUsersActions(pageRequest,
                 null,
                 quizId,

@@ -111,4 +111,41 @@ class TablePageUtilSpec extends Specification {
         SkillQuizException pageErr = thrown()
         pageErr.message == "[page] must be < 100"
     }
+    def "lower-bound-only paging helpers do not add upper-bound restrictions"() {
+        when:
+        PageRequest withProject = TablePageUtil.createPagingRequestWithLowerBoundValidation("proj1", 501, 1, "name", true)
+        PageRequest withoutProject = TablePageUtil.createPagingRequestWithLowerBoundValidation(501, 1, "name", true)
+        PageRequest quiz = TablePageUtil.createQuizPagingRequestWithLowerBoundValidation(501, 1, "name", true)
+
+        then:
+        withProject.pageSize == 501
+        withoutProject.pageSize == 501
+        quiz.pageSize == 501
+    }
+
+    def "lower-bound-only paging helpers reject invalid values"() {
+        when:
+        TablePageUtil.createPagingRequestWithLowerBoundValidation("proj1", 10, 0, "name", true)
+
+        then:
+        SkillException projectPage = thrown()
+        projectPage.errorCode == ErrorCode.BadParam
+        projectPage.projectId == "proj1"
+
+        when:
+        TablePageUtil.createPagingRequestWithLowerBoundValidation(0, 1, "name", true)
+
+        then:
+        SkillException limitError = thrown()
+        limitError.errorCode == ErrorCode.BadParam
+
+        when:
+        TablePageUtil.createQuizPagingRequestWithLowerBoundValidation(10, 0, "name", true)
+
+        then:
+        SkillQuizException quizPage = thrown()
+        quizPage.errorCode == ErrorCode.BadParam
+        quizPage.message == "[page] must be >= 1"
+    }
+
 }

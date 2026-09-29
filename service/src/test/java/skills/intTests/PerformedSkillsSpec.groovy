@@ -16,7 +16,9 @@
 package skills.intTests
 
 
+import org.springframework.http.HttpStatus
 import skills.intTests.utils.DefaultIntSpec
+import skills.intTests.utils.SkillsClientException
 import skills.intTests.utils.SkillsFactory
 
 class PerformedSkillsSpec extends DefaultIntSpec {
@@ -174,4 +176,23 @@ class PerformedSkillsSpec extends DefaultIntSpec {
         events.data[9].groupId == null
         events.data[9].subjectId == proj1_subj1.subjectId
     }
+    def "performed skills reject invalid paging - limit: #limit, page: #page"() {
+        def proj = SkillsFactory.createProject(5)
+        skillsService.createProject(proj)
+
+        when:
+        skillsService.getPerformedSkills(skillsService.userName, proj.projectId, "", "performedOn", limit, page)
+
+        then:
+        SkillsClientException e = thrown(SkillsClientException)
+        e.httpStatus == HttpStatus.BAD_REQUEST
+        e.resBody.contains('"errorCode":"BadParam"')
+        e.resBody.contains(expectedMessage)
+
+        where:
+        limit | page | expectedMessage
+        10    | 0    | "Page must be 1 or greater (pages are 1-based), provided=[0]"
+        0     | 1    | "Limit must be greater than 0, provided=[0]"
+    }
+
 }
