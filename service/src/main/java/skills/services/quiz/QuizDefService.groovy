@@ -1323,6 +1323,8 @@ class QuizDefService {
         }
 
         if (questionDefRequest.questionType == QuizQuestionType.FillInTheBlank) {
+            int blankCount = questionDefRequest.question.findAll('___').size()
+            QuizValidator.isTrue(blankCount == questionDefRequest.answers.size(), "FillInTheBlank questions require one answer for each blank", quizId)
             QuizValidator.isNotNull(questionDefRequest.answers, "answers", quizId)
             QuizValidator.isTrue(!questionDefRequest.answers.isEmpty(), "Must have at least 1 answer", quizId)
             questionDefRequest.answers.each { answer ->
