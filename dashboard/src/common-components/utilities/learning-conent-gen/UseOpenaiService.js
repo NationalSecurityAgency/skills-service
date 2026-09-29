@@ -32,11 +32,15 @@ export const useOpenaiService = () => {
     const prompt = async (promptParams, onChunk, onComplete, onError) => {
         try {
             currentRequestController = new AbortController();
+            const xsrfToken = document.cookie.split('; ')
+                .find((cookie) => cookie.startsWith('XSRF-TOKEN='))
+                ?.substring('XSRF-TOKEN='.length);
             const response = await fetch(`/openai/chat`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'Accept': 'text/event-stream'
+                    'Accept': 'text/event-stream',
+                    ...(xsrfToken ? { 'X-XSRF-TOKEN': decodeURIComponent(xsrfToken) } : {})
                 },
                 body: JSON.stringify(promptParams),
                 signal: currentRequestController.signal  // Add the signal to the request

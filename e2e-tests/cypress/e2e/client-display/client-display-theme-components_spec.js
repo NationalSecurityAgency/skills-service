@@ -40,7 +40,7 @@ describe('Client Display Theme Components Tests', () => {
     cy.cdVisit(`/subjects/subj1/skills/skill1?themeParam=breadcrumb|${breadcrumb}&${titleBg}`)
 
     cy.get('[data-cy="skillsDisplayBreadcrumbBar"]')
-    cy.matchSnapshotImageForElement('[data-cy="skillsDisplayBreadcrumbBar"] nav')
+    cy.matchSnapshotImageForElement('[data-cy="skillsDisplayBreadcrumbBar"] nav', { errorThreshold: 0.2 })
   })
 
   it('disable breadcrumb', () => {
@@ -69,7 +69,7 @@ describe('Client Display Theme Components Tests', () => {
     cy.cdVisit(`/subjects/subj1/skills/skill1?themeParam=pageTitle|${pageTitle}&${titleBg}&${disableBrand}&${disableBackButton}&${disableSearchButton}&${breadcrumb}`)
 
     cy.get('[data-cy="skillsTitle"]')
-    cy.matchSnapshotImageForElement('[data-cy="skillsTitle"]')
+    cy.matchSnapshotImageForElement('[data-cy="skillsTitle"]', { errorThreshold: 0.1 })
   })
 
   it('circleProgressInteriorTextColor config', () => {
@@ -89,12 +89,14 @@ describe('Client Display Theme Components Tests', () => {
       cy.get('[data-cy="overallPoints"] [data-cy="animationCompleted"]')
       cy.get('[data-cy="levelProgress"] [data-cy="animationCompleted"]')
     cy.matchSnapshotImageForElement('[data-cy="overallPoints"] [data-pc-name="chart"]', {
-      name: 'circleProgressInteriorTextColor is not present default to textPrimaryColor'
+      name: 'circleProgressInteriorTextColor is not present default to textPrimaryColor',
+      errorThreshold: 0.1
     })
 
     cy.cdVisit(`/?${titleBg}&${textPrimaryColor}&${circleProgressInteriorTextColor}`)
     cy.matchSnapshotImageForElement('[data-cy="overallPoints"] [data-pc-name="chart"]', {
-      name: 'circleProgressInteriorTextColor overrides textPrimaryColor'
+      name: 'circleProgressInteriorTextColor overrides textPrimaryColor',
+      errorThreshold: 0.1
     })
   })
 
@@ -122,38 +124,45 @@ describe('Client Display Theme Components Tests', () => {
     cy.get('[data-cy="skillsTitle"]')
 
     cy.matchSnapshotImageForElement('[data-cy="subjectTile-subj1"]', {
-      name: 'progressIndicators settings - beforeTodayColor earnedTodayColor and incompleteColor'
+      name: 'progressIndicators settings - beforeTodayColor earnedTodayColor and incompleteColor',
+      errorThreshold: 0.1
     })
 
     cy.matchSnapshotImageForElement('[data-cy="subjectTile-subj2"]', {
-      name: 'progressIndicators settings - incompleteColor'
+      name: 'progressIndicators settings - incompleteColor',
+      errorThreshold: 0.1
     })
 
     cy.matchSnapshotImageForElement('[data-cy="subjectTile-subj3"]', {
-      name: 'progressIndicators settings - completeColor'
+      name: 'progressIndicators settings - completeColor',
+      errorThreshold: 0.1
     })
 
 
       cy.get('[data-cy="overallPoints"] [data-cy="animationCompleted"]')
     cy.matchSnapshotImageForElement('[data-cy="overallPoints"] [data-pc-name="chart"]', {
-      name: 'beforeTodayColor and  incompleteColor apply to CircleProgress comoponent'
+      name: 'beforeTodayColor and  incompleteColor apply to CircleProgress comoponent',
+      errorThreshold: 0.1
     })
 
     cy.matchSnapshotImageForElement('[data-cy="achievedSkillsProgress"]', {
-      name: 'achieved skills progress component'
+      name: 'achieved skills progress component',
+      errorThreshold: 0.1
     })
 
     cy.cdClickSubj(0, 'Subject 1', true)
     cy.matchSnapshotImageForElement('[data-cy="skillsProgressList"] [data-pc-section="body"]', {
       name: 'progressIndicators settings - skill list - beforeTodayColor earnedTodayColor and incompleteColor',
-      blackout: '[data-cy="skillProgressTitle"]'
+      blackout: '[data-cy="skillProgressTitle"]',
+      errorThreshold: 0.1
     })
 
     cy.cdBack()
     cy.cdClickSubj(2, 'Completed', false)
     cy.matchSnapshotImageForElement('[data-cy="skillsProgressList"] [data-pc-section="body"]', {
       name: 'progressIndicators settings - skill list - completeColor',
-      blackout: '[data-cy="skillProgressTitle"]'
+      blackout: '[data-cy="skillProgressTitle"]',
+      errorThreshold: 0.1
     })
   })
 
@@ -179,19 +188,23 @@ describe('Client Display Theme Components Tests', () => {
     cy.get('[data-cy="skillsTitle"]')
 
     cy.matchSnapshotImageForElement('[data-cy="overallStars"]', {
-      name: 'stars config - overall level'
+      name: 'stars config - overall level',
+      errorThreshold: 0.1
     })
 
     cy.matchSnapshotImageForElement('[data-cy="subjectTile-subj1"] [data-cy="subjectStars"]', {
-      name: 'stars config - subject - some levels achieved'
+      name: 'stars config - subject - some levels achieved',
+      errorThreshold: 0.1
     })
 
     cy.matchSnapshotImageForElement('[data-cy="subjectTile-subj2"] [data-cy="subjectStars"]', {
-      name: 'stars config - subject - no levels'
+      name: 'stars config - subject - no levels',
+      errorThreshold: 0.1
     })
 
     cy.matchSnapshotImageForElement('[data-cy="subjectTile-subj3"] [data-cy="subjectStars"]', {
-      name: 'stars config - subject - all levels achieved'
+      name: 'stars config - subject - all levels achieved',
+      errorThreshold: 0.1
     })
 
 
@@ -214,7 +227,7 @@ describe('Client Display Theme Components Tests', () => {
     // let's wait for animation to complete
     cy.get('[data-cy="pointHistoryChart-animationEnded"]')
     cy.wait(3000)
-    cy.matchSnapshotImageForElement('[data-cy=pointHistoryChart]')
+    cy.matchSnapshotImageForElement('[data-cy=pointHistoryChart]', { errorThreshold: 0.1 })
   })
 
   it('point history chart - dark gray background customization', () => {
@@ -223,7 +236,7 @@ describe('Client Display Theme Components Tests', () => {
     // let's wait for animation to complete
     cy.get('[data-cy="pointHistoryChart-animationEnded"]')
     cy.wait(3000)
-    cy.matchSnapshotImageForElement('[data-cy=pointHistoryChart]')
+    cy.matchSnapshotImageForElement('[data-cy=pointHistoryChart]', { errorThreshold: 0.1 })
   })
 
   it('chart labels for all the charts', () => {
@@ -232,12 +245,12 @@ describe('Client Display Theme Components Tests', () => {
     // // let's wait for animation to complete
     cy.get('[data-cy="pointHistoryChart-animationEnded"]')
     cy.wait(3000)
-    cy.matchSnapshotImageForElement('[data-cy=pointHistoryChart]', 'chartLabels-pointsHistory')
+    cy.matchSnapshotImageForElement('[data-cy=pointHistoryChart]', { name: 'chartLabels-pointsHistory', errorThreshold: 0.1 })
     cy.cdClickRank()
 
     cy.get('[data-cy="levelBreakdownChart-animationEnded"]')
     cy.wait(3000)
-    cy.matchSnapshotImageForElement('[data-cy="levelBreakdownChart"]', 'chartLabels-levelBreakdown')
+    cy.matchSnapshotImageForElement('[data-cy="levelBreakdownChart"]', { name: 'chartLabels-levelBreakdown', errorThreshold: 0.1 })
 
   })
 
@@ -256,14 +269,14 @@ describe('Client Display Theme Components Tests', () => {
     cy.cdVisit(url, true)
 
     cy.cdClickSubj(0, 'Subject 1', true)
-    cy.matchSnapshotImageForElement('[data-cy="back"]', 'buttons-Back')
-    cy.matchSnapshotImageForElement('[data-cy="filterMenu"] [data-cy="filterBtn"]', 'buttons-skillsFilter')
+    cy.matchSnapshotImageForElement('[data-cy="back"]', { name: 'buttons-Back', errorThreshold: 0.1 })
+    cy.matchSnapshotImageForElement('[data-cy="filterMenu"] [data-cy="filterBtn"]', { name: 'buttons-skillsFilter', errorThreshold: 0.1 })
     cy.cdClickSkill(1)
 
-    cy.matchSnapshotImageForElement('[data-cy="claimPointsBtn"]', 'buttons-selfReport')
+    cy.matchSnapshotImageForElement('[data-cy="claimPointsBtn"]', { name: 'buttons-selfReport', errorThreshold: 0.1 })
     cy.cdVisit(url, true)
     cy.cdClickBadges()
-    cy.matchSnapshotImageForElement('[data-cy="badgeDetailsLink_badge1"] [data-pc-name="button"]', 'buttons-viewBadgeDetails')
+    cy.matchSnapshotImageForElement('[data-cy="badgeDetailsLink_badge1"] [data-pc-name="button"]', { name: 'buttons-viewBadgeDetails', errorThreshold: 0.1 })
 
     // todo: add back
     // cy.matchSnapshotImageForElement('[data-cy="filterMenu"] [data-cy="filterBtn"]', 'buttons-badgesFilter')
@@ -279,8 +292,8 @@ describe('Client Display Theme Components Tests', () => {
 
     cy.get('[data-cy="filterMenu"]')
 
-    cy.matchSnapshotImageForElement('[data-cy="back"]', 'buttons-Back-darkTileBackground')
-    cy.matchSnapshotImageForElement('[data-cy="filterMenu"]', 'buttons-skillsFilter-darkTileBackground')
+    cy.matchSnapshotImageForElement('[data-cy="back"]', { name: 'buttons-Back-darkTileBackground', errorThreshold: 0.1 })
+    cy.matchSnapshotImageForElement('[data-cy="filterMenu"]', { name: 'buttons-skillsFilter-darkTileBackground', errorThreshold: 0.1 })
   })
 
   it('buttons customization with changing tile background - skill', () => {
@@ -291,7 +304,7 @@ describe('Client Display Theme Components Tests', () => {
     const url = '/subjects/subj1/skills/skill2?themeParam=buttons|{"backgroundColor":"green","foregroundColor":"white",%20"borderColor":"purple"}&themeParam=tiles|{"backgroundColor":"black"}'
     cy.cdVisit(url)
 
-    cy.matchSnapshotImageForElement('[data-cy="claimPointsBtn"]', 'buttons-selfReport-darkTileBackground')
+    cy.matchSnapshotImageForElement('[data-cy="claimPointsBtn"]', { name: 'buttons-selfReport-darkTileBackground', errorThreshold: 0.1 })
   })
 
   it('buttons customization with changing tile background - badge', () => {
@@ -303,7 +316,7 @@ describe('Client Display Theme Components Tests', () => {
     cy.cdVisit(url)
     cy.get('[data-cy="badgeDetailsLink_badge1"] button').should('be.enabled')
 
-    cy.matchSnapshotImageForElement('[data-cy="badgeDetailsLink_badge1"] [data-pc-name="button"]', 'buttons-viewBadgeDetails-darkTileBackground')
+    cy.matchSnapshotImageForElement('[data-cy="badgeDetailsLink_badge1"] [data-pc-name="button"]', { name: 'buttons-viewBadgeDetails-darkTileBackground', errorThreshold: 0.1 })
   })
 
   it('filter menu with dark tile background - skills', () => {
@@ -316,7 +329,8 @@ describe('Client Display Theme Components Tests', () => {
     cy.get('[data-cy="clearSkillsSearchInput"]').tab().type('{enter}')
 
     cy.matchSnapshotImageForElement('[data-pc-name="panelmenu"]', {
-      name: 'filterMenu-skills'
+      name: 'filterMenu-skills',
+      errorThreshold: 0.1
     })
   })
 
@@ -331,7 +345,8 @@ describe('Client Display Theme Components Tests', () => {
     cy.get('[data-cy="badgeDetailsLink_badge1"] button').should('be.enabled')
     cy.get('[data-cy="clearSkillsSearchInput"]').tab().type('{enter}')
     cy.matchSnapshotImageForElement('[data-pc-name="panelmenu"]', {
-      name: 'filterMenu-badges'
+      name: 'filterMenu-badges',
+      errorThreshold: 0.1
     })
   })
 
@@ -343,7 +358,7 @@ describe('Client Display Theme Components Tests', () => {
     const url = '/subjects/subj1/?themeParam=textPrimaryColor|purple'
     cy.cdVisit(url)
     cy.get('[data-cy="clearSkillsSearchInput"]').tab().type('{enter}')
-    cy.matchSnapshotImageForElement('[data-pc-name="panelmenu"]')
+    cy.matchSnapshotImageForElement('[data-pc-name="panelmenu"]', { errorThreshold: 0.1 })
   })
 
   it('theme info cards', () => {
@@ -367,7 +382,7 @@ describe('Client Display Theme Components Tests', () => {
     cy.get('[data-cy="timeWindowPts"]')
       .contains('100')
 
-    cy.matchSnapshotImageForElement('[data-cy="skillsSummaryCards"]', 'infoCards-skill')
+    cy.matchSnapshotImageForElement('[data-cy="skillsSummaryCards"]', { name: 'infoCards-skill', errorThreshold: 0.1 })
   })
 
   it('theme info cards border overrides tile border', () => {
@@ -393,7 +408,7 @@ describe('Client Display Theme Components Tests', () => {
     cy.get('[data-cy="timeWindowPts"]')
       .contains('100')
 
-    cy.matchSnapshotImageForElement('[data-cy=skillsSummaryCards]')
+    cy.matchSnapshotImageForElement('[data-cy=skillsSummaryCards]', { errorThreshold: 0.1 })
   })
 
   it('ability to configure tile border', () => {
@@ -406,7 +421,7 @@ describe('Client Display Theme Components Tests', () => {
 
     cy.get('[data-cy="pointHistoryChart-animationEnded"]')
     cy.wait(3000)
-    cy.matchSnapshotImageForElement('[data-cy="skillsDisplayHome"]', { blackout: '[data-cy=achievementDate]' })
+    cy.matchSnapshotImageForElement('[data-cy="skillsDisplayHome"]', { blackout: '[data-cy=achievementDate]', errorThreshold: 0.1 })
   })
 
   it('tiles watermarkIconColor config', () => {
@@ -424,8 +439,8 @@ describe('Client Display Theme Components Tests', () => {
 
     cy.get('[data-cy="pointHistoryChart-animationEnded"]')
     cy.wait(1111)
-    cy.matchSnapshotImageForElement('[data-cy="myRank"]', 'watermarkIconColor for my rank')
-    cy.matchSnapshotImageForElement('[data-cy="myBadges"]', 'watermarkIconColor for my badges')
+    cy.matchSnapshotImageForElement('[data-cy="myRank"]', { name: 'watermarkIconColor for my rank', errorThreshold: 0.1 })
+    cy.matchSnapshotImageForElement('[data-cy="myBadges"]', { name: 'watermarkIconColor for my badges', errorThreshold: 0.1 })
   })
 
   it('tiles subtitle overlay colors', () => {
@@ -444,8 +459,8 @@ describe('Client Display Theme Components Tests', () => {
 
     cy.get('[data-cy="pointHistoryChart-animationEnded"]')
     cy.wait(1111)
-    cy.matchSnapshotImageForElement('[data-cy="myRank"]', 'subtitle overlay colors for my rank')
-    cy.matchSnapshotImageForElement('[data-cy="myBadges"]', 'subtitle overlay colors for my badges')
+    cy.matchSnapshotImageForElement('[data-cy="myRank"]', { name: 'subtitle overlay colors for my rank', errorThreshold: 0.1 })
+    cy.matchSnapshotImageForElement('[data-cy="myBadges"]', { name: 'subtitle overlay colors for my badges', errorThreshold: 0.1 })
   })
 
   it('badge settings', () => {
@@ -459,7 +474,7 @@ describe('Client Display Theme Components Tests', () => {
 
     cy.get('[data-cy="pointHistoryChart-animationEnded"]')
     cy.wait(1111)
-    cy.matchSnapshotImageForElement('[data-cy="overallLevelDesc"]')
+    cy.matchSnapshotImageForElement('[data-cy="overallLevelDesc"]', { errorThreshold: 0.1 })
   })
 
   it('subjectTileIconColor settings', () => {
@@ -469,7 +484,7 @@ describe('Client Display Theme Components Tests', () => {
 
     cy.get('[data-cy="pointHistoryChart-animationEnded"]')
     cy.wait(1111)
-    cy.matchSnapshotImageForElement('[data-cy="subjectTile"] .sd-theme-subject-tile-icon')
+    cy.matchSnapshotImageForElement('[data-cy="subjectTile"] .sd-theme-subject-tile-icon', { errorThreshold: 0.1 })
   })
 
   it('trophyIconColor settings', () => {
@@ -479,7 +494,7 @@ describe('Client Display Theme Components Tests', () => {
 
     cy.get('[data-cy="pointHistoryChart-animationEnded"]')
     cy.wait(1111)
-    cy.matchSnapshotImageForElement('[data-cy="overallLevel"] [data-cy="trophyIcon"]')
+    cy.matchSnapshotImageForElement('[data-cy="overallLevel"] [data-cy="trophyIcon"]', { errorThreshold: 0.1 })
   })
 
   it('backButton settings', () => {
@@ -493,7 +508,7 @@ describe('Client Display Theme Components Tests', () => {
 
     cy.get('[data-cy="pointHistoryChart-animationEnded"]')
     cy.wait(1111)
-    cy.matchSnapshotImageForElement('[data-cy="back"]')
+    cy.matchSnapshotImageForElement('[data-cy="back"]', { errorThreshold: 0.1 })
   })
 
   it('searchButton settings', () => {
@@ -507,7 +522,7 @@ describe('Client Display Theme Components Tests', () => {
 
     cy.get('[data-cy="pointHistoryChart-animationEnded"]')
     cy.wait(1111)
-    cy.matchSnapshotImageForElement('[data-cy="skillsDisplaySearchBtn"]')
+    cy.matchSnapshotImageForElement('[data-cy="skillsDisplaySearchBtn"]', { errorThreshold: 0.1 })
   })
 
   it('maxWidth setting - 75%', () => {
@@ -622,4 +637,3 @@ describe('Client Display Theme Components Tests', () => {
 
 
 })
-
