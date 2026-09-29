@@ -37,9 +37,15 @@ describe('Project learning path in skills display', () => {
     cy.cdVisit('/')
     cy.get('[data-cy="numAchievedLearningPathItems"]').should('have.text', '1')
     cy.get('[data-cy="numTotalLearningPathItems"]').should('have.text', '3')
+    cy.get('[data-cy="numAchievedLearningPathItems"]').parent().should('contain.text', '1 of 3 Skills Achieved')
     cy.get('[data-cy="learningPathPercent"]').should('have.text', '33%')
     cy.get('[data-cy="numAchievedSkills"]').should('have.text', '1')
     cy.get('[data-cy="numTotalSkills"]').should('have.text', '4')
+    cy.get('[data-cy="learningPathTitle"]').then(($learningPathTitle) => {
+      cy.get('[data-cy="achievedSkillsTitle"]').should(($achievedSkillsTitle) => {
+        expect(Math.abs($learningPathTitle[0].getBoundingClientRect().top - $achievedSkillsTitle[0].getBoundingClientRect().top)).to.be.lessThan(1)
+      })
+    })
     cy.get('[data-cy="viewLearningPathLink"]').should('be.visible').click()
     cy.location('pathname').should('eq', '/test-skills-display/proj1/learning-path')
     cy.get('[data-cy="skillsTitle"]').contains('Learning Path')
@@ -47,6 +53,34 @@ describe('Project learning path in skills display', () => {
     cy.get('[data-cy="learningPathTable"] [data-cy="skillsBTableTotalRows"]').should('have.text', '2')
     cy.get('[data-cy="learningPathTable"] [data-cy="sharedSkillsTable-removeBtn"]').should('not.exist')
     cy.get('[data-cy="learningPathTable"]').contains('View Route').should('not.exist')
+  })
+
+  it('reflects completed and incomplete learning path skills in the progress summary', () => {
+    cy.createSkill(1, 1, 1, { numPerformToCompletion: 1 })
+    cy.createSkill(1, 1, 2, { numPerformToCompletion: 1 })
+    cy.createSkill(1, 1, 3, { numPerformToCompletion: 1 })
+    cy.createSkill(1, 1, 4, { numPerformToCompletion: 1 })
+    cy.addLearningPathItem(1, 1, 2)
+    cy.addLearningPathItem(1, 2, 3)
+
+    cy.reportSkill(1, 1, Cypress.env('proxyUser'), 'now')
+    cy.reportSkill(1, 2, Cypress.env('proxyUser'), 'now')
+    cy.reportSkill(1, 4, Cypress.env('proxyUser'), 'now')
+
+    cy.cdVisit('/')
+    cy.get('[data-cy="numAchievedLearningPathItems"]').should('have.text', '2')
+    cy.get('[data-cy="numTotalLearningPathItems"]').should('have.text', '3')
+    cy.get('[data-cy="numAchievedLearningPathItems"]').parent().should('contain.text', '2 of 3 Skills Achieved')
+    cy.get('[data-cy="learningPathPercent"]').should('have.text', '67%')
+    cy.get('[data-cy="numAchievedSkills"]').should('have.text', '3')
+    cy.get('[data-cy="numTotalSkills"]').should('have.text', '4')
+
+    cy.get('[data-cy="viewLearningPathLink"]').click()
+    cy.get('#dependency-graph canvas').should('be.visible')
+    cy.get('[data-cy="learningPathTable"] [data-cy="fromNodeLink_skill1"]').should('be.visible')
+    cy.get('[data-cy="learningPathTable"] [data-cy="fromNodeLink_skill2"]').should('be.visible')
+    cy.get('[data-cy="learningPathTable"] [data-cy="toNodeLink_skill3"]').should('be.visible')
+    cy.get('[data-cy="learningPathTable"] [data-cy="toNodeLink_skill4"]').should('not.exist')
   })
 
   it('shows an empty learning path on a direct visit', () => {

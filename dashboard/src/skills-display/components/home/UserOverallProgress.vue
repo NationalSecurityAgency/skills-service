@@ -129,11 +129,11 @@ onMounted(() => {
           </circle-progress>
         </div>
       </div>
-      <div class="mt-9 mx-4 mb-4 flex justify-center sd-theme-achieved-skills-progress" data-cy="achievedSkillsProgress">
+      <div class="mt-9 mx-2 mb-4 flex justify-center sd-theme-achieved-skills-progress" data-cy="achievedSkillsProgress">
         <div class="w-11/12 flex flex-col md:flex-row gap-4 items-stretch">
           <div
             v-if="hasLearningPath"
-            class="rounded-lg border border-surface-200 dark:border-surface-700 px-4 py-2 flex items-center gap-3 md:w-96 text-left shadow-sm">
+            class="rounded-lg border border-surface-200 dark:border-surface-700 px-4 py-1 flex items-center gap-3 md:w-96 text-left shadow-sm">
             <circle-progress
               class="shrink-0"
               :diameter="48"
@@ -143,10 +143,15 @@ onMounted(() => {
                 <div class="text-xs font-semibold sd-theme-primary-color" data-cy="learningPathPercent">{{ learningPathPercent }}%</div>
               </template>
             </circle-progress>
-            <div class="flex-1 min-w-0" :aria-label="`Achieved ${learningPathProgress.achieved} out of ${learningPathProgress.total} learning path items`">
-              <div class="font-semibold whitespace-nowrap text-blue-600 dark:text-blue-800 "><i class="fas fa-route mr-2" aria-hidden="true" />Learning Path</div>
-              <div class="text-sm whitespace-nowrap" >
-                <span class="text-orange-700 dark:text-orange-400 sd-theme-primary-color" data-cy="numAchievedLearningPathItems">{{ learningPathProgress.achieved }}</span> / <span data-cy="numTotalLearningPathItems">{{ learningPathProgress.total }}</span>
+            <div class="flex-1 min-w-0 self-start">
+              <div class="flex items-center gap-2 text-lg font-semibold whitespace-nowrap" data-cy="learningPathTitle">
+                <span class="inline-flex w-5 h-5 shrink-0 items-center justify-center" aria-hidden="true">
+                  <i class="fas fa-route" />
+                </span>
+                <span>Learning Path</span>
+              </div>
+              <div class="text-sm whitespace-nowrap">
+                <span class="text-orange-700 dark:text-orange-400 sd-theme-primary-color" data-cy="numAchievedLearningPathItems">{{ learningPathProgress.achieved }}</span> of <span data-cy="numTotalLearningPathItems">{{ learningPathProgress.total }}</span> <span class="ml-0">{{ pluralize.plural(attributes.skillDisplayName, learningPathProgress.total) }} Achieved</span>
               </div>
             </div>
             <RouterLink
@@ -154,13 +159,16 @@ onMounted(() => {
               class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded border border-green-600 text-green-700 dark:text-green-400 px-3 py-2 text-sm font-medium no-underline hover:bg-green-50 dark:hover:bg-green-950/30"
               data-cy="viewLearningPathLink"
               aria-label="View project learning path">
-              <span>View Path</span>
-              <i class="fas fa-arrow-right" aria-hidden="true" />
+              <i class="far fa-eye" aria-hidden="true" />
+              <span>View</span>
             </RouterLink>
           </div>
-          <div class="flex-1 rounded-lg border border-surface-200 dark:border-surface-700 px-4 py-3 shadow-sm">
-            <div class="flex mb-1" :aria-label="`Achieved ${skillsAchieved} out of ${totalSkills} skills`">
-              <div class="flex-1 text-lg font-medium"><i class="fas fa-check-circle mr-2" aria-hidden="true" />Achieved {{ attributes.skillDisplayNamePlural }}</div>
+          <div class="flex-1 rounded-lg border border-surface-200 dark:border-surface-700 px-4 py-1 flex flex-col shadow-sm text-left">
+            <div class="flex items-center gap-2 mb-1" :aria-label="`Achieved ${skillsAchieved} out of ${totalSkills} skills`">
+              <div class="flex flex-1 items-center gap-2 text-lg font-semibold" data-cy="achievedSkillsTitle">
+                <span class="inline-flex w-5 h-5 shrink-0 items-center justify-center" aria-hidden="true"><i class="fa-solid fa-list-check" /></span>
+                <span>Achieved {{ attributes.skillDisplayNamePlural }}</span>
+              </div>
               <div><span class="text-orange-700 dark:text-orange-400 font-medium sd-theme-primary-color" data-cy="numAchievedSkills">{{skillsAchieved}}</span> / <span data-cy="numTotalSkills">{{totalSkills}}</span></div>
             </div>
             <vertical-progress-bar

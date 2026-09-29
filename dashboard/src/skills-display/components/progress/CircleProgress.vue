@@ -85,7 +85,7 @@ const radialChartLabelStyle = computed(() => {
 
 <template>
   <div class="progress-circle-wrapper flex flex-col gap-3">
-    <h2 class="text-2xl font-medium">{{ title }}</h2>
+    <h2 v-if="title" class="text-2xl font-medium">{{ title }}</h2>
     <div>
       <radial-percentage-chart
           :value="is100Percent ? 100 :  totalCompletedPoints"
@@ -108,7 +108,7 @@ const radialChartLabelStyle = computed(() => {
         </template>
       </radial-percentage-chart>
     </div>
-    <div>
+    <div v-if="$slots.footer">
       <slot name="footer" />
     </div>
   </div>
