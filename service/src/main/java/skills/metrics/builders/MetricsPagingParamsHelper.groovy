@@ -16,6 +16,7 @@
 package skills.metrics.builders
 
 import groovy.transform.CompileStatic
+import skills.controller.exceptions.ErrorCode
 import skills.controller.exceptions.SkillException
 
 @CompileStatic
@@ -38,7 +39,7 @@ class MetricsPagingParamsHelper {
 
     int getPageSize() {
         String strPage = MetricsParams.getParam(props, PROP_PAGE_SIZE, chartId, projectId)
-        int pageSize = Integer.valueOf(strPage)
+        int pageSize = parseIntegerParam(PROP_PAGE_SIZE, strPage)
         if (validatePageSize && pageSize > 100) {
             throw new SkillException("Metrics[${chartId}]: page size must not exceed 100. Provided [${pageSize}]", projectId)
         }
@@ -52,12 +53,24 @@ class MetricsPagingParamsHelper {
     int getCurrentPage() {
         String strPage = MetricsParams.getParam(props, PROP_CURRENT_PAGE, chartId, projectId)
         // client's page starts 1, dbs at 0
-        int currentPage = Integer.valueOf(strPage) - 1
+        int currentPage = parseIntegerParam(PROP_CURRENT_PAGE, strPage) - 1
         if (currentPage < 0) {
             throw new SkillException("Metrics[${chartId}]: current page must be >= 1. Provided [${strPage}]", projectId)
         }
 
         return currentPage
+    }
+
+    private int parseIntegerParam(String paramId, String value) {
+        try {
+            return Integer.valueOf(value)
+        } catch (NumberFormatException ignored) {
+            throw new SkillException(
+                    "Metrics[${chartId}]: ${paramId} must be a valid integer. Provided [${value}]",
+                    projectId,
+                    SkillException.NA,
+                    ErrorCode.BadParam)
+        }
     }
 
     String getSortBy(boolean optional = false, String defaultValue = '') {
