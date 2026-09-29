@@ -84,6 +84,7 @@ class UserLearningPathGraphSpec extends DefaultIntSpec {
         then:
         def partialBadge = partial.nodes.find { it.skillId == badge.badgeId }
         !partialBadge.achieved
+        partialBadge.containedSkills.collectEntries { [(it.skillId): it.achieved] } == [skill1: true, skill2: false]
         partial.nodes*.skillId.toSet() == [badge.badgeId, skills[2].skillId].toSet()
         !partial.nodes.find { it.skillId == skills[2].skillId }.achieved
 
@@ -95,7 +96,53 @@ class UserLearningPathGraphSpec extends DefaultIntSpec {
         then:
         def completeBadge = complete.nodes.find { it.skillId == badge.badgeId }
         completeBadge.achieved
+        completeBadge.containedSkills.every { it.achieved }
         complete.nodes.size() == 2
         !complete.nodes.find { it.skillId == skills[2].skillId }.achieved
+    }
+
+    def "shared prerequisite achievements are shown for the owning project only"() {
+        def project = SkillsFactory.createProject(1)
+        def subject = SkillsFactory.createSubject(1, 1)
+        def skills = SkillsFactory.createSkills(2, 1, 1)
+        skillsService.createProjectAndSubjectAndSkills(project, subject, skills)
+
+        def sharedProject = SkillsFactory.createProject(2)
+        def sharedSubject = SkillsFactory.createSubject(2, 1)
+        def sharedSkills = SkillsFactory.createSkills(2, 2, 1, 100)
+        skillsService.createProjectAndSubjectAndSkills(sharedProject, sharedSubject, sharedSkills)
+        skillsService.shareSkill(sharedProject.projectId, sharedSkills[0].skillId, project.projectId)
+        skillsService.addLearningPathPrerequisite(project.projectId, skills[1].skillId, sharedProject.projectId, sharedSkills[0].skillId)
+        skillsService.addSkill([projectId: sharedProject.projectId, skillId: sharedSkills[0].skillId], 'user1', new Date())
+
+        when:
+        def graph = skillsService.getUserDependencyGraph(project.projectId, 'user1')
+
+        then:
+        graph.nodes.size() == 2
+        graph.nodes.find { it.projectId == sharedProject.projectId }.achieved
+        !graph.nodes.find { it.projectId == project.projectId }.achieved
+    }
+
+    def "target badge includes its achieved child skills"() {
+        def project = SkillsFactory.createProject()
+        def subject = SkillsFactory.createSubject()
+        def skills = SkillsFactory.createSkills(2, 1, 1, 100)
+        skillsService.createProjectAndSubjectAndSkills(project, subject, skills)
+        def badge = SkillsFactory.createBadge()
+        skillsService.createBadge(badge)
+        skillsService.assignSkillToBadge([projectId: project.projectId, badgeId: badge.badgeId, skillId: skills[0].skillId])
+        badge.enabled = true
+        skillsService.createBadge(badge)
+        skillsService.addLearningPathPrerequisite(project.projectId, badge.badgeId, skills[1].skillId)
+        skillsService.addSkill([projectId: project.projectId, skillId: skills[1].skillId], 'user1', new Date())
+        skillsService.addSkill([projectId: project.projectId, skillId: skills[0].skillId], 'user1', new Date())
+
+        when:
+        def graph = skillsService.getUserDependencyGraph(project.projectId, 'user1')
+
+        then:
+        graph.nodes.find { it.skillId == badge.badgeId }.containedSkills.collect { it.skillId } == [skills[0].skillId]
+        graph.nodes.find { it.skillId == badge.badgeId }.containedSkills.every { it.achieved }
     }
 }

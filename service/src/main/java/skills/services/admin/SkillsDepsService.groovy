@@ -258,52 +258,62 @@ class SkillsDepsService {
 
     @Profile
     List<GraphSkillDefEdge> loadGraphEdges(String projectId, SkillRelDef.RelationshipType type, String userId=null) {
+        List<Object[]> edges = skillRelDefRepo.getGraph(projectId, type)
+        if (!edges) {
+            return []
+        }
 
         List<TinyUserAchievement> achievedSkillsAndBadges = []
         if (userId) {
-            achievedSkillsAndBadges = skillEventsSupportRepo.findTinyUserAchievementsForSkillsAndBadgesByUserIdAndProjectId(userId, projectId)
+            Set<String> projectIds = edges.collectMany { [it[5], it[15]] }.toSet()
+            achievedSkillsAndBadges = skillEventsSupportRepo.findTinyUserAchievementsForSkillsAndBadgesByUserIdAndProjectIds(userId, projectIds)
         }
-        List<Object[]> edges = skillRelDefRepo.getGraph(projectId, type)
+        Set<Integer> achievedSkillRefIds = achievedSkillsAndBadges.collect { it.skillRefId }.toSet()
+        Map<Integer, List<SkillDefGraphRes>> badgeSkillsById = [:]
 
-        return edges.collect({
+        return edges.collect({ row ->
             //   mapping directly to entity is slow, we can save over a second in latency by mapping attributes explicitly
 
             SkillDefGraphRes from = new SkillDefGraphRes(
-                    id: it[0],
-                    name: it[1],
-                    skillId: it[2],
-                    groupId: it[3],
-                    subjectId: it[4],
-                    projectId: it[5],
-                    projectName: it[6],
-                    pointIncrement: it[7],
-                    totalPoints: it[8],
-                    type: it[9],
+                    id: row[0],
+                    name: row[1],
+                    skillId: row[2],
+                    groupId: row[3],
+                    subjectId: row[4],
+                    projectId: row[5],
+                    projectName: row[6],
+                    pointIncrement: row[7],
+                    totalPoints: row[8],
+                    type: row[9],
                     containedSkills: null,
-                    achieved: achievedSkillsAndBadges.find({ua -> ua.skillRefId == it[0] }) != null
+                    achieved: achievedSkillRefIds.contains(row[0])
             )
 
-            if(it[9] == SkillDef.ContainerType.Badge) {
-                from.containedSkills = getSkillsForLearningPathItem(projectId, it[6], it[2], achievedSkillsAndBadges)
+            if(row[9] == SkillDef.ContainerType.Badge) {
+                from.containedSkills = badgeSkillsById.computeIfAbsent(row[0] as Integer) {
+                    getSkillsForLearningPathItem(row[5] as String, row[6] as String, row[2] as String, achievedSkillRefIds)
+                }
             }
 
             SkillDefGraphRes to = new SkillDefGraphRes(
-                    id: it[10],
-                    name: it[11],
-                    skillId: it[12],
-                    groupId: it[13],
-                    subjectId: it[14],
-                    projectId: it[15],
-                    projectName: it[16],
-                    pointIncrement: it[17],
-                    totalPoints: it[18],
-                    type: it[19],
+                    id: row[10],
+                    name: row[11],
+                    skillId: row[12],
+                    groupId: row[13],
+                    subjectId: row[14],
+                    projectId: row[15],
+                    projectName: row[16],
+                    pointIncrement: row[17],
+                    totalPoints: row[18],
+                    type: row[19],
                     containedSkills: null,
-                    achieved: achievedSkillsAndBadges.find({ ua -> ua.skillRefId == it[10] }) != null
+                    achieved: achievedSkillRefIds.contains(row[10])
             )
 
-            if(it[18] == SkillDef.ContainerType.Badge) {
-                to.containedSkills = getSkillsForLearningPathItem(projectId, it[16], it[12], achievedSkillsAndBadges)
+            if(row[19] == SkillDef.ContainerType.Badge) {
+                to.containedSkills = badgeSkillsById.computeIfAbsent(row[10] as Integer) {
+                    getSkillsForLearningPathItem(row[15] as String, row[16] as String, row[12] as String, achievedSkillRefIds)
+                }
             }
 
             new GraphSkillDefEdge(from: from, to: to)
@@ -311,7 +321,7 @@ class SkillsDepsService {
         })
     }
 
-    private List<SkillDefGraphRes> getSkillsForLearningPathItem(String projectId, String projectName, String skillId, List<TinyUserAchievement> achievedSkillsAndBadges) {
+    private List<SkillDefGraphRes> getSkillsForLearningPathItem(String projectId, String projectName, String skillId, Set<Integer> achievedSkillRefIds) {
         List<SkillDefPartialRes> badgeSkills = skillsAdminService.getSkillsByProjectSkillAndType(projectId, skillId, SkillDef.ContainerType.Badge, SkillRelDef.RelationshipType.BadgeRequirement)
         List<SkillDefGraphRes> skills = badgeSkills.collect{res -> new SkillDefGraphRes(
                 id: null,
@@ -324,7 +334,7 @@ class SkillsDepsService {
                 pointIncrement: res.pointIncrement,
                 totalPoints: res.totalPoints,
                 type: res.type,
-                achieved: achievedSkillsAndBadges.find({ it.skillId == res.skillId }) != null
+                achieved: achievedSkillRefIds.contains(skillDefRepo.findByProjectIdAndSkillIdIgnoreCaseAndType(projectId, res.skillId, SkillDef.ContainerType.Skill)?.id)
         ) }
         return skills
     }

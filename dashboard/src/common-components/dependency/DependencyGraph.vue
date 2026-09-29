@@ -62,10 +62,12 @@ const isAdminMode = computed(() => props.mode === 'admin')
 const showLegend = computed(() => isAdminMode.value || (isSkillsDisplayMode.value &&
   props.graph?.nodes?.some((node) => node.type === 'Skill') &&
   props.graph?.nodes?.some((node) => node.type === 'Badge')))
-const legendItems = [
-  { label: 'Skill', color: 'lightgreen', iconClass: 'fa-graduation-cap' },
-  { label: 'Badge', color: '#88a9fc', iconClass: 'fa-award' },
-]
+const skillColor = computed(() => isSkillsDisplayMode.value ? themeState.graphSkillColor : 'lightgreen')
+const badgeColor = computed(() => isSkillsDisplayMode.value ? themeState.graphBadgeColor : '#88a9fc')
+const legendItems = computed(() => [
+  { label: 'Skill', color: skillColor.value, iconClass: 'fa-graduation-cap' },
+  { label: 'Badge', color: badgeColor.value, iconClass: 'fa-award' },
+])
 const displayOptions = {
   layout: { hierarchical: { enabled: false } },
   interaction: { selectConnectedEdges: false, navigationButtons: true, selectable: true, hover: isSkillsDisplayMode.value },
@@ -114,7 +116,7 @@ const buildNode = (node) => {
       code: '\uf19d',
       weight: '900',
       size: 50,
-      color: 'lightgreen',
+      color: skillColor.value,
     },
     chosen: false,
     details: node,
@@ -128,9 +130,9 @@ const buildNode = (node) => {
   }
   if (node.type === 'Badge') {
     newNode.icon.code = '\uf559'
-    newNode.icon.color = '#88a9fc'
+    newNode.icon.color = badgeColor.value
   }
-  if (node.belongsToBadge) newNode.icon.color = '#88a9fc'
+  if (node.belongsToBadge) newNode.icon.color = badgeColor.value
   return newNode
 }
 
@@ -241,6 +243,7 @@ const toggleOrientation = () => {
 }
 
 watch(() => props.graph, () => nextTick(createGraph), { immediate: true })
+watch([skillColor, badgeColor], () => nextTick(createGraph))
 onBeforeUnmount(() => network?.destroy())
 defineExpose({ fitNetworkToScreen, panToNode, refresh })
 </script>

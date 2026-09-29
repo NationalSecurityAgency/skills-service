@@ -247,19 +247,19 @@ interface SkillEventsSupportRepo extends CrudRepository<SkillDef, Long> {
             ua.projectId = ?2 ''')
     List<TinyUserAchievement> findTinyUserAchievementsByUserIdAndProjectId(String userId, String projectId)
 
-    @Query('''SELECT 
-        ua.skillRefId as skillRefId,
-        ua.skillId as skillId,
+    @Query('''SELECT
+        sd.id as skillRefId,
+        sd.skillId as skillId,
         ua.level as level
-        from UserAchievement ua 
+        from UserAchievement ua
         JOIN SkillDef sd ON
             ua.projectId = sd.projectId
-            AND ua.skillRefId = sd.id
-        where 
+            AND ua.skillRefId = (case when sd.copiedFrom is not null then sd.copiedFrom else sd.id end)
+        where
             ua.userId = ?1
-            AND ua.projectId = ?2
+            AND ua.projectId IN (?2)
             AND sd.type IN ('Skill', 'Badge')''')
-    List<TinyUserAchievement> findTinyUserAchievementsForSkillsAndBadgesByUserIdAndProjectId(String userId, String projectId)
+    List<TinyUserAchievement> findTinyUserAchievementsForSkillsAndBadgesByUserIdAndProjectIds(String userId, Collection<String> projectIds)
 
     @Query('''SELECT l from LevelDef l, ProjDef p 
         where
