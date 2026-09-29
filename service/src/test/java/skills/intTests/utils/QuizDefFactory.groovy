@@ -71,6 +71,9 @@ class QuizDefFactory {
 
     static createFillInTheBlankQuestion(int quizNumber = 1, int questionsNumber = 1, int numberOfAnswers = 2) {
         String question = "This is questions #${questionsNumber}".toString()
+        for(def x = 0; x < numberOfAnswers; x++) {
+            question = question + ' ___ '
+        }
         String answerHint = "This is a hint for question #${questionsNumber}".toString()
 
         List answers = numberOfAnswers > 0 ? (1..numberOfAnswers).collect {

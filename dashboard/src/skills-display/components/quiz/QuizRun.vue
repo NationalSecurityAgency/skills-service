@@ -364,7 +364,7 @@ const startQuizAttempt = () => {
             }
           } else if (enteredText && q.questionType === QuestionType.FillInTheBlank) {
             enteredText.map((answer) => {
-              let currentAnswer = answerOptions.find((a) => a.id === answer.answerId);
+              const currentAnswer = answerOptions.find((a) => a.id === answer.answerId);
               if(currentAnswer) {
                 currentAnswer.answerOption = answer.answerText;
               }

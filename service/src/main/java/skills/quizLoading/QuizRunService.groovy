@@ -627,7 +627,10 @@ class QuizRunService {
             QuizDef quizDef = getQuizDef(quizId)
             handleReportingTextInputQuestion(quizDef, userId, quizAttemptId, answerDefId, quizReportAnswerReq)
         } else if (answerDefPartialInfo.getQuestionType() == QuizQuestionType.FillInTheBlank) {
-//            propsBasedValidator.quizValidationMaxStrLength(PublicProps.UiProp.maxTakeQuizInputTextAnswerLength, "Answer", quizReportAnswerReq.answerText, quizId)
+            if(quizReportAnswerReq.isSelected) {
+                QuizValidator.isNotNull(quizReportAnswerReq.getAnswerText(), "answerText", quizId)
+            }
+            propsBasedValidator.quizValidationMaxStrLength(PublicProps.UiProp.maxTakeQuizInputTextAnswerLength, "Answer", quizReportAnswerReq.answerText, quizId)
             handleReportingFillInTheBlankQuestion(userId, quizAttemptId, answerDefId, quizReportAnswerReq)
         } else if (answerDefPartialInfo.getQuestionType() == QuizQuestionType.Matching) {
             handleReportingMatchingQuestion(userId, quizAttemptId, answerDefId, quizReportAnswerReq, answerDefPartialInfo)
@@ -664,7 +667,7 @@ class QuizRunService {
             } else {
                 quizAttemptAnswerRepo.delete(existingAnswerAttempt)
             }
-        } else if (quizReportAnswerReq.isSelected) {
+        } else if (quizReportAnswerReq.isSelected && quizReportAnswerReq.answerText?.trim()) {
             UserQuizAnswerAttempt newAnswerAttempt = new UserQuizAnswerAttempt(
                     userQuizAttemptRefId: quizAttemptId,
                     quizAnswerDefinitionRefId: answerDefId,

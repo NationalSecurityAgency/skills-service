@@ -16,6 +16,7 @@
 package skills.intTests.quiz
 
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.http.HttpStatus
 import skills.controller.exceptions.SkillQuizException
 import skills.intTests.utils.DefaultIntSpec
 import skills.intTests.utils.QuizDefFactory
@@ -1358,4 +1359,89 @@ class QuizApi_RunQuizSpecs extends DefaultIntSpec {
 
     }
 
+    def "can not complete a quiz when a fill in the blank answer was never reported"() {
+        def quiz = QuizDefFactory.createQuiz(1, "Fancy Description")
+        skillsService.createQuizDef(quiz)
+        def question = QuizDefFactory.createFillInTheBlankQuestion(1, 1, 2)
+        skillsService.createQuizQuestionDefs([question])
+
+        def quizAttempt = skillsService.startQuizAttempt(quiz.quizId).body
+        skillsService.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizAttempt.questions[0].answerOptions[0].id, [answerText: 'Answer #1'])
+
+        when:
+        skillsService.completeQuizAttempt(quiz.quizId, quizAttempt.id)
+
+        then:
+        SkillsClientException ex = thrown(SkillsClientException)
+        ex.httpStatus == HttpStatus.BAD_REQUEST
+        ex.message.contains("Can not submit blank entries for Fill in the Blank questions")
+        def quizInfo = skillsService.getQuizInfo(quiz.quizId)
+        quizInfo.isAttemptAlreadyInProgress == true
+        quizInfo.userNumPreviousQuizAttempts == 0
+        skillsService.startQuizAttempt(quiz.quizId).body.id == quizAttempt.id
+    }
+
+    def "reporting a null fill in the blank answer returns a client error"() {
+        def quiz = QuizDefFactory.createQuiz(1)
+        skillsService.createQuizDef(quiz)
+        skillsService.createQuizQuestionDef(QuizDefFactory.createFillInTheBlankQuestion(1, 1, 1))
+        def attempt = skillsService.startQuizAttempt(quiz.quizId).body
+        def answerId = attempt.questions[0].answerOptions[0].id
+
+        when:
+        skillsService.reportQuizAnswer(quiz.quizId, attempt.id, answerId, [answerText: null])
+
+        then:
+        SkillsClientException ex = thrown(SkillsClientException)
+        ex.httpStatus == HttpStatus.BAD_REQUEST
+        !userQuizAnswerAttemptRepo.existsByUserQuizAttemptRefIdAndQuizAnswerDefinitionRefId(attempt.id, answerId)
+    }
+
+    def "reporting an oversized fill in the blank answer returns a client error"() {
+        def quiz = QuizDefFactory.createQuiz(1)
+        skillsService.createQuizDef(quiz)
+        skillsService.createQuizQuestionDef(QuizDefFactory.createFillInTheBlankQuestion(1, 1, 1))
+        def attempt = skillsService.startQuizAttempt(quiz.quizId).body
+        def answerId = attempt.questions[0].answerOptions[0].id
+
+        when:
+        skillsService.reportQuizAnswer(quiz.quizId, attempt.id, answerId, [answerText: 'a' * 501])
+
+        then:
+        SkillsClientException ex = thrown(SkillsClientException)
+        ex.httpStatus == HttpStatus.BAD_REQUEST
+        ex.message.contains('[Answer] must not exceed [500] chars.')
+        !userQuizAnswerAttemptRepo.existsByUserQuizAttemptRefIdAndQuizAnswerDefinitionRefId(attempt.id, answerId)
+    }
+
+    def "clearing a fill in the blank answer does not persist an empty answer"() {
+        def quiz = QuizDefFactory.createQuiz(1)
+        skillsService.createQuizDef(quiz)
+        def question = QuizDefFactory.createFillInTheBlankQuestion(1, 1, 1)
+        skillsService.createQuizQuestionDef(question)
+        def attempt = skillsService.startQuizAttempt(quiz.quizId).body
+        def answerId = attempt.questions[0].answerOptions[0].id
+
+        when: 'the user clears a blank that has never been saved'
+        skillsService.reportQuizAnswer(quiz.quizId, attempt.id, answerId, [answerText: ''])
+        then:
+        !userQuizAnswerAttemptRepo.existsByUserQuizAttemptRefIdAndQuizAnswerDefinitionRefId(attempt.id, answerId)
+    }
+
+    def "FillInTheBlank question requires one answer for each blank on create and update"() {
+        def quiz = QuizDefFactory.createQuiz(1)
+        skillsService.createQuizDef(quiz)
+        def question = QuizDefFactory.createFillInTheBlankQuestion(1, 1, 2)
+        question.question = 'First ___ and second ___'
+        def created = skillsService.createQuizQuestionDef(question).body
+
+        when: 'an update removes a blank but retains both answer definitions'
+        created.quizId = quiz.quizId
+        created.question = 'Only one ___'
+        skillsService.updateQuizQuestionDef(created)
+
+        then:
+        SkillsClientException ex = thrown(SkillsClientException)
+        ex.httpStatus == HttpStatus.BAD_REQUEST
+    }
 }
