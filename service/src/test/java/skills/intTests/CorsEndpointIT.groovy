@@ -87,7 +87,7 @@ class CorsEndpointIT extends DefaultIntSpec {
         given:
         HttpHeaders headers = new HttpHeaders()
         headers.setOrigin('https://trusted.example')
-        if (method == HttpMethod.POST || method == HttpMethod.PUT) {
+        if (!isPkiMode && (method == HttpMethod.POST || method == HttpMethod.PUT)) {
             ResponseEntity<String> tokenResponse = skillsService.wsHelper.restTemplateWrapper.exchange(
                     "${skillsService.wsHelper.skillsService}/app/userInfo".toString(),
                     HttpMethod.GET, new HttpEntity<>(), String)
