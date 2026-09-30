@@ -72,7 +72,8 @@ class PasswordResetSpec extends DefaultIntSpec {
                 "publicUrl"  : "http://localhost:${localPort}/".toString(),
                 "fromEmail"  : "resetspec@skilltreetests"
         ])
-        template.interceptors.add(new RestTemplateWrapper.StatefulRestTemplateInterceptor(template.requestFactory))
+        boolean isPki = System.getenv("SPRING_PROFILES_ACTIVE") == 'pki'
+        template.interceptors.add(new RestTemplateWrapper.StatefulRestTemplateInterceptor(template.requestFactory, isPki))
         template.getForEntity("http://localhost:${localPort}/app/users/validExistingDashboardUserId/randomuser@skills.org", String.class)
     }
 
