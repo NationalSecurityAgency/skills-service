@@ -97,7 +97,7 @@
     "mochawesome": "7.1.4",
     "mochawesome-merge": "5.1.1",
     "mochawesome-report-generator": "6.3.2",
-    "moment": "2.30.1",
+    "moment": "2.31.0",
     "moment-timezone": "0.6.2",
     "number-format.js": "2.0.9",
     "pdf-parse": "2.4.5",
