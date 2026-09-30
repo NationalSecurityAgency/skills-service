@@ -406,13 +406,27 @@ const updateSelectedAnswers = (questionSelectedAnswer) => {
   isAttemptAlreadyInProgress.value = true;
   if (questionSelectedAnswer.reportAnswerPromise) {
     const key = QuestionType.isFillInTheBlank(questionSelectedAnswer.questionType) ? `answer:${questionSelectedAnswer.changedAnswerId}` : `question:${questionSelectedAnswer.questionId}`
-    reportAnswerPromises.value[key] = questionSelectedAnswer.reportAnswerPromise;
+    const trackedSave = {
+      promise: Promise.resolve(questionSelectedAnswer.reportAnswerPromise),
+      answer: QuestionType.isFillInTheBlank(questionSelectedAnswer.questionType) ? questionSelectedAnswer : null,
+      failed: false,
+    }
+    reportAnswerPromises.value[key] = trackedSave
+    if (trackedSave.answer) {
+      trackedSave.promise.catch(() => {
+        trackedSave.failed = true
+      })
+    }
   }
 }
 const updateMatchedAnswer = (matchedAnswer) => {
   isAttemptAlreadyInProgress.value = true;
   if (matchedAnswer.reportAnswerPromise) {
-    reportAnswerPromises.value[matchedAnswer.questionId] = matchedAnswer.reportAnswerPromise;
+    reportAnswerPromises.value[matchedAnswer.questionId] = {
+      promise: Promise.resolve(matchedAnswer.reportAnswerPromise),
+      answer: null,
+      failed: false,
+    }
   }
 }
 const completeTestRun = () => {
@@ -423,11 +437,26 @@ const handleSaveError = (error) => {
   saveError.value = error?.response?.data?.explanation || 'Unable to save your quiz. Please review your answers and try again.'
   announcer.polite(saveError.value)
 }
+const waitForAnswerSaves = () => {
+  const saves = Object.entries(reportAnswerPromises.value).map(([key, trackedSave]) => {
+    // A failed blank save can be retried with its latest value even when the learner has not edited it again.
+    const retryFailedSave = () => {
+      const answer = trackedSave.answer
+      trackedSave.failed = false
+      trackedSave.promise = QuizRunService.reportAnswer(props.quizId, quizAttemptId.value, answer.changedAnswerId, answer.changedAnswerIdSelected, answer.answerText)
+      trackedSave.promise.catch(() => {
+        trackedSave.failed = true
+      })
+      return trackedSave.promise
+    }
+    return trackedSave.failed && trackedSave.answer ? retryFailedSave() : trackedSave.promise
+  })
+  return Promise.all(saves)
+}
 const submitTestRun = handleSubmit((values) => {
   isCompleting.value = true;
   saveError.value = '';
-  const existingPromises = Object.values(reportAnswerPromises.value)
-  return Promise.all(existingPromises)
+  return waitForAnswerSaves()
     .then(() => reportTestRunToBackend())
     .then(() => {
       destroyDateTimer();
@@ -497,8 +526,7 @@ const cancelQuizAttempt = () => {
 const saveAndCloseThisRun = () => {
   isCompleting.value = true;
   saveError.value = '';
-  const existingPromises = Object.values(reportAnswerPromises.value)
-  return Promise.all(existingPromises)
+  return waitForAnswerSaves()
       .then(() => {
         emit('cancelled');
       })

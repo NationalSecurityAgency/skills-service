@@ -14,12 +14,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <script setup>
-import { computed, ref, watch, onMounted } from 'vue'
+import { watch, onMounted } from 'vue'
 import { useFieldArray } from "vee-validate";
-import SelectCorrectAnswer from '@/components/quiz/testCreation/SelectCorrectAnswer.vue';
-import { useAppConfig } from '@/common-components/stores/UseAppConfig.js';
-import QuestionType from '@/skills-display/components/quiz/QuestionType.js';
-import {useLog} from "@/components/utils/misc/useLog.js";
 
 const model = defineModel()
 const props = defineProps({
@@ -48,7 +44,7 @@ onMounted(() => {
         answers.push({
           id: fields.value[x].value.id,
           answer: fields.value[x].value.answer,
-          isCorrect: fields.value[x].value.isCorrect
+          isCorrect: true
         });
       } else {
         answers.push({
@@ -83,17 +79,6 @@ watch(() => props.numberOfBlanks, (newValue, oldValue) => {
 })
 
 const { remove, push, replace, fields } = useFieldArray('answers');
-const appConfig = useAppConfig()
-const log = useLog()
-const isQuizType = computed(() => {
-  return props.quizType === 'Quiz';
-})
-const maxAnswersAllowed = computed(() => {
-  return appConfig.maxAnswersPerQuizQuestion;
-})
-const noMoreAnswers = computed(() => {
-  return fields.value && fields.value.length >= maxAnswersAllowed.value
-})
 
 const replaceAnswers = (answers) => {
   const fieldSize = fields.value.length
@@ -102,24 +87,12 @@ const replaceAnswers = (answers) => {
   }
   replace(answers)
 }
-const answerSelected = (answerNumber) => {
-  if(QuestionType.isSingleChoice(props.questionType)) {
-    resetAnswers(answerNumber);
-  }
-}
-
-const resetAnswers = (answerToPreserve = null) => {
+const resetAnswers = () => {
   const numFields = fields.value.length
   for(let index = 0; index < numFields; index++) {
-    fields.value[index].value.isCorrect = false;
-  }
-  if (answerToPreserve) {
-    const adjustedAnswer = answerToPreserve - 1
-    fields.value[adjustedAnswer].value.isCorrect = true;
+    fields.value[index].value.isCorrect = true;
   }
 }
-
-const answersRef = ref([]);
 
 defineExpose( {
   replaceAnswers,
@@ -130,16 +103,6 @@ defineExpose( {
 <template>
   <div v-if="model" class="mt-2">
     <div v-for="(answer, index) in fields" :key="answer.key" class="flex flex-wrap items-center gap-0" :data-cy="`answer-${index}`">
-      <SelectCorrectAnswer
-          v-if="isQuizType && !QuestionType.isFillInTheBlank(questionType)"
-          :id="`answers[${index}].isCorrect`"
-          :answer-number="index+1"
-          ref="answersRef"
-          :name="`answers[${index}].isCorrect`"
-          v-model="answer.value.isCorrect"
-          :is-radio-icon="QuestionType.isSingleChoice(questionType)"
-          @answerSelected="answerSelected"
-          class="flex flex-initial mr-2 field"/>
       <SkillsTextInput
           class="flex flex-1"
           placeholder="Enter an answer"

@@ -317,6 +317,31 @@ describe('Skills Display Run Quizzes With Fill In the Blank Questions', () => {
         cy.get('[data-cy="questionDisplayCard-1"]').should('contain.text', 'gamma');
     });
 
+    it('retains correct answers when switching an existing question to fill in the blank', () => {
+        cy.createQuizDef(1);
+        cy.createQuizQuestionDef(1, 1, {
+            question: 'First ___ and second ___',
+            answers: [
+                { answer: 'alpha', isCorrect: true },
+                { answer: 'beta', isCorrect: false },
+            ],
+        });
+        cy.visit('/administrator/quizzes/quiz1');
+        cy.get('[data-cy="editQuestionButton_1"]').click();
+        cy.get('[data-cy="answerTypeSelector"]').click();
+        cy.get('[data-cy="selectionItem_FillInTheBlank"]').click();
+
+        cy.get('[data-cy="answer-0"] [data-cy="answerText"]').should('have.value', 'alpha');
+        cy.get('[data-cy="answer-1"] [data-cy="answerText"]').should('have.value', 'beta');
+        cy.clickSaveDialogBtn();
+
+        cy.get('[data-cy="editQuestionButton_1"]').click();
+        cy.get('[data-cy="answerTypeSelector"]').click();
+        cy.get('[data-cy="selectionItem_SingleChoice"]').click();
+        cy.get('[data-cy="answer-0"] [data-cy="selectCorrectAnswer"] [data-cy="selected"]').should('be.visible');
+        cy.get('[data-cy="answer-1"] [data-cy="selectCorrectAnswer"] [data-cy="selected"]').should('be.visible');
+    });
+
     it('shows missing blanks and allows completing after they are filled', () => {
         createQuizSkill();
         cy.createFillInTheBlankQuestionDef(1, 1);
@@ -397,6 +422,56 @@ describe('Skills Display Run Quizzes With Fill In the Blank Questions', () => {
         cy.get('[data-cy="quizSaveError"]').should('not.exist');
         cy.get('[data-cy="quizCompletion"]').should('contain.text', 'Congrats!!');
         cy.then(() => expect(completionRequests).to.equal(1));
+    });
+
+    it('retries a failed answer save when completing without editing the blank again', () => {
+        createQuizSkill();
+        cy.createFillInTheBlankQuestionDef(1, 1, {
+            question: 'Finish ___',
+            answers: [{ answer: 'Only Answer', isCorrect: true }],
+        });
+        cy.cdVisit(quizPath);
+        cy.get('[data-cy="startQuizAttempt"]').click();
+
+        let answerRequests = 0;
+        let completionRequests = 0;
+        cy.intercept('POST', '/api/quizzes/quiz1/attempt/*/answers/*', (req) => {
+            answerRequests += 1;
+            if (answerRequests < 3) {
+                req.reply({ statusCode: 500, body: { explanation: 'Unable to save answer' } });
+            } else {
+                req.continue();
+            }
+        });
+        cy.intercept('POST', '/api/quizzes/quiz1/attempt/*/complete', (req) => {
+            completionRequests += 1;
+            req.continue();
+        });
+
+        cy.get(firstBlank).type('Only Answer');
+        cy.get('[data-cy="completeQuizBtn"]').click();
+        cy.get('[data-cy="quizSaveError"]').should('be.visible').and('contain.text', 'Unable to save answer');
+        cy.get('[data-cy="quizCompletion"]').should('not.exist');
+        cy.then(() => {
+            expect(answerRequests).to.equal(1);
+            expect(completionRequests).to.equal(0);
+        });
+
+        cy.clickCompleteQuizBtn();
+        cy.get('[data-cy="quizSaveError"]').should('be.visible').and('contain.text', 'Unable to save answer');
+        cy.get('[data-cy="quizCompletion"]').should('not.exist');
+        cy.then(() => {
+            expect(answerRequests).to.equal(2);
+            expect(completionRequests).to.equal(0);
+        });
+
+        cy.clickCompleteQuizBtn();
+        cy.get('[data-cy="quizSaveError"]').should('not.exist');
+        cy.get('[data-cy="quizCompletion"]').should('contain.text', 'Congrats!!');
+        cy.then(() => {
+            expect(answerRequests).to.equal(3);
+            expect(completionRequests).to.equal(1);
+        });
     });
 
 });
