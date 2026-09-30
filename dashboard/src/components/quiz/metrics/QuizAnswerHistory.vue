@@ -87,6 +87,21 @@ onMounted(() => {
       dataCy: 'answerCorrectCol',
     });
   }
+  if (isFillInTheBlank.value) {
+    fields.push({
+      key: 'answerTxt',
+      label: 'Answer Text',
+      sortable: true,
+      dataCy: 'answerTextCol',
+    })
+    fields.push({
+      key: 'status',
+      label: 'Result',
+      sortable: true,
+      imageClass: 'far fa-check-square',
+      dataCy: 'answerCorrectCol',
+    });
+  }
   if (userTagsUtils.showUserTagColumn()) {
     fields.push({
       key: 'userTag',
@@ -106,6 +121,10 @@ onMounted(() => {
 
 const isTextInput = computed(() => {
   return props.questionType === 'TextInput';
+});
+
+const isFillInTheBlank = computed(() => {
+  return props.questionType === 'FillInTheBlank';
 });
 
 const loadData = () => {
@@ -250,6 +269,9 @@ const collapseAll = () => {
                                 size="small"/>
               </router-link>
             </div>
+          </div>
+          <div v-else-if="slotProps.field === 'answerTxt'">
+            <span>{{ slotProps.data[col.key] }}</span>
           </div>
           <div v-else-if="slotProps.field === 'userTag'">
             <span :data-cy="`row${slotProps.index}-userTag`">{{ slotProps.data[col.key] }}</span>
