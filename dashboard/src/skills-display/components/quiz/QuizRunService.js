@@ -45,7 +45,7 @@ export default {
         .then((response) => response.data);
   },
   reportAnswer(quizId, attemptId, answerId, isSelected, answerText = null) {
-    return axios.post(`/api/quizzes/${quizId}/attempt/${attemptId}/answers/${answerId}`, { ...this.getUserIdParams(), isSelected, answerText })
+    return axios.post(`/api/quizzes/${quizId}/attempt/${attemptId}/answers/${answerId}`, { ...this.getUserIdParams(), isSelected, answerText }, { handleError: false })
         .then((response) => response.data);
   },
   completeQuizAttempt(quizId, attemptId) {
