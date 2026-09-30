@@ -375,6 +375,10 @@ const saveQuestionDef = (values) => {
     processedAnswers = answers.filter((a) => a.answer && a.answer.trim().length > 0)
   }
 
+  if (QuestionType.isFillInTheBlank(questionType)) {
+    processedAnswers = processedAnswers.map((answer) => ({ ...answer, isCorrect: true }))
+  }
+
   if(!QuestionType.isMatching(questionType)) {
     // address a race condition where isCorrect could be undefined
     processedAnswers = processedAnswers.map((ans) => ans.isCorrect !== undefined ? ans : ({...ans, isCorrect: false}))
