@@ -24,7 +24,7 @@ import NoContent2 from '@/components/utils/NoContent2.vue'
 import { useBadgeState } from '@/stores/UseBadgeState.js';
 import SkillsService from '@/components/skills/SkillsService.js';
 import BadgesService from '@/components/badges/BadgesService.js';
-import { SkillsReporter } from '@skilltree/skills-client-js'
+import { useInceptionStore } from '@/stores/UseInceptionStore.js'
 import SkillsSelector from "@/components/skills/SkillsSelector.vue";
 import { useProjConfig } from '@/stores/UseProjConfig.js'
 import { storeToRefs } from 'pinia';
@@ -160,7 +160,7 @@ const skillAdded = (newItem) => {
           availableSkills.value = availableSkills.value.filter((item) => item.skillId !== newItem.skillId);
           badgeState.loadBadgeDetailsState(projectId.value, badgeId.value );
           loading.value.skillOp = false;
-          SkillsReporter.reportSkill('AssignGemOrBadgeSkills');
+          useInceptionStore().reportSkill('AssignGemOrBadgeSkills');
           nameQuery.value = null
           filterSkills('');
         }).catch((e) => {

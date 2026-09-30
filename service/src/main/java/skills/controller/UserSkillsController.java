@@ -70,7 +70,6 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-@CrossOrigin(allowCredentials = "true", originPatterns = {"*"})
 @RestController
 @RequestMapping("/api")
 @AdminOrApproverGetRequestUsersOnlyWhenUserIdSupplied

@@ -132,8 +132,6 @@ class SAML2IntegrationIT extends Specification{
 
         then: "The user is successfully authenticated and can access the protected resource"
         assert protectedResponse.statusCode == HttpStatus.OK
-        restTemplate.exchange("${skillServiceUrl}/userExists/test", HttpMethod.GET, entity, String.class).body == "true"
-        restTemplate.exchange("${skillServiceUrl}/userExists/unknownUser", HttpMethod.GET, entity, String.class).body == "false"
         jsonSlurper.parseText(restTemplate.exchange("${skillServiceUrl}/app/userInfo", HttpMethod.GET, entity, String.class).body).userId == "test"
     }
 

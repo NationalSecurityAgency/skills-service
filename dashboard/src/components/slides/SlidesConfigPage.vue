@@ -15,7 +15,7 @@ limitations under the License.
 */
 <script setup>
 import {computed, defineAsyncComponent, onMounted, ref} from "vue";
-import { SkillsReporter } from '@skilltree/skills-client-js'
+import { useInceptionStore } from '@/stores/UseInceptionStore.js'
 import SubPageHeader from "@/components/utils/pages/SubPageHeader.vue";
 import VideoFileInput from "@/components/video/VideoFileInput.vue";
 import SkillsButton from "@/components/utils/inputForm/SkillsButton.vue";
@@ -189,7 +189,7 @@ const saveSettings = () => {
     isSaving.value = false;
     unsavedConfigChanges.value = false;
     announcer.polite('Slides settings were saved');
-    SkillsReporter.reportSkill('AddSkillSlides')
+    useInceptionStore().reportSkill('AddSkillSlides')
   }, (error) => {
     upgradeInProgressErrorChecker.checkError(error)
   })

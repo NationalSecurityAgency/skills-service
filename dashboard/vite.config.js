@@ -81,7 +81,6 @@ export default defineConfig({
       '^/oauth2$': proxyConf,
       '^/login$': proxyConf,
       '^/root/': proxyConf,
-      '^/userExists': proxyConf,
       '^/public/': proxyConf,
       '^/metrics/' : proxyConf,
       '^/resetPassword$' : proxyConf,
@@ -89,7 +88,6 @@ export default defineConfig({
       '^/isFeatureSupported$' : proxyConf,
       '^/resendEmailVerification/' : proxyConf,
       '^/verifyEmail$' : proxyConf,
-      '^/userEmailIsVerified/' : proxyConf,
       '^/skills-websocket/info' : proxyConf,
       '^/skills-websocket/.*/websocket$' : {
         target: 'ws://localhost:8080',
@@ -111,4 +109,3 @@ export default defineConfig({
     }
   }
 })
-

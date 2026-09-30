@@ -22,6 +22,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.web.server.LocalServerPort
 import org.springframework.core.io.ClassPathResource
 import org.springframework.core.io.Resource
+import org.springframework.core.io.buffer.DefaultDataBufferFactory
 import org.springframework.http.*
 import org.springframework.http.client.reactive.ReactorClientHttpConnector
 import org.springframework.util.LinkedMultiValueMap
@@ -29,6 +30,7 @@ import org.springframework.util.MultiValueMap
 import org.springframework.util.ResourceUtils
 import org.springframework.web.client.RestTemplate
 import org.springframework.web.reactive.function.client.WebClient
+import org.springframework.web.reactive.function.BodyInserters
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
 import reactor.netty.http.client.HttpClient
@@ -67,6 +69,11 @@ class DefaultAiIntSpec extends DefaultIntSpec {
         mockLlmServer.stop()
     }
 
+    static AiChatRequest chatRequest(List<String> contents = ['hi'], String model = 'model1') {
+        new AiChatRequest(model: model, modelTemperature: 1d,
+                messages: contents.collect { new AiChatRequest.ChatMessage(role: AiChatRequest.Role.User, content: it) })
+    }
+
     static class ChatClient {
 
         String chatUrl
@@ -76,6 +83,7 @@ class DefaultAiIntSpec extends DefaultIntSpec {
         CertificateRegistry certificateRegistry
 
         private String cookieHeader
+        private String csrfToken
         private WebClient client
         private boolean isPki
         ChatClient(int skillsServicePort,
@@ -96,9 +104,14 @@ class DefaultAiIntSpec extends DefaultIntSpec {
             if (!isPki) {
                 cookieHeader = getCookie()
                 webClientBuilder.defaultHeader(HttpHeaders.COOKIE, cookieHeader)
+                webClientBuilder.defaultHeader('X-XSRF-TOKEN', csrfToken)
                 webClientBuilder.clientConnector(new ReactorClientHttpConnector())
             } else {
-                webClientBuilder.clientConnector(new ReactorClientHttpConnector(createPkiHttpClient()))
+                HttpClient pkiHttpClient = createPkiHttpClient()
+                String token = getPkiCsrfToken(pkiHttpClient)
+                webClientBuilder.defaultHeader(HttpHeaders.COOKIE, "XSRF-TOKEN=${token}")
+                webClientBuilder.defaultHeader('X-XSRF-TOKEN', token)
+                webClientBuilder.clientConnector(new ReactorClientHttpConnector(pkiHttpClient))
             }
 
             client = webClientBuilder.build()
@@ -139,20 +152,72 @@ class DefaultAiIntSpec extends DefaultIntSpec {
             return collectedResponses
         }
 
+        ResponseEntity<String> exchange(Object request) {
+            return client.post().uri(chatUrl).accept(MediaType.TEXT_EVENT_STREAM)
+                    .bodyValue(request)
+                    .exchangeToMono { it.toEntity(String) }
+                    .block(Duration.ofSeconds(30))
+        }
+
+        Flux<String> stream(AiChatRequest request) {
+            return client.post().uri(chatUrl).accept(MediaType.TEXT_EVENT_STREAM)
+                    .bodyValue(request).retrieve().bodyToFlux(String)
+        }
+
+        ResponseEntity<String> exchangeRaw(String json, boolean chunked) {
+            def request = client.post().uri(chatUrl).accept(MediaType.TEXT_EVENT_STREAM)
+            byte[] bytes = json.getBytes(java.nio.charset.StandardCharsets.UTF_8)
+            def withBody = chunked ? request.body(BodyInserters.fromDataBuffers(
+                    Flux.just(new DefaultDataBufferFactory().wrap(bytes)))) : request.bodyValue(bytes)
+            return withBody.exchangeToMono { it.toEntity(String) }.block(Duration.ofSeconds(30))
+        }
+
         private String getCookie() {
+            RestTemplate authClient = new RestTemplate()
+            ResponseEntity<String> csrfResponse = authClient.getForEntity(
+                    loginUrl.replace('/performLogin', '/app/userInfo'), String.class)
+            String initialToken = csrfResponse.headers.get(HttpHeaders.SET_COOKIE)?.find { it.startsWith('XSRF-TOKEN=') }
+                    ?.split(';')[0]?.substring('XSRF-TOKEN='.length())
+            assert initialToken
+            String initialSession = csrfResponse.headers.get(HttpHeaders.SET_COOKIE)?.find { it.startsWith('JSESSIONID=') }
+                    ?.split(';')[0]
+
             HttpHeaders authHeaders = new HttpHeaders()
             authHeaders.setContentType(MediaType.APPLICATION_FORM_URLENCODED)
+            authHeaders.set(HttpHeaders.COOKIE, ([initialSession, "XSRF-TOKEN=${initialToken}"].findAll { it }).join('; '))
+            authHeaders.set('X-XSRF-TOKEN', initialToken)
             MultiValueMap<String, String> authParams = new LinkedMultiValueMap<>()
             authParams.add('username', username)
             authParams.add('password', password)
 
             HttpEntity<MultiValueMap<String, String>> httpRequest = new HttpEntity<>(authParams, authHeaders)
-            ResponseEntity<String> authResponse = new RestTemplate().postForEntity(loginUrl, httpRequest, String.class)
+            ResponseEntity<String> authResponse = authClient.postForEntity(loginUrl, httpRequest, String.class)
 
             List<String> setCookiesHeaders = authResponse.headers.get(HttpHeaders.SET_COOKIE)
             log.debug("authResponse: [{}]", setCookiesHeaders)
-            String cookieHeader = String.join("; ", setCookiesHeaders)
-            return cookieHeader
+            String session = setCookiesHeaders?.find { it.startsWith('JSESSIONID=') }?.split(';')[0]
+            assert session
+
+            HttpHeaders csrfHeaders = new HttpHeaders()
+            csrfHeaders.set(HttpHeaders.COOKIE, session)
+            ResponseEntity<String> freshTokenResponse = authClient.exchange(
+                    loginUrl.replace('/performLogin', '/app/userInfo'), HttpMethod.GET, new HttpEntity<>(csrfHeaders), String)
+            csrfToken = freshTokenResponse.headers.get(HttpHeaders.SET_COOKIE)?.find { it.startsWith('XSRF-TOKEN=') }
+                    ?.split(';')[0]?.substring('XSRF-TOKEN='.length())
+            assert csrfToken
+            return "${session}; XSRF-TOKEN=${csrfToken}"
+        }
+
+        private String getPkiCsrfToken(HttpClient httpClient) {
+            WebClient tokenClient = WebClient.builder()
+                    .clientConnector(new ReactorClientHttpConnector(httpClient))
+                    .build()
+            ResponseEntity<Void> response = tokenClient.get().uri(chatUrl.replace('/openai/chat', '/public/status'))
+                    .exchangeToMono { it.toBodilessEntity() }.block(Duration.ofSeconds(30))
+            String token = response.headers.get(HttpHeaders.SET_COOKIE)?.find { it.startsWith('XSRF-TOKEN=') }
+                    ?.split(';')[0]?.substring('XSRF-TOKEN='.length())
+            assert token
+            return token
         }
 
         HttpClient createPkiHttpClient() throws Exception {

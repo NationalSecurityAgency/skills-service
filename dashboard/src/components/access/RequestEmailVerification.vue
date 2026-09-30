@@ -17,7 +17,7 @@ limitations under the License.
 import { computed } from 'vue';
 import { useRouter } from 'vue-router';
 import AccessService from "@/components/access/AccessService.js";
-import Logo1 from "@/components/brand/Logo1.vue";
+import AccessPageCard from '@/components/access/AccessPageCard.vue';
 import {useEmailVerificationInfo} from "@/components/access/UseEmailVerificationInfo.js";
 
 const emailVerificationInfo = useEmailVerificationInfo()
@@ -41,34 +41,36 @@ const resend = () => {
 </script>
 
 <template>
-  <div>
-    <div class="flex w-full justify-center">
-      <div class="flex flex-col" style="min-width: 20rem;">
-        <div class="mt-8 mb-8 flex flex-col items-center" data-cy="confirmEmailTitle">
-          <logo1 />
-          <div class="h3 mt-6 text-primary">Email Verification is Required!</div>
-        </div>
-        <Card data-cy="confirmEmailExplanation">
-          <template #content>
-            <div v-if="explanationReason">
-              <p>{{explanationReason}}</p>
-            </div>
-            <div v-else>
-              <p>You must first validate your email address in order to start using SkillTree.</p>
-              <p>An email verification code has been sent to {{ emailVerificationInfo.email }}.</p>
-              <p>Please check your email and confirm your email address to complete your SkillTree account creation, or you can click the button below to resend a new verification code.</p>
-            </div>
-            <div class="text-center">
-              <SkillsButton variant="outline-primary" @click="resend" data-cy="resendConfirmationCodeButton" aria-label="Resend Email Confirmation Code" icon="fas fa-arrow-circle-right" label="Resend Email Confirmation Code">
-              </SkillsButton>
-            </div>
-          </template>
-        </Card>
+  <AccessPageCard icon="fas fa-envelope-open-text" labelled-by="verification-required-title">
+    <div data-cy="confirmEmailTitle">
+      <p class="mb-2 text-xs font-bold uppercase tracking-[0.12em] text-blue-600">Account verification</p>
+      <h1 id="verification-required-title" class="m-0 text-[clamp(1.5rem,4vw,2rem)] leading-[1.2] text-gray-900">
+        Email verification required
+      </h1>
+    </div>
+
+    <div class="mt-4 text-gray-600" data-cy="confirmEmailExplanation">
+      <p v-if="explanationReason" class="mx-auto max-w-108 leading-[1.7]">
+        {{ explanationReason }}
+      </p>
+      <div v-else class="mx-auto max-w-108 leading-[1.7]">
+        <p>You must first validate your email address in order to start using SkillTree.</p>
+        <p>
+          An email verification code has been sent to
+          <span class="font-semibold text-gray-800">{{ emailVerificationInfo.email }}</span>.
+        </p>
+        <p>Please check your email and confirm your email address to complete your SkillTree account creation, or resend a new verification code.</p>
       </div>
     </div>
-  </div>
+
+    <div class="mt-7 text-center">
+      <SkillsButton
+        variant="outline-primary"
+        data-cy="resendConfirmationCodeButton"
+        aria-label="Resend Email Confirmation Code"
+        icon="fas fa-arrow-circle-right"
+        label="Resend Email Confirmation Code"
+        @click="resend" />
+    </div>
+  </AccessPageCard>
 </template>
-
-<style scoped>
-
-</style>

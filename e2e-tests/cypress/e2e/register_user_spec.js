@@ -46,8 +46,41 @@ describe('Register Dashboard Users', () => {
         cy.contains('Create Account')
             .click();
 
-        cy.get('[data-cy="breadcrumb-Progress And Rankings"]')
-            .should('be.visible');
+        cy.url().should('include', '/skills-login');
+        cy.contains('Sign in to continue building and managing skills.').should('be.visible');
+
+        cy.get('#username').type('rob.smith@madeup.org');
+        cy.get('#inputPassword').type('password');
+        cy.get('[data-cy=login]').click();
+        cy.get('[data-cy="manageMyProjsBtnInNoContent"]')
+    });
+
+    it('handles registration for an existing account', () => {
+        const existingEmail = 'existing@skills.org';
+        const origPassword = 'password'
+        cy.register(existingEmail, origPassword, false);
+
+        cy.visit('/request-account');
+        cy.get('[data-cy="requestAccountFirstName"]')
+            .type('Robert');
+        cy.get('[data-cy="requestAccountLastName"]')
+            .type('Smith');
+        cy.get('[data-cy="requestAccountEmail"]')
+            .type(existingEmail);
+        cy.get('[data-cy="requestAccountPassword"]')
+            .type('newonepass');
+        cy.get('[data-cy="requestAccountConfirmPassword"]')
+            .type('newonepass');
+        cy.get('[data-cy="createAccountButton"]')
+            .click();
+
+        cy.url().should('include', '/skills-login');
+        cy.contains('Sign in to continue building and managing skills.').should('be.visible');
+
+        cy.get('#username').type(existingEmail);
+        cy.get('#inputPassword').type(origPassword);
+        cy.get('[data-cy=login]').click();
+        cy.get('[data-cy="manageMyProjsBtnInNoContent"]')
     });
 
     it('register dashboard user redirects to previous page', () => {
@@ -69,8 +102,15 @@ describe('Register Dashboard Users', () => {
         cy.get('[data-cy="createAccountButton"]')
             .click();
 
-        cy.get('[data-cy="breadcrumb-Settings"]')
-            .should('be.visible');
+        cy.url().should('include', '/skills-login');
+        cy.contains('Sign in to continue building and managing skills.').should('be.visible');
+
+        cy.get('#username').type('rob.smith@madeup.org');
+        cy.get('#inputPassword').type('password');
+        cy.get('[data-cy=login]').click();
+
+        cy.url().should('include', '/settings');
+        cy.get('[data-cy="generalSettingsSave"]')
     });
 
     it('register dashboard validation', () => {
@@ -184,22 +224,6 @@ describe('Register Dashboard Users', () => {
         cy.contains('Create Account').should('be.enabled');
         cy.contains('The Email field must be a valid email').should('not.exist')
          */
-
-        // email already taken
-        cy.get('[data-cy="requestAccountEmail"]')
-            .clear()
-            .type('skills@skills.org');
-        cy.contains('This email address is already used for another account');
-        cy.contains('Create Account')
-            .should('be.disabled');
-
-        cy.get('[data-cy="requestAccountEmail"]')
-            .clear()
-            .type('skills1@skills.org');
-        cy.contains('Create Account')
-            .should('be.enabled');
-        cy.contains('This email address is already used for another account')
-            .should('not.exist');
 
         // valid email
         cy.get('[data-cy="requestAccountEmail"]')

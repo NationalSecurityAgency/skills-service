@@ -25,7 +25,7 @@ import SubPageHeader from '@/components/utils/pages/SubPageHeader.vue'
 import LoadingContainer from '@/components/utils/LoadingContainer.vue'
 import { useSkillsAnnouncer } from '@/common-components/utilities/UseSkillsAnnouncer.js'
 import SettingService from '@/components/settings/SettingsService'
-import { SkillsReporter } from '@skilltree/skills-client-js'
+import { useInceptionStore } from '@/stores/UseInceptionStore.js'
 import { useAppConfig } from '@/common-components/stores/UseAppConfig.js'
 import { useProjConfig } from '@/stores/UseProjConfig.js'
 import SkillsSettingTextInput from '@/components/settings/SkillsSettingTextInput.vue'
@@ -478,7 +478,7 @@ const saveSettings = ((dirtyChanges) => {
             lastLoadedValue: value.value,
           });
           if (value.setting === settings.value.helpUrlHost.setting && value.value && value.value.length > 0) {
-            SkillsReporter.reportSkill('ConfigureProjectRootHelpUrl');
+            useInceptionStore().reportSkill('ConfigureProjectRootHelpUrl');
           }
         });
         labelsHaveBeenCleared.value = false;

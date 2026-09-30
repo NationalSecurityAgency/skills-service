@@ -14,20 +14,21 @@
  * limitations under the License.
  */
 import { useDebounceFn } from '@vueuse/core'
-import { SkillsReporter, SUCCESS_EVENT, FAILURE_EVENT } from '@skilltree/skills-client-js';
+import { useInceptionStore } from '@/stores/UseInceptionStore.js'
 import { useAppConfig } from '@/common-components/stores/UseAppConfig.js'
 
 export const useSkillsReporterDirective = () => {
   const eventCache = new WeakMap();
   const appConfig = useAppConfig()
+  const inceptionStore = useInceptionStore()
   const eventListener = (el, skillId) => useDebounceFn(() => {
-    SkillsReporter.reportSkill(skillId)
+    inceptionStore.reportSkill(skillId)
       .then((result) => {
-        const event = new CustomEvent(SUCCESS_EVENT, { detail: result });
+        const event = new CustomEvent('skills-report-success', { detail: result });
         el.dispatchEvent(event);
       })
       .catch((error) => {
-        const event = new CustomEvent(FAILURE_EVENT, { detail: error });
+        const event = new CustomEvent('skills-report-error', { detail: error });
         el.dispatchEvent(event);
       });
   }, appConfig.formFieldDebounceInMs);
@@ -52,9 +53,7 @@ export const useSkillsReporterDirective = () => {
 
   const vSkillsOnMounted = {
     mounted: (el, binding) => {
-      const {projectId, subjectId, skillId} = binding.value;
-      const skillsReporter = new SkillsReporter(projectId, subjectId, skillId);
-      skillsReporter.render(el);
+      eventListener(el, binding.value.skillId)();
     },
   }
 

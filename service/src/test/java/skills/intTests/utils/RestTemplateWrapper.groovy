@@ -63,7 +63,7 @@ class RestTemplateWrapper extends RestTemplate {
         this.pkiAuth = pkiAuth
         this.restTemplate = restTemplate
         setupRestTemplate()
-        List<ClientHttpRequestInterceptor> interceptors = [new StatefulRestTemplateInterceptor()]
+        List<ClientHttpRequestInterceptor> interceptors = [new StatefulRestTemplateInterceptor(restTemplate.requestFactory, pkiAuth)]
         this.restTemplate.setInterceptors(interceptors)
     }
 
@@ -71,40 +71,81 @@ class RestTemplateWrapper extends RestTemplate {
      * Need for load balancer support as it uses cookies to keep track which server currently connected to
      */
     static class StatefulRestTemplateInterceptor implements ClientHttpRequestInterceptor {
+        private final ClientHttpRequestFactory requestFactory
+        private final boolean pkiAuth
         private Map<String, String> cookiesByName = [:]
-        private String xsrfToken;
+
+        StatefulRestTemplateInterceptor(ClientHttpRequestFactory requestFactory, boolean pkiAuth) {
+            this.requestFactory = requestFactory
+            this.pkiAuth = pkiAuth
+        }
 
         @Override
         public ClientHttpResponse intercept(HttpRequest request, byte[] body, ClientHttpRequestExecution execution) throws IOException {
+            if (needsCsrfToken(request)) {
+                refreshCsrfToken(request)
+            }
 
-            HttpHeaders requstHeaders = request.getHeaders()
-            if (!cookiesByName.isEmpty()) {
-                String cookieHeader = cookiesByName.collect { key, value -> "${key}=${value}" }.join("; ")
-                requstHeaders.set(HttpHeaders.COOKIE, cookieHeader)
-            }
-            if (xsrfToken != null) {
-                requstHeaders.add("X-XSRF-TOKEN" , xsrfToken);
-            }
+            addCookiesAndCsrfHeader(request.headers)
             log.debug("REQUEST: [{}], headers [{}]", request.URI, request.headers)
             ClientHttpResponse response = execution.execute(request, body);
+            updateCookies(response.headers)
+            return response;
+        }
 
-            HttpHeaders headers = response.getHeaders();
+        private boolean needsCsrfToken(HttpRequest request) {
+            String path = request.URI.path
+            boolean clientEndpoint = path == '/public' || path.startsWith('/public/') ||
+                    path == '/api' || path.startsWith('/api/')
+            boolean multipart = request.headers.contentType?.isCompatibleWith(MediaType.MULTIPART_FORM_DATA)
+            return !['GET', 'HEAD', 'TRACE', 'OPTIONS'].contains(request.method.name()) &&
+                    !(pkiAuth && clientEndpoint && !multipart) &&
+                    !cookiesByName.get('XSRF-TOKEN') &&
+                    !request.headers.containsHeader('X-XSRF-TOKEN')
+        }
 
+        private void refreshCsrfToken(HttpRequest request) throws IOException {
+            // PKI rejects unauthenticated /app/userInfo even though the CSRF filter
+            // issues a cookie; /public/status reaches the same filter in both modes.
+            URI csrfUri = request.URI.resolve('/public/status')
+            ClientHttpRequest csrfRequest = requestFactory.createRequest(csrfUri, HttpMethod.GET)
+            addCookiesAndCsrfHeader(csrfRequest.headers)
+            ClientHttpResponse csrfResponse = csrfRequest.execute()
+            try {
+                updateCookies(csrfResponse.headers)
+            } finally {
+                csrfResponse.close()
+            }
+            if (!cookiesByName.get('XSRF-TOKEN')) {
+                throw new IOException("No XSRF-TOKEN cookie returned by GET ${csrfUri}")
+            }
+        }
+
+        private void addCookiesAndCsrfHeader(HttpHeaders headers) {
+            if (!cookiesByName.isEmpty()) {
+                headers.set(HttpHeaders.COOKIE, cookiesByName.collect { key, value -> "${key}=${value}" }.join('; '))
+            }
+            String xsrfToken = cookiesByName.get('XSRF-TOKEN')
+            if (xsrfToken && !headers.containsHeader('X-XSRF-TOKEN')) {
+                headers.set('X-XSRF-TOKEN', xsrfToken)
+            }
+        }
+
+        private void updateCookies(HttpHeaders headers) {
             List<String> returnedCookies = headers.getOrEmpty(HttpHeaders.SET_COOKIE)
             if (returnedCookies) {
                 returnedCookies.each { String setCookieHeader ->
                     List<java.net.HttpCookie> parsedCookies = java.net.HttpCookie.parse(setCookieHeader)
                     parsedCookies.each { java.net.HttpCookie cookie ->
-                        cookiesByName.put(cookie.name, cookie.value)
-                        if (!xsrfToken && cookie.name == "XSRF-TOKEN") {
-                            xsrfToken = cookie.value
-                            log.debug("Response: [{}], set xsrfToken to [{}]", request.URI, xsrfToken)
+                        if (!cookie.value || cookie.maxAge == 0) {
+                            cookiesByName.remove(cookie.name)
+                        } else {
+                            cookiesByName.put(cookie.name, cookie.value)
                         }
                     }
                 }
                 log.info("Setting cookies to {}", returnedCookies)
             }
-            return response;
         }
     }
 
@@ -160,20 +201,19 @@ class RestTemplateWrapper extends RestTemplate {
     void auth(String skillsServiceUrl, String username, String password, String firstName, String lastName, String email=null) {
         if(!this.pkiAuth) {
             boolean accountCreated = createAccount(skillsServiceUrl, username, password, firstName, lastName, email)
+            HttpHeaders headers = new HttpHeaders()
+            headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED)
+            MultiValueMap<String, String> params = new LinkedMultiValueMap<>()
+            params.add('username', username)
+            params.add('password', password)
+
+            HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<>(params, headers)
+            authResponse = restTemplate.postForEntity(skillsServiceUrl + '/performLogin', request, String.class)
+
             if (!accountCreated) {
-                HttpHeaders headers = new HttpHeaders()
-                headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED)
-                MultiValueMap<String, String> params = new LinkedMultiValueMap<>()
-                params.add('username', username)
-                params.add('password', password)
-
-                HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<>(params, headers)
-                authResponse = restTemplate.postForEntity(skillsServiceUrl + '/performLogin', request, String.class)
-
                 assert authResponse.statusCode == HttpStatus.OK, 'authentication failed: ' + authResponse.statusCode
-
-                authenticationToken = authResponse.getHeaders().getFirst(AUTH_HEADER)
             }
+            authenticationToken = authResponse.getHeaders().getFirst(AUTH_HEADER)
         } else {
             restTemplate.getForEntity("${skillsServiceUrl}/app/users/validExistingDashboardUserId/{userId}", String, username)
         }

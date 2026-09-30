@@ -14,38 +14,31 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <script setup>
-import Logo1 from "@/components/brand/Logo1.vue";
-import {useEmailVerificationInfo} from "@/components/access/UseEmailVerificationInfo.js";
-
-const emailVerificationInfo = useEmailVerificationInfo()
-
+import AccessPageCard from '@/components/access/AccessPageCard.vue';
 </script>
 
 <template>
-  <div>
-    <div class="flex justify-center text-center" data-cy="emailVerificationSentConfirmation">
-      <div class="" style="min-width: 20rem;">
-        <div class="mt-8">
-          <logo1 />
-          <div class="h3 mt-6 text-primary">Email Verification Sent!</div>
-        </div>
-        <Card>
-          <template #content>
-            <p>An email verification code has been sent to <span class="text-primary font-weight-bold">{{ emailVerificationInfo.email }}</span>.</p>
-            <p>Please check your email and confirm your email address to complete your SkillTree account creation.</p>
-            <div class="text-center mt-4">
-              <router-link to="/skills-login" tabindex="-1">
-                <SkillsButton class="p-2" data-cy="loginPage" icon="fas fa-sign-in-alt" label="Return to Login Page"></SkillsButton>
-              </router-link>
-            </div>
-          </template>
-        </Card>
+  <AccessPageCard
+    data-cy="emailVerificationSentConfirmation"
+    icon="fas fa-envelope-circle-check"
+    labelled-by="verification-title">
+    <p class="mb-2 text-xs font-bold uppercase tracking-[0.12em] text-blue-600">Registration request received</p>
+    <h1 id="verification-title" class="m-0 text-[clamp(1.75rem,5vw,2.25rem)] leading-[1.2] text-gray-900">Check your inbox</h1>
+    <p class="mx-auto mb-0 mt-4 max-w-108 leading-[1.7] text-gray-600">
+      If an eligible account exists, an email has been sent with the next steps to complete your registration.
+    </p>
 
-      </div>
+    <div class="my-7 flex items-center gap-3 rounded-xl bg-blue-50 p-4 text-left text-sm leading-6 text-gray-600">
+      <i class="fas fa-circle-info text-2xl text-blue-600" aria-hidden="true"></i>
+      <span>It may take a few minutes to arrive. Be sure to check your spam or junk folder.</span>
     </div>
-  </div>
+
+    <router-link class="block no-underline" to="/skills-login">
+      <SkillsButton
+        data-cy="loginPage"
+        icon="fas fa-arrow-left"
+        label="Return to Login Page"
+        outlined />
+    </router-link>
+  </AccessPageCard>
 </template>
-
-<style scoped>
-
-</style>

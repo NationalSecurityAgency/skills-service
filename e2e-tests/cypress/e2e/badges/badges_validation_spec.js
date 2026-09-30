@@ -353,6 +353,7 @@ describe('Badges Tests', () => {
             .type('a', 0);
         cy.get('[data-cy=descriptionError]')
             .contains(msg)
+            .scrollIntoView()
             .should('be.visible');
         cy.get('#markdown-editor')
             .type('{backspace}');

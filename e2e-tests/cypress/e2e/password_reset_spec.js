@@ -181,7 +181,6 @@ describe('Password Reset Tests', () => {
     });
 
     it('reset password - user does not exist', () => {
-        cy.register('test@skills.org', 'apassword', false);
         cy.visit('/administrator/');
         cy.get('[data-cy=forgotPassword]')
             .click();
@@ -189,10 +188,14 @@ describe('Password Reset Tests', () => {
             .should('exist');
         cy.get('[data-cy=forgotPasswordEmail]')
             .type('fake@skills.org');
-        cy.get('[data-cy=resetPassword')
+        cy.get('[data-cy=resetPassword]')
             .click();
-        cy.get('[data-cy=resetFailedError]')
+        cy.get('[data-cy=resetRequestConfirmation]')
             .should('be.visible');
+        cy.get('[data-cy=resetFailedError]')
+            .should('not.exist');
+        cy.getEmails(0)
+            .should('have.length', 0);
     });
 
     it('cannot use reset link twice', () => {

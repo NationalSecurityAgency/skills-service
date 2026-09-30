@@ -26,7 +26,7 @@ import { useLanguagePluralSupport } from '@/components/utils/misc/UseLanguagePlu
 import NoContent2 from '@/components/utils/NoContent2.vue'
 import { useFocusState } from '@/stores/UseFocusState.js'
 import BadgesService from '@/components/badges/BadgesService.js'
-import { SkillsReporter } from '@skilltree/skills-client-js'
+import { useInceptionStore } from '@/stores/UseInceptionStore.js'
 import { useErrorChecker } from '@/components/utils/errors/UseErrorChecker.js'
 
 const props = defineProps({
@@ -143,7 +143,7 @@ const addSkillsToBadge = (navToNextStep) => {
       const focusOn = groupId ? `group-${groupId}_newSkillBtn` : 'newSkillBtn'
       focusState.setElementId(focusOn)
 
-      SkillsReporter.reportSkill('AssignGemOrBadgeSkills');
+      useInceptionStore().reportSkill('AssignGemOrBadgeSkills');
     })
     .catch((e) => {
       if (errorChecker.isLearningPathErrorCode(e)) {

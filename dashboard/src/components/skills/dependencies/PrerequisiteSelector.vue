@@ -21,7 +21,7 @@ import { object, string } from 'yup'
 import SkillsSelector from "@/components/skills/SkillsSelector.vue";
 import SkillsService from '@/components/skills/SkillsService';
 import SkillsShareService from '@/components/skills/crossProjects/SkillsShareService.js';
-import { SkillsReporter } from '@skilltree/skills-client-js'
+import { useInceptionStore } from '@/stores/UseInceptionStore.js'
 import { useSkillsAnnouncer } from '@/common-components/utilities/UseSkillsAnnouncer.js'
 import InputSanitizer from "@/components/utils/InputSanitizer.js";
 
@@ -122,9 +122,9 @@ const onAddPath = () => {
       const from = props.selectedFromSkills.name;
       const to = toSkillName.value;
       if (toProjectId.value === props.selectedFromSkills.projectId) {
-        SkillsReporter.reportSkill('CreateSkillDependencies');
+        useInceptionStore().reportSkill('CreateSkillDependencies');
       } else {
-        SkillsReporter.reportSkill('CreateCrossProjectSkillDependencies');
+        useInceptionStore().reportSkill('CreateCrossProjectSkillDependencies');
       }
       nextTick(() => announcer.assertive(`Successfully added Learning Path from ${from} to ${to}`));
       clearData();

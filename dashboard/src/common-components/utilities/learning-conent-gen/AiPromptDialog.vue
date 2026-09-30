@@ -322,7 +322,7 @@ const genWithStreaming = (messages) => {
           setFinalMsgToLastChatItem(props.generateCancelledMsg, false, true)
         } else {
           log.error(`Failed to generate description via streaming: ${error}`)
-          setFinalMsgToLastChatItem(props.failedToGenerateMsg, true)
+          setFinalMsgToLastChatItem(error.userMessage || props.failedToGenerateMsg, true)
         }
         focusOnInstructionsInput()
         emit('generation-failed')

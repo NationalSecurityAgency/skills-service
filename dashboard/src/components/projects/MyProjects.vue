@@ -22,7 +22,7 @@ import SkillsSpinner from '@/components/utils/SkillsSpinner.vue'
 import ProjectService from '@/components/projects/ProjectService'
 import MyProject from '@/components/projects/MyProject.vue'
 import EditProject from '@/components/projects/EditProject.vue'
-import { SkillsReporter } from '@skilltree/skills-client-js'
+import { useInceptionStore } from '@/stores/UseInceptionStore.js'
 import NoContent2 from '@/components/utils/NoContent2.vue'
 import { useAppConfig } from '@/common-components/stores/UseAppConfig.js'
 import { useAccessState } from '@/stores/UseAccessState.js'
@@ -132,7 +132,7 @@ const copyProject = (projectInfo) => {
       copyProgressModal.value.copiedProjectId = projectInfo.newProject.projectId
       copyProgressModal.value.isComplete = true
       announcer.polite(`Project ${projectInfo.newProject.name} was copied`)
-      SkillsReporter.reportSkill('CopyProject')
+      useInceptionStore().reportSkill('CopyProject')
       loadProjectsAfterCopy()
     }).catch((err) => {
       const isParagraphValidationFailed = err && err.response && err.response.data && (err.response.data.errorCode === 'ParagraphValidationFailed' || err.response.data.errorCode === 'AttachmentNotFound')
@@ -183,7 +183,7 @@ const projectAdded = (project) => {
   if (isUpdated) {
     announcer.polite(`Project ${project.name} has been updated`)
   } else {
-    SkillsReporter.reportSkill('CreateProject')
+    useInceptionStore().reportSkill('CreateProject')
     announcer.polite(`Project ${project.name} has been created`)
   }
 }

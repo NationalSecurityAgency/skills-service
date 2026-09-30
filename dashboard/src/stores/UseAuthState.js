@@ -14,12 +14,13 @@
  * limitations under the License.
  */
 import { computed, ref } from 'vue'
-import { useRoute, useRouter } from 'vue-router'
+import { useRouter } from 'vue-router'
 import { defineStore } from 'pinia'
 import axios from 'axios'
-import { SkillsConfiguration } from '@skilltree/skills-client-js'
 import { useAppConfig } from '@/common-components/stores/UseAppConfig.js'
 import { useAppInfoState } from '@/stores/UseAppInfoState.js'
+import { useInceptionStore } from '@/stores/UseInceptionStore.js'
+import { useSkillsDisplayParentFrameState } from '@/skills-display/stores/UseSkillsDisplayParentFrameState.js'
 
 
 export const useAuthState = defineStore('authState', () => {
@@ -31,9 +32,9 @@ export const useAuthState = defineStore('authState', () => {
     const oAuthAuth = ref(false)
 
     const router = useRouter()
-    const route = useRoute()
     const appConfig = useAppConfig()
     const appInfoState = useAppInfoState()
+    const inceptionStore = useInceptionStore()
 
     const setAuthUser = (authData) => {
         localAuth.value = true
@@ -52,15 +53,16 @@ export const useAuthState = defineStore('authState', () => {
         restoringSessionState.value = value
     }
     const clearAuthData = () => {
+        inceptionStore.reset()
         userInfoState.value = null
         localAuth.value = false
         oAuthAuth.value = false
-        SkillsConfiguration.logout()
         localStorage.removeItem('localAuth')
         localStorage.removeItem('oAuthAuth')
         localStorage.removeItem('expirationDate')
         localStorage.removeItem('userInfo')
         delete axios.defaults.headers.common.Authorization
+        useSkillsDisplayParentFrameState().setAuthToken('')
     }
 
     const handleLogin = (result) => {
@@ -75,7 +77,7 @@ export const useAuthState = defineStore('authState', () => {
     const signup = (authData) => {
         const url = authData.isRootAccount ? '/createRootAccount' : '/createAccount'
         return axios
-          .put(url, authData)
+          .put(url, authData, { handleError: false })
           .then((result) => {
               if (result) {
                   handleLogin(result)
@@ -99,9 +101,7 @@ export const useAuthState = defineStore('authState', () => {
     }
     const oAuth2Login = (oAuthId) => {
         setOauth2AuthUser()
-        const redirect = route.query.redirect
-        const newLocation = `/oauth2/authorization/${encodeURIComponent(oAuthId)}${redirect ? `?skillsRedirectUri=${redirect}` : ''}`
-        window.location = newLocation
+        window.location = `/oauth2/authorization/${encodeURIComponent(oAuthId)}`
     }
     
     const saml2Login = (registrationid) => {
@@ -154,35 +154,6 @@ export const useAuthState = defineStore('authState', () => {
               }
           })
     }
-    const configureSkillsClientForInception = () => {
-        return new Promise((resolve, reject) => {
-            if (userInfoState.value) {
-                const projectId = 'Inception'
-                const serviceUrl = window.location.origin
-                let authenticator
-                if (appConfig.isPkiAuthenticated) {
-                    authenticator = 'pki'
-                } else {
-                    authenticator = `/api/projects/${encodeURIComponent(projectId)}/token`
-                }
-
-                SkillsConfiguration.configure({
-                    serviceUrl,
-                    projectId,
-                    authenticator
-                })
-
-                SkillsConfiguration.afterConfigure()
-                  .then(() => {
-                      resolve()
-                  })
-                  .catch((error) => reject(error))
-            } else {
-                resolve()
-            }
-        })
-    }
-
     const isAuthenticated = computed(() => {
         return (
           (appConfig.isPkiAuthenticated ||
@@ -208,7 +179,6 @@ export const useAuthState = defineStore('authState', () => {
         restoreSessionIfAvailable,
         setRestoringSession,
         logout,
-        configureSkillsClientForInception,
         isAuthenticated,
         userInfo,
         restoringSession,

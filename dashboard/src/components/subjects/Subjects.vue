@@ -17,7 +17,7 @@ limitations under the License.
 import { computed, nextTick, onMounted, provide, ref, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import { useElementHelper } from '@/components/utils/inputForm/UseElementHelper.js';
-import { SkillsReporter } from '@skilltree/skills-client-js'
+import { useInceptionStore } from '@/stores/UseInceptionStore.js'
 import Sortable from 'sortablejs'
 import BlockUI from 'primevue/blockui'
 import LoadingContainer from '@/components/utils/LoadingContainer.vue'
@@ -154,9 +154,9 @@ const subjectAdded = (subject) => {
     }
   } else {
     subjectsState.subjects.push(subject)
-    SkillsReporter.reportSkill('CreateSubject');
+    useInceptionStore().reportSkill('CreateSubject');
     if (!subject.enabled) {
-      SkillsReporter.reportSkill('CreateSubjectInitiallyHidden')
+      useInceptionStore().reportSkill('CreateSubjectInitiallyHidden')
     }
   }
   announcer.polite(`Subject ${subject.name} has been saved`);
@@ -189,7 +189,7 @@ const sortOrderUpdate = (updateEvent) => {
       .finally(() => {
         sortOrder.value.loading = false;
         sortOrder.value.loadingSubjectId = '-1';
-        SkillsReporter.reportSkill('ChangeSubjectDisplayOrder');
+        useInceptionStore().reportSkill('ChangeSubjectDisplayOrder');
       });
 };
 </script>

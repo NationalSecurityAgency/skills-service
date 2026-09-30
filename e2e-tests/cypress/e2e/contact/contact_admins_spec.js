@@ -111,7 +111,6 @@ describe('Contact Project Admins Specs', () => {
 
         cy.intercept('/root/users/countAllProjectAdmins')
             .as('countAdmins');
-        cy.intercept('api/projects/Inception/skillsClientVersion').as('reportSkillsClientVersion')
         cy.fixture('vars.json')
             .then((vars) => {
                 cy.login(vars.rootUser, vars.defaultPass);
@@ -123,7 +122,6 @@ describe('Contact Project Admins Specs', () => {
                     .click();
                 cy.wait('@isRoot');
                 cy.wait('@countAdmins');
-                cy.wait('@reportSkillsClientVersion');
                 cy.get('[data-cy=projectAdminCount]')
                     .should('have.text', '4');
                 cy.get('[data-cy=emailUsers-submitBtn]')

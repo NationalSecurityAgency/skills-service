@@ -24,7 +24,7 @@ import SkillsDataTable from "@/components/utils/table/SkillsDataTable.vue";
 import SelfReportApprovalConfUserTag from "@/components/skills/selfReport/SelfReportApprovalConfUserTag.vue";
 import SelfReportApprovalConfSkill from "@/components/skills/selfReport/SelfReportApprovalConfSkill.vue";
 import SelfReportApprovalConfSpecificUsers from "@/components/skills/selfReport/SelfReportApprovalConfSpecificUsers.vue";
-import { SkillsReporter } from '@skilltree/skills-client-js'
+import { useInceptionStore } from '@/stores/UseInceptionStore.js'
 import { useAppConfig } from '@/common-components/stores/UseAppConfig.js'
 import UserRolesUtil from '@/components/utils/UserRolesUtil.js';
 import { useColors } from '@/skills-display/components/utilities/UseColors.js'
@@ -198,7 +198,7 @@ const handleFallback = (checked, rowItem) => {
           // close expanded child
           collapseRow(rowItem.userId);
           nextTick(() => announcer.polite(`Assigned ${newConf.approverUserId} as a fallback approver.`));
-          SkillsReporter.reportSkill('ConfigureSelfApprovalWorkload');
+          useInceptionStore().reportSkill('ConfigureSelfApprovalWorkload');
         })
         .finally(() => {
           itemToUpdate.loading = false;
@@ -209,7 +209,7 @@ const handleFallback = (checked, rowItem) => {
           itemToUpdate.allConf = itemToUpdate.allConf.filter((i) => i.id !== rowItem.fallbackConf.id);
           updateTable(data.value);
           nextTick(() => announcer.polite('Removed workload configuration successfully.'));
-          SkillsReporter.reportSkill('ConfigureSelfApprovalWorkload');
+          useInceptionStore().reportSkill('ConfigureSelfApprovalWorkload');
         }).finally(() => {
       itemToUpdate.loading = false;
     });

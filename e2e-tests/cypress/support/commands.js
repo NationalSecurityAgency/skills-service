@@ -49,6 +49,44 @@ addCompareSnapshotCommand({
     errorThreshold: 0.05
 });
 
+// cy.request does not add Axios's X-XSRF-TOKEN header automatically. Keep the
+// cookie and header in sync for requests to the Skills Service, including
+// registration and login requests made before the browser visits the dashboard.
+Cypress.Commands.overwrite('request', (originalFn, ...args) => {
+    const options = typeof args[0] === 'object'
+        ? { ...args[0] }
+        : typeof args[1] === 'string'
+            ? { method: args[0], url: args[1], body: args[2] }
+            : { url: args[0], body: args[1] };
+    const method = (options.method || 'GET').toUpperCase();
+    const url = new URL(options.url, Cypress.config('baseUrl'));
+    const backend = new URL(Cypress.config('baseUrl'));
+    const isSkillsService = url.origin === backend.origin ||
+        (url.hostname === backend.hostname && url.port === '8080');
+
+    if (!isSkillsService || ['GET', 'HEAD', 'OPTIONS', 'TRACE'].includes(method)) {
+        return originalFn(...args);
+    }
+
+    return cy.getCookie('XSRF-TOKEN').then((cookie) => {
+        if (cookie) {
+            return originalFn({
+                ...options,
+                headers: { ...options.headers, 'X-XSRF-TOKEN': cookie.value },
+            });
+        }
+
+        // The first request can be registration, logout, or login. A GET loads
+        // the token without requiring an authenticated session.
+        return cy.request({ url: `${url.origin}/app/userInfo` })
+            .then(() => cy.getCookie('XSRF-TOKEN').should('exist'))
+            .then((xsrfCookie) => originalFn({
+                ...options,
+                headers: { ...options.headers, 'X-XSRF-TOKEN': xsrfCookie.value },
+            }));
+    });
+});
+
 function terminalLog(violations) {
     violations = violations || { length: 0 };
     const { length } = violations;
@@ -334,6 +372,13 @@ Cypress.Commands.add("register", (user, pass, grantRoot, usernameForDisplay = nu
                         usernameForDisplay,
                     }).then((innerResponse) => {
                         requestStatus = innerResponse.status;
+                        cy.request({
+                            method: 'POST',
+                            url: '/performLogin',
+                            form: true,
+                            body: { username: user, password: pass },
+                            failOnStatusCode: false,
+                        });
                     });
                 } else {
                     cy.log(`Creating app user [${user}]`)
@@ -1068,6 +1113,7 @@ Cypress.Commands.add("getFooterFromEmail", (wait=true) => {
 
 Cypress.Commands.add("getEmails", (expectAtLeastNumEmails = 1) => {
     const emailUrl = 'http://localhost:1080/email';
+    cy.waitForBackendAsyncTasksToComplete()
     cy.waitUntil(() => cy.request(emailUrl).then((response) => response.body && response.body.length >= expectAtLeastNumEmails), {
         errorMsg: `Timed out after 2 minutes while attempting to find at least ${expectAtLeastNumEmails} emails in the test SMTP server (${emailUrl}).`,
         timeout: 120000, // waits up to 2 minutes
@@ -1334,8 +1380,6 @@ Cypress.Commands.add('loginBySingleSignOn', (projId = 'proj1') => {
                 cy.log('Skills token request failed, authenticating with OAuth provider...');
                 cy.request({
                     url: 'http://localhost:8080/oauth2/authorization/hydra',
-                    qs: { skillsRedirectUri: baseUrl, },
-                    // qs: { skillsRedirectUri: `${baseUrl}${homePage}` },
                 }).then((resp) => {
                     expect(resp.status).to.eq(200)
 

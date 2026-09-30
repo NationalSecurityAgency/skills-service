@@ -23,7 +23,6 @@ import { useSkillsAnnouncer } from '@/common-components/utilities/UseSkillsAnnou
 import SkillsSelector from "@/components/skills/SkillsSelector.vue";
 import NoContent2 from "@/components/utils/NoContent2.vue";
 import DateCell from "@/components/utils/table/DateCell.vue";
-import { SkillsReporter } from '@skilltree/skills-client-js';
 import SubjectSelector from "@/components/skills/SubjectSelector.vue";
 import {useStorage} from "@vueuse/core";
 

@@ -58,8 +58,8 @@ class PasswordResetController {
         log.info("requesting password reset for [${userId}]")
         User user = userAuthService.getUserRepository().findByUserId(userId)
         if (!user) {
-            log.error("no user found for requested password reset")
-            throw new SkillException("No user found for id [${userId}]")
+            log.info("ignoring password reset request for an unknown user")
+            return RequestResult.success()
         }
         resetService.createResetPasswordTokenAndNotifyUser(user)
         return RequestResult.success()

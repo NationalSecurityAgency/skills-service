@@ -19,7 +19,7 @@ import { useRouter } from 'vue-router';
 import { useForm } from 'vee-validate';
 import { useAppConfig } from '@/common-components/stores/UseAppConfig.js';
 import * as yup from 'yup';
-import Logo1 from '@/components/brand/Logo1.vue';
+import AccessPageCard from '@/components/access/AccessPageCard.vue';
 import AccessService from '@/components/access/AccessService.js';
 import { string } from 'yup';
 
@@ -80,45 +80,35 @@ const resetPassword = handleSubmit((values) => {
 </script>
 
 <template>
-<div>
-  <div class="pt-10">
-    <div class="max-w-md lg:max-w-xl mx-auto">
-      <h1 class="sr-only">SkillTree Login Page</h1>
-      <div class="mt-8 text-center">
-        <logo1 class="mb-4"/>
-        <Message :closable="false">Reset Password For SkillTree Dashboard</Message>
+  <AccessPageCard icon="fas fa-key" labelled-by="reset-password-title">
+    <p class="mb-2 text-xs font-bold uppercase tracking-[0.12em] text-blue-600">Account recovery</p>
+    <h1 id="reset-password-title" class="m-0 text-[clamp(1.75rem,5vw,2.25rem)] leading-[1.2] text-gray-900">Reset your password</h1>
+    <p class="mx-auto mb-7 mt-4 max-w-108 leading-[1.7] text-gray-600">
+      Enter your account email address and we'll send you instructions to choose a new password.
+    </p>
+
+    <form class="text-left" @submit.prevent="resetPassword">
+      <div class="w-full">
+        <SkillsTextInput
+          id="username"
+          v-model="username"
+          label="Email Address"
+          size="small"
+          :is-required="true"
+          placeholder="Enter email"
+          data-cy="forgotPasswordEmail"
+          name="username" />
       </div>
-      <Card class="mt-4 text-left">
-        <template #content>
-          <div class="w-full">
-            <SkillsTextInput
-                label="Email Address"
-                size="small"
-                :is-required="true"
-                @keyup.enter="resetPassword"
-                placeholder="Enter email"
-                v-model="username"
-                data-cy="forgotPasswordEmail"
-                id="username"
-                name="username"/>
-          </div>
-          <small class="text-danger text-red-500" v-if="serverError" data-cy="resetFailedError" role="alert">{{ serverError }}</small>
-          <div class="flex justify-end mt-2">
-            <SkillsButton variant="outline-success"
-                          label="Reset Password"
-                          icon="fas fa-arrow-circle-right"
-                          @click="resetPassword"
-                          :disabled="disabled"
-                          data-cy="resetPassword">
-            </SkillsButton>
-          </div>
-        </template>
-      </Card>
-    </div>
-  </div>
-</div>
+      <small v-if="serverError" class="text-red-700" data-cy="resetFailedError" role="alert">{{ serverError }}</small>
+      <div class="mt-4 flex justify-end">
+        <SkillsButton
+          type="submit"
+          variant="outline-success"
+          label="Reset Password"
+          icon="fas fa-arrow-circle-right"
+          :disabled="disabled"
+          data-cy="resetPassword" />
+      </div>
+    </form>
+  </AccessPageCard>
 </template>
-
-<style scoped>
-
-</style>

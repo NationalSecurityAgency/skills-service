@@ -16,7 +16,7 @@ limitations under the License.
 <script setup>
 import { onMounted, ref } from 'vue'
 import BootstrapService from '@/components/access/BootstrapService.js'
-import Logo1 from '@/components/brand/Logo1.vue'
+import AccessPageCard from '@/components/access/AccessPageCard.vue'
 
 const isLoading = ref(true)
 
@@ -33,16 +33,30 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="flex justify-center">
-    <Card class="mt-4 text-center w-11/12">
-    <template #content>
-      <logo1 />
-      <div v-if="isLoading" class="justify-center mt-6">
+  <AccessPageCard
+    :icon="isLoading ? 'fas fa-gears' : 'fas fa-circle-check'"
+    labelled-by="bootstrap-title">
+    <div v-if="isLoading">
+      <p class="mb-2 text-xs font-bold uppercase tracking-[0.12em] text-blue-600">Setting up SkillTree</p>
+      <h1 id="bootstrap-title" class="m-0 text-[clamp(1.5rem,4vw,2rem)] leading-[1.2] text-gray-900">
+        Getting things ready
+      </h1>
+      <div class="mt-6 flex flex-col items-center">
         <skills-spinner :is-loading="true" />
-        <div class="mt-2 text-primary text-xl">Getting Things Ready!</div>
-        <div class="text-muted-color">This may take just a second...</div>
+        <p class="mb-0 mt-4 text-gray-600">This may take just a second...</p>
       </div>
-      <div v-else>
+    </div>
+
+    <div v-else>
+      <p class="mb-2 text-xs font-bold uppercase tracking-[0.12em] text-blue-600">Setup complete</p>
+      <h1 id="bootstrap-title" class="m-0 text-[clamp(1.5rem,4vw,2rem)] leading-[1.2] text-gray-900">
+        SkillTree is ready
+      </h1>
+      <p class="mx-auto mb-7 mt-4 max-w-108 leading-[1.7] text-gray-600">
+        Your SkillTree environment has been successfully initialized.
+      </p>
+
+      <div class="flex flex-col gap-3 text-left">
         <Message icon="far fa-check-square" severity="success" :closable="false">
           The root account has been successfully created!
         </Message>
@@ -50,19 +64,16 @@ onMounted(() => {
         <Message icon="far fa-check-square" severity="success" :closable="false">
           Inception self-training project created!
         </Message>
-        <p class="mt-2">Please proceed to the SkillTree Dashboard.</p>
+      </div>
+
+      <p class="mt-7 text-gray-600">Please proceed to the SkillTree Dashboard.</p>
+      <div class="text-center">
         <SkillsButton
           label="Let's Get Started!"
           icon="far fa-smile-beam"
           @click="refresh"
-          class="mt-2"
           severity="success" />
       </div>
-    </template>
-  </Card>
-  </div>
+    </div>
+  </AccessPageCard>
 </template>
-
-<style scoped>
-
-</style>

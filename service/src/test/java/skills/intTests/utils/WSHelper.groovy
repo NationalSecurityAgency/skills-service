@@ -171,6 +171,12 @@ class WSHelper {
         return multipartPost(url, params)
     }
 
+    def rootContextUpload(String endpoint, Map params = null) {
+        String url = "${skillsService}/${endpoint}"
+        log.info("MULTIPART POST: {}", url)
+        return multipartPost(url, params)
+    }
+
     def globalBadgeUpload(String endpoint, Map params = null) {
         String url = "${skillsService}/admin/${endpoint}"
         log.info("MULTIPART POST: {}", url)
@@ -411,11 +417,9 @@ class WSHelper {
     private def multipartPost(String endpoint, Map params, boolean throwException = false){
         HttpHeaders headers = new HttpHeaders()
         headers.setContentType(MediaType.MULTIPART_FORM_DATA)
-
-        //TEMP
-
-
-
+        if (restTemplateWrapper.authenticationToken) {
+            headers.set(RestTemplateWrapper.AUTH_HEADER, restTemplateWrapper.authenticationToken)
+        }
         MultiValueMap<String, Object> body = new LinkedMultiValueMap<>()
         params.each { key, val ->
             if (val instanceof File) {

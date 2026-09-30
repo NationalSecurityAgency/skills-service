@@ -23,7 +23,7 @@ import ThemeHelper from '@/skills-display/theme/ThemeHelper.js'
 import { useAppConfig } from '@/common-components/stores/UseAppConfig.js'
 import { useSkillsDisplayInfo } from '@/skills-display/UseSkillsDisplayInfo.js'
 import { useRouter } from 'vue-router'
-import SkillsClientPath from '@/router/SkillsClientPath.js'
+import { validateSkillsDisplayServiceUrl } from '@/skills-display/iframe/SkillsDisplayServiceUrl.js'
 
 export const useIframeInit = () => {
 
@@ -35,6 +35,7 @@ export const useIframeInit = () => {
   const log = useLog()
   const completedHandshake = ref(false)
   const updatedAuthToken = ref(false)
+  const initializationError = ref('')
 
   const loadedIframe = computed(() => completedHandshake.value && updatedAuthToken.value)
 
@@ -53,13 +54,12 @@ export const useIframeInit = () => {
     log.debug('UseIframeInit.js: handleHandshake')
     const handshake = new Postmate.Model({
       updateAuthenticationToken(authToken) {
+        if (!completedHandshake.value || initializationError.value) return
         parentState.setAuthToken(authToken)
-        if (log.isTraceEnabled()) {
-          log.trace(`UseIframeInit.js: updateAuthenticationToken: ${authToken}`)
-        }
         updatedAuthToken.value = true
       },
       updateVersion(newVersion) {
+        if (!completedHandshake.value || initializationError.value) return
         displayAttributes.version = newVersion
         if (log.isTraceEnabled()) {
           log.trace(`UseIframeInit.js: updateVersion: ${newVersion}`)
@@ -67,6 +67,7 @@ export const useIframeInit = () => {
         displayInfo.routerPush('SkillsDisplayInIframe')
       },
       navigate(route) {
+        if (!completedHandshake.value || initializationError.value) return
         if (log.isTraceEnabled()) {
           log.trace(`UseIframeInit.js: navigate: ${JSON.stringify(route)}`)
         }
@@ -76,8 +77,9 @@ export const useIframeInit = () => {
     if (appConfig.isPkiAuthenticated) {
       updatedAuthToken.value = true
     }
-    handshake.then((parent) => {
+    return handshake.then((parent) => {
       log.debug('UseIframeInit.js: handshake.then')
+      const serviceUrl = validateSkillsDisplayServiceUrl(parent.model.serviceUrl)
       // Make sure to freeze the parent object so Pinia won't try to make it reactive
       // CORs won't allow this because parent object can't be changed from an iframe
       parentState.parentFrame = Object.freeze(parent)
@@ -102,10 +104,10 @@ export const useIframeInit = () => {
         log.trace(`UseIframeInit.js: internalBackButton: ${displayAttributes.internalBackButton}`)
       }
 
-      parentState.serviceUrl = parent.model.serviceUrl
+      parentState.serviceUrl = serviceUrl
 
       displayAttributes.projectId = parent.model.projectId
-      displayAttributes.serviceUrl = parent.model.serviceUrl
+      displayAttributes.serviceUrl = serviceUrl
       log.debug(`UseIframeInit.js: serviceUrl: [${displayAttributes.serviceUrl}], projectId: [${displayAttributes.projectId}]`)
 
       if (parent.model.options) {
@@ -136,6 +138,11 @@ export const useIframeInit = () => {
       // this.getCustomIconCss();
 
       completedHandshake.value = true
+    }).catch(() => {
+      parentState.setAuthToken('')
+      completedHandshake.value = false
+      initializationError.value = 'Unable to initialize Skills Display. The service URL must use the same origin as the SkillTree iframe.'
+      log.error(initializationError.value)
     })
   }
 
@@ -162,6 +169,7 @@ export const useIframeInit = () => {
 
   return {
     handleHandshake,
+    initializationError,
     loadedIframe
   }
 }

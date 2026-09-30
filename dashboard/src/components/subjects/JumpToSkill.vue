@@ -16,7 +16,7 @@ limitations under the License.
 <script setup>
 import { ref } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
-import { SkillsReporter } from '@skilltree/skills-client-js';
+import { useInceptionStore } from '@/stores/UseInceptionStore.js'
 import SkillsService from '@/components/skills/SkillsService';
 import SkillsSelector from '@/components/skills/SkillsSelector.vue';
 import { useSkillOverviewRouteUtil } from '@/components/skills/UseSkillOverviewRouteUtil.js'
@@ -49,7 +49,7 @@ const navToSkill = (selectedItem) => {
       name: routeProps.name,
       params: routeProps.params,
     });
-    SkillsReporter.reportSkill('SearchandNavigatedirectlytoaskill');
+    useInceptionStore().reportSkill('SearchandNavigatedirectlytoaskill');
   }
 };
 </script>

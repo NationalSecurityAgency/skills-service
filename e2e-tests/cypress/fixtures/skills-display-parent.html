@@ -1,0 +1,46 @@
+<!--
+Copyright 2026 SkillTree
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    https://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+-->
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Skills Display parent fixture</title>
+  <script src="/__e2e/postmate.js"></script>
+</head>
+<body>
+  <div id="skills-client-container"></div>
+  <script>
+    const serviceUrl = new URLSearchParams(window.location.search).get('serviceUrl') || window.location.origin;
+    new Postmate({
+      container: document.querySelector('#skills-client-container'),
+      // Keep the iframe on SkillTree even when the model supplies an attacker URL.
+      url: `${window.location.origin}/static/clientPortal/index.html`,
+      model: { serviceUrl, projectId: 'proj1' },
+    }).then((child) => {
+      child.frame.title = 'Skills Display';
+      child.frame.style.width = '100%';
+      child.frame.style.height = '1000px';
+      child.on('needs-authentication', async () => {
+        const response = await fetch('/api/projects/proj1/token');
+        if (!response.ok) throw new Error('Unable to obtain the fixture authentication token');
+        const token = await response.json();
+        if (!token.access_token) throw new Error('Missing fixture authentication token');
+        child.call('updateAuthenticationToken', token.access_token);
+      });
+    });
+  </script>
+</body>
+</html>

@@ -22,7 +22,7 @@ import jakarta.servlet.http.HttpServletResponse
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.DependsOn
-import org.springframework.http.HttpMethod
+import org.springframework.http.MediaType
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
 import org.springframework.security.authorization.AuthorityAuthorizationManager
 import org.springframework.security.authorization.AuthorizationManager
@@ -57,6 +57,9 @@ class PortalWebSecurityHelper {
     @Value('#{"${skills.config.disableCsrfProtection:false}"}')
     Boolean disableCsrfProtection
 
+    @Value('${skills.authorization.authMode:#{T(skills.auth.AuthMode).DEFAULT_AUTH_MODE}}')
+    AuthMode authMode
+
     @Autowired
     InviteOnlyProjectAuthorizationManager inviteOnlyProjectAuthorizationManager
 
@@ -80,10 +83,9 @@ class PortalWebSecurityHelper {
             http.csrf((csrf) -> csrf.disable())
         } else {
             http.csrf((csrf) -> csrf
-                    .requireCsrfProtectionMatcher(new MultipartRequestMatcher())
-                    .csrfTokenRepository(cookieCsrfTokenRepository)
-//                    .csrfTokenRepository(new HttpSessionCsrfTokenRepository())
-                    .sessionAuthenticationStrategy(csrfAuthenticationStrategy)
+                     .requireCsrfProtectionMatcher(new ClientEndpointCsrfRequestMatcher(authMode == AuthMode.PKI))
+                     .csrfTokenRepository(cookieCsrfTokenRepository)
+                     .sessionAuthenticationStrategy(csrfAuthenticationStrategy)
                     .csrfTokenRequestHandler(new SpaCsrfTokenRequestHandler()))
                     .addFilterAfter(new CsrfCookieFilter(), BasicAuthenticationFilter.class)
         }
@@ -95,12 +97,12 @@ class PortalWebSecurityHelper {
                                   "/app/oAuthProviders", "/login*", "/login/**",
                                   "/performLogin", "/createAccount",
                                   "/createRootAccount", '/grantFirstRoot',
-                                  '/userExists/**', "/app/userInfo",
+                                  "/app/userInfo",
                                   "/app/users/validExistingDashboardUserId/*", "/app/oAuthProviders",
                                   "/index.html", "index.html", "/public/**",
                                   "/skills-websocket/**", "/requestPasswordReset",
                                   "/resetPassword/**", "/performPasswordReset",
-                                  "/resendEmailVerification/**", "/verifyEmail", "/userEmailIsVerified/*","/saml2/**"]
+                                  "/resendEmailVerification/**", "/verifyEmail", "/saml2/**"]
         RequestMatcher permitAllMatcher = new OrRequestMatcher(
                 permitAllPatterns.collect { String pattern ->
                     String normalizedPattern = StringUtils.hasText(pattern) && !pattern.startsWith('/') ? "/${pattern}" : pattern
@@ -131,6 +133,29 @@ class PortalWebSecurityHelper {
 
     AuthorizationManager<RequestAuthorizationContext> hasAnyAuthorityPlus(List<AuthorizationManager<RequestAuthorizationContext>> managers, String... authorities) {
         return AuthorizationManagers.allOf(([AuthorityAuthorizationManager.hasAnyAuthority(authorities)] + managers) as AuthorizationManager[])
+    }
+}
+
+final class ClientEndpointCsrfRequestMatcher implements RequestMatcher {
+    private final boolean pkiMode
+    private final RequestMatcher clientEndpointMatcher = new OrRequestMatcher(
+            PathPatternRequestMatcher.pathPattern('/api/**'),
+            PathPatternRequestMatcher.pathPattern('/public/**'))
+    private final Set<String> safeMethods = ['GET', 'HEAD', 'TRACE', 'OPTIONS'] as Set
+
+    ClientEndpointCsrfRequestMatcher(boolean pkiMode) {
+        this.pkiMode = pkiMode
+    }
+
+    @Override
+    boolean matches(HttpServletRequest request) {
+        if (safeMethods.contains(request.method)) {
+            return false
+        }
+        // Support running skills-client within iframe on a different domain,
+        // except for multipart uploads, which must be protected on every path.
+        boolean multipart = request.contentType && MediaType.MULTIPART_FORM_DATA.isCompatibleWith(MediaType.parseMediaType(request.contentType))
+        return multipart || !(pkiMode && clientEndpointMatcher.matches(request))
     }
 }
 
@@ -177,23 +202,6 @@ final class CsrfCookieFilter extends OncePerRequestFilter {
         csrfToken.getToken()
 
         filterChain.doFilter(request, response)
-    }
-}
-
-final class MultipartRequestMatcher implements RequestMatcher {
-
-    private final HashSet<String> allowedMethods = new HashSet<>(Arrays.asList("GET", "HEAD", "TRACE", "OPTIONS"))
-    private final OrRequestMatcher pathMatcher = new OrRequestMatcher(
-            PathPatternRequestMatcher.pathPattern("/**/upload"),
-            PathPatternRequestMatcher.pathPattern("/admin/*/*/*/*/video"),
-            PathPatternRequestMatcher.pathPattern("/admin/*/*/*/*/slides"),
-            PathPatternRequestMatcher.pathPattern("/admin/*/*/slides"),
-    )
-
-    @Override
-    boolean matches(HttpServletRequest request) {
-        Boolean matches = (pathMatcher.matches(request) && !this.allowedMethods.contains(request.getMethod()))
-        return matches
     }
 }
 

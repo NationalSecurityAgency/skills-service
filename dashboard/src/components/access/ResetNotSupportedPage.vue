@@ -14,28 +14,29 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <script setup>
-
-import Logo1 from '@/components/brand/Logo1.vue';
+import AccessPageCard from '@/components/access/AccessPageCard.vue';
 </script>
 
 <template>
-  <div>
-    <div class="grid grid-cols-12 gap-4 justify-center text-center" data-cy="resetNotSupported">
-      <div class="col md:col-span-8 lg:col-span-7 xl:col-span-5 mt-4" style="min-width: 20rem;">
-        <div class="mt-8">
-          <logo1 />
-          <div class="text-3xl mt-6 text-primary">Password Reset not currently enabled</div>
-        </div>
-        <Card class="mt-4 text-left">
-          <template #content>
-            Password Reset is not currently enabled on this system. Please contact your SkillTree administrator. Return to the <router-link :to="{ name: 'Login' }" data-cy="loginPage">login page</router-link>?
-          </template>
-        </Card>
-      </div>
+  <AccessPageCard
+    data-cy="resetNotSupported"
+    icon="fas fa-lock"
+    labelled-by="reset-not-supported-title">
+    <p class="mb-2 text-xs font-bold uppercase tracking-[0.12em] text-blue-600">Password reset unavailable</p>
+    <h1 id="reset-not-supported-title" class="m-0 text-[clamp(1.5rem,4vw,2rem)] leading-[1.2] text-gray-900">
+      Password reset is not enabled
+    </h1>
+    <p class="mx-auto mb-7 mt-4 max-w-108 leading-[1.7] text-gray-600">
+      Password reset is not currently enabled on this system. Please contact your SkillTree administrator for assistance.
+    </p>
+
+    <div class="text-center">
+      <router-link class="inline-block no-underline" :to="{ name: 'Login' }" data-cy="loginPage">
+        <SkillsButton
+          icon="fas fa-arrow-left"
+          outlined
+          label="Return to Login Page" />
+      </router-link>
     </div>
-  </div>
+  </AccessPageCard>
 </template>
-
-<style scoped>
-
-</style>

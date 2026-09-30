@@ -22,11 +22,11 @@ import skills.intTests.utils.DefaultIntSpec
 import skills.intTests.utils.SkillsService
 import spock.lang.IgnoreIf
 
-@SpringBootTest(properties = ['skills.config.forceSameSiteNoneCookie=true', 'skills.h2.port=9095'], webEnvironment=SpringBootTest.WebEnvironment.RANDOM_PORT, classes = SpringBootApp)
-class SameSiteCookieAttrEnabledSpec extends DefaultIntSpec {
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT, classes = SpringBootApp)
+class DefaultSessionCookieSpec extends DefaultIntSpec {
 
     @IgnoreIf({env["SPRING_PROFILES_ACTIVE"] == "pki" })
-    def "SameSite=None attribute is on the Set-Cookie header" () {
+    def "default session cookie does not opt in to cross-site requests"() {
         setup:
         SkillsService ss = super.createService()
 
@@ -35,7 +35,9 @@ class SameSiteCookieAttrEnabledSpec extends DefaultIntSpec {
 
         then:
         responseEntity.statusCode.is2xxSuccessful()
-        responseEntity.headers.get('Set-Cookie')
-        responseEntity.headers.get('Set-Cookie').first().contains('SameSite=None')
+        String sessionCookie = responseEntity.headers.get('Set-Cookie').find { it.startsWith('JSESSIONID=') }
+        sessionCookie
+        sessionCookie.contains('HttpOnly')
+        !sessionCookie.contains('SameSite=None')
     }
 }
