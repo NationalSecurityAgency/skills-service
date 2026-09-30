@@ -203,7 +203,8 @@ const fillInTheBlankChangedDebounced = (textInput, answerIndex) => {
     const save = () => reportAnswer(pending.answer)
     // A later edit waits for an in-flight save, and can retry after a failure.
     const request = state.inFlight.then(save, save)
-    state.inFlight = request
+    // Keep the save failure available to the parent without an unhandled rejection in this chain.
+    state.inFlight = request.catch(() => {})
     request.then(pending.resolve, pending.reject)
   }, appConfig.formFieldDebounceInMs)
 
