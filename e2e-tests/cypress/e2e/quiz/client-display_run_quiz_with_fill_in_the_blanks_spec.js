@@ -23,8 +23,17 @@ dayjs.extend(advancedFormatPlugin);
 
 describe('Skills Display Run Quizzes With Fill In the Blank Questions', () => {
 
-    beforeEach(() => {
-    });
+    const quizPath = '/subjects/subj1/skills/skill1/quizzes/quiz1';
+    const firstBlank = '[data-cy="question_1"] [data-cy="questions[0].answerTextArray[0]"]';
+    const secondBlank = '[data-cy="question_1"] [data-cy="questions[0].answerTextArray[1]"]';
+    const thirdBlank = '[data-cy="question_1"] [data-cy="questions[0].answerTextArray[2]"]';
+
+    const createQuizSkill = () => {
+        cy.createQuizDef(1);
+        cy.createProject(1);
+        cy.createSubject(1, 1);
+        cy.createSkill(1, 1, 1, { selfReportingType: 'Quiz', quizId: 'quiz1', pointIncrement: '150', numPerformToCompletion: 1 });
+    };
 
     it('run quiz with 1 fill in the blank', () => {
         cy.createQuizDef(1);
@@ -271,5 +280,123 @@ describe('Skills Display Run Quizzes With Fill In the Blank Questions', () => {
         cy.get('[data-cy="quizCompletion"]').should('contain.text', 'Congrats!!');
     });
 
-});
+    it('creates and edits fill in the blank questions using the question form', () => {
+        cy.createQuizDef(1);
+        cy.visit('/administrator/quizzes/quiz1');
+        cy.openDialog('[data-cy="btn_Questions"]', true);
 
+        cy.get('[data-cy="answerTypeSelector"]').click();
+        cy.get('[data-cy="selectionItem_FillInTheBlank"]').click();
+        cy.get('[data-cy="answer-0"]').should('not.exist');
+        cy.typeInMarkdownEditor('[data-cy="questionText"]', 'First ___');
+        cy.get('[data-cy="answer-0"] [data-cy="answerText"]').type('alpha', { force: true });
+        cy.get('[data-cy="answer-1"]').should('not.exist');
+
+        cy.get('[data-cy="questionText"] [data-cy="markdownEditorInput"] .toastui-editor-ww-container .toastui-editor-contents').type(' and second ___', { force: true });
+        cy.get('[data-cy="answer-1"] [data-cy="answerText"]').type('beta', { force: true });
+        cy.get('[data-cy="questionText"] [data-cy="markdownEditorInput"] .toastui-editor-ww-container .toastui-editor-contents').type(' and third ___', { force: true });
+        cy.get('[data-cy="answer-2"] [data-cy="answerText"]').type('gamma', { force: true });
+        cy.get('[data-cy="questionText"] [data-cy="markdownEditorInput"] .toastui-editor-ww-container .toastui-editor-contents').type('{backspace}{backspace}{backspace}');
+        cy.get('[data-cy="answer-2"]').should('not.exist');
+        cy.get('[data-cy="answer-0"] [data-cy="answerText"]').should('have.value', 'alpha');
+        cy.get('[data-cy="answer-1"] [data-cy="answerText"]').should('have.value', 'beta');
+        cy.clickSaveDialogBtn();
+
+        cy.get('[data-cy="questionDisplayCard-1"] [data-cy="questionDisplayText"]').should('contain.text', 'First ___ and second ___ and third');
+        cy.get('[data-cy="questionDisplayCard-1"]').should('contain.text', 'alpha').and('contain.text', 'beta');
+        cy.get('[data-cy="questionDisplayCard-1"]').should('not.contain.text', 'gamma');
+
+        cy.get('[data-cy="editQuestionButton_1"]').click();
+        cy.get('[data-cy="editQuestionModal"] [data-cy="answer-0"] [data-cy="answerText"]').should('have.value', 'alpha');
+        cy.get('[data-cy="editQuestionModal"] [data-cy="answer-1"] [data-cy="answerText"]').should('have.value', 'beta');
+        cy.get('[data-cy="editQuestionModal"] [data-cy="questionText"] [data-cy="markdownEditorInput"] .toastui-editor-ww-container .toastui-editor-contents').type(' ___', { force: true });
+        cy.get('[data-cy="editQuestionModal"] [data-cy="answer-2"] [data-cy="answerText"]').type('gamma', { force: true });
+
+        cy.clickSaveDialogBtn();
+        cy.get('[data-cy="questionDisplayCard-1"] [data-cy="questionDisplayText"]').should('contain.text', 'First ___ and second ___ and third ___');
+        cy.get('[data-cy="questionDisplayCard-1"]').should('contain.text', 'gamma');
+    });
+
+    it('shows missing blanks and allows completing after they are filled', () => {
+        createQuizSkill();
+        cy.createFillInTheBlankQuestionDef(1, 1);
+        cy.cdVisit(quizPath);
+        cy.get('[data-cy="startQuizAttempt"]').click();
+
+        cy.get(firstBlank).type('Question 1 - First Answer');
+        cy.get(secondBlank).should('have.value', '');
+        cy.get(thirdBlank).type('Question 1 - Third Answer');
+        cy.get('[data-cy="completeQuizBtn"]').click();
+        cy.get('[data-cy="questionErrors"]').should('be.visible').and('contain.text', 'All blanks must be filled in');
+        cy.get('[data-cy="quizCompletion"]').should('not.exist');
+
+        cy.get(secondBlank).type('Question 1 - Second Answer');
+        cy.get('[data-cy="questionErrors"]').should('not.exist');
+        cy.clickCompleteQuizBtn();
+        cy.get('[data-cy="quizCompletion"]').should('contain.text', 'Congrats!!');
+    });
+
+    it('restores saved blanks after leaving and reopening an attempt, then saves edits', () => {
+        createQuizSkill();
+        cy.createFillInTheBlankQuestionDef(1, 1);
+        cy.cdVisit(quizPath);
+        cy.get('[data-cy="startQuizAttempt"]').click();
+
+        // Leaving after the save response exercises the debounced reporting path without a race with navigation.
+        cy.intercept('POST', '/api/quizzes/quiz1/attempt/*/answers/*').as('saveBlank');
+        cy.get(firstBlank).type('Question 1 - First Answer');
+        cy.wait('@saveBlank');
+        cy.get(thirdBlank).type('Question 1 - Third Answer');
+        cy.wait('@saveBlank');
+        cy.cdVisit('/subjects/subj1/skills/skill1');
+        cy.get('[data-cy="takeQuizBtn"]').should('be.visible').click();
+
+        cy.get(firstBlank).should('have.value', 'Question 1 - First Answer');
+        cy.get(secondBlank).should('have.value', '');
+        cy.get(thirdBlank).should('have.value', 'Question 1 - Third Answer');
+        cy.get(firstBlank).clear().type('wrong answer');
+        cy.get(secondBlank).type('Question 1 - Second Answer');
+        cy.get(firstBlank).clear().type('Question 1 - First Answer');
+        cy.clickCompleteQuizBtn();
+        cy.get('[data-cy="quizCompletion"]').should('contain.text', 'Congrats!!');
+    });
+
+    it('shows a failed answer save and completes only after the edited answer is saved', () => {
+        createQuizSkill();
+        cy.createFillInTheBlankQuestionDef(1, 1, {
+            question: 'Finish ___',
+            answers: [{ answer: 'Only Answer', isCorrect: true }],
+        });
+        cy.cdVisit(quizPath);
+        cy.get('[data-cy="startQuizAttempt"]').click();
+
+        let failNextSave = true;
+        let completionRequests = 0;
+        cy.intercept('POST', '/api/quizzes/quiz1/attempt/*/answers/*', (req) => {
+            if (failNextSave) {
+                failNextSave = false;
+                req.reply({ statusCode: 500, body: { explanation: 'Unable to save answer' } });
+            } else {
+                req.continue();
+            }
+        });
+        cy.intercept('POST', '/api/quizzes/quiz1/attempt/*/complete', (req) => {
+            completionRequests += 1;
+            req.continue();
+        });
+
+        cy.get(firstBlank).type('wrong answer');
+        cy.get('[data-cy="completeQuizBtn"]').click();
+        cy.get('[data-cy="quizSaveError"]').should('be.visible').and('contain.text', 'Unable to save answer');
+        cy.get('[data-cy="quizCompletion"]').should('not.exist');
+        cy.get('[data-cy="completeQuizBtn"]').should('be.enabled');
+        cy.then(() => expect(completionRequests).to.equal(0));
+
+        cy.get(firstBlank).clear().type('Only Answer');
+        cy.clickCompleteQuizBtn();
+        cy.get('[data-cy="quizSaveError"]').should('not.exist');
+        cy.get('[data-cy="quizCompletion"]').should('contain.text', 'Congrats!!');
+        cy.then(() => expect(completionRequests).to.equal(1));
+    });
+
+});
