@@ -130,7 +130,6 @@ defineExpose( {
 <template>
   <div v-if="model" class="mt-2">
     <div v-for="(answer, index) in fields" :key="answer.key" class="flex flex-wrap items-center gap-0" :data-cy="`answer-${index}`">
-      ({{index + 1}}):
       <SelectCorrectAnswer
           v-if="isQuizType && !QuestionType.isFillInTheBlank(questionType)"
           :id="`answers[${index}].isCorrect`"
