@@ -275,7 +275,7 @@ const buildNode = (skill, isCrossProject, createdSkillIds, nodes, achievedIds, e
     createdSkillIds.push(skill.id)
     const skillColor = skill.isThisSkill ? themeState.graphThisSkillColor : themeState.graphSkillColor
     const isAchieved = achievedIds.includes(skill.id)
-    let label = isCrossProject ? `Shared from\n<b>${skill.projectName}</b>\n${GraphUtils.truncate(skill.skillName)}` : GraphUtils.truncate(skill.skillName)
+    let label = GraphUtils.getPrerequisiteLabel(skill, isCrossProject)
     if (skill.isThisSkill) {
       label = `<b>This Skill</b>\n${label}`
     } else if (skill.isThisBadge) {

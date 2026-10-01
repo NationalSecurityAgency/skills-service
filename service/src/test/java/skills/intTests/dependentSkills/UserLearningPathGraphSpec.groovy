@@ -16,10 +16,17 @@
 package skills.intTests.dependentSkills
 
 import org.springframework.beans.factory.annotation.Autowired
+import skills.intTests.utils.SkillsService
 import skills.intTests.utils.DefaultIntSpec
 import skills.intTests.utils.SkillsFactory
+import skills.services.settings.Settings
+import skills.storage.model.Setting
+import skills.storage.model.auth.RoleName
+import skills.storage.model.auth.UserRole
 import skills.storage.repos.SkillDefRepo
 import skills.storage.repos.UserAchievedLevelRepo
+import skills.storage.repos.UserRepo
+import skills.storage.repos.UserRoleRepo
 
 class UserLearningPathGraphSpec extends DefaultIntSpec {
 
@@ -28,6 +35,12 @@ class UserLearningPathGraphSpec extends DefaultIntSpec {
 
     @Autowired
     UserAchievedLevelRepo userAchievedLevelRepo
+
+    @Autowired
+    UserRoleRepo userRoleRepo
+
+    @Autowired
+    UserRepo userRepo
 
     def "user graph has no nodes when the project has no learning path"() {
         skillsService.createProject(SkillsFactory.createProject())
@@ -229,6 +242,71 @@ class UserLearningPathGraphSpec extends DefaultIntSpec {
         graph.nodes.size() == 2
         graph.nodes.find { it.projectId == sharedProject.projectId }.achieved
         !graph.nodes.find { it.projectId == project.projectId }.achieved
+    }
+
+    def "user graph omits invite-only prerequisites unless the caller can access the project"() {
+        def project = SkillsFactory.createProject(1)
+        def skills = SkillsFactory.createSkills(3, 1, 1)
+        skillsService.createProjectAndSubjectAndSkills(project, SkillsFactory.createSubject(1, 1), skills)
+
+        def restrictedProject = SkillsFactory.createProject(2)
+        def restrictedSkills = SkillsFactory.createSkills(2, 2, 1)
+        skillsService.createProjectAndSubjectAndSkills(restrictedProject, SkillsFactory.createSubject(2, 1), restrictedSkills)
+        skillsService.shareSkill(restrictedProject.projectId, restrictedSkills[0].skillId, project.projectId)
+        skillsService.addLearningPathPrerequisite(project.projectId, skills[1].skillId, restrictedProject.projectId, restrictedSkills[0].skillId)
+        skillsService.addLearningPathPrerequisite(project.projectId, skills[2].skillId, skills[0].skillId)
+        skillsService.changeSetting(restrictedProject.projectId, 'invite_only', [projectId: restrictedProject.projectId, setting: 'invite_only', value: 'true'])
+
+        String userId = getRandomUsers(1)[0]
+        SkillsService viewer = createService(userId)
+
+        when:
+        def deniedGraph = viewer.getUserDependencyGraph(project.projectId)
+
+        then:
+        deniedGraph.nodes*.skillId.toSet() == [skills[0].skillId, skills[2].skillId].toSet()
+        deniedGraph.edges.size() == 1
+        !deniedGraph.nodes.find { it.projectId == restrictedProject.projectId }
+
+        when:
+        String normalizedUserId = viewer.getUsername(userId)
+        userRoleRepo.save(new UserRole(userId: normalizedUserId, userRefId: userRepo.findByUserId(normalizedUserId).id,
+                projectId: restrictedProject.projectId, roleName: RoleName.ROLE_PRIVATE_PROJECT_USER))
+        def allowedGraph = viewer.getUserDependencyGraph(project.projectId)
+
+        then:
+        allowedGraph.nodes.find { it.projectId == restrictedProject.projectId && it.skillId == restrictedSkills[0].skillId }
+        allowedGraph.edges.size() == 2
+    }
+
+    def "user graph omits community-only prerequisites for nonmembers"() {
+        SkillsService root = createRootSkillService()
+        String memberId = getRandomUsers(1)[0]
+        SkillsService member = createService(memberId)
+        root.saveUserTag(memberId, 'dragons', ['DivineDragon'])
+
+        def project = SkillsFactory.createProject(1)
+        def skills = SkillsFactory.createSkills(2, 1, 1)
+        skillsService.createProjectAndSubjectAndSkills(project, SkillsFactory.createSubject(1, 1), skills)
+
+        def restrictedProject = SkillsFactory.createProject(2)
+        def restrictedSkills = SkillsFactory.createSkills(2, 2, 1)
+        member.createProjectAndSubjectAndSkills(restrictedProject, SkillsFactory.createSubject(2, 1), restrictedSkills)
+        member.shareSkill(restrictedProject.projectId, restrictedSkills[0].skillId, project.projectId)
+        skillsService.addLearningPathPrerequisite(project.projectId, skills[1].skillId, restrictedProject.projectId, restrictedSkills[0].skillId)
+        // A project cannot enable community protection while it is sharing skills. Simulate an existing
+        // relationship after its visibility changes to exercise the graph's read-time access check.
+        settingRepo.save(new Setting(type: Setting.SettingType.Project, projectId: restrictedProject.projectId,
+                setting: Settings.USER_COMMUNITY_ONLY_PROJECT.settingName, value: 'true'))
+
+        when:
+        def deniedGraph = skillsService.getUserDependencyGraph(project.projectId)
+        def allowedGraph = member.getUserDependencyGraph(project.projectId)
+
+        then:
+        !deniedGraph.nodes
+        !deniedGraph.edges
+        allowedGraph.nodes.find { it.projectId == restrictedProject.projectId && it.skillId == restrictedSkills[0].skillId }
     }
 
     def "target badge includes its achieved child skills"() {

@@ -19,8 +19,11 @@ import callStack.profiler.Profile
 import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
+import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import skills.auth.UserInfoService
+import skills.auth.UserSkillsGrantedAuthority
 import skills.controller.exceptions.ErrorCode
 import skills.controller.exceptions.SkillException
 import skills.controller.result.model.*
@@ -34,6 +37,7 @@ import skills.storage.accessors.ProjDefAccessor
 import skills.storage.accessors.SkillDefAccessor
 import skills.storage.model.SkillDef
 import skills.storage.model.SkillRelDef
+import skills.storage.model.auth.RoleName
 import skills.storage.repos.SkillDefRepo
 import skills.storage.repos.SkillEventsSupportRepo
 import skills.storage.repos.SkillRelDefRepo
@@ -88,6 +92,14 @@ class SkillsDepsService {
     @Autowired
     SkillEventsSupportRepo skillEventsSupportRepo
 
+    @Autowired
+    InviteOnlyProjectService inviteOnlyProjectService
+
+    @Autowired
+    UserCommunityService userCommunityService
+
+    @Autowired
+    UserInfoService userInfoService
 
     @Transactional(readOnly = true)
     boolean checkIfSkillInAnotherProjectPartOfLearningPath(String projId, String otherProj, String otherProjSkillId) {
@@ -184,6 +196,30 @@ class SkillsDepsService {
         return convertToSkillsGraphRes(edges)
     }
 
+    @Transactional(readOnly = true)
+    SkillsGraphRes getUserDependentSkillsGraph(String projectId, String userId, Integer version=null) {
+        List<Object[]> rows = skillRelDefRepo.getGraph(projectId, SkillRelDef.RelationshipType.Dependence, version)
+        Set<String> referencedProjectIds = rows.collectMany { [it[5] as String, it[15] as String] }.toSet()
+        referencedProjectIds.remove(projectId)
+
+        String currentUserId = userInfoService.getCurrentUserId()
+        boolean isRoot = SecurityContextHolder.context.authentication?.authorities?.any { authority ->
+            authority instanceof UserSkillsGrantedAuthority && authority.role?.roleName == RoleName.ROLE_SUPER_DUPER_USER
+        }
+        boolean isCommunityMember = userCommunityService.isUserCommunityMember(currentUserId)
+        Set<String> accessibleProjectIds = referencedProjectIds.findAll { referencedProjectId ->
+            (!userCommunityService.isUserCommunityOnlyProject(referencedProjectId) || isCommunityMember) &&
+                    (!inviteOnlyProjectService.isInviteOnlyProject(referencedProjectId) || isRoot ||
+                            inviteOnlyProjectService.isPrivateProjRoleOrAdminRole(referencedProjectId, currentUserId))
+        }.toSet()
+        accessibleProjectIds.add(projectId)
+
+        List<Object[]> visibleRows = rows.findAll { row ->
+            accessibleProjectIds.contains(row[5]) && accessibleProjectIds.contains(row[15])
+        }
+        return convertToSkillsGraphRes(mapGraphEdges(visibleRows, userId))
+    }
+
 
     private static Comparator<SkillDefGraphRes> skillDefComparator = new Comparator<SkillDefGraphRes>() {
         @Override
@@ -259,6 +295,10 @@ class SkillsDepsService {
     @Profile
     List<GraphSkillDefEdge> loadGraphEdges(String projectId, SkillRelDef.RelationshipType type, String userId=null, Integer version=null) {
         List<Object[]> edges = skillRelDefRepo.getGraph(projectId, type, version)
+        return mapGraphEdges(edges, userId)
+    }
+
+    private List<GraphSkillDefEdge> mapGraphEdges(List<Object[]> edges, String userId) {
         if (!edges) {
             return []
         }

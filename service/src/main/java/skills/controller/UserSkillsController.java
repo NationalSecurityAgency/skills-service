@@ -453,7 +453,7 @@ class UserSkillsController {
         SkillsValidator.isNotBlank(projectId, "Project Id");
         String userId = userInfoService.getUserName(userIdParam, true, idType);
 
-        return skillsDepsService.getDependentSkillsGraph(projectId, userId, getProvidedVersionOrReturnDefault(version));
+        return skillsDepsService.getUserDependentSkillsGraph(projectId, userId, getProvidedVersionOrReturnDefault(version));
     }
 
     @RequestMapping(value = "/projects/{projectId}/skills/{skillId}", method = {RequestMethod.PUT, RequestMethod.POST}, produces = "application/json")
