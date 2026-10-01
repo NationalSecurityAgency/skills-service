@@ -28,6 +28,7 @@ import { useThemesHelper } from '@/components/header/UseThemesHelper.js'
 import { useSkillsDisplayThemeState } from '@/skills-display/stores/UseSkillsDisplayThemeState.js'
 import VerticalProgressBar from '@/skills-display/components/progress/VerticalProgressBar.vue'
 import { useDependencyNavigation } from '@/common-components/dependency/UseDependencyNavigation.js'
+import { usePluralize } from '@/components/utils/misc/UsePluralize.js'
 
 const props = defineProps({
   graph: { type: Object, default: () => ({ nodes: [], edges: [] }) },
@@ -41,6 +42,7 @@ const emit = defineEmits(['dataChanged', 'edgeSelected', 'fullscreenChanged', 'n
 const themeHelper = useThemesHelper()
 const themeState = useSkillsDisplayThemeState()
 const dependencyNavigation = useDependencyNavigation()
+const pluralize = usePluralize()
 const graphTemplate = useTemplateRef('fullDepsSkillsGraphContainer')
 const dependencyGraph = useTemplateRef('dependencyGraph')
 const { isFullscreen, toggle } = useFullscreen(graphTemplate)
@@ -299,10 +301,10 @@ defineExpose({ fitNetworkToScreen, panToNode, refresh })
                 <div class="min-w-0 flex-1">
                   <div v-if="showProgress" class="mb-4 w-full max-w-xs rounded-lg border border-surface-200 dark:border-surface-700 bg-surface-0 dark:bg-surface-900 px-3 py-2 shadow-sm" data-cy="learningPathProgressSummary">
                     <div class="flex items-center justify-between gap-4 text-sm">
-                      <span class="text-surface-600 dark:text-surface-300" data-cy="learningPathProgressCount">{{ completedItems }} of {{ totalItems }} items achieved</span>
+                      <span class="text-surface-600 dark:text-surface-300" data-cy="learningPathProgressCount">{{ completedItems }} of {{ totalItems }} {{ pluralize.plural('item', totalItems) }} achieved</span>
                       <span class="shrink-0 font-semibold sd-theme-primary-color" data-cy="learningPathProgressPercent">{{ percentComplete }}%</span>
                     </div>
-                    <VerticalProgressBar class="mt-2" :total-progress="percentComplete" :bar-size="6" :disable-daily-color="true" :aria-label="`${completedItems} of ${totalItems} items achieved`" data-cy="learningPathProgressBar" />
+                    <VerticalProgressBar class="mt-2" :total-progress="percentComplete" :bar-size="6" :disable-daily-color="true" :aria-label="`${completedItems} of ${totalItems} ${pluralize.plural('item', totalItems)} achieved`" data-cy="learningPathProgressBar" />
                   </div>
                   <GraphLegend v-if="showLegend" class="graph-legend deps-overlay" :items="legendItems" />
                 </div>
