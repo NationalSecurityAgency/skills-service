@@ -18,7 +18,7 @@ import { ref } from 'vue';
 import Popover from "primevue/popover";
 import {useStorage} from "@vueuse/core";
 
-const props = defineProps(['isFullscreen', 'enableZoom', 'enableAnimations', 'horizontalOrientation', 'enableDynamicHeight', 'disabled'])
+const props = defineProps(['isFullscreen', 'isAdminMode', 'enableZoom', 'enableAnimations', 'horizontalOrientation', 'enableDynamicHeight', 'disabled'])
 const emit = defineEmits(['toggleFullscreen', 'toggleZoom', 'toggleAnimations', 'toggleOrientation', 'toggleDynamicHeight'])
 
 const storedEnableZoom = useStorage('learningPath-enableZoom', true);
@@ -54,7 +54,7 @@ const toggleDynamicHeight = () => {
 </script>
 
 <template>
-  <div v-if="isFullscreen">
+  <div v-if="isFullscreen && isAdminMode">
     <Checkbox
         :defaultValue="storedEnableZoom"
         :value="enableZoom"
@@ -69,7 +69,7 @@ const toggleDynamicHeight = () => {
       <label for="enableZoom" class="font-bold text-primary ml-2">Focus On Select</label>
     </span>
   </div>
-  <div v-if="isFullscreen">
+  <div v-if="isFullscreen && isAdminMode">
     <Checkbox
         :value="enableAnimations"
         :defaultValue="storedEnableAnimations"
@@ -113,7 +113,7 @@ const toggleDynamicHeight = () => {
       aria-haspopup="true"
       aria-controls="learning_path_settings_menu" />
   <Popover ref="menu">
-    <div class="p-1">
+    <div v-if="isAdminMode" class="p-1">
       <Checkbox
           :value="enableZoom"
           :defaultValue="storedEnableZoom"
@@ -128,7 +128,7 @@ const toggleDynamicHeight = () => {
         <label for="enableZoom" class="font-bold text-primary ml-2">Focus On Select</label>
       </span>
     </div>
-    <div class="p-1">
+    <div v-if="isAdminMode" class="p-1">
       <Checkbox
           :value="enableAnimations"
           :defaultValue="storedEnableAnimations"

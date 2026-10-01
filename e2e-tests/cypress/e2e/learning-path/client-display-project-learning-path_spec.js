@@ -123,6 +123,26 @@ describe('Project learning path in skills display', () => {
     cy.get('[data-cy="learningPathTable"]').should('be.visible')
   })
 
+  it('hides focus settings in both graph modes', () => {
+    cy.createSkill(1, 1, 1)
+    cy.createSkill(1, 1, 2)
+    cy.addLearningPathItem(1, 1, 2)
+
+    cy.cdVisit('/learning-path')
+    cy.get('#dependency-graph canvas').should('be.visible')
+    cy.get('[data-cy="learningPathSettingsMenu"]').click()
+    cy.contains('Focus On Select').should('not.exist')
+    cy.contains('Smooth Focus').should('not.exist')
+    cy.contains('Dynamic Height').should('be.visible')
+
+    cy.get('[data-cy="learningPath-fullScreenButton"]').realClick()
+    cy.get('#fullDepsSkillsGraphContainer').should('match', ':fullscreen')
+    cy.get('#additionalControls').should('be.visible').within(() => {
+      cy.contains('Focus On Select').should('not.exist')
+      cy.contains('Smooth Focus').should('not.exist')
+    })
+  })
+
   it('shows an empty learning path on a direct visit', () => {
     cy.cdVisit('/learning-path')
     cy.get('[data-cy="skillsTitle"]').contains('Learning Path')

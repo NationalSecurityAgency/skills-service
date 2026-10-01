@@ -309,6 +309,7 @@ defineExpose({ fitNetworkToScreen, panToNode, refresh })
                 <div id="additionalControls" class="flex shrink-0 items-center gap-2">
                   <GraphControls
                     :is-fullscreen="isFullscreen"
+                    :is-admin-mode="isAdminMode"
                     :enable-zoom="enableZoom"
                     :enable-animations="enableAnimations"
                     :horizontal-orientation="horizontalOrientation"
