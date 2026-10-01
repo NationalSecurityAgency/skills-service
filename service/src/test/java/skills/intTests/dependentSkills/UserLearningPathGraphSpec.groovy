@@ -33,6 +33,36 @@ class UserLearningPathGraphSpec extends DefaultIntSpec {
         !graph.edges
     }
 
+    def "user graph limits nodes and progress to the requested skill version"() {
+        String projectId = SkillsFactory.defaultProjId
+        List<Map> skills = SkillsFactory.createSkillsWithDifferentVersions([0, 0, 1, 2])
+        skills.each { it.pointIncrement = 50 }
+        skills.each { it.numPerformToCompletion = 1 }
+        skillsService.createProject(SkillsFactory.createProject())
+        skillsService.createSubject(SkillsFactory.createSubject())
+        skillsService.createSkills(skills)
+        skillsService.addSkill([projectId: projectId, skillId: skills[0].skillId], 'user1', new Date())
+        skillsService.addSkill([projectId: projectId, skillId: skills[2].skillId], 'user1', new Date())
+        skillsService.addLearningPathPrerequisite(projectId, skills[1].skillId, skills[0].skillId)
+        skillsService.addLearningPathPrerequisite(projectId, skills[2].skillId, skills[1].skillId)
+        skillsService.addLearningPathPrerequisite(projectId, skills[3].skillId, skills[2].skillId)
+
+        when:
+        def version0Graph = skillsService.getUserDependencyGraph(projectId, 'user1', 0)
+        def version1Graph = skillsService.getUserDependencyGraph(projectId, 'user1', 1)
+        def version2Graph = skillsService.getUserDependencyGraph(projectId, 'user1', 2)
+        def adminGraph = skillsService.getDependencyGraph(projectId)
+
+        then:
+        version0Graph.nodes.collectEntries { [(it.skillId): it.achieved] } == [(skills[0].skillId): true, (skills[1].skillId): false]
+        version0Graph.edges.size() == 1
+        version1Graph.nodes.collectEntries { [(it.skillId): it.achieved] } == [(skills[0].skillId): true, (skills[1].skillId): false, (skills[2].skillId): true]
+        version1Graph.edges.size() == 2
+        version2Graph.nodes*.skillId.toSet() == skills*.skillId.toSet()
+        version2Graph.edges.size() == 3
+        adminGraph.nodes*.skillId.toSet() == skills*.skillId.toSet()
+    }
+
     def "user graph only marks fully achieved learning path skills and keeps other users separate"() {
         String projectId = SkillsFactory.defaultProjId
         List<Map> skills = SkillsFactory.createSkills(4)

@@ -952,10 +952,13 @@ class SkillsService {
         wsHelper.adminGet(url)
     }
 
-    def getUserDependencyGraph(String projId, String userId = null) {
+    def getUserDependencyGraph(String projId, String userId = null, Integer version = null) {
         String url = "/projects/${projId}/dependency/graph"
         if (userId) {
             url += "?userId=${userId}"
+        }
+        if (version != null) {
+            url += "${userId ? '&' : '?'}version=${version}"
         }
         wsHelper.apiGet(url)
     }

@@ -447,12 +447,13 @@ class UserSkillsController {
     @RequestMapping(value = "/projects/{projectId}/dependency/graph", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     SkillsGraphRes getDependencyGraphForProject(@PathVariable("projectId") String projectId,
-                                                @RequestParam(name = "userId", required = false) String userIdParam,
-                                                @RequestParam(name = "idType", required = false) String idType) {
+                                                 @RequestParam(name = "userId", required = false) String userIdParam,
+                                                 @RequestParam(name = "version", required = false) Integer version,
+                                                 @RequestParam(name = "idType", required = false) String idType) {
         SkillsValidator.isNotBlank(projectId, "Project Id");
         String userId = userInfoService.getUserName(userIdParam, true, idType);
 
-        return skillsDepsService.getDependentSkillsGraph(projectId, userId);
+        return skillsDepsService.getDependentSkillsGraph(projectId, userId, getProvidedVersionOrReturnDefault(version));
     }
 
     @RequestMapping(value = "/projects/{projectId}/skills/{skillId}", method = {RequestMethod.PUT, RequestMethod.POST}, produces = "application/json")

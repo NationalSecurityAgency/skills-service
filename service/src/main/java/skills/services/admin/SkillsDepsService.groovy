@@ -179,8 +179,8 @@ class SkillsDepsService {
 
     @Profile
     @Transactional(readOnly = true)
-    SkillsGraphRes getDependentSkillsGraph(String projectId, String userId=null) {
-        List<GraphSkillDefEdge> edges = loadGraphEdges(projectId, SkillRelDef.RelationshipType.Dependence, userId)
+    SkillsGraphRes getDependentSkillsGraph(String projectId, String userId=null, Integer version=null) {
+        List<GraphSkillDefEdge> edges = loadGraphEdges(projectId, SkillRelDef.RelationshipType.Dependence, userId, version)
         return convertToSkillsGraphRes(edges)
     }
 
@@ -257,8 +257,8 @@ class SkillsDepsService {
     }
 
     @Profile
-    List<GraphSkillDefEdge> loadGraphEdges(String projectId, SkillRelDef.RelationshipType type, String userId=null) {
-        List<Object[]> edges = skillRelDefRepo.getGraph(projectId, type)
+    List<GraphSkillDefEdge> loadGraphEdges(String projectId, SkillRelDef.RelationshipType type, String userId=null, Integer version=null) {
+        List<Object[]> edges = skillRelDefRepo.getGraph(projectId, type, version)
         if (!edges) {
             return []
         }
