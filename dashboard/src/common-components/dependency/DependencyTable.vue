@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <script setup>
-import { computed, nextTick, onMounted, ref, watch } from 'vue'
+import { computed, nextTick, ref, watch } from 'vue'
 import { useSkillsAnnouncer } from '@/common-components/utilities/UseSkillsAnnouncer.js'
 import SkillsService from '@/components/skills/SkillsService.js'
 import NoContent2 from '@/components/utils/NoContent2.vue'
@@ -45,7 +45,6 @@ const paginatorLabelStyle = computed(() => props.mode === 'skills-display' ? {
 } : {})
 
 const learningPaths = ref([])
-const isProcessing = ref(true)
 const sortField = ref('')
 const sortOrder = ref(0)
 
@@ -62,40 +61,26 @@ const getNode = (nodes, id) => {
   }
 }
 
-onMounted(() => {
-
-    loadPaths()
-    isProcessing.value = false
-})
-
-watch(() => props.data?.edges?.length, (newLen) => {
-  if (newLen !== learningPaths.value.length) {
-    loadPaths()
-  }
-})
-
-const loadPaths = () => {
+watch(() => props.data, () => {
   const learningPathsTmp = []
-  if (props.data && props.data.edges && props.data.edges.length > 0) {
+  if (props.data?.edges?.length) {
     const {nodes, edges} = props.data
-    if (edges && edges.length > 0) {
-      edges.forEach((edge) => {
-        const fromNode = getNode(nodes, edge.from)
-        const toNode = getNode(nodes, edge.to)
+    edges.forEach((edge) => {
+      const fromNode = getNode(nodes, edge.from)
+      const toNode = getNode(nodes, edge.to)
 
-        if (fromNode && toNode) {
-          learningPathsTmp.push({
-            fromItem: fromNode?.details?.name,
-            fromNode: fromNode?.details,
-            toItem: toNode?.details?.name,
-            toNode: toNode?.details
-          })
-        }
-      })
-    }
-    learningPaths.value = learningPathsTmp
+      if (fromNode && toNode) {
+        learningPathsTmp.push({
+          fromItem: fromNode?.details?.name,
+          fromNode: fromNode?.details,
+          toItem: toNode?.details?.name,
+          toNode: toNode?.details
+        })
+      }
+    })
   }
-}
+  learningPaths.value = learningPathsTmp
+}, { immediate: true })
 
 const removeLearningPath = (data) => {
   const message = `Do you want to remove the path from ${data.fromItem} to ${data.toItem}?`
@@ -135,12 +120,11 @@ const jumpToNode = (value) => {
       <SkillsCardHeader title="Learning Path Routes" :title-tag="mode === 'skills-display' ? 'h2' : 'h3'" :style="routeHeaderStyle" />
     </template>
     <template #content>
-      <div v-if="!isProcessing && learningPaths.length > 0">
+      <div v-if="learningPaths.length > 0">
         <SkillsDataTable
           tableStoredStateId="dependencies"
           aria-label="Learning Path Routes"
           :value="learningPaths"
-          v-if="!isProcessing"
           :loading="isLoading"
           data-cy="learningPathTable"
           paginator :rows="5" :rowsPerPageOptions="[5, 10, 15, 20]"

@@ -58,6 +58,27 @@ describe('Learning Path Management Validation Tests', () => {
         cy.intercept('GET', '/admin/projects/proj1/sharedWithMe').as('loadSharedSkills');
     });
 
+    it('updates learning path rows when a route is replaced without changing the edge count', () => {
+        cy.addLearningPathItem(1, 1, 2)
+        visitLearningPath()
+
+        cy.get(`${tableSelector} [data-cy="fromNodeLink_skill1"]`).should('be.visible')
+        cy.get(`${tableSelector} [data-cy="toNodeLink_skill2"]`).should('be.visible')
+        cy.get('[data-cy="learningPathTotalRows"] [data-cy="skillsBTableTotalRows"]').should('have.text', '1')
+
+        // Replace the route on the server and refresh the graph without remounting the table.
+        cy.request('DELETE', '/admin/projects/proj1/skill2/prerequisite/proj1/skill1')
+        cy.selectSkill('[data-cy="learningPathFromSkillSelector"]', 'skill3')
+        cy.selectSkill('[data-cy="learningPathToSkillSelector"]', 'skill4')
+        cy.get('[data-cy="addLearningPathItemBtn"]').click()
+
+        cy.get(`${tableSelector} [data-cy="fromNodeLink_skill3"]`).should('be.visible')
+        cy.get(`${tableSelector} [data-cy="toNodeLink_skill4"]`).should('be.visible')
+        cy.get(`${tableSelector} [data-cy="fromNodeLink_skill1"]`).should('not.exist')
+        cy.get(`${tableSelector} [data-cy="toNodeLink_skill2"]`).should('not.exist')
+        cy.get('[data-cy="learningPathTotalRows"] [data-cy="skillsBTableTotalRows"]').should('have.text', '1')
+    })
+
     it('Create a simple learning path', () => {
         visitLearningPath()
         cy.get('[data-cy="fullDepsSkillsGraph"] [data-cy="graphLegend"]').should('be.visible')
