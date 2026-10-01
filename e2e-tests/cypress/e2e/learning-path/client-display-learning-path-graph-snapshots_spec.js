@@ -24,7 +24,7 @@ describe('Client Display Prerequisites Snapshot Tests', () => {
 
         Cypress.Commands.add('clickOnNode', (x, y) => {
             cy.contains('Prerequisites');
-            cy.get('[data-cy="graphLegend"]').contains('Legend');
+            cy.get('[data-cy="graphLegend"]').should('not.exist');
             cy.wait(2000); // wait for chart
             // have to click twice to it to work...
             cy.get('#dependent-skills-network canvas')
@@ -61,7 +61,7 @@ describe('Client Display Prerequisites Snapshot Tests', () => {
 
         cy.navToTheFirstSkill();
         cy.contains('Prerequisites');
-        cy.get('[data-cy="graphLegend"]').contains('Legend');
+        cy.get('[data-cy="graphLegend"]').should('not.exist');
         cy.get('[data-cy="depsProgress"] [data-cy="numDeps"]')
             .contains('4');
         cy.get('[data-cy="depsProgress"] [data-cy="depsPercentComplete"]')
@@ -102,7 +102,7 @@ describe('Client Display Prerequisites Snapshot Tests', () => {
 
         cy.navToTheFirstSkill();
         cy.contains('Prerequisites');
-        cy.get('[data-cy="graphLegend"]').contains('Legend');
+        cy.get('[data-cy="graphLegend"]').should('not.exist');
         cy.get('[data-cy="depsProgress"] [data-cy="numDeps"]')
             .contains('4');
         cy.get('[data-cy="depsProgress"] [data-cy="depsPercentComplete"]')
@@ -144,7 +144,7 @@ describe('Client Display Prerequisites Snapshot Tests', () => {
 
         cy.navToTheFirstSkill();
         cy.contains('Prerequisites');
-        cy.get('[data-cy="graphLegend"]').contains('Legend');
+        cy.get('[data-cy="graphLegend"]').should('not.exist');
         cy.get('[data-cy="depsProgress"] [data-cy="numDeps"]')
             .contains('4');
         cy.get('[data-cy="depsProgress"] [data-cy="depsPercentComplete"]')
@@ -188,7 +188,7 @@ describe('Client Display Prerequisites Snapshot Tests', () => {
 
         cy.navToTheFirstSkill();
         cy.contains('Prerequisites');
-        cy.get('[data-cy="graphLegend"]').contains('Legend');
+        cy.get('[data-cy="graphLegend"]').should('not.exist');
         cy.get('[data-cy="depsProgress"] [data-cy="numDeps"]')
             .contains('3');
         cy.get('[data-cy="depsProgress"] [data-cy="depsPercentComplete"]')
