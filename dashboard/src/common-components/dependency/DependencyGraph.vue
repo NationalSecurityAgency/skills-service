@@ -52,10 +52,13 @@ const showGraph = ref(false)
 const data = ref({})
 const dataHeight = ref(0)
 const dataWidth = ref(0)
+const hasGraphData = computed(() => !!props.graph?.nodes?.length)
 const nodeSize = 65
 const nodes = new DataSet()
 const edges = new DataSet()
 let network = null
+let graphResizeObserver = null
+let resizeToFit = false
 
 const isSkillsDisplayMode = computed(() => props.mode === 'skills-display')
 const isAdminMode = computed(() => props.mode === 'admin')
@@ -78,7 +81,6 @@ const displayOptions = {
     color: { border: 'green', background: 'lightgreen' },
   },
 }
-const hasGraphData = computed(() => !!props.graph?.nodes?.length)
 const showProgress = computed(() => isSkillsDisplayMode.value && (props.graph?.edges?.length || 0) > 0)
 const totalItems = computed(() => showProgress.value ? (props.graph?.nodes?.length || 0) : 0)
 const completedItems = computed(() => showProgress.value ? (props.graph?.nodes?.filter((node) => node.achieved).length || 0) : 0)
@@ -179,12 +181,21 @@ const setVisNetworkTabIndex = () => {
 }
 
 const createGraph = () => {
+  graphResizeObserver?.disconnect()
+  resizeToFit = false
   network?.destroy()
   network = null
   buildData()
   showGraph.value = hasGraphData.value
-  if (!hasGraphData.value || !dependencyGraph.value) return
+  if (!hasGraphData.value || !dependencyGraph.value || !dependencyGraph.value.isConnected) return
   network = new Network(dependencyGraph.value, data.value, displayOptions)
+  graphResizeObserver = new ResizeObserver(() => {
+    if (resizeToFit && dependencyGraph.value?.clientWidth && dependencyGraph.value?.clientHeight) {
+      resizeToFit = false
+      requestAnimationFrame(fitNetworkToScreen)
+    }
+  })
+  graphResizeObserver.observe(dependencyGraph.value)
 
   if (isSkillsDisplayMode.value) {
     const networkCanvas = dependencyGraph.value.querySelector('canvas')
@@ -223,6 +234,11 @@ const createGraph = () => {
   network.fit()
   setVisNetworkTabIndex()
 }
+const updateGraph = async () => {
+  // The initial graph replaces the empty-state markup; wait for its container to mount.
+  await nextTick()
+  createGraph()
+}
 
 const refresh = (skillId = null) => {
   createGraph()
@@ -231,20 +247,33 @@ const refresh = (skillId = null) => {
     if (node) panToNode(node.id)
   }
 }
-const fitNetworkToScreen = () => network?.fit()
-const toggleFullscreen = () => toggle().then(() => {
-  emit('fullscreenChanged', isFullscreen.value)
-  fitNetworkToScreen()
-})
+const fitNetworkToScreen = () => {
+  if (!network || !dependencyGraph.value) return
+  network.setSize('100%', '100%')
+  network.fit({ animation: false })
+}
+const toggleFullscreen = async () => {
+  resizeToFit = !!network
+  try {
+    await toggle()
+  } catch (error) {
+    resizeToFit = false
+    throw error
+  }
+}
 const toggleOrientation = () => {
   horizontalOrientation.value = !horizontalOrientation.value
   buildData()
   fitNetworkToScreen()
 }
 
-watch(() => props.graph, () => nextTick(createGraph), { immediate: true })
+watch(() => props.graph, updateGraph, { immediate: true })
 watch([skillColor, badgeColor], () => nextTick(createGraph))
-onBeforeUnmount(() => network?.destroy())
+watch(isFullscreen, (fullscreen) => emit('fullscreenChanged', fullscreen))
+onBeforeUnmount(() => {
+  graphResizeObserver?.disconnect()
+  network?.destroy()
+})
 defineExpose({ fitNetworkToScreen, panToNode, refresh })
 </script>
 
@@ -265,7 +294,7 @@ defineExpose({ fitNetworkToScreen, panToNode, refresh })
                 title="No Learning Path Yet..."
                 :message="isAdminMode ? `Here you can create and manage the project's Learning Path.` : `Here you can view the project's Learning Path, which may consist of skills and badges.`" />
             </div>
-            <div v-else class="w-full px-2" :class="isFullscreen ? 'pt-4' : ''">
+            <div class="w-full px-2" :class="isFullscreen ? 'pt-4' : ''">
               <div class="flex flex-wrap items-start justify-between gap-3">
                 <div class="min-w-0 flex-1">
                   <div v-if="showProgress" class="mb-4 w-full max-w-xs rounded-lg border border-surface-200 dark:border-surface-700 bg-surface-0 dark:bg-surface-900 px-3 py-2 shadow-sm" data-cy="learningPathProgressSummary">
@@ -322,5 +351,6 @@ defineExpose({ fitNetworkToScreen, panToNode, refresh })
 .vis-navigation { background-color: white; position: absolute; top: 30px; right: 0; }
 .fullscreen > .vis-network > .vis-navigation { right: 15px !important; }
 #fullDepsSkillsGraphContainer { height: 31.25rem; min-height: 31.25rem; }
+#fullDepsSkillsGraphContainer:fullscreen { height: 100vh; }
 #additionalControls { z-index: 999; }
 </style>

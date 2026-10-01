@@ -516,4 +516,43 @@ describe('Learning Path Management Validation Tests', () => {
         ], 5, false, null, false);
 
     })
+
+    it('keeps the graph and add controls after entering and leaving full screen', () => {
+        visitLearningPath()
+        cy.get('[data-cy="fullDepsSkillsGraph"]').contains('No Learning Path Yet').should('be.visible')
+        cy.get('[data-cy="learningPath-fullScreenButton"]').should('be.visible')
+
+        cy.selectSkill('[data-cy="learningPathFromSkillSelector"]', 'badge1')
+        cy.selectSkill('[data-cy="learningPathToSkillSelector"]', 'badge2')
+        cy.get('[data-cy="addLearningPathItemBtn"]').click()
+
+        cy.get('#dependency-graph canvas').should('be.visible')
+        cy.get('[data-cy="learningPathTable"] tbody tr').should('have.length', 1)
+        cy.get('[data-cy="learningPath-fullScreenButton"]').realClick()
+        cy.get('#fullDepsSkillsGraphContainer').should('match', ':fullscreen')
+        cy.get('#dependency-graph canvas').should('be.visible')
+        cy.get('#prerequisiteContent').should('be.visible')
+        const checkGraphViewport = () => {
+            cy.get('#dependency-graph').should(($graph) => {
+                const graph = $graph[0]
+                const network = graph.querySelector('.vis-network')
+                const navigation = graph.querySelector('.vis-navigation')
+                const graphBounds = graph.getBoundingClientRect()
+                const navigationBounds = navigation.getBoundingClientRect()
+                expect(graph.clientHeight).to.be.greaterThan(0)
+                expect(network.clientWidth).to.equal(graph.clientWidth)
+                expect(network.clientHeight).to.equal(graph.clientHeight)
+                expect(navigationBounds.right).to.be.at.most(graphBounds.right)
+                expect(navigationBounds.right).to.be.greaterThan(graphBounds.right - 100)
+            })
+        }
+        checkGraphViewport()
+
+        cy.get('[data-cy="learningPath-fullScreenButton"]').realClick()
+        cy.get('#fullDepsSkillsGraphContainer').should('not.match', ':fullscreen')
+        cy.get('#dependency-graph canvas').should('be.visible')
+        checkGraphViewport()
+        cy.get('[data-cy="addPrerequisiteToLearningPath"]').should('be.visible')
+        cy.get('[data-cy="learningPathFromSkillSelector"] input').should('be.enabled')
+    })
 });
