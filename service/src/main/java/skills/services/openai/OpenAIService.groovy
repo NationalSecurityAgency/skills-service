@@ -18,6 +18,8 @@ package skills.services.openai
 import groovy.json.JsonOutput
 import groovy.json.JsonSlurper
 import groovy.util.logging.Slf4j
+import com.openai.client.OpenAIClient
+import com.openai.models.models.Model
 import org.springframework.ai.chat.messages.AssistantMessage
 import org.springframework.ai.chat.messages.Message
 import org.springframework.ai.chat.messages.SystemMessage
@@ -29,14 +31,8 @@ import org.springframework.ai.chat.prompt.Prompt
 import org.springframework.ai.openai.OpenAiChatModel
 import org.springframework.ai.openai.OpenAiChatOptions
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.beans.factory.annotation.Value
-import org.springframework.http.*
 import org.springframework.stereotype.Service
-import org.springframework.web.client.HttpClientErrorException
-import org.springframework.web.client.HttpServerErrorException
-import org.springframework.web.client.RestTemplate
-import org.springframework.web.reactive.function.client.WebClient
 import reactor.core.publisher.Flux
 import skills.controller.exceptions.SkillException
 import skills.controller.request.model.AiChatRequest
@@ -51,12 +47,6 @@ class OpenAIService {
 
     @Value('${skills.openai.host:#{null}}')
     String openAiBaseUrl
-
-    @Value('#{"${skills.openai.modelsEndpoint:/v1/models}"}')
-    String modelsEndpoint
-
-    @Value('${skills.openai.key:#{null}}')
-    String openAiKey
 
     @Value('#{"${skills.openai.stream.stream-usage:true}"}')
     Boolean streamUsage
@@ -74,12 +64,8 @@ class OpenAIService {
 
     String textInputQuestionGradingMsg
 
-    @Autowired
-    @Qualifier('openAIRestTemplate')
-    RestTemplate restTemplate
-
-    @Autowired
-    WebClient.Builder webClientBuilder
+    @Autowired(required = false)
+    OpenAIClient openAiClient
 
     @Autowired(required = false)
     OpenAiChatModel chatModel;
@@ -97,29 +83,16 @@ class OpenAIService {
     }
 
     AvailableModels getAvailableModels() {
-        if (!openAiHost) {
+        if (!openAiClient) {
             throw new UnsupportedOperationException("ai support is not configured")
         }
-
-        String url = String.join("/", openAiBaseUrl, modelsEndpoint)
-        log.debug("Fetching available models from OpenAI. URL=[{}]", url)
-
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_JSON);
-        if (openAiKey) {
-            headers.set("Authorization", "Bearer " + openAiKey)
-        }
-        HttpEntity entity = new HttpEntity<>(headers);
-
-        JsonSlurper jsonSlurper = new JsonSlurper()
+        log.debug("Fetching available models from OpenAI SDK. Base URL=[{}]", openAiBaseUrl)
         try {
-            ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.GET, entity, String.class)
-            String bodyAsStr = response.body
-            def parsed = jsonSlurper.parseText(bodyAsStr)
-            List<AvailableModel> models = parsed?.data?.collect { parsedModel ->
+            List<AvailableModel> models = openAiClient.models().list().autoPager().collect { Model model ->
+                Long created = model._created().asKnown().orElse(null)
                 new AvailableModel(
-                        model: parsedModel.id,
-                        created: parsedModel.created ? new Date(parsedModel.created) : null
+                        model: model.id(),
+                        created: created != null ? new Date(created * 1000L) : null
                 )
             }
             if (usageLimits.allowedModels) {

@@ -40,6 +40,14 @@
 
     <dependencies>
         <dependency>
+            <groupId>software.amazon.awssdk</groupId>
+            <artifactId>auth</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>software.amazon.awssdk</groupId>
+            <artifactId>http-auth-aws</artifactId>
+        </dependency>
+        <dependency>
             <groupId>org.jsoup</groupId>
             <artifactId>jsoup</artifactId>
             <version>${jsoup.version}</version>
@@ -608,7 +616,7 @@
             </plugin>
 
             <plugin>
-<!--                mvn license:add-third-party-->
+<!--                mvn org.codehaus.mojo:license-maven-plugin:add-third-party-->
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>license-maven-plugin</artifactId>
                 <version>${codehaus.license-maven-plugin.version}</version>
@@ -702,8 +710,8 @@
             </plugin>
 
             <plugin>
-<!--                mvn com.mycila:license-maven-plugin:3.0:check
-                    mvn com.mycila:license-maven-plugin:3.0:format-->
+<!--                mvn com.mycila:license-maven-plugin:check
+                    mvn com.mycila:license-maven-plugin:format-->
                 <groupId>com.mycila</groupId>
                 <artifactId>license-maven-plugin</artifactId>
                 <version>${mycila.license-maven-plugin.version}</version>

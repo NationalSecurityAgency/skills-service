@@ -17,14 +17,19 @@ package skills.services.openai
 
 
 import groovy.util.logging.Slf4j
+import com.openai.client.OpenAIClient
+import io.micrometer.observation.ObservationRegistry
 import org.springframework.ai.openai.OpenAiChatModel
 import org.springframework.ai.openai.OpenAiChatOptions
 import org.springframework.ai.openai.http.okhttp.OpenAiHttpClientBuilderCustomizer
 import org.springframework.ai.openai.http.okhttp.SpringAiOpenAiHttpClient
+import org.springframework.ai.openai.setup.OpenAiSetup
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
+import software.amazon.awssdk.auth.credentials.AwsCredentialsProvider
+import software.amazon.awssdk.regions.providers.AwsRegionProvider
 
 import javax.net.ssl.*
 import java.security.KeyStore
@@ -38,6 +43,16 @@ class OpenAIChatConfig {
 
     @Value('${skills.openai.key:#{null}}')
     String openAiKey
+
+    @Value('${skills.openai.aws.service:bedrock}')
+    String awsService
+
+    @Bean
+    @ConditionalOnProperty(prefix = 'skills.openai.aws', name = 'enabled', havingValue = 'true')
+    AwsOpenAiSigningInterceptor openAiAwsSigningInterceptor(AwsCredentialsProvider credentialsProvider,
+                                                          AwsRegionProvider regionProvider) {
+        return new AwsOpenAiSigningInterceptor(credentialsProvider, regionProvider.region.id(), awsService)
+    }
 
     @Value('#{"${skills.disableHostnameVerifier:false}"}')
     Boolean disableHostnameVerification = false
@@ -129,15 +144,29 @@ class OpenAIChatConfig {
     }
 
 
-    /**
-     * 2. The Manually Configured Chat Model Bean.
-     * Accepts the optional 'mutualTlsCustomizer' if it exists in the ApplicationContext.
-     */
-    @Bean
+    /** Shared SDK client for model discovery, synchronous grading, and asynchronous chat. */
+    @Bean(destroyMethod = 'close')
     @ConditionalOnProperty(prefix = 'skills.openai', name = 'enabled', havingValue = 'true', matchIfMissing = true)
-    OpenAiChatModel openAiChatModel(Optional<OpenAiHttpClientBuilderCustomizer> customizerOptional) {
+    OpenAIClient openAiClient(Optional<OpenAiHttpClientBuilderCustomizer> customizerOptional,
+                            Optional<AwsOpenAiSigningInterceptor> signingInterceptor) {
         if (!aiHost) {
             log.debug("skills.openai.host is not configured")
+            return null
+        }
+        List<OpenAiHttpClientBuilderCustomizer> customizers = []
+        customizerOptional.ifPresent { customizer -> customizers.add(customizer) }
+        signingInterceptor.ifPresent { signer ->
+            customizers.add({ SpringAiOpenAiHttpClient.Builder builder -> builder.interceptor(signer) } as OpenAiHttpClientBuilderCustomizer)
+        }
+        return OpenAiSetup.setupSyncClient(aiHost, openAiKey ?: 'NoKeyProvided',
+                null, null, null, null, false, false, null, Duration.ofSeconds(timeoutInSecs),
+                0, null, null, ObservationRegistry.NOOP, null, customizers)
+    }
+
+    @Bean
+    @ConditionalOnProperty(prefix = 'skills.openai', name = 'enabled', havingValue = 'true', matchIfMissing = true)
+    OpenAiChatModel openAiChatModel(Optional<OpenAIClient> clientOptional) {
+        if (!clientOptional.present) {
             return null
         }
         log.info("OpenAiChatModel: aiHost=[{}], streamUsage=[{}], timeoutInSecs=[{}]", aiHost, streamUsage, timeoutInSecs)
@@ -150,15 +179,9 @@ class OpenAIChatConfig {
                 .timeout(Duration.ofSeconds(timeoutInSecs))
                 .maxRetries(0)
                 .build()
-        // Construct the model via its builder pattern
-        OpenAiChatModel.Builder modelBuilder = OpenAiChatModel.builder().options(chatOptions)
-
-        // Bind the 2-way SSL customizer directly if it was created/enabled
-        customizerOptional.ifPresent { customizer ->
-            modelBuilder.httpClientBuilderCustomizer(customizer)
-        }
-
-        return modelBuilder.build()
+        OpenAIClient client = clientOptional.get()
+        return OpenAiChatModel.builder().options(chatOptions)
+                .openAiClient(client).openAiClientAsync(client.async()).build()
     }
 
     private X509TrustManager getTrustedManager(TrustManagerFactory tmf) {
