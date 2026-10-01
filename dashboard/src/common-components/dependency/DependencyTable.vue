@@ -23,6 +23,7 @@ import { useResponsiveBreakpoints } from '@/components/utils/misc/UseResponsiveB
 import { useDialogMessages } from '@/components/utils/modal/UseDialogMessages.js'
 import { useDependencyNavigation } from '@/common-components/dependency/UseDependencyNavigation.js'
 import { RouterLink } from 'vue-router'
+import { useSkillsDisplayThemeState } from '@/skills-display/stores/UseSkillsDisplayThemeState.js'
 
 const dialogMessages = useDialogMessages()
 const props = defineProps({
@@ -34,6 +35,14 @@ const props = defineProps({
 const emit = defineEmits(['update', 'panToNode'])
 const announcer = useSkillsAnnouncer()
 const dependencyNavigation = useDependencyNavigation()
+const themeState = useSkillsDisplayThemeState()
+const routeHeaderStyle = computed(() => props.mode === 'skills-display' ? {
+  color: themeState.graphTextPrimaryColor || undefined,
+  backgroundColor: themeState.theme?.tiles?.backgroundColor || undefined,
+} : {})
+const paginatorLabelStyle = computed(() => props.mode === 'skills-display' ? {
+  color: themeState.graphTextPrimaryColor || undefined,
+} : {})
 
 const learningPaths = ref([])
 const isProcessing = ref(true)
@@ -123,7 +132,7 @@ const jumpToNode = (value) => {
 <template>
   <Card class="mb-4" :pt="{ body: { class: 'p-0!' } }">
     <template #header>
-      <SkillsCardHeader title="Learning Path Routes" :title-tag="mode === 'skills-display' ? 'h2' : 'h3'" />
+      <SkillsCardHeader title="Learning Path Routes" :title-tag="mode === 'skills-display' ? 'h2' : 'h3'" :style="routeHeaderStyle" />
     </template>
     <template #content>
       <div v-if="!isProcessing && learningPaths.length > 0">
@@ -167,8 +176,7 @@ const jumpToNode = (value) => {
           </Column>
 
           <template #paginatorstart>
-            <span>Total Rows:</span> <span class="font-semibold" data-cy=skillsBTableTotalRows>{{ learningPaths.length
-            }}</span>
+            <span data-cy="learningPathTotalRows" :style="paginatorLabelStyle">Total Rows: <span class="font-semibold" data-cy="skillsBTableTotalRows">{{ learningPaths.length }}</span></span>
           </template>
         </SkillsDataTable>
       </div>

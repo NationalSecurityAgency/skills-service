@@ -136,7 +136,7 @@ onMounted(() => {
         <div class="w-11/12 flex flex-col md:flex-row gap-4 items-stretch">
           <div
             v-if="hasLearningPath"
-            class="rounded-lg border border-surface-200 dark:border-surface-700 px-4 py-1 flex items-center gap-3 md:w-96 text-left shadow-sm">
+            class="rounded-lg border border-surface-50 dark:border-surface-800 px-4 py-2 flex items-center gap-3 md:w-96 text-left shadow-sm">
             <circle-progress
               class="shrink-0"
               aria-hidden="true"
@@ -167,7 +167,7 @@ onMounted(() => {
               <span>View</span>
             </SkillsButton>
           </div>
-          <div class="flex-1 rounded-lg border border-surface-200 dark:border-surface-700 px-4 py-1 flex flex-col shadow-sm text-left">
+          <div class="flex-1 rounded-lg border border-surface-50 dark:border-surface-800 px-4 py-2 flex flex-col shadow-sm text-left">
             <div class="flex items-center gap-2 mb-1" :aria-label="`Achieved ${skillsAchieved} out of ${totalSkills} skills`">
               <div class="flex flex-1 items-center gap-2 text-lg font-semibold" data-cy="achievedSkillsTitle">
                 <span class="inline-flex w-5 h-5 shrink-0 items-center justify-center" aria-hidden="true"><i class="fa-solid fa-list-check" /></span>

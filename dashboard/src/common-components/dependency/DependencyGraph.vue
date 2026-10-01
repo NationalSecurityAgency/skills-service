@@ -73,6 +73,14 @@ const legendItems = computed(() => [
   { label: 'Skill', color: skillColor.value, iconClass: 'fa-graduation-cap' },
   { label: 'Badge', color: badgeColor.value, iconClass: 'fa-award' },
 ])
+const graphProgressStyle = computed(() => isSkillsDisplayMode.value ? {
+  backgroundColor: themeState.theme?.tiles?.backgroundColor || undefined,
+  color: themeState.graphTextPrimaryColor || undefined,
+} : {})
+const graphControlsStyle = computed(() => isSkillsDisplayMode.value ? {
+  '--learning-path-orientation-color': themeState.graphTextPrimaryColor || undefined,
+  '--learning-path-orientation-background': themeState.theme?.tiles?.backgroundColor || undefined,
+} : {})
 const displayOptions = {
   layout: { hierarchical: { enabled: false } },
   interaction: { selectConnectedEdges: false, navigationButtons: true, selectable: true, hover: isSkillsDisplayMode.value },
@@ -127,9 +135,15 @@ const buildNode = (node) => {
     font: { multi: 'html', size: 20 },
     title: GraphUtils.getTitle(node, isCrossProject),
   }
-  if (themeHelper.isDarkTheme) newNode.font.color = '#f5f9ff'
+  if (isSkillsDisplayMode.value && themeState.graphTextPrimaryColor) {
+    newNode.font.color = themeState.graphTextPrimaryColor
+  } else if (themeHelper.isDarkTheme) {
+    newNode.font.color = '#f5f9ff'
+  }
   if (node.achieved) {
-    newNode.font.color = themeState.graphAchievedColor
+    newNode.font.color = isSkillsDisplayMode.value && themeState.graphTextPrimaryColor
+      ? themeState.graphTextPrimaryColor
+      : themeState.graphAchievedColor
     newNode.label = `${newNode.label} <b>✓</b>`
   }
   if (node.type === 'Badge') {
@@ -270,7 +284,7 @@ const toggleOrientation = () => {
 }
 
 watch(() => props.graph, updateGraph, { immediate: true })
-watch([skillColor, badgeColor], () => nextTick(createGraph))
+watch([skillColor, badgeColor, () => themeState.graphTextPrimaryColor], () => nextTick(createGraph))
 watch(isFullscreen, (fullscreen) => emit('fullscreenChanged', fullscreen))
 onBeforeUnmount(() => {
   graphResizeObserver?.disconnect()
@@ -299,16 +313,16 @@ defineExpose({ fitNetworkToScreen, panToNode, refresh })
             <div class="w-full px-2" :class="isFullscreen ? 'pt-4' : ''">
               <div class="flex flex-wrap items-start justify-between gap-3">
                 <div class="min-w-0 flex-1">
-                  <div v-if="showProgress" class="mb-4 w-full max-w-xs rounded-lg border border-surface-200 dark:border-surface-700 bg-surface-0 dark:bg-surface-900 px-3 py-2 shadow-sm" data-cy="learningPathProgressSummary">
+                  <div v-if="showProgress" class="mb-4 w-full max-w-xs rounded-lg border border-surface-50 dark:border-surface-800 bg-surface-0 dark:bg-surface-900 px-3 py-2 shadow-sm" :style="graphProgressStyle" data-cy="learningPathProgressSummary">
                     <div class="flex items-center justify-between gap-4 text-sm">
-                      <span class="text-surface-600 dark:text-surface-300" data-cy="learningPathProgressCount">{{ completedItems }} of {{ totalItems }} {{ pluralize.plural('item', totalItems) }} achieved</span>
+                      <span class="sd-theme-primary-color" :class="{ 'text-surface-600 dark:text-surface-300': !isSkillsDisplayMode || !themeState.graphTextPrimaryColor }" data-cy="learningPathProgressCount">{{ completedItems }} of {{ totalItems }} {{ pluralize.plural('item', totalItems) }} achieved</span>
                       <span class="shrink-0 font-semibold sd-theme-primary-color" data-cy="learningPathProgressPercent">{{ percentComplete }}%</span>
                     </div>
                     <VerticalProgressBar class="mt-2" :total-progress="percentComplete" :bar-size="6" :disable-daily-color="true" :aria-label="`${completedItems} of ${totalItems} ${pluralize.plural('item', totalItems)} achieved`" data-cy="learningPathProgressBar" />
                   </div>
                   <GraphLegend v-if="showLegend" class="graph-legend deps-overlay" :items="legendItems" />
                 </div>
-                <div id="additionalControls" class="flex shrink-0 items-center gap-2">
+                <div id="additionalControls" class="flex shrink-0 items-center gap-2" :class="{ 'skills-display-controls': isSkillsDisplayMode }" :style="graphControlsStyle">
                   <GraphControls
                     :is-fullscreen="isFullscreen"
                     :is-admin-mode="isAdminMode"
@@ -325,7 +339,7 @@ defineExpose({ fitNetworkToScreen, panToNode, refresh })
                 </div>
               </div>
             </div>
-            <div id="dependency-graph" ref="dependencyGraph" :style="{ visibility: showGraph ? 'visible' : 'hidden' }" :class="{ fullscreen: isFullscreen }" />
+            <div id="dependency-graph" ref="dependencyGraph" :style="{ visibility: showGraph ? 'visible' : 'hidden', '--graph-nav-color': isSkillsDisplayMode ? (themeState.graphNavButtonsColor || themeState.graphTextPrimaryColor || undefined) : undefined }" :class="{ fullscreen: isFullscreen, 'skills-display-graph': isSkillsDisplayMode }" />
           </SkillsOverlay>
         </div>
       </template>
@@ -353,6 +367,14 @@ defineExpose({ fitNetworkToScreen, panToNode, refresh })
 #dependency-graph { flex: 1 1 0; min-height: 0; overflow: hidden; }
 .vis-navigation { background-color: white; position: absolute; top: 30px; right: 0; }
 .fullscreen > .vis-network > .vis-navigation { right: 15px !important; }
+.skills-display-graph .vis-navigation { background-color: transparent; }
+#dependency-graph.skills-display-graph .vis-navigation .vis-button { color: var(--graph-nav-color, #8c8c8c); }
+#dependency-graph.skills-display-graph .vis-navigation .vis-button:hover:after { color: var(--graph-nav-color, #3273dc); }
+body #app .sd-theme-home #additionalControls.skills-display-controls .p-togglebutton.p-component {
+  color: var(--learning-path-orientation-color) !important;
+  background-color: var(--learning-path-orientation-background) !important;
+  border-color: var(--learning-path-orientation-color) !important;
+}
 #fullDepsSkillsGraphContainer { height: 31.25rem; min-height: 31.25rem; }
 #fullDepsSkillsGraphContainer:fullscreen { height: 100vh; }
 #additionalControls { z-index: 999; }

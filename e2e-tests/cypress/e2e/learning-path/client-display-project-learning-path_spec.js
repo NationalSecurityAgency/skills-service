@@ -99,6 +99,49 @@ describe('Project learning path in skills display', () => {
     cy.get('[data-cy="learningPathTable"] [data-cy="toNodeLink_skill4"]').should('not.exist')
   })
 
+  it('uses the Skills Display theme for the learning path graph, progress, controls, and routes', () => {
+    cy.createSkill(1, 1, 1)
+    cy.createSkill(1, 1, 2)
+    cy.addLearningPathItem(1, 1, 2)
+
+    cy.reportSkill(1, 1, Cypress.env('proxyUser'), 'yesterday')
+    cy.reportSkill(1, 1, Cypress.env('proxyUser'), 'now')
+
+    cy.visit('/test-skills-display/proj1/?enableTheme=true')
+    cy.get('[data-cy="skillsTitle"]').should('be.visible')
+    cy.get('[data-cy="viewLearningPathLink"]').should('be.visible').click()
+    cy.get('#dependency-graph canvas').should('be.visible')
+    cy.get('[data-cy="learningPathProgressSummary"]').should('have.css', 'background-color', 'rgb(21, 46, 77)')
+    cy.get('[data-cy="learningPathProgressCount"]').should('have.css', 'color', 'rgb(255, 255, 255)')
+    cy.get('[data-cy="learningPathProgressPercent"]').should('have.css', 'color', 'rgb(255, 255, 255)')
+    cy.get('[data-cy="learningPathProgressSummary"] .p-progressbar-value').should('have.css', 'background-color', 'rgb(89, 173, 82)')
+    cy.get('[data-cy="learningPathProgressSummary"] .p-progressbar').should('have.css', 'background-color', 'rgb(205, 205, 205)')
+    cy.get('#dependency-graph .vis-navigation').should('have.css', 'background-color', 'rgba(0, 0, 0, 0)')
+    cy.get('#dependency-graph .vis-navigation .vis-button').first().should('have.css', 'color', 'rgb(204, 231, 243)')
+    cy.get('#additionalControls .p-togglebutton').should('have.css', 'color', 'rgb(255, 255, 255)')
+      .and('have.css', 'background-color', 'rgb(21, 46, 77)')
+    cy.get('[data-cy="learningPathTotalRows"]').should('have.css', 'color', 'rgb(255, 255, 255)')
+      .and('contain.text', 'Total Rows: 1')
+    cy.get('[data-cy="learningPathTable"] .p-paginator').should('have.css', 'background-color', 'rgb(21, 46, 77)')
+    cy.get('#additionalControls .p-togglebutton, [data-cy="learningPathTotalRows"]').each(($label) => {
+      const element = $label[0]
+      const foreground = getComputedStyle(element).color.match(/\d+/g).slice(0, 3).map(Number)
+      const background = getComputedStyle($label.is('.p-togglebutton') ? element : element.closest('.p-paginator'))
+        .backgroundColor.match(/\d+/g).slice(0, 3).map(Number)
+      const luminance = (rgb) => rgb.map((value) => {
+        const channel = value / 255
+        return channel <= 0.04045 ? channel / 12.92 : ((channel + 0.055) / 1.055) ** 2.4
+      }).reduce((sum, channel, index) => sum + channel * [0.2126, 0.7152, 0.0722][index], 0)
+      const light = Math.max(luminance(foreground), luminance(background))
+      const dark = Math.min(luminance(foreground), luminance(background))
+      expect((light + 0.05) / (dark + 0.05), `${$label.text().trim()} contrast`).to.be.at.least(4.5)
+    })
+    cy.get('[data-cy="learningPathTable"] thead th').first().should('have.css', 'color', 'rgb(255, 255, 255)')
+    cy.get('[data-cy="learningPathTable"] thead th').first().should('have.css', 'background-color', 'rgb(21, 46, 77)')
+    cy.contains('[data-cy="card-header"]', 'Learning Path Routes').should('have.css', 'color', 'rgb(255, 255, 255)')
+      .and('have.css', 'background-color', 'rgb(21, 46, 77)')
+  })
+
   it('keeps the graph within its card while zooming and dragging', () => {
     cy.createSkill(1, 1, 1)
     cy.createSkill(1, 1, 2)
