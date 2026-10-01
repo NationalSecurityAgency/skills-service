@@ -576,4 +576,28 @@ describe('Learning Path Management Validation Tests', () => {
         cy.get('[data-cy="addPrerequisiteToLearningPath"]').should('be.visible')
         cy.get('[data-cy="learningPathFromSkillSelector"] input').should('be.enabled')
     })
+
+    it('clears the selected From skill when leaving full screen', () => {
+        cy.addLearningPathItem(1, 1, 2, true, true)
+        visitLearningPath()
+
+        cy.get('[data-cy="learningPath-fullScreenButton"]').realClick()
+        cy.get('#fullDepsSkillsGraphContainer').should('match', ':fullscreen')
+        cy.get('#prerequisiteContent').should('be.visible')
+        cy.get('#dependency-graph canvas').should('be.visible')
+
+        cy.get('#prerequisiteContent [data-pc-name="accordionheader"]').click()
+        cy.get('#prerequisiteContent [data-cy="learningPathFromSkillSelector"] input')
+            .should('be.visible')
+        cy.selectSkill('#prerequisiteContent [data-cy="learningPathFromSkillSelector"]', 'badge1')
+        cy.get('#prerequisiteContent [data-cy="learningPathFromSkillSelector"] input')
+            .should('have.value', 'Badge 1')
+
+        cy.get('[data-cy="learningPath-fullScreenButton"]').realClick()
+        cy.get('#fullDepsSkillsGraphContainer').should('not.match', ':fullscreen')
+        cy.get('[data-cy="addPrerequisiteToLearningPath"] [data-cy="learningPathFromSkillSelector"] input')
+            .should('have.value', '')
+        cy.get('[data-cy="addPrerequisiteToLearningPath"] [data-cy="learningPathToSkillSelector"] input')
+            .should('be.disabled')
+    })
 });

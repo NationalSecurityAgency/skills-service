@@ -93,7 +93,7 @@ onMounted(loadGraph)
       :editable="isEditable"
       :mode="mode"
       @data-changed="graphData = $event"
-      @fullscreen-changed="isFullscreen = $event"
+      @fullscreen-changed="isFullscreen = $event; clearSelectedFromSkills()"
       @node-selected="updateSelectedFromSkills"
       @edge-selected="removeDependency">
       <template #fullscreen-header="{ isFullscreen }">
