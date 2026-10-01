@@ -221,6 +221,36 @@ class UserLearningPathGraphSpec extends DefaultIntSpec {
         !complete.nodes.find { it.skillId == skills[2].skillId }.achieved
     }
 
+    def "badge skills in a user graph respect the requested version"() {
+        String projectId = SkillsFactory.defaultProjId
+        List<Map> skills = SkillsFactory.createSkillsWithDifferentVersions([0, 0, 1])
+        skills.each { it.pointIncrement = 100 }
+        skills.each { it.numPerformToCompletion = 1 }
+        def badge = SkillsFactory.createBadge()
+        skillsService.createProject(SkillsFactory.createProject())
+        skillsService.createSubject(SkillsFactory.createSubject())
+        skillsService.createSkills(skills)
+        skillsService.createBadge(badge)
+        skillsService.assignSkillToBadge([projectId: projectId, badgeId: badge.badgeId, skillId: skills[0].skillId])
+        skillsService.assignSkillToBadge([projectId: projectId, badgeId: badge.badgeId, skillId: skills[2].skillId])
+        badge.enabled = true
+        skillsService.createBadge(badge)
+        skillsService.addLearningPathPrerequisite(projectId, skills[1].skillId, badge.badgeId)
+        skillsService.addSkill([projectId: projectId, skillId: skills[2].skillId], 'user1', new Date())
+
+        when:
+        def version0Graph = skillsService.getUserDependencyGraph(projectId, 'user1', 0)
+        def version1Graph = skillsService.getUserDependencyGraph(projectId, 'user1', 1)
+        def adminGraph = skillsService.getDependencyGraph(projectId)
+
+        then:
+        version0Graph.nodes.find { it.skillId == badge.badgeId }.containedSkills*.skillId == [skills[0].skillId]
+        version0Graph.nodes.find { it.skillId == badge.badgeId }.containedSkills*.achieved == [false]
+        version1Graph.nodes.find { it.skillId == badge.badgeId }.containedSkills*.skillId == [skills[0].skillId, skills[2].skillId]
+        version1Graph.nodes.find { it.skillId == badge.badgeId }.containedSkills*.achieved == [false, true]
+        adminGraph.nodes.find { it.skillId == badge.badgeId }.containedSkills*.skillId == [skills[0].skillId, skills[2].skillId]
+    }
+
     def "shared prerequisite achievements are shown for the owning project only"() {
         def project = SkillsFactory.createProject(1)
         def subject = SkillsFactory.createSubject(1, 1)

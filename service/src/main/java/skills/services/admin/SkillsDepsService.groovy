@@ -217,7 +217,7 @@ class SkillsDepsService {
         List<Object[]> visibleRows = rows.findAll { row ->
             accessibleProjectIds.contains(row[5]) && accessibleProjectIds.contains(row[15])
         }
-        return convertToSkillsGraphRes(mapGraphEdges(visibleRows, userId))
+        return convertToSkillsGraphRes(mapGraphEdges(visibleRows, userId, version))
     }
 
 
@@ -295,10 +295,10 @@ class SkillsDepsService {
     @Profile
     List<GraphSkillDefEdge> loadGraphEdges(String projectId, SkillRelDef.RelationshipType type, String userId=null, Integer version=null) {
         List<Object[]> edges = skillRelDefRepo.getGraph(projectId, type, version)
-        return mapGraphEdges(edges, userId)
+        return mapGraphEdges(edges, userId, version)
     }
 
-    private List<GraphSkillDefEdge> mapGraphEdges(List<Object[]> edges, String userId) {
+    private List<GraphSkillDefEdge> mapGraphEdges(List<Object[]> edges, String userId, Integer version) {
         if (!edges) {
             return []
         }
@@ -331,7 +331,7 @@ class SkillsDepsService {
 
             if(row[9] == SkillDef.ContainerType.Badge) {
                 from.containedSkills = badgeSkillsById.computeIfAbsent(row[0] as Integer) {
-                    getSkillsForLearningPathItem(row[5] as String, row[6] as String, row[2] as String, achievedSkillRefIds)
+                    getSkillsForLearningPathItem(row[5] as String, row[6] as String, row[2] as String, achievedSkillRefIds, version)
                 }
             }
 
@@ -352,7 +352,7 @@ class SkillsDepsService {
 
             if(row[19] == SkillDef.ContainerType.Badge) {
                 to.containedSkills = badgeSkillsById.computeIfAbsent(row[10] as Integer) {
-                    getSkillsForLearningPathItem(row[15] as String, row[16] as String, row[12] as String, achievedSkillRefIds)
+                    getSkillsForLearningPathItem(row[15] as String, row[16] as String, row[12] as String, achievedSkillRefIds, version)
                 }
             }
 
@@ -361,8 +361,11 @@ class SkillsDepsService {
         })
     }
 
-    private List<SkillDefGraphRes> getSkillsForLearningPathItem(String projectId, String projectName, String skillId, Set<Integer> achievedSkillRefIds) {
+    private List<SkillDefGraphRes> getSkillsForLearningPathItem(String projectId, String projectName, String skillId, Set<Integer> achievedSkillRefIds, Integer version) {
         List<SkillDefPartialRes> badgeSkills = skillsAdminService.getSkillsByProjectSkillAndType(projectId, skillId, SkillDef.ContainerType.Badge, SkillRelDef.RelationshipType.BadgeRequirement)
+        if (version != null && version >= 0) {
+            badgeSkills = badgeSkills.findAll { it.version <= version }
+        }
         List<SkillDefGraphRes> skills = badgeSkills.collect{res -> new SkillDefGraphRes(
                 id: null,
                 name: res.name,
