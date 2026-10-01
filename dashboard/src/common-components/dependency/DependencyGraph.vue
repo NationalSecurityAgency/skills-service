@@ -205,6 +205,10 @@ const createGraph = () => {
   showGraph.value = hasGraphData.value
   if (!hasGraphData.value || !dependencyGraph.value || !dependencyGraph.value.isConnected) return
   network = new Network(dependencyGraph.value, data.value, displayOptions)
+  if (isSkillsDisplayMode.value) dependencyGraph.value.getNodePosition = (projectId, skillId) => {
+    const node = nodes.get({ filter: (item) => item.details.projectId === projectId && item.details.skillId === skillId })[0]
+    return node ? network.canvasToDOM(network.getPosition(node.id)) : null
+  }
   graphResizeObserver = new ResizeObserver(() => {
     if (resizeToFit && dependencyGraph.value?.clientWidth && dependencyGraph.value?.clientHeight) {
       resizeToFit = false
@@ -289,6 +293,7 @@ watch(isFullscreen, (fullscreen) => emit('fullscreenChanged', fullscreen))
 onBeforeUnmount(() => {
   graphResizeObserver?.disconnect()
   network?.destroy()
+  if (dependencyGraph.value) delete dependencyGraph.value.getNodePosition
 })
 defineExpose({ fitNetworkToScreen, panToNode, refresh })
 </script>

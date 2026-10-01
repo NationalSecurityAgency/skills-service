@@ -169,38 +169,16 @@ describe('Project learning path in skills display', () => {
     cy.addLearningPathItem(1, 1, 2, true, false)
     cy.addCrossProjectLearningPathItem(2, 3, 1, 2)
 
-    const graphComponent = ($graph) => {
-      let component = $graph[0].__vueParentComponent
-      while (component && component.type?.__name !== 'DependencyGraph') component = component.parent
-      return component
-    }
     const clickGraphNode = (skillId, projectId) => {
       cy.cdVisit('/learning-path')
       cy.get('#dependency-graph canvas').should('be.visible')
       cy.get('#dependency-graph').should(($graph) => {
-        const nodes = graphComponent($graph)?.setupState.nodes
-        expect(nodes?.get({ filter: (node) => node.details.skillId === skillId && node.details.projectId === projectId }).length).to.eq(1)
+        const position = $graph[0].getNodePosition?.(projectId, skillId)
+        expect(position, `${projectId}/${skillId} graph node position`).to.have.property('x').that.is.a('number')
+        expect(position).to.have.property('y').that.is.a('number')
       }).then(($graph) => {
-        const component = graphComponent($graph)
-        const renderedNode = component.setupState.nodes.get({ filter: (node) => node.details.skillId === skillId && node.details.projectId === projectId })[0]
-        const canvas = $graph.find('canvas')[0]
-        const canvasBounds = canvas.getBoundingClientRect()
-        const graphBounds = $graph[0].getBoundingClientRect()
-        const nodes = component.setupState.nodes.get()
-        const centerX = (Math.min(...nodes.map((item) => item.x)) + Math.max(...nodes.map((item) => item.x))) / 2
-        const centerY = (Math.min(...nodes.map((item) => item.y)) + Math.max(...nodes.map((item) => item.y))) / 2
-        const layoutWidth = component.setupState.dataWidth
-        const layoutHeight = component.setupState.dataHeight
-        const scale = Math.min(1, canvas.clientWidth / (layoutWidth * 1.1), canvas.clientHeight / (layoutHeight * 1.1))
-        const canvasPosition = {
-          x: canvas.clientWidth / 2 + (renderedNode.x - centerX) * scale,
-          y: canvas.clientHeight / 2 + (renderedNode.y - centerY) * scale,
-        }
-        const x = canvasPosition.x + canvasBounds.left - graphBounds.left
-        const y = canvasPosition.y + canvasBounds.top - graphBounds.top
-        expect(x, `${skillId} canvas x`).to.be.within(0, graphBounds.width)
-        expect(y, `${skillId} canvas y`).to.be.within(0, graphBounds.height)
-        cy.wrap(canvas).click(canvasPosition.x, canvasPosition.y)
+        const position = $graph[0].getNodePosition(projectId, skillId)
+        cy.get('#dependency-graph canvas').click(position.x, position.y)
       })
     }
 
