@@ -99,6 +99,38 @@ describe('Project learning path in skills display', () => {
     cy.get('[data-cy="learningPathTable"] [data-cy="toNodeLink_skill4"]').should('not.exist')
   })
 
+  it('shows 100% completion on both the home and learning path pages', () => {
+    cy.createSkill(1, 1, 1, { numPerformToCompletion: 1 })
+    cy.createSkill(1, 1, 2, { numPerformToCompletion: 1 })
+    cy.addLearningPathItem(1, 1, 2)
+    cy.reportSkill(1, 1, Cypress.env('proxyUser'), 'now')
+    cy.reportSkill(1, 2, Cypress.env('proxyUser'), 'now')
+
+    cy.cdVisit('/')
+    cy.get('[data-cy="numAchievedLearningPathItems"]').should('have.text', '2')
+    cy.get('[data-cy="numTotalLearningPathItems"]').should('have.text', '2')
+    cy.get('[data-cy="learningPathPercent"]').should('have.text', '100%')
+    cy.get('[data-cy="numAchievedSkills"]').should('have.text', '2')
+    cy.get('[data-cy="numTotalSkills"]').should('have.text', '2')
+
+    cy.get('[data-cy="viewLearningPathLink"]').click()
+    cy.get('[data-cy="learningPathProgressCount"]').should('contain.text', '2 of 2 items achieved')
+    cy.get('[data-cy="learningPathProgressPercent"]').should('have.text', '100%')
+    cy.get('[data-cy="learningPathProgressBar"] [role="progressbar"]').should('have.attr', 'aria-valuenow', '100')
+  })
+
+  it('shows the learning path in the embedded skills-client display', () => {
+    cy.createSkill(1, 1, 1)
+    cy.createSkill(1, 1, 2)
+    cy.addLearningPathItem(1, 1, 2)
+
+    cy.visit('/test-skills-client/proj1')
+    cy.wrapIframe().find('[data-cy="viewLearningPathLink"]').should('be.visible').click()
+    cy.wrapIframe().find('[data-cy="skillsTitle"]').contains('Learning Path')
+    cy.wrapIframe().find('[data-cy="learningPathProgressCount"]').should('contain.text', '0 of 2 items achieved')
+    cy.wrapIframe().find('[data-cy="learningPathTable"] [data-cy="fromNodeLink_skill1"]').should('be.visible')
+  })
+
   it('uses the Skills Display theme for the learning path graph, progress, controls, and routes', () => {
     cy.createSkill(1, 1, 1)
     cy.createSkill(1, 1, 2)
@@ -237,4 +269,5 @@ describe('Project learning path in skills display', () => {
     cy.get('[data-cy="crossProjAlert"]').contains('This skill is shared from another project')
     cy.get('[data-cy="skillProgressTitle"]').contains('Very Great Skill 2')
   })
+
 })

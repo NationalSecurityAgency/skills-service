@@ -254,7 +254,7 @@ interface SkillEventsSupportRepo extends CrudRepository<SkillDef, Long> {
         from UserAchievement ua
         JOIN SkillDef sd ON
             ua.projectId = sd.projectId
-            AND ua.skillRefId = (case when sd.copiedFrom is not null then sd.copiedFrom else sd.id end)
+            AND ua.skillRefId = sd.id
         where
             ua.userId = ?1
             AND ua.projectId IN (?2)

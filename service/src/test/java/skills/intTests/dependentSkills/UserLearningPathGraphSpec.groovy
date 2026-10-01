@@ -15,10 +15,19 @@
  */
 package skills.intTests.dependentSkills
 
+import org.springframework.beans.factory.annotation.Autowired
 import skills.intTests.utils.DefaultIntSpec
 import skills.intTests.utils.SkillsFactory
+import skills.storage.repos.SkillDefRepo
+import skills.storage.repos.UserAchievedLevelRepo
 
 class UserLearningPathGraphSpec extends DefaultIntSpec {
+
+    @Autowired
+    SkillDefRepo skillDefRepo
+
+    @Autowired
+    UserAchievedLevelRepo userAchievedLevelRepo
 
     def "user graph has no nodes when the project has no learning path"() {
         skillsService.createProject(SkillsFactory.createProject())
@@ -89,6 +98,45 @@ class UserLearningPathGraphSpec extends DefaultIntSpec {
         adminGraph.nodes.every { !it.achieved }
         user1Graph.nodes*.skillId.toSet() == [skills[0].skillId, skills[1].skillId, skills[2].skillId].toSet()
         user1Graph.edges.size() == 2
+    }
+
+    def "user graph maps an imported learning path skill's achievement to its local node and badge entry"() {
+        def sourceProject = SkillsFactory.createProject(1)
+        def sourceSubject = SkillsFactory.createSubject(1, 1)
+        def sourceSkills = SkillsFactory.createSkills(2, 1, 1, 100)
+        skillsService.createProjectAndSubjectAndSkills(sourceProject, sourceSubject, sourceSkills)
+        skillsService.exportSkillToCatalog(sourceProject.projectId, sourceSkills[0].skillId)
+
+        def project = SkillsFactory.createProject(2)
+        def subject = SkillsFactory.createSubject(2, 1)
+        def skills = SkillsFactory.createSkillsStartingAt(2, 3, 2, 1, 100)
+        skillsService.createProjectAndSubjectAndSkills(project, subject, skills)
+        skillsService.importSkillFromCatalogAndFinalize(project.projectId, subject.subjectId, sourceProject.projectId, sourceSkills[0].skillId)
+
+        def badge = SkillsFactory.createBadge(2, 1)
+        skillsService.createBadge(badge)
+        skillsService.assignSkillToBadge([projectId: project.projectId, badgeId: badge.badgeId, skillId: sourceSkills[0].skillId])
+        skillsService.assignSkillToBadge([projectId: project.projectId, badgeId: badge.badgeId, skillId: skills[0].skillId])
+        badge.enabled = true
+        skillsService.createBadge(badge)
+        skillsService.addLearningPathPrerequisite(project.projectId, skills[1].skillId, sourceSkills[0].skillId)
+        skillsService.addLearningPathPrerequisite(project.projectId, skills[1].skillId, badge.badgeId)
+        skillsService.addSkill([projectId: sourceProject.projectId, skillId: sourceSkills[0].skillId], 'user1', new Date())
+        skillsService.addSkill([projectId: sourceProject.projectId, skillId: sourceSkills[0].skillId], 'user1', new Date())
+        waitForAsyncTasksCompletion.waitForAllScheduleTasks()
+        def importedSkillDef = skillDefRepo.findByProjectIdAndSkillId(project.projectId, sourceSkills[0].skillId)
+        def originalSkillDef = skillDefRepo.findByProjectIdAndSkillId(sourceProject.projectId, sourceSkills[0].skillId)
+        def achievements = userAchievedLevelRepo.findAll().findAll { it.userId == 'user1' && it.skillId == sourceSkills[0].skillId }
+
+        when:
+        def graph = skillsService.getUserDependencyGraph(project.projectId, 'user1')
+
+        then:
+        importedSkillDef.copiedFrom == originalSkillDef.id
+        achievements.find { it.projectId == project.projectId }?.skillRefId == importedSkillDef.id
+        graph.nodes.find { it.skillId == sourceSkills[0].skillId && it.projectId == project.projectId }.achieved
+        graph.nodes.find { it.skillId == badge.badgeId }.containedSkills.find { it.skillId == sourceSkills[0].skillId }.achieved
+        !graph.nodes.find { it.skillId == badge.badgeId }.achieved
     }
 
     def "user graph marks a badge achieved only after all of its skills are completed"() {
