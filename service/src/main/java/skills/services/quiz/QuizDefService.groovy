@@ -781,7 +781,7 @@ class QuizDefService {
 
         QuizQuestionDef questionDef = new QuizQuestionDef(
                 quizId: quizDef.quizId,
-                question: InputSanitizer.sanitize(questionDefRequest.question),
+                question: InputSanitizer.sanitizeDescription(questionDefRequest.question),
                 answerHint: InputSanitizer.sanitize(questionDefRequest.answerHint),
                 type: questionDefRequest.questionType,
                 displayOrder: displayOrder,
@@ -793,7 +793,7 @@ class QuizDefService {
     @Profile
     private QuizQuestionDef updateQuizQuestionDef(String quizId, int existingQuestionId, QuizQuestionDefRequest questionDefRequest) {
         QuizQuestionDef existing = getQuestingDef(quizId, existingQuestionId)
-        existing.question = InputSanitizer.sanitize(questionDefRequest.question)
+        existing.question = InputSanitizer.sanitizeDescription(questionDefRequest.question)
         existing.answerHint = questionDefRequest.answerHint
         existing.type = questionDefRequest.questionType
         QuizQuestionDef savedQuestion = quizQuestionRepo.saveAndFlush(existing)

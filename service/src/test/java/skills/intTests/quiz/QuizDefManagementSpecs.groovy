@@ -716,6 +716,69 @@ class QuizDefManagementSpecs extends DefaultIntSpec {
         updatedQuestion.answers.displayOrder == [1, 2, 3]
     }
 
+    def "creating a quiz question preserves font size formatting - #fontSize"() {
+        def quiz = QuizDefFactory.createQuiz(1)
+        skillsService.createQuizDef(quiz)
+        def question = QuizDefFactory.createChoiceQuestion(1, 1)
+        question.question = "this **is a** quiz\n\nthis <span style=\"font-size: ${fontSize};\">font</span> is big".toString()
+
+        when:
+        def created = skillsService.createQuizQuestionDef(question).body
+        def retrieved = skillsService.getQuizQuestionDef(quiz.quizId, created.id)
+        def questions = skillsService.getQuizQuestionDefs(quiz.quizId)
+
+        then:
+        created.question == question.question
+        retrieved.question == question.question
+        questions.questions[0].question == question.question
+
+        where:
+        fontSize << ['18px', '24px', '36px']
+    }
+
+    def "updating a quiz question preserves font size formatting - #fontSize"() {
+        def quiz = QuizDefFactory.createQuiz(1)
+        skillsService.createQuizDef(quiz)
+        def question = QuizDefFactory.createChoiceQuestion(1, 1)
+        question.id = skillsService.createQuizQuestionDef(question).body.id
+        question.question = "this **is an updated** quiz\n\n<span style=\"font-size: ${fontSize};\">updated font</span>".toString()
+
+        when:
+        def updated = skillsService.updateQuizQuestionDef(question).body
+        def retrieved = skillsService.getQuizQuestionDef(quiz.quizId, question.id)
+        def questions = skillsService.getQuizQuestionDefs(quiz.quizId)
+
+        then:
+        updated.question == question.question
+        retrieved.question == question.question
+        questions.questions[0].question == question.question
+
+        where:
+        fontSize << ['18px', '24px', '36px']
+    }
+
+    def "quiz question formatting is preserved while unsafe HTML is sanitized on #operation"() {
+        def quiz = QuizDefFactory.createQuiz(1)
+        skillsService.createQuizDef(quiz)
+        def question = QuizDefFactory.createChoiceQuestion(1, 1)
+        if (operation == 'update') {
+            question.id = skillsService.createQuizQuestionDef(question).body.id
+        }
+        question.question = 'this **is a** quiz\n\n<span style="font-size: 18px;" onclick="alert(1)">font</span><script>alert(1)</script>'
+        String expected = 'this **is a** quiz\n\n<span style="font-size: 18px;">font</span>'
+
+        when:
+        def saved = (operation == 'create' ? skillsService.createQuizQuestionDef(question) : skillsService.updateQuizQuestionDef(question)).body
+        def retrieved = skillsService.getQuizQuestionDef(quiz.quizId, saved.id)
+
+        then:
+        saved.question == expected
+        retrieved.question == expected
+
+        where:
+        operation << ['create', 'update']
+    }
+
     def "quiz answers and answer hints are sanitized"() {
         def quiz = QuizDefFactory.createQuiz(1)
         skillsService.createQuizDef(quiz)
@@ -926,4 +989,3 @@ class QuizDefManagementSpecs extends DefaultIntSpec {
         q3StatusUpdated.data.hasPendingGrades == true
     }
 }
-
