@@ -18,7 +18,7 @@ import { onMounted, ref } from 'vue'
 import { useRoute } from 'vue-router'
 import SkillsTitle from '@/skills-display/components/utilities/SkillsTitle.vue'
 import DependencyGraph from '@/common-components/dependency/DependencyGraph.vue'
-import DependencyTable from '@/components/skills/dependencies/DependencyTable.vue'
+import DependencyTable from '@/common-components/dependency/DependencyTable.vue'
 import { useSkillsDisplayService } from '@/skills-display/services/UseSkillsDisplayService.js'
 
 const route = useRoute()

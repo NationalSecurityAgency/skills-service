@@ -14,13 +14,13 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <script setup>
-import {computed, nextTick, onMounted, ref, watch} from 'vue'
+import { computed, nextTick, onMounted, ref, watch } from 'vue'
 import { useSkillsAnnouncer } from '@/common-components/utilities/UseSkillsAnnouncer.js'
-import SkillsService from '@/components/skills/SkillsService'
+import SkillsService from '@/components/skills/SkillsService.js'
 import NoContent2 from '@/components/utils/NoContent2.vue'
 import Column from 'primevue/column'
 import { useResponsiveBreakpoints } from '@/components/utils/misc/UseResponsiveBreakpoints.js'
-import {useDialogMessages} from "@/components/utils/modal/UseDialogMessages.js";
+import { useDialogMessages } from '@/components/utils/modal/UseDialogMessages.js'
 import { useDependencyNavigation } from '@/common-components/dependency/UseDependencyNavigation.js'
 import { RouterLink } from 'vue-router'
 
