@@ -72,6 +72,35 @@ class UserLearningPathGraphSpec extends DefaultIntSpec {
         adminGraph.nodes*.skillId.toSet() == skills*.skillId.toSet()
     }
 
+    def "project summary skill counts respect the requested version like the user graph"() {
+        String projectId = SkillsFactory.defaultProjId
+        List<Map> skills = SkillsFactory.createSkillsWithDifferentVersions([0, 0, 1])
+        skills.each { it.pointIncrement = 100 }
+        skillsService.createProject(SkillsFactory.createProject())
+        skillsService.createSubject(SkillsFactory.createSubject())
+        skillsService.createSkills(skills)
+        skillsService.addSkill([projectId: projectId, skillId: skills[0].skillId], 'user1', new Date())
+        skillsService.addSkill([projectId: projectId, skillId: skills[2].skillId], 'user1', new Date())
+        skillsService.addLearningPathPrerequisite(projectId, skills[1].skillId, skills[0].skillId)
+        skillsService.addLearningPathPrerequisite(projectId, skills[2].skillId, skills[1].skillId)
+
+        when:
+        def summary0 = skillsService.getSkillsSummaryForUser(projectId, 'user1', 0)
+        def graph0 = skillsService.getUserDependencyGraph(projectId, 'user1', 0)
+        def summary1 = skillsService.getSkillsSummaryForUser(projectId, 'user1', 1)
+        def graph1 = skillsService.getUserDependencyGraph(projectId, 'user1', 1)
+
+        then:
+        summary0.totalSkills == 2
+        summary0.skillsAchieved == 1
+        graph0.nodes.size() == summary0.totalSkills
+        graph0.nodes.count { it.achieved } == summary0.skillsAchieved
+        summary1.totalSkills == 3
+        summary1.skillsAchieved == 2
+        graph1.nodes.size() == summary1.totalSkills
+        graph1.nodes.count { it.achieved } == summary1.skillsAchieved
+    }
+
     def "user graph only marks fully achieved learning path skills and keeps other users separate"() {
         String projectId = SkillsFactory.defaultProjId
         List<Map> skills = SkillsFactory.createSkills(4)

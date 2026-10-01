@@ -131,6 +131,93 @@ describe('Project learning path in skills display', () => {
     cy.wrapIframe().find('[data-cy="learningPathTable"] [data-cy="fromNodeLink_skill1"]').should('be.visible')
   })
 
+  it('keeps the graph progress in sync with the versioned skills summary', () => {
+    cy.createSkill(1, 1, 1, { version: 0, numPerformToCompletion: 1 })
+    cy.createSkill(1, 1, 2, { version: 0, numPerformToCompletion: 1 })
+    cy.createSkill(1, 1, 3, { version: 1, numPerformToCompletion: 1 })
+    cy.addLearningPathItem(1, 1, 2)
+    cy.addLearningPathItem(1, 2, 3)
+    cy.reportSkill(1, 1, Cypress.env('proxyUser'), 'now')
+
+    cy.intercept('GET', '/api/projects/proj1/summary*').as('versionedSummary')
+    cy.intercept('GET', '/api/projects/proj1/dependency/graph*').as('versionedGraph')
+    cy.visit('/test-skills-display/proj1?skillsVersion=0')
+    cy.wait('@versionedSummary').then(({ request, response }) => {
+      expect(request.url).to.include('version=0')
+      expect(response.body.totalSkills).to.eq(2)
+    })
+    cy.wait('@versionedGraph').its('request.url').should('include', 'version=0')
+    cy.get('[data-cy="numTotalSkills"]').should('have.text', '2')
+    cy.get('[data-cy="numAchievedLearningPathItems"]').should('have.text', '1')
+    cy.get('[data-cy="numTotalLearningPathItems"]').should('have.text', '2')
+    cy.get('[data-cy="viewLearningPathLink"]').click()
+    cy.get('[data-cy="learningPathProgressCount"]').should('have.text', '1 of 2 items achieved')
+    cy.get('[data-cy="learningPathProgressPercent"]').should('have.text', '50%')
+    cy.get('[data-cy="learningPathTable"] [data-cy="toNodeLink_skill3"]').should('not.exist')
+  })
+
+  it('navigates from the learning path graph to skill, badge, and shared-skill details', () => {
+    cy.viewport(1280, 1280)
+    cy.createSkill(1, 1, 1)
+    cy.createSkill(1, 1, 2)
+    cy.createBadge(1, 1)
+    cy.assignSkillToBadge(1, 1, 1)
+    cy.createBadge(1, 1, { enabled: true })
+    cy.createProject(2)
+    cy.createSubject(2, 1)
+    cy.createSkill(2, 1, 3)
+    cy.addLearningPathItem(1, 1, 2, true, false)
+    cy.addCrossProjectLearningPathItem(2, 3, 1, 2)
+
+    const graphComponent = ($graph) => {
+      let component = $graph[0].__vueParentComponent
+      while (component && component.type?.__name !== 'DependencyGraph') component = component.parent
+      return component
+    }
+    const clickGraphNode = (skillId, projectId) => {
+      cy.cdVisit('/learning-path')
+      cy.get('#dependency-graph canvas').should('be.visible')
+      cy.get('#dependency-graph').should(($graph) => {
+        const nodes = graphComponent($graph)?.setupState.nodes
+        expect(nodes?.get({ filter: (node) => node.details.skillId === skillId && node.details.projectId === projectId }).length).to.eq(1)
+      }).then(($graph) => {
+        const component = graphComponent($graph)
+        const renderedNode = component.setupState.nodes.get({ filter: (node) => node.details.skillId === skillId && node.details.projectId === projectId })[0]
+        const canvas = $graph.find('canvas')[0]
+        const canvasBounds = canvas.getBoundingClientRect()
+        const graphBounds = $graph[0].getBoundingClientRect()
+        const nodes = component.setupState.nodes.get()
+        const centerX = (Math.min(...nodes.map((item) => item.x)) + Math.max(...nodes.map((item) => item.x))) / 2
+        const centerY = (Math.min(...nodes.map((item) => item.y)) + Math.max(...nodes.map((item) => item.y))) / 2
+        const layoutWidth = component.setupState.dataWidth
+        const layoutHeight = component.setupState.dataHeight
+        const scale = Math.min(1, canvas.clientWidth / (layoutWidth * 1.1), canvas.clientHeight / (layoutHeight * 1.1))
+        const canvasPosition = {
+          x: canvas.clientWidth / 2 + (renderedNode.x - centerX) * scale,
+          y: canvas.clientHeight / 2 + (renderedNode.y - centerY) * scale,
+        }
+        const x = canvasPosition.x + canvasBounds.left - graphBounds.left
+        const y = canvasPosition.y + canvasBounds.top - graphBounds.top
+        expect(x, `${skillId} canvas x`).to.be.within(0, graphBounds.width)
+        expect(y, `${skillId} canvas y`).to.be.within(0, graphBounds.height)
+        cy.wrap(canvas).click(canvasPosition.x, canvasPosition.y)
+      })
+    }
+
+    clickGraphNode('skill2', 'proj1')
+    cy.location('pathname').should('eq', '/test-skills-display/proj1/subjects/subj1/skills/skill2')
+    cy.get('[data-cy="skillProgressTitle"]').should('contain.text', 'Very Great Skill 2')
+
+    clickGraphNode('badge1', 'proj1')
+    cy.location('pathname').should('eq', '/test-skills-display/proj1/badges/badge1')
+    cy.get('[data-cy="badge_badge1"] [data-cy="badgeTitle"]').should('contain.text', 'Badge 1')
+
+    clickGraphNode('skill3', 'proj2')
+    cy.location('pathname').should('eq', '/test-skills-display/proj1/subjects/subj1/skills/skill3/crossProject/proj2/skill3')
+    cy.get('[data-cy="crossProjAlert"]').should('contain.text', 'This skill is shared from another project')
+    cy.get('[data-cy="skillProgressTitle"]').should('contain.text', 'Very Great Skill 3')
+  })
+
   it('uses the Skills Display theme for the learning path graph, progress, controls, and routes', () => {
     cy.createSkill(1, 1, 1)
     cy.createSkill(1, 1, 2)
