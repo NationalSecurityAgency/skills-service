@@ -27,6 +27,7 @@ import AchievementCelebration from "@/skills-display/components/progress/celebra
 import {usePluralize} from "@/components/utils/misc/UsePluralize.js";
 import {useSkillsDisplayService} from '@/skills-display/services/UseSkillsDisplayService.js'
 import {useSkillsDisplayInfo} from '@/skills-display/UseSkillsDisplayInfo.js'
+import { useRouter } from 'vue-router'
 
 const props = defineProps({
   isSubject: {
@@ -46,6 +47,7 @@ const pluralize = usePluralize()
 const numFormat = useNumberFormat()
 const skillsDisplayService = useSkillsDisplayService()
 const skillsDisplayInfo = useSkillsDisplayInfo()
+const router = useRouter()
 const learningPathProgress = ref({ achieved: 0, total: 0 })
 
 const totalSkills = computed(() => userProgress.value?.totalSkills || 0)
@@ -53,6 +55,7 @@ const skillsAchieved = computed(() => userProgress.value?.skillsAchieved || 0)
 const skillsPercentAchieved = computed(() => totalSkills.value > 0 ? Math.round((skillsAchieved.value / totalSkills.value) * 100) : 0)
 const hasLearningPath = computed(() => learningPathProgress.value.total > 0)
 const learningPathPercent = computed(() => Math.round((learningPathProgress.value.achieved / learningPathProgress.value.total) * 100))
+const viewLearningPath = () => router.push({ name: skillsDisplayInfo.getContextSpecificRouteName('projectLearningPathPage'), params: { projectId: attributes.projectId } })
 
 const isLevelComplete = computed(() => userProgress.value.levelTotalPoints === -1)
 const levelStats = computed(() => {
@@ -136,6 +139,7 @@ onMounted(() => {
             class="rounded-lg border border-surface-200 dark:border-surface-700 px-4 py-1 flex items-center gap-3 md:w-96 text-left shadow-sm">
             <circle-progress
               class="shrink-0"
+              aria-hidden="true"
               :diameter="48"
               :total-completed-points="learningPathProgress.achieved"
               :total-possible-points="learningPathProgress.total">
@@ -154,14 +158,14 @@ onMounted(() => {
                 <span class="text-orange-700 dark:text-orange-400 sd-theme-primary-color" data-cy="numAchievedLearningPathItems">{{ learningPathProgress.achieved }}</span> of <span data-cy="numTotalLearningPathItems">{{ learningPathProgress.total }}</span> <span class="ml-0">{{ pluralize.plural("item", learningPathProgress.total) }} achieved</span>
               </div>
             </div>
-            <RouterLink
-              :to="{ name: skillsDisplayInfo.getContextSpecificRouteName('projectLearningPathPage'), params: { projectId: attributes.projectId } }"
+            <SkillsButton
+              @click="viewLearningPath"
               class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded border border-green-600 text-green-700 dark:text-green-400 px-3 py-2 text-sm font-medium no-underline hover:bg-green-50 dark:hover:bg-green-950/30"
               data-cy="viewLearningPathLink"
               aria-label="View project learning path">
               <i class="far fa-eye" aria-hidden="true" />
               <span>View</span>
-            </RouterLink>
+            </SkillsButton>
           </div>
           <div class="flex-1 rounded-lg border border-surface-200 dark:border-surface-700 px-4 py-1 flex flex-col shadow-sm text-left">
             <div class="flex items-center gap-2 mb-1" :aria-label="`Achieved ${skillsAchieved} out of ${totalSkills} skills`">

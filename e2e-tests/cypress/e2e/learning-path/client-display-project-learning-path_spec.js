@@ -39,6 +39,7 @@ describe('Project learning path in skills display', () => {
     cy.get('[data-cy="numTotalLearningPathItems"]').should('have.text', '3')
     cy.get('[data-cy="numAchievedLearningPathItems"]').parent().should('contain.text', '1 of 3 items achieved')
     cy.get('[data-cy="learningPathPercent"]').should('have.text', '33%')
+    cy.get('[data-cy="learningPathPercent"]').closest('[aria-hidden="true"]').should('exist')
     cy.get('[data-cy="numAchievedSkills"]').should('have.text', '1')
     cy.get('[data-cy="numTotalSkills"]').should('have.text', '4')
     cy.get('[data-cy="learningPathTitle"]').then(($learningPathTitle) => {
@@ -46,7 +47,7 @@ describe('Project learning path in skills display', () => {
         expect(Math.abs($learningPathTitle[0].getBoundingClientRect().top - $achievedSkillsTitle[0].getBoundingClientRect().top)).to.be.lessThan(1)
       })
     })
-    cy.get('[data-cy="viewLearningPathLink"]').should('be.visible').click()
+    cy.get('[data-cy="viewLearningPathLink"]').should('be.visible').and('have.prop', 'tagName', 'BUTTON').and('have.attr', 'aria-label', 'View project learning path').click()
     cy.location('pathname').should('eq', '/test-skills-display/proj1/learning-path')
     cy.get('[data-cy="skillsTitle"]').contains('Learning Path')
     cy.get('[data-cy="fullDepsSkillsGraph"] [data-cy="graphLegend"]').should('not.exist')
