@@ -381,8 +381,14 @@ describe('Edit Imported Skill Tests', () => {
         cy.get('[data-cy="pointIncrement"] [data-pc-name="pcinputtext"]').should('be.visible')
         cy.get('[data-cy="pointIncrement"] [data-pc-name="pcinputtext"]')
             .should('have.value', '150');
+        // Wait for the dialog's initial autofocus so it cannot steal focus while typing.
+        cy.get('[data-cy="EditImportedSkillModal"] [data-pc-name="pcmaximizebutton"]')
+            .should('be.focused');
         cy.get('[data-cy="pointIncrement"] [data-pc-name="pcinputtext"]')
-            .type('{end}1');
+            .type('{selectall}1501')
+            .blur();
+        cy.get('[data-cy="pointIncrement"] [data-pc-name="pcinputtext"]')
+            .should('have.value', '1,501');
         cy.clickSaveDialogBtn()
         cy.get('[data-cy="pointIncrement"] [data-pc-name="pcinputtext"]').should("not.exist")
 
