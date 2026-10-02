@@ -64,6 +64,7 @@ describe('Learning Path Management Validation Tests', () => {
 
         cy.get(`${tableSelector} [data-cy="fromNodeLink_skill1"]`).should('be.visible')
         cy.get(`${tableSelector} [data-cy="toNodeLink_skill2"]`).should('be.visible')
+        cy.get(`${tableSelector} thead`).should('not.contain.text', 'From Status').and('not.contain.text', 'To Status')
         cy.get('[data-cy="learningPathTotalRows"] [data-cy="skillsBTableTotalRows"]').should('have.text', '1')
 
         // Replace the route on the server and refresh the graph without remounting the table.

@@ -73,8 +73,10 @@ watch(() => props.data, () => {
         learningPathsTmp.push({
           fromItem: fromNode?.details?.name,
           fromNode: fromNode?.details,
+          fromAchieved: !!fromNode?.details?.achieved,
           toItem: toNode?.details?.name,
-          toNode: toNode?.details
+          toNode: toNode?.details,
+          toAchieved: !!toNode?.details?.achieved
         })
       }
     })
@@ -138,9 +140,19 @@ const jumpToNode = (value) => {
               <RouterLink :to="getRoute(slotProps.data.fromNode)" :data-cy="`fromNodeLink_${slotProps.data.fromNode.skillId}`">{{ slotProps.data.fromItem }}</RouterLink>
             </template>
           </Column>
+          <Column v-if="mode === 'skills-display'" field="fromAchieved" header="From Status" sortable :class="{'flex': isFlex }">
+            <template #body="slotProps">
+              <span :data-cy="`fromNodeStatus_${slotProps.data.fromNode.skillId}`"><i v-if="slotProps.data.fromAchieved" class="fas fa-check mr-1" aria-hidden="true" />{{ slotProps.data.fromAchieved ? 'Achieved' : 'Not achieved' }}</span>
+            </template>
+          </Column>
           <Column field="toItem" header="To" sortable :class="{'flex': isFlex }">
             <template #body="slotProps">
               <RouterLink :to="getRoute(slotProps.data.toNode)" :data-cy="`toNodeLink_${slotProps.data.toNode.skillId}`">{{ slotProps.data.toItem }}</RouterLink>
+            </template>
+          </Column>
+          <Column v-if="mode === 'skills-display'" field="toAchieved" header="To Status" sortable :class="{'flex': isFlex }">
+            <template #body="slotProps">
+              <span :data-cy="`toNodeStatus_${slotProps.data.toNode.skillId}`"><i v-if="slotProps.data.toAchieved" class="fas fa-check mr-1" aria-hidden="true" />{{ slotProps.data.toAchieved ? 'Achieved' : 'Not achieved' }}</span>
             </template>
           </Column>
           <Column field="edit" header="View Route" v-if="editable" :class="{'flex': isFlex }">
