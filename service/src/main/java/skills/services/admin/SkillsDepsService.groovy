@@ -19,8 +19,11 @@ import callStack.profiler.Profile
 import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
+import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import skills.auth.UserInfoService
+import skills.auth.UserSkillsGrantedAuthority
 import skills.controller.exceptions.ErrorCode
 import skills.controller.exceptions.SkillException
 import skills.controller.result.model.*
@@ -34,13 +37,17 @@ import skills.storage.accessors.ProjDefAccessor
 import skills.storage.accessors.SkillDefAccessor
 import skills.storage.model.SkillDef
 import skills.storage.model.SkillRelDef
+import skills.storage.model.auth.RoleName
 import skills.storage.repos.SkillDefRepo
+import skills.storage.repos.SkillEventsSupportRepo
 import skills.storage.repos.SkillRelDefRepo
 import skills.storage.repos.SkillShareDefRepo
 import skills.utils.InputSanitizer
 import skills.utils.Props
 
 import java.util.concurrent.atomic.AtomicInteger
+
+import static skills.storage.repos.SkillEventsSupportRepo.*
 
 @Service
 @Slf4j
@@ -82,6 +89,17 @@ class SkillsDepsService {
     @Autowired
     SkillsAdminService skillsAdminService
 
+    @Autowired
+    SkillEventsSupportRepo skillEventsSupportRepo
+
+    @Autowired
+    InviteOnlyProjectService inviteOnlyProjectService
+
+    @Autowired
+    UserCommunityService userCommunityService
+
+    @Autowired
+    UserInfoService userInfoService
 
     @Transactional(readOnly = true)
     boolean checkIfSkillInAnotherProjectPartOfLearningPath(String projId, String otherProj, String otherProjSkillId) {
@@ -173,9 +191,33 @@ class SkillsDepsService {
 
     @Profile
     @Transactional(readOnly = true)
-    SkillsGraphRes getDependentSkillsGraph(String projectId) {
-        List<GraphSkillDefEdge> edges = loadGraphEdges(projectId, SkillRelDef.RelationshipType.Dependence)
+    SkillsGraphRes getDependentSkillsGraph(String projectId, String userId=null, Integer version=null) {
+        List<GraphSkillDefEdge> edges = loadGraphEdges(projectId, SkillRelDef.RelationshipType.Dependence, userId, version)
         return convertToSkillsGraphRes(edges)
+    }
+
+    @Transactional(readOnly = true)
+    SkillsGraphRes getUserDependentSkillsGraph(String projectId, String userId, Integer version=null) {
+        List<Object[]> rows = skillRelDefRepo.getGraph(projectId, SkillRelDef.RelationshipType.Dependence, version)
+        Set<String> referencedProjectIds = rows.collectMany { [it[5] as String, it[15] as String] }.toSet()
+        referencedProjectIds.remove(projectId)
+
+        String currentUserId = userInfoService.getCurrentUserId()
+        boolean isRoot = SecurityContextHolder.context.authentication?.authorities?.any { authority ->
+            authority instanceof UserSkillsGrantedAuthority && authority.role?.roleName == RoleName.ROLE_SUPER_DUPER_USER
+        }
+        boolean isCommunityMember = userCommunityService.isUserCommunityMember(currentUserId)
+        Set<String> accessibleProjectIds = referencedProjectIds.findAll { referencedProjectId ->
+            (!userCommunityService.isUserCommunityOnlyProject(referencedProjectId) || isCommunityMember) &&
+                    (!inviteOnlyProjectService.isInviteOnlyProject(referencedProjectId) || isRoot ||
+                            inviteOnlyProjectService.isPrivateProjRoleOrAdminRole(referencedProjectId, currentUserId))
+        }.toSet()
+        accessibleProjectIds.add(projectId)
+
+        List<Object[]> visibleRows = rows.findAll { row ->
+            accessibleProjectIds.contains(row[5]) && accessibleProjectIds.contains(row[15])
+        }
+        return convertToSkillsGraphRes(mapGraphEdges(visibleRows, userId, version))
     }
 
 
@@ -203,6 +245,7 @@ class SkillsDepsService {
             graphRes.id = it.value
             graphRes.projectName = it.key.projectName
             graphRes.containedSkills = it.key.containedSkills
+            graphRes.achieved = it.key.achieved
             return graphRes
         }
         SkillsGraphRes res = new SkillsGraphRes(nodes: nodes, edges: edgesRes)
@@ -250,46 +293,67 @@ class SkillsDepsService {
     }
 
     @Profile
-    List<GraphSkillDefEdge> loadGraphEdges(String projectId, SkillRelDef.RelationshipType type) {
-        List<Object[]> edges = skillRelDefRepo.getGraph(projectId, type)
+    List<GraphSkillDefEdge> loadGraphEdges(String projectId, SkillRelDef.RelationshipType type, String userId=null, Integer version=null) {
+        List<Object[]> edges = skillRelDefRepo.getGraph(projectId, type, version)
+        return mapGraphEdges(edges, userId, version)
+    }
 
-        return edges.collect({
+    private List<GraphSkillDefEdge> mapGraphEdges(List<Object[]> edges, String userId, Integer version) {
+        if (!edges) {
+            return []
+        }
+
+        List<TinyUserAchievement> achievedSkillsAndBadges = []
+        if (userId) {
+            Set<String> projectIds = edges.collectMany { [it[5], it[15]] }.toSet()
+            achievedSkillsAndBadges = skillEventsSupportRepo.findTinyUserAchievementsForSkillsAndBadgesByUserIdAndProjectIds(userId, projectIds)
+        }
+        Set<Integer> achievedSkillRefIds = achievedSkillsAndBadges.collect { it.skillRefId }.toSet()
+        Map<Integer, List<SkillDefGraphRes>> badgeSkillsById = [:]
+
+        return edges.collect({ row ->
             //   mapping directly to entity is slow, we can save over a second in latency by mapping attributes explicitly
 
             SkillDefGraphRes from = new SkillDefGraphRes(
-                    id: it[0],
-                    name: it[1],
-                    skillId: it[2],
-                    groupId: it[3],
-                    subjectId: it[4],
-                    projectId: it[5],
-                    projectName: it[6],
-                    pointIncrement: it[7],
-                    totalPoints: it[8],
-                    type: it[9],
+                    id: row[0],
+                    name: row[1],
+                    skillId: row[2],
+                    groupId: row[3],
+                    subjectId: row[4],
+                    projectId: row[5],
+                    projectName: row[6],
+                    pointIncrement: row[7],
+                    totalPoints: row[8],
+                    type: row[9],
                     containedSkills: null,
+                    achieved: achievedSkillRefIds.contains(row[0])
             )
 
-            if(it[9] == SkillDef.ContainerType.Badge) {
-                from.containedSkills = getSkillsForLearningPathItem(projectId, it[6], it[2])
+            if(row[9] == SkillDef.ContainerType.Badge) {
+                from.containedSkills = badgeSkillsById.computeIfAbsent(row[0] as Integer) {
+                    getSkillsForLearningPathItem(row[5] as String, row[6] as String, row[2] as String, achievedSkillRefIds, version)
+                }
             }
 
             SkillDefGraphRes to = new SkillDefGraphRes(
-                    id: it[10],
-                    name: it[11],
-                    skillId: it[12],
-                    groupId: it[13],
-                    subjectId: it[14],
-                    projectId: it[15],
-                    projectName: it[16],
-                    pointIncrement: it[17],
-                    totalPoints: it[18],
-                    type: it[19],
+                    id: row[10],
+                    name: row[11],
+                    skillId: row[12],
+                    groupId: row[13],
+                    subjectId: row[14],
+                    projectId: row[15],
+                    projectName: row[16],
+                    pointIncrement: row[17],
+                    totalPoints: row[18],
+                    type: row[19],
                     containedSkills: null,
+                    achieved: achievedSkillRefIds.contains(row[10])
             )
 
-            if(it[18] == SkillDef.ContainerType.Badge) {
-                to.containedSkills = getSkillsForLearningPathItem(projectId, it[16], it[12])
+            if(row[19] == SkillDef.ContainerType.Badge) {
+                to.containedSkills = badgeSkillsById.computeIfAbsent(row[10] as Integer) {
+                    getSkillsForLearningPathItem(row[15] as String, row[16] as String, row[12] as String, achievedSkillRefIds, version)
+                }
             }
 
             new GraphSkillDefEdge(from: from, to: to)
@@ -297,8 +361,11 @@ class SkillsDepsService {
         })
     }
 
-    private List<SkillDefGraphRes> getSkillsForLearningPathItem(String projectId, String projectName, String skillId) {
+    private List<SkillDefGraphRes> getSkillsForLearningPathItem(String projectId, String projectName, String skillId, Set<Integer> achievedSkillRefIds, Integer version) {
         List<SkillDefPartialRes> badgeSkills = skillsAdminService.getSkillsByProjectSkillAndType(projectId, skillId, SkillDef.ContainerType.Badge, SkillRelDef.RelationshipType.BadgeRequirement)
+        if (version != null && version >= 0) {
+            badgeSkills = badgeSkills.findAll { it.version <= version }
+        }
         List<SkillDefGraphRes> skills = badgeSkills.collect{res -> new SkillDefGraphRes(
                 id: null,
                 name: res.name,
@@ -310,6 +377,7 @@ class SkillsDepsService {
                 pointIncrement: res.pointIncrement,
                 totalPoints: res.totalPoints,
                 type: res.type,
+                achieved: achievedSkillRefIds.contains(skillDefRepo.findByProjectIdAndSkillIdIgnoreCaseAndType(projectId, res.skillId, SkillDef.ContainerType.Skill)?.id)
         ) }
         return skills
     }

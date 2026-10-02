@@ -454,10 +454,11 @@ interface SkillRelDefRepo extends CrudRepository<SkillRelDef, Integer> {
             and sd2 = srd.child
             and srd.type=?2 
             and sd1.projectId=?1
+            and (?3 is null or (sd1.version <= ?3 and sd2.version <= ?3))
             and p1.projectId = sd1.projectId
             and p2.projectId = sd2.projectId
         ''')
-    List<Object[]> getGraph(String projectId, SkillRelDef.RelationshipType type)
+    List<Object[]> getGraph(String projectId, SkillRelDef.RelationshipType type, @Nullable Integer version)
 
 
     @Query(value='''

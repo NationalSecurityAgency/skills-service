@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <script setup>
-import { ref, onMounted, watch } from 'vue'
+import { computed, ref, onMounted, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import { Network } from 'vis-network'
 import { useSkillsDisplayAttributesState } from '@/skills-display/stores/UseSkillsDisplayAttributesState.js'
@@ -42,6 +42,8 @@ const loadingData = ref(true)
 const thisSkill = ref({})
 const dependenciesInternal = ref([])
 const network = ref(null)
+const showLegend = computed(() => dependenciesInternal.value.some((item) => item.skill?.type === 'Badge' || item.dependsOn?.type === 'Badge') &&
+  dependenciesInternal.value.some((item) => item.skill?.type === 'Skill' || item.dependsOn?.type === 'Skill'))
 const displayOptions = {
   layout: {
     randomSeed: 419465,
@@ -273,7 +275,7 @@ const buildNode = (skill, isCrossProject, createdSkillIds, nodes, achievedIds, e
     createdSkillIds.push(skill.id)
     const skillColor = skill.isThisSkill ? themeState.graphThisSkillColor : themeState.graphSkillColor
     const isAchieved = achievedIds.includes(skill.id)
-    let label = isCrossProject ? `Shared from\n<b>${skill.projectName}</b>\n${GraphUtils.truncate(skill.skillName)}` : GraphUtils.truncate(skill.skillName)
+    let label = GraphUtils.getPrerequisiteLabel(skill, isCrossProject)
     if (skill.isThisSkill) {
       label = `<b>This Skill</b>\n${label}`
     } else if (skill.isThisBadge) {
@@ -335,11 +337,11 @@ const buildNode = (skill, isCrossProject, createdSkillIds, nodes, achievedIds, e
       <div class="pt-4 px-4">
         <h2 class="sr-only">Skill's Prerequisites</h2>
         <div class="flex flex-wrap gap-4">
-          <div class="flex-1 w-min-16rem">
+          <div v-if="showLegend" class="flex-1 w-min-16rem">
             <graph-legend />
           </div>
 
-          <div class="">
+          <div class="ml-auto">
             <user-prerequisites-progress :dependencies="dependenciesInternal"/>
           </div>
         </div>

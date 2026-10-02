@@ -22,7 +22,7 @@ describe('Client Display Prerequisites Tests', () => {
 
         Cypress.Commands.add('clickOnNode', (x, y) => {
             cy.contains('Prerequisites');
-            cy.get('[data-cy="graphLegend"]').contains('Legend');
+            cy.get('[data-cy="graphLegend"]').should('not.exist');
             cy.wait(2000); // wait for chart
             // have to click twice to it to work...
             cy.get('#dependent-skills-network canvas')
@@ -355,7 +355,7 @@ describe('Client Display Prerequisites Tests', () => {
         }
 
         cy.navToTheFirstSkill();
-        cy.get('[data-cy="graphLegend"]').contains('Legend');
+        cy.get('[data-cy="graphLegend"]').should('not.exist');
 
         cy.cdVisit('/');
         cy.cdClickSubj(0);

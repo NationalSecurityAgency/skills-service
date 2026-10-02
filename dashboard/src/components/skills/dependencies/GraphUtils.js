@@ -16,6 +16,12 @@
 import { useStringUtils } from '@/common-components/utilities/UseStringUtils.js'
 
 const stringUtils = useStringUtils();
+const escapeHtml = (value) => value.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+
+const buildLabel = (name, projectName, isCrossProject, trailingSpace = false) => {
+  const escapedName = escapeHtml(name);
+  return isCrossProject ? `Shared from\n<b>${escapeHtml(projectName)}</b>\n${escapedName}${trailingSpace ? ' ' : ''}` : escapedName;
+};
 
 export default {
   getTitle(skillItem, isCrossProject) {
@@ -70,7 +76,10 @@ export default {
     return container;
   },
   getLabel(skillItem, isCrossProject) {
-    return isCrossProject ? `Shared from\n<b>${this.truncate(skillItem.projectName)}</b>\n${this.truncate(skillItem.name)} ` : this.truncate(skillItem.name);
+    return buildLabel(this.truncate(skillItem.name), isCrossProject ? this.truncate(skillItem.projectName) : '', isCrossProject, true);
+  },
+  getPrerequisiteLabel(skillItem, isCrossProject) {
+    return buildLabel(this.truncate(skillItem.skillName), isCrossProject ? skillItem.projectName : '', isCrossProject);
   },
   truncate(strValue, truncateTo = 20) {
     let chunks = strValue.split(' ');

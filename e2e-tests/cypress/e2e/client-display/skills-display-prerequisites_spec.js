@@ -152,6 +152,7 @@ describe('Prerequisite tests', () => {
 
     cy.wait(4000);
     cy.get('[data-cy="prereqTable"] [data-cy="skillLink-proj1-skill2"]')
+    cy.get('[data-cy="prerequisitesCard"] [data-cy="graphLegend"]').should('not.exist')
     cy.matchSnapshotImageForElement('[data-cy="skillsDisplayHome"]', {
       blackout: '[data-cy=pointHistoryChart]'
     });

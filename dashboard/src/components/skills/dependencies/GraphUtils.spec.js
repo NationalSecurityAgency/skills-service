@@ -42,3 +42,13 @@ describe('dependency graph tooltips', () => {
     expect(names).toEqual(count > 11 ? [...containedSkills.slice(0, 10).map((skill) => skill.name), `and ${count - 10} more skills...`] : containedSkills.map((skill) => skill.name))
   })
 })
+
+describe('dependency graph labels', () => {
+  it('escapes names before inserting them into HTML-formatted labels', () => {
+    const item = { name: '<img src=x onerror="alert(1)">', projectName: 'R&D <private> \'team\'' }
+    expect(GraphUtils.getLabel(item, false)).toBe('&lt;img src=x onerror=&quot;alert(1)&quot;&gt; ')
+    expect(GraphUtils.getLabel(item, true)).toBe('Shared from\n<b>R&amp;D &lt;private&gt; &#39;team&#39; </b>\n&lt;img src=x onerror=&quot;alert(1)&quot;&gt;  ')
+    expect(GraphUtils.getPrerequisiteLabel({ skillName: item.name, projectName: item.projectName }, true))
+      .toBe('Shared from\n<b>R&amp;D &lt;private&gt; &#39;team&#39;</b>\n&lt;img src=x onerror=&quot;alert(1)&quot;&gt; ')
+  })
+})

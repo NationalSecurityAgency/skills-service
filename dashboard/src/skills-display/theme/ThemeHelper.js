@@ -271,7 +271,7 @@ export default {
     },
     buttons: {
       backgroundColor: [{
-        selector: '.sd-theme-home .p-button.p-component',
+        selector: '.sd-theme-home .p-button.p-component, .sd-theme-home .p-togglebutton.p-component',
         styleName: 'background-color'
       }, {
         selector: '.sd-theme-home .p-button.p-component:hover,' +
@@ -282,10 +282,10 @@ export default {
         styleName: 'border-color'
       }],
       foregroundColor: [{
-        selector: '.sd-theme-home .p-button.p-component',
+        selector: '.sd-theme-home .p-button.p-component, .sd-theme-home .p-togglebutton.p-component',
         styleName: 'color'
       }, {
-        selector: '.sd-theme-home .p-button.p-component',
+        selector: '.sd-theme-home .p-button.p-component, .sd-theme-home .p-togglebutton.p-component',
         styleName: 'border-color'
       }, {
         selector: '.sd-theme-home .p-button.p-component:hover,' +

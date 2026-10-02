@@ -14,28 +14,37 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <script setup>
-import {computed, nextTick, onMounted, ref, watch} from 'vue'
+import { computed, nextTick, ref, watch } from 'vue'
 import { useSkillsAnnouncer } from '@/common-components/utilities/UseSkillsAnnouncer.js'
-import SkillsService from '@/components/skills/SkillsService'
+import SkillsService from '@/components/skills/SkillsService.js'
 import NoContent2 from '@/components/utils/NoContent2.vue'
 import Column from 'primevue/column'
-import { useProjConfig } from '@/stores/UseProjConfig.js'
 import { useResponsiveBreakpoints } from '@/components/utils/misc/UseResponsiveBreakpoints.js'
-import {useDialogMessages} from "@/components/utils/modal/UseDialogMessages.js";
-import { useSkillOverviewRouteUtil } from '@/components/skills/UseSkillOverviewRouteUtil.js'
-import SkillType from "@/common-components/utilities/SkillType.js";
+import { useDialogMessages } from '@/components/utils/modal/UseDialogMessages.js'
+import { useDependencyNavigation } from '@/common-components/dependency/UseDependencyNavigation.js'
+import { RouterLink } from 'vue-router'
+import { useSkillsDisplayThemeState } from '@/skills-display/stores/UseSkillsDisplayThemeState.js'
 
 const dialogMessages = useDialogMessages()
-const projConfig = useProjConfig();
-const props = defineProps(['isLoading', 'data'])
+const props = defineProps({
+  isLoading: Boolean,
+  data: Object,
+  editable: { type: Boolean, default: false },
+  mode: { type: String, default: 'admin' },
+})
 const emit = defineEmits(['update', 'panToNode'])
 const announcer = useSkillsAnnouncer()
-const skillRouteUtil = useSkillOverviewRouteUtil()
-
-const isReadOnlyProj = computed(() => projConfig.isReadOnlyProj);
+const dependencyNavigation = useDependencyNavigation()
+const themeState = useSkillsDisplayThemeState()
+const routeHeaderStyle = computed(() => props.mode === 'skills-display' ? {
+  color: themeState.graphTextPrimaryColor || undefined,
+  backgroundColor: themeState.theme?.tiles?.backgroundColor || undefined,
+} : {})
+const paginatorLabelStyle = computed(() => props.mode === 'skills-display' ? {
+  color: themeState.graphTextPrimaryColor || undefined,
+} : {})
 
 const learningPaths = ref([])
-const isProcessing = ref(true)
 const sortField = ref('')
 const sortOrder = ref(0)
 
@@ -52,40 +61,26 @@ const getNode = (nodes, id) => {
   }
 }
 
-onMounted(() => {
-
-    loadPaths()
-    isProcessing.value = false
-})
-
-watch(() => props.data?.edges?.length, (newLen) => {
-  if (newLen !== learningPaths.value.length) {
-    loadPaths()
-  }
-})
-
-const loadPaths = () => {
+watch(() => props.data, () => {
   const learningPathsTmp = []
-  if (props.data && props.data.edges && props.data.edges.length > 0) {
+  if (props.data?.edges?.length) {
     const {nodes, edges} = props.data
-    if (edges && edges.length > 0) {
-      edges.forEach((edge) => {
-        const fromNode = getNode(nodes, edge.from)
-        const toNode = getNode(nodes, edge.to)
+    edges.forEach((edge) => {
+      const fromNode = getNode(nodes, edge.from)
+      const toNode = getNode(nodes, edge.to)
 
-        if (fromNode && toNode) {
-          learningPathsTmp.push({
-            fromItem: fromNode?.details?.name,
-            fromNode: fromNode?.details,
-            toItem: toNode?.details?.name,
-            toNode: toNode?.details
-          })
-        }
-      })
-    }
-    learningPaths.value = learningPathsTmp
+      if (fromNode && toNode) {
+        learningPathsTmp.push({
+          fromItem: fromNode?.details?.name,
+          fromNode: fromNode?.details,
+          toItem: toNode?.details?.name,
+          toNode: toNode?.details
+        })
+      }
+    })
   }
-}
+  learningPaths.value = learningPathsTmp
+}, { immediate: true })
 
 const removeLearningPath = (data) => {
   const message = `Do you want to remove the path from ${data.fromItem} to ${data.toItem}?`
@@ -104,17 +99,7 @@ const removeLearningPath = (data) => {
   })
 }
 
-const getUrl = (item) => {
-  let url = `/administrator/projects/${encodeURIComponent(item.projectId)}`
-  if (SkillType.isSkill(item.type)) {
-    const routeProps = skillRouteUtil.toRouteProps(item.projectId, item.subjectId, item.skillId, item.type, item.groupId)
-    url = routeProps.path
-  } else if (SkillType.isBadge(item.type)) {
-    url += `/badges/${encodeURIComponent(item.skillId)}`
-  }
-
-  return url
-}
+const getRoute = (item) => dependencyNavigation.getRoute(item, props.mode === 'skills-display')
 
 const sortTable = (criteria) => {
   sortField.value = criteria.sortField
@@ -132,15 +117,14 @@ const jumpToNode = (value) => {
 <template>
   <Card class="mb-4" :pt="{ body: { class: 'p-0!' } }">
     <template #header>
-      <SkillsCardHeader title="Learning Path Routes"></SkillsCardHeader>
+      <SkillsCardHeader title="Learning Path Routes" :title-tag="mode === 'skills-display' ? 'h2' : 'h3'" :style="routeHeaderStyle" />
     </template>
     <template #content>
-      <div v-if="!isProcessing && learningPaths.length > 0">
+      <div v-if="learningPaths.length > 0">
         <SkillsDataTable
           tableStoredStateId="dependencies"
           aria-label="Learning Path Routes"
           :value="learningPaths"
-          v-if="!isProcessing"
           :loading="isLoading"
           data-cy="learningPathTable"
           paginator :rows="5" :rowsPerPageOptions="[5, 10, 15, 20]"
@@ -151,21 +135,21 @@ const jumpToNode = (value) => {
           striped-rows>
           <Column field="fromItem" header="From" sortable :class="{'flex': isFlex }">
             <template #body="slotProps">
-              <a :href="getUrl(slotProps.data.fromNode)" :data-cy="`fromNodeLink_${slotProps.data.fromNode.skillId}`">{{ slotProps.data.fromItem }}</a>
+              <RouterLink :to="getRoute(slotProps.data.fromNode)" :data-cy="`fromNodeLink_${slotProps.data.fromNode.skillId}`">{{ slotProps.data.fromItem }}</RouterLink>
             </template>
           </Column>
           <Column field="toItem" header="To" sortable :class="{'flex': isFlex }">
             <template #body="slotProps">
-              <a :href="getUrl(slotProps.data.toNode)" :data-cy="`toNodeLink_${slotProps.data.toNode.skillId}`">{{ slotProps.data.toItem }}</a>
+              <RouterLink :to="getRoute(slotProps.data.toNode)" :data-cy="`toNodeLink_${slotProps.data.toNode.skillId}`">{{ slotProps.data.toItem }}</RouterLink>
             </template>
           </Column>
-          <Column field="edit" header="View Route" v-if="!isReadOnlyProj" :class="{'flex': isFlex }">
+          <Column field="edit" header="View Route" v-if="editable" :class="{'flex': isFlex }">
             <template #body="slotProps">
               <SkillsButton @click="jumpToNode(slotProps.data)" variant="outline-info" size="small" class="text-info mr-2" icon="fa fa-network-wired"
                             :aria-label="`View route of ${slotProps.data.fromItem} to ${slotProps.data.toItem} in graph`" title="View route in graph"></SkillsButton>
             </template>
           </Column>
-          <Column field="edit" header="Edit" v-if="!isReadOnlyProj" :class="{'flex': isFlex }">
+          <Column field="edit" header="Edit" v-if="editable" :class="{'flex': isFlex }">
             <template #body="slotProps">
               <SkillsButton @click="removeLearningPath(slotProps.data)"
                       variant="outline-info" size="small" class="text-info" icon="fa fa-trash"
@@ -176,8 +160,7 @@ const jumpToNode = (value) => {
           </Column>
 
           <template #paginatorstart>
-            <span>Total Rows:</span> <span class="font-semibold" data-cy=skillsBTableTotalRows>{{ learningPaths.length
-            }}</span>
+            <span data-cy="learningPathTotalRows" :style="paginatorLabelStyle">Total Rows: <span class="font-semibold" data-cy="skillsBTableTotalRows">{{ learningPaths.length }}</span></span>
           </template>
         </SkillsDataTable>
       </div>

@@ -73,6 +73,7 @@ const dataLabelNameColor = computed(() => {
 
 const barColor = computed(() => themeState.theme?.progressIndicators?.beforeTodayColor || chartColors.cyan700Color)
 const remainingBarColor = computed(() => themeState.theme?.progressIndicators?.incompleteColor || chartColors.surface300Color)
+const sizeInRem = computed(() => props.diameter / 16)
 
 const radialChartLabelStyle = computed(() => {
   if (dataLabelNameColor.value) {
@@ -84,28 +85,30 @@ const radialChartLabelStyle = computed(() => {
 
 <template>
   <div class="progress-circle-wrapper flex flex-col gap-3">
-    <h2 class="text-2xl font-medium">{{ title }}</h2>
+    <h2 v-if="title" class="text-2xl font-medium">{{ title }}</h2>
     <div>
       <radial-percentage-chart
           :value="is100Percent ? 100 :  totalCompletedPoints"
           :max="is100Percent ? 100 : totalPossiblePoints"
           :full-circle="true"
-          :size-in-rem="12"
+          :size-in-rem="sizeInRem"
           :completed-bar-color="barColor"
           :remaining-bar-color="remainingBarColor"
       >
         <template #center>
-          <div v-if="is100Percent" data-cy="circleProgressCompleted">
-            <i class="fa-solid fa-check-double text-green-500 text-4xl" aria-hidden="true"></i>
-          </div>
-          <div v-else>
-            <div class="text-xl font-semibold" :style="radialChartLabelStyle"><span data-cy="circleProgressPts">{{ numFormat.pretty(totalCompletedPoints) }}</span> {{ attributes.pointDisplayNamePlural }}</div>
-          </div>
-          <div class="text-gray-500 dark:text-gray-200" :style="radialChartLabelStyle" data-cy="circleProgressPercent">{{  percentComplete }}%</div>
+          <slot name="center" :percent-complete="percentComplete">
+            <div v-if="is100Percent" data-cy="circleProgressCompleted">
+              <i class="fa-solid fa-check-double text-green-500 text-4xl" aria-hidden="true"></i>
+            </div>
+            <div v-else>
+              <div class="text-xl font-semibold" :style="radialChartLabelStyle"><span data-cy="circleProgressPts">{{ numFormat.pretty(totalCompletedPoints) }}</span> {{ attributes.pointDisplayNamePlural }}</div>
+            </div>
+            <div class="text-gray-500 dark:text-gray-200" :style="radialChartLabelStyle" data-cy="circleProgressPercent">{{  percentComplete }}%</div>
+          </slot>
         </template>
       </radial-percentage-chart>
     </div>
-    <div>
+    <div v-if="$slots.footer">
       <slot name="footer" />
     </div>
   </div>

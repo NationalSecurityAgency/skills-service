@@ -58,8 +58,30 @@ describe('Learning Path Management Validation Tests', () => {
         cy.intercept('GET', '/admin/projects/proj1/sharedWithMe').as('loadSharedSkills');
     });
 
+    it('updates learning path rows when a route is replaced without changing the edge count', () => {
+        cy.addLearningPathItem(1, 1, 2)
+        visitLearningPath()
+
+        cy.get(`${tableSelector} [data-cy="fromNodeLink_skill1"]`).should('be.visible')
+        cy.get(`${tableSelector} [data-cy="toNodeLink_skill2"]`).should('be.visible')
+        cy.get('[data-cy="learningPathTotalRows"] [data-cy="skillsBTableTotalRows"]').should('have.text', '1')
+
+        // Replace the route on the server and refresh the graph without remounting the table.
+        cy.request('DELETE', '/admin/projects/proj1/skill2/prerequisite/proj1/skill1')
+        cy.selectSkill('[data-cy="learningPathFromSkillSelector"]', 'skill3')
+        cy.selectSkill('[data-cy="learningPathToSkillSelector"]', 'skill4')
+        cy.get('[data-cy="addLearningPathItemBtn"]').click()
+
+        cy.get(`${tableSelector} [data-cy="fromNodeLink_skill3"]`).should('be.visible')
+        cy.get(`${tableSelector} [data-cy="toNodeLink_skill4"]`).should('be.visible')
+        cy.get(`${tableSelector} [data-cy="fromNodeLink_skill1"]`).should('not.exist')
+        cy.get(`${tableSelector} [data-cy="toNodeLink_skill2"]`).should('not.exist')
+        cy.get('[data-cy="learningPathTotalRows"] [data-cy="skillsBTableTotalRows"]').should('have.text', '1')
+    })
+
     it('Create a simple learning path', () => {
         visitLearningPath()
+        cy.get('[data-cy="fullDepsSkillsGraph"] [data-cy="graphLegend"]').should('be.visible')
 
         // Add Badge1 as a prerequisite for Badge2
         cy.selectSkill('[data-cy="learningPathFromSkillSelector"]', 'badge1')
@@ -514,5 +536,68 @@ describe('Learning Path Management Validation Tests', () => {
             }],
         ], 5, false, null, false);
 
+    })
+
+    it('keeps the graph and add controls after entering and leaving full screen', () => {
+        visitLearningPath()
+        cy.get('[data-cy="fullDepsSkillsGraph"]').contains('No Learning Path Yet').should('be.visible')
+        cy.get('[data-cy="learningPath-fullScreenButton"]').should('be.visible')
+
+        cy.selectSkill('[data-cy="learningPathFromSkillSelector"]', 'badge1')
+        cy.selectSkill('[data-cy="learningPathToSkillSelector"]', 'badge2')
+        cy.get('[data-cy="addLearningPathItemBtn"]').click()
+
+        cy.get('#dependency-graph canvas').should('be.visible')
+        cy.get('[data-cy="learningPathTable"] tbody tr').should('have.length', 1)
+        cy.get('[data-cy="learningPath-fullScreenButton"]').realClick()
+        cy.get('#fullDepsSkillsGraphContainer').should('match', ':fullscreen')
+        cy.get('#dependency-graph canvas').should('be.visible')
+        cy.get('#prerequisiteContent').should('be.visible')
+        const checkGraphViewport = () => {
+            cy.get('#dependency-graph').should(($graph) => {
+                const graph = $graph[0]
+                const network = graph.querySelector('.vis-network')
+                const navigation = graph.querySelector('.vis-navigation')
+                const graphBounds = graph.getBoundingClientRect()
+                const navigationBounds = navigation.getBoundingClientRect()
+                expect(graph.clientHeight).to.be.greaterThan(0)
+                expect(network.clientWidth).to.equal(graph.clientWidth)
+                expect(network.clientHeight).to.equal(graph.clientHeight)
+                expect(navigationBounds.right).to.be.at.most(graphBounds.right)
+                expect(navigationBounds.right).to.be.greaterThan(graphBounds.right - 100)
+            })
+        }
+        checkGraphViewport()
+
+        cy.get('[data-cy="learningPath-fullScreenButton"]').realClick()
+        cy.get('#fullDepsSkillsGraphContainer').should('not.match', ':fullscreen')
+        cy.get('#dependency-graph canvas').should('be.visible')
+        checkGraphViewport()
+        cy.get('[data-cy="addPrerequisiteToLearningPath"]').should('be.visible')
+        cy.get('[data-cy="learningPathFromSkillSelector"] input').should('be.enabled')
+    })
+
+    it('clears the selected From skill when leaving full screen', () => {
+        cy.addLearningPathItem(1, 1, 2, true, true)
+        visitLearningPath()
+
+        cy.get('[data-cy="learningPath-fullScreenButton"]').realClick()
+        cy.get('#fullDepsSkillsGraphContainer').should('match', ':fullscreen')
+        cy.get('#prerequisiteContent').should('be.visible')
+        cy.get('#dependency-graph canvas').should('be.visible')
+
+        cy.get('#prerequisiteContent [data-pc-name="accordionheader"]').click()
+        cy.get('#prerequisiteContent [data-cy="learningPathFromSkillSelector"] input')
+            .should('be.visible')
+        cy.selectSkill('#prerequisiteContent [data-cy="learningPathFromSkillSelector"]', 'badge1')
+        cy.get('#prerequisiteContent [data-cy="learningPathFromSkillSelector"] input')
+            .should('have.value', 'Badge 1')
+
+        cy.get('[data-cy="learningPath-fullScreenButton"]').realClick()
+        cy.get('#fullDepsSkillsGraphContainer').should('not.match', ':fullscreen')
+        cy.get('[data-cy="addPrerequisiteToLearningPath"] [data-cy="learningPathFromSkillSelector"] input')
+            .should('have.value', '')
+        cy.get('[data-cy="addPrerequisiteToLearningPath"] [data-cy="learningPathToSkillSelector"] input')
+            .should('be.disabled')
     })
 });

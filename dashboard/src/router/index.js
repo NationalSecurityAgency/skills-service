@@ -86,23 +86,20 @@ import AdminGroupQuizzes from '@/components/access/groups/AdminGroupQuizzes.vue'
 import RedirectPage from '@/components/utils/RedirectPage.vue'
 import UpgradeInProgressPage from '@/components/utils/errors/UpgradeInProgressPage.vue'
 import SkillsClientPath from '@/router/SkillsClientPath.js'
-import log from 'loglevel'
 import UserArchivePage from '@/components/users/UserArchivePage.vue'
 import UsersTablePage from '@/components/users/UsersTablePage.vue'
 import GlobalUsersTablePage from '@/components/users/GlobalUsersTablePage.vue'
 import SupportPage from '@/components/contact/SupportPage.vue'
-import { defineAsyncComponent } from 'vue'
 import GlobalBadgeAccessPage from '@/components/badges/global/GlobalBadgeAccessPage.vue'
 import AdminGroupGlobalBadges from '@/components/access/groups/AdminGroupGlobalBadges.vue'
 import SkillGroupPage from '@/components/skills/SkillGroupPage.vue'
 import SkillGroupSkills from '@/components/skills/SkillGroupSkills.vue'
-import SkillTagsPage from "@/components/skills/tags/SkillTagsPage.vue";
-import SingleSkillTagPage from "@/components/skills/tags/SingleSkillTagPage.vue";
-import SkillTagUsers from "@/components/skills/tags/SkillTagUsers.vue";
-import TaggedSkills from "@/components/skills/tags/TaggedSkills.vue";
+import SkillTagsPage from '@/components/skills/tags/SkillTagsPage.vue'
+import SingleSkillTagPage from '@/components/skills/tags/SingleSkillTagPage.vue'
+import SkillTagUsers from '@/components/skills/tags/SkillTagUsers.vue'
+import TaggedSkills from '@/components/skills/tags/TaggedSkills.vue'
+import FullDependencyGraph from '@/components/skills/dependencies/FullDependencyGraph.vue'
 import { useSkillsDisplayParentFrameState } from '@/skills-display/stores/UseSkillsDisplayParentFrameState.js'
-
-const FullDependencyGraph = defineAsyncComponent(() => import('@/components/skills/dependencies/FullDependencyGraph.vue'))
 
 const routes = [
   {

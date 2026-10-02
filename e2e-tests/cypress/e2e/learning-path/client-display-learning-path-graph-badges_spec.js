@@ -64,6 +64,8 @@ describe('Client Display Prerequisites Badges Tests', () => {
         cy.cdVisit('/subjects/subj1');
         cy.cdClickSkill(1);
 
+        cy.get('[data-cy="prerequisitesCard"] [data-cy="graphLegend"]').should('be.visible')
+
         cy.get('[data-pc-section="headercell"]').contains('Prerequisite Name').click()
 
         cy.get('[data-cy="prereqTable"] [data-p-index="0"] [data-cy="skillLink-proj1-badge1"]').contains('Badge 1')
@@ -90,6 +92,8 @@ describe('Client Display Prerequisites Badges Tests', () => {
         cy.addLearningPathItem(1, 1, 2, true)
 
         cy.cdVisit('/subjects/subj1/skills/skill2');
+
+        cy.get('[data-cy="prerequisitesCard"] [data-cy="graphLegend"]').should('be.visible')
 
         cy.get('[data-pc-section="headercell"]').contains('Prerequisite Name').click()
 

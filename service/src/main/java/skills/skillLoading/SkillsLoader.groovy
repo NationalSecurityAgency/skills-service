@@ -1075,8 +1075,8 @@ class SkillsLoader {
         } else {
             points = calculatePointsForSubject(projDef.projectId, userId, subjectDefinition)
             todaysPoints= calculateTodayPoints(userId, subjectDefinition)
-            skillsAchieved = achievedLevelRepository.countAchievedChildSkills(userId, projDef.projectId, subjectDefinition.skillId)
-            totalSkills = skillDefRepo.countSkillChildren(projDef.projectId, subjectDefinition.skillId)
+            skillsAchieved = achievedLevelRepository.countAchievedChildSkills(userId, projDef.projectId, subjectDefinition.skillId, version)
+            totalSkills = skillDefRepo.countSkillChildren(projDef.projectId, subjectDefinition.skillId, version)
         }
 
         // convert null result to 0
