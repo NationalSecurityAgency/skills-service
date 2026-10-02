@@ -81,6 +81,9 @@ const graphControlsStyle = computed(() => isSkillsDisplayMode.value ? {
   '--learning-path-orientation-color': themeState.graphTextPrimaryColor || undefined,
   '--learning-path-orientation-background': themeState.theme?.tiles?.backgroundColor || undefined,
 } : {})
+const fullscreenBackground = computed(() => isSkillsDisplayMode.value
+  ? themeState.theme?.tiles?.backgroundColor || (themeHelper.isDarkTheme ? 'var(--p-surface-900)' : 'var(--p-surface-0)')
+  : themeHelper.isDarkTheme ? 'var(--p-surface-900)' : 'var(--p-surface-0)')
 const displayOptions = {
   layout: { hierarchical: { enabled: false } },
   interaction: { selectConnectedEdges: false, navigationButtons: true, selectable: true, hover: isSkillsDisplayMode.value },
@@ -306,7 +309,7 @@ defineExpose({ fitNetworkToScreen, panToNode, refresh })
           id="fullDepsSkillsGraphContainer"
           ref="fullDepsSkillsGraphContainer"
           class="flex flex-col"
-          :style="!isFullscreen && dynamicHeight ? { height: `${computedHeight}px` } : undefined">
+          :style="{ ...(!isFullscreen && dynamicHeight ? { height: `${computedHeight}px` } : {}), '--learning-path-fullscreen-background': fullscreenBackground }">
           <slot name="fullscreen-header" :is-fullscreen="isFullscreen" />
           <SkillsOverlay :show="isLoading && isFullscreen" class="flex flex-col flex-1 min-h-0">
             <div v-if="!hasGraphData && !isLoading" class="my-8">
@@ -368,7 +371,8 @@ defineExpose({ fitNetworkToScreen, panToNode, refresh })
 #dependency-graph .vis-button.vis-zoomOut:after { content: '\f146'; }
 #dependency-graph .vis-button.vis-zoomExtends:after { content: '\f78c'; font-weight: 900; font-size: 30px; }
 .deps-overlay { z-index: 99; }
-:fullscreen, ::backdrop { background-color: rgba(255, 255, 255, 1); }
+#fullDepsSkillsGraphContainer:fullscreen { background-color: var(--learning-path-fullscreen-background); }
+#fullDepsSkillsGraphContainer::backdrop { background-color: var(--learning-path-fullscreen-background); }
 #dependency-graph { flex: 1 1 0; min-height: 0; overflow: hidden; }
 .vis-navigation { background-color: white; position: absolute; top: 30px; right: 0; }
 .fullscreen > .vis-network > .vis-navigation { right: 15px !important; }
