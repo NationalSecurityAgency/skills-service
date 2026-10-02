@@ -49,6 +49,7 @@ const currentScaleOptions = ref([3, 4, 5, 6, 7, 8, 9, 10])
 const answersRef = ref(null)
 const showHint = ref(false)
 const editTypeDisabled = ref(false);
+const quizDefs = ref([]);
 
 const modalTitle = computed(() => {
   if( props.isEdit ) {
@@ -71,6 +72,18 @@ onMounted(() => {
       loadingComponent.value = true;
       QuizService.getGradingStatus(props.questionDef.quizId, props.questionDef.id).then((gradingStatus) => {
         editTypeDisabled.value = gradingStatus.data.hasPendingGrades;
+        loadingComponent.value = false;
+      })
+    }
+    if (props.isCopy) {
+      loadingComponent.value = true;
+      QuizService.getQuizDefs().then((quizzes) => {
+        quizDefs.value = quizzes.filter((quiz) => quiz.type === props.questionDef.quizType).map((quiz) =>  {
+          return {
+            label: quiz.name,
+            id: quiz.quizId
+          };
+        });
         loadingComponent.value = false;
       })
     }
@@ -277,6 +290,7 @@ const noRepeatAnswers = (value) => {
 }
 
 const schema = object({
+  'selectedQuiz': props.isCopy ? string().required().label('Copy Question To') : string().nullable(),
   'questionType': object()
       .required()
       .label('Type'),
@@ -309,6 +323,7 @@ const schema = object({
   ,
 })
 const initialQuestionData = {
+  selectedQuiz: props.isCopy ? quizId.value : undefined,
   questionType: props.isEdit || props.isCopy ? questionType.value.options.find((o) => o.id === props.questionDef.questionType) : questionType.value.selectedType,
   question: props.questionDef.question || '',
   answerHint: props.questionDef.answerHint || '',
@@ -319,7 +334,7 @@ const initialQuestionData = {
 const close = () => { model.value = false }
 
 const saveQuestionDef = (values) => {
-  const { question, answerHint, answers, currentScaleValue } = values
+  const { question, answerHint, answers, currentScaleValue, selectedQuiz } = values
   let processedAnswers = answers
   let { questionType : { id : questionType } } = values
 
@@ -353,6 +368,18 @@ const saveQuestionDef = (values) => {
   if (props.isEdit) {
     return QuizService.updateQuizQuestionDef(quizId.value, questionToSave)
         .then((updatedQuizQuestionDef) => {
+          return {
+            ...updatedQuizQuestionDef,
+            isEdit: props.isEdit,
+          }
+        });
+  } else if (props.isCopy) {
+    return QuizService.saveQuizQuestionDef(selectedQuiz, questionToSave)
+        .then((updatedQuizQuestionDef) => {
+          updatedQuizQuestionDef.quizId = selectedQuiz
+          if(selectedQuiz !== props.questionDef.quizId) {
+            updatedQuizQuestionDef.isCopyToAnotherQuiz = true
+          }
           return {
             ...updatedQuizQuestionDef,
             isEdit: props.isEdit,
@@ -453,6 +480,17 @@ const startAiAssistant = () => {
           :existing-question="existingQuestionInfo"
           @question-generated="onQuestionGenerated"
       />
+
+      <div class="mb-2 flex flex-col gap-1" v-if="isCopy">
+        <span class="font-bold text-primary">Copy Question To:</span>
+        <SkillsDropDown
+            name="selectedQuiz"
+            :options="quizDefs"
+            aria-label="Copy Question To"
+            optionLabel="label"
+            optionValue="id"
+            data-cy="quizzes-to-copy" />
+      </div>
 
       <markdown-editor
           ref="markdownEditorRef"
