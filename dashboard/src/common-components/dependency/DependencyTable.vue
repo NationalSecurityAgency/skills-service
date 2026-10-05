@@ -141,8 +141,10 @@ const jumpToNode = (value) => {
           striped-rows>
           <Column field="fromItem" header="From" sortable :class="{'flex': isFlex }">
             <template #body="slotProps">
-              <RouterLink :to="getRoute(slotProps.data.fromNode)" :data-cy="`fromNodeLink_${slotProps.data.fromNode.skillId}`">{{ slotProps.data.fromItem }}</RouterLink>
-              <span v-if="slotProps.data.fromNode.projectId !== route.params.projectId" class="italic ml-1">(shared from {{ slotProps.data.fromNode.projectName }})</span>
+              <div>
+                <RouterLink :to="getRoute(slotProps.data.fromNode)" :data-cy="`fromNodeLink_${slotProps.data.fromNode.skillId}`">{{ slotProps.data.fromItem }}</RouterLink>
+                <span v-if="slotProps.data.fromNode.projectId !== route.params.projectId" class="block italic">(shared from {{ slotProps.data.fromNode.projectName }})</span>
+              </div>
             </template>
           </Column>
           <Column v-if="mode === 'skills-display'" field="fromAchieved" header="From Status" sortable :class="{'flex': isFlex }">
@@ -152,8 +154,10 @@ const jumpToNode = (value) => {
           </Column>
           <Column field="toItem" header="To" sortable :class="{'flex': isFlex }">
             <template #body="slotProps">
-              <RouterLink :to="getRoute(slotProps.data.toNode)" :data-cy="`toNodeLink_${slotProps.data.toNode.skillId}`">{{ slotProps.data.toItem }}</RouterLink>
-              <span v-if="slotProps.data.toNode.projectId !== route.params.projectId" class="italic ml-1">(shared from {{ slotProps.data.toNode.projectName }})</span>
+              <div>
+                <RouterLink :to="getRoute(slotProps.data.toNode)" :data-cy="`toNodeLink_${slotProps.data.toNode.skillId}`">{{ slotProps.data.toItem }}</RouterLink>
+                <span v-if="slotProps.data.toNode.projectId !== route.params.projectId" class="block italic">(shared from {{ slotProps.data.toNode.projectName }})</span>
+              </div>
             </template>
           </Column>
           <Column v-if="mode === 'skills-display'" field="toAchieved" header="To Status" sortable :class="{'flex': isFlex }">
