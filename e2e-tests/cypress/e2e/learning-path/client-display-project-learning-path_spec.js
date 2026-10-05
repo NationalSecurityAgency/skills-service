@@ -344,7 +344,7 @@ describe('Project learning path in skills display', () => {
     cy.get('[data-cy="badge_badge1"] [data-cy="badgeTitle"]').contains('Badge 1')
   })
 
-  it('shows the shared project name in italics next to cross-project skills in dependency tables', () => {
+  it('shows a smaller indented shared project label below cross-project skills in dependency tables', () => {
     cy.createSkill(1, 1, 1)
     cy.createProject(2, { name: 'Shared Skills Project' })
     cy.createSubject(2, 1)
@@ -356,10 +356,16 @@ describe('Project learning path in skills display', () => {
         .should('be.visible').and('have.text', 'Very Great Skill 2')
         .parent().find('span')
         .should('be.visible')
-        .and('have.text', '(shared from Shared Skills Project)')
+        .and('have.text', 'shared from Shared Skills Project')
         .and('have.css', 'font-style', 'italic')
+        .should(($label) => {
+          const link = $label.parent().find('a')[0]
+          expect(parseFloat($label.css('font-size'))).to.be.lessThan(parseFloat(getComputedStyle(link).fontSize))
+          expect(parseFloat($label.css('padding-left'))).to.be.greaterThan(0)
+          expect($label[0].getBoundingClientRect().top).to.be.at.least(link.getBoundingClientRect().bottom)
+        })
       cy.get('[data-cy="learningPathTable"] [data-cy="toNodeLink_skill1"]')
-        .parent().should('not.contain.text', '(shared from')
+        .parent().should('not.contain.text', 'shared from')
     }
 
     cy.cdVisit('/learning-path')
