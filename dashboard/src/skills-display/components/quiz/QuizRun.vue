@@ -523,18 +523,6 @@ const tryAgain = () => {
 const cancelQuizAttempt = () => {
   emit('cancelled');
 }
-const saveAndCloseThisRun = () => {
-  isCompleting.value = true;
-  saveError.value = '';
-  return waitForAnswerSaves()
-      .then(() => {
-        emit('cancelled');
-      })
-      .catch(handleSaveError)
-      .finally(() => {
-        isCompleting.value = false;
-      });
-}
 const doneWithThisRun = () => {
   emit('testWasTaken', quizResult.value);
 }

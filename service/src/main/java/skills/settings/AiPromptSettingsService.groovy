@@ -60,10 +60,12 @@ class AiPromptSettingsService {
     static final String singleQuestionInstructionsSingleChoice = 'aiPrompt.singleQuestionInstructionsSingleChoice'
     static final String singleQuestionInstructionsTextInput = 'aiPrompt.singleQuestionInstructionsTextInput'
     static final String singleQuestionInstructionsMatching = 'aiPrompt.singleQuestionInstructionsMatching'
+    static final String singleQuestionInstructionsFillInTheBlank = 'aiPrompt.singleQuestionInstructionsFillInTheBlank'
     static final String updateSingleQuestionTypeToMultipleChoiceChangedInstructions = 'aiPrompt.updateSingleQuestionTypeChangedToMultipleChoiceInstructions'
     static final String updateSingleQuestionTypeChangedToSingleChoiceInstructions = 'aiPrompt.updateSingleQuestionTypeChangedToSingleChoiceInstructions'
     static final String updateSingleQuestionTypeChangedToTextInputInstructions = 'aiPrompt.updateSingleQuestionTypeChangedToTextInputInstructions'
     static final String updateSingleQuestionTypeChangedToMatchingInstructions = 'aiPrompt.updateSingleQuestionTypeChangedToMatchingInstructions'
+    static final String updateSingleQuestionTypeChangedToFillInTheBlankInstructions = 'aiPrompt.updateSingleQuestionTypeChangedToFillInTheBlankInstructions'
     static final String textInputQuestionGradingInstructions = 'aiPrompt.textInputQuestionGradingInstructions'
 
     @Autowired
@@ -139,10 +141,12 @@ class AiPromptSettingsService {
         info.singleQuestionInstructionsSingleChoice = new AiPromptSetting(value: AiPromptSettingDefaults.singleQuestionInstructionsSingleChoice, label: 'New Single Question Single Choice', isDefault: true)
         info.singleQuestionInstructionsTextInput = new AiPromptSetting(value: AiPromptSettingDefaults.singleQuestionInstructionsTextInput, label: 'New Single Question Text Input', isDefault: true)
         info.singleQuestionInstructionsMatching = new AiPromptSetting(value: AiPromptSettingDefaults.singleQuestionInstructionsMatching, label: 'New Single Question Matching', isDefault: true)
+        info.singleQuestionInstructionsFillInTheBlank = new AiPromptSetting(value: AiPromptSettingDefaults.singleQuestionInstructionsFillInTheBlank, label: 'New Single Question Fill In The Blank', isDefault: true)
         info.updateSingleQuestionTypeChangedToMultipleChoiceInstructions = new AiPromptSetting(value: AiPromptSettingDefaults.updateSingleQuestionTypeChangedToMultipleChoiceInstructions, label: 'Update Single Question Type to Multiple Choice', isDefault: true)
         info.updateSingleQuestionTypeChangedToSingleChoiceInstructions = new AiPromptSetting(value: AiPromptSettingDefaults.updateSingleQuestionTypeChangedToSingleChoiceInstructions, label: 'Update Single Question Type to Single Choice', isDefault: true)
         info.updateSingleQuestionTypeChangedToTextInputInstructions = new AiPromptSetting(value: AiPromptSettingDefaults.updateSingleQuestionTypeChangedToTextInputInstructions, label: 'Update Single Question Type to Text Input', isDefault: true)
         info.updateSingleQuestionTypeChangedToMatchingInstructions = new AiPromptSetting(value: AiPromptSettingDefaults.updateSingleQuestionTypeChangedToMatchingInstructions, label: 'Update Single Question Type to Matching', isDefault: true)
+        info.updateSingleQuestionTypeChangedToFillInTheBlankInstructions = new AiPromptSetting(value: AiPromptSettingDefaults.updateSingleQuestionTypeChangedToFillInTheBlankInstructions, label: 'Update Single Question Type to Fill In The Blank', isDefault: true)
         info.textInputQuestionGradingInstructions = new AiPromptSetting(value: AiPromptSettingDefaults.textInputQuestionGradingInstructions, label: 'Text Input Question Grading Instructions', isDefault: true)
 
         if (aiPromptGroupSettings) {
@@ -172,10 +176,12 @@ class AiPromptSettingsService {
             updateSetting('singleQuestionInstructionsSingleChoice', singleQuestionInstructionsSingleChoice)
             updateSetting('singleQuestionInstructionsTextInput', singleQuestionInstructionsTextInput)
             updateSetting('singleQuestionInstructionsMatching', singleQuestionInstructionsMatching)
+            updateSetting('singleQuestionInstructionsFillInTheBlank', singleQuestionInstructionsFillInTheBlank)
             updateSetting('updateSingleQuestionTypeChangedToMultipleChoiceInstructions', updateSingleQuestionTypeToMultipleChoiceChangedInstructions)
             updateSetting('updateSingleQuestionTypeChangedToSingleChoiceInstructions', updateSingleQuestionTypeChangedToSingleChoiceInstructions)
             updateSetting('updateSingleQuestionTypeChangedToTextInputInstructions', updateSingleQuestionTypeChangedToTextInputInstructions)
             updateSetting('updateSingleQuestionTypeChangedToMatchingInstructions', updateSingleQuestionTypeChangedToMatchingInstructions)
+            updateSetting('updateSingleQuestionTypeChangedToFillInTheBlankInstructions', updateSingleQuestionTypeChangedToFillInTheBlankInstructions)
             updateSetting('textInputQuestionGradingInstructions', textInputQuestionGradingInstructions)
         }
 

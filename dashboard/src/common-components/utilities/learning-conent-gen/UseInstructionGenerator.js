@@ -134,7 +134,7 @@ export const useInstructionGenerator = () => {
 
     let answersJson = [];
     if (existingQuestionInfo?.answers?.length > 0 &&
-      (QuestionType.isMultipleChoice(questionType.id) || QuestionType.isSingleChoice(questionType.id))) {
+      (QuestionType.isMultipleChoice(questionType.id) || QuestionType.isSingleChoice(questionType.id) || QuestionType.isFillInTheBlank(questionType.id))) {
       answersJson = existingQuestionInfo.answers.map((answer) => ({
         answer: answer.answer,
         isCorrect: answer.isCorrect

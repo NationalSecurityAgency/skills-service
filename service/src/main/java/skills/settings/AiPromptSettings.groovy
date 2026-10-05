@@ -36,9 +36,11 @@ class AiPromptSettings {
     AiPromptSetting singleQuestionInstructionsSingleChoice
     AiPromptSetting singleQuestionInstructionsTextInput
     AiPromptSetting singleQuestionInstructionsMatching
+    AiPromptSetting singleQuestionInstructionsFillInTheBlank
     AiPromptSetting updateSingleQuestionTypeChangedToMultipleChoiceInstructions
     AiPromptSetting updateSingleQuestionTypeChangedToSingleChoiceInstructions
     AiPromptSetting updateSingleQuestionTypeChangedToTextInputInstructions
     AiPromptSetting updateSingleQuestionTypeChangedToMatchingInstructions
+    AiPromptSetting updateSingleQuestionTypeChangedToFillInTheBlankInstructions
     AiPromptSetting textInputQuestionGradingInstructions
 }

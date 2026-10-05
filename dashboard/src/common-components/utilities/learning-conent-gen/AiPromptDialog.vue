@@ -308,13 +308,20 @@ const genWithStreaming = (messages) => {
         scrollInstructionsIntoView()
       },
       () => {
-        const lastItem = getLastChatItem()
-        const updatedHistoryItem = props.generationCompletedFn(lastItem)
-        updateLastChatItemGeneratedValue(updatedHistoryItem)
-        setFinalMsgToLastChatItem(props.generationCompletedMsg)
-        isGenerating.value = false
-        focusOnInstructionsInput()
-        announcer.polite(`AI Generation Completed. To review the generated content, navigate to the 'Generated Content ${getGeneratedValueId(lastItem.id)}' section using your screen reader's landmark navigation.`)
+        try {
+          const lastItem = getLastChatItem()
+          const updatedHistoryItem = props.generationCompletedFn(lastItem)
+          updateLastChatItemGeneratedValue(updatedHistoryItem)
+          setFinalMsgToLastChatItem(props.generationCompletedMsg)
+          isGenerating.value = false
+          focusOnInstructionsInput()
+          announcer.polite(`AI Generation Completed. To review the generated content, navigate to the 'Generated Content ${getGeneratedValueId(lastItem.id)}' section using your screen reader's landmark navigation.`)
+        } catch (error) {
+          isGenerating.value = false
+          setFinalMsgToLastChatItem(error.message, true)
+          focusOnInstructionsInput()
+          emit('generation-failed')
+        }
       },
       (error) => {
         isGenerating.value = false

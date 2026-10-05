@@ -59,9 +59,9 @@ onMounted(() => {
   }
 })
 
-watch(() => props.numberOfBlanks, (newValue, oldValue) => {
-  if(oldValue < newValue) {
-    const itemsToAdd = newValue - oldValue;
+watch(() => props.numberOfBlanks, (newValue) => {
+  if(fields.value.length < newValue) {
+    const itemsToAdd = newValue - fields.value.length;
 
     for(let x = 0; x < itemsToAdd; x++) {
       push({
@@ -70,8 +70,8 @@ watch(() => props.numberOfBlanks, (newValue, oldValue) => {
         isCorrect: true,
       })
     }
-  } else if(oldValue > newValue) {
-    const itemsToRemove = oldValue - newValue
+  } else if(fields.value.length > newValue) {
+    const itemsToRemove = fields.value.length - newValue
     for (let x = 0; x < itemsToRemove; x++) {
       remove(fields.value.length - 1)
     }

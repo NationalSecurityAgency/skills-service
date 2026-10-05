@@ -1,0 +1,5 @@
+data: {"id":"chat-1","object":"chat.completion.chunk","created":1700608923,"model":"model1","choices":[{"index":0,"delta":{"content":"### Question:\nThe rock bands behind Hey Jude and Bohemian Rhapsody are ___ and ___.\n\n"},"finish_reason":null}]}
+
+data: {"id":"chat-1","object":"chat.completion.chunk","created":1700608923,"model":"model1","choices":[{"index":0,"delta":{"content":"### Answers:\n[\n  {\"answer\":\"The Beatles\",\"isCorrect\":true},\n  {\"answer\":\"Queen\",\"isCorrect\":true}\n]"},"finish_reason":null}]}
+
+data: [DONE]
