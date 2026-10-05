@@ -22,7 +22,7 @@ import Column from 'primevue/column'
 import { useResponsiveBreakpoints } from '@/components/utils/misc/UseResponsiveBreakpoints.js'
 import { useDialogMessages } from '@/components/utils/modal/UseDialogMessages.js'
 import { useDependencyNavigation } from '@/common-components/dependency/UseDependencyNavigation.js'
-import { RouterLink } from 'vue-router'
+import { RouterLink, useRoute } from 'vue-router'
 import { useSkillsDisplayThemeState } from '@/skills-display/stores/UseSkillsDisplayThemeState.js'
 
 const dialogMessages = useDialogMessages()
@@ -36,6 +36,7 @@ const emit = defineEmits(['update', 'panToNode'])
 const announcer = useSkillsAnnouncer()
 const dependencyNavigation = useDependencyNavigation()
 const themeState = useSkillsDisplayThemeState()
+const route = useRoute()
 const routeHeaderStyle = computed(() => props.mode === 'skills-display' ? {
   color: themeState.graphTextPrimaryColor || undefined,
   backgroundColor: themeState.theme?.tiles?.backgroundColor || undefined,
@@ -138,6 +139,7 @@ const jumpToNode = (value) => {
           <Column field="fromItem" header="From" sortable :class="{'flex': isFlex }">
             <template #body="slotProps">
               <RouterLink :to="getRoute(slotProps.data.fromNode)" :data-cy="`fromNodeLink_${slotProps.data.fromNode.skillId}`">{{ slotProps.data.fromItem }}</RouterLink>
+              <span v-if="slotProps.data.fromNode.projectId !== route.params.projectId" class="italic ml-1">(shared from {{ slotProps.data.fromNode.projectName }})</span>
             </template>
           </Column>
           <Column v-if="mode === 'skills-display'" field="fromAchieved" header="From Status" sortable :class="{'flex': isFlex }">
@@ -148,6 +150,7 @@ const jumpToNode = (value) => {
           <Column field="toItem" header="To" sortable :class="{'flex': isFlex }">
             <template #body="slotProps">
               <RouterLink :to="getRoute(slotProps.data.toNode)" :data-cy="`toNodeLink_${slotProps.data.toNode.skillId}`">{{ slotProps.data.toItem }}</RouterLink>
+              <span v-if="slotProps.data.toNode.projectId !== route.params.projectId" class="italic ml-1">(shared from {{ slotProps.data.toNode.projectName }})</span>
             </template>
           </Column>
           <Column v-if="mode === 'skills-display'" field="toAchieved" header="To Status" sortable :class="{'flex': isFlex }">

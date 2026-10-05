@@ -344,6 +344,30 @@ describe('Project learning path in skills display', () => {
     cy.get('[data-cy="badge_badge1"] [data-cy="badgeTitle"]').contains('Badge 1')
   })
 
+  it.only('shows the shared project name in italics next to cross-project skills in dependency tables', () => {
+    cy.createSkill(1, 1, 1)
+    cy.createProject(2, { name: 'Shared Skills Project' })
+    cy.createSubject(2, 1)
+    cy.createSkill(2, 1, 2)
+    cy.addCrossProjectLearningPathItem(2, 2, 1, 1)
+
+    const checkSharedProjectLabel = () => {
+      cy.get('[data-cy="learningPathTable"] [data-cy="fromNodeLink_skill2"]')
+        .should('be.visible').and('have.text', 'Very Great Skill 2')
+        .parent().find('span')
+        .should('be.visible')
+        .and('have.text', '(shared from Shared Skills Project)')
+        .and('have.css', 'font-style', 'italic')
+      cy.get('[data-cy="learningPathTable"] [data-cy="toNodeLink_skill1"]')
+        .parent().should('not.contain.text', '(shared from')
+    }
+
+    cy.cdVisit('/learning-path')
+    checkSharedProjectLabel()
+    cy.visit('/administrator/projects/proj1/learning-path')
+    checkSharedProjectLabel()
+  })
+
   it('opens cross-project skills from the learning path table', () => {
     cy.createSkill(1, 1, 1)
     cy.createProject(2)
