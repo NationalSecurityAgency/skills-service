@@ -16,6 +16,14 @@
 
 describe('Accessibility Rich Text Editor Tests', () => {
 
+    const openProjectDialog = () => {
+        cy.visit('/administrator/');
+        cy.get('[data-cy=newProjectButton]').click()
+        // Dialog autofocus runs again after its opening transition finishes.
+        cy.get('[role="dialog"]').should('be.visible').and('not.have.class', 'p-dialog-enter-active')
+        cy.get('[data-cy="projectName"]').should('have.focus')
+    }
+
     beforeEach(() => {
         Cypress.Commands.add("validateHeaderTabIndex", (tabIndexValues) => {
             cy.get('.toastui-editor-popup-body #headerChoicesId [data-level="1"]').should('have.attr', 'tabindex', tabIndexValues[0])
@@ -30,9 +38,7 @@ describe('Accessibility Rich Text Editor Tests', () => {
     });
 
     it('header selector - use keyboard to select', () => {
-        cy.visit('/administrator/');
-        cy.get('[data-cy=newProjectButton]').click()
-        cy.get('[data-cy="projectName"]').should('have.focus')
+        openProjectDialog()
 
         cy.get('[data-cy="projectName"]').tab().tab().type('{enter}{downArrow}')
         cy.get('.toastui-editor-popup-body #headerChoicesId [data-level="1"]').should('have.focus')
@@ -43,11 +49,11 @@ describe('Accessibility Rich Text Editor Tests', () => {
     });
 
     it('header selector - use keyboard to select - using keyboard shortcut', () => {
-        cy.visit('/administrator/');
-        cy.get('[data-cy=newProjectButton]').click()
-        cy.get('[data-cy="projectName"]').should('have.focus')
+        openProjectDialog()
 
-        cy.get('[data-cy="markdownEditorInput"]').type('{ctrl+alt+t}')
+        // The shortcut is handled by the editable surface, not the editor's outer container.
+        cy.get('[data-cy="markdownEditorInput"] .toastui-editor-ww-container [contenteditable="true"]')
+            .should('be.visible').focus().should('have.focus').type('{ctrl+alt+t}')
         cy.get('#headerButtonId').should('have.focus').type('{downArrow}')
         cy.get('.toastui-editor-popup-body #headerChoicesId [data-level="1"]').should('have.focus')
         cy.validateHeaderTabIndex(['0', '-1', '-1', '-1', '-1', '-1', '-1'])
@@ -57,9 +63,7 @@ describe('Accessibility Rich Text Editor Tests', () => {
     });
 
     it('header selector - ability to navigate down using keyboard', () => {
-        cy.visit('/administrator/');
-        cy.get('[data-cy=newProjectButton]').click()
-        cy.get('[data-cy="projectName"]').should('have.focus')
+        openProjectDialog()
 
         cy.get('[data-cy="projectName"]').tab().tab().type('{enter}')
         cy.get('#headerButtonId').should('have.focus')
@@ -105,9 +109,7 @@ describe('Accessibility Rich Text Editor Tests', () => {
     });
 
     it('header selector - ability to navigate up using keyboard', () => {
-        cy.visit('/administrator/');
-        cy.get('[data-cy=newProjectButton]').click()
-        cy.get('[data-cy="projectName"]').should('have.focus')
+        openProjectDialog()
 
         cy.get('[data-cy="projectName"]').tab().tab().type('{enter}{downArrow}')
         cy.get('.toastui-editor-popup-body #headerChoicesId [data-level="1"]').should('have.focus')
@@ -154,18 +156,14 @@ describe('Accessibility Rich Text Editor Tests', () => {
     });
 
     it('toolbar custom aria-labels', () => {
-        cy.visit('/administrator/');
-        cy.get('[data-cy=newProjectButton]').click()
-        cy.get('[data-cy="projectName"]').should('have.focus')
+        openProjectDialog()
 
         cy.get('.toastui-editor-defaultUI-toolbar [aria-label="Font Size"][type="button"]').should('have.text', 'F')
         cy.get('.toastui-editor-defaultUI-toolbar .more[aria-label="More Toolbar Controls"][type="button"]')
     });
 
     it('modify font size via keyboard - use keyboard mapping', () => {
-        cy.visit('/administrator/');
-        cy.get('[data-cy=newProjectButton]').click()
-        cy.get('[data-cy="projectName"]').should('have.focus')
+        openProjectDialog()
 
         cy.typeInMarkdownEditor('[data-cy="markdownEditorInput"]', 'value{selectAll}{ctrl+alt+s}')
         cy.get('.toastui-editor-popup-body .size-input').should('have.focus').type('22{enter}')
@@ -173,9 +171,7 @@ describe('Accessibility Rich Text Editor Tests', () => {
     });
 
     it('ability to insert image using keyboard - use keyboard mapping', () => {
-        cy.visit('/administrator/');
-        cy.get('[data-cy=newProjectButton]').click()
-        cy.get('[data-cy="projectName"]').should('have.focus')
+        openProjectDialog()
 
         cy.typeInMarkdownEditor('[data-cy="markdownEditorInput"]', '{ctrl+alt+i}')
         cy.get('.toastui-editor-popup-body .toastui-editor-tabs .tab-item.active').should('have.focus');
@@ -190,9 +186,7 @@ describe('Accessibility Rich Text Editor Tests', () => {
     });
 
     it('insert image via URL using keyboard - use keyboard mapping', () => {
-        cy.visit('/administrator/');
-        cy.get('[data-cy=newProjectButton]').click()
-        cy.get('[data-cy="projectName"]').should('have.focus')
+        openProjectDialog()
 
         cy.typeInMarkdownEditor('[data-cy="markdownEditorInput"]', '{ctrl+alt+i}')
         cy.get('.toastui-editor-popup-body .toastui-editor-tabs .tab-item.active').should('have.focus').should('have.text', 'File')
@@ -216,9 +210,7 @@ describe('Accessibility Rich Text Editor Tests', () => {
 
     it('insert link using keyboard - use keyboard mapping', () => {
         cy.viewport(1000, 1400);
-        cy.visit('/administrator/');
-        cy.get('[data-cy=newProjectButton]').click()
-        cy.get('[data-cy="projectName"]').should('have.focus')
+        openProjectDialog()
 
         cy.typeInMarkdownEditor('[data-cy="markdownEditorInput"]', '{ctrl+alt+r}')
         cy.get('.toastui-editor-popup-body #toastuiLinkUrlInput').should('have.focus')
@@ -236,9 +228,7 @@ describe('Accessibility Rich Text Editor Tests', () => {
 
   it('insert table using keyboard - use keyboard mapping', () => {
       cy.viewport(1000, 1400);
-      cy.visit('/administrator/');
-      cy.get('[data-cy=newProjectButton]').click()
-      cy.get('[data-cy="projectName"]').should('have.focus')
+      openProjectDialog()
 
       cy.typeInMarkdownEditor('[data-cy="markdownEditorInput"]', 'Table:{ctrl+alt+w}')
       cy.get('[data-cy="insertTableRowsInput"] #inputinsertTableRows').should('have.focus')
