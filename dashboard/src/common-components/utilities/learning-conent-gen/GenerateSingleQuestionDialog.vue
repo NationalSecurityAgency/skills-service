@@ -184,7 +184,8 @@ const handleGenerationCompleted = (generated) => {
       generatedInfo
     }
   } catch (e) {
-    throw e instanceof SyntaxError ? new Error('The generated answers are not valid JSON. Please ask the AI to regenerate them.') : e
+    console.error(e)
+    throw new Error(`Failed to parse answers JSON from [${answersString.value}]`);
   } finally {
     answersFound.value = false
     answersString.value = ''
