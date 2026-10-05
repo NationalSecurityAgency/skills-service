@@ -15,6 +15,7 @@ limitations under the License.
 */
 <script setup>
 import { computed, nextTick, ref, watch } from 'vue'
+import { useStorage } from '@vueuse/core'
 import { useSkillsAnnouncer } from '@/common-components/utilities/UseSkillsAnnouncer.js'
 import SkillsService from '@/components/skills/SkillsService.js'
 import NoContent2 from '@/components/utils/NoContent2.vue'
@@ -46,6 +47,7 @@ const paginatorLabelStyle = computed(() => props.mode === 'skills-display' ? {
 } : {})
 
 const learningPaths = ref([])
+const pageSize = useStorage('dependencies-pageSize', 5)
 const sortField = ref('')
 const sortOrder = ref(0)
 
@@ -130,7 +132,8 @@ const jumpToNode = (value) => {
           :value="learningPaths"
           :loading="isLoading"
           data-cy="learningPathTable"
-          paginator :rows="5" :rowsPerPageOptions="[5, 10, 15, 20]"
+          paginator :rows="pageSize" :rowsPerPageOptions="[5, 10, 15, 20]"
+          @page="pageSize = $event.rows"
           show-gridlines
           :sortField="sortField"
           :sortOrder="sortOrder"

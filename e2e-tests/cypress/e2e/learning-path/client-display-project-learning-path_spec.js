@@ -344,7 +344,7 @@ describe('Project learning path in skills display', () => {
     cy.get('[data-cy="badge_badge1"] [data-cy="badgeTitle"]').contains('Badge 1')
   })
 
-  it.only('shows the shared project name in italics next to cross-project skills in dependency tables', () => {
+  it('shows the shared project name in italics next to cross-project skills in dependency tables', () => {
     cy.createSkill(1, 1, 1)
     cy.createProject(2, { name: 'Shared Skills Project' })
     cy.createSubject(2, 1)
@@ -366,6 +366,34 @@ describe('Project learning path in skills display', () => {
     checkSharedProjectLabel()
     cy.visit('/administrator/projects/proj1/learning-path')
     checkSharedProjectLabel()
+  })
+
+  it('preserves the dependency table page size after reload in skills display and admin views', () => {
+    for (let skill = 1; skill <= 8; skill += 1) {
+      cy.createSkill(1, 1, skill)
+    }
+    for (let skill = 2; skill <= 8; skill += 1) {
+      cy.addLearningPathItem(1, skill - 1, skill)
+    }
+
+    const table = '[data-cy="learningPathTable"]'
+    cy.cdVisit('/learning-path')
+    cy.get(`${table} tbody tr`).should('have.length', 5)
+    cy.get(`${table} [data-pc-name="pcrowperpagedropdown"]`).click()
+    cy.get('[data-pc-section="option"]').contains(/^10$/).click()
+    cy.get(`${table} tbody tr`).should('have.length', 7)
+
+    cy.reload()
+    cy.get(`${table} [data-pc-name="pcrowperpagedropdown"]`).should('contain.text', '10')
+    cy.get(`${table} tbody tr`).should('have.length', 7)
+
+    cy.visit('/administrator/projects/proj1/learning-path')
+    cy.get(`${table} [data-pc-name="pcrowperpagedropdown"]`).should('contain.text', '10').click()
+    cy.get('[data-pc-section="option"]').contains(/^5$/).click()
+    cy.get(`${table} tbody tr`).should('have.length', 5)
+    cy.reload()
+    cy.get(`${table} [data-pc-name="pcrowperpagedropdown"]`).should('contain.text', '5')
+    cy.get(`${table} tbody tr`).should('have.length', 5)
   })
 
   it('opens cross-project skills from the learning path table', () => {
