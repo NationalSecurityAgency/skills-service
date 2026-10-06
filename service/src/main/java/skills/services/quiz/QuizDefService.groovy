@@ -1309,6 +1309,11 @@ class QuizDefService {
         QuizValidator.isNotBlank(questionDefRequest.question, "question", quizId)
         QuizValidator.isNotNull(questionDefRequest.questionType, "questionType", quizId)
 
+        propsBasedValidator.quizValidationMaxIntValue(PublicProps.UiProp.maxAnswersPerQuizQuestion, "Number of Answers", questionDefRequest.answers?.size() ?: 0, quizId)
+        if (questionDefRequest.questionType == QuizQuestionType.Rating) {
+            propsBasedValidator.quizValidationMaxIntValue(PublicProps.UiProp.maxAnswersPerQuizQuestion, "Number of Answers", questionDefRequest.questionScale, quizId)
+        }
+
         propsBasedValidator.quizValidationMaxStrLength(PublicProps.UiProp.descriptionMaxLength, "Question", questionDefRequest.question, quizDef.quizId)
         propsBasedValidator.quizValidationMaxStrLength(PublicProps.UiProp.maxQuizAnswerHintLength, "Answer Hint", questionDefRequest.answerHint, quizDef.quizId)
         int numQuestions = quizQuestionRepo.countByQuizId(quizDef.quizId)

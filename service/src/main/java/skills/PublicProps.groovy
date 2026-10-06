@@ -67,6 +67,7 @@ class PublicProps {
         attachmentWarningMessage,
         maxQuizDefsPerAdmin,
         maxQuestionsPerQuiz,
+        maxAnswersPerQuizQuestion,
         maxQuizTextAnswerLength,
         maxTakeQuizInputTextAnswerLength,
         maxVideoCaptionsLength,

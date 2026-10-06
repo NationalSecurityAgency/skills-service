@@ -16,6 +16,8 @@
 package skills.intTests.quiz
 
 import groovy.util.logging.Slf4j
+import org.springframework.beans.factory.annotation.Autowired
+import skills.PublicProps
 import skills.intTests.utils.DefaultIntSpec
 import skills.intTests.utils.QuizDefFactory
 import skills.intTests.utils.SkillsClientException
@@ -24,6 +26,76 @@ import skills.services.quiz.QuizQuestionType
 
 @Slf4j
 class QuestionDefValidationSpecs extends DefaultIntSpec {
+
+    @Autowired
+    PublicProps publicProps
+
+    def "question answer count cannot exceed configured maximum for #questionType"() {
+        int maxAnswers = publicProps.getInt(PublicProps.UiProp.maxAnswersPerQuizQuestion)
+        def quiz = questionType == QuizQuestionType.Rating ? QuizDefFactory.createQuizSurvey(1) : QuizDefFactory.createQuiz(1)
+        skillsService.createQuizDef(quiz)
+        def question = questionWithAnswers(questionType, maxAnswers + 1)
+
+        when:
+        skillsService.createQuizQuestionDef(question)
+
+        then:
+        SkillsClientException exception = thrown()
+        exception.message.contains("[Number of Answers] must be <= [${maxAnswers}]")
+        exception.message.contains("quizId:${quiz.quizId}")
+        skillsService.getQuizQuestionDefs(quiz.quizId).questions == []
+
+        where:
+        questionType << QuizQuestionType.values()
+    }
+
+    def "question accepts the configured maximum answers for #questionType"() {
+        int maxAnswers = publicProps.getInt(PublicProps.UiProp.maxAnswersPerQuizQuestion)
+        def quiz = questionType == QuizQuestionType.Rating ? QuizDefFactory.createQuizSurvey(1) : QuizDefFactory.createQuiz(1)
+        skillsService.createQuizDef(quiz)
+        def question = questionWithAnswers(questionType, maxAnswers)
+
+        when:
+        skillsService.createQuizQuestionDef(question)
+
+        then:
+        def savedQuestions = skillsService.getQuizQuestionDefs(quiz.quizId).questions
+        savedQuestions.size() == 1
+        savedQuestions[0].answers.size() == maxAnswers
+
+        where:
+        questionType << QuizQuestionType.values().findAll { it != QuizQuestionType.TextInput }
+    }
+
+    def "text input question accepts no predefined answers and rejects predefined answers"() {
+        def quiz = QuizDefFactory.createQuiz(1)
+        skillsService.createQuizDef(quiz)
+        def question = QuizDefFactory.createTextInputQuestion(1, 1)
+        skillsService.createQuizQuestionDef(question)
+
+        when:
+        skillsService.createQuizQuestionDef(questionWithAnswers(QuizQuestionType.TextInput, 1))
+
+        then:
+        SkillsClientException exception = thrown()
+        exception.message.contains("must not provide an answer")
+        skillsService.getQuizQuestionDefs(quiz.quizId).questions.size() == 1
+    }
+
+    private Map questionWithAnswers(QuizQuestionType questionType, int numAnswers) {
+        if (questionType == QuizQuestionType.Matching) {
+            return QuizDefFactory.createMatchingQuestion(1, 1, numAnswers)
+        }
+        if (questionType == QuizQuestionType.FillInTheBlank) {
+            return QuizDefFactory.createFillInTheBlankQuestion(1, 1, numAnswers)
+        }
+        if (questionType == QuizQuestionType.Rating) {
+            def question = QuizDefFactory.createRatingSurveyQuestion(1, 1)
+            question.questionScale = numAnswers
+            return question
+        }
+        return QuizDefFactory.createChoiceQuestion(1, 1, numAnswers, questionType)
+    }
 
     def "quiz single choice question must have 1 answer marked as correct"() {
         def quiz = QuizDefFactory.createQuiz(1)
@@ -295,5 +367,4 @@ class QuestionDefValidationSpecs extends DefaultIntSpec {
     }
 
 }
-
 
