@@ -419,4 +419,3 @@ describe('Skills Display Run Quizzes With Text Input Questions', () => {
 
 });
 
-

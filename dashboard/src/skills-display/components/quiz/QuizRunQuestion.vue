@@ -22,7 +22,6 @@ import QuestionType from '@/skills-display/components/quiz/QuestionType.js';
 import QuizRunService from '@/skills-display/components/quiz/QuizRunService.js';
 import MarkdownEditor from "@/common-components/utilities/markdown/MarkdownEditor.vue";
 import QuizStatus from "@/components/quiz/runsHistory/QuizStatus.js";
-import {useDebounceFn} from "@vueuse/core";
 import {useAppConfig} from "@/common-components/stores/UseAppConfig.js";
 import SkillsButton from "@/components/utils/inputForm/SkillsButton.vue";
 import QuizRunMatchingComponent from "@/skills-display/components/quiz/QuizRunMatchingComponent.vue";
@@ -133,7 +132,7 @@ onMounted(() => {
 
 const textAnswerChanged = (providedAnswerText) => {
   const selectedAnswerIds = answerOptions.value.map((a) => a.id);
-  if (providedAnswerText) {
+  if (providedAnswerText !== undefined) {
     answerText.value = providedAnswerText;
   }
   const isAnswerBlank = !answerText.value || answerText.value.trimEnd() === '';
@@ -145,22 +144,13 @@ const textAnswerChanged = (providedAnswerText) => {
     changedAnswerIdSelected: !isAnswerBlank,
     answerText: answerText.value,
   };
-  reportAnswer(currentAnswer).then((reportAnswerPromise) => {
-    // only 1 answer in case of TextInput
-    emit('answer-text-changed', {
-      ...currentAnswer,
-      reportAnswerPromise,
-    });
-  });
+  scheduleAnswerSave(currentAnswer, 'answer-text-changed')
 }
-const textAnswerChangedDebounced = useDebounceFn((providedAnswerTextOuter) => textAnswerChanged(providedAnswerTextOuter), appConfig.formFieldDebounceInMs)
 
 const selectionChanged = (currentAnswer) => { 
-  reportAnswer(currentAnswer).then((reportAnswerPromise) => {
-    emit('selected-answer', {
-      ...currentAnswer,
-      reportAnswerPromise,
-    });
+  emit('selected-answer', {
+    ...currentAnswer,
+    reportAnswerPromise: reportAnswer(currentAnswer),
   });
 }
 
@@ -177,10 +167,14 @@ const fillInTheBlankChangedDebounced = (textInput, answerIndex) => {
     changedAnswerId: answer.id,
     answerText: textInput,
   }
-  let state = blankSaveStates.get(answer.id)
+  scheduleAnswerSave(currentAnswer, 'fill-in-the-blank-changed')
+}
+const scheduleAnswerSave = (currentAnswer, eventName) => {
+  const answerId = currentAnswer.changedAnswerId
+  let state = blankSaveStates.get(answerId)
   if (!state) {
     state = { timer: null, pending: null, inFlight: Promise.resolve() }
-    blankSaveStates.set(answer.id, state)
+    blankSaveStates.set(answerId, state)
   }
   clearTimeout(state.timer)
 
@@ -208,7 +202,7 @@ const fillInTheBlankChangedDebounced = (textInput, answerIndex) => {
     request.then(pending.resolve, pending.reject)
   }, appConfig.formFieldDebounceInMs)
 
-  emit('fill-in-the-blank-changed', {
+  emit(eventName, {
     ...currentAnswer,
     reportAnswerPromise: pending.promise,
   })
@@ -225,15 +219,26 @@ const ratingChanged = (value) => {
       changedAnswerId: answerId,
       changedAnswerIdSelected: true,
     };
-    reportAnswer(currentAnswer).then((reportAnswerPromise) => {
-      emit('selected-answer', {
-        ...currentAnswer,
-        reportAnswerPromise,
-      });
+    emit('selected-answer', {
+      ...currentAnswer,
+      reportAnswerPromise: reportAnswer(currentAnswer),
     });
   }
 }
+let answerSaveQueue = Promise.resolve()
 const reportAnswer = (answer) => {
+  // Blank edits are already serialized per answer by scheduleAnswerSave.
+  // Distinct blanks can save independently, and the parent awaits each one.
+  if (QuestionType.isFillInTheBlank(props.q.questionType)) {
+    return performAnswerSave(answer)
+  }
+  // Serialize changes within a question; the latest save also waits for earlier edits.
+  const save = () => performAnswerSave(answer)
+  const request = answerSaveQueue.then(save, save)
+  answerSaveQueue = request.catch(() => {})
+  return request
+}
+const performAnswerSave = (answer) => {
 
   if (!isLoading.value) {
     const reportAnswer = () => QuizRunService.reportAnswer(props.quizId, props.quizAttemptId, answer.changedAnswerId, answer.changedAnswerIdSelected, answer.answerText)
@@ -269,11 +274,9 @@ const updateAnswerOrder = (newOrder) => {
       answerText: pair.value,
       changedAnswerId: answerItem.id
     };
-    reportAnswer(currentAnswer).then((reportAnswerPromise) => {
-      emit('answer-matched', {
-        ...currentAnswer,
-        reportAnswerPromise,
-      });
+    emit('answer-matched', {
+      ...currentAnswer,
+      reportAnswerPromise: reportAnswer(currentAnswer),
     })
   })
 }
@@ -337,7 +340,7 @@ const updateAnswerOrder = (newOrder) => {
                              :id="`question-${num}`"
                              data-cy="textInputAnswer"
                              label="Answer"
-                             @value-changed="textAnswerChangedDebounced"
+                             @value-changed="textAnswerChanged"
                              :show-label="false"
                              :name="fieldName"
                              :user-community="userCommunity"

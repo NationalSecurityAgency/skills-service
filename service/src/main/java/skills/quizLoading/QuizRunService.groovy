@@ -598,16 +598,18 @@ class QuizRunService {
             throw new SkillQuizException("Provided attempt id [${quizAttemptId}], which corresponds to a failed quiz", ErrorCode.BadParam)
         }
 
+        UserQuizAttempt attempt = getQuizAttempt(quizAttemptId)
+        if (attempt.status != UserQuizAttempt.QuizAttemptStatus.INPROGRESS) {
+            throw new SkillQuizException("Provided attempt id [${quizAttemptId}] is not in progress. Current status is [${attempt.status}]", ErrorCode.BadParam)
+        }
+
         if (!quizAnswerRepo.doesAnswerBelongToQuizAttempt(quizAttemptId, answerDefId)) {
             throw new SkillQuizException("Provided answer id [${answerDefId}] does not exist for [${quizAttemptId}] quiz attempt", ErrorCode.BadParam)
         }
 
-        UserQuizAttempt inProgressAttempt = quizAttemptRepo.getByUserIdAndQuizIdAndState(userId, quizId, UserQuizAttempt.QuizAttemptStatus.INPROGRESS)
-        if (inProgressAttempt) {
-            if(shouldQuizBeFailed(inProgressAttempt)) {
-                failQuizAttempt(userId, quizId, quizAttemptId)
-                throw new SkillQuizException("Deadline for [${quizAttemptId}] has expired", ErrorCode.BadParam)
-            }
+        if (shouldQuizBeFailed(attempt)) {
+            failQuizAttempt(userId, quizId, quizAttemptId)
+            throw new SkillQuizException("Deadline for [${quizAttemptId}] has expired", ErrorCode.BadParam)
         }
 
         QuizAnswerDefRepo.AnswerDefPartialInfo answerDefPartialInfo = getAnswerDefPartialInfo(quizId, answerDefId)
@@ -900,6 +902,7 @@ class QuizRunService {
 
     @Transactional
     QuizGradedResult completeQuizAttempt(String userId, String quizId, Integer quizAttemptId) {
+        lockingService.lockUserQuizAttempt(quizAttemptId)
         QuizDef quizDef = getQuizDef(quizId)
         boolean isSurvey = quizDef.type == QuizDefParent.QuizType.Survey
 

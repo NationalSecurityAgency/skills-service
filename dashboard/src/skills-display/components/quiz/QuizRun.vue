@@ -400,6 +400,7 @@ const initializeFormData = (copy) => {
     }
   })
   checkIfAnswerChangedForValidation.reset()
+  reportAnswerPromises.value = {}
   resetForm({ values: { questions: formQuestions }, errors: {} });
 }
 const updateSelectedAnswers = (questionSelectedAnswer) => {
@@ -412,11 +413,9 @@ const updateSelectedAnswers = (questionSelectedAnswer) => {
       failed: false,
     }
     reportAnswerPromises.value[key] = trackedSave
-    if (trackedSave.answer) {
-      trackedSave.promise.catch(() => {
-        trackedSave.failed = true
-      })
-    }
+    trackedSave.promise.catch(() => {
+      trackedSave.failed = true
+    })
   }
 }
 const updateMatchedAnswer = (matchedAnswer) => {
@@ -427,6 +426,7 @@ const updateMatchedAnswer = (matchedAnswer) => {
       answer: null,
       failed: false,
     }
+    matchedAnswer.reportAnswerPromise.catch(() => {})
   }
 }
 const completeTestRun = () => {

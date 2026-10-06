@@ -1340,6 +1340,235 @@ class QuizApi_RunQuizSpecs extends DefaultIntSpec {
         [0, 1, 2]      | true
     }
 
+    def "learner can not mutate a graded fill in the blank answer after passing: #mutation"() {
+        def quiz = QuizDefFactory.createQuiz(1)
+        skillsService.createQuizDef(quiz)
+        skillsService.createQuizQuestionDef(QuizDefFactory.createFillInTheBlankQuestion(1, 1, 1))
+        SkillsService learner = createService(getRandomUsers(1)[0])
+        def attempt = learner.startQuizAttempt(quiz.quizId).body
+        Integer answerId = attempt.questions[0].answerOptions[0].id
+        learner.reportQuizAnswer(quiz.quizId, attempt.id, answerId, [answerText: 'Answer #1'])
+        def graded = learner.completeQuizAttempt(quiz.quizId, attempt.id).body
+        def beforeMutation = learner.getCurrentUserSingleQuizAttempt(attempt.id)
+
+        assert graded.passed
+        assert beforeMutation.status == 'PASSED'
+        assert beforeMutation.questions[0].isCorrect
+        assert beforeMutation.questions[0].answers[0].answer == [answerText: 'Answer #1', isCorrect: 'CORRECT']
+
+        when: 'the learner directly reports an answer against the completed attempt'
+        learner.reportQuizAnswer(quiz.quizId, attempt.id, answerId, request)
+
+        then: 'the request is rejected and the graded submission is preserved'
+        SkillsClientException ex = thrown(SkillsClientException)
+        ex.httpStatus == HttpStatus.BAD_REQUEST
+        def afterMutation = learner.getCurrentUserSingleQuizAttempt(attempt.id)
+        def adminHistory = skillsService.getQuizAttemptResult(quiz.quizId, attempt.id)
+        afterMutation.status == 'PASSED'
+        afterMutation.completed == beforeMutation.completed
+        afterMutation.numQuestionsPassed == 1
+        afterMutation.questions[0].isCorrect == true
+        afterMutation.questions[0].answers[0].answer == beforeMutation.questions[0].answers[0].answer
+        adminHistory.status == 'PASSED'
+        adminHistory.questions[0].isCorrect == true
+        adminHistory.questions[0].answers[0].answer == beforeMutation.questions[0].answers[0].answer
+
+        where:
+        mutation    | request
+        'overwrite' | [isSelected: true, answerText: 'Changed after grading']
+        'clear'     | [isSelected: true, answerText: '']
+        'deselect'  | [isSelected: false, answerText: 'Answer #1']
+    }
+
+    def "learner can not mutate a graded single choice answer after passing: #mutation"() {
+        def quiz = QuizDefFactory.createQuiz(1)
+        skillsService.createQuizDef(quiz)
+        skillsService.createQuizQuestionDef(QuizDefFactory.createChoiceQuestion(1, 1, 3, QuizQuestionType.SingleChoice))
+        SkillsService learner = createService(getRandomUsers(1)[0])
+        def attempt = learner.startQuizAttempt(quiz.quizId).body
+        def answerOptions = attempt.questions[0].answerOptions
+        learner.reportQuizAnswer(quiz.quizId, attempt.id, answerOptions[0].id)
+        def graded = learner.completeQuizAttempt(quiz.quizId, attempt.id).body
+        def beforeMutation = learner.getCurrentUserSingleQuizAttempt(attempt.id)
+        def adminBeforeMutation = skillsService.getQuizAttemptResult(quiz.quizId, attempt.id)
+        assert graded.passed
+        assert beforeMutation.status == 'PASSED'
+
+        when:
+        learner.reportQuizAnswer(quiz.quizId, attempt.id, answerOptions[answerIndex].id, request)
+
+        then:
+        SkillsClientException ex = thrown(SkillsClientException)
+        ex.httpStatus == HttpStatus.BAD_REQUEST
+        ex.message.contains('is not in progress')
+        def afterMutation = learner.getCurrentUserSingleQuizAttempt(attempt.id)
+        def adminAfterMutation = skillsService.getQuizAttemptResult(quiz.quizId, attempt.id)
+        afterMutation.status == 'PASSED'
+        afterMutation.completed == beforeMutation.completed
+        afterMutation.numQuestionsPassed == beforeMutation.numQuestionsPassed
+        afterMutation.questions == beforeMutation.questions
+        adminAfterMutation.status == 'PASSED'
+        adminAfterMutation.questions == adminBeforeMutation.questions
+
+        where:
+        mutation   | answerIndex | request
+        'replace'  | 1           | [isSelected: true]
+        'deselect' | 0           | [isSelected: false]
+    }
+
+    def "learner can not mutate a graded multiple choice answer after passing: #mutation"() {
+        def quiz = QuizDefFactory.createQuiz(1)
+        skillsService.createQuizDef(quiz)
+        skillsService.createQuizQuestionDef(QuizDefFactory.createChoiceQuestion(1, 1, 3, QuizQuestionType.MultipleChoice))
+        SkillsService learner = createService(getRandomUsers(1)[0])
+        def attempt = learner.startQuizAttempt(quiz.quizId).body
+        def answerOptions = attempt.questions[0].answerOptions
+        learner.reportQuizAnswer(quiz.quizId, attempt.id, answerOptions[0].id)
+        learner.reportQuizAnswer(quiz.quizId, attempt.id, answerOptions[2].id)
+        def graded = learner.completeQuizAttempt(quiz.quizId, attempt.id).body
+        def beforeMutation = learner.getCurrentUserSingleQuizAttempt(attempt.id)
+        def adminBeforeMutation = skillsService.getQuizAttemptResult(quiz.quizId, attempt.id)
+        assert graded.passed
+        assert beforeMutation.status == 'PASSED'
+
+        when:
+        learner.reportQuizAnswer(quiz.quizId, attempt.id, answerOptions[answerIndex].id, request)
+
+        then:
+        SkillsClientException ex = thrown(SkillsClientException)
+        ex.httpStatus == HttpStatus.BAD_REQUEST
+        ex.message.contains('is not in progress')
+        def afterMutation = learner.getCurrentUserSingleQuizAttempt(attempt.id)
+        def adminAfterMutation = skillsService.getQuizAttemptResult(quiz.quizId, attempt.id)
+        afterMutation.status == 'PASSED'
+        afterMutation.completed == beforeMutation.completed
+        afterMutation.numQuestionsPassed == beforeMutation.numQuestionsPassed
+        afterMutation.questions == beforeMutation.questions
+        adminAfterMutation.status == 'PASSED'
+        adminAfterMutation.questions == adminBeforeMutation.questions
+
+        where:
+        mutation   | answerIndex | request
+        'add'      | 1           | [isSelected: true]
+        'deselect' | 0           | [isSelected: false]
+    }
+
+    def "learner can not mutate a graded matching answer after passing: #mutation"() {
+        def quiz = QuizDefFactory.createQuiz(1)
+        skillsService.createQuizDef(quiz)
+        skillsService.createQuizQuestionDef(QuizDefFactory.createMatchingQuestion(1, 1, 2))
+        SkillsService learner = createService(getRandomUsers(1)[0])
+        def attempt = learner.startQuizAttempt(quiz.quizId).body
+        def answerOptions = attempt.questions[0].answerOptions
+        learner.reportQuizAnswer(quiz.quizId, attempt.id, answerOptions[0].id, [answerText: 'value1'])
+        learner.reportQuizAnswer(quiz.quizId, attempt.id, answerOptions[1].id, [answerText: 'value2'])
+        def graded = learner.completeQuizAttempt(quiz.quizId, attempt.id).body
+        def beforeMutation = learner.getCurrentUserSingleQuizAttempt(attempt.id)
+        def adminBeforeMutation = skillsService.getQuizAttemptResult(quiz.quizId, attempt.id)
+        assert graded.passed
+        assert beforeMutation.status == 'PASSED'
+
+        when:
+        learner.reportQuizAnswer(quiz.quizId, attempt.id, answerOptions[0].id, request)
+
+        then:
+        SkillsClientException ex = thrown(SkillsClientException)
+        ex.httpStatus == HttpStatus.BAD_REQUEST
+        ex.message.contains('is not in progress')
+        def afterMutation = learner.getCurrentUserSingleQuizAttempt(attempt.id)
+        def adminAfterMutation = skillsService.getQuizAttemptResult(quiz.quizId, attempt.id)
+        afterMutation.status == 'PASSED'
+        afterMutation.completed == beforeMutation.completed
+        afterMutation.numQuestionsPassed == beforeMutation.numQuestionsPassed
+        afterMutation.questions == beforeMutation.questions
+        adminAfterMutation.status == 'PASSED'
+        adminAfterMutation.questions == adminBeforeMutation.questions
+
+        where:
+        mutation    | request
+        'overwrite' | [isSelected: true, answerText: 'value2']
+        'deselect'  | [isSelected: false]
+    }
+
+    def "learner can not mutate a submitted text input answer in #expectedStatus state: #mutation"() {
+        def quiz = QuizDefFactory.createQuiz(1)
+        skillsService.createQuizDef(quiz)
+        skillsService.createQuizQuestionDef(QuizDefFactory.createTextInputQuestion(1, 1))
+        SkillsService learner = createService(getRandomUsers(1)[0])
+        def attempt = learner.startQuizAttempt(quiz.quizId).body
+        Integer answerId = attempt.questions[0].answerOptions[0].id
+        learner.reportQuizAnswer(quiz.quizId, attempt.id, answerId, [answerText: 'Original submitted answer'])
+        def graded = learner.completeQuizAttempt(quiz.quizId, attempt.id).body
+        assert graded.needsGrading
+        if (expectedStatus == 'PASSED') {
+            skillsService.gradeAnswer(learner.userName, quiz.quizId, attempt.id, answerId, true, 'Correct answer', false, false)
+        }
+        def beforeMutation = learner.getCurrentUserSingleQuizAttempt(attempt.id)
+        def adminBeforeMutation = skillsService.getQuizAttemptResult(quiz.quizId, attempt.id)
+        assert beforeMutation.status == expectedStatus
+
+        when:
+        learner.reportQuizAnswer(quiz.quizId, attempt.id, answerId, request)
+
+        then:
+        SkillsClientException ex = thrown(SkillsClientException)
+        ex.httpStatus == HttpStatus.BAD_REQUEST
+        ex.message.contains('is not in progress')
+        def afterMutation = learner.getCurrentUserSingleQuizAttempt(attempt.id)
+        def adminAfterMutation = skillsService.getQuizAttemptResult(quiz.quizId, attempt.id)
+        afterMutation.status == expectedStatus
+        afterMutation.completed == beforeMutation.completed
+        afterMutation.numQuestionsPassed == beforeMutation.numQuestionsPassed
+        afterMutation.questions == beforeMutation.questions
+        adminAfterMutation.status == expectedStatus
+        adminAfterMutation.questions == adminBeforeMutation.questions
+
+        where:
+        expectedStatus  | mutation    | request
+        'PASSED'        | 'overwrite' | [isSelected: true, answerText: 'Changed after grading']
+        'PASSED'        | 'clear'     | [isSelected: false, answerText: '']
+        'NEEDS_GRADING' | 'overwrite' | [isSelected: true, answerText: 'Changed after submission']
+        'NEEDS_GRADING' | 'clear'     | [isSelected: false, answerText: '']
+    }
+
+    def "learner can not mutate a rating answer after completing a survey: #mutation"() {
+        def quiz = QuizDefFactory.createQuizSurvey(1)
+        skillsService.createQuizDef(quiz)
+        def question = QuizDefFactory.createRatingSurveyQuestion(1, 1)
+        question.questionScale = 5
+        skillsService.createQuizQuestionDef(question)
+        SkillsService learner = createService(getRandomUsers(1)[0])
+        def attempt = learner.startQuizAttempt(quiz.quizId).body
+        def answerOptions = attempt.questions[0].answerOptions
+        learner.reportQuizAnswer(quiz.quizId, attempt.id, answerOptions[0].id)
+        def graded = learner.completeQuizAttempt(quiz.quizId, attempt.id).body
+        def beforeMutation = learner.getCurrentUserSingleQuizAttempt(attempt.id)
+        def adminBeforeMutation = skillsService.getQuizAttemptResult(quiz.quizId, attempt.id)
+        assert graded.passed
+        assert beforeMutation.status == 'PASSED'
+
+        when:
+        learner.reportQuizAnswer(quiz.quizId, attempt.id, answerOptions[answerIndex].id, request)
+
+        then:
+        SkillsClientException ex = thrown(SkillsClientException)
+        ex.httpStatus == HttpStatus.BAD_REQUEST
+        ex.message.contains('is not in progress')
+        def afterMutation = learner.getCurrentUserSingleQuizAttempt(attempt.id)
+        def adminAfterMutation = skillsService.getQuizAttemptResult(quiz.quizId, attempt.id)
+        afterMutation.status == 'PASSED'
+        afterMutation.completed == beforeMutation.completed
+        afterMutation.numQuestionsPassed == beforeMutation.numQuestionsPassed
+        afterMutation.questions == beforeMutation.questions
+        adminAfterMutation.status == 'PASSED'
+        adminAfterMutation.questions == adminBeforeMutation.questions
+
+        where:
+        mutation   | answerIndex | request
+        'replace'  | 1           | [isSelected: true]
+        'deselect' | 0           | [isSelected: false]
+    }
+
     def "can not complete a quiz with blank fill in the blank answers"() {
         def quiz = QuizDefFactory.createQuiz(1, "Fancy Description")
         skillsService.createQuizDef(quiz)
