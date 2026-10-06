@@ -183,9 +183,10 @@ describe('Accessibility Tests', () => {
             cy.get('[data-cy="exportUsersTableBtn"]')
             cy.get('[data-cy="usersTable"] [data-cy="skillsBTableTotalRows"]').should('have.text', '6');
 
-            cy.get('[data-p-index="3"] [data-pc-name="pcrowcheckbox"]').click()
+            cy.contains('[data-cy="usersTable"] tbody tr', 'u4').find('[data-pc-name="pcrowcheckbox"]').click()
             cy.get('[data-cy="archiveUsersTableBtn"]').should('be.enabled');
             cy.get('[data-cy="archiveUsersTableBtn"]').click()
+            cy.get('[data-cy="usersTable"] [data-cy="skillsBTableTotalRows"]').should('have.text', '5');
             cy.get('[data-cy="userArchiveBtn"]').should('be.enabled');
             cy.get('[data-cy="userArchiveBtn"]').click()
 
@@ -195,10 +196,16 @@ describe('Accessibility Tests', () => {
 
             cy.get('[data-cy="restoreUser-u4"]').should('be.enabled');
             cy.get('[data-cy="restoreUser-u4"]').click()
+            // Lighthouse reloads the page, so wait for restoration to finish before auditing.
+            cy.get('[data-cy="restoreUser-u4"]').should('not.exist');
+            cy.get('[data-cy="userArchiveTable"]').should('contain.text', 'No Archived Users...');
 
             cy.customLighthouse();
             cy.injectAxe();
             cy.customA11y()
+
+            cy.get('[data-cy="backToProjectUsersBtn"]').click();
+            cy.get('[data-cy="usersTable"] [data-cy="skillsBTableTotalRows"]').should('have.text', '6');
         });
 
         it(`project - access page${darkMode}`, () => {
