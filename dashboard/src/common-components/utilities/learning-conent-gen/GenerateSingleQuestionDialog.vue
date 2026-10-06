@@ -168,7 +168,7 @@ const handleGenerationCompleted = (generated) => {
     const answers = QuestionType.isTextInput(props.questionType.selectedType?.id) ? [] : JSON.parse(cleanJsonString(answersMatch[1].trim()))
     const question = questionMatch[1].trim()
     if (QuestionType.isFillInTheBlank(props.questionType.selectedType?.id)) {
-      validateGeneratedBlanks(question, answers)
+      validateGeneratedBlanks(question, answers, appConfig.maxAnswersPerQuizQuestion)
     }
 
     const generatedInfo = {

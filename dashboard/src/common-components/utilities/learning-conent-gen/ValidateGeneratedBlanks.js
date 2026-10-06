@@ -14,11 +14,14 @@
  * limitations under the License.
  */
 
-export const validateGeneratedBlanks = (question, answers) => {
+export const validateGeneratedBlanks = (question, answers, maxAnswersPerQuizQuestion) => {
   // Match the blank syntax accepted by quiz validation and the question editor.
   const blankCount = (question.replace(/\\_/g, '_').match(/_{2,}/g) || []).length
   if (blankCount === 0) {
     throw new Error('The generated question needs at least one blank (___). Please ask the AI to regenerate it.')
+  }
+  if (blankCount > maxAnswersPerQuizQuestion) {
+    throw new Error(`The generated question exceeds the maximum number of answers ${maxAnswersPerQuizQuestion}. Please ask the AI to regenerate it.`)
   }
   if (!Array.isArray(answers) || answers.length !== blankCount) {
     throw new Error(`The generated question has ${blankCount} blank(s), but ${Array.isArray(answers) ? answers.length : 'no valid array of'} answer(s). Please ask the AI to provide one answer per blank in order.`)
