@@ -563,7 +563,7 @@ describe('Learning Path Management Validation Tests', () => {
     it('keeps the graph and add controls after entering and leaving full screen', () => {
         visitLearningPath()
         cy.get('[data-cy="fullDepsSkillsGraph"]').contains('No Learning Path Yet').should('be.visible')
-        cy.get('[data-cy="learningPath-fullScreenButton"]').should('be.visible')
+        cy.get('[data-cy="learningPath-fullScreenButton"]').should('not.exist')
 
         cy.selectSkill('[data-cy="learningPathFromSkillSelector"]', 'badge1')
         cy.selectSkill('[data-cy="learningPathToSkillSelector"]', 'badge2')
