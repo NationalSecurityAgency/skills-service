@@ -1147,6 +1147,11 @@ class QuizDefService {
                     boolean isTextInput = questionDef.type == QuizQuestionType.TextInput
                     boolean isRating = questionDef.type == QuizQuestionType.Rating
                     boolean isMatching = questionDef.type == QuizQuestionType.Matching
+                    boolean isFillInTheBlank = questionDef.type == QuizQuestionType.FillInTheBlank
+
+                    if(isFillInTheBlank) {
+                        quizAnswerDefs.sort{ it.displayOrder }
+                    }
                     List<UserGradedQuizAnswerResult> answers = quizAnswerDefs.collect { QuizAnswerDef answerDef ->
                         UserQuizAnswerAttemptRepo.AnswerIdAndAnswerText foundSelected = alreadySelected.find { it.answerId == answerDef.id }
 
@@ -1180,6 +1185,11 @@ class QuizDefService {
                                     selectedMatch: InputSanitizer.unsanitizeEscapedHtml(originalAnswer.value),
                                     correctMatch: InputSanitizer.unsanitizeEscapedHtml(originalAnswer.answer)
                             )
+                        } else if(isFillInTheBlank) {
+                            answer = [
+                                    answerText: foundSelected?.answerText,
+                                    isCorrect: foundSelected?.answerStatus
+                            ]
                         } else {
                             answer = InputSanitizer.unsanitizeEscapedHtml(answerDef.answer)
                         }
@@ -1203,7 +1213,7 @@ class QuizDefService {
                     } else {
                         if (questionDef.type == QuizQuestionType.Matching) {
                             isCorrect = (!answers.find { it.answer.correctMatch != it.answer.selectedMatch }) as Boolean
-                        } else if (questionDef.type == QuizQuestionType.TextInput) {
+                        } else if (questionDef.type == QuizQuestionType.TextInput || questionDef.type == QuizQuestionType.FillInTheBlank) {
                             isCorrect = userQuizQuestionAttempt?.status == UserQuizQuestionAttempt.QuizQuestionStatus.CORRECT
                         } else {
                             isCorrect = !answers.find { it.isConfiguredCorrect != it.isSelected }
@@ -1299,6 +1309,11 @@ class QuizDefService {
         QuizValidator.isNotBlank(questionDefRequest.question, "question", quizId)
         QuizValidator.isNotNull(questionDefRequest.questionType, "questionType", quizId)
 
+        propsBasedValidator.quizValidationMaxIntValue(PublicProps.UiProp.maxAnswersPerQuizQuestion, "Number of Answers", questionDefRequest.answers?.size() ?: 0, quizId)
+        if (questionDefRequest.questionType == QuizQuestionType.Rating) {
+            propsBasedValidator.quizValidationMaxIntValue(PublicProps.UiProp.maxAnswersPerQuizQuestion, "Number of Answers", questionDefRequest.questionScale, quizId)
+        }
+
         propsBasedValidator.quizValidationMaxStrLength(PublicProps.UiProp.descriptionMaxLength, "Question", questionDefRequest.question, quizDef.quizId)
         propsBasedValidator.quizValidationMaxStrLength(PublicProps.UiProp.maxQuizAnswerHintLength, "Answer Hint", questionDefRequest.answerHint, quizDef.quizId)
         int numQuestions = quizQuestionRepo.countByQuizId(quizDef.quizId)
@@ -1312,7 +1327,22 @@ class QuizDefService {
             throw new SkillQuizException("Answer Hint: ${customValidationResult.msg}", quizId, ErrorCode.BadParam)
         }
 
-        if (questionDefRequest.questionType != QuizQuestionType.TextInput && questionDefRequest.questionType != QuizQuestionType.Rating) {
+        if (questionDefRequest.questionType == QuizQuestionType.FillInTheBlank) {
+            String unescapedQuestion = questionDefRequest.question.replaceAll(/\\_/, '_')
+            int blankCount = (unescapedQuestion =~ /_{2,}/).count
+            QuizValidator.isTrue(blankCount == questionDefRequest.answers?.size(), "FillInTheBlank questions require one answer for each blank", quizId)
+            QuizValidator.isNotNull(questionDefRequest.answers, "answers", quizId)
+            QuizValidator.isTrue(!questionDefRequest.answers.isEmpty(), "Must have at least 1 answer", quizId)
+            questionDefRequest.answers.each { answer ->
+                QuizValidator.isNotNull(answer, "answers entry", quizId)
+                QuizValidator.isNotBlank(answer.answer, "answers.answer", quizId, true)
+                propsBasedValidator.quizValidationMaxStrLength(PublicProps.UiProp.maxQuizTextAnswerLength, "Answer", answer.answer, quizId)
+
+                String normalizedAnswer = InputSanitizer.unsanitizeEscapedHtml(InputSanitizer.sanitize(answer.answer))
+                QuizValidator.isTrue(normalizedAnswer.split(';', -1).every { it.trim() },
+                        "Each acceptable answer option must contain text", quizId)
+            }
+        } else if (questionDefRequest.questionType != QuizQuestionType.TextInput && questionDefRequest.questionType != QuizQuestionType.Rating) {
             QuizValidator.isNotNull(questionDefRequest.answers, "answers", quizId)
             QuizValidator.isTrue(questionDefRequest.answers.size() >= 2, "Must have at least 2 answers", quizId)
             questionDefRequest.answers.each {

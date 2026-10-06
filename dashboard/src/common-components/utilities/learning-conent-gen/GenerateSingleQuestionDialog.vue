@@ -29,6 +29,7 @@ import QuestionTypeDropDown from "@/components/quiz/testCreation/QuestionTypeDro
 import QuestionType from "@/skills-display/components/quiz/QuestionType.js";
 import AssistantGenUtil from "@/common-components/utilities/learning-conent-gen/AssistantGenUtil.js";
 import {useLog} from "@/components/utils/misc/useLog.js";
+import {validateGeneratedBlanks} from "@/common-components/utilities/learning-conent-gen/ValidateGeneratedBlanks.js";
 
 const model = defineModel()
 const props = defineProps({
@@ -165,9 +166,13 @@ const handleGenerationCompleted = (generated) => {
   }
   try {
     const answers = QuestionType.isTextInput(props.questionType.selectedType?.id) ? [] : JSON.parse(cleanJsonString(answersMatch[1].trim()))
+    const question = questionMatch[1].trim()
+    if (QuestionType.isFillInTheBlank(props.questionType.selectedType?.id)) {
+      validateGeneratedBlanks(question, answers, appConfig.maxAnswersPerQuizQuestion)
+    }
 
     const generatedInfo = {
-      question: questionMatch[1].trim(),
+      question,
       answers: answers,
       questionTypeId: props.questionType.selectedType?.id
     }
@@ -220,6 +225,9 @@ const communityValue = computed(() => {
 
 const generationFailed = () => {
   answersFound.value = false
+  answersString.value = ''
+  upToStartOfAnswers.value = ''
+  isGenerating.value = false
 }
 
 const questionTypeSelectionDisabled = computed(() => {
@@ -288,6 +296,13 @@ const questionTypeSelectionDisabled = computed(() => {
             </div>
             <hr v-if="index < historyItem.generatedInfo?.answers.length - 1"
                 class="mt-3 border-t border-dashed border-gray-300 dark:border-gray-600"/>
+          </div>
+        </div>
+        <div v-else-if="QuestionType.isFillInTheBlank(historyItem.generatedInfo?.questionTypeId)">
+          <div v-for="(a, index) in historyItem.generatedInfo?.answers" :key="a.id" class="flex mt-1 pl-1 flex-row items-baseline">
+            <i v-if="a.isCorrect" class="far text-primary fa-check-square" style="font-size: 1.3rem;"></i>
+            <i v-if="!a.isCorrect" class="fa fa-ban text-red-500" style="font-size: 1.1rem;"></i>
+            {{ a.answer }}
           </div>
         </div>
         <div v-else  v-for="(answer, index) in historyItem.generatedInfo?.answers" :key="index" class="flex gap-1 items-start">

@@ -22,7 +22,6 @@ import QuestionType from '@/skills-display/components/quiz/QuestionType.js';
 import QuizRunService from '@/skills-display/components/quiz/QuizRunService.js';
 import MarkdownEditor from "@/common-components/utilities/markdown/MarkdownEditor.vue";
 import QuizStatus from "@/components/quiz/runsHistory/QuizStatus.js";
-import {useDebounceFn} from "@vueuse/core";
 import {useAppConfig} from "@/common-components/stores/UseAppConfig.js";
 import SkillsButton from "@/components/utils/inputForm/SkillsButton.vue";
 import QuizRunMatchingComponent from "@/skills-display/components/quiz/QuizRunMatchingComponent.vue";
@@ -42,7 +41,7 @@ const props = defineProps({
 })
 
 const isLoading = ref(true);
-const emit = defineEmits(['answer-text-changed', 'selected-answer', 'answer-matched'])
+const emit = defineEmits(['answer-text-changed', 'selected-answer', 'answer-matched', 'fill-in-the-blank-changed'])
 
 const appConfig = useAppConfig()
 
@@ -85,6 +84,9 @@ const isRating = computed(() => {
 const isMatchingType = computed(() => {
   return props.q.questionType === QuestionType.Matching;
 })
+const isFillInTheBlank = computed(() => {
+  return props.q.questionType === QuestionType.FillInTheBlank;
+})
 const isMissingAnswer = computed(() => {
   if (isTextInput.value) {
     return !answerText.value || answerText.value.trimEnd() === '';
@@ -108,7 +110,9 @@ const numberOfStars = computed(() => {
 const fieldName = computed(() => {
   const num = props.num;
   if (isTextInput.value) {
-    return `questions[${num-1}].answerText`;
+    return `questions[${num - 1}].answerText`;
+  } else if (isFillInTheBlank.value) {
+    return `questions[${num-1}].answerTextArray`;
   } else if (isRating.value) {
     return `questions[${num-1}].answerRating`;
   }
@@ -128,7 +132,7 @@ onMounted(() => {
 
 const textAnswerChanged = (providedAnswerText) => {
   const selectedAnswerIds = answerOptions.value.map((a) => a.id);
-  if (providedAnswerText) {
+  if (providedAnswerText !== undefined) {
     answerText.value = providedAnswerText;
   }
   const isAnswerBlank = !answerText.value || answerText.value.trimEnd() === '';
@@ -140,24 +144,70 @@ const textAnswerChanged = (providedAnswerText) => {
     changedAnswerIdSelected: !isAnswerBlank,
     answerText: answerText.value,
   };
-  reportAnswer(currentAnswer).then((reportAnswerPromise) => {
-    // only 1 answer in case of TextInput
-    emit('answer-text-changed', {
-      ...currentAnswer,
-      reportAnswerPromise,
-    });
-  });
+  scheduleAnswerSave(currentAnswer, 'answer-text-changed')
 }
-const textAnswerChangedDebounced = useDebounceFn((providedAnswerTextOuter) => textAnswerChanged(providedAnswerTextOuter), appConfig.formFieldDebounceInMs)
 
 const selectionChanged = (currentAnswer) => { 
-  reportAnswer(currentAnswer).then((reportAnswerPromise) => {
-    emit('selected-answer', {
-      ...currentAnswer,
-      reportAnswerPromise,
-    });
+  emit('selected-answer', {
+    ...currentAnswer,
+    reportAnswerPromise: reportAnswer(currentAnswer),
   });
 }
+
+const blankSaveStates = new Map()
+const fillInTheBlankChangedDebounced = (textInput, answerIndex) => {
+  const answer = answerOptions.value[answerIndex]
+  if (!answer || isLoading.value || props.quizComplete) {
+    return
+  }
+
+  const currentAnswer = {
+    questionId: props.q.id,
+    questionType: props.q.questionType,
+    changedAnswerId: answer.id,
+    answerText: textInput,
+  }
+  scheduleAnswerSave(currentAnswer, 'fill-in-the-blank-changed')
+}
+const scheduleAnswerSave = (currentAnswer, eventName) => {
+  const answerId = currentAnswer.changedAnswerId
+  let state = blankSaveStates.get(answerId)
+  if (!state) {
+    state = { timer: null, pending: null, inFlight: Promise.resolve() }
+    blankSaveStates.set(answerId, state)
+  }
+  clearTimeout(state.timer)
+
+  if (!state.pending) {
+    const pending = {}
+    pending.promise = new Promise((resolve, reject) => {
+      pending.resolve = resolve
+      pending.reject = reject
+    })
+    // Observe early failures while preserving rejection for the parent's await.
+    pending.promise.catch(() => {})
+    state.pending = pending
+  }
+
+  const pending = state.pending
+  pending.answer = currentAnswer
+  state.timer = setTimeout(() => {
+    state.timer = null
+    state.pending = null
+    const save = () => reportAnswer(pending.answer)
+    // A later edit waits for an in-flight save, and can retry after a failure.
+    const request = state.inFlight.then(save, save)
+    // Keep the save failure available to the parent without an unhandled rejection in this chain.
+    state.inFlight = request.catch(() => {})
+    request.then(pending.resolve, pending.reject)
+  }, appConfig.formFieldDebounceInMs)
+
+  emit(eventName, {
+    ...currentAnswer,
+    reportAnswerPromise: pending.promise,
+  })
+}
+
 const ratingChanged = (value) => {
   if (value) {
     const selectedAnswerIds = answerOptions.value.map((a) => a.id);
@@ -169,15 +219,27 @@ const ratingChanged = (value) => {
       changedAnswerId: answerId,
       changedAnswerIdSelected: true,
     };
-    reportAnswer(currentAnswer).then((reportAnswerPromise) => {
-      emit('selected-answer', {
-        ...currentAnswer,
-        reportAnswerPromise,
-      });
+    emit('selected-answer', {
+      ...currentAnswer,
+      reportAnswerPromise: reportAnswer(currentAnswer),
     });
   }
 }
+let answerSaveQueue = Promise.resolve()
 const reportAnswer = (answer) => {
+  // Blank edits are already serialized per answer by scheduleAnswerSave.
+  // Distinct blanks can save independently, and the parent awaits each one.
+  if (QuestionType.isFillInTheBlank(props.q.questionType)) {
+    return performAnswerSave(answer)
+  }
+  // Serialize changes within a question; the latest save also waits for earlier edits.
+  const save = () => performAnswerSave(answer)
+  const request = answerSaveQueue.then(save, save)
+  answerSaveQueue = request.catch(() => {})
+  return request
+}
+const performAnswerSave = (answer) => {
+
   if (!isLoading.value) {
     const reportAnswer = () => QuizRunService.reportAnswer(props.quizId, props.quizAttemptId, answer.changedAnswerId, answer.changedAnswerIdSelected, answer.answerText)
     if (QuestionType.isTextInput(props.q.questionType) ) {
@@ -212,11 +274,9 @@ const updateAnswerOrder = (newOrder) => {
       answerText: pair.value,
       changedAnswerId: answerItem.id
     };
-    reportAnswer(currentAnswer).then((reportAnswerPromise) => {
-      emit('answer-matched', {
-        ...currentAnswer,
-        reportAnswerPromise,
-      });
+    emit('answer-matched', {
+      ...currentAnswer,
+      reportAnswerPromise: reportAnswer(currentAnswer),
     })
   })
 }
@@ -280,7 +340,7 @@ const updateAnswerOrder = (newOrder) => {
                              :id="`question-${num}`"
                              data-cy="textInputAnswer"
                              label="Answer"
-                             @value-changed="textAnswerChangedDebounced"
+                             @value-changed="textAnswerChanged"
                              :show-label="false"
                              :name="fieldName"
                              :user-community="userCommunity"
@@ -297,6 +357,15 @@ const updateAnswerOrder = (newOrder) => {
           </div>
           <div v-else-if="isMatchingType">
             <QuizRunMatchingComponent :q="q" :name="fieldName" :value="answerOptions" @updateAnswerOrder="updateAnswerOrder" :questionNumber="num" :quizComplete="quizComplete" />
+          </div>
+          <div v-else-if="isFillInTheBlank">
+            <div v-for="(a, index) in q.answerOptions">
+              <SkillsTextInput
+                  :disabled="quizComplete"
+                  @input="(e) => fillInTheBlankChangedDebounced(e, index)"
+                  :placeholder="`Fill in blank ${index + 1}`"
+                  :name="`${fieldName}[${index}]`" />
+            </div>
           </div>
           <div v-else>
             <div v-if="isMultipleChoice" class="text-secondary italic small" data-cy="multipleChoiceMsg">(Select <b>all</b> that apply)</div>

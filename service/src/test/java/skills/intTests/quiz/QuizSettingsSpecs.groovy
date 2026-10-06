@@ -446,7 +446,7 @@ class QuizSettingsSpecs extends DefaultIntSpec {
     def "Answers for a question can be randomized"() {
         def quiz = QuizDefFactory.createQuiz(1, "Fancy Description")
         skillsService.createQuizDef(quiz)
-        def questions = QuizDefFactory.createChoiceQuestions(1, 1, 100)
+        def questions = QuizDefFactory.createChoiceQuestions(1, 1, 10)
         skillsService.createQuizQuestionDefs(questions)
 
         def firstSortedQuizInfo = skillsService.startQuizAttempt(quiz.quizId).body

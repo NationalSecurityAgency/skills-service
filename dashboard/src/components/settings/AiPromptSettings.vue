@@ -108,6 +108,11 @@ const schema = object({
       .max(appConfig.maxAiPromptLength)
       .noScript()
       .label('New Quiz Question Matching'),
+  singleQuestionInstructionsFillInTheBlank: string()
+      .required()
+      .max(appConfig.maxAiPromptLength)
+      .noScript()
+      .label('New Quiz Question Fill In The Blank'),
   updateSingleQuestionTypeChangedToMultipleChoiceInstructions: string()
       .required()
       .max(appConfig.maxAiPromptLength)
@@ -128,6 +133,11 @@ const schema = object({
       .max(appConfig.maxAiPromptLength)
       .noScript()
       .label('Update Quiz Question to Matching'),
+  updateSingleQuestionTypeChangedToFillInTheBlankInstructions: string()
+      .required()
+      .max(appConfig.maxAiPromptLength)
+      .noScript()
+      .label('Update Quiz Question to Fill In The Blank'),
   textInputQuestionGradingInstructions: string()
       .required()
       .max(appConfig.maxAiPromptLength)

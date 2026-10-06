@@ -620,6 +620,54 @@ Before responding, count the number of `"isCorrect": true` for the question and 
 - If questionType doesn't match, FIX IT
 '''
 
+    public static final String singleQuestionInstructionsFillInTheBlank =
+            '''{{ intro }}{{ existingQuestionInfoString }}
+
+## User's {{ usersRequestWord }}:
+"{{ userInput }}"
+
+
+# Question Type Rules (FillInTheBlank)
+
+## Instructions:
+- Generate a clear and concise question with at least one blank, written as three underscores (___).
+- Return exactly one answer object per blank, in the same order as the blanks appear in the question.
+- Each answer must have an `answer` string and `"isCorrect": true`; do not include `multiPartAnswer`.
+- For multiple acceptable responses to a single blank, separate them with semicolons in that blank's `answer` string.
+- Ensure answers are plausible and relevant to the question.{{ additionalInstructions }}
+
+## Required Response Format:
+### Question:
+[Your generated question here]
+
+### Answers:
+[Your JSON array of answers here]
+
+## Example Response:
+### Question:
+The capital of France is ___.
+
+### Answers:
+[
+  { "answer": "Paris", "isCorrect": true }
+]
+
+## Important Notes:
+- Start with "### Question:" on its own line
+- Follow with the question text
+- Add a blank line
+- Then "### Answers:" on its own line
+- Follow with the JSON array
+- The JSON must be valid and properly formatted
+- The JSON array must strictly adhere to the Question Type Rules (FillInTheBlank):
+- Include explanations in the answers if the question is complex
+- Do not include any other text outside these sections
+- Do not number answers
+
+## Validation Checklist
+Before responding, verify that every blank has exactly one nonempty answer object, all answers are marked correct, and the answers are ordered by blank position.
+'''
+
     public static final String updateSingleQuestionTypeChangedToMultipleChoiceInstructions =
 '''Apply the following instructions to this conversation: "{{ userEnteredText }}"
 
@@ -920,6 +968,65 @@ Before responding, count the number of `"isCorrect": true` for the question and 
 - If questionType doesn't match, FIX IT
 '''
 
+    public static final String updateSingleQuestionTypeChangedToFillInTheBlankInstructions =
+            '''Apply the following instructions to this conversation: "{{ userEnteredText }}"
+
+Here are the specific requirements:
+- Make sure to regenerate the entire content again
+- At the end create a new section with the title of "Here is what was changed" - then list any comments or suggestions.
+
+
+## IMPORTANT: The Question Type has changed from `{{ previousQuestionType }}` to `FillInTheBlank`.
+- **You must change the answers array to follow the new questionType (FillInTheBlank) rules!**
+- Disregard the "Question Type Rules ({{ previousQuestionType }})" from earlier in the conversation and use only the following "Question Type Rules (FillInTheBlank)" for this response.
+
+# Question Generation Instructions - STRICT RULES
+
+## Output Format
+Return the answers as JSON array of objects that strictly adhere to the following rules based on the new questionType (FillInTheBlank):
+
+
+# Question Type Rules (FillInTheBlank)
+
+## Instructions:
+- Generate a clear and concise question with at least one blank, written as three underscores (___).
+- Return exactly one answer object per blank, in the same order as the blanks appear in the question. A single-blank question requires exactly one answer object.
+- Each answer must have an `answer` string and `"isCorrect": true`; do not include `multiPartAnswer`.
+- For multiple acceptable responses to a single blank, separate them with semicolons in that blank's `answer` string.
+- Ensure answers are plausible and relevant to the question.
+
+## Required Response Format:
+### Question:
+[Your generated question here]
+
+### Answers:
+[Your JSON array of answers here]
+
+## Example Response:
+### Question:
+The capital of France is ___ and the capital of Italy is ___.
+
+### Answers:
+[
+  {"answer": "Paris", "isCorrect": true},
+  {"answer": "Rome", "isCorrect": true}
+]
+
+## Important Notes:
+- Start with "### Question:" on its own line
+- Follow with the question text
+- Add a blank line
+- Then "### Answers:" on its own line
+- Follow with the JSON array
+- The JSON must be valid and properly formatted
+- The JSON array must strictly adhere to the Question Type Rules (FillInTheBlank):
+- Include explanations in the answers if the question is complex
+- Do not include any other text outside these sections
+- Do not number answers
+
+## Validation Checklist
+Before responding, verify that every blank has exactly one nonempty answer object, all answers are marked correct, and the answers are ordered by blank position. One blank and one answer is valid.
+'''
 
     public static final String textInputQuestionGradingInstructions =
 '''# LLM Quiz Answer Confidence Assessment Prompt

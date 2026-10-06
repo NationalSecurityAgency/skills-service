@@ -268,6 +268,40 @@ describe('Generate Single Question Tests', () => {
         cy.get('[data-cy="questionDisplayCard-1"] [data-cy="textAreaPlaceHolder"]')
     })
 
+    it('generates and applies a Fill In the Blank question', () => {
+        const question = 'The rock bands behind Hey Jude and Bohemian Rhapsody are ___ and ___.';
+        cy.intercept('GET', '/public/config', (req) => {
+            req.reply((res) => {
+                const conf = res.body;
+                conf.enableOpenAIIntegration = true;
+                res.send(conf);
+            });
+        }).as('getConfig');
+        cy.createQuizDef(1);
+
+        cy.visit('/administrator/quizzes/quiz1');
+        cy.get('@getConfig');
+        cy.get('[data-cy="btn_Questions"]').click();
+        cy.get('[data-cy="aiButton"]').click();
+        cy.get('[data-cy="genQuestionTypeSelector"]').click();
+        cy.get('[data-cy="selectionItem_FillInTheBlank"]').click();
+        cy.get('[data-cy="instructionsInput"]').type('Great rock bands{enter}');
+
+        cy.get('[data-cy="aiMsg-2"] [data-cy="generatedSegment"]').should('contain.text', question);
+        cy.get('[data-cy="aiMsg-2"] [data-cy="generatedAnswers"]').should('contain.text', 'The Beatles').and('contain.text', 'Queen');
+        cy.get('[data-cy="aiMsg-2"] [data-cy="finalSegment"]').should('contain.text', completedMsg);
+        cy.get('[data-cy="useGenValueBtn-2"]').should('be.enabled').click();
+
+        cy.get('[data-cy="questionText"] [data-cy="markdownEditorInput"]').should('contain.text', question);
+        cy.get('[data-cy="answerTypeSelector"] [data-cy="selectionItem_FillInTheBlank"]').should('exist');
+        cy.get('[data-cy="answer-0"] [data-cy="answerText"]').should('have.value', 'The Beatles');
+        cy.get('[data-cy="answer-1"] [data-cy="answerText"]').should('have.value', 'Queen');
+        cy.get('[data-cy="answer-2"]').should('not.exist');
+        cy.get('[data-cy="saveDialogBtn"]').should('be.enabled').click();
+        cy.get('[data-cy="questionDisplayCard-1"] [data-cy="questionDisplayText"]').should('contain.text', question);
+        cy.get('[data-cy="questionDisplayCard-1"]').should('contain.text', 'The Beatles').and('contain.text', 'Queen');
+    });
+
     it('generate a new Matching question', () => {
         cy.viewport(1280, 1400)
         cy.intercept('GET', '/public/config', (req) => {
@@ -906,5 +940,3 @@ describe('Generate Single Question Tests', () => {
         validateSavedAnswers(expectedAnswers)
     });
 });
-
-
