@@ -32,6 +32,7 @@ const props = defineProps({
   data: Object,
   editable: { type: Boolean, default: false },
   mode: { type: String, default: 'admin' },
+  projectId: { type: String, required: true },
 })
 const emit = defineEmits(['update', 'panToNode'])
 const announcer = useSkillsAnnouncer()
@@ -143,7 +144,7 @@ const jumpToNode = (value) => {
             <template #body="slotProps">
               <div>
                 <RouterLink :to="getRoute(slotProps.data.fromNode)" :data-cy="`fromNodeLink_${slotProps.data.fromNode.skillId}`">{{ slotProps.data.fromItem }}</RouterLink>
-                <span v-if="slotProps.data.fromNode.projectId !== route.params.projectId" class="block italic text-sm pl-2">shared from {{ slotProps.data.fromNode.projectName }}</span>
+                <span v-if="slotProps.data.fromNode.projectId !== projectId" class="block italic text-sm pl-2">shared from {{ slotProps.data.fromNode.projectName }}</span>
               </div>
             </template>
           </Column>
@@ -156,7 +157,7 @@ const jumpToNode = (value) => {
             <template #body="slotProps">
               <div>
                 <RouterLink :to="getRoute(slotProps.data.toNode)" :data-cy="`toNodeLink_${slotProps.data.toNode.skillId}`">{{ slotProps.data.toItem }}</RouterLink>
-                <span v-if="slotProps.data.toNode.projectId !== route.params.projectId" class="block italic text-sm pl-2">shared from {{ slotProps.data.toNode.projectName }}</span>
+                <span v-if="slotProps.data.toNode.projectId !== projectId" class="block italic text-sm pl-2">shared from {{ slotProps.data.toNode.projectName }}</span>
               </div>
             </template>
           </Column>
