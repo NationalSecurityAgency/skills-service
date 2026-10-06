@@ -106,14 +106,63 @@ describe('Project learning path in skills display', () => {
     cy.get('[data-cy="learningPathTable"] [data-cy="toNodeLink_skill3"]').should('be.visible')
     cy.get('[data-cy="learningPathTable"] [data-cy="toNodeLink_skill4"]').should('not.exist')
     cy.get('[data-cy="learningPathTable"] [data-cy="fromNodeStatus_skill1"]').should('have.text', 'Achieved')
+      .and('have.css', 'color', 'rgb(0, 128, 0)')
+      .find('i.fa-check').should('have.css', 'color', 'rgb(0, 128, 0)')
     cy.get('[data-cy="learningPathTable"] [data-cy="fromNodeStatus_skill2"]').should('have.text', 'Achieved')
     cy.get('[data-cy="learningPathTable"] [data-cy="toNodeStatus_skill2"]').should('have.text', 'Achieved')
-      .find('i.fa-check[aria-hidden="true"]').should('exist')
+      .and('have.css', 'color', 'rgb(0, 128, 0)')
+      .find('i.fa-check[aria-hidden="true"]').should('have.css', 'color', 'rgb(0, 128, 0)')
     cy.get('[data-cy="learningPathTable"] [data-cy="toNodeStatus_skill3"]').should('have.text', 'Not achieved')
     cy.get('[data-cy="learningPathTable"] thead th').contains('To Status').click()
     cy.get('[data-cy="learningPathTable"] tbody tr').first().find('[data-cy="toNodeStatus_skill3"]').should('have.text', 'Not achieved')
     cy.get('[data-cy="learningPathTable"] thead th').contains('To Status').click()
     cy.get('[data-cy="learningPathTable"] tbody tr').first().find('[data-cy="toNodeStatus_skill2"]').should('have.text', 'Achieved')
+  })
+
+  ;[
+    { mode: 'dark', color: 'rgb(134, 239, 172)' },
+    { mode: 'themed', color: 'rgb(109, 242, 139)' },
+  ].forEach(({ mode, color }) => {
+    it(`colors achieved dependency statuses and check marks in ${mode} mode`, () => {
+      cy.createSkill(1, 1, 1, { numPerformToCompletion: 1 })
+      cy.createSkill(1, 1, 2, { numPerformToCompletion: 1 })
+      cy.createSkill(1, 1, 3, { numPerformToCompletion: 1 })
+      cy.addLearningPathItem(1, 1, 2)
+      cy.addLearningPathItem(1, 2, 3)
+      cy.reportSkill(1, 1, Cypress.env('proxyUser'), 'now')
+      cy.reportSkill(1, 2, Cypress.env('proxyUser'), 'now')
+      cy.configureDarkMode(mode === 'dark')
+
+      cy.visit(`/test-skills-display/proj1${mode === 'themed' ? '/?enableTheme=true' : ''}`)
+      if (mode === 'dark') {
+        cy.get('html').should('have.class', 'st-dark-theme')
+      }
+      cy.get('[data-cy="viewLearningPathLink"]').click()
+      ;['fromNodeStatus_skill1', 'toNodeStatus_skill2'].forEach((status) => {
+        cy.get(`[data-cy="learningPathTable"] [data-cy="${status}"]`)
+          .should('be.visible').and('have.text', 'Achieved')
+          .and('have.css', 'color', color)
+          .should(($status) => {
+            const element = $status[0]
+            const foreground = getComputedStyle(element).color.match(/\d+/g).slice(0, 3).map(Number)
+            let backgroundElement = element
+            while (backgroundElement && getComputedStyle(backgroundElement).backgroundColor === 'rgba(0, 0, 0, 0)') {
+              backgroundElement = backgroundElement.parentElement
+            }
+            const background = getComputedStyle(backgroundElement).backgroundColor.match(/\d+/g).slice(0, 3).map(Number)
+            const luminance = (rgb) => rgb.map((value) => {
+              const channel = value / 255
+              return channel <= 0.04045 ? channel / 12.92 : ((channel + 0.055) / 1.055) ** 2.4
+            }).reduce((sum, channel, index) => sum + channel * [0.2126, 0.7152, 0.0722][index], 0)
+            const light = Math.max(luminance(foreground), luminance(background))
+            const dark = Math.min(luminance(foreground), luminance(background))
+            expect((light + 0.05) / (dark + 0.05), `${mode} achieved status contrast`).to.be.at.least(4.5)
+          })
+          .find('i.fa-check').should('have.css', 'color', color)
+      })
+      cy.get('[data-cy="toNodeStatus_skill3"]').should('have.text', 'Not achieved')
+        .find('i.fa-check').should('not.exist')
+    })
   })
 
   it('shows 100% completion on both the home and learning path pages', () => {

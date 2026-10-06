@@ -149,7 +149,7 @@ const jumpToNode = (value) => {
           </Column>
           <Column v-if="mode === 'skills-display'" field="fromAchieved" header="From Status" sortable :class="{'flex': isFlex }">
             <template #body="slotProps">
-              <span :data-cy="`fromNodeStatus_${slotProps.data.fromNode.skillId}`"><i v-if="slotProps.data.fromAchieved" class="fas fa-check mr-1" aria-hidden="true" />{{ slotProps.data.fromAchieved ? 'Achieved' : 'Not achieved' }}</span>
+              <span :data-cy="`fromNodeStatus_${slotProps.data.fromNode.skillId}`" :style="slotProps.data.fromAchieved ? { color: themeState.graphAchievedColor } : undefined"><i v-if="slotProps.data.fromAchieved" class="fas fa-check mr-1" aria-hidden="true" />{{ slotProps.data.fromAchieved ? 'Achieved' : 'Not achieved' }}</span>
             </template>
           </Column>
           <Column field="toItem" header="To" sortable :class="{'flex': isFlex }">
@@ -162,7 +162,7 @@ const jumpToNode = (value) => {
           </Column>
           <Column v-if="mode === 'skills-display'" field="toAchieved" header="To Status" sortable :class="{'flex': isFlex }">
             <template #body="slotProps">
-              <span :data-cy="`toNodeStatus_${slotProps.data.toNode.skillId}`"><i v-if="slotProps.data.toAchieved" class="fas fa-check mr-1" aria-hidden="true" />{{ slotProps.data.toAchieved ? 'Achieved' : 'Not achieved' }}</span>
+              <span :data-cy="`toNodeStatus_${slotProps.data.toNode.skillId}`" :style="slotProps.data.toAchieved ? { color: themeState.graphAchievedColor } : undefined"><i v-if="slotProps.data.toAchieved" class="fas fa-check mr-1" aria-hidden="true" />{{ slotProps.data.toAchieved ? 'Achieved' : 'Not achieved' }}</span>
             </template>
           </Column>
           <Column field="edit" header="View Route" v-if="editable" :class="{'flex': isFlex }">
