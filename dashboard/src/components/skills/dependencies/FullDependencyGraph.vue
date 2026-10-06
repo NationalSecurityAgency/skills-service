@@ -122,6 +122,7 @@ onMounted(loadGraph)
       :data="graphData"
       :editable="isEditable"
       :mode="mode"
+      :project-id="route.params.projectId"
       @update="handleUpdate"
       @pan-to-node="graphComponent?.panToNode" />
     <ShareSkillsWithOtherProjects v-if="isEditable" :project-id="route.params.projectId" />

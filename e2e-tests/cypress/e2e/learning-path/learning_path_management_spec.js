@@ -80,15 +80,36 @@ describe('Learning Path Management Validation Tests', () => {
         cy.get('[data-cy="learningPathTotalRows"] [data-cy="skillsBTableTotalRows"]').should('have.text', '1')
     })
 
+    it('hides graph controls and legend until a learning path exists', () => {
+        visitLearningPath()
+
+        cy.get('[data-cy="fullDepsSkillsGraph"]').contains('No Learning Path Yet...').should('be.visible')
+        cy.get('[data-cy="fullDepsSkillsGraph"] [data-cy="graphLegend"]').should('not.exist')
+        cy.get('[data-cy="learningPath-fullScreenButton"]').should('not.exist')
+        cy.get('[data-cy="learningPathSettingsMenu"]').should('not.exist')
+        cy.get('#additionalControls').should('not.exist')
+
+        cy.selectSkill('[data-cy="learningPathFromSkillSelector"]', 'skill1')
+        cy.selectSkill('[data-cy="learningPathToSkillSelector"]', 'skill2')
+        cy.get('[data-cy="addLearningPathItemBtn"]').click()
+
+        cy.get(`${tableSelector} [data-cy="fromNodeLink_skill1"]`).should('be.visible')
+        cy.get('[data-cy="fullDepsSkillsGraph"]').should('not.contain.text', 'No Learning Path Yet...')
+        cy.get('[data-cy="fullDepsSkillsGraph"] [data-cy="graphLegend"]').should('be.visible')
+        cy.get('[data-cy="learningPath-fullScreenButton"]').should('be.visible')
+        cy.get('[data-cy="learningPathSettingsMenu"]').should('be.visible')
+        cy.get('#additionalControls').should('be.visible')
+    })
+
     it('Create a simple learning path', () => {
         visitLearningPath()
-        cy.get('[data-cy="fullDepsSkillsGraph"] [data-cy="graphLegend"]').should('be.visible')
 
         // Add Badge1 as a prerequisite for Badge2
         cy.selectSkill('[data-cy="learningPathFromSkillSelector"]', 'badge1')
         cy.selectSkill('[data-cy="learningPathToSkillSelector"]', 'badge2');
         cy.get('[data-cy="addLearningPathItemBtn"]').click();
         cy.get('[data-cy="learningPathFromSkillSelector"] input').should('be.enabled')
+        cy.get('[data-cy="fullDepsSkillsGraph"] [data-cy="graphLegend"]').should('be.visible')
 
         // Add Skill5 as a prerequisite for Badge1
         cy.selectSkill('[data-cy="learningPathFromSkillSelector"]', 'skill5Subj2')
@@ -542,7 +563,7 @@ describe('Learning Path Management Validation Tests', () => {
     it('keeps the graph and add controls after entering and leaving full screen', () => {
         visitLearningPath()
         cy.get('[data-cy="fullDepsSkillsGraph"]').contains('No Learning Path Yet').should('be.visible')
-        cy.get('[data-cy="learningPath-fullScreenButton"]').should('be.visible')
+        cy.get('[data-cy="learningPath-fullScreenButton"]').should('not.exist')
 
         cy.selectSkill('[data-cy="learningPathFromSkillSelector"]', 'badge1')
         cy.selectSkill('[data-cy="learningPathToSkillSelector"]', 'badge2')

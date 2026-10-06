@@ -15,14 +15,14 @@ limitations under the License.
 */
 <script setup>
 import { onMounted, ref } from 'vue'
-import { useRoute } from 'vue-router'
 import SkillsTitle from '@/skills-display/components/utilities/SkillsTitle.vue'
 import DependencyGraph from '@/common-components/dependency/DependencyGraph.vue'
 import DependencyTable from '@/common-components/dependency/DependencyTable.vue'
 import { useSkillsDisplayService } from '@/skills-display/services/UseSkillsDisplayService.js'
+import { useSkillsDisplayAttributesState } from '@/skills-display/stores/UseSkillsDisplayAttributesState.js'
 
-const route = useRoute()
 const skillsDisplayService = useSkillsDisplayService()
+const attributes = useSkillsDisplayAttributesState()
 const graph = ref({ nodes: [], edges: [] })
 const graphData = ref({})
 const isLoading = ref(true)
@@ -42,11 +42,11 @@ onMounted(() => {
       <DependencyGraph
         :graph="graph"
         :is-loading="isLoading"
-        :project-id="route.params.projectId"
+        :project-id="attributes.projectId"
         :mode="mode"
         @data-changed="graphData = $event"
       />
-      <DependencyTable v-if="graph.nodes.length" :is-loading="isLoading" :data="graphData" :mode="mode" />
+      <DependencyTable v-if="graph.nodes.length" :is-loading="isLoading" :data="graphData" :mode="mode" :project-id="attributes.projectId"/>
     </div>
   </div>
 </template>

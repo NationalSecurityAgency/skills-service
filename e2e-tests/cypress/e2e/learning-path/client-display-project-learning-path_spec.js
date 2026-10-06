@@ -106,14 +106,63 @@ describe('Project learning path in skills display', () => {
     cy.get('[data-cy="learningPathTable"] [data-cy="toNodeLink_skill3"]').should('be.visible')
     cy.get('[data-cy="learningPathTable"] [data-cy="toNodeLink_skill4"]').should('not.exist')
     cy.get('[data-cy="learningPathTable"] [data-cy="fromNodeStatus_skill1"]').should('have.text', 'Achieved')
+      .and('have.css', 'color', 'rgb(0, 128, 0)')
+      .find('i.fa-check').should('have.css', 'color', 'rgb(0, 128, 0)')
     cy.get('[data-cy="learningPathTable"] [data-cy="fromNodeStatus_skill2"]').should('have.text', 'Achieved')
     cy.get('[data-cy="learningPathTable"] [data-cy="toNodeStatus_skill2"]').should('have.text', 'Achieved')
-      .find('i.fa-check[aria-hidden="true"]').should('exist')
+      .and('have.css', 'color', 'rgb(0, 128, 0)')
+      .find('i.fa-check[aria-hidden="true"]').should('have.css', 'color', 'rgb(0, 128, 0)')
     cy.get('[data-cy="learningPathTable"] [data-cy="toNodeStatus_skill3"]').should('have.text', 'Not achieved')
     cy.get('[data-cy="learningPathTable"] thead th').contains('To Status').click()
     cy.get('[data-cy="learningPathTable"] tbody tr').first().find('[data-cy="toNodeStatus_skill3"]').should('have.text', 'Not achieved')
     cy.get('[data-cy="learningPathTable"] thead th').contains('To Status').click()
     cy.get('[data-cy="learningPathTable"] tbody tr').first().find('[data-cy="toNodeStatus_skill2"]').should('have.text', 'Achieved')
+  })
+
+  ;[
+    { mode: 'dark', color: 'rgb(134, 239, 172)' },
+    { mode: 'themed', color: 'rgb(109, 242, 139)' },
+  ].forEach(({ mode, color }) => {
+    it(`colors achieved dependency statuses and check marks in ${mode} mode`, () => {
+      cy.createSkill(1, 1, 1, { numPerformToCompletion: 1 })
+      cy.createSkill(1, 1, 2, { numPerformToCompletion: 1 })
+      cy.createSkill(1, 1, 3, { numPerformToCompletion: 1 })
+      cy.addLearningPathItem(1, 1, 2)
+      cy.addLearningPathItem(1, 2, 3)
+      cy.reportSkill(1, 1, Cypress.env('proxyUser'), 'now')
+      cy.reportSkill(1, 2, Cypress.env('proxyUser'), 'now')
+      cy.configureDarkMode(mode === 'dark')
+
+      cy.visit(`/test-skills-display/proj1${mode === 'themed' ? '/?enableTheme=true' : ''}`)
+      if (mode === 'dark') {
+        cy.get('html').should('have.class', 'st-dark-theme')
+      }
+      cy.get('[data-cy="viewLearningPathLink"]').click()
+      ;['fromNodeStatus_skill1', 'toNodeStatus_skill2'].forEach((status) => {
+        cy.get(`[data-cy="learningPathTable"] [data-cy="${status}"]`)
+          .should('be.visible').and('have.text', 'Achieved')
+          .and('have.css', 'color', color)
+          .should(($status) => {
+            const element = $status[0]
+            const foreground = getComputedStyle(element).color.match(/\d+/g).slice(0, 3).map(Number)
+            let backgroundElement = element
+            while (backgroundElement && getComputedStyle(backgroundElement).backgroundColor === 'rgba(0, 0, 0, 0)') {
+              backgroundElement = backgroundElement.parentElement
+            }
+            const background = getComputedStyle(backgroundElement).backgroundColor.match(/\d+/g).slice(0, 3).map(Number)
+            const luminance = (rgb) => rgb.map((value) => {
+              const channel = value / 255
+              return channel <= 0.04045 ? channel / 12.92 : ((channel + 0.055) / 1.055) ** 2.4
+            }).reduce((sum, channel, index) => sum + channel * [0.2126, 0.7152, 0.0722][index], 0)
+            const light = Math.max(luminance(foreground), luminance(background))
+            const dark = Math.min(luminance(foreground), luminance(background))
+            expect((light + 0.05) / (dark + 0.05), `${mode} achieved status contrast`).to.be.at.least(4.5)
+          })
+          .find('i.fa-check').should('have.css', 'color', color)
+      })
+      cy.get('[data-cy="toNodeStatus_skill3"]').should('have.text', 'Not achieved')
+        .find('i.fa-check').should('not.exist')
+    })
   })
 
   it('shows 100% completion on both the home and learning path pages', () => {
@@ -342,6 +391,64 @@ describe('Project learning path in skills display', () => {
       .should('have.attr', 'href', '/test-skills-display/proj1/badges/badge1')
       .click()
     cy.get('[data-cy="badge_badge1"] [data-cy="badgeTitle"]').contains('Badge 1')
+  })
+
+  it('shows a smaller indented shared project label below cross-project skills in dependency tables', () => {
+    cy.createSkill(1, 1, 1)
+    cy.createProject(2, { name: 'Shared Skills Project' })
+    cy.createSubject(2, 1)
+    cy.createSkill(2, 1, 2)
+    cy.addCrossProjectLearningPathItem(2, 2, 1, 1)
+
+    const checkSharedProjectLabel = () => {
+      cy.get('[data-cy="learningPathTable"] [data-cy="fromNodeLink_skill2"]')
+        .should('be.visible').and('have.text', 'Very Great Skill 2')
+        .parent().find('span')
+        .should('be.visible')
+        .and('have.text', 'shared from Shared Skills Project')
+        .and('have.css', 'font-style', 'italic')
+        .should(($label) => {
+          const link = $label.parent().find('a')[0]
+          expect(parseFloat($label.css('font-size'))).to.be.lessThan(parseFloat(getComputedStyle(link).fontSize))
+          expect(parseFloat($label.css('padding-left'))).to.be.greaterThan(0)
+          expect($label[0].getBoundingClientRect().top).to.be.at.least(link.getBoundingClientRect().bottom)
+        })
+      cy.get('[data-cy="learningPathTable"] [data-cy="toNodeLink_skill1"]')
+        .parent().should('not.contain.text', 'shared from')
+    }
+
+    cy.cdVisit('/learning-path')
+    checkSharedProjectLabel()
+    cy.visit('/administrator/projects/proj1/learning-path')
+    checkSharedProjectLabel()
+  })
+
+  it('preserves the dependency table page size after reload in skills display and admin views', () => {
+    for (let skill = 1; skill <= 8; skill += 1) {
+      cy.createSkill(1, 1, skill)
+    }
+    for (let skill = 2; skill <= 8; skill += 1) {
+      cy.addLearningPathItem(1, skill - 1, skill)
+    }
+
+    const table = '[data-cy="learningPathTable"]'
+    cy.cdVisit('/learning-path')
+    cy.get(`${table} tbody tr`).should('have.length', 5)
+    cy.get(`${table} [data-pc-name="pcrowperpagedropdown"]`).click()
+    cy.get('[data-pc-section="option"]').contains(/^10$/).click()
+    cy.get(`${table} tbody tr`).should('have.length', 7)
+
+    cy.reload()
+    cy.get(`${table} [data-pc-name="pcrowperpagedropdown"]`).should('contain.text', '10')
+    cy.get(`${table} tbody tr`).should('have.length', 7)
+
+    cy.visit('/administrator/projects/proj1/learning-path')
+    cy.get(`${table} [data-pc-name="pcrowperpagedropdown"]`).should('contain.text', '10').click()
+    cy.get('[data-pc-section="option"]').contains(/^5$/).click()
+    cy.get(`${table} tbody tr`).should('have.length', 5)
+    cy.reload()
+    cy.get(`${table} [data-pc-name="pcrowperpagedropdown"]`).should('contain.text', '5')
+    cy.get(`${table} tbody tr`).should('have.length', 5)
   })
 
   it('opens cross-project skills from the learning path table', () => {

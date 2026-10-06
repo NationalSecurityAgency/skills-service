@@ -318,7 +318,7 @@ defineExpose({ fitNetworkToScreen, panToNode, refresh })
                 title="No Learning Path Yet..."
                 :message="isAdminMode ? `Here you can create and manage the project's Learning Path.` : `Here you can view the project's Learning Path, which may consist of skills and badges.`" />
             </div>
-            <div class="w-full px-2" :class="isFullscreen ? 'pt-4' : ''">
+            <div v-if="hasGraphData" class="w-full px-2" :class="isFullscreen ? 'pt-4' : ''">
               <div class="flex flex-wrap items-start justify-between gap-3">
                 <div class="min-w-0 flex-1">
                   <div v-if="showProgress" class="mb-4 w-full max-w-xs rounded-lg border border-surface-50 dark:border-surface-800 bg-surface-0 dark:bg-surface-900 px-3 py-2 shadow-sm" :style="graphProgressStyle" data-cy="learningPathProgressSummary">
