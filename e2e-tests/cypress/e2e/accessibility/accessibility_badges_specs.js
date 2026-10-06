@@ -247,6 +247,7 @@ describe('Accessibility Badges Tests', () => {
             cy.customA11y();
 
             cy.selectSkill('[data-cy="skillsSelector"]', 'skill1', 'This is 1', 'MyNewtestProject');
+            cy.get('[data-cy="badgeSkillsTable"] [data-cy="manage_skill1"]').should('be.visible');
             cy.customA11y();
             cy.get('[data-cy=nav-Levels]')
                 .click();
@@ -271,8 +272,11 @@ describe('Accessibility Badges Tests', () => {
                 .should('have.text', '1');
             cy.customA11y();
 
+            // The Live status is optimistic; wait for persistence before navigation and Lighthouse.
+            cy.intercept('PUT', '/admin/badges/globalbadgeBadge').as('publishGlobalBadge');
             cy.get('[data-cy="goLive"]').click()
             cy.get('[data-pc-name="pcacceptbutton"]').click()
+            cy.wait('@publishGlobalBadge').its('response.statusCode').should('eq', 200);
 
             cy.get('[data-cy=nav-Users]').click();
             cy.wait('@getUsers')

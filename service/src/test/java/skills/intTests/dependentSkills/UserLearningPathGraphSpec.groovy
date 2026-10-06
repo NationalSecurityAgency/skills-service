@@ -299,7 +299,8 @@ class UserLearningPathGraphSpec extends DefaultIntSpec {
         !deniedGraph.nodes.find { it.projectId == restrictedProject.projectId }
 
         when:
-        String normalizedUserId = viewer.getUsername(userId)
+        // PKI certificate usernames may contain uppercase characters; persisted user IDs are lowercase.
+        String normalizedUserId = viewer.getUsername(userId).toLowerCase()
         userRoleRepo.save(new UserRole(userId: normalizedUserId, userRefId: userRepo.findByUserId(normalizedUserId).id,
                 projectId: restrictedProject.projectId, roleName: RoleName.ROLE_PRIVATE_PROJECT_USER))
         def allowedGraph = viewer.getUserDependencyGraph(project.projectId)

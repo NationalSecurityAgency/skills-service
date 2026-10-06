@@ -139,7 +139,26 @@ class CsrfSkillSubmissionSpecs extends DefaultIntSpec {
         withValidCredentials != HttpStatus.FORBIDDEN
 
         where:
-        [method, path] << JSON_ENDPOINTS + PUBLIC_ENDPOINTS
+        [method, path] << JSON_ENDPOINTS
+    }
+
+    @Unroll
+    def '#method public logging needs no CSRF token or header in either mode'() {
+        given:
+        RestTemplate client = probeClient()
+        HttpHeaders headers = new HttpHeaders()
+        headers.contentType = MediaType.APPLICATION_JSON
+        headers.accept = [MediaType.APPLICATION_JSON]
+
+        when:
+        HttpStatusCode status = responseOrError(client, "${skillsService.wsHelper.skillsService}${path}",
+                method, payloadFor(path), headers)
+
+        then:
+        status == HttpStatus.OK
+
+        where:
+        [method, path] << PUBLIC_ENDPOINTS
     }
 
     def 'every production POST and PUT mapping under /api and /public has a CSRF policy probe'() {

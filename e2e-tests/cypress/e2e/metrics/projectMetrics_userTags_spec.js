@@ -289,7 +289,9 @@ describe('Metrics Using User Tags Tests', () => {
 
             cy.get('[data-cy="userTagTableCard"] [data-pc-section="header"]').contains('Many Values');
 
-            cy.get('[data-cy="userTagTableCard"] [data-cy="manyValues-metricsDateFilter"]').click()
+            // The DatePicker wrapper can be clicked while its input is still disabled by the initial load.
+            cy.get('[data-cy="manyValues-metricsDateFilter"] input').should('be.enabled').click()
+            cy.get('[data-pc-section="panel"] [data-pc-section="calendar"]').should('be.visible')
             cy.prevMonth()
             cy.setDay(1)
             cy.setDay(1)
