@@ -141,6 +141,8 @@ final class ClientEndpointCsrfRequestMatcher implements RequestMatcher {
     private final RequestMatcher clientEndpointMatcher = new OrRequestMatcher(
             PathPatternRequestMatcher.pathPattern('/api/**'),
             PathPatternRequestMatcher.pathPattern('/public/**'))
+    private final RequestMatcher publicClientLog = new OrRequestMatcher(
+            PathPatternRequestMatcher.pathPattern('/public/log'))
     private final Set<String> safeMethods = ['GET', 'HEAD', 'TRACE', 'OPTIONS'] as Set
 
     ClientEndpointCsrfRequestMatcher(boolean pkiMode) {
@@ -149,7 +151,7 @@ final class ClientEndpointCsrfRequestMatcher implements RequestMatcher {
 
     @Override
     boolean matches(HttpServletRequest request) {
-        if (safeMethods.contains(request.method)) {
+        if (safeMethods.contains(request.method) || publicClientLog.matches(request)) {
             return false
         }
         // Support running skills-client within iframe on a different domain,
