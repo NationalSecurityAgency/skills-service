@@ -317,6 +317,35 @@ describe('Skills Display Run Quizzes With Fill In the Blank Questions', () => {
         cy.get('[data-cy="questionDisplayCard-1"]').should('contain.text', 'gamma');
     });
 
+    it('does not save fill in the blank questions with more than the maximum number of answers', () => {
+        cy.createQuizDef(1);
+        cy.visit('/administrator/quizzes/quiz1');
+        cy.openDialog('[data-cy="btn_Questions"]', true);
+        cy.get('[data-cy="answerTypeSelector"]').click();
+        cy.get('[data-cy="selectionItem_FillInTheBlank"]').click();
+
+        cy.request('/public/config').its('body.maxAnswersPerQuizQuestion').then((configuredMaximum) => {
+            const maxAnswers = Number(configuredMaximum);
+            cy.typeInMarkdownEditor('[data-cy="questionText"]', '___');
+            for (let index = 0; index < maxAnswers; index += 1) {
+                if (index > 0) {
+                    cy.get('[data-cy="questionText"] [data-cy="markdownEditorInput"] .toastui-editor-ww-container .toastui-editor-contents').type(' ___', { force: true });
+                }
+                cy.get('[data-cy^="answer-"]').should('have.length', index + 1);
+                cy.get(`[data-cy="answer-${index}"] [data-cy="answerText"]`).type(`answer ${index + 1}`, { force: true });
+            }
+
+            cy.get('[data-cy="saveDialogBtn"]').should('be.enabled');
+            cy.get('[data-cy="questionText"] [data-cy="markdownEditorInput"] .toastui-editor-ww-container .toastui-editor-contents').type(' ___', { force: true });
+            cy.get('[data-cy^="answer-"]').should('have.length', maxAnswers + 1);
+            cy.get(`[data-cy="answer-${maxAnswers}"] [data-cy="answerText"]`).type('extra answer', { force: true });
+            cy.get('[data-cy="saveDialogBtn"]').should('be.disabled');
+            cy.get('[data-cy="answersError"]').scrollIntoView().should('be.visible')
+                .and('contain.text', `Exceeded maximum number of [${maxAnswers}] answers`);
+            cy.get('[data-cy="questionDisplayCard-1"]').should('not.exist');
+        });
+    });
+
     it('retains correct answers when switching an existing question to fill in the blank', () => {
         cy.createQuizDef(1);
         cy.createQuizQuestionDef(1, 1, {

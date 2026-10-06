@@ -236,9 +236,10 @@ const correctAnswersMustHaveText = (value) => {
   return correctWithoutText === 0;
 }
 const maxNumAnswers = (value) => {
-  if (isQuestionTypeTextInput.value || isQuestionTypeRatingInput.value || isQuestionTypeFillInTheBlank.value) {
+  if (isQuestionTypeTextInput.value || isQuestionTypeRatingInput.value || !value) {
     return true;
   }
+
   return value && value.length <= appConfig.maxAnswersPerQuizQuestion;
 }
 const singleChoiceQuestionsMustHave1Answer = (value) => {
