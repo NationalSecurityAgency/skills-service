@@ -31,6 +31,9 @@ import skills.storage.repos.SettingRepo
 import skills.storage.repos.SkillDefRepo
 import spock.lang.IgnoreIf
 
+import java.util.concurrent.Callable
+import java.util.concurrent.Executors
+import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicInteger
 
 @Slf4j
@@ -97,24 +100,32 @@ class ConcurrencySpecs extends DefaultIntSpec {
         assert !settingRepo.findAll().findAll { !it.settingGroup.startsWith("public_") }
         int numThreads = 5
         int numProj = 25
+        def executor = Executors.newFixedThreadPool(numThreads)
         when:
-        List<Thread> threads = (1..numThreads).collect { int threadNum ->
-            Thread.start {
-                (1..numProj).each {
-                    try {
-                        def proj = SkillsFactory.createProject(it)
-                        proj.projectId = uppperCaseOneChar(proj.projectId, threadNum)
-                        proj.name = uppperCaseOneChar(proj.name, threadNum)
+        try {
+            def workers = (1..numThreads).collect { int threadNum ->
+                executor.submit({
+                    (1..numProj).each {
+                        try {
+                            def proj = SkillsFactory.createProject(it)
+                            proj.projectId = uppperCaseOneChar(proj.projectId, threadNum)
+                            proj.name = uppperCaseOneChar(proj.name, threadNum)
 
-                        skillsService.createProject(proj)
-                    } catch (SkillsClientException e) {
-                        // should throw dup projects, that's what we are trying to break
+                            skillsService.createProject(proj)
+                        } catch (SkillsClientException e) {
+                            // Only duplicate-project rejections are expected; surface CSRF,
+                            // authentication, and server errors on the test thread.
+                            assert e.message.contains('errorCode:ConstraintViolation'), e.toString()
+                            assert e.message.contains('already exists'), e.toString()
+                        }
                     }
-                }
+                    return null
+                } as Callable)
             }
-        }
-        threads.each {
-            it.join(5000)
+            workers.each { it.get(60, TimeUnit.SECONDS) }
+        } finally {
+            executor.shutdownNow()
+            assert executor.awaitTermination(60, TimeUnit.SECONDS)
         }
 
         List<String> settingsAsStrings = settingRepo.findAll().collect({ "${it.projectId}-${it.userRefId}" })

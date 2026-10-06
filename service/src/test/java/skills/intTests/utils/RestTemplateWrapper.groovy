@@ -73,7 +73,8 @@ class RestTemplateWrapper extends RestTemplate {
     static class StatefulRestTemplateInterceptor implements ClientHttpRequestInterceptor {
         private final ClientHttpRequestFactory requestFactory
         private final boolean pkiAuth
-        private Map<String, String> cookiesByName = [:]
+        private final Map<String, String> cookiesByName = [:]
+        private final Object cookieLock = new Object()
 
         StatefulRestTemplateInterceptor(ClientHttpRequestFactory requestFactory, boolean pkiAuth) {
             this.requestFactory = requestFactory
@@ -82,14 +83,20 @@ class RestTemplateWrapper extends RestTemplate {
 
         @Override
         public ClientHttpResponse intercept(HttpRequest request, byte[] body, ClientHttpRequestExecution execution) throws IOException {
-            if (needsCsrfToken(request)) {
-                refreshCsrfToken(request)
+            synchronized (cookieLock) {
+                // Login clears the token. Only one worker should fetch its replacement,
+                // and Cookie and X-XSRF-TOKEN must come from the same snapshot.
+                if (needsCsrfToken(request)) {
+                    refreshCsrfToken(request)
+                }
+                addCookiesAndCsrfHeader(request.headers)
             }
 
-            addCookiesAndCsrfHeader(request.headers)
             log.debug("REQUEST: [{}], headers [{}]", request.URI, request.headers)
             ClientHttpResponse response = execution.execute(request, body);
-            updateCookies(response.headers)
+            synchronized (cookieLock) {
+                updateCookies(response.headers)
+            }
             return response;
         }
 
@@ -177,6 +184,8 @@ class RestTemplateWrapper extends RestTemplate {
         return HttpClients.custom()
                 .useSystemProperties()
                 .setConnectionManager(poolingHttpClientConnectionManager())
+                // The interceptor owns cookies, including the matching CSRF header.
+                .disableCookieManagement()
                 .disableAutomaticRetries()
                 .build()
     }
