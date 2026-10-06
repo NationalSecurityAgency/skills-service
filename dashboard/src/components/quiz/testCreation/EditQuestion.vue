@@ -628,7 +628,8 @@ const numberOfBlanks = computed(() => {
             :class="{ 'p-invalid': answersErrorMessage }"
             :aria-invalid="!!answersErrorMessage"
             aria-errormessage="answersError"
-            aria-describedby="answersError" />
+            aria-describedby="answersError"
+            @answers-synced="skillsInputFormDialogRef?.validate()" />
 
         <matching-question ref="answersRef" v-model="props.questionDef.answers" v-if="isQuestionTypeMatching" />
 

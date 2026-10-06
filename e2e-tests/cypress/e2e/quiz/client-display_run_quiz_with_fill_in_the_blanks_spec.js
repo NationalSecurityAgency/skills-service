@@ -346,6 +346,47 @@ describe('Skills Display Run Quizzes With Fill In the Blank Questions', () => {
         });
     });
 
+    it('revalidates answers after selecting and deleting multiple blanks at once', () => {
+        cy.createQuizDef(1);
+        cy.visit('/administrator/quizzes/quiz1');
+        cy.openDialog('[data-cy="btn_Questions"]', true);
+        cy.get('[data-cy="answerTypeSelector"]').click();
+        cy.get('[data-cy="selectionItem_FillInTheBlank"]').click();
+
+        cy.request('/public/config').its('body.maxAnswersPerQuizQuestion').then((configuredMaximum) => {
+            const maxAnswers = Number(configuredMaximum);
+            const editor = '[data-cy="questionText"] [data-cy="markdownEditorInput"] .toastui-editor-ww-container .toastui-editor-contents';
+            cy.typeInMarkdownEditor('[data-cy="questionText"]', 'First ___');
+            cy.get('[data-cy="answer-0"] [data-cy="answerText"]').type('first', { force: true });
+            for (let index = 1; index < maxAnswers + 2; index += 1) {
+                cy.get(editor).type(' ___', { force: true });
+                cy.get(`[data-cy="answer-${index}"]`).should('exist');
+            }
+            cy.get('[data-cy="answersError"]').should('contain.text', `Exceeded maximum number of [${maxAnswers}] answers`);
+            cy.get('[data-cy="saveDialogBtn"]').should('be.disabled');
+
+            cy.get(editor).then(($editor) => {
+                const paragraph = $editor.find('p').last()[0];
+                const textNode = paragraph.lastChild;
+                expect(textNode.textContent).to.match(/ ___ ___$/);
+                const range = document.createRange();
+                range.setStart(textNode, textNode.textContent.length - 8);
+                range.setEnd(textNode, textNode.textContent.length);
+                const selection = paragraph.ownerDocument.defaultView.getSelection();
+                selection.removeAllRanges();
+                selection.addRange(range);
+                expect(selection.toString()).to.equal(' ___ ___');
+            });
+            cy.get(editor).type('{backspace}', { force: true });
+            cy.get('[data-cy^="answer-"]').should('have.length', maxAnswers);
+            cy.get('[data-cy="answersError"]').should('not.contain.text', `Exceeded maximum number of [${maxAnswers}] answers`);
+            for (let index = 1; index < maxAnswers; index += 1) {
+                cy.get(`[data-cy="answer-${index}"] [data-cy="answerText"]`).type(`answer ${index + 1}`, { force: true });
+            }
+            cy.get('[data-cy="saveDialogBtn"]').should('be.enabled');
+        });
+    });
+
     it('retains correct answers when switching an existing question to fill in the blank', () => {
         cy.createQuizDef(1);
         cy.createQuizQuestionDef(1, 1, {

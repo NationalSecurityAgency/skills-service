@@ -14,10 +14,11 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <script setup>
-import { watch, onMounted } from 'vue'
+import { watch, onMounted, nextTick } from 'vue'
 import { useFieldArray } from "vee-validate";
 
 const model = defineModel()
+const emit = defineEmits(['answers-synced'])
 const props = defineProps({
   quizType: {
     type: String,
@@ -76,6 +77,7 @@ watch(() => props.numberOfBlanks, (newValue) => {
       remove(fields.value.length - 1)
     }
   }
+  nextTick(() => emit('answers-synced'))
 })
 
 const { remove, push, replace, fields } = useFieldArray('answers');
