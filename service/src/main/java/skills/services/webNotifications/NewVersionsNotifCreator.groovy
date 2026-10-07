@@ -49,6 +49,19 @@ class NewVersionsNotifCreator {
         assert docsRootHost // must have it configured
         List<WebNotifWrapper> newVersionsNotifications = [
                 new WebNotifWrapper(
+                        releaseNoLaterThan: Date.parse('yyyy-MM-dd', '2026-10-13'),
+                        notif: new WebNotification(
+                                notifiedOn: new Date(),
+                                showUntil: Date.parse('yyyy-MM-dd', '2026-11-12'),
+                                lookupId: "new-versions-12",
+                                title: "Version 5.0 Released",
+                                notification: """- Track acquired and upcoming skills with interactive learning paths
+- Create fill-in-the-blank quiz questions with automatic grading
+- Download video and audio directly from the player when enabled by an administrator
+- [Learn More]({{docsRootHost}}/release-notes/skills-service.html)
+""")
+                ),
+                new WebNotifWrapper(
                         releaseNoLaterThan: Date.parse('yyyy-MM-dd', '2026-08-12'),
                         notif: new WebNotification(
                                 notifiedOn: new Date(),
