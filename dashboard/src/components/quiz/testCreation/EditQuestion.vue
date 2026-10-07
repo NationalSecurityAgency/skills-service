@@ -601,7 +601,7 @@ const numberOfBlanks = computed(() => {
             v-if="isQuestionTypeMatching" class="text-secondary">Add pairs of terms and their matching values:</span>
           <span v-if="isQuestionTypeFillInTheBlank" class="text-secondary">
             <span v-if="numberOfBlanks === 0">
-              Add spaces to the question text to create answer options below.
+              Add blanks to the question text using underscores (___) to create answer options below.
             </span>
             <span v-else>Provide the correct answers for each blank.</span>
              Use a <b>semicolon (;)</b> to separate multiple acceptable options:
