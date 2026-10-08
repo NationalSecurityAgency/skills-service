@@ -303,12 +303,18 @@ describe('Project learning path in skills display', () => {
     cy.get('[data-cy="learningPathTable"] thead th').first().should('have.css', 'background-color', 'rgb(21, 46, 77)')
     cy.contains('[data-cy="card-header"]', 'Learning Path Routes').should('have.css', 'color', 'rgb(255, 255, 255)')
       .and('have.css', 'background-color', 'rgb(21, 46, 77)')
-    cy.get('[data-cy="learningPath-fullScreenButton"]').realClick()
+    // Center the button to avoid the sticky header, then prevent realClick from scrolling it back to the top.
+    cy.get('[data-cy="learningPath-fullScreenButton"]').then(($button) => {
+      $button[0].scrollIntoView({ block: 'center', behavior: 'instant' })
+    })
+    cy.get('[data-cy="learningPath-fullScreenButton"]').should('be.visible').and('be.enabled')
+      .realClick({ scrollBehavior: false })
     cy.get('#fullDepsSkillsGraphContainer').should('match', ':fullscreen')
       .and('have.css', 'background-color', 'rgb(21, 46, 77)')
     cy.get('#dependency-graph canvas').should('be.visible')
     cy.get('[data-cy="learningPathProgressCount"]').should('have.css', 'color', 'rgb(255, 255, 255)')
-    cy.get('[data-cy="learningPath-fullScreenButton"]').realClick()
+    cy.get('[data-cy="learningPath-fullScreenButton"]').should('be.visible').and('be.enabled')
+      .realClick({ scrollBehavior: false })
     cy.get('#fullDepsSkillsGraphContainer').should('not.match', ':fullscreen')
     cy.get('#dependency-graph canvas').should('be.visible')
   })
@@ -352,7 +358,12 @@ describe('Project learning path in skills display', () => {
     cy.contains('Smooth Focus').should('not.exist')
     cy.contains('Dynamic Height').should('be.visible')
 
-    cy.get('[data-cy="learningPath-fullScreenButton"]').realClick()
+    // Center the button to avoid the sticky header, then prevent realClick from scrolling it back to the top.
+    cy.get('[data-cy="learningPath-fullScreenButton"]').then(($button) => {
+      $button[0].scrollIntoView({ block: 'center', behavior: 'instant' })
+    })
+    cy.get('[data-cy="learningPath-fullScreenButton"]').should('be.visible').and('be.enabled')
+      .realClick({ scrollBehavior: false })
     cy.get('#fullDepsSkillsGraphContainer').should('match', ':fullscreen')
     cy.get('#additionalControls').should('be.visible').within(() => {
       cy.contains('Focus On Select').should('not.exist')
