@@ -93,11 +93,11 @@ class UserPointsSpecs extends DefaultIntSpec {
 
         then:
         resultsBefore
-        resultsBefore.data.get(0).userId.contains(sampleUserIds.get(0)?.toLowerCase())
+        resultsBefore.data.get(0).userId.equalsIgnoreCase(sampleUserIds.get(0))
         resultsBefore.data.get(0).totalPoints == 70
 
         resultsAfter
-        resultsBefore.data.get(0).userId.contains(sampleUserIds.get(0)?.toLowerCase())
+        resultsAfter.data.get(0).userId.equalsIgnoreCase(sampleUserIds.get(0))
 
         // totalPoints remains 70 for H2 (see UserPointsRepo.updateUserPointsForASkillInH2())
         resultsAfter.data.get(0).totalPoints == 20
@@ -235,9 +235,9 @@ class UserPointsSpecs extends DefaultIntSpec {
         results.count == 2
         results.totalCount == 2
         results.data.size() == 2
-        results.data.get(0).userId.contains(sampleUserIds.get(0)?.toLowerCase())
+        results.data.get(0).userId.equalsIgnoreCase(sampleUserIds.get(0))
         results.data.get(0).totalPoints == 70
-        results.data.get(1).userId.contains(sampleUserIds.get(1)?.toLowerCase())
+        results.data.get(1).userId.equalsIgnoreCase(sampleUserIds.get(1))
         results.data.get(1).totalPoints == 35
         results.data.sort { a, b -> b.lastUpdated <=> a.lastUpdated }.get(0).lastUpdated == threeDaysAgo.toInstant().toString()
     }
@@ -252,13 +252,13 @@ class UserPointsSpecs extends DefaultIntSpec {
         results1.count == 2
         results1.totalCount == 2
         results1.data.size() == 1
-        results1.data.get(0).userId.contains(sampleUserIds.get(0)?.toLowerCase())
+        results1.data.get(0).userId.equalsIgnoreCase(sampleUserIds.get(0))
         results1.data.get(0).totalPoints == 70
         results2
         results2.count == 2
         results2.totalCount == 2
         results2.data.size() == 1
-        results2.data.get(0).userId.contains(sampleUserIds.get(1)?.toLowerCase())
+        results2.data.get(0).userId.equalsIgnoreCase(sampleUserIds.get(1))
         results2.data.get(0).totalPoints == 35
     }
 
@@ -272,13 +272,13 @@ class UserPointsSpecs extends DefaultIntSpec {
         results1.count == 2 // result count
         results1.totalCount == 2  // total user count
         results1.data.size() == 1
-        results1.data.get(0).userId.contains(sampleUserIds.get(0)?.toLowerCase())
+        results1.data.get(0).userId.equalsIgnoreCase(sampleUserIds.get(0))
         results1.data.get(0).totalPoints == 70
         results2
         results2.count == 2
         results2.totalCount == 2
         results2.data.size() == 1
-        results2.data.get(0).userId.contains(sampleUserIds.get(1)?.toLowerCase())
+        results2.data.get(0).userId.equalsIgnoreCase(sampleUserIds.get(1))
         results2.data.get(0).totalPoints == 35
     }
 
@@ -291,9 +291,9 @@ class UserPointsSpecs extends DefaultIntSpec {
         result.count == 2
         result.totalCount == 2  // total user count
         result.data.size() == 2
-        result.data.get(0).userId.contains(sampleUserIds.get(0)?.toLowerCase())
+        result.data.get(0).userId.equalsIgnoreCase(sampleUserIds.get(0))
         result.data.get(0).totalPoints == 70
-        result.data.get(1).userId.contains(sampleUserIds.get(1)?.toLowerCase())
+        result.data.get(1).userId.equalsIgnoreCase(sampleUserIds.get(1))
         result.data.get(1).totalPoints == 35
     }
 
@@ -307,15 +307,15 @@ class UserPointsSpecs extends DefaultIntSpec {
         results1.count == 2 // result count
         results1.totalCount == 2  // total user count
         results1.data.size() == 2
-        results1.data.get(0).userId.contains(sampleUserIds.get(0)?.toLowerCase())
+        results1.data.get(0).userId.equalsIgnoreCase(sampleUserIds.get(0))
         results1.data.get(0).totalPoints == 70
-        results1.data.get(1).userId.contains(sampleUserIds.get(1)?.toLowerCase())
+        results1.data.get(1).userId.equalsIgnoreCase(sampleUserIds.get(1))
         results1.data.get(1).totalPoints == 35
         results2
         results2.count == 1
         results2.totalCount == results2.count
         results2.data.size() == 1
-        results2.data.get(0).userId.contains(sampleUserIds.get(0)?.toLowerCase())
+        results2.data.get(0).userId.equalsIgnoreCase(sampleUserIds.get(0))
         results2.data.get(0).totalPoints == 70
     }
 
@@ -330,15 +330,15 @@ class UserPointsSpecs extends DefaultIntSpec {
         results1.count == 2 // result count
         results1.totalCount == 2  // total user count
         results1.data.size() == 2
-        results1.data.get(0).userId.contains(sampleUserIds.get(0)?.toLowerCase())
+        results1.data.get(0).userId.equalsIgnoreCase(sampleUserIds.get(0))
         results1.data.get(0).totalPoints == 70
-        results1.data.get(1).userId.contains(sampleUserIds.get(1)?.toLowerCase())
+        results1.data.get(1).userId.equalsIgnoreCase(sampleUserIds.get(1))
         results1.data.get(1).totalPoints == 35
         results2
         results2.count == 1
         results2.totalCount == results2.count
         results2.data.size() == 1
-        results2.data.get(0).userId.contains(sampleUserIds.get(1)?.toLowerCase())
+        results2.data.get(0).userId.equalsIgnoreCase(sampleUserIds.get(1))
         results2.data.get(0).totalPoints == 35
     }
 
@@ -352,15 +352,15 @@ class UserPointsSpecs extends DefaultIntSpec {
         results1.count == 2 // result count
         results1.totalCount == 2  // total user count
         results1.data.size() == 2
-        results1.data.get(0).userId.contains(sampleUserIds.get(0)?.toLowerCase())
+        results1.data.get(0).userId.equalsIgnoreCase(sampleUserIds.get(0))
         results1.data.get(0).totalPoints == 70
-        results1.data.get(1).userId.contains(sampleUserIds.get(1)?.toLowerCase())
+        results1.data.get(1).userId.equalsIgnoreCase(sampleUserIds.get(1))
         results1.data.get(1).totalPoints == 35
         results2
         results2.count == 1
         results2.totalCount == results2.count
         results2.data.size() == 1
-        results2.data.get(0).userId.contains(sampleUserIds.get(0)?.toLowerCase())
+        results2.data.get(0).userId.equalsIgnoreCase(sampleUserIds.get(0))
         results2.data.get(0).totalPoints == 70
     }
 
@@ -375,7 +375,7 @@ class UserPointsSpecs extends DefaultIntSpec {
         results1.count == 1
         results1.totalCount == 1
         results1.data.size() == 1
-        results1.data.get(0).userId.contains(sampleUserIds.get(0)?.toLowerCase())
+        results1.data.get(0).userId.equalsIgnoreCase(sampleUserIds.get(0))
         results1.data.get(0).totalPoints == 35
         results1.data.sort { a, b -> b.lastUpdated <=> a.lastUpdated }.get(0).lastUpdated == threeDaysAgo.toInstant().toString()
 
@@ -383,9 +383,9 @@ class UserPointsSpecs extends DefaultIntSpec {
         results2.count == 2
         results2.totalCount == 2
         results2.data.size() == 2
-        results2.data.get(0).userId.contains(sampleUserIds.get(0)?.toLowerCase())
+        results2.data.get(0).userId.equalsIgnoreCase(sampleUserIds.get(0))
         results2.data.get(0).totalPoints == 35
-        results2.data.get(1).userId.contains(sampleUserIds.get(1)?.toLowerCase())
+        results2.data.get(1).userId.equalsIgnoreCase(sampleUserIds.get(1))
         results2.data.get(1).totalPoints == 35
         results2.data.sort { a, b -> b.lastUpdated <=> a.lastUpdated }.get(0).lastUpdated == threeDaysAgo.toInstant().toString()
 
@@ -413,9 +413,9 @@ class UserPointsSpecs extends DefaultIntSpec {
         results1.count == 5
         results1.totalCount == 5
         results1.data.size() == 5
-        results1.data.get(0).userId.contains(sampleUserIds.get(0)?.toLowerCase())
+        results1.data.get(0).userId.equalsIgnoreCase(sampleUserIds.get(0))
         results1.data.get(0).totalPoints == 35
-        results1.data.get(1).userId.contains(sampleUserIds.get(1)?.toLowerCase())
+        results1.data.get(1).userId.equalsIgnoreCase(sampleUserIds.get(1))
         results1.data.get(1).totalPoints == 35
 
         results2
@@ -448,9 +448,9 @@ class UserPointsSpecs extends DefaultIntSpec {
         results1.count == 5
         results1.totalCount == 5
         results1.data.size() == 5
-        results1.data.get(0).userId.contains(sampleUserIds.get(0)?.toLowerCase())
+        results1.data.get(0).userId.equalsIgnoreCase(sampleUserIds.get(0))
         results1.data.get(0).totalPoints == 35
-        results1.data.get(1).userId.contains(sampleUserIds.get(1)?.toLowerCase())
+        results1.data.get(1).userId.equalsIgnoreCase(sampleUserIds.get(1))
         results1.data.get(1).totalPoints == 35
 
         results2
@@ -483,9 +483,9 @@ class UserPointsSpecs extends DefaultIntSpec {
         results1.count == 5
         results1.totalCount == 5
         results1.data.size() == 5
-        results1.data.get(0).userId.contains(sampleUserIds.get(0)?.toLowerCase())
+        results1.data.get(0).userId.equalsIgnoreCase(sampleUserIds.get(0))
         results1.data.get(0).totalPoints == 35
-        results1.data.get(1).userId.contains(sampleUserIds.get(1)?.toLowerCase())
+        results1.data.get(1).userId.equalsIgnoreCase(sampleUserIds.get(1))
         results1.data.get(1).totalPoints == 35
 
         results2
@@ -511,7 +511,7 @@ class UserPointsSpecs extends DefaultIntSpec {
         results1.count == 1
         results1.totalCount == 1
         results1.data.size() == 1
-        results1.data.get(0).userId.contains(sampleUserIds.get(0)?.toLowerCase())
+        results1.data.get(0).userId.equalsIgnoreCase(sampleUserIds.get(0))
         results1.data.get(0).totalPoints == 35
         results2.data.sort { a, b -> b.lastUpdated <=> a.lastUpdated }.get(0).lastUpdated == threeDaysAgo.toInstant().toString()
 
@@ -519,9 +519,9 @@ class UserPointsSpecs extends DefaultIntSpec {
         results2.count == 2
         results2.totalCount == 2
         results2.data.size() == 2
-        results2.data.get(0).userId.contains(sampleUserIds.get(0)?.toLowerCase())
+        results2.data.get(0).userId.equalsIgnoreCase(sampleUserIds.get(0))
         results2.data.get(0).totalPoints == 35
-        results2.data.get(1).userId.contains(sampleUserIds.get(1)?.toLowerCase())
+        results2.data.get(1).userId.equalsIgnoreCase(sampleUserIds.get(1))
         results2.data.get(1).totalPoints == 35
         results2.data.sort { a, b -> b.lastUpdated <=> a.lastUpdated }.get(0).lastUpdated == threeDaysAgo.toInstant().toString()
 
@@ -542,14 +542,14 @@ class UserPointsSpecs extends DefaultIntSpec {
         results1.count == 1
         results1.totalCount == 1
         results1.data.size() == 1
-        results1.data.get(0).userId.contains(sampleUserIds.get(0)?.toLowerCase())
+        results1.data.get(0).userId.equalsIgnoreCase(sampleUserIds.get(0))
         results1.data.get(0).totalPoints == 35
 
         results2
         results2.count == 2
         results2.totalCount == 2
         results2.data.size() == 1
-        results2.data.get(0).userId.contains(sampleUserIds.get(0)?.toLowerCase())
+        results2.data.get(0).userId.equalsIgnoreCase(sampleUserIds.get(0))
         results2.data.get(0).totalPoints == 35
 
         results3
@@ -576,7 +576,7 @@ class UserPointsSpecs extends DefaultIntSpec {
         results1.count == 4
         results1.totalCount == 4
         results1.data.size() == 4
-        results1.data.get(0).userId.contains(sampleUserIds.get(0)?.toLowerCase())
+        results1.data.get(0).userId.equalsIgnoreCase(sampleUserIds.get(0))
         results1.data.get(0).totalPoints == 35
 
         results2
@@ -607,7 +607,7 @@ class UserPointsSpecs extends DefaultIntSpec {
         results1.count == 4
         results1.totalCount == 4
         results1.data.size() == 4
-        results1.data.get(0).userId.contains(sampleUserIds.get(0)?.toLowerCase())
+        results1.data.get(0).userId.equalsIgnoreCase(sampleUserIds.get(0))
         results1.data.get(0).totalPoints == 35
 
         results2
@@ -638,7 +638,7 @@ class UserPointsSpecs extends DefaultIntSpec {
         results1.count == 4
         results1.totalCount == 4
         results1.data.size() == 4
-        results1.data.get(0).userId.contains(sampleUserIds.get(0)?.toLowerCase())
+        results1.data.get(0).userId.equalsIgnoreCase(sampleUserIds.get(0))
         results1.data.get(0).totalPoints == 35
 
         results2
@@ -672,7 +672,7 @@ class UserPointsSpecs extends DefaultIntSpec {
         results1.count == 1
         results1.totalCount == 1
         results1.data.size() == 1
-        results1.data.get(0).userId.contains(sampleUserIds.get(0)?.toLowerCase())
+        results1.data.get(0).userId.equalsIgnoreCase(sampleUserIds.get(0))
         results1.data.get(0).totalPoints == 35
         results1.totalPoints == 35 * 4
     }
@@ -685,7 +685,7 @@ class UserPointsSpecs extends DefaultIntSpec {
         when:
         def users = skillsService.getProjectUsers(projId, 100).data
 
-        def userBeforeSkillAdd = users.find() { it.userId.contains(uid) }
+        def userBeforeSkillAdd = users.find { it.userId.equalsIgnoreCase(uid) }
         DateTimeFormatter formatter = DateTimeFormat.forPattern("yyyy-MM-dd'T'HH:mm:ss.SSSZ")
 
         def res = skillsService.addSkill(['projectId': projId, skillId: allSkillIds.get(0).get(1)], uid, new DateTime().toDate())
@@ -693,7 +693,7 @@ class UserPointsSpecs extends DefaultIntSpec {
 
         def users2 = skillsService.getProjectUsers(projId, 100).data
 
-        def userAfterSkillAdd = users2.find() { it.userId.contains(uid) }
+        def userAfterSkillAdd = users2.find { it.userId.equalsIgnoreCase(uid) }
 
 
         then:
@@ -725,14 +725,14 @@ class UserPointsSpecs extends DefaultIntSpec {
         control.data.size() == 5
 
         result1.data.size() == 1
-        result1.data.find { it.userId.contains('jadoe@email.foo') }
+        result1.data.find { it.userId.equalsIgnoreCase('jadoe@email.foo') }
 
         result2.data.size() == 1
-        result2.data.find { it.userId.contains('jadoe@email.foo') }
+        result2.data.find { it.userId.equalsIgnoreCase('jadoe@email.foo') }
 
         result3.data.size() == 2
-        result3.data.find { it.userId.contains('jadoe@email.foo') }
-        result3.data.find { it.userId.contains('jdoe@email.foo') }
+        result3.data.find { it.userId.equalsIgnoreCase('jadoe@email.foo') }
+        result3.data.find { it.userId.equalsIgnoreCase('jdoe@email.foo') }
     }
 
     @IgnoreIf({ env["SPRING_PROFILES_ACTIVE"] == "pki" })
@@ -755,26 +755,26 @@ class UserPointsSpecs extends DefaultIntSpec {
 
         then:
         allUsers.data.size() == 5
-        allUsers.data[0].userId.contains('fbar@email.foo')
-        allUsers.data[1].userId.contains('hanson')
-        allUsers.data[2].userId.contains('harry')
-        allUsers.data[3].userId.contains('jadoe@email.foo')
-        allUsers.data[4].userId.contains('jdoe@email.foo')
+        allUsers.data[0].userId.equalsIgnoreCase('fbar@email.foo')
+        allUsers.data[1].userId.equalsIgnoreCase('hanson')
+        allUsers.data[2].userId.equalsIgnoreCase('harry')
+        allUsers.data[3].userId.equalsIgnoreCase('jadoe@email.foo')
+        allUsers.data[4].userId.equalsIgnoreCase('jdoe@email.foo')
 
         fooUsers.data.size() == 3
-        fooUsers.data[0].userId.contains('fbar@email.foo')
-        fooUsers.data[1].userId.contains('jadoe@email.foo')
-        fooUsers.data[2].userId.contains('jdoe@email.foo')
+        fooUsers.data[0].userId.equalsIgnoreCase('fbar@email.foo')
+        fooUsers.data[1].userId.equalsIgnoreCase('jadoe@email.foo')
+        fooUsers.data[2].userId.equalsIgnoreCase('jdoe@email.foo')
 
         fooUsersDesc.data.size() == 3
-        fooUsersDesc.data[2].userId.contains('fbar@email.foo')
-        fooUsersDesc.data[1].userId.contains('jadoe@email.foo')
-        fooUsersDesc.data[0].userId.contains('jdoe@email.foo')
+        fooUsersDesc.data[2].userId.equalsIgnoreCase('fbar@email.foo')
+        fooUsersDesc.data[1].userId.equalsIgnoreCase('jadoe@email.foo')
+        fooUsersDesc.data[0].userId.equalsIgnoreCase('jdoe@email.foo')
 
         fooUsersSortByFirstName.data.size() == 3
-        fooUsersSortByFirstName.data[0].userId.contains('fbar@email.foo')
-        fooUsersSortByFirstName.data[1].userId.contains('jadoe@email.foo')
-        fooUsersSortByFirstName.data[2].userId.contains('jdoe@email.foo')
+        fooUsersSortByFirstName.data[0].userId.equalsIgnoreCase('fbar@email.foo')
+        fooUsersSortByFirstName.data[1].userId.equalsIgnoreCase('jadoe@email.foo')
+        fooUsersSortByFirstName.data[2].userId.equalsIgnoreCase('jdoe@email.foo')
 
         fooUsersSortByLastName.data.size() == 3
         fooUsersSortByLastName.data[0].lastName == 'Bar'
@@ -809,16 +809,16 @@ class UserPointsSpecs extends DefaultIntSpec {
 
         then:
         firstPage.data.size() == 5
-        firstPage.data[0].userId.contains('aaa@email.foo')
-        firstPage.data[1].userId.contains('bbb@email.foo')
-        firstPage.data[2].userId.contains('ccc@email.foo')
-        firstPage.data[3].userId.contains('ddd@email.foo')
-        firstPage.data[4].userId.contains('eee@email.foo')
+        firstPage.data[0].userId.equalsIgnoreCase('aaa@email.foo')
+        firstPage.data[1].userId.equalsIgnoreCase('bbb@email.foo')
+        firstPage.data[2].userId.equalsIgnoreCase('ccc@email.foo')
+        firstPage.data[3].userId.equalsIgnoreCase('ddd@email.foo')
+        firstPage.data[4].userId.equalsIgnoreCase('eee@email.foo')
 
         secondPage.data.size() == 3
-        secondPage.data[0].userId.contains('fff@email.foo')
-        secondPage.data[1].userId.contains('ggg@email.foo')
-        secondPage.data[2].userId.contains('hhh@email.foo')
+        secondPage.data[0].userId.equalsIgnoreCase('fff@email.foo')
+        secondPage.data[1].userId.equalsIgnoreCase('ggg@email.foo')
+        secondPage.data[2].userId.equalsIgnoreCase('hhh@email.foo')
     }
 
 
@@ -1490,16 +1490,16 @@ class UserPointsSpecs extends DefaultIntSpec {
         results.count == 4
         results.totalCount == 4
         results.data.size() == 4
-        results.data.get(0).userId.contains(users[0].toLowerCase())
+        results.data.get(0).userId.equalsIgnoreCase(users[0])
         results.data.get(0).totalPoints == 400
         results.data.get(0).skillsAchieved == 1
-        results.data.get(1).userId.contains(users[1].toLowerCase())
+        results.data.get(1).userId.equalsIgnoreCase(users[1])
         results.data.get(1).totalPoints == 300
         results.data.get(1).skillsAchieved == 0
-        results.data.get(2).userId.contains(users[2].toLowerCase())
+        results.data.get(2).userId.equalsIgnoreCase(users[2])
         results.data.get(2).totalPoints == 200
         results.data.get(2).skillsAchieved == 0
-        results.data.get(3).userId.contains(users[3].toLowerCase())
+        results.data.get(3).userId.equalsIgnoreCase(users[3])
         results.data.get(3).totalPoints == 100
         results.data.get(3).skillsAchieved == 0
     }
@@ -1636,13 +1636,15 @@ class UserPointsSpecs extends DefaultIntSpec {
 
         when:
         def results = skillsService.getSkillGroupUsers(projId, skillsGroupId, 10, 1, "userId", true, users[0])
+        // The query is a substring search, so overlapping certificate user IDs can also match.
+        def expectedUsers = users.findAll { it.toLowerCase().contains(users[0].toLowerCase()) }
 
         then:
         results
-        results.count == 1
-        results.totalCount == 1
-        results.data.size() == 1
-        results.data.get(0).userId.contains(users[0]?.toLowerCase())
+        results.count == expectedUsers.size()
+        results.totalCount == expectedUsers.size()
+        results.data.size() == expectedUsers.size()
+        results.data.userId == expectedUsers.collect { it.toLowerCase() }.sort()
     }
 
     def 'get skill group users with point range filter'() {
@@ -1685,7 +1687,7 @@ class UserPointsSpecs extends DefaultIntSpec {
         results.count == 1
         results.totalCount == 1
         results.data.size() == 1
-        results.data.get(0).userId.contains(users[0]?.toLowerCase())
+        results.data.get(0).userId.equalsIgnoreCase(users[0])
         results.data.get(0).totalPoints == 400
     }
 
@@ -1734,7 +1736,7 @@ class UserPointsSpecs extends DefaultIntSpec {
         results.count == 1
         results.totalCount == 1
         results.data.size() == 1
-        results.data.get(0).userId.contains(users[0]?.toLowerCase())
+        results.data.get(0).userId.equalsIgnoreCase(users[0])
     }
 
     def 'get skill group users with exclude imported filter'() {
@@ -1901,11 +1903,11 @@ class UserPointsSpecs extends DefaultIntSpec {
         results.count == 4
         results.data.size() == 4
 
-        def resultUser = results.data.find { it -> it.userId.contains(users[0].toLowerCase()) }
+        def resultUser = results.data.find { users[0].equalsIgnoreCase(it.userId) }
         resultUser.lastUpdated == date4.toInstant().toString()
         resultUser.firstUpdated == date1.toInstant().toString()
 
-        def result2User = results.data.find { it -> it.userId.contains(users[1].toLowerCase()) }
+        def result2User = results.data.find { users[1].equalsIgnoreCase(it.userId) }
         result2User.lastUpdated == date4.toInstant().toString()
         result2User.firstUpdated == date2.toInstant().toString()
     }
