@@ -451,6 +451,39 @@ describe('Project learning path in skills display', () => {
     cy.get(`${table} tbody tr`).should('have.length', 5)
   })
 
+  it('draws ampersands literally in local and shared graph labels', () => {
+    cy.createSkill(1, 1, 1, { name: 'Read & Write' })
+    cy.createProject(2, { name: 'Research and Design' })
+    cy.createSubject(2, 1)
+    cy.createSkill(2, 1, 2, { name: 'Plan & Build' })
+    cy.addCrossProjectLearningPathItem(2, 2, 1, 1)
+
+    const checkGraph = (url) => {
+      const drawnText = []
+      cy.visit(url, {
+        onBeforeLoad(win) {
+          const original = win.CanvasRenderingContext2D.prototype.fillText
+          cy.stub(win.CanvasRenderingContext2D.prototype, 'fillText').callsFake(function (text, ...args) {
+            drawnText.push(String(text))
+            return original.call(this, text, ...args)
+          })
+        },
+      })
+      cy.get('#dependency-graph canvas').should('be.visible')
+      cy.get('[data-cy="learningPathTable"] [data-cy="toNodeLink_skill1"]').should('have.text', 'Read & Write')
+      cy.get('[data-cy="learningPathTable"] [data-cy="fromNodeLink_skill2"]').should('have.text', 'Plan & Build')
+      cy.wrap(null).should(() => {
+        const rendered = drawnText.join(' ')
+        expect(rendered).to.include('Read & Write')
+        expect(rendered).to.include('Plan & Build')
+        expect(rendered).to.include('Research and Design')
+        expect(rendered).not.to.include('&amp;')
+      })
+    }
+    checkGraph('/test-skills-display/proj1/learning-path')
+    checkGraph('/administrator/projects/proj1/learning-path')
+  })
+
   it('opens cross-project skills from the learning path table', () => {
     cy.createSkill(1, 1, 1)
     cy.createProject(2)

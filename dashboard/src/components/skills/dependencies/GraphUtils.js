@@ -16,7 +16,9 @@
 import { useStringUtils } from '@/common-components/utilities/UseStringUtils.js'
 
 const stringUtils = useStringUtils();
-const escapeHtml = (value) => value.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+// vis-network labels are parsed for formatting and drawn on canvas, not inserted into HTML.
+// Escape tag delimiters only: HTML entities for ampersands and quotes are displayed literally.
+const escapeHtml = (value) => value.replace(/</g, '&lt;').replace(/>/g, '&gt;');
 
 const buildLabel = (name, projectName, isCrossProject, trailingSpace = false) => {
   const escapedName = escapeHtml(name);
