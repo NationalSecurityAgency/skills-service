@@ -135,14 +135,8 @@ const handleGeneratedChunk = (chunk) => {
 }
 
 const cleanJsonString = (jsonString) => {
-  // Remove single-line comments (// ...)
-  const res = jsonString.replace(/\/\/.*$/gm, '')
-      // Remove multi-line comments (/* ... */)
-      .replace(/\/\*[\s\S]*?\*\//g, '')
-      // Remove any remaining whitespace
-      .trim();
-
-  return res
+  // Strip only an outer Markdown fence; preserve code and URLs inside JSON strings.
+  return jsonString.trim().replace(/^```(?:json)?\s*\r?\n([\s\S]*?)\r?\n```\s*$/i, '$1').trim()
 };
 
 const handleGenerationCompleted = (generated) => {
@@ -150,7 +144,9 @@ const handleGenerationCompleted = (generated) => {
     log.debug(`GenerateSingleQuestionDialog.vue: handleGenerationCompleted: upToStartOfAnswers=[${upToStartOfAnswers.value}], answersString=[${answersString.value}]`)
   }
 
-  const questionMatch = /### Question:\s*([\s\S]+?)(?=\s*#+\s|$)/.exec(upToStartOfAnswers.value)
+  // The streaming handler already separates the answers section. Keep all question
+  // content, including Markdown headings and comments inside fenced code examples.
+  const questionMatch = /### Question:\s*([\s\S]+)/.exec(upToStartOfAnswers.value)
   if (!questionMatch) {
     throw new Error(`Invalid response format for question text=[${upToStartOfAnswers.value}]`);
   }
@@ -168,7 +164,13 @@ const handleGenerationCompleted = (generated) => {
     const answers = QuestionType.isTextInput(props.questionType.selectedType?.id) ? [] : JSON.parse(cleanJsonString(answersMatch[1].trim()))
     const question = questionMatch[1].trim()
     if (QuestionType.isFillInTheBlank(props.questionType.selectedType?.id)) {
-      validateGeneratedBlanks(question, answers, appConfig.maxAnswersPerQuizQuestion)
+      try {
+        validateGeneratedBlanks(question, answers, appConfig.maxAnswersPerQuizQuestion)
+      } catch (error) {
+        // These validation messages explain how to correct the generated question.
+        error.userMessage = error.message
+        throw error
+      }
     }
 
     const generatedInfo = {
@@ -185,7 +187,9 @@ const handleGenerationCompleted = (generated) => {
     }
   } catch (e) {
     console.error(e)
-    throw new Error(`Failed to parse answers JSON from [${answersString.value}]`);
+    const error = new Error(`Failed to process generated question: ${e.message}`, { cause: e })
+    error.userMessage = e.userMessage || 'The AI returned answers in an invalid format. Please ask it to regenerate the question with a valid JSON array of answers.'
+    throw error
   } finally {
     answersFound.value = false
     answersString.value = ''

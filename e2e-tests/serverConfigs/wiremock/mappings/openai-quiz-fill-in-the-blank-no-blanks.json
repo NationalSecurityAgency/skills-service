@@ -1,0 +1,17 @@
+{
+  "priority": 1,
+  "request": {
+    "method": "POST",
+    "urlPath": "/v1/chat/completions",
+    "bodyPatterns": [
+      { "contains": "AI blank validation - no blanks" },
+      { "contains": "Generate a FillInTheBlank Question Type" }
+    ]
+  },
+  "response": {
+    "status": 200,
+    "headers": { "Content-Type": "text/event-stream" },
+    "bodyFileName": "response-body-question-fill-in-the-blank-no-blanks.txt",
+    "chunkedDribbleDelay": { "numberOfChunks": 20, "totalDuration": 1500 }
+  }
+}
