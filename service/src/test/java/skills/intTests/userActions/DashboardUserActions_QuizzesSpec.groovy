@@ -53,6 +53,8 @@ class DashboardUserActions_QuizzesSpec  extends DefaultIntSpec {
 
         then:
         def res = rootService.getUserActionsForQuiz(quiz.quizId)
+        // Assert CRUD contents independently of tied creation timestamps.
+        res.data.sort { [DashboardAction.Delete.toString(), DashboardAction.Edit.toString(), DashboardAction.Create.toString()].indexOf(it.action) }
         def createAction = rootService.getUserActionAttributes(res.data[2].id)
         def editActions = rootService.getUserActionsForQuiz(quiz.quizId, 10, 1, "created", false,
                 DashboardItem.Quiz, '', quiz.quizId, DashboardAction.Edit)
@@ -109,6 +111,9 @@ class DashboardUserActions_QuizzesSpec  extends DefaultIntSpec {
 
         then:
         def res = rootService.getUserActionsForEverything()
+        res.data.sort { action ->
+            action.action == DashboardAction.Edit.toString() ? 0 : (action.item == DashboardItem.Question.toString() ? 1 : 2)
+        }
         def editAction = rootService.getUserActionAttributes(res.data[0].id)
         then:
         // previous actions are still associated
@@ -152,6 +157,10 @@ class DashboardUserActions_QuizzesSpec  extends DefaultIntSpec {
         skillsService.deleteQuizQuestionDef(quiz.quizId, q1Res.id)
         then:
         def res = rootService.getUserActionsForEverything()
+        res.data.sort { action ->
+            action.action == DashboardAction.Delete.toString() ? 0 :
+                    (action.action == DashboardAction.Edit.toString() ? 1 : (action.itemRefId == q1Res.id ? 3 : 2))
+        }
         def createAction1 = rootService.getUserActionAttributes(res.data[3].id)
         def createAction2 = rootService.getUserActionAttributes(res.data[2].id)
         def editAction = rootService.getUserActionAttributes(res.data[1].id)
@@ -270,6 +279,7 @@ class DashboardUserActions_QuizzesSpec  extends DefaultIntSpec {
         skillsService.deleteQuizUserRole(quiz.quizId, otherUser.userName, RoleName.ROLE_QUIZ_ADMIN.toString())
 
         def res = rootService.getUserActionsForEverything()
+        res.data.sort { it.action == DashboardAction.Delete.toString() ? 0 : 1 }
         def createAction = rootService.getUserActionAttributes(res.data[1].id)
         def deleteAction = rootService.getUserActionAttributes(res.data[0].id)
         then:
@@ -311,9 +321,8 @@ class DashboardUserActions_QuizzesSpec  extends DefaultIntSpec {
         ])
 
         def res = rootService.getUserActionsForEverything()
-        def settingAction3 = rootService.getUserActionAttributes(res.data[2].id)
-        def settingAction2 = rootService.getUserActionAttributes(res.data[1].id)
-        def settingAction1 = rootService.getUserActionAttributes(res.data[0].id)
+        // Settings saved in one request can have identical audit timestamps, so their order is not guaranteed.
+        def settingActions = res.data.collect { rootService.getUserActionAttributes(it.id) }
         then:
         res.count == 3
         res.data[0].action == DashboardAction.Create.toString()
@@ -340,14 +349,11 @@ class DashboardUserActions_QuizzesSpec  extends DefaultIntSpec {
         !res.data[2].projectId
         res.data[2].quizId == quiz.quizId
 
-        settingAction1.setting == name3
-        settingAction1.value == 'a-3'
-
-        settingAction2.setting == name2
-        settingAction2.value == 'a-2'
-
-        settingAction3.setting == name1
-        settingAction3.value == 'a-1'
+        settingActions.sort { it.setting } == [
+                [setting: name1, value: 'a-1'],
+                [setting: name2, value: 'a-2'],
+                [setting: name3, value: 'a-3'],
+        ]
     }
 
 }
