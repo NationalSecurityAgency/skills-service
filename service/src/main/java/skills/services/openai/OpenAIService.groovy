@@ -144,6 +144,11 @@ class OpenAIService {
         }
         long startTime = System.currentTimeMillis()
         List<Message> messages = createChatMessages(genDescRequest)
+        if (logPromptAndResponseText) {
+            messages.each { message ->
+                log.debug("Chat prompt [{}]: {}", message.messageType, message.text)
+            }
+        }
 
         Prompt prompt = new Prompt(
                 messages,

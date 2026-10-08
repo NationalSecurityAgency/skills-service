@@ -1,0 +1,5 @@
+data: {"id":"chat-1","object":"chat.completion.chunk","created":1700608923,"model":"model1","choices":[{"index":0,"delta":{"content":"### Question:\nComplete the Python expressions below.\n\n## Code example\n```python\n# Use integer division and the documentation URL\ndef example(n):\n    half = ___\n    docs = ___\n    return half, docs\n```\n\nKeep both expressions intact.\n\n### Ans"},"finish_reason":null}]}
+
+data: {"id":"chat-1","object":"chat.completion.chunk","created":1700608923,"model":"model1","choices":[{"index":0,"delta":{"content":"wers:\n```json\n[\n  {\"answer\":\"n // 2\",\"isCorrect\":true},\n  {\"answer\":\"\\\"https://example.org/*docs*/\\\"\",\"isCorrect\":true}\n]\n```"},"finish_reason":null}]}
+
+data: [DONE]

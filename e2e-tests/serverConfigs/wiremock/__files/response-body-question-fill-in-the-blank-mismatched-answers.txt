@@ -1,0 +1,5 @@
+data: {"id":"chat-1","object":"chat.completion.chunk","created":1700608923,"model":"model1","choices":[{"index":0,"delta":{"content":"### Question:\nFill in the missing expression marked by ___.\n\n```python\nhalf = ___\ndocs = ___\n```\n\n### Ans"},"finish_reason":null}]}
+
+data: {"id":"chat-1","object":"chat.completion.chunk","created":1700608923,"model":"model1","choices":[{"index":0,"delta":{"content":"wers:\n[{\"answer\":\"n // 2\",\"isCorrect\":true},{\"answer\":\"docs\",\"isCorrect\":true}]"},"finish_reason":null}]}
+
+data: [DONE]

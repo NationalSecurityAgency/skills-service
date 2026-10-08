@@ -632,6 +632,7 @@ Before responding, count the number of `"isCorrect": true` for the question and 
 ## Instructions:
 - Generate a clear and concise question with at least one blank, written as three underscores (___).
 - Return exactly one answer object per blank, in the same order as the blanks appear in the question.
+- Every occurrence of two or more consecutive underscores in the entire question counts as a blank, including prose and code blocks. Use ___ only at actual answer locations; refer to "the blank" in instructions instead of repeating the marker.
 - Each answer must have an `answer` string and `"isCorrect": true`; do not include `multiPartAnswer`.
 - For multiple acceptable responses to a single blank, separate them with semicolons in that blank's `answer` string.
 - Ensure answers are plausible and relevant to the question.{{ additionalInstructions }}
@@ -660,7 +661,7 @@ The capital of France is ___.
 - Follow with the JSON array
 - The JSON must be valid and properly formatted
 - The JSON array must strictly adhere to the Question Type Rules (FillInTheBlank):
-- Include explanations in the answers if the question is complex
+- Each answer string must contain only the text that replaces its blank, without explanations or explanatory code comments, even for complex questions.
 - Do not include any other text outside these sections
 - Do not number answers
 
@@ -991,6 +992,7 @@ Return the answers as JSON array of objects that strictly adhere to the followin
 ## Instructions:
 - Generate a clear and concise question with at least one blank, written as three underscores (___).
 - Return exactly one answer object per blank, in the same order as the blanks appear in the question. A single-blank question requires exactly one answer object.
+- Every occurrence of two or more consecutive underscores in the entire question counts as a blank, including prose and code blocks. Use ___ only at actual answer locations; refer to "the blank" in instructions instead of repeating the marker.
 - Each answer must have an `answer` string and `"isCorrect": true`; do not include `multiPartAnswer`.
 - For multiple acceptable responses to a single blank, separate them with semicolons in that blank's `answer` string.
 - Ensure answers are plausible and relevant to the question.
@@ -1020,7 +1022,7 @@ The capital of France is ___ and the capital of Italy is ___.
 - Follow with the JSON array
 - The JSON must be valid and properly formatted
 - The JSON array must strictly adhere to the Question Type Rules (FillInTheBlank):
-- Include explanations in the answers if the question is complex
+- Each answer string must contain only the text that replaces its blank, without explanations or explanatory code comments, even for complex questions.
 - Do not include any other text outside these sections
 - Do not number answers
 

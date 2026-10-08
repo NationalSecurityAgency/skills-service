@@ -374,7 +374,8 @@ describe('Generate Single Question Tests', () => {
         cy.get('[data-cy="userMsg-1"]').contains('Great rock bands')
         cy.get('[data-cy="aiMsg-2"] [data-cy="origSegment"]').contains(gotStartedMsg)
         cy.get('[data-cy="aiMsg-2"] [data-cy="generatedSegment"]').contains(selectRockBandsQuestion)
-        cy.get('[data-cy="finalSegment"]').contains(errMsg)
+        cy.get('[data-cy="finalSegment"]').should('contain.text', 'The AI returned answers in an invalid format. Please ask it to regenerate the question with a valid JSON array of answers.')
+        cy.get('[data-cy="useGenValueBtn-2"]').should('not.exist')
     });
 
     it('generate a new Multiple Choice question with a prefix', () => {

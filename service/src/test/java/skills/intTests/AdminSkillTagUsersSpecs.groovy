@@ -383,12 +383,20 @@ class AdminSkillTagUsersSpecs extends DefaultIntSpec {
         def filteredResult = skillsService.getSkillTagUsers(proj1.projectId, tagId, 100, 1, 'userId', true, userIdForDisplayToQuery)
         def filteredResult1 = skillsService.getSkillTagUsers(proj1.projectId, tagId, 100, 1, 'userId', true, userIdForDisplayToQuery1)
 
+        // PKI display names can overlap (e.g. otheruser and anotheruser), and the filter matches substrings.
+        def expectedUsers = allUsers.data.findAll {
+            it.userIdForDisplay.toLowerCase(Locale.ROOT).contains(userIdForDisplayToQuery.toLowerCase(Locale.ROOT))
+        }
+        def expectedUsers1 = allUsers.data.findAll {
+            it.userIdForDisplay.toLowerCase(Locale.ROOT).contains(userIdForDisplayToQuery1.toLowerCase(Locale.ROOT))
+        }
+
         then:
         allUsers.count == 10
-        filteredResult.count == 1
-        filteredResult.data[0].userIdForDisplay == allUsers.data[3].userIdForDisplay
-        filteredResult1.count == 1
-        filteredResult1.data[0].userIdForDisplay == allUsers.data[4].userIdForDisplay
+        filteredResult.count == expectedUsers.size()
+        filteredResult.data.userIdForDisplay == expectedUsers.userIdForDisplay
+        filteredResult1.count == expectedUsers1.size()
+        filteredResult1.data.userIdForDisplay == expectedUsers1.userIdForDisplay
     }
 
     def "filter by userTag"() {
@@ -410,7 +418,7 @@ class AdminSkillTagUsersSpecs extends DefaultIntSpec {
 
         // assign each user a unique userTag so ordering is deterministic
         users.eachWithIndex { SkillsService user, int index ->
-            String userTag = StringUtils.leftPad(index.toString(), 3, "0")
+            String userTag = "UserTag-${StringUtils.leftPad(index.toString(), 3, '0')}"
             rootUser.saveUserTag(user.userName, userTagKey, [userTag])
             // give each user some tagged skill so they appear in results
             user.addSkill(proj1Subj1Skills[0])
@@ -419,15 +427,9 @@ class AdminSkillTagUsersSpecs extends DefaultIntSpec {
         when:
         def allUsers = skillsService.getSkillTagUsers(proj1.projectId, tagId, 10, 1, 'userTag', true)
 
-        // shuffle the case of this string
-        String userTag1ToQuery = allUsers.data[3].userTag
-                .toCharArray()
-                .collect { Math.random() > 0.5 ? it.toUpperCase() : it.toLowerCase() }
-                .join('')
-        String userTag2ToQuery = allUsers.data[4].userTag
-                .toCharArray()
-                .collect { Math.random() > 0.5 ? it.toUpperCase() : it.toLowerCase() }
-                .join('')
+        // Both queries differ from the stored mixed-case tags to exercise case-insensitive matching.
+        String userTag1ToQuery = allUsers.data[3].userTag.toUpperCase(Locale.ROOT)
+        String userTag2ToQuery = allUsers.data[4].userTag.toLowerCase(Locale.ROOT)
 
         def filtered1 = skillsService.getSkillTagUsers(proj1.projectId, tagId, 10, 1, 'userTag', true, "", 0, 100, userTag1ToQuery)
         def filtered2 = skillsService.getSkillTagUsers(proj1.projectId, tagId, 10, 1, 'userTag', true, "", 0, 100, userTag2ToQuery)

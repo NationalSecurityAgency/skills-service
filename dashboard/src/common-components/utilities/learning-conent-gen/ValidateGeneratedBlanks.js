@@ -24,7 +24,7 @@ export const validateGeneratedBlanks = (question, answers, maxAnswersPerQuizQues
     throw new Error(`The generated question exceeds the maximum number of answers ${maxAnswersPerQuizQuestion}. Please ask the AI to regenerate it.`)
   }
   if (!Array.isArray(answers) || answers.length !== blankCount) {
-    throw new Error(`The generated question has ${blankCount} blank(s), but ${Array.isArray(answers) ? answers.length : 'no valid array of'} answer(s). Please ask the AI to provide one answer per blank in order.`)
+    throw new Error(`The generated question has ${blankCount} blank(s), but ${Array.isArray(answers) ? answers.length : 'no valid array of'} answer(s). Please close and reopen the AI assistant to start a new conversation`)
   }
   answers.forEach((answer, index) => {
     if (!answer || typeof answer.answer !== 'string' ||
