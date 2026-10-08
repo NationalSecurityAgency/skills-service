@@ -277,9 +277,9 @@ const buildNode = (skill, isCrossProject, createdSkillIds, nodes, achievedIds, e
     const isAchieved = achievedIds.includes(skill.id)
     let label = GraphUtils.getPrerequisiteLabel(skill, isCrossProject)
     if (skill.isThisSkill) {
-      label = `<b>This Skill</b>\n${label}`
+      label = `This Skill\n${label}`
     } else if (skill.isThisBadge) {
-      label = `<b>This Badge</b>\n${label}`
+      label = `This Badge\n${label}`
     }
 
     const node = {
@@ -295,7 +295,7 @@ const buildNode = (skill, isCrossProject, createdSkillIds, nodes, achievedIds, e
         color: skillColor
       },
       chosen: !skill.isThisSkill,
-      font: { multi: 'html', size: 20 },
+      font: { multi: false, size: 20 },
     }
 
     const themePrimaryColor = themeState.graphTextPrimaryColor
@@ -307,7 +307,7 @@ const buildNode = (skill, isCrossProject, createdSkillIds, nodes, achievedIds, e
 
     if (isAchieved) {
       node.font.color = themeState.graphAchievedColor
-      node.label = `${node.label} <b>✓</b>`
+      node.label = `${node.label} ✓`
     }
 
     if (skill.type === 'Badge') {

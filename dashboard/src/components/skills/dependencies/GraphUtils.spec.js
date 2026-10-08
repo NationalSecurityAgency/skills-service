@@ -44,11 +44,11 @@ describe('dependency graph tooltips', () => {
 })
 
 describe('dependency graph labels', () => {
-  it('escapes names before inserting them into HTML-formatted labels', () => {
+  it('preserves names in plain-text canvas labels', () => {
     const item = { name: '<img src=x onerror="alert(1)">', projectName: 'R&D <private> \'team\'' }
-    expect(GraphUtils.getLabel(item, false)).toBe('&lt;img src=x onerror="alert(1)"&gt; ')
-    expect(GraphUtils.getLabel(item, true)).toBe('Shared from\n<b>R&D &lt;private&gt; \'team\' </b>\n&lt;img src=x onerror="alert(1)"&gt;  ')
+    expect(GraphUtils.getLabel(item, false)).toBe('<img src=x onerror="alert(1)"> ')
+    expect(GraphUtils.getLabel(item, true)).toBe('Shared from\nR&D <private> \'team\' \n<img src=x onerror="alert(1)">  ')
     expect(GraphUtils.getPrerequisiteLabel({ skillName: item.name, projectName: item.projectName }, true))
-      .toBe('Shared from\n<b>R&D &lt;private&gt; \'team\'</b>\n&lt;img src=x onerror="alert(1)"&gt; ')
+      .toBe('Shared from\nR&D <private> \'team\'\n<img src=x onerror="alert(1)"> ')
   })
 })
