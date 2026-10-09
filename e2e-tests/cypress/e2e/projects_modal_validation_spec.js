@@ -44,7 +44,7 @@ describe('Projects Modal Validation Tests', () => {
         cy.wait('@loadUserInfo');
         cy.wait('@loadProjects');
 
-        cy.get('[data-cy="newProjectButton"]').click()
+        cy.openDialog('[data-cy="newProjectButton"]', true, '[data-cy="projectName"]')
         cy.get('[data-cy="projectName"]')
             .type('My New test Project');
         cy.get('[data-cy=projectNameError]')
@@ -67,7 +67,7 @@ describe('Projects Modal Validation Tests', () => {
         cy.visit('/administrator/');
         cy.wait('@loadUserInfo');
         cy.wait('@loadProjects');
-        cy.get('[data-cy="newProjectButton"]').click()
+        cy.openDialog('[data-cy="newProjectButton"]', true, '[data-cy="projectName"]')
         cy.get('[data-cy="projectName"]')
             .type('Other Project Name');
         cy.get('[data-cy="enableIdInput"] input').click();
@@ -97,7 +97,7 @@ describe('Projects Modal Validation Tests', () => {
         cy.visit('/administrator/');
         cy.wait('@loadUserInfo');
         cy.wait('@loadProjects');
-        cy.get('[data-cy="newProjectButton"]').click()
+        cy.openDialog('[data-cy="newProjectButton"]', true, '[data-cy="projectName"]')
         cy.get('[data-cy="projectName"]')
             .type(providedName);
         cy.getIdField()
@@ -106,7 +106,7 @@ describe('Projects Modal Validation Tests', () => {
         cy.clickSave();
         cy.wait('@postNewProject');
 
-        cy.get('[data-cy="newProjectButton"]').click()
+        cy.openDialog('[data-cy="newProjectButton"]', true, '[data-cy="projectName"]')
         cy.get('[data-cy="projectName"]')
             .type(providedName.toLowerCase());
 
@@ -127,7 +127,7 @@ describe('Projects Modal Validation Tests', () => {
         cy.visit('/administrator/');
         cy.wait('@loadUserInfo');
         cy.wait('@loadProjects');
-        cy.get('[data-cy="newProjectButton"]').click()
+        cy.openDialog('[data-cy="newProjectButton"]', true, '[data-cy="projectName"]')
         cy.get('[data-cy="enableIdInput"] input')
             .click();
         cy.getIdField()
@@ -146,7 +146,7 @@ describe('Projects Modal Validation Tests', () => {
         cy.visit('/administrator/');
         cy.wait('@loadUserInfo');
         cy.wait('@loadProjects');
-        cy.get('[data-cy="newProjectButton"]').click()
+        cy.openDialog('[data-cy="newProjectButton"]', true, '[data-cy="projectName"]')
         ;
         cy.get('[data-cy="projectName"]')
             .type('New Project');
@@ -170,7 +170,7 @@ describe('Projects Modal Validation Tests', () => {
         cy.visit('/administrator/');
         cy.wait('@loadUserInfo');
         cy.wait('@loadProjects');
-        cy.get('[data-cy="newProjectButton"]').click()
+        cy.openDialog('[data-cy="newProjectButton"]', true, '[data-cy="projectName"]')
 
         cy.get('[data-cy="projectName"]')
           .type('Great Name');
@@ -210,7 +210,7 @@ describe('Projects Modal Validation Tests', () => {
         cy.wait('@loadUserInfo');
         cy.wait('@loadProjects');
 
-        cy.get('[data-cy="newProjectButton"]').click()
+        cy.openDialog('[data-cy="newProjectButton"]', true, '[data-cy="projectName"]')
 
         cy.get('[data-cy="enableIdInput"] input')
             .click();
@@ -281,7 +281,7 @@ describe('Projects Modal Validation Tests', () => {
         cy.visit('/administrator/');
         cy.wait('@loadUserInfo');
         cy.wait('@loadProjects');
-        cy.get('[data-cy="newProjectButton"]').click()
+        cy.openDialog('[data-cy="newProjectButton"]', true, '[data-cy="projectName"]')
 
         cy.get('[data-cy="enableIdInput"] input')
             .click();
@@ -343,7 +343,7 @@ describe('Projects Modal Validation Tests', () => {
 
     it('null word is not allowed for project ID or project name', () => {
         cy.visit('/administrator/');
-        cy.get('[data-cy="newProjectButton"]').click()
+        cy.openDialog('[data-cy="newProjectButton"]', true, '[data-cy="projectName"]')
         cy.get('[data-cy="projectName"]')
             .type('null');
         cy.get('[data-cy=projectNameError]')

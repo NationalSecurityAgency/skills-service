@@ -41,7 +41,7 @@ describe('Global Badges Tests', () => {
         cy.get('[data-cy="inception-button"]').contains('Level');
         cy.wait('@getGlobalBadges');
 
-        cy.get('[data-cy="btn_Global Badges"]').click();
+        cy.openDialog('[data-cy="btn_Global Badges"]', true, '[data-cy="name"]');
 
         cy.get('[data-cy="name"]')
             .type(providedName);
