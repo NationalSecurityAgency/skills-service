@@ -1051,7 +1051,8 @@ class QuizDefManagementSpecs extends DefaultIntSpec {
                     [[[answer: '<script>alert(1)</script>', isCorrect: true]], 'Each acceptable answer option must contain text'],
                     [[[answer: ';;', isCorrect: true]], 'Each acceptable answer option must contain text'],
                     [[[answer: 'Paris;;London', isCorrect: true]], 'Each acceptable answer option must contain text'],
-                    [[[answer: 'Paris;', isCorrect: true]], 'Each acceptable answer option must contain text'],
+                    [[[answer: 'Paris;;', isCorrect: true]], 'Each acceptable answer option must contain text'],
+                    [[[answer: 'Paris; ;  ', isCorrect: true]], 'Each acceptable answer option must contain text'],
                     [[[answer: ';Paris', isCorrect: true]], 'Each acceptable answer option must contain text'],
                     [[[answer: 'Paris;   ;London', isCorrect: true]], 'Each acceptable answer option must contain text'],
                     [[[answer: 'Paris;<script>alert(1)</script>', isCorrect: true]], 'Each acceptable answer option must contain text'],
@@ -1085,7 +1086,9 @@ class QuizDefManagementSpecs extends DefaultIntSpec {
         updated.answers[0].answer == answerText
 
         where:
-        answerText << ['Paris', 'Paris;London', 'A & B;A and B', '1 < 2;3 > 2', 'a' * 2000]
+        answerText << ['Paris', 'Paris;London', 'A & B;A and B', '1 < 2;3 > 2', 'a' * 2000,
+                       'one;two;three;', 'one;two;three ;', 'one;two;three; ',
+                       'one;two;three ; ', 'one;two;three   ;   ', 'one ; two ; three ; ', 'Paris;']
     }
 
     def "FillInTheBlank question choices are sanitized"() {

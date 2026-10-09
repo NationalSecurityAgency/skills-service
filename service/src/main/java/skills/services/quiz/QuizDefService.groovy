@@ -1338,7 +1338,9 @@ class QuizDefService {
                 QuizValidator.isNotBlank(answer.answer, "answers.answer", quizId, true)
                 propsBasedValidator.quizValidationMaxStrLength(PublicProps.UiProp.maxQuizTextAnswerLength, "Answer", answer.answer, quizId)
 
-                String normalizedAnswer = InputSanitizer.unsanitizeEscapedHtml(InputSanitizer.sanitize(answer.answer))
+                // Allow an optional trailing delimiter, but still reject empty answer options.
+                String answerOptions = answer.answer.replaceFirst(/;\s*$/, '')
+                String normalizedAnswer = InputSanitizer.unsanitizeEscapedHtml(InputSanitizer.sanitize(answerOptions))
                 QuizValidator.isTrue(normalizedAnswer.split(';', -1).every { it.trim() },
                         "Each acceptable answer option must contain text", quizId)
             }
