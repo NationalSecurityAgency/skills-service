@@ -463,7 +463,7 @@ describe('Project learning path in skills display', () => {
   })
 
   it('draws ampersands literally in local and shared graph labels', () => {
-    cy.createSkill(1, 1, 1, { name: 'Read & Write' })
+    cy.createSkill(1, 1, 1, { name: '& operator' })
     cy.createProject(2, { name: 'Research and Design' })
     cy.createSubject(2, 1)
     cy.createSkill(2, 1, 2, { name: 'Plan & Build' })
@@ -481,14 +481,15 @@ describe('Project learning path in skills display', () => {
         },
       })
       cy.get('#dependency-graph canvas').should('be.visible')
-      cy.get('[data-cy="learningPathTable"] [data-cy="toNodeLink_skill1"]').should('have.text', 'Read & Write')
+      cy.get('[data-cy="learningPathTable"] [data-cy="toNodeLink_skill1"]').should('have.text', '& operator')
       cy.get('[data-cy="learningPathTable"] [data-cy="fromNodeLink_skill2"]').should('have.text', 'Plan & Build')
       cy.wrap(null).should(() => {
         const rendered = drawnText.join(' ')
-        expect(rendered).to.include('Read & Write')
+        expect(rendered).to.include('& operator')
         expect(rendered).to.include('Plan & Build')
         expect(rendered).to.include('Research and Design')
         expect(rendered).not.to.include('&amp;')
+        expect(rendered).not.to.include('&lt;')
       })
     }
     checkGraph('/test-skills-display/proj1/learning-path')

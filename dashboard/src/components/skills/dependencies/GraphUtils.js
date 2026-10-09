@@ -16,13 +16,10 @@
 import { useStringUtils } from '@/common-components/utilities/UseStringUtils.js'
 
 const stringUtils = useStringUtils();
-// vis-network labels are parsed for formatting and drawn on canvas, not inserted into HTML.
-// Escape tag delimiters only: HTML entities for ampersands and quotes are displayed literally.
-const escapeHtml = (value) => value.replace(/</g, '&lt;').replace(/>/g, '&gt;');
-
+// Render labels with font.multi=false: the HTML parser corrupts literal ampersands.
+// Canvas text needs no HTML escaping and must not interpret names as formatting.
 const buildLabel = (name, projectName, isCrossProject, trailingSpace = false) => {
-  const escapedName = escapeHtml(name);
-  return isCrossProject ? `Shared from\n<b>${escapeHtml(projectName)}</b>\n${escapedName}${trailingSpace ? ' ' : ''}` : escapedName;
+  return isCrossProject ? `Shared from\n${projectName}\n${name}${trailingSpace ? ' ' : ''}` : name;
 };
 
 export default {

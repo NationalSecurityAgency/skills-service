@@ -135,7 +135,7 @@ const buildNode = (node) => {
     },
     chosen: false,
     details: node,
-    font: { multi: 'html', size: 20 },
+    font: { multi: false, size: 20 },
     title: GraphUtils.getTitle(node, isCrossProject),
   }
   if (isSkillsDisplayMode.value && themeState.graphTextPrimaryColor) {
@@ -147,7 +147,7 @@ const buildNode = (node) => {
     newNode.font.color = isSkillsDisplayMode.value && themeState.graphTextPrimaryColor
       ? themeState.graphTextPrimaryColor
       : themeState.graphAchievedColor
-    newNode.label = `${newNode.label} <b>✓</b>`
+    newNode.label = `${newNode.label} ✓`
   }
   if (node.type === 'Badge') {
     newNode.icon.code = '\uf559'
