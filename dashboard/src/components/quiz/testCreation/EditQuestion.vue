@@ -289,6 +289,17 @@ const matchesMustNotBeBlank = (value) => {
   });
 }
 
+const copyIsAllowed = async (value) => {
+  if(props.questionDef.quizId === value) {
+    return true;
+  } else {
+    const response = await QuizService.validateQuizCopy(props.questionDef.quizId, value, "test")
+    if(response) {
+      return response.isAllowed;
+    }
+  }
+}
+
 const allAnswersFilledIn = (value) => {
   if(!isQuestionTypeFillInTheBlank.value) {
     return true;
@@ -326,7 +337,8 @@ const noRepeatAnswers = (value) => {
 }
 
 const schema = object({
-  'selectedQuiz': props.isCopy ? string().required().label('Copy Question To') : string().nullable(),
+  'selectedQuiz': props.isCopy ? string().required().label('Copy Question To')
+      .test('copyIsAllowed', 'Unmet community requirements', (value) => copyIsAllowed(value)) : string().nullable(),
   'questionType': object()
       .required()
       .label('Type'),
@@ -426,17 +438,29 @@ const saveQuestionDef = (values) => {
           }
         });
   } else if (props.isCopy) {
-    return QuizService.saveQuizQuestionDef(selectedQuiz, questionToSave)
-        .then((updatedQuizQuestionDef) => {
-          updatedQuizQuestionDef.quizId = selectedQuiz
-          if(selectedQuiz !== props.questionDef.quizId) {
-            updatedQuizQuestionDef.isCopyToAnotherQuiz = true
-          }
-          return {
-            ...updatedQuizQuestionDef,
-            isEdit: props.isEdit,
-          }
-        });
+    if(selectedQuiz !== props.questionDef.quizId) {
+      return QuizService.copyToAnotherQuiz(props.questionDef.quizId, selectedQuiz, [questionToSave.id]).then((response) => {
+        let updatedQuizQuestionDef = {
+          isCopyToAnotherQuiz: true
+        }
+        return {
+          ...updatedQuizQuestionDef,
+          isEdit: props.isEdit,
+        }
+      })
+    } else {
+      return QuizService.saveQuizQuestionDef(selectedQuiz, questionToSave)
+          .then((updatedQuizQuestionDef) => {
+            updatedQuizQuestionDef.quizId = selectedQuiz
+            if (selectedQuiz !== props.questionDef.quizId) {
+              updatedQuizQuestionDef.isCopyToAnotherQuiz = true
+            }
+            return {
+              ...updatedQuizQuestionDef,
+              isEdit: props.isEdit,
+            }
+          });
+    }
   } else {
     return QuizService.saveQuizQuestionDef(quizId.value, questionToSave)
         .then((updatedQuizQuestionDef) => {

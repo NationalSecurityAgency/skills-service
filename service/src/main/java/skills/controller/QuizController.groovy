@@ -25,6 +25,7 @@ import org.springframework.web.bind.annotation.*
 import org.springframework.web.multipart.MultipartFile
 import org.springframework.web.servlet.ModelAndView
 import skills.PublicProps
+import skills.controller.request.model.CopyToAnotherProjectRequest
 import skills.controller.request.model.TextInputAIGradingRequest
 import skills.services.openai.OpenAIService
 import skills.controller.exceptions.ErrorCode
@@ -205,6 +206,15 @@ class QuizController {
                                             @PathVariable("questionId") Integer questionId,
                                             @RequestBody QuizQuestionDefRequest questionDefRequest) {
         return quizDefService.saveQuestion(quizId, questionDefRequest, questionId)
+    }
+
+    @RequestMapping(value = "/{quizId}/questions/copy/{toQuizId}", method = [RequestMethod.PUT, RequestMethod.POST], produces = "application/json")
+    @ResponseBody
+    RequestResult copyQuestionDefToAnotherProject(@PathVariable("quizId") String quizId,
+                                                          @PathVariable("toQuizId") String toQuizId,
+                                                          @RequestBody List<Integer> ids) {
+        quizDefService.copyQuestions(quizId, toQuizId, ids)
+        return RequestResult.success()
     }
 
     @RequestMapping(value = "/{quizId}/questions/{questionRefId}", method = [RequestMethod.DELETE], produces = "application/json")
@@ -576,5 +586,13 @@ class QuizController {
         QuizValidator.isNotNull(questionId, "Question Id")
 
         return new RequestResult(success: true, data: [ hasPendingGrades: quizDefService.hasUngradedQuestions(questionId) ])
+    }
+
+    @RequestMapping(value = "/{quizId}/questions/{questionId}/{otherQuizId}/validateCopy", method = [RequestMethod.POST], produces = "application/json")
+    @ResponseBody
+    CopyValidationRes validateCopyItemsToAnotherProject(
+            @PathVariable("quizId") String quizId,
+            @PathVariable("otherQuizId") String otherQuizId) {
+        return quizDefService.validateCopyQuestionsToAnotherQuiz(quizId, otherQuizId)
     }
 }

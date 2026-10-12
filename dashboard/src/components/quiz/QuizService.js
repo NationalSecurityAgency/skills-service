@@ -65,6 +65,12 @@ export default {
       .post(`/admin/quiz-definitions/${quizId}/create-question`, newQuestionDef)
       .then((response) => response.data)
   },
+  validateQuizCopy(fromQuizId, toQuizId, questionId) {
+    return axios.post(`/admin/quiz-definitions/${fromQuizId}/questions/${questionId}/${toQuizId}/validateCopy`).then((response) => response.data)
+  },
+  copyToAnotherQuiz(fromQuizId, toQuizId, questionIds) {
+    return axios.post(`/admin/quiz-definitions/${fromQuizId}/questions/copy/${toQuizId}`, questionIds).then((response) => response.data)
+  },
   updateQuizQuestionDef(quizId, existingQuestionDef) {
     return axios
       .post(
