@@ -309,9 +309,15 @@ class QuizDefService {
         return [quizAttributesAsStr: quizAttributesAsStr, attachment: slidesAttachment]
     }
 
-    void copyQuestions(String originalQuizId, String newQuizId) {
+    @Transactional
+    void copyQuestions(String originalQuizId, String newQuizId, List<Integer> questionIdsToCopy = null) {
         QuizDef originalQuizDef = findQuizDef(originalQuizId)
-        List<QuizQuestionDef> originalQuestions = quizQuestionRepo.findAllByQuizIdIgnoreCase(originalQuizId)
+        List<QuizQuestionDef> originalQuestions
+        if(questionIdsToCopy) {
+            originalQuestions = quizQuestionRepo.findAllByQuizIdIgnoreCaseAndIds(originalQuizId, questionIdsToCopy)
+        } else {
+            originalQuestions = quizQuestionRepo.findAllByQuizIdIgnoreCase(originalQuizId)
+        }
 
         // validate questions
         validateQuestions(originalQuestions, originalQuizDef.quizId)
@@ -1302,6 +1308,19 @@ class QuizDefService {
             throw new SkillQuizException("Failed to find quiz id.", quizId, ErrorCode.BadParam)
         }
         return updatedDef
+    }
+
+    @Transactional
+    CopyValidationRes validateCopyQuestionsToAnotherQuiz(String fromQuiz, String toQuiz) {
+        if(userCommunityService.isUserCommunityOnlyQuiz(fromQuiz) && !userCommunityService.isUserCommunityOnlyQuiz(toQuiz)) {
+            String fromCommunity = userCommunityService.getQuizUserCommunity(fromQuiz)
+            String toCommunity = userCommunityService.getQuizUserCommunity(toQuiz)
+            String errorMessage = "Can not copy questions from ${fromCommunity} quizzes to ${toCommunity} quizzes."
+            return new CopyValidationRes(isAllowed: false, validationErrors: [errorMessage])
+        }
+
+        CopyValidationRes res = new CopyValidationRes(isAllowed: true, validationErrors: [])
+        return res;
     }
 
     private void validate(QuizDef quizDef, QuizQuestionDefRequest questionDefRequest) {
