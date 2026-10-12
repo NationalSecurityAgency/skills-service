@@ -458,7 +458,7 @@ describe('Skills Tests', () => {
     cy.get('[data-cy=closeDialogBtn]').click()
     cy.get('[data-cy=editSkillButton_skill2]').should('have.focus')
 
-    cy.get('[data-cy=editSkillButton_skill2]').click()
+    cy.openDialog('[data-cy=editSkillButton_skill2]', true, '[data-cy=skillName]')
     cy.get('[data-cy=skillName]').type('test 123')
     cy.get('[data-cy=saveDialogBtn]').click()
     cy.wait('@saveSkill2')

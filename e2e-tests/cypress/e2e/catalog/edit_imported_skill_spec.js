@@ -39,15 +39,20 @@ describe('Edit Imported Skill Tests', () => {
 
         cy.visit('/administrator/projects/proj2/subjects/subj1');
         cy.get('[data-cy="subTitle"]').contains('ID: subj1')
-        cy.get('[data-cy="editSkillButton_skill1"]')
-            .click();
+        cy.openDialog('[data-cy="editSkillButton_skill1"]', true);
         cy.get('[data-cy="importedSkillMessage"]').should('be.visible')
         cy.get('[data-cy="importedSkillMessage"]').contains('You can change the Point Increment');
         cy.get('[data-cy="pointIncrement"] [data-pc-name="pcinputtext"]').should('be.visible')
          cy.get('[data-cy="pointIncrement"] [data-pc-name="pcinputtext"]')
             .should('have.value', '100');
-        cy.get('[data-cy="pointIncrement"]')
-            .type('1');
+        // Wait for the dialog's initial autofocus so it cannot steal focus while typing.
+        cy.get('[data-cy="EditImportedSkillModal"] [data-pc-name="pcmaximizebutton"]')
+            .should('be.focused');
+        cy.get('[data-cy="pointIncrement"] [data-pc-name="pcinputtext"]')
+            .type('{selectall}1001')
+            .blur();
+        cy.get('[data-cy="pointIncrement"] [data-pc-name="pcinputtext"]')
+            .should('have.value', '1,001');
         cy.clickSaveDialogBtn()
 
         cy.get('[data-cy="skillsTable-additionalColumns"] [data-pc-section="dropdownicon"]').click()
@@ -127,8 +132,7 @@ describe('Edit Imported Skill Tests', () => {
 
         cy.visit('/administrator/projects/proj2/subjects/subj1');
         cy.get('[data-cy="subTitle"]').contains('ID: subj1')
-        cy.get('[data-cy="editSkillButton_skill1"]')
-            .click();
+        cy.openDialog('[data-cy="editSkillButton_skill1"]', true);
          cy.get('[data-cy="pointIncrement"] [data-pc-name="pcinputtext"]')
             .should('have.value', '100');
 
@@ -176,8 +180,7 @@ describe('Edit Imported Skill Tests', () => {
 
         cy.visit('/administrator/projects/proj2/subjects/subj1');
         cy.get('[data-cy="subTitle"]').contains('ID: subj1')
-        cy.get('[data-cy="editSkillButton_skill1"]')
-            .click();
+        cy.openDialog('[data-cy="editSkillButton_skill1"]', true);
         cy.get('[data-cy="pointIncrement"]')
             .type('1');
         cy.get('[data-cy="closeDialogBtn"]')
@@ -204,8 +207,7 @@ describe('Edit Imported Skill Tests', () => {
         cy.get(`${tableSelector} tbody tr`)
             .should('have.length', 2);
 
-        cy.get('[data-cy="editSkillButton_skill1"]')
-            .click();
+        cy.openDialog('[data-cy="editSkillButton_skill1"]', true);
         cy.get('[data-cy="pointIncrement"]')
             .type('1');
         cy.get(' [aria-label="Close"]')
@@ -247,8 +249,7 @@ describe('Edit Imported Skill Tests', () => {
 
         cy.visit('/administrator/projects/proj2/subjects/subj1');
         cy.get('[data-cy="subTitle"]').contains('ID: subj1')
-        cy.get('[data-cy="editSkillButton_skill1"]')
-            .click();
+        cy.openDialog('[data-cy="editSkillButton_skill1"]', true);
         cy.get('[data-cy="importedSkillMessage"]').should('be.visible')
         cy.get('[data-cy="importedSkillMessage"]').contains('You can change the Point Increment');
          cy.get('[data-cy="pointIncrement"] [data-pc-name="pcinputtext"]')
@@ -311,8 +312,7 @@ describe('Edit Imported Skill Tests', () => {
         cy.visit('/administrator/projects/proj1/subjects/subj1');
         cy.get('[data-cy="pageHeaderStat_Points"] [data-cy="statValue"]')
             .should('have.text', '400');
-        cy.get('[data-cy="editSkillButton_skill1"]')
-            .click();
+        cy.openDialog('[data-cy="editSkillButton_skill1"]', true, '[data-cy="skillName"]');
          cy.get('[data-cy="pointIncrement"] [data-pc-name="pcinputtext"]')
             .should('have.value', '100');
         cy.get('[data-cy="pointIncrement"]')
@@ -343,8 +343,7 @@ describe('Edit Imported Skill Tests', () => {
         cy.get('[data-cy="subTitle"]').contains('ID: subj1')
         cy.get('[data-cy="pageHeaderStat_Points"] [data-cy="statValue"]')
             .should('have.text', '200');
-        cy.get('[data-cy="editSkillButton_skill2"]')
-            .click();
+        cy.openDialog('[data-cy="editSkillButton_skill2"]', true);
          cy.get('[data-cy="pointIncrement"] [data-pc-name="pcinputtext"]')
             .should('have.value', '100');
         cy.get('[data-cy="pointIncrement"]')

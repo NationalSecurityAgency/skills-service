@@ -62,7 +62,7 @@ describe('Badges Tests', () => {
         cy.visit('/administrator/projects/proj1/badges');
         // // // cy.get('[data-cy="inception-button"]').contains('Level');
         cy.wait('@loadBadges');
-        cy.get('[data-cy="btn_Badges"]').click();
+        cy.openDialog('[data-cy="btn_Badges"]', true, '[data-cy="name"]');
 
         cy.get('[data-cy="name"]')
             .type('a name');

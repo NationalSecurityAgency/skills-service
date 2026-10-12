@@ -43,7 +43,7 @@ describe('Projects Admin Management Tests', () => {
         cy.wait('@loadUserInfo');
         cy.wait('@loadProjects');
 
-        cy.get('[data-cy="newProjectButton"]').click()
+        cy.openDialog('[data-cy="newProjectButton"]', true, '[data-cy="projectName"]')
         cy.get('[data-cy="projectName"]')
             .type('My New test Project');
         cy.get('[data-cy="saveDialogBtn"]').should('be.enabled').click();
