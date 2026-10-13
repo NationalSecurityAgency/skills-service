@@ -133,10 +133,8 @@ export const useSkillsDisplayInfo = () => {
   }
   const isGlobalBadgeSkillDetails = () => {
     const routeName = route.name
-    return routeName === 'globalBadgeSkillDetailsSkillsClient'
-        || getContextSpecificRouteName('globalBadgeSkillDetailsSkillsClient')
-        || routeName === 'globalBadgeSkillDetailsUnderAnotherProject'
-        || getContextSpecificRouteName('globalBadgeSkillDetailsUnderAnotherProject')
+    return routeName === getContextSpecificRouteName('globalBadgeSkillDetails')
+        || routeName === getContextSpecificRouteName('globalBadgeSkillDetailsUnderAnotherProject')
   }
 
   return {

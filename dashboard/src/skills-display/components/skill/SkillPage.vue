@@ -16,7 +16,7 @@ limitations under the License.
 <script setup>
 import {computed, defineAsyncComponent, onMounted, ref, watch} from 'vue'
 import SkillsTitle from '@/skills-display/components/utilities/SkillsTitle.vue'
-import {useRoute} from 'vue-router'
+import {onBeforeRouteLeave, useRoute} from 'vue-router'
 import {useSkillsDisplayService} from '@/skills-display/services/UseSkillsDisplayService.js'
 import {useSkillsDisplayInfo} from '@/skills-display/UseSkillsDisplayInfo.js'
 import SkillProgress from '@/skills-display/components/progress/SkillProgress.vue'
@@ -39,6 +39,13 @@ const loadingSkill = ref(true)
 const displayGroupDescription = ref(false);
 const groupDescription = ref(null);
 const loadingDescription = ref(true);
+
+onBeforeRouteLeave((to) => {
+  scrollIntoViewState.jumpToLastViewed = to.name === skillsDisplayInfo.getContextSpecificRouteName('SubjectDetailsPage')
+    && to.params.subjectId === skill.value.subjectId
+    && !skillsDisplayInfo.isCrossProject()
+    && !skillsDisplayInfo.isGlobalBadgeSkillDetails()
+})
 
 onMounted( () => {
   loadSkillSummary()
