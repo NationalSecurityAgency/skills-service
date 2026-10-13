@@ -195,13 +195,23 @@ class ExportGlobalUserProgressSpec extends ExportBaseIntSpec {
             skillsService.addSkill(skill1, userId)
         }
 
+        // Use overlapping display names to consistently exercise substring matching in both authentication modes.
+        List<String> displayNames = ['OtherUser for display', 'AnotherUser for display', 'UnrelatedUser for display']
+        users.eachWithIndex { userId, index ->
+            def userAttrs = userAttrsRepo.findByUserIdIgnoreCase(userId)
+            userAttrs.userIdForDisplay = displayNames[index]
+            userAttrsRepo.save(userAttrs)
+        }
+
         when:
-        def excelExport = skillsService.getGlobalUserProgressExcelExport('userIdForDisplay', true, getUserIdForDisplay(users[0]), '')
+        def excelExport = skillsService.getGlobalUserProgressExcelExport('userIdForDisplay', true, getUserIdForDisplay(users[0]).toLowerCase(Locale.ROOT), '')
 
         then:
         validateExport(excelExport.file, [
                 ["For All Dragons Only"],
                 headers,
+                [getUserIdForDisplay(users[1]), getName(users[1], false), getName(users[1]), "", "0.0", "0.0", "0.0", "0.0", "0.0",
+                 "0.0", "0.0", "0.0", "1.0", "1.0", "1.0", "0.0", "0.0", "0.0"],
                 [getUserIdForDisplay(users[0]), getName(users[0], false), getName(users[0]), "", "0.0", "0.0", "0.0", "0.0", "0.0",
                  "0.0", "0.0", "0.0", "1.0", "1.0", "1.0", "0.0", "0.0", "0.0"],
                 ["For All Dragons Only"],
