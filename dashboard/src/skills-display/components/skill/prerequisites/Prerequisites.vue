@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <script setup>
-import { computed, ref, onMounted, watch } from 'vue'
+import { computed, ref, onMounted, watch, nextTick, onBeforeUnmount } from 'vue'
 import { useRoute } from 'vue-router'
 import { Network } from 'vis-network'
 import { useSkillsDisplayAttributesState } from '@/skills-display/stores/UseSkillsDisplayAttributesState.js'
@@ -76,15 +76,22 @@ onMounted(() => {
   loadAllDataForPrereq()
 })
 
-watch( () => route.params.skillId, () => {
+watch(() => props.dependencies, () => {
   loadAllDataForPrereq()
+})
+
+onBeforeUnmount(() => clearNetwork())
+
+watch( () => route.params.skillId, () => {
+  if (props.dependencies === undefined) loadAllDataForPrereq()
 });
 
 const loadAllDataForPrereq  = () => {
   loadData().then(() => {
+    clearNetwork()
     if (dependenciesInternal.value?.length > 0) {
       initInternalDeps()
-      createGraph()
+      nextTick(createGraph)
     }
   })
 }
@@ -97,6 +104,13 @@ const isDependency = () => {
 
 const loadData = () => {
   loadingData.value = true
+  if (props.dependencies !== undefined) {
+    dependenciesInternal.value = props.dependencies.map((item) => ({
+      ...item, skill: { ...item.skill }, dependsOn: { ...item.dependsOn }
+    }))
+    loadingData.value = false
+    return Promise.resolve()
+  }
   if (!route.params.crossProjectId) {
     let lookupId = isDependency() ? route.params.dependentSkillId : route.params.skillId
     if (!route.params.skillId && route.params.badgeId) {
@@ -144,7 +158,8 @@ const initInternalDeps = () => {
 
 const clearNetwork = () => {
   if (network.value) {
-    return network.value.destroy()
+    network.value.destroy()
+    network.value = null
   }
   return true
 }
