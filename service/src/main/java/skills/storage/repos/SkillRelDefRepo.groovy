@@ -455,10 +455,13 @@ interface SkillRelDefRepo extends CrudRepository<SkillRelDef, Integer> {
             and srd.type=?2 
             and sd1.projectId=?1
             and (?3 is null or (sd1.version <= ?3 and sd2.version <= ?3))
+            and (?4 is null or sd2.projectId=?4)
+            and (?5 is null or lower(sd2.skillId)=lower(cast(?5 as String)))
+            and (?5 is null or sd1.type != 'Badge' or sd1.enabled is null or sd1.enabled = 'true')
             and p1.projectId = sd1.projectId
             and p2.projectId = sd2.projectId
         ''')
-    List<Object[]> getGraph(String projectId, SkillRelDef.RelationshipType type, @Nullable Integer version)
+    List<Object[]> getGraph(String projectId, SkillRelDef.RelationshipType type, @Nullable Integer version, @Nullable String prerequisiteProjectId, @Nullable String prerequisiteSkillId)
 
 
     @Query(value='''

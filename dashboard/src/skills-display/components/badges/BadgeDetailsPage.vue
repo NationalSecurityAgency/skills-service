@@ -15,7 +15,7 @@ limitations under the License.
 */
 <script setup>
 import SkillsTitle from '@/skills-display/components/utilities/SkillsTitle.vue'
-import {computed, defineAsyncComponent, onMounted, watch} from 'vue'
+import {computed, defineAsyncComponent, onMounted, ref, watch} from 'vue'
 import { useRoute } from 'vue-router'
 import BadgeCatalogItem from '@/skills-display/components/badges/BadgeCatalogItem.vue'
 import SkillsProgressList from '@/skills-display/components/progress/SkillsProgressList.vue'
@@ -24,10 +24,25 @@ import { useSkillsDisplayInfo } from '@/skills-display/UseSkillsDisplayInfo.js'
 import GlobalBadgeProjectLevels from '@/skills-display/components/badges/GlobalBadgeProjectLevels.vue'
 const Prerequisites = defineAsyncComponent(() => import('@/skills-display/components/skill/prerequisites/Prerequisites.vue'))
 import IconManagerService from '@/components/utils/iconPicker/IconManagerService.js'
+import NextLearningPathItems from '@/skills-display/components/skill/NextLearningPathItems.vue'
+import { useSkillsDisplayService } from '@/skills-display/services/UseSkillsDisplayService.js'
 
 const route = useRoute()
 const summaryAndSkillsState = useSkillsDisplaySubjectState()
 const skillsDisplayInfo = useSkillsDisplayInfo()
+const skillsDisplayService = useSkillsDisplayService()
+const learningPath = ref({ dependencies: [], nextItems: [] })
+let learningPathRequest = 0
+
+watch(() => [route.params.projectId, route.params.badgeId, skillsDisplayInfo.isGlobalBadgePage.value], async () => {
+  const request = ++learningPathRequest
+  learningPath.value = { dependencies: [], nextItems: [] }
+  if (skillsDisplayInfo.isGlobalBadgePage.value) return
+  const result = await skillsDisplayService.getSkillLearningPath(route.params.badgeId)
+  if (request === learningPathRequest && Array.isArray(result?.dependencies) && Array.isArray(result?.nextItems)) {
+    learningPath.value = result
+  }
+}, { immediate: true })
 
 const badge = computed(() => summaryAndSkillsState.subjectSummary)
 const isLoading = computed(() => summaryAndSkillsState.loadingBadgeSummary)
@@ -83,7 +98,8 @@ const badgeTitle = computed(() => skillsDisplayInfo.isGlobalBadgePage.value ? 'G
         class="mt-4"
         :badge-is-locked="locked"/>
 
-      <prerequisites />
+      <NextLearningPathItems :next-items="learningPath.nextItems" />
+      <prerequisites :dependencies="skillsDisplayInfo.isGlobalBadgePage.value ? undefined : learningPath.dependencies" />
       <global-badge-project-levels :badge="badge"/>
 
     </div>

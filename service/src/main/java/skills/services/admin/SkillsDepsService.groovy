@@ -29,6 +29,7 @@ import skills.controller.exceptions.SkillException
 import skills.controller.result.model.*
 import skills.services.DependencyValidator
 import skills.services.RuleSetDefGraphService
+import skills.skillLoading.model.SkillDependencyInfo
 import skills.services.userActions.DashboardAction
 import skills.services.userActions.DashboardItem
 import skills.services.userActions.UserActionInfo
@@ -197,9 +198,26 @@ class SkillsDepsService {
     }
 
     @Transactional(readOnly = true)
-    SkillsGraphRes getUserDependentSkillsGraph(String projectId, String userId, Integer version=null) {
-        List<Object[]> rows = skillRelDefRepo.getGraph(projectId, SkillRelDef.RelationshipType.Dependence, version)
+    SkillsGraphRes getUserDependentSkillsGraph(String projectId, String userId, Integer version=null, String prerequisiteProjectId=null, String prerequisiteSkillId=null) {
+        List<Object[]> rows = skillRelDefRepo.getGraph(projectId, SkillRelDef.RelationshipType.Dependence, version, prerequisiteProjectId, prerequisiteSkillId)
         Set<String> referencedProjectIds = rows.collectMany { [it[5] as String, it[15] as String] }.toSet()
+        Set<String> accessibleProjectIds = getAccessibleProjectIds(projectId, referencedProjectIds)
+        List<Object[]> visibleRows = rows.findAll { row ->
+            accessibleProjectIds.contains(row[5]) && accessibleProjectIds.contains(row[15])
+        }
+        return convertToSkillsGraphRes(mapGraphEdges(visibleRows, userId, version))
+    }
+
+    @Transactional(readOnly = true)
+    List<SkillDependencyInfo.SkillRelationship> filterAccessibleDependencies(String projectId, List<SkillDependencyInfo.SkillRelationship> dependencies) {
+        Set<String> referencedProjectIds = dependencies.collectMany { [it.skill.projectId, it.dependsOn.projectId] }.toSet()
+        Set<String> accessibleProjectIds = getAccessibleProjectIds(projectId, referencedProjectIds)
+        return dependencies.findAll {
+            accessibleProjectIds.contains(it.skill.projectId) && accessibleProjectIds.contains(it.dependsOn.projectId)
+        }
+    }
+
+    private Set<String> getAccessibleProjectIds(String projectId, Set<String> referencedProjectIds) {
         referencedProjectIds.remove(projectId)
 
         String currentUserId = userInfoService.getCurrentUserId()
@@ -214,10 +232,7 @@ class SkillsDepsService {
         }.toSet()
         accessibleProjectIds.add(projectId)
 
-        List<Object[]> visibleRows = rows.findAll { row ->
-            accessibleProjectIds.contains(row[5]) && accessibleProjectIds.contains(row[15])
-        }
-        return convertToSkillsGraphRes(mapGraphEdges(visibleRows, userId, version))
+        return accessibleProjectIds
     }
 
 
@@ -294,7 +309,7 @@ class SkillsDepsService {
 
     @Profile
     List<GraphSkillDefEdge> loadGraphEdges(String projectId, SkillRelDef.RelationshipType type, String userId=null, Integer version=null) {
-        List<Object[]> edges = skillRelDefRepo.getGraph(projectId, type, version)
+        List<Object[]> edges = skillRelDefRepo.getGraph(projectId, type, version, null, null)
         return mapGraphEdges(edges, userId, version)
     }
 

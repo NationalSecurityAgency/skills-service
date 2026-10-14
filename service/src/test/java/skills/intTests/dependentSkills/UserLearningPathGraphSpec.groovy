@@ -30,6 +30,106 @@ import skills.storage.repos.UserRoleRepo
 
 class UserLearningPathGraphSpec extends DefaultIntSpec {
 
+    def "skill learning path combines prerequisites with only immediate successors"() {
+        def project = SkillsFactory.createProject()
+        def skills = SkillsFactory.createSkills(5)
+        skillsService.createProjectAndSubjectAndSkills(project, SkillsFactory.createSubject(), skills)
+        skillsService.addLearningPathPrerequisite(project.projectId, skills[1].skillId, skills[0].skillId)
+        skillsService.addLearningPathPrerequisite(project.projectId, skills[2].skillId, skills[1].skillId)
+        skillsService.addLearningPathPrerequisite(project.projectId, skills[3].skillId, skills[1].skillId)
+        skillsService.addLearningPathPrerequisite(project.projectId, skills[4].skillId, skills[3].skillId)
+
+        when:
+        def result = skillsService.wsHelper.apiGet("/projects/${project.projectId}/skills/${skills[1].skillId}/learningPath")
+        def terminal = skillsService.wsHelper.apiGet("/projects/${project.projectId}/skills/${skills[4].skillId}/learningPath")
+
+        then:
+        result.dependencies*.dependsOn*.skillId == [skills[0].skillId]
+        result.nextItems*.skillId.toSet() == [skills[2].skillId, skills[3].skillId].toSet()
+        result.nextItems.every { it.subjectId == SkillsFactory.createSubject().subjectId && it.projectId == project.projectId }
+        !terminal.nextItems
+    }
+
+    def "skill learning path filters successor versions and includes badges"() {
+        def project = SkillsFactory.createProject()
+        def skills = SkillsFactory.createSkillsWithDifferentVersions([0, 0, 1])
+        skillsService.createProjectAndSubjectAndSkills(project, SkillsFactory.createSubject(), skills)
+        def badge = SkillsFactory.createBadge()
+        skillsService.createBadge(badge)
+        skillsService.assignSkillToBadge([projectId: project.projectId, badgeId: badge.badgeId, skillId: skills[1].skillId])
+        badge.enabled = true
+        skillsService.createBadge(badge)
+        skillsService.addLearningPathPrerequisite(project.projectId, badge.badgeId, skills[0].skillId)
+        skillsService.addLearningPathPrerequisite(project.projectId, skills[2].skillId, skills[0].skillId)
+
+        when:
+        def result = skillsService.wsHelper.apiGet("/projects/${project.projectId}/skills/${skills[0].skillId}/learningPath?version=0")
+
+        then:
+        result.nextItems*.skillId == [badge.badgeId]
+        result.nextItems[0].type == 'Badge'
+        !result.dependencies
+    }
+
+    def "skill learning path omits a successor badge after it is disabled"() {
+        def project = SkillsFactory.createProject()
+        def skills = SkillsFactory.createSkills(2)
+        skillsService.createProjectAndSubjectAndSkills(project, SkillsFactory.createSubject(), skills)
+        def badge = SkillsFactory.createBadge()
+        skillsService.createBadge(badge)
+        skillsService.assignSkillToBadge([projectId: project.projectId, badgeId: badge.badgeId, skillId: skills[1].skillId])
+        badge.enabled = true
+        skillsService.createBadge(badge)
+        skillsService.addLearningPathPrerequisite(project.projectId, badge.badgeId, skills[0].skillId)
+        skillsService.addLearningPathPrerequisite(project.projectId, skills[1].skillId, skills[0].skillId)
+        String endpoint = "/projects/${project.projectId}/skills/${skills[0].skillId}/learningPath"
+
+        when:
+        def enabled = skillsService.wsHelper.apiGet(endpoint)
+
+        then:
+        enabled.nextItems*.skillId.toSet() == [badge.badgeId, skills[1].skillId].toSet()
+
+        when:
+        // Published badges cannot be disabled through the admin endpoint. Simulate an
+        // existing disabled badge relationship to verify read-time visibility filtering.
+        def badgeDef = skillDefRepo.findByProjectIdAndSkillId(project.projectId, badge.badgeId)
+        badgeDef.enabled = 'false'
+        skillDefRepo.save(badgeDef)
+        def disabled = skillsService.wsHelper.apiGet(endpoint)
+
+        then:
+        disabled.nextItems*.skillId == [skills[1].skillId]
+
+        when:
+        badgeDef.enabled = 'true'
+        skillDefRepo.save(badgeDef)
+        def reenabled = skillsService.wsHelper.apiGet(endpoint)
+
+        then:
+        reenabled.nextItems*.skillId.toSet() == [badge.badgeId, skills[1].skillId].toSet()
+    }
+
+    def "shared skill learning path returns successors in the viewing project"() {
+        def project = SkillsFactory.createProject(1)
+        def skills = SkillsFactory.createSkills(2, 1, 1)
+        skillsService.createProjectAndSubjectAndSkills(project, SkillsFactory.createSubject(1, 1), skills)
+        def sharedProject = SkillsFactory.createProject(2)
+        def sharedSkills = SkillsFactory.createSkills(2, 2, 1)
+        skillsService.createProjectAndSubjectAndSkills(sharedProject, SkillsFactory.createSubject(2, 1), sharedSkills)
+        skillsService.shareSkill(sharedProject.projectId, sharedSkills[0].skillId, project.projectId)
+        skillsService.addLearningPathPrerequisite(project.projectId, skills[1].skillId, sharedProject.projectId, sharedSkills[0].skillId)
+        skillsService.addLearningPathPrerequisite(sharedProject.projectId, sharedSkills[1].skillId, sharedSkills[0].skillId)
+
+        when:
+        def result = skillsService.wsHelper.apiGet("/projects/${project.projectId}/skills/${sharedSkills[0].skillId}/learningPath?crossProjectId=${sharedProject.projectId}")
+
+        then:
+        !result.dependencies
+        result.nextItems*.skillId == [skills[1].skillId]
+        result.nextItems*.projectId == [project.projectId]
+    }
+
     @Autowired
     SkillDefRepo skillDefRepo
 
@@ -292,11 +392,15 @@ class UserLearningPathGraphSpec extends DefaultIntSpec {
 
         when:
         def deniedGraph = viewer.getUserDependencyGraph(project.projectId)
+        def deniedPath = viewer.wsHelper.apiGet("/projects/${project.projectId}/skills/${skills[1].skillId}/learningPath")
+        def localPath = viewer.wsHelper.apiGet("/projects/${project.projectId}/skills/${skills[2].skillId}/learningPath")
 
         then:
         deniedGraph.nodes*.skillId.toSet() == [skills[0].skillId, skills[2].skillId].toSet()
         deniedGraph.edges.size() == 1
         !deniedGraph.nodes.find { it.projectId == restrictedProject.projectId }
+        !deniedPath.dependencies
+        localPath.dependencies*.dependsOn*.skillId == [skills[0].skillId]
 
         when:
         // PKI certificate usernames may contain uppercase characters; persisted user IDs are lowercase.
@@ -304,10 +408,13 @@ class UserLearningPathGraphSpec extends DefaultIntSpec {
         userRoleRepo.save(new UserRole(userId: normalizedUserId, userRefId: userRepo.findByUserId(normalizedUserId).id,
                 projectId: restrictedProject.projectId, roleName: RoleName.ROLE_PRIVATE_PROJECT_USER))
         def allowedGraph = viewer.getUserDependencyGraph(project.projectId)
+        def allowedPath = viewer.wsHelper.apiGet("/projects/${project.projectId}/skills/${skills[1].skillId}/learningPath")
 
         then:
         allowedGraph.nodes.find { it.projectId == restrictedProject.projectId && it.skillId == restrictedSkills[0].skillId }
         allowedGraph.edges.size() == 2
+        allowedPath.dependencies*.dependsOn*.projectId == [restrictedProject.projectId]
+        allowedPath.dependencies*.dependsOn*.skillId == [restrictedSkills[0].skillId]
     }
 
     def "user graph omits community-only prerequisites for nonmembers"() {
@@ -333,11 +440,16 @@ class UserLearningPathGraphSpec extends DefaultIntSpec {
         when:
         def deniedGraph = skillsService.getUserDependencyGraph(project.projectId)
         def allowedGraph = member.getUserDependencyGraph(project.projectId)
+        def deniedPath = skillsService.wsHelper.apiGet("/projects/${project.projectId}/skills/${skills[1].skillId}/learningPath")
+        def allowedPath = member.wsHelper.apiGet("/projects/${project.projectId}/skills/${skills[1].skillId}/learningPath")
 
         then:
         !deniedGraph.nodes
         !deniedGraph.edges
         allowedGraph.nodes.find { it.projectId == restrictedProject.projectId && it.skillId == restrictedSkills[0].skillId }
+        !deniedPath.dependencies
+        allowedPath.dependencies*.dependsOn*.projectId == [restrictedProject.projectId]
+        allowedPath.dependencies*.dependsOn*.skillId == [restrictedSkills[0].skillId]
     }
 
     def "target badge includes its achieved child skills"() {

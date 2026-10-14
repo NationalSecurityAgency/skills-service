@@ -30,7 +30,11 @@ const mode = "skills-display"
 
 onMounted(() => {
   skillsDisplayService.getSkillDependenciesGraphForProject()
-    .then((response) => { graph.value = response })
+    .then((response) => {
+      if (Array.isArray(response?.nodes) && Array.isArray(response?.edges)) {
+        graph.value = response
+      }
+    })
     .finally(() => { isLoading.value = false })
 })
 </script>

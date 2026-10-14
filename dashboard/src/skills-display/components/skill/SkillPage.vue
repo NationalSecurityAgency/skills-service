@@ -27,6 +27,7 @@ const Prerequisites = defineAsyncComponent(() => import('@/skills-display/compon
 import SkillAchievementMsg from "@/skills-display/components/progress/celebration/SkillAchievementMsg.vue";
 import MarkdownText from "@/common-components/utilities/markdown/MarkdownText.vue";
 import SkillNavigation from "@/skills-display/components/utilities/SkillNavigation.vue";
+import NextLearningPathItems from '@/skills-display/components/skill/NextLearningPathItems.vue'
 
 const attributes = useSkillsDisplayAttributesState()
 const skillsDisplayService = useSkillsDisplayService()
@@ -39,6 +40,16 @@ const loadingSkill = ref(true)
 const displayGroupDescription = ref(false);
 const groupDescription = ref(null);
 const loadingDescription = ref(true);
+const learningPath = ref({ dependencies: [], nextItems: [] })
+let learningPathRequest = 0
+
+watch(() => [route.params.projectId, route.params.skillId, route.params.dependentSkillId, route.params.crossProjectId], async () => {
+  const request = ++learningPathRequest
+  learningPath.value = { dependencies: [], nextItems: [] }
+  const skillId = route.params.dependentSkillId || route.params.skillId
+  const result = await skillsDisplayService.getSkillLearningPath(skillId, route.params.crossProjectId)
+  if (request === learningPathRequest) learningPath.value = result
+}, { immediate: true })
 
 onMounted( () => {
   loadSkillSummary()
@@ -156,7 +167,8 @@ const groupLink = computed(() => {
 
       </Card>
 
-      <prerequisites />
+      <NextLearningPathItems :next-items="learningPath.nextItems" />
+      <prerequisites :dependencies="learningPath.dependencies" />
     </div>
     <skills-spinner v-if="isLoading" :is-loading="isLoading" class="mt-8" />
 

@@ -456,6 +456,34 @@ class UserSkillsController {
         return skillsDepsService.getUserDependentSkillsGraph(projectId, userId, getProvidedVersionOrReturnDefault(version));
     }
 
+    @GetMapping(value = "/projects/{projectId}/skills/{skillId}/learningPath", produces = MediaType.APPLICATION_JSON_VALUE)
+    public SkillDependencyInfo loadSkillLearningPath(@PathVariable("projectId") String projectId,
+                                                     @PathVariable("skillId") String skillId,
+                                                     @RequestParam(name = "userId", required = false) String userIdParam,
+                                                     @RequestParam(name = "idType", required = false) String idType,
+                                                     @RequestParam(name = "version", required = false) Integer version,
+                                                     @RequestParam(name = "crossProjectId", required = false) String crossProjectId) {
+        SkillsValidator.isNotBlank(projectId, "Project Id");
+        SkillsValidator.isNotBlank(skillId, "Skill Id");
+        String userId = userInfoService.getUserName(userIdParam, true, idType);
+        boolean sharedSkill = StringUtils.isNotBlank(crossProjectId) && !projectId.equals(crossProjectId);
+        if (sharedSkill) {
+            boolean partOfLP = skillsDepsService.checkIfSkillInAnotherProjectPartOfLearningPath(projectId, crossProjectId, skillId);
+            boolean partOfGB = globalBadgesService.checkIfSkillBelongsToBadgeThatThisProjectIsPartOf(projectId, crossProjectId, skillId);
+            SkillsValidator.isTrue(partOfLP || partOfGB, "The shared skill must be associated with this project through a Learning Path or Global Badge");
+        }
+        // Shared skill pages do not expose the source project's prerequisite graph.
+        SkillDependencyInfo result = sharedSkill ? new SkillDependencyInfo() : skillsLoader.loadSkillDependencyInfo(projectId, userId, skillId);
+        if (sharedSkill) result.setDependencies(List.of());
+        else result.setDependencies(skillsDepsService.filterAccessibleDependencies(projectId, result.getDependencies()));
+        SkillsGraphRes graph = skillsDepsService.getUserDependentSkillsGraph(projectId, userId,
+                getProvidedVersionOrReturnDefault(version), sharedSkill ? crossProjectId : projectId, skillId);
+        result.setNextItems(graph.getNodes().stream()
+                .filter(node -> graph.getEdges().stream().anyMatch(edge -> edge.getFromId().equals(node.getId())))
+                .collect(Collectors.toList()));
+        return result;
+    }
+
     @RequestMapping(value = "/projects/{projectId}/skills/{skillId}", method = {RequestMethod.PUT, RequestMethod.POST}, produces = "application/json")
     @ResponseBody
     @Profile

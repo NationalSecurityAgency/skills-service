@@ -15,9 +15,12 @@
  */
 package skills.skillLoading.model
 
+import skills.controller.result.model.SkillDefGraphRes
+
 class SkillDependencyInfo {
 
     List<SkillRelationship> dependencies
+    List<SkillDefGraphRes> nextItems = []
 
     static class SkillRelationshipItem {
         String projectId

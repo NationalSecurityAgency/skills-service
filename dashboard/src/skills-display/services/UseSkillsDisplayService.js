@@ -250,6 +250,12 @@ export const useSkillsDisplayService = () => {
     }).then((result) => result.data)
   }
 
+  const getSkillLearningPath = (skillId, crossProjectId) => {
+    return axios.get(`${attributes.serviceUrl}${servicePath}/${encodeURIComponent(attributes.projectId)}/skills/${encodeURIComponent(skillId)}/learningPath`, {
+      params: { ...getUserIdAndVersionParams(), crossProjectId }
+    }).then((result) => result.data)
+  }
+
   const getUserSkillsRankingDistribution = (subjectId) => {
     const url = subjectId ?
       `${attributes.serviceUrl}${servicePath}/${encodeURIComponent(attributes.projectId)}/subjects/${encodeURIComponent(subjectId)}/rankDistribution` :
@@ -329,6 +335,7 @@ export const useSkillsDisplayService = () => {
     getBadgeSummaries,
     getBadgeSkills,
     getSkillDependencies,
+    getSkillLearningPath,
     getSkillDependenciesGraphForProject: getDependencyGraphForProject,
     getUserSkillsRanking,
     getUserSkillsRankingDistribution,
