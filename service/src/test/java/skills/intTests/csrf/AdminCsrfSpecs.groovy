@@ -15,6 +15,8 @@
  */
 package skills.intTests.csrf
 
+import groovy.json.JsonSlurper
+
 import org.apache.hc.client5.http.impl.classic.HttpClients
 import org.apache.hc.client5.http.impl.io.PoolingHttpClientConnectionManager
 import org.apache.hc.client5.http.socket.PlainConnectionSocketFactory
@@ -130,6 +132,7 @@ class AdminCsrfSpecs extends DefaultIntSpec {
         then:
         HttpClientErrorException missingToken = thrown()
         missingToken.statusCode == HttpStatus.FORBIDDEN
+        assertCsrfResponse(missingToken)
 
         when:
         HttpHeaders protectedHeaders = new HttpHeaders()
@@ -161,6 +164,7 @@ class AdminCsrfSpecs extends DefaultIntSpec {
         then:
         HttpClientErrorException missingHeader = thrown()
         missingHeader.statusCode == HttpStatus.FORBIDDEN
+        assertCsrfResponse(missingHeader)
 
         when:
         HttpHeaders protectedHeaders = new HttpHeaders()
@@ -177,6 +181,47 @@ class AdminCsrfSpecs extends DefaultIntSpec {
         HttpMethod.PUT  | '/admin/projects/TestProject1/subjects/TestSubject1'    | '{"subjectId":"TestSubject1","name":"Updated Subject"}'
         HttpMethod.POST | '/admin/projects/TestProject1/reportSkillEvents'        | '{"skillIds":["skill1"],"userIds":["skills@skills.org"]}'
         HttpMethod.PUT  | '/admin/projects/TestProject1/reportSkillEvents'        | '{"skillIds":["skill1"],"userIds":["skills@skills.org"]}'
+    }
+
+    @Unroll
+    def 'CSRF rejection provides a safe error for #scenario'() {
+        given:
+        RestTemplate client = probeClient()
+        String token = csrfToken()
+        HttpHeaders headers = new HttpHeaders()
+        headers.contentType = MediaType.APPLICATION_JSON
+        if (includeCookie) {
+            headers.set(HttpHeaders.COOKIE, isPkiMode ? "XSRF-TOKEN=${token}" : "${sessionCookie()}; XSRF-TOKEN=${token}")
+        }
+        if (suppliedToken) {
+            headers.set('X-XSRF-TOKEN', suppliedToken)
+        }
+
+        when:
+        client.exchange("${skillsService.wsHelper.skillsService}/admin/projects/TestProject1/subjects/Subject2",
+                HttpMethod.POST, new HttpEntity<>('{"subjectId":"Subject2","name":"New Subject"}', headers), String)
+
+        then:
+        HttpClientErrorException failure = thrown()
+        failure.statusCode == HttpStatus.FORBIDDEN
+        assertCsrfResponse(failure)
+        !failure.responseBodyAsString.contains(token)
+        !failure.responseBodyAsString.contains('deliberately-invalid-token')
+
+        where:
+        scenario         | includeCookie | suppliedToken
+        'missing token'  | false         | null
+        'invalid token'  | true          | 'deliberately-invalid-token'
+    }
+
+    private void assertCsrfResponse(HttpClientErrorException failure) {
+        assert failure.responseHeaders.contentType.isCompatibleWith(MediaType.APPLICATION_JSON)
+        def body = new JsonSlurper().parseText(failure.responseBodyAsString)
+        assert body.success == false
+        assert body.errorCode == 'CsrfValidationFailed'
+        assert body.explanation == 'CSRF validation failed: the security token is missing or invalid. Refresh the page, or obtain a fresh CSRF token if using a programmatic client, then try again.'
+        assert !body.containsKey('requestId')
+        assert !failure.responseHeaders.containsHeader('X-Request-ID')
     }
 
     private ResponseEntity<String> exchange(RestTemplate client, String url, HttpMethod method,
