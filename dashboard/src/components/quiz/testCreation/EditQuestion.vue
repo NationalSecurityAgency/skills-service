@@ -50,7 +50,6 @@ const currentScaleOptions = ref([3, 4, 5, 6, 7, 8, 9, 10])
 const answersRef = ref(null)
 const showHint = ref(false)
 const editTypeDisabled = ref(false);
-const quizDefs = ref([]);
 
 const modalTitle = computed(() => {
   if( props.isEdit ) {
@@ -77,18 +76,6 @@ onMounted(() => {
           loadingComponent.value = false;
         })
       }
-    }
-    if (props.isCopy) {
-      loadingComponent.value = true;
-      QuizService.getQuizDefs().then((quizzes) => {
-        quizDefs.value = quizzes.filter((quiz) => quiz.type === props.questionDef.quizType).map((quiz) =>  {
-          return {
-            label: quiz.name,
-            id: quiz.quizId
-          };
-        });
-        loadingComponent.value = false;
-      })
     }
   }
   if (isQuizType.value && props.questionDef.answerHint) {
@@ -293,17 +280,6 @@ const matchesMustNotBeBlank = (value) => {
   return emptyAnswers.length === 0;
 }
 
-const copyIsAllowed = async (value) => {
-  if(props.questionDef.quizId === value) {
-    return true;
-  } else {
-    const response = await QuizService.validateQuizCopy(props.questionDef.quizId, value, "test")
-    if(response) {
-      return response.isAllowed;
-    }
-  }
-}
-
 const allAnswersFilledIn = (value) => {
   if(!isQuestionTypeFillInTheBlank.value) {
     return true;
@@ -341,8 +317,7 @@ const noRepeatAnswers = (value) => {
 }
 
 const schema = object({
-  'selectedQuiz': props.isCopy ? string().required().label('Copy Question To')
-      .test('copyIsAllowed', 'Unmet community requirements', (value) => copyIsAllowed(value)) : string().nullable(),
+  'selectedQuiz': props.isCopy ? string().required().label('Copy Question To') : string().nullable(),
   'questionType': object()
       .required()
       .label('Type'),
@@ -562,16 +537,6 @@ const numberOfBlanks = computed(() => {
           @question-generated="onQuestionGenerated"
       />
 
-      <div class="mb-2 flex flex-col gap-1" v-if="isCopy">
-        <span class="font-bold text-primary">Copy Question To:</span>
-        <SkillsDropDown
-            name="selectedQuiz"
-            :options="quizDefs"
-            aria-label="Copy Question To"
-            optionLabel="label"
-            optionValue="id"
-            data-cy="quizzes-to-copy" />
-      </div>
       <Message v-if="numberOfBlanks === 0 && isQuestionTypeFillInTheBlank" :closable="false">
         Insert blanks in your question by using underscores (___) where answers should go.
       </Message>

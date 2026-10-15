@@ -52,10 +52,18 @@ const props = defineProps({
   collapsed: {
     type: Boolean,
     default: false
+  },
+  selectionMode: {
+    type: Boolean,
+    default: false
+  },
+  selected: {
+    type: Boolean,
+    default: false,
   }
 })
 
-const emit = defineEmits(['editQuestion', 'deleteQuestion', 'sortChangeRequested', 'copyQuestion', 'questionUpdated', 'collapseQuestion', 'expandQuestion'])
+const emit = defineEmits(['editQuestion', 'deleteQuestion', 'sortChangeRequested', 'copyQuestion', 'questionUpdated', 'collapseQuestion', 'expandQuestion', 'questionSelectToggled'])
 
 const showDeleteDialog = ref(false)
 
@@ -113,13 +121,17 @@ const toggleQuestionState = () => {
     emit('expandQuestion', props.question.id)
   }
 }
+
+const questionSelected = () => {
+  emit('questionSelectToggled', props.question.id)
+}
 </script>
 
 <template>
   <div class="border border-surface-300 dark:border-surface-500" data-cy="questionDisplayCard">
     <div class="flex flex-col md:flex-row flex-wrap gap-0 mb-4" :data-cy="`questionDisplayCard-${questionNum}`">
       <div class="flex flex-initial items-start flex-col gap-1">
-        <div v-if="isDragAndDropControlsVisible"
+        <div v-if="isDragAndDropControlsVisible && !selectionMode"
              :id="`questionSortControl-${question.id}`"
              class="sort-control border-r border-b border-surface text-muted-color rounded-br-md w-full"
              @click.prevent.self
@@ -133,7 +145,7 @@ const toggleQuestionState = () => {
         </div>
         <SkillsButton :id="`questionCollapseControl-${question.id}`"
              style="max-width: 33px;"
-             v-if="!quizConfig.isReadOnlyQuiz"
+             v-if="!quizConfig.isReadOnlyQuiz && !selectionMode"
              class="border-l-0! rounded-none! rounded-r-md! mt-2"
              @click="toggleQuestionState"
              tabindex="0"
@@ -141,6 +153,13 @@ const toggleQuestionState = () => {
              :icon="collapsed ? 'fas fa-angle-right' : 'fas fa-angle-down'"
              data-cy="collapseQuestionButton">
         </SkillsButton>
+        <SkillsCheckboxInput
+            v-if="selectionMode"
+            @change="questionSelected"
+            :binary="true"
+            class="mt-2 ml-2"
+            :name="`selectedQuestion_${question.id}`"
+            data-cy="selectSkillCheckbox" />
       </div>
       <div :class="{ 'ml-3' : !isDragAndDropControlsVisible }" class="flex-col flex-1 items-start px-2 py-1">
         <div class="flex flex-1">
@@ -237,7 +256,7 @@ const toggleQuestionState = () => {
           </Message>
         </div>
       </div>
-      <div v-if="!quizConfig.isReadOnlyQuiz && showEditControls" class="flex flex-col gap-2 pr-4">
+      <div v-if="!quizConfig.isReadOnlyQuiz && showEditControls && !selectionMode" class="flex flex-col gap-2 pr-4">
         <div>
           <ButtonGroup class="ml-1 mt-2">
             <SkillsButton @click="editQuestion"
