@@ -57,6 +57,9 @@ class PortalWebSecurityHelper {
     @Value('#{"${skills.config.disableCsrfProtection:false}"}')
     Boolean disableCsrfProtection
 
+    @Value('${skills.config.disableCsrfProtectionInPkiMode:false}')
+    Boolean disableCsrfProtectionInPkiMode
+
     @Value('${skills.authorization.authMode:#{T(skills.auth.AuthMode).DEFAULT_AUTH_MODE}}')
     AuthMode authMode
 
@@ -83,7 +86,7 @@ class PortalWebSecurityHelper {
             http.csrf((csrf) -> csrf.disable())
         } else {
             http.csrf((csrf) -> csrf
-                     .requireCsrfProtectionMatcher(new ClientEndpointCsrfRequestMatcher(authMode == AuthMode.PKI))
+                     .requireCsrfProtectionMatcher(new ClientEndpointCsrfRequestMatcher(authMode == AuthMode.PKI, disableCsrfProtectionInPkiMode))
                      .csrfTokenRepository(cookieCsrfTokenRepository)
                      .sessionAuthenticationStrategy(csrfAuthenticationStrategy)
                     .csrfTokenRequestHandler(new SpaCsrfTokenRequestHandler()))
@@ -138,6 +141,7 @@ class PortalWebSecurityHelper {
 
 final class ClientEndpointCsrfRequestMatcher implements RequestMatcher {
     private final boolean pkiMode
+    private final boolean disableCsrfProtectionInPkiMode
     private final RequestMatcher clientEndpointMatcher = new OrRequestMatcher(
             PathPatternRequestMatcher.pathPattern('/api/**'),
             PathPatternRequestMatcher.pathPattern('/public/**'))
@@ -145,8 +149,9 @@ final class ClientEndpointCsrfRequestMatcher implements RequestMatcher {
             PathPatternRequestMatcher.pathPattern('/public/log'))
     private final Set<String> safeMethods = ['GET', 'HEAD', 'TRACE', 'OPTIONS'] as Set
 
-    ClientEndpointCsrfRequestMatcher(boolean pkiMode) {
+    ClientEndpointCsrfRequestMatcher(boolean pkiMode, boolean disableCsrfProtectionInPkiMode = false) {
         this.pkiMode = pkiMode
+        this.disableCsrfProtectionInPkiMode = disableCsrfProtectionInPkiMode
     }
 
     @Override
@@ -157,7 +162,7 @@ final class ClientEndpointCsrfRequestMatcher implements RequestMatcher {
         // Support running skills-client within iframe on a different domain,
         // except for multipart uploads, which must be protected on every path.
         boolean multipart = request.contentType && MediaType.MULTIPART_FORM_DATA.isCompatibleWith(MediaType.parseMediaType(request.contentType))
-        return multipart || !(pkiMode && clientEndpointMatcher.matches(request))
+        return multipart || !(pkiMode && (disableCsrfProtectionInPkiMode || clientEndpointMatcher.matches(request)))
     }
 }
 
