@@ -15,6 +15,8 @@
  */
 package skills.utils
 
+import skills.controller.exceptions.ErrorCode
+import skills.controller.exceptions.SkillException
 import spock.lang.Specification
 
 class TimeRangeFormatterUtilSpec extends Specification {
@@ -53,5 +55,31 @@ class TimeRangeFormatterUtilSpec extends Specification {
         then:
         range[0].toLocalDateTime().toLocalTime() == java.time.LocalTime.MIN
         range[1].toLocalDateTime().toLocalDate().toString() == "2024-03-04"
+    }
+
+    def "a malformed start is a BadParam instead of an unexpected error - #value"() {
+        when:
+        TimeRangeFormatterUtil.formatTimeRange(value, null)
+
+        then:
+        SkillException e = thrown()
+        e.errorCode == ErrorCode.BadParam
+        e.message == "start must be a date and time in the yyyy-MM-dd HH:mm:ss format. Provided [${value}]"
+
+        where:
+        value << ["2024-03-04", "abc", "2024-03-04T05:06:07", "2024-13-04 05:06:07"]
+    }
+
+    def "a malformed end is a BadParam instead of an unexpected error - #value"() {
+        when:
+        TimeRangeFormatterUtil.formatTimeRange(null, value)
+
+        then:
+        SkillException e = thrown()
+        e.errorCode == ErrorCode.BadParam
+        e.message == "end must be a date and time in the yyyy-MM-dd HH:mm:ss format. Provided [${value}]"
+
+        where:
+        value << ["2024-03-04", "abc", "2024-03-04T05:06:07", "2024-13-04 05:06:07"]
     }
 }
