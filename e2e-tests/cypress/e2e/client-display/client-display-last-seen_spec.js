@@ -15,6 +15,160 @@
  */
 describe('Client Display Skills Last Viewed', () => {
 
+    it('skills-client: persists the last viewed skill and only auto scrolls when returning from the skill page', () => {
+        cy.createProject(1);
+        cy.createSubject(1, 1);
+        for (let skillId = 1; skillId <= 12; skillId += 1) {
+            cy.createSkill(1, 1, skillId);
+        }
+
+        cy.visit('/test-skills-client/proj1');
+        cy.wrapIframe().find('[data-cy="subjectTileBtn"]').click();
+        cy.wrapIframe().find('#skillProgressTitleLink-skill12').click();
+        cy.wrapIframe().find('[data-cy="skillProgressTitle"]').should('contain', 'Very Great Skill 12');
+        cy.go('back');
+        cy.wrapIframe().find('#skillProgressTitleLink-skill12').should('have.focus');
+        cy.window().its('scrollY').should('be.greaterThan', 0);
+
+        cy.reload();
+        cy.wrapIframe().find('#skillRow-skill12 [data-cy="lastViewedIndicator"]').should('exist');
+        cy.wrapIframe().find('#skillProgressTitleLink-skill12').should('not.have.focus');
+        cy.window().its('scrollY').should('eq', 0);
+        cy.wrapIframe().find('[data-cy="jumpToLastViewedButton"]').click();
+        cy.wrapIframe().find('#skillProgressTitleLink-skill12').should('have.focus');
+        cy.window().its('scrollY').should('be.greaterThan', 0);
+
+        cy.wrapIframe().find('[data-cy="breadcrumbItemValue"]').contains('Overview').click();
+        cy.wrapIframe().find('[data-cy="subjectTileBtn"]').click();
+        cy.wrapIframe().find('#skillRow-skill12 [data-cy="lastViewedIndicator"]').should('exist');
+        cy.wrapIframe().find('#skillProgressTitleLink-skill12').should('not.have.focus');
+        cy.window().its('scrollY').should('eq', 0);
+    });
+
+    [false, true].forEach((skillsClient) => {
+        it(`${skillsClient ? 'skills-client: ' : ''}skill group last viewed persists and only auto scrolls on return to the subject`, () => {
+            const get = (selector) => skillsClient ? cy.wrapIframe().find(selector) : cy.get(selector);
+            cy.createProject(1);
+            cy.createSubject(1, 1);
+            cy.createSkillsGroup(1, 1, 1);
+            for (let skillId = 1; skillId <= 12; skillId += 1) {
+                cy.addSkillToGroup(1, 1, 1, skillId);
+            }
+
+            if (skillsClient) {
+                cy.visit('/test-skills-client/proj1');
+            } else {
+                cy.cdVisit('/');
+            }
+            get('[data-cy="subjectTileBtn"]').click();
+            get('#skillProgressTitleLink-group1').click();
+            get('[data-cy="lastViewedIndicator"]').should('not.exist');
+            get('#skillProgressTitleLink-skill12').click();
+            get('[data-cy="skillProgressTitle"]').should('contain', 'Very Great Skill 12');
+            cy.go('back');
+            get('#skillRow-skill12 [data-cy="lastViewedIndicator"]').should('exist');
+            get('#skillProgressTitleLink-skill12').should('not.have.focus');
+
+            cy.reload();
+            get('#skillRow-skill12 [data-cy="lastViewedIndicator"]').should('exist');
+            get('#skillProgressTitleLink-skill12').should('not.have.focus');
+            cy.window().its('scrollY').should('eq', 0);
+            get('[data-cy="jumpToLastViewedButton"]').should('be.enabled').click();
+            get('#skillProgressTitleLink-skill12').should('have.focus');
+            cy.window().its('scrollY').should('be.greaterThan', 0);
+
+            get('[data-cy="breadcrumbItemValue"]').contains('Overview').click();
+            get('[data-cy="subjectTileBtn"]').click();
+            get('#skillRow-skill12 [data-cy="lastViewedIndicator"]').should('exist');
+            get('#skillProgressTitleLink-skill12').should('not.have.focus');
+            cy.window().its('scrollY').should('eq', 0);
+            get('#skillProgressTitleLink-group1').click();
+            get('#skillRow-skill12 [data-cy="lastViewedIndicator"]').should('exist');
+            get('#skillProgressTitleLink-skill12').should('not.have.focus');
+            cy.window().its('scrollY').should('eq', 0);
+
+            get('[data-cy="breadcrumbItemValue"]').contains('subj1').click();
+            get('#skillProgressTitleLink-skill12').click();
+            get('[data-cy="skillProgressTitle"]').should('contain', 'Very Great Skill 12');
+            cy.go('back');
+            get('#skillProgressTitleLink-skill12').should('have.focus');
+            cy.window().its('scrollY').should('be.greaterThan', 0);
+            cy.reload();
+            get('#skillRow-skill12 [data-cy="lastViewedIndicator"]').should('exist');
+            get('#skillProgressTitleLink-skill12').should('not.have.focus');
+            cy.window().its('scrollY').should('eq', 0);
+        });
+
+        it(`${skillsClient ? 'skills-client: ' : ''}badge last viewed persists without automatic scrolling and supports an explicit jump`, () => {
+            const get = (selector) => skillsClient ? cy.wrapIframe().find(selector) : cy.get(selector);
+            cy.createProject(1);
+            cy.createSubject(1, 1);
+            cy.createBadge(1, 1);
+            for (let skillId = 1; skillId <= 12; skillId += 1) {
+                cy.createSkill(1, 1, skillId);
+                cy.assignSkillToBadge(1, 1, skillId);
+            }
+            cy.enableBadge(1, 1);
+
+            if (skillsClient) {
+                cy.visit('/test-skills-client/proj1');
+            } else {
+                cy.cdVisit('/');
+            }
+            get('[data-cy="myBadgesBtn"]').click();
+            get('[data-cy="badgeDetailsLink_badge1"]').click();
+            get('[data-cy="lastViewedIndicator"]').should('not.exist');
+            get('#skillProgressTitleLink-skill12').click();
+            get('[data-cy="skillProgressTitle"]').should('contain', 'Very Great Skill 12');
+            cy.go('back');
+            get('#skillRow-skill12 [data-cy="lastViewedIndicator"]').should('exist');
+            get('#skillProgressTitleLink-skill12').should('not.have.focus');
+
+            cy.reload();
+            get('#skillRow-skill12 [data-cy="lastViewedIndicator"]').should('exist');
+            get('#skillProgressTitleLink-skill12').should('not.have.focus');
+            cy.window().its('scrollY').should('eq', 0);
+            get('[data-cy="jumpToLastViewedButton"]').should('be.enabled').click();
+            get('#skillProgressTitleLink-skill12').should('have.focus');
+            cy.window().its('scrollY').should('be.greaterThan', 0);
+
+            get('[data-cy="breadcrumbItemValue"]').contains('Overview').click();
+            get('[data-cy="myBadgesBtn"]').click();
+            get('[data-cy="badgeDetailsLink_badge1"]').click();
+            get('#skillRow-skill12 [data-cy="lastViewedIndicator"]').should('exist');
+            get('#skillProgressTitleLink-skill12').should('not.have.focus');
+            cy.window().its('scrollY').should('eq', 0);
+        });
+    });
+
+    it('persists the last viewed skill without auto scrolling on refresh or ordinary subject navigation', () => {
+        cy.createProject(1);
+        cy.createSubject(1, 1);
+        for (let skillId = 1; skillId <= 12; skillId += 1) {
+            cy.createSkill(1, 1, skillId);
+        }
+
+        cy.cdVisit('/subjects/subj1?internalBackButton=true');
+        cy.get('#skillProgressTitleLink-skill12').click();
+        cy.get('[data-cy="skillProgressTitle"]').should('contain', 'Very Great Skill 12');
+        cy.get('[data-cy="back"]').click();
+        cy.get('#skillProgressTitleLink-skill12').should('have.focus');
+
+        cy.reload();
+        cy.get('#skillRow-skill12 [data-cy="lastViewedIndicator"]').should('exist');
+        cy.get('#skillProgressTitleLink-skill12').should('not.have.focus');
+        cy.window().its('scrollY').should('eq', 0);
+        cy.get('[data-cy="jumpToLastViewedButton"]').click();
+        cy.get('#skillProgressTitleLink-skill12').should('have.focus');
+        cy.window().its('scrollY').should('be.greaterThan', 0);
+
+        cy.get('[data-cy="back"]').click();
+        cy.cdClickSubj(0);
+        cy.get('#skillRow-skill12 [data-cy="lastViewedIndicator"]').should('exist');
+        cy.get('#skillProgressTitleLink-skill12').should('not.have.focus');
+        cy.window().its('scrollY').should('eq', 0);
+    });
+
     it('visiting a skill shows the Last Viewed indicator on the Subject page', () => {
         cy.intercept('/api/projects/proj1/subjects/subj1/pointHistory**').as('getSubjectPointsHistory')
         cy.intercept('/api/projects/proj1/pointHistory**').as('getProjPointsHistory')
@@ -73,6 +227,9 @@ describe('Client Display Skills Last Viewed', () => {
         cy.wrapIframe().find('[data-cy="lastViewedIndicator"]').should('exist');
         cy.wrapIframe().find('[data-cy="jumpToLastViewedButton"]').should('exist');
         cy.wrapIframe().find('#skillProgressTitleLink-skill1').should('have.focus');
+        cy.reload();
+        cy.wrapIframe().find('[data-cy="lastViewedIndicator"]').should('exist');
+        cy.wrapIframe().find('#skillProgressTitleLink-skill1').should('not.have.focus');
     });
 
     it('visiting a skill shows the Last Viewed indicator on the Subject page with skills and groups', () => {
@@ -137,7 +294,7 @@ describe('Client Display Skills Last Viewed', () => {
         cy.get('[data-cy="group-group1_skillProgress-skill1"] [data-cy="skillProgressTitle"]').should('exist');
         cy.get('[data-cy="group-group1_skillProgress-skill1"] [data-cy="skillProgressTitle"]').click();
 
-        cy.get('[data-cy=back]').click()
+        cy.go('back');
         cy.get('[data-cy="lastViewedIndicator"]').should('exist');
         cy.get('[data-cy="jumpToLastViewedButton"]').should('exist');
         cy.get('#skillProgressTitleLink-skill1').should('have.focus');
@@ -164,6 +321,10 @@ describe('Client Display Skills Last Viewed', () => {
         cy.get('[data-cy=back]').click()
         cy.get('[data-cy="lastViewedIndicator"]').should('exist');
         cy.get('[data-cy="jumpToLastViewedButton"]').should('exist');
+        cy.get('#skillProgressTitleLink-skill1').should('not.have.focus');
+        cy.reload();
+        cy.get('[data-cy="lastViewedIndicator"]').should('exist');
+        cy.get('[data-cy="jumpToLastViewedButton"]').click();
         cy.get('#skillProgressTitleLink-skill1').should('have.focus');
     });
 

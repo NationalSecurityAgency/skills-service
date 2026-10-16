@@ -83,6 +83,7 @@ export const useScrollSkillsIntoViewState = defineStore('scrollSkillsIntoViewSta
   }
 
   return {
+    jumpToLastViewed,
     setLastViewedSkillId,
     lastViewedSkillId,
     isScrollFeatureSupported,

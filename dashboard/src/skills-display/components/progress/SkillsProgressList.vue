@@ -69,32 +69,18 @@ const searchString = ref('')
 const skillsInternal = computed(() => subjectAndSkillsState.subjectSummary.skills)
 const subject = computed(() => subjectAndSkillsState.subjectSummary)
 onMounted(() => {
-  scrollToLastViewedSkill(400)
+  if (scrollIntoViewState.jumpToLastViewed) {
+    scrollIntoViewState.jumpToLastViewed = false
+    scrollToLastViewedSkill(400)
+  }
 })
 
 const lastViewedButtonDisabled = computed(() => !findLastViewedSkill(skillsToShow.value))
 const scrollToLastViewedSkill = (timeout = null) => {
-  if (scrollIntoViewState.lastViewedSkillId) {
-    const found = skillsInternal.value.find((skill) => {
-      return skill.skillId === scrollIntoViewState.lastViewedSkillId ||
-        skill.children?.find((childItem) => childItem.skillId === scrollIntoViewState.lastViewedSkillId)
-    })
-    if (found && !skillsDisplayInfo.isGlobalBadgePage.value) {
-      scrollIntoViewState.scrollToLastViewedSkill(timeout)
-    }
-  } else {
-    // set it if backend provided
-    skillsInternal.value?.forEach((item) => {
-      if (item.isLastViewed === true) {
-        scrollIntoViewState.setLastViewedSkillId(item.skillId)
-      } else if (item.type === 'SkillsGroup') {
-        item.children.forEach((childItem) => {
-          if (childItem.isLastViewed === true) {
-            scrollIntoViewState.setLastViewedSkillId(childItem.skillId)
-          }
-        })
-      }
-    })
+  const found = findLastViewedSkill(skillsToShow.value)
+  if (found && !skillsDisplayInfo.isGlobalBadgePage.value) {
+    scrollIntoViewState.setLastViewedSkillId(found.skillId)
+    scrollIntoViewState.scrollToLastViewedSkill(timeout)
   }
 }
 const hasLastViewedSkill = computed(() => findLastViewedSkill(skillsInternal.value))
