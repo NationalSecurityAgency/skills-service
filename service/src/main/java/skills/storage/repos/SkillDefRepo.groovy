@@ -31,6 +31,11 @@ import skills.storage.model.SkillRelDef.RelationshipType
 
 interface SkillDefRepo extends CrudRepository<SkillDef, Integer>, PagingAndSortingRepository<SkillDef, Integer> {
 
+    @Query(value = '''select exists(select 1 from skill_definition where project_id = ?1
+        and enabled = 'true' and copied_from_project_id is not null
+        and copied_from_project_id <> project_id)''', nativeQuery = true)
+    boolean existsEnabledCatalogImport(String projectId)
+
     /**
      * Need to create a custom query with limited fields as having many fields is slow,
      * for example 300 rows select is 330ms+ with description and 20ms without

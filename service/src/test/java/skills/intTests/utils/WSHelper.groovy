@@ -259,6 +259,19 @@ class WSHelper {
         return get(endpoint, "api", params)
     }
 
+    ResponseEntity<String> apiHead(String endpoint, Map params = null) {
+        String url = "${skillsService}/api${endpoint}${getUrlFromParams(params)}"
+        log.info('HEAD: {}', url)
+        ResponseEntity<String> response = restTemplateWrapper.headForEntity(url)
+        assert response.headers.get('skills-client-lib-version')
+        if (response.statusCode != HttpStatus.OK) {
+            String message = "Bad request for [$url] code=${response.statusCode}"
+            log.error(message)
+            throw new SkillsClientException(message, url, response.statusCode)
+        }
+        return response
+    }
+
     def openaiGet(String endpoint, Map params = null) {
         return get(endpoint, "openai", params)
     }

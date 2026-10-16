@@ -59,6 +59,7 @@ class CsrfSkillSubmissionSpecs extends DefaultIntSpec {
     // Client endpoints are probed with and without the XSRF header.
     // The upload mapping needs multipart encoding and is exercised in AdminCsrfSpecs.
     private static final List<List> JSON_ENDPOINTS = [
+            [HttpMethod.POST, '/api/projects/{projectId}/progress/initialize'],
             [HttpMethod.POST, '/api/projects/{projectId}/skillsClientVersion'],
             [HttpMethod.PUT, '/api/projects/{projectId}/skillsClientVersion'],
             [HttpMethod.POST, '/api/projects/{projectId}/crossProject/{crossProjectId}/skills/{skillId}'],

@@ -27,6 +27,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.http.HttpStatus;
+import skills.controller.result.model.ProjectProgressInitializationResult;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -91,6 +94,33 @@ class UserSkillsController {
 
     @Autowired
     private UserInfoService userInfoService;
+
+    @Autowired
+    private ProjectParticipationService projectParticipationService;
+
+    @PostMapping(value = "/projects/{projectId}/progress/initialize", produces = "application/json")
+    public ResponseEntity<ProjectProgressInitializationResult> initializeProgress(
+            @PathVariable("projectId") String projectId, HttpServletRequest request,
+            @RequestBody(required = false) Map<String, Object> body) {
+        SkillsValidator.isTrue(
+                request.getParameter("userId") == null,
+                "userId must not be supplied; initialization uses the authenticated learner.",
+                projectId);
+        SkillsValidator.isTrue(
+                request.getParameter("idType") == null,
+                "idType must not be supplied; initialization uses the authenticated learner.",
+                projectId);
+        SkillsValidator.isTrue(
+                body == null || body.isEmpty(),
+                "Progress initialization does not accept request body fields.",
+                projectId);
+        ProjectProgressInitializationResult result = projectParticipationService.initialize(
+                projectId, userInfoService.getUserName(null));
+        if (!result.getReady()) {
+            return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).header("Retry-After", "1").body(result);
+        }
+        return ResponseEntity.ok(result);
+    }
 
     @Autowired
     private CustomIconFacade customIconFacade;
