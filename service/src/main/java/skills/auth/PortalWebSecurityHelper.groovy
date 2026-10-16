@@ -15,6 +15,8 @@
  */
 package skills.auth
 
+import tools.jackson.databind.ObjectMapper
+
 import jakarta.servlet.FilterChain
 import jakarta.servlet.ServletException
 import jakarta.servlet.http.HttpServletRequest
@@ -28,6 +30,7 @@ import org.springframework.security.authorization.AuthorityAuthorizationManager
 import org.springframework.security.authorization.AuthorizationManager
 import org.springframework.security.authorization.AuthorizationManagers
 import org.springframework.security.config.annotation.web.builders.HttpSecurity
+import org.springframework.security.config.ObjectPostProcessor
 import org.springframework.security.core.Authentication
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.security.web.access.intercept.RequestAuthorizationContext
@@ -78,6 +81,9 @@ class PortalWebSecurityHelper {
     @Autowired
     UserAuthService userAuthService
 
+    @Autowired
+    ObjectMapper objectMapper
+
     HttpSecurity configureHttpSecurity(HttpSecurity http) {
         if (disableCsrfProtection) {
             http.csrf((csrf) -> csrf.disable())
@@ -86,7 +92,14 @@ class PortalWebSecurityHelper {
                      .requireCsrfProtectionMatcher(new ClientEndpointCsrfRequestMatcher(authMode == AuthMode.PKI))
                      .csrfTokenRepository(cookieCsrfTokenRepository)
                      .sessionAuthenticationStrategy(csrfAuthenticationStrategy)
-                    .csrfTokenRequestHandler(new SpaCsrfTokenRequestHandler()))
+                     .csrfTokenRequestHandler(new SpaCsrfTokenRequestHandler())
+                     .withObjectPostProcessor(new ObjectPostProcessor<CsrfFilter>() {
+                         @Override
+                         <O extends CsrfFilter> O postProcess(O filter) {
+                             filter.setAccessDeniedHandler(new CsrfAccessDeniedHandler(objectMapper))
+                             return filter
+                         }
+                     }))
                     .addFilterAfter(new CsrfCookieFilter(), BasicAuthenticationFilter.class)
         }
 
