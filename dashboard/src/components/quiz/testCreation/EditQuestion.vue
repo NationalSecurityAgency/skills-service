@@ -15,7 +15,8 @@ limitations under the License.
 */
 <script setup>
 import {computed, nextTick, onMounted, ref, watch} from 'vue'
-import {array, boolean, object, string} from 'yup'
+import {array, object, string} from 'yup'
+import {buildAnswerSchema} from '@/components/quiz/testCreation/BuildAnswerSchema.js'
 import {useRoute} from 'vue-router';
 import {useAppConfig} from '@/common-components/stores/UseAppConfig.js'
 import QuizService from '@/components/quiz/QuizService.js';
@@ -333,10 +334,7 @@ const schema = object({
       .label('Answer Hint'),
   'answers': array()
       .of(
-          object({
-            'answer': string().nullable().label('Answer'),
-            'isCorrect': boolean().label('Is Correct'),
-          })
+          buildAnswerSchema(appConfig.maxQuizTextAnswerLength)
       )
       .test('atLeastOneCorrectAnswer', 'Must have at least 1 correct answer selected', (value) => atLeastOneCorrectAnswer(value))
       .test('atLeastTwoAnswersFilledIn', 'Must have at least 2 answers', (value) => atLeastTwoAnswersFilledIn(value))
