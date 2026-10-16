@@ -121,9 +121,8 @@ function copySelectedQuestions() {
   copyQuestionInfo.value.showDialog = true;
 }
 
-function toggleSelectionMode() {
-  selectionModeEnabled.value = !selectionModeEnabled.value;
-  if(selectionModeEnabled.value) {
+function toggleSelectionMode(value) {
+  if(value) {
     collapseAllQuestions()
   } else {
     expandAllQuestions()
@@ -314,6 +313,54 @@ function clearSelectedQuestions() {
     setFieldValue(`selectedQuestion_${id}`, false);
   })
 }
+
+function selectAllQuestions() {
+  const ids = questions.value.map(question => question.id)
+  ids.forEach(id => {
+    selectedQuestions.value[id] = true;
+    setFieldValue(`selectedQuestion_${id}`, true);
+  })
+}
+
+const questionsActionsMenu = ref(false)
+const toggleActionsMenu = (event) => {
+  questionsActionsMenu.value.toggle(event)
+}
+const actionsMenu = ref([
+  {
+    label: 'Copy to Another Project',
+    icon: 'fas fa-user-plus',
+    command: () => {
+      copySelectedQuestions()
+    }
+  },
+  // {
+  //   label: 'Delete',
+  //   icon: 'fas fa-user-plus',
+  //   command: () => {
+  //     console.log('delete');
+  //   }
+  // },
+])
+function handleKeyDown(event) {
+  // tab=9
+  if (event.keyCode === 9) {
+    event.preventDefault();
+    if (actionMenuFocused.value) {
+      focusState.focusOnLastElement()
+    }
+  }
+}
+const actionMenuFocused = ref(false)
+const actionMenuOnFocus = () => {
+  actionMenuFocused.value = true
+  document.addEventListener('keydown', handleKeyDown);
+}
+const actionMenuOnBlur = () => {
+  actionMenuFocused.value = false
+  document.removeEventListener('keydown', handleKeyDown);
+
+}
 </script>
 
 <template>
@@ -334,42 +381,60 @@ function clearSelectedQuestions() {
                       aria-label="Expand/Collapse All Questions" />
       </template>
 
-      <SkillsButton @click="toggleSelectionMode()"
-                    icon="fas fa-plus-circle"
-                    class="mr-2"
-                    outlined
-                    size="small"
-                    data-cy="newQuestionOnBottomBtn"
-                    aria-label="Create new Question"
-                    ref="newQuestionOnBottomBtn"
-                    id="newQuestionOnBottomBtn"
-                    :track-for-focus="true"
-                    label="Selection Mode">
-      </SkillsButton>
-      <SkillsButton @click="copySelectedQuestions()"
-                    icon="fas fa-plus-circle"
-                    v-if="selectionModeEnabled"
-                    outlined
-                    :disabled="Object.keys(selectedQuestions).length === 0"
-                    size="small"
-                    data-cy="copyQuestionsBtn"
-                    aria-label="Copy Selected Questions"
-                    ref="copyQuestionsBtn"
-                    id="copyQuestionsBtn"
-                    :track-for-focus="true"
-                    label="Copy Questions">
-      </SkillsButton>
-      <SkillsButton v-if="!quizConfig.isReadOnlyQuiz && !selectionModeEnabled"
-                    @click="openNewQuestionModal()"
-                    icon="fas fa-plus-circle"
-                    outlined
-                    size="small"
-                    data-cy="btn_Questions"
-                    id="btn_Questions"
-                    aria-label="Create new Question"
-                    :track-for-focus="true"
-                    label="Question">
-      </SkillsButton>
+      <div class="flex-1 flex items-center content-center">
+        <ToggleSwitch
+            data-cy="toggleSelectionMode"
+            aria-label="Toggle select questions"
+            class="mr-2"
+            v-on:update:modelValue="toggleSelectionMode"
+            v-model="selectionModeEnabled" />
+        <label id="toggleSelectMessage">Select Questions</label>
+
+        <SkillsButton
+            id="questionActionsBtn"
+            size="small"
+            class="ml-3"
+            v-if="selectionModeEnabled"
+            @click="toggleActionsMenu"
+            aria-label="Question actions button"
+            aria-haspopup="true"
+            :disabled="Object.keys(selectedQuestions).length === 0"
+            :track-for-focus="true"
+            data-cy="questionActionsBtn">
+          <i class="fas fa-tools" aria-hidden="true"></i>
+          <span>Action</span>
+          <i class="fas fa-caret-down"></i>
+        </SkillsButton>
+        <Menu ref="questionsActionsMenu"
+              v-if="selectionModeEnabled"
+              id="questions-actions-menu"
+              data-cy="questionsActionsMenu"
+              :model="actionsMenu"
+              @focus="actionMenuOnFocus"
+              @blur="actionMenuOnBlur"
+              aria-label="Menu to perform actions on selected questions"
+              :popup="true">
+          <template #item="{ item, props }">
+            <a :href="item.url" target="_blank" v-bind="props.action">
+              <span class="w-7 border text-center rounded-sm text-green-800 bg-green-50 dark:bg-gray-900 dark:text-green-500 dark:border-green-700"><i :class="item.icon"/></span>
+              <span class="">{{ item.label }}</span>
+            </a>
+          </template>
+        </Menu>
+
+        <SkillsButton v-if="!quizConfig.isReadOnlyQuiz && !selectionModeEnabled"
+                      @click="openNewQuestionModal()"
+                      icon="fas fa-plus-circle"
+                      outlined
+                      class="ml-3"
+                      size="small"
+                      data-cy="btn_Questions"
+                      id="btn_Questions"
+                      aria-label="Create new Question"
+                      :track-for-focus="true"
+                      label="Question">
+        </SkillsButton>
+      </div>
     </SubPageHeader>
 
     <BlockUI :blocked="operationInProgress">
@@ -378,6 +443,24 @@ function clearSelectedQuestions() {
           <div>
             <SkillsSpinner :is-loading="isLoading" class="py-20"/>
             <div v-if="!isLoading">
+              <div v-if="selectionModeEnabled" class="mb-2 mt-1">
+                <SkillsButton
+                    label="Select All"
+                    icon="fas fa-check"
+                    size="small"
+                    class="ml-1"
+                    @click="selectAllQuestions"
+                    data-cy="selectAllQuestionsBtn"
+                />
+                <SkillsButton
+                    label="Deselect All"
+                    icon="fas fa-times"
+                    size="small"
+                    class="ml-2"
+                    @click="clearSelectedQuestions"
+                    data-cy="deselectAllQuestionsBtn"
+                />
+              </div>
               <NoContent2 v-if="!hasData"
                           title="No Questions Yet..."
                           class="mt-8 pt-8"
