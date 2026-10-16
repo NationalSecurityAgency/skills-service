@@ -131,6 +131,10 @@ interface UserPerformedSkillRepo extends JpaRepository<UserPerformedSkill, Integ
 
     Boolean existsByUserId(String userId)
 
+    @Query(value = '''select exists(select 1 from user_performed_skill
+        where project_id = ?1 and user_id = ?2)''', nativeQuery = true)
+    boolean existsLocalEventByProjectIdAndUserId(String projectId, String userId)
+
     @Query('''select true from UserPerformedSkill up 
                 where up.skillRefId in (
                     select case when s.copiedFrom is not null then s.copiedFrom else s.id end as id 
