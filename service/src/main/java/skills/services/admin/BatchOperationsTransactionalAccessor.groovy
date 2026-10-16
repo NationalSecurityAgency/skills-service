@@ -22,6 +22,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 import skills.controller.result.model.SettingsResult
 import skills.services.BadgeUtils
+import skills.services.LockingService
 import skills.services.RuleSetDefGraphService
 import skills.services.RuleSetDefinitionScoreUpdater
 import skills.services.UserAchievementsAndPointsManagement
@@ -40,6 +41,9 @@ import skills.storage.repos.nativeSql.PostgresQlNativeRepo
 @Service
 @Slf4j
 class BatchOperationsTransactionalAccessor {
+
+    @Autowired
+    LockingService lockingService
 
     @Autowired
     SkillDefRepo skillDefRepo
@@ -83,6 +87,9 @@ class BatchOperationsTransactionalAccessor {
     @Transactional
     @Profile
     void enableSkills(List<SkillDef> disabledImportedSkills) {
+        disabledImportedSkills.collect { SkillDef skill -> skill.projectId }.unique().sort().each { String projectId ->
+            lockingService.lockCatalogActivation(projectId)
+        }
         disabledImportedSkills.each {
             it.enabled = Boolean.TRUE.toString()
         }
