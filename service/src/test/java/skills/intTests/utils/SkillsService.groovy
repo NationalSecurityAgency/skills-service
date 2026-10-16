@@ -916,6 +916,20 @@ class SkillsService {
         wsHelper.apiGet(url)
     }
 
+    ResponseEntity<String> headSkillsSummaryForCurrentUser(String projectId) {
+        return wsHelper.apiHead("/projects/${projectId}/summary")
+    }
+
+    Map initializeProjectProgress(String projectId, Map params = [:], Map body = [:]) {
+        String query = params ? '?' + params.collect { String key, Object value -> "${key}=${value}" }.join('&') : ''
+        wsHelper.apiPost("/projects/${projectId}/progress/initialize${query}", body).body
+    }
+
+    Map initializeProjectProgressAsProxy(String projectId, String userId) {
+        String token = wsHelper.getTokenForUser(userId)
+        return wsHelper.proxyApiPost(token, "/projects/${projectId}/progress/initialize", [:]).body
+    }
+
     def getSkillsSummaryForUser(String projId, String userId, int version = -1) {
         String url = "/projects/${projId}/summary?userId=${userId}"
         if (version >= 0) {
