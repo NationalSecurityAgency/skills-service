@@ -17,6 +17,7 @@ package skills.metrics.builders.multipleProj
 
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
+import skills.controller.exceptions.ErrorCode
 import skills.controller.exceptions.SkillException
 import skills.metrics.builders.GlobalMetricsBuilder
 import skills.metrics.builders.MetricsPagingParamsHelper
@@ -71,12 +72,17 @@ class FindExpertsForMultipleProjectsMetricsBuilder implements GlobalMetricsBuild
             if (lastIndex < 0){
                 throw new SkillException("Metrics[${id}]: projectId and level must be separted by '${PARAM_SEP}', full param=[${paramVal}]")
             }
-            String id = it.substring(0, lastIndex)
-            Integer level = Integer.valueOf(it.substring(lastIndex + PARAM_SEP.size()))
+            String projectId = it.substring(0, lastIndex)
+            Integer level
+            try {
+                level = Integer.valueOf(it.substring(lastIndex + PARAM_SEP.size()))
+            } catch (NumberFormatException ignored) {
+                throw new SkillException("Metrics[${id}]: level must be a valid integer in [${paramVal}]".toString(), SkillException.NA, SkillException.NA, ErrorCode.BadParam)
+            }
             if (level <= 0) {
                 throw new SkillException("Metrics[${id}]: level must be more than 0 in [${paramVal}]")
             }
-            new UserAchievedCustomRepo.ProjectAndLevel(projectId: id, level: level)
+            new UserAchievedCustomRepo.ProjectAndLevel(projectId: projectId, level: level)
         })
 
         return params
