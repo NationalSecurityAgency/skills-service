@@ -311,10 +311,22 @@ class QuizDefService {
 
     @Transactional
     void copyQuestions(String originalQuizId, String newQuizId, List<Integer> questionIdsToCopy = null) {
+        if (questionIdsToCopy != null) {
+            QuizValidator.isTrue(!questionIdsToCopy.isEmpty(), "At least one question id must be provided", originalQuizId)
+        }
         QuizDef originalQuizDef = findQuizDef(originalQuizId)
+        QuizDef newQuizDef = findQuizDef(newQuizId)
+        CopyValidationRes copyValidation = validateCopyQuestionsToAnotherQuiz(originalQuizDef.quizId, newQuizDef.quizId)
+        if (!copyValidation.isAllowed) {
+            throw new SkillQuizException(copyValidation.validationErrors.join(' '), newQuizDef.quizId, ErrorCode.AccessDenied)
+        }
+
         List<QuizQuestionDef> originalQuestions
-        if(questionIdsToCopy) {
+        if(questionIdsToCopy != null) {
             originalQuestions = quizQuestionRepo.findAllByQuizIdIgnoreCaseAndIds(originalQuizId, questionIdsToCopy)
+            Set<Integer> foundQuestionIds = originalQuestions.collect { it.id }.toSet()
+            List<Integer> missingQuestionIds = questionIdsToCopy.findAll { !foundQuestionIds.contains(it) }
+            QuizValidator.isTrue(missingQuestionIds.isEmpty(), "Question ids ${missingQuestionIds} do not belong to quiz [${originalQuizDef.quizId}]", originalQuizDef.quizId)
         } else {
             originalQuestions = quizQuestionRepo.findAllByQuizIdIgnoreCase(originalQuizId)
         }
@@ -322,10 +334,11 @@ class QuizDefService {
         // validate questions
         validateQuestions(originalQuestions, originalQuizDef.quizId)
 
-        QuizDef newQuizDef = findQuizDef(newQuizId)
         lockingService.lockQuizDef(newQuizDef.quizId)
+        Integer nextDisplayOrder = quizQuestionRepo.getMaxQuestionDisplayOrderByQuizId(newQuizDef.quizId)
+        nextDisplayOrder = nextDisplayOrder != null ? nextDisplayOrder + 1 : 0
 
-        originalQuestions.each { QuizQuestionDef fromQuestionDef ->
+        originalQuestions.sort { it.displayOrder }.each { QuizQuestionDef fromQuestionDef ->
             QuestionAttrs questionAttrs = copyQuestionAttrs(fromQuestionDef, newQuizDef)
 
             String updatedQuestion = attachmentService.copyAttachmentsForIncomingDescription(fromQuestionDef.question, null, null, newQuizId)
@@ -334,7 +347,7 @@ class QuizDefService {
                     question: updatedQuestion,
                     answerHint: fromQuestionDef.answerHint,
                     type: fromQuestionDef.type,
-                    displayOrder: fromQuestionDef.displayOrder,
+                    displayOrder: nextDisplayOrder++,
                     attributes: questionAttrs ? mapper.writeValueAsString(questionAttrs) : null
             ))
 

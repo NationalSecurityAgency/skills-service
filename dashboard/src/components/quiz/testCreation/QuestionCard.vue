@@ -122,8 +122,8 @@ const toggleQuestionState = () => {
   }
 }
 
-const questionSelected = () => {
-  emit('questionSelectToggled', props.question.id)
+const questionSelected = (selected) => {
+  emit('questionSelectToggled', { questionId: props.question.id, selected })
 }
 </script>
 
@@ -153,12 +153,14 @@ const questionSelected = () => {
              :icon="collapsed ? 'fas fa-angle-right' : 'fas fa-angle-down'"
              data-cy="collapseQuestionButton">
         </SkillsButton>
-        <SkillsCheckboxInput
+        <Checkbox
             v-if="selectionMode"
-            @change="questionSelected"
-            :binary="true"
+            :model-value="selected"
+            @update:model-value="questionSelected"
+            binary
             class="mt-2 ml-2"
-            :name="`selectedQuestion_${question.id}`"
+            :input-id="`selectedQuestion_${question.id}Checkbox`"
+            :aria-label="`Select Question Number ${questionNum}`"
             data-cy="selectSkillCheckbox" />
       </div>
       <div :class="{ 'ml-3' : !isDragAndDropControlsVisible }" class="flex-col flex-1 items-start px-2 py-1">
