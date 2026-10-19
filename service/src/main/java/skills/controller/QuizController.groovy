@@ -21,11 +21,14 @@ import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.domain.PageRequest
 import org.springframework.http.MediaType
+import org.springframework.security.access.AccessDeniedException
 import org.springframework.web.bind.annotation.*
 import org.springframework.web.multipart.MultipartFile
 import org.springframework.web.servlet.ModelAndView
 import skills.PublicProps
-import skills.controller.request.model.CopyToAnotherProjectRequest
+import skills.auth.UserAuthService
+import skills.auth.UserInfo
+import skills.auth.UserInfoService
 import skills.controller.request.model.TextInputAIGradingRequest
 import skills.services.openai.OpenAIService
 import skills.controller.exceptions.ErrorCode
@@ -76,6 +79,12 @@ class QuizController {
 
     @Autowired
     QuizDefService quizDefService
+
+    @Autowired
+    UserAuthService userAuthService
+
+    @Autowired
+    UserInfoService userInfoService
 
     @Autowired
     QuizRunService quizRunService
@@ -213,6 +222,10 @@ class QuizController {
     RequestResult copyQuestionDefToAnotherProject(@PathVariable("quizId") String quizId,
                                                           @PathVariable("toQuizId") String toQuizId,
                                                           @RequestBody List<Integer> ids) {
+        UserInfo currentUser = userInfoService.currentUser
+        if (!userAuthService.isUserQuizAdmin(currentUser, toQuizId)) {
+            throw new AccessDeniedException("User [${currentUser.username}] is not an admin for quiz [${toQuizId}]")
+        }
         quizDefService.copyQuestions(quizId, toQuizId, ids)
         return RequestResult.success()
     }
