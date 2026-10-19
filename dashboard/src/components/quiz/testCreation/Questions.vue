@@ -16,7 +16,6 @@ limitations under the License.
 <script setup>
 import { computed, nextTick, onMounted, ref } from 'vue'
 import { useRoute } from 'vue-router'
-import { useForm } from 'vee-validate'
 import { useQuizSummaryState } from '@/stores/UseQuizSummaryState.js';
 import { useQuizConfig } from '@/stores/UseQuizConfig.js';
 import { useFocusState } from '@/stores/UseFocusState.js'
@@ -39,7 +38,6 @@ const quizSummaryState = useQuizSummaryState()
 const quizConfig = useQuizConfig()
 const focusState = useFocusState()
 const elementHelper = useElementHelper()
-const { setFieldValue } = useForm()
 
 const loadingQuestions = ref(false);
 const operationInProgress = ref(false);
@@ -125,6 +123,7 @@ function toggleSelectionMode(value) {
   if(value) {
     collapseAllQuestions()
   } else {
+    clearSelectedQuestions()
     expandAllQuestions()
   }
 }
@@ -296,12 +295,10 @@ function toggleQuestions() {
 }
 
 const selectedQuestions = ref({});
-function questionSelected(questionId) {
-  if(!selectedQuestions.value[questionId]) {
-    setFieldValue(`selectedQuestion_${questionId}`, true);
+function questionSelected({ questionId, selected }) {
+  if (selected) {
     selectedQuestions.value[questionId] = true
   } else {
-    setFieldValue(`selectedQuestion_${questionId}`, false);
     delete selectedQuestions.value[questionId]
   }
 }
@@ -310,7 +307,6 @@ function clearSelectedQuestions() {
   const questionIds = Object.keys(selectedQuestions.value);
   questionIds.forEach((id) => {
     delete selectedQuestions.value[id]
-    setFieldValue(`selectedQuestion_${id}`, false);
   })
 }
 
@@ -318,7 +314,6 @@ function selectAllQuestions() {
   const ids = questions.value.map(question => question.id)
   ids.forEach(id => {
     selectedQuestions.value[id] = true;
-    setFieldValue(`selectedQuestion_${id}`, true);
   })
 }
 

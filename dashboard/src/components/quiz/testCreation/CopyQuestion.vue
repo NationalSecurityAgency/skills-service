@@ -19,40 +19,46 @@ const loadingComponent = ref(false)
 const copyInProgress = ref(false);
 const selectedQuiz = ref(null)
 const canCopyQuestion = ref(false);
+const validatingQuiz = ref(false)
+let validationRequestId = 0
 const copied = ref(false)
 const hasValidationErrors = ref(false)
 const validationErrors = ref([])
+const copyError = ref('')
+const loadError = ref('')
 
-onMounted(() => {
+const loadQuizDefs = async () => {
   loadingComponent.value = true;
-  QuizService.getQuizDefs().then((quizzes) => {
+  loadError.value = ''
+  try {
+    const quizzes = await QuizService.getQuizDefs(false)
     quizDefs.value = quizzes.filter((quiz) => quiz.type === props.questionDef.quizType && quiz.quizId !== props.questionDef.quizId).map((quiz) =>  {
       return {
         label: quiz.name,
         id: quiz.quizId
       };
     });
+  } catch (error) {
+    loadError.value = error.response?.data?.explanation || 'Unable to load destination quizzes. Please try again.'
+  } finally {
     loadingComponent.value = false;
-  })
-})
-
-const copyIsAllowed = async (value) => {
-  if(props.questionDef.quizId === value) {
-    return true;
-  } else {
-    const response = await QuizService.validateQuizCopy(props.questionDef.quizId, value, "test")
-    if(response) {
-      return response;
-    }
   }
 }
 
+onMounted(loadQuizDefs)
+
 const copyQuestions = async () => {
   copyInProgress.value = true;
-  const questionsToSave = Object.keys(props.questionsToSave)
-  await QuizService.copyToAnotherQuiz(props.questionDef.quizId, selectedQuiz.value, questionsToSave)
-  copyInProgress.value = false;
-  copied.value = true;
+  copyError.value = ''
+  try {
+    const questionsToSave = Object.keys(props.questionsToSave)
+    await QuizService.copyToAnotherQuiz(props.questionDef.quizId, selectedQuiz.value, questionsToSave)
+    copied.value = true;
+  } catch (error) {
+    copyError.value = error.response?.data?.explanation || 'Unable to copy questions. Please try again.'
+  } finally {
+    copyInProgress.value = false;
+  }
 }
 
 const close = () => {
@@ -65,19 +71,36 @@ const numberOfQuestions = computed(() => {
 })
 
 const onQuizChanged = async (value) => {
+  const requestId = ++validationRequestId
+  canCopyQuestion.value = false
   hasValidationErrors.value = false
   validationErrors.value = []
-  const copyResult = await copyIsAllowed(value)
-  canCopyQuestion.value = copyResult.isAllowed
-  if(!copyResult.isAllowed) {
-    hasValidationErrors.value = true
-    validationErrors.value = copyResult.validationErrors
+  if (!value) {
+    validatingQuiz.value = false
+    return
   }
 
+  validatingQuiz.value = true
+  try {
+    const copyResult = await QuizService.validateQuizCopy(props.questionDef.quizId, value, "test")
+    if (requestId !== validationRequestId) return
+
+    canCopyQuestion.value = copyResult.isAllowed
+    if (!copyResult.isAllowed) {
+      hasValidationErrors.value = true
+      validationErrors.value = copyResult.validationErrors
+    }
+  } catch (error) {
+    if (requestId !== validationRequestId) return
+    hasValidationErrors.value = true
+    validationErrors.value = [error.response?.data?.explanation || 'Unable to validate the selected quiz. Please try again.']
+  } finally {
+    if (requestId === validationRequestId) validatingQuiz.value = false
+  }
 }
 
 const canCopy = computed(() => {
-  return canCopyQuestion.value && selectedQuiz.value
+  return canCopyQuestion.value && !loadError.value && !validatingQuiz.value && !copyInProgress.value && selectedQuiz.value
 })
 const showOkButton = computed(() => !copied.value)
 </script>
@@ -108,8 +131,15 @@ const showOkButton = computed(() => !copied.value)
       <Message severity="info" :closable="false">
         This will copy {{ numberOfQuestions }} question(s), including attachments, to the selected quiz.
       </Message>
-      <span class="font-bold text-primary">Copy Question To:</span>
+      <div v-if="loadError" class="flex flex-col items-start gap-2">
+        <Message severity="error" :closable="false" data-cy="quizDestinationsLoadError">
+          {{ loadError }}
+        </Message>
+        <SkillsButton label="Retry" icon="fas fa-sync" size="small" data-cy="retryQuizDestinationsBtn" @click="loadQuizDefs" />
+      </div>
+      <span v-else class="font-bold text-primary">Copy Question To:</span>
       <Select
+          v-if="!loadError"
           :options="quizDefs"
           aria-label="Copy Question To"
           optionLabel="label"
@@ -122,6 +152,9 @@ const showOkButton = computed(() => !copied.value)
         <ul>
           <li v-for="error in validationErrors" :key="error"><span v-html="InputSanitizer.sanitize(error)"></span></li>
         </ul>
+      </Message>
+      <Message v-if="copyError" :closable="false" severity="error" data-cy="copyQuestionsFailedMsg">
+        {{ copyError }}
       </Message>
     </div>
     <skills-spinner :is-loading="copyInProgress" class="mt-6 mb-4"/>

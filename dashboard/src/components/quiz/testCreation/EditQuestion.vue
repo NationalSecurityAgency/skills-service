@@ -413,17 +413,6 @@ const saveQuestionDef = (values) => {
           }
         });
   } else if (props.isCopy) {
-    if(selectedQuiz !== props.questionDef.quizId) {
-      return QuizService.copyToAnotherQuiz(props.questionDef.quizId, selectedQuiz, [questionToSave.id]).then((response) => {
-        let updatedQuizQuestionDef = {
-          isCopyToAnotherQuiz: true
-        }
-        return {
-          ...updatedQuizQuestionDef,
-          isEdit: props.isEdit,
-        }
-      })
-    } else {
       return QuizService.saveQuizQuestionDef(selectedQuiz, questionToSave)
           .then((updatedQuizQuestionDef) => {
             updatedQuizQuestionDef.quizId = selectedQuiz
@@ -435,7 +424,6 @@ const saveQuestionDef = (values) => {
               isEdit: props.isEdit,
             }
           });
-    }
   } else {
     return QuizService.saveQuizQuestionDef(quizId.value, questionToSave)
         .then((updatedQuizQuestionDef) => {
