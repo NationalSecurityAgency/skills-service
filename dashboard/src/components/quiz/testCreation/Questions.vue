@@ -328,7 +328,7 @@ const toggleActionsMenu = (event) => {
 }
 const actionsMenu = ref([
   {
-    label: 'Copy to Another Project',
+    label: 'Copy to Another Quiz',
     icon: 'fas fa-user-plus',
     command: () => {
       copySelectedQuestions()

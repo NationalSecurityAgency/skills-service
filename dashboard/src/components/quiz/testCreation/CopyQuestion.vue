@@ -5,6 +5,8 @@ import {ref, onMounted, computed} from "vue";
 import QuizService from "@/components/quiz/QuizService.js";
 import {object, string} from "yup";
 import SkillsInputFormDialog from "@/components/utils/inputForm/SkillsInputFormDialog.vue";
+import SkillsSpinner from "@/components/utils/SkillsSpinner.vue";
+import InputSanitizer from "@/components/utils/InputSanitizer.js";
 
 const emit = defineEmits(['copy-modal-closed'])
 const model = defineModel()
@@ -15,10 +17,11 @@ const props = defineProps({
 const quizDefs = ref([]);
 const loadingComponent = ref(false)
 const copyInProgress = ref(false);
-
-const initialData = {
-  selectedQuiz: undefined,
-}
+const selectedQuiz = ref(null)
+const canCopyQuestion = ref(false);
+const copied = ref(false)
+const hasValidationErrors = ref(false)
+const validationErrors = ref([])
 
 onMounted(() => {
   loadingComponent.value = true;
@@ -33,28 +36,23 @@ onMounted(() => {
   })
 })
 
-const schema = object({
-  'selectedQuiz': string().required().label('Copy Question To')
-      .test('copyIsAllowed', 'Unmet community requirements', (value) => copyIsAllowed(value))
-})
-
 const copyIsAllowed = async (value) => {
   if(props.questionDef.quizId === value) {
     return true;
   } else {
     const response = await QuizService.validateQuizCopy(props.questionDef.quizId, value, "test")
     if(response) {
-      return response.isAllowed;
+      return response;
     }
   }
 }
 
-const copyQuestions = async (values) => {
-  const { selectedQuiz } = values
+const copyQuestions = async () => {
   copyInProgress.value = true;
   const questionsToSave = Object.keys(props.questionsToSave)
-  await QuizService.copyToAnotherQuiz(props.questionDef.quizId, selectedQuiz, questionsToSave)
+  await QuizService.copyToAnotherQuiz(props.questionDef.quizId, selectedQuiz.value, questionsToSave)
   copyInProgress.value = false;
+  copied.value = true;
 }
 
 const close = () => {
@@ -65,40 +63,74 @@ const close = () => {
 const numberOfQuestions = computed(() => {
   return Object.keys(props.questionsToSave).length
 })
+
+const onQuizChanged = async (value) => {
+  hasValidationErrors.value = false
+  validationErrors.value = []
+  const copyResult = await copyIsAllowed(value)
+  canCopyQuestion.value = copyResult.isAllowed
+  if(!copyResult.isAllowed) {
+    hasValidationErrors.value = true
+    validationErrors.value = copyResult.validationErrors
+  }
+
+}
+
+const canCopy = computed(() => {
+  return canCopyQuestion.value && selectedQuiz.value
+})
+const showOkButton = computed(() => !copied.value)
 </script>
 
 <template>
-  <SkillsInputFormDialog
+  <SkillsDialog
         ref="copyQuestionDialogRef"
         id="copyQuestionDialog"
         data-cy="copyQuestionDialog"
         :enable-return-focus="true"
-        :initial-values="initialData"
         :maximizable="false"
+        cancel-button-severity="secondary"
+        ok-button-severity="danger"
+        ok-button-icon="fas fa-copy"
+        ok-button-label="Copy"
+        :ok-button-disabled="!canCopy"
         v-model="model"
+        :show-ok-button="showOkButton"
+        :cancel-button-label="!showOkButton ? 'Close' : 'Cancel'"
+        :cancel-button-severity="!showOkButton ? 'success' : 'secondary'"
+        :cancel-button-icon="!showOkButton ? 'fas fa-check' : 'far fa-times-circle'"
         header="Copy Questions"
         :loading="loadingComponent"
-        :save-data-function="copyQuestions"
-        @close="close"
-        @cancelled="close"
-        :validation-schema="schema">
-    <div class="flex flex-col gap-1" v-if="!copyInProgress">
+        @on-ok="copyQuestions"
+        @on-cancel="close">
+
+    <div class="flex flex-col gap-1 mb-4" v-if="!copyInProgress && !copied">
       <Message severity="info" :closable="false">
-        This will copy {{ numberOfQuestions }} questions, including attachments, to the selected quiz.
+        This will copy {{ numberOfQuestions }} question(s), including attachments, to the selected quiz.
       </Message>
       <span class="font-bold text-primary">Copy Question To:</span>
-      <SkillsDropDown
-          name="selectedQuiz"
+      <Select
           :options="quizDefs"
           aria-label="Copy Question To"
           optionLabel="label"
+          v-model="selectedQuiz"
+          @update:model-value="onQuizChanged"
           optionValue="id"
           data-cy="quizzes-to-copy" />
+      <Message v-if="hasValidationErrors" :closable="false" severity="error" data-cy="validationFailedMsg">
+        <div>Questions cannot be copied:</div>
+        <ul>
+          <li v-for="error in validationErrors" :key="error"><span v-html="InputSanitizer.sanitize(error)"></span></li>
+        </ul>
+      </Message>
     </div>
-    <div v-if="copyInProgress">
-      Copying...
+    <skills-spinner :is-loading="copyInProgress" class="mt-6 mb-4"/>
+    <div v-if="copied" class="mb-4">
+      <Message severity="info" :closable="false">
+        Successfully copied {{ numberOfQuestions }} question(s) to {{ selectedQuiz }}.
+      </Message>
     </div>
-  </SkillsInputFormDialog>
+  </SkillsDialog>
 </template>
 
 <style scoped>
