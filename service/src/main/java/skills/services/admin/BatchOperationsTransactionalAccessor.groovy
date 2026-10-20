@@ -20,14 +20,18 @@ import groovy.util.logging.Slf4j
 import jakarta.transaction.Transactional
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
+import skills.controller.request.model.ProjectSettingsRequest
+import skills.controller.result.model.LevelDefinitionRes
 import skills.controller.result.model.SettingsResult
 import skills.services.BadgeUtils
+import skills.services.LevelDefinitionStorageService
 import skills.services.LockingService
 import skills.services.RuleSetDefGraphService
 import skills.services.RuleSetDefinitionScoreUpdater
 import skills.services.UserAchievementsAndPointsManagement
 import skills.services.settings.Settings
 import skills.services.settings.SettingsService
+import skills.services.admin.SkillCatalogFinalizationService.FinalizeState
 import skills.storage.model.SkillDef
 import skills.storage.model.SkillRelDef
 import skills.storage.repos.SkillDefRepo
@@ -37,6 +41,7 @@ import skills.storage.repos.UserEventsRepo
 import skills.storage.repos.UserPerformedSkillRepo
 import skills.storage.repos.UserPointsRepo
 import skills.storage.repos.nativeSql.PostgresQlNativeRepo
+import skills.tasks.TaskSchedulerService
 
 @Service
 @Slf4j
@@ -84,6 +89,40 @@ class BatchOperationsTransactionalAccessor {
     @Autowired
     UserCommunityService userCommunityService
 
+    @Autowired TaskSchedulerService taskSchedulerService
+    @Autowired BadgeAdminService badgeAdminService
+    @Autowired LevelDefinitionStorageService levelDefinitionStorageService
+
+    @Transactional
+    void addMissingCatalogLevels(String projectId, String subjectId = null, String userId = null) {
+        if (skillDefRepo.existsCatalogImport(projectId)) {
+            Integer refId = subjectId ? skillDefRepo.findByProjectIdAndSkillId(projectId, subjectId).id : null
+            levelDefinitionStorageService.getLevels(projectId, subjectId).each { LevelDefinitionRes level ->
+                if (level.pointsFrom != null) {
+                    userAchievedLevelRepo.addMissingCatalogLevel(projectId, subjectId, refId, userId, level.level, level.pointsFrom)
+                }
+            }
+        }
+    }
+
+    @Transactional
+    void completeCatalogFinalization(String projectId, List<SkillDef> imports) {
+        enableSkills(imports)
+        settingsService.saveSetting(new ProjectSettingsRequest(projectId: projectId,
+                setting: SkillCatalogFinalizationService.PROJ_FINALIZE_STATE_PROP,
+                value: FinalizeState.COMPLETED.toString()))
+        taskSchedulerService.scheduleCatalogParticipantBackfill(projectId)
+    }
+
+    @Transactional
+    void awardCatalogBadges(String projectId) {
+        skillDefRepo.findAllByProjectIdAndType(projectId, SkillDef.ContainerType.Badge).each { SkillDef badge ->
+            if (Boolean.valueOf(badge.enabled)) {
+                badgeAdminService.awardBadgeToUsersMeetingRequirements(badge, true)
+            }
+        }
+    }
+
     @Transactional
     @Profile
     void enableSkills(List<SkillDef> disabledImportedSkills) {
@@ -114,6 +153,7 @@ class BatchOperationsTransactionalAccessor {
 
 
         identifyAndAddSubjectLevelAchievements(subject.projectId, subjectId)
+        addMissingCatalogLevels(projectId, subjectId)
     }
 
     /**
@@ -131,6 +171,7 @@ class BatchOperationsTransactionalAccessor {
         createProjectUserPointsForTheNewUsers(projectId)
         updateUserPointsForProject(projectId)
         identifyAndAddProjectLevelAchievements(projectId, pointsBased)
+        addMissingCatalogLevels(projectId)
     }
 
     @Transactional
@@ -172,7 +213,7 @@ class BatchOperationsTransactionalAccessor {
     @Profile
     void copySkillAchievementsToTheImportedProjects(String projectId, List<Integer> fromSkillRefIds) {
         log.info("Copying [{}] skills achievements to the imported project [{}]", fromSkillRefIds.size(), projectId)
-        userAchievedLevelRepo.copySkillAchievementsToTheImportedProjects(fromSkillRefIds, userCommunityService.userCommunityUserTagKey ?: '', userCommunityService.userCommunityUserTagValue ?: '')
+        userAchievedLevelRepo.copySkillAchievementsToTheImportedProjects(projectId, fromSkillRefIds, userCommunityService.userCommunityUserTagKey ?: '', userCommunityService.userCommunityUserTagValue ?: '')
         log.info("Done copying [{}] skills achievements to the imported project [{}]", fromSkillRefIds.size(), projectId)
     }
 
@@ -180,7 +221,7 @@ class BatchOperationsTransactionalAccessor {
     @Profile
     void copyForSingleUserSkillAchievementsToTheImportedProjects(String userId, String projectId, List<Integer> fromSkillRefIds) {
         log.info("Copying [{}] skills achievements to the imported project [{}] for user=[{}]", fromSkillRefIds.size(), projectId, userId)
-        userAchievedLevelRepo.copyForSingleUserSkillAchievementsToTheImportedProjects(userId, fromSkillRefIds)
+        userAchievedLevelRepo.copyForSingleUserSkillAchievementsToTheImportedProjects(userId, projectId, fromSkillRefIds)
         log.info("Done copying [{}] skills achievements to the imported project [{}] for user=[{}]", fromSkillRefIds.size(), projectId, userId)
     }
 
@@ -281,9 +322,15 @@ class BatchOperationsTransactionalAccessor {
 
     @Transactional
     @Profile
-    void identifyAndAddGroupAchievements(List<SkillDef> groups) {
+    void identifyAndAddGroupAchievements(List<SkillDef> groups, List<SkillDef> skillsBeingFinalized = []) {
         groups.each { SkillDef skillsGroupSkillDef ->
             int numSkillsRequired = skillsGroupAdminService.getActualNumSkillsRequred(skillsGroupSkillDef.numSkillsRequired, skillsGroupSkillDef.id)
+            if (skillsGroupSkillDef.numSkillsRequired == -1) {
+                // Finalization evaluates achievements before enabling the imported children.
+                numSkillsRequired += skillsBeingFinalized.count { SkillDef skill ->
+                    skill.projectId == skillsGroupSkillDef.projectId && skill.groupId == skillsGroupSkillDef.skillId && skill.enabled == 'false'
+                }
+            }
             log.info("Identifying group achievements groupRefId=[{}], groupId=[{}.{}], numSkillsRequired=[{}]",
                     skillsGroupSkillDef.id, skillsGroupSkillDef.projectId, skillsGroupSkillDef.skillId, numSkillsRequired)
             userAchievedLevelRepo.identifyAndAddGroupAchievements(
@@ -292,6 +339,8 @@ class BatchOperationsTransactionalAccessor {
                     skillsGroupSkillDef.id,
                     numSkillsRequired,
                     Boolean.FALSE.toString(),
+                    userCommunityService.userCommunityUserTagKey ?: '',
+                    userCommunityService.userCommunityUserTagValue ?: '',
             )
             log.info("Finished identifying group achievements groupRefId=[{}], groupId=[{}.{}], numSkillsRequired=[{}]",
                     skillsGroupSkillDef.id, skillsGroupSkillDef.projectId, skillsGroupSkillDef.skillId, numSkillsRequired)

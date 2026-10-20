@@ -76,6 +76,10 @@ class AchievedBadgeHandler {
             return skillDate.date
         }
         Date achievedOn = skillEventsSupportRepo.getUserPerformedSkillLatestDate(userId.toLowerCase(), badge.projectId, badge?.id, SkillRelDef.RelationshipType.BadgeRequirement)
+        Date latestAchievement = skillEventsSupportRepo.getLatestChildAchievementDate(userId.toLowerCase(), badge.projectId, badge.id, SkillRelDef.RelationshipType.BadgeRequirement)
+        if (latestAchievement && (!achievedOn || latestAchievement.after(achievedOn))) {
+            achievedOn = latestAchievement
+        }
         if (!achievedOn || skillDate.date.after(achievedOn)) {
             achievedOn = skillDate.date
         }

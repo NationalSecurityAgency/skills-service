@@ -49,6 +49,9 @@ interface UserPointsRepo extends CrudRepository<UserPoints, Integer> {
                     toDef.copied_from_skill_ref = up.skill_ref_id and
                     toDef.copied_from_skill_ref = fromDef.id and
                     up.skill_ref_id in (:fromSkillRefIds)
+                    and (toDef.project_id = fromDef.project_id
+                      or exists(select 1 from user_performed_skill localEvent where localEvent.project_id = toDef.project_id and localEvent.user_id = up.user_id)
+                      or exists(select 1 from project_participation participant where participant.project_id = toDef.project_id and participant.user_id = up.user_id))
                    and (not exists(
                         select 1
                         from settings s
@@ -79,6 +82,7 @@ interface UserPointsRepo extends CrudRepository<UserPoints, Integer> {
                     toDef.copied_from_skill_ref = up.skill_ref_id and
                     toDef.copied_from_skill_ref = fromDef.id and
                     up.skill_ref_id in (:fromSkillRefIds) and 
+                    toDef.enabled = 'true' and
                     up.user_id = :userId
                     and not exists(
                         select 1
@@ -459,6 +463,9 @@ interface UserPointsRepo extends CrudRepository<UserPoints, Integer> {
             WHERE
                     up.project_id = :toProjectId and
                     sd.project_id = :toProjectId and sd.id = up.skill_ref_id and sd.type = 'Skill'
+            and (not exists(select 1 from skill_definition imported where imported.project_id = :toProjectId and imported.copied_from_project_id <> imported.project_id)
+              or exists(select 1 from user_performed_skill e where e.project_id = :toProjectId and e.user_id = up.user_id)
+              or exists(select 1 from project_participation p where p.project_id = :toProjectId and p.user_id = up.user_id))
             and not exists (select 1 from user_points innerUP where up.project_id = innerUP.project_id and up.user_id = innerUP.user_id and innerUP.skill_id is null)
             group by up.user_id;
             ''', nativeQuery = true)
@@ -486,6 +493,9 @@ interface UserPointsRepo extends CrudRepository<UserPoints, Integer> {
           and subject.project_id = :toProjectId and subject.skill_id = :toSubjectId
           and subject.id = srd.parent_ref_id and sd.id = srd.child_ref_id and srd.type in ('RuleSetDefinition', 'GroupSkillToSubject')
           and sd.id = up.skill_ref_id
+          and (not exists(select 1 from skill_definition imported where imported.project_id = :toProjectId and imported.copied_from_project_id <> imported.project_id)
+            or exists(select 1 from user_performed_skill e where e.project_id = :toProjectId and e.user_id = up.user_id)
+            or exists(select 1 from project_participation p where p.project_id = :toProjectId and p.user_id = up.user_id))
           and not exists (
             select 1 from user_points innerUP
             where
@@ -1426,7 +1436,10 @@ HAVING
                 update user_points up set points = pointsToUpdate.newPoints
                         from pointsToUpdate
                 where up.user_id = pointsToUpdate.user_id
-                and up.project_id = :projectId and up.skill_id is null;''', nativeQuery=true)
+                and up.project_id = :projectId and up.skill_id is null
+                and (not exists(select 1 from skill_definition imported where imported.project_id = :projectId and imported.copied_from_project_id <> imported.project_id)
+                  or exists(select 1 from user_performed_skill e where e.project_id = :projectId and e.user_id = up.user_id)
+                  or exists(select 1 from project_participation p where p.project_id = :projectId and p.user_id = up.user_id));''', nativeQuery=true)
     void updateUserPointsForProject(@Param("projectId") String projectId)
 
     @Modifying
@@ -1468,7 +1481,10 @@ HAVING
             update user_points up set points = pointsToUpdate.newPoints
             from pointsToUpdate
             where up.user_id = pointsToUpdate.userId
-              and up.project_id = :projectId and up.skill_id = :skillId''', nativeQuery = true)
+              and up.project_id = :projectId and up.skill_id = :skillId
+              and (not exists(select 1 from skill_definition imported where imported.project_id = :projectId and imported.copied_from_project_id <> imported.project_id)
+                or exists(select 1 from user_performed_skill e where e.project_id = :projectId and e.user_id = up.user_id)
+                or exists(select 1 from project_participation p where p.project_id = :projectId and p.user_id = up.user_id))''', nativeQuery = true)
     void updateSubjectUserPoints(@Param("projectId") String projectId, @Param("skillId") String skillId, @Param('enabledSkillsOnly') Boolean enabledSkillsOnly)
 
 

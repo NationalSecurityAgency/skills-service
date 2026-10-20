@@ -110,9 +110,10 @@ class SkillCatalogFinalizationService {
         long start = System.currentTimeMillis()
         log.info("Finalizing imported skills for [{}]", projectId)
         List<Integer> finalizedSkillIds = []
+        List<SkillDef> disabledImportedSkills = []
         try {
             projDefAccessor.getProjDef(projectId) // validate
-            List<SkillDef> disabledImportedSkills = skillDefRepo.findAllByProjectIdAndTypeAndEnabledAndCopiedFromIsNotNull(projectId, SkillDef.ContainerType.Skill, Boolean.FALSE.toString())
+            disabledImportedSkills = skillDefRepo.findAllByProjectIdAndTypeAndEnabledAndCopiedFromIsNotNull(projectId, SkillDef.ContainerType.Skill, Boolean.FALSE.toString())
 
             if (disabledImportedSkills) {
                 // update groups points
@@ -141,7 +142,7 @@ class SkillCatalogFinalizationService {
                 batchOperationsTransactionalAccessor.copySkillAchievementsToTheImportedProjects(projectId, skillRefIds)
 
                 log.info("Identifying group achievements for [{}] groups in project [{}]", groups.size(), projectId)
-                batchOperationsTransactionalAccessor.identifyAndAddGroupAchievements(groups)
+                batchOperationsTransactionalAccessor.identifyAndAddGroupAchievements(groups, disabledImportedSkills)
                 log.info("Completed import of group achievements for [{}] groups in [{}] project", groups.size(), projectId)
 
                 // 2. for each subject (1) create user points for new users (2) update existing (3) calculate achievements
@@ -154,12 +155,12 @@ class SkillCatalogFinalizationService {
 
                 log.info("Completed import of points and achievements for [{}] skills for project [{}]", skillRefIds.size(), projectId)
                 finalizedSkillIds = disabledImportedSkills.collect {it.id }
-                batchOperationsTransactionalAccessor.enableSkills(disabledImportedSkills)
+                batchOperationsTransactionalAccessor.awardCatalogBadges(projectId)
             } else {
                 log.warn("Finalize was called for [{}] projectId but there were no disabled skills", projectId)
             }
 
-            updateState(projectId, FinalizeState.COMPLETED)
+            batchOperationsTransactionalAccessor.completeCatalogFinalization(projectId, disabledImportedSkills)
         } catch (Throwable t) {
             updateState(projectId, FinalizeState.FAILED)
             throw new TaskConfig.DoNotRetryAsyncTaskException("Failed to finalize [${projectId}] project", t)

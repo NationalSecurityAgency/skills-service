@@ -84,6 +84,8 @@ class CatalogImportedSkillUserStatsSpecs extends CatalogIntSpec {
         def user = randomUsers[0]
         def user2 = randomUsers[1]
         def user3 = randomUsers[2]
+        participateInProject(project2.projectId, randomUsers)
+        participateInProject(project3.projectId, [user3])
 
         when:
         // user1: just imported skill

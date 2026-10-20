@@ -36,6 +36,20 @@ interface SkillDefRepo extends CrudRepository<SkillDef, Integer>, PagingAndSorti
         and copied_from_project_id <> project_id)''', nativeQuery = true)
     boolean existsEnabledCatalogImport(String projectId)
 
+    @Query(value = '''select exists(select 1 from skill_definition where project_id = ?1
+        and copied_from_project_id is not null and copied_from_project_id <> project_id)''', nativeQuery = true)
+    boolean existsCatalogImport(String projectId)
+
+    @Query(value = '''select exists(select 1 from skill_definition dest
+        where dest.project_id = ?1 and dest.enabled = 'true'
+          and dest.copied_from_project_id <> dest.project_id
+           and exists(select 1 from user_points p where p.skill_ref_id = dest.copied_from_skill_ref
+                      and p.user_id = ?2 and p.points > 0)
+          and (not exists(select 1 from settings s where s.project_id = dest.project_id
+                      and s.setting = 'user_community' and s.value = 'true')
+            or exists(select 1 from user_tags t where t.user_id = ?2 and t.key = ?3 and t.value = ?4)))''', nativeQuery = true)
+    boolean existsSourceCreditForEnabledCatalogImports(String projectId, String userId, String communityKey, String communityValue)
+
     /**
      * Need to create a custom query with limited fields as having many fields is slow,
      * for example 300 rows select is 330ms+ with description and 20ms without

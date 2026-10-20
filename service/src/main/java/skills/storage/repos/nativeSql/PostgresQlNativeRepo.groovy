@@ -274,7 +274,8 @@ class PostgresQlNativeRepo {
         query.executeUpdate()
     }
 
-    int addBadgeAchievementForEligibleUsers(String projectId, String badgeId, Integer badgeRowId, Boolean notified, Date start, Date end) {
+    int addBadgeAchievementForEligibleUsers(String projectId, String badgeId, Integer badgeRowId, Boolean notified, Date start, Date end,
+                                          boolean participantLimited = false, String communityKey = '', String communityValue = '') {
 
         String q = '''
         WITH badgeSkills AS (
@@ -299,6 +300,14 @@ class PostgresQlNativeRepo {
         GROUP BY ua.user_id 
         HAVING COUNT(*) = (SELECT COUNT(*) FROM badgeSkills)'''
 
+        if (participantLimited) {
+            q += ''' AND (not exists(select 1 from skill_definition imported where imported.project_id = :projectId and imported.copied_from_project_id <> imported.project_id)
+              or ((exists(select 1 from user_performed_skill e where e.project_id = :projectId and e.user_id = ua.user_id)
+                or exists(select 1 from project_participation p where p.project_id = :projectId and p.user_id = ua.user_id))
+                and (not exists(select 1 from settings s where s.project_id = :projectId and s.setting = 'user_community' and s.value = 'true')
+                  or exists(select 1 from user_tags t where t.user_id = ua.user_id and t.key = :communityKey and t.value = :communityValue))))'''
+        }
+
         final String dateFrag = '''
         AND 
         (
@@ -318,6 +327,11 @@ class PostgresQlNativeRepo {
         Query query = entityManager.createNativeQuery(q);
         query.setParameter('projectId', projectId)
         query.setParameter('badgeId', badgeId)
+
+        if (participantLimited) {
+            query.setParameter('communityKey', communityKey)
+            query.setParameter('communityValue', communityValue)
+        }
 
         if (dateCheck) {
             query.setParameter('start', start)

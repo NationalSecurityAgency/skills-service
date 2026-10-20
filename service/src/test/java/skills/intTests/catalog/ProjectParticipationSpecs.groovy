@@ -165,12 +165,11 @@ class ProjectParticipationSpecs extends CatalogIntSpec {
 
         when:
         SkillsService learner = createService(learnerId)
-        learner.initializeProjectProgress(destination.projectId)
+        Map initialized = learner.initializeProjectProgress(destination.projectId)
         then:
-        SkillsClientException error = thrown()
-        error.message.contains('NOT_REQUESTED')
-        error.httpStatus == HttpStatus.SERVICE_UNAVAILABLE
-        participationRepo.findByProjectIdAndUserId(destination.projectId, learnerId).backfillStatus == BackfillStatus.NOT_REQUESTED
+        initialized.ready
+        initialized.backfillStatus == 'COMPLETED'
+        participationRepo.findByProjectIdAndUserId(destination.projectId, learnerId).backfillStatus == BackfillStatus.COMPLETED
     }
 
     def "activity touches advance updated without overwriting pending status or created"() {
@@ -186,7 +185,7 @@ class ProjectParticipationSpecs extends CatalogIntSpec {
         when:
         learner.initializeProjectProgress(project.projectId)
         then:
-        thrown(SkillsClientException)
+        participationRepo.readStatus(project.projectId, learnerId) == BackfillStatus.PENDING
         ProjectParticipation after = participationRepo.findById(row.id).get()
         after.backfillStatus == BackfillStatus.PENDING
         after.created == created

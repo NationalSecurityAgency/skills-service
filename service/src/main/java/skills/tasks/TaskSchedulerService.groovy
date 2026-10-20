@@ -23,6 +23,7 @@ import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
 import skills.services.events.SkillDate
 import skills.tasks.data.CatalogFinalizeRequest
+import skills.tasks.data.CatalogParticipantBackfillRequest
 import skills.tasks.data.CatalogSkillDefinitionUpdated
 import skills.tasks.data.ImportedSkillAchievement
 import skills.tasks.data.RemoveSkillEventsForUserRequest
@@ -48,6 +49,16 @@ class TaskSchedulerService {
 
     @Autowired
     OneTimeTask<CatalogFinalizeRequest> finalizeCatalogImportsOneTimeTask
+
+    @Autowired
+    OneTimeTask<CatalogParticipantBackfillRequest> catalogParticipantBackfillOneTimeTask
+
+    void scheduleCatalogParticipantBackfill(String projectId, String userId = null) {
+        String key = userId ? "user:${projectId}:${userId}" : "project:${projectId}"
+        String id = UUID.nameUUIDFromBytes(key.getBytes('UTF-8')).toString()
+        scheduler.scheduleIfNotExists(catalogParticipantBackfillOneTimeTask.instance(id,
+                new CatalogParticipantBackfillRequest(projectId: projectId, userId: userId)), Instant.now())
+    }
 
     @Autowired
     OneTimeTask<RemoveSkillEventsForUserRequest> removeSkillEventsForAUser
