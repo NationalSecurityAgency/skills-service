@@ -15,6 +15,7 @@
  */
 package skills.services
 
+import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.Lazy
 import org.springframework.stereotype.Service
@@ -39,6 +40,7 @@ import skills.storage.repos.UserPointsRepo
 import skills.tasks.TaskSchedulerService
 
 @Service
+@Slf4j
 class CatalogParticipantBackfillService {
     @Autowired ProjectParticipationRepo participationRepo
     @Autowired SkillDefRepo skillDefRepo
@@ -71,9 +73,11 @@ class CatalogParticipantBackfillService {
         lockingService.lockForSkillReporting(userId, projectId)
         ProjectParticipation participant = participationRepo.findByProjectIdAndUserId(projectId, userId)
         if (participant && participant.backfillStatus != BackfillStatus.NOT_REQUESTED) {
+            log.trace('Retaining catalog participation status: projectId=[{}], userId=[{}], status=[{}]', projectId, userId, participant.backfillStatus)
             return participant.backfillStatus
         }
         if (!visit && !participant && !performedSkillRepo.existsLocalEventByProjectIdAndUserId(projectId, userId)) {
+            log.debug('Skipping catalog qualification without participation or local events: projectId=[{}], userId=[{}]', projectId, userId)
             return null
         }
         // Retain the foundation's reporting-before-activation lock convention. This
@@ -82,6 +86,7 @@ class CatalogParticipantBackfillService {
         boolean finalizing = hasApplicableFinalization(projectId)
         boolean imports = skillDefRepo.existsEnabledCatalogImport(projectId)
         if (!participant && !visit && !imports && !finalizing) {
+            log.debug('Skipping catalog qualification without enabled imports or finalization: projectId=[{}], userId=[{}]', projectId, userId)
             return null
         }
         if (!participant) {
@@ -92,6 +97,11 @@ class CatalogParticipantBackfillService {
         participant.backfillStatus = finalizing || sourceCredit ? BackfillStatus.PENDING :
                 (imports ? BackfillStatus.COMPLETED : BackfillStatus.NOT_NEEDED)
         participationRepo.save(participant)
+        log.debug('Evaluated catalog qualification: projectId=[{}], userId=[{}], visit=[{}], enabledImports=[{}], finalizing=[{}], sourceCredit=[{}], status=[{}]',
+                projectId, userId, visit, imports, finalizing, sourceCredit, participant.backfillStatus)
+        if (participant.backfillStatus == BackfillStatus.PENDING && finalizing) {
+            log.debug('Deferring catalog participant backfill to finalization sweep: projectId=[{}], userId=[{}]', projectId, userId)
+        }
         if (participant.backfillStatus == BackfillStatus.PENDING && !finalizing) {
             taskSchedulerService.scheduleCatalogParticipantBackfill(projectId, userId)
         }
@@ -104,9 +114,11 @@ class CatalogParticipantBackfillService {
         lockingService.lockCatalogActivation(projectId)
         ProjectParticipation participant = participationRepo.findByProjectIdAndUserId(projectId, userId)
         if (!participant && !hadLocalEvents) {
+            log.debug('Skipping catalog participation reset without participation or prior local events: projectId=[{}], userId=[{}]', projectId, userId)
             return
         }
         if (hasApplicableFinalization(projectId)) {
+            log.debug('Deferring catalog participation reset credit restoration to finalization: projectId=[{}], userId=[{}]', projectId, userId)
             // Retain eligibility after deletion so finalization can restore all enabled import batches.
             if (!participant && hadLocalEvents) {
                 participant = new ProjectParticipation(projectId: projectId, userId: userId)
@@ -131,6 +143,7 @@ class CatalogParticipantBackfillService {
             // Joins the deletion transaction: callers never observe cleared catalog credit after a normal reset.
             copyCredit(projectId, userId)
         }
+        log.debug('Evaluated catalog participation reset: projectId=[{}], userId=[{}], status=[{}]', projectId, userId, participant?.backfillStatus)
     }
 
     @Transactional(timeoutString = '${skills.catalog.backfillTimeoutSeconds:300}')
@@ -138,25 +151,35 @@ class CatalogParticipantBackfillService {
         lockingService.lockForSkillReporting(userId, projectId)
         ProjectParticipation participant = participationRepo.findByProjectIdAndUserId(projectId, userId)
         if (!participant || participant.backfillStatus != BackfillStatus.PENDING) {
+            log.debug('Skipping catalog participant backfill: projectId=[{}], userId=[{}], status=[{}]', projectId, userId, participant?.backfillStatus)
             return
         }
         if (hasApplicableFinalization(projectId)) {
+            log.debug('Blocking catalog participant backfill until finalization completes: projectId=[{}], userId=[{}]', projectId, userId)
             throw new IllegalStateException("Catalog finalization is not complete for [${projectId}]")
         }
         if (!userCommunityService.isUserCommunityOnlyProject(projectId) || userCommunityService.isUserCommunityMember(userId)) {
             copyCredit(projectId, userId)
+        } else {
+            log.debug('Excluding catalog credit for non-community member: projectId=[{}], userId=[{}]', projectId, userId)
         }
         participant.backfillStatus = BackfillStatus.COMPLETED
         participationRepo.save(participant)
+        log.debug('Marked catalog participant COMPLETED in current transaction: projectId=[{}], userId=[{}]', projectId, userId)
     }
 
     private void copyCredit(String projectId, String userId) {
+        long started = System.nanoTime()
         List<SkillDef> imports = skillDefRepo.findAllByProjectIdAndTypeAndEnabledAndCopiedFromIsNotNull(
                 projectId, SkillDef.ContainerType.Skill, 'true')
         if (!imports) {
+            log.debug('Skipping catalog credit copy without enabled imports: projectId=[{}], userId=[{}]', projectId, userId)
             return
         }
         List<Integer> sourceIds = imports.collect { SkillDef skill -> skill.copiedFrom }
+        if (log.isTraceEnabled()) {
+            log.trace('Copying catalog credit: projectId=[{}], userId=[{}], sourceSkillRefIds=[{}]', projectId, userId, sourceIds)
+        }
         batchAccessor.copySingleUserSkillUserPointsToTheImportedProjects(userId, projectId, sourceIds)
         batchAccessor.copyForSingleUserSkillAchievementsToTheImportedProjects(userId, projectId, sourceIds)
         List<Integer> reuseSourceIds = imports.findAll { SkillDef skill -> skill.copiedFromProjectId == projectId }
@@ -171,6 +194,7 @@ class CatalogParticipantBackfillService {
         batchAccessor.identifyAndAddGroupAchievementsForSingleUser(userId, groups)
         List<SkillDef> subjects = imports.collect { SkillDef skill -> graphService.getMySubjectParent(skill.id) }.unique { SkillDef subject -> subject.id }
         subjects.each { SkillDef subject ->
+            log.trace('Recalculating catalog subject credit: projectId=[{}], userId=[{}], subjectId=[{}]', projectId, userId, subject.skillId)
             batchAccessor.createSubjectUserPointsForSingleNewUser(userId, projectId, subject.skillId)
             userPointsRepo.updateSubjectUserPointsForUser(userId, projectId, subject.skillId, true)
             batchAccessor.identifyAndAddSubjectLevelAchievementsForSingleUser(userId, projectId, subject.skillId)
@@ -181,6 +205,7 @@ class CatalogParticipantBackfillService {
         batchAccessor.identifyAndAddProjectLevelAchievements(userId, projectId)
         batchAccessor.addMissingCatalogLevels(projectId, null, userId)
         imports.each { SkillDef skill ->
+            log.trace('Evaluating catalog badges: projectId=[{}], userId=[{}], skillId=[{}]', projectId, userId, skill.skillId)
             List<UserAchievement> achievements = achievementRepo.findAllByUserIdAndProjectIdAndSkillId(userId, projectId, skill.skillId)
             if (achievements) {
                 SkillDate date = new SkillDate(date: achievements.first().achievedOn, isProvided: true)
@@ -188,5 +213,7 @@ class CatalogParticipantBackfillService {
             }
             globalBadgeHandler.checkForGlobalBadges(new SkillEventResult(), userId, projectId, skillDefRepo.findSkillDefMinById(skill.id))
         }
+        log.debug('Finished catalog credit copy stages in current transaction: projectId=[{}], userId=[{}], imports=[{}], reusedSkills=[{}], groups=[{}], subjects=[{}], elapsedMs=[{}]',
+                projectId, userId, imports.size(), reuseSourceIds.size(), groups.size(), subjects.size(), (System.nanoTime() - started) / 1_000_000L)
     }
 }

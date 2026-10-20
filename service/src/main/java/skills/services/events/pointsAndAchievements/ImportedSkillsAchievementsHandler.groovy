@@ -76,16 +76,25 @@ class ImportedSkillsAchievementsHandler {
             log.debug("userId=[${userId}], skill=[${skill.skillId}], incomingSkillDate=[${incomingSkillDate}], thisRequestCompletedOriginalSkill=[${thisRequestCompletedOriginalSkill}]")
         }
         lockTransaction(userId, skill.projectId)
-        if (!Boolean.valueOf(skillDefRepo.findSkillDefMinById(skill.id).enabled) ||
-                (userCommunityService.isUserCommunityOnlyProject(skill.projectId) && !userCommunityService.isUserCommunityMember(userId))) {
+        if (!Boolean.valueOf(skillDefRepo.findSkillDefMinById(skill.id).enabled)) {
+            log.debug('Skipping imported achievement for disabled skill: projectId=[{}], skillId=[{}], userId=[{}]', skill.projectId, skill.skillId, userId)
+            return
+        }
+        if (userCommunityService.isUserCommunityOnlyProject(skill.projectId) && !userCommunityService.isUserCommunityMember(userId)) {
+            log.debug('Skipping imported achievement for non-community member: projectId=[{}], skillId=[{}], userId=[{}]', skill.projectId, skill.skillId, userId)
             return
         }
         if (skill.copiedFromProjectId != skill.projectId) {
             if (!participationService.isEligible(skill.projectId, userId)) {
+                log.debug('Skipping imported achievement for ineligible participant: projectId=[{}], skillId=[{}], userId=[{}]', skill.projectId, skill.skillId, userId)
                 return
             }
-            if (participationRepo.readStatus(skill.projectId, userId) == BackfillStatus.PENDING ||
-                    backfillService.hasApplicableFinalization(skill.projectId)) {
+            if (participationRepo.readStatus(skill.projectId, userId) == BackfillStatus.PENDING) {
+                log.debug('Blocking imported achievement while participant initialization is pending: projectId=[{}], skillId=[{}], userId=[{}]', skill.projectId, skill.skillId, userId)
+                throw new IllegalStateException('Catalog participant initialization is pending')
+            }
+            if (backfillService.hasApplicableFinalization(skill.projectId)) {
+                log.debug('Blocking imported achievement while catalog finalization is unfinished: projectId=[{}], skillId=[{}], userId=[{}]', skill.projectId, skill.skillId, userId)
                 throw new IllegalStateException('Catalog participant initialization is pending')
             }
         }
