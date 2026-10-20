@@ -56,6 +56,7 @@ class TaskSchedulerService {
     void scheduleCatalogParticipantBackfill(String projectId, String userId = null) {
         String key = userId ? "user:${projectId}:${userId}" : "project:${projectId}"
         String id = UUID.nameUUIDFromBytes(key.getBytes('UTF-8')).toString()
+        log.debug('Requesting catalog participant backfill scheduling if absent: taskId=[{}], projectId=[{}], userId=[{}], scope=[{}]', id, projectId, userId, userId ? 'user' : 'project')
         scheduler.scheduleIfNotExists(catalogParticipantBackfillOneTimeTask.instance(id,
                 new CatalogParticipantBackfillRequest(projectId: projectId, userId: userId)), Instant.now())
     }

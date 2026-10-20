@@ -204,9 +204,9 @@ class BatchOperationsTransactionalAccessor {
     @Transactional
     @Profile
     void copySingleUserSkillUserPointsToTheImportedProjects(String userId, String toProjectId, List<Integer> fromSkillRefIds) {
-        log.info("Copying [{}] skills UserPoints to the imported project [{}] for user=[{}]", fromSkillRefIds.size(), toProjectId, userId)
+        log.debug("Copying [{}] skills UserPoints to the imported project [{}] for user=[{}]", fromSkillRefIds.size(), toProjectId, userId)
         userPointsRepo.copySingleUserSkillUserPointsToTheImportedProjects(userId, toProjectId, fromSkillRefIds)
-        log.info("Done copying [{}] skills UserPoints to the imported project [{}] for user=[{}]", fromSkillRefIds.size(), toProjectId, userId)
+        log.debug("Done copying [{}] skills UserPoints to the imported project [{}] for user=[{}]", fromSkillRefIds.size(), toProjectId, userId)
     }
 
     @Transactional
@@ -220,9 +220,9 @@ class BatchOperationsTransactionalAccessor {
     @Transactional
     @Profile
     void copyForSingleUserSkillAchievementsToTheImportedProjects(String userId, String projectId, List<Integer> fromSkillRefIds) {
-        log.info("Copying [{}] skills achievements to the imported project [{}] for user=[{}]", fromSkillRefIds.size(), projectId, userId)
+        log.debug("Copying [{}] skills achievements to the imported project [{}] for user=[{}]", fromSkillRefIds.size(), projectId, userId)
         userAchievedLevelRepo.copyForSingleUserSkillAchievementsToTheImportedProjects(userId, projectId, fromSkillRefIds)
-        log.info("Done copying [{}] skills achievements to the imported project [{}] for user=[{}]", fromSkillRefIds.size(), projectId, userId)
+        log.debug("Done copying [{}] skills achievements to the imported project [{}] for user=[{}]", fromSkillRefIds.size(), projectId, userId)
     }
 
     @Transactional
@@ -239,9 +239,9 @@ class BatchOperationsTransactionalAccessor {
     @Transactional
     @Profile
     Integer createSubjectUserPointsForSingleNewUser(String userId, String toProjectId, String toSubjectId) {
-        log.info("Creating UserPoints for the new users for [{}-{}] subject", toProjectId, toSubjectId)
+        log.debug("Creating subject UserPoints: projectId=[{}], subjectId=[{}], userId=[{}]", toProjectId, toSubjectId, userId)
         int numRows = userPointsRepo.createSubjectUserPointsForSingleNewUser(userId, toProjectId, toSubjectId)
-        log.info("Created [{}] UserPoints for the new users for [{}-{}] subject", numRows, toProjectId, toSubjectId)
+        log.debug("Created [{}] subject UserPoints: projectId=[{}], subjectId=[{}], userId=[{}]", numRows, toProjectId, toSubjectId, userId)
 
         return numRows
     }
@@ -352,7 +352,7 @@ class BatchOperationsTransactionalAccessor {
     void identifyAndAddGroupAchievementsForSingleUser(String userId, List<SkillDef> groups) {
         groups.each { SkillDef skillsGroupSkillDef ->
             int numSkillsRequired = skillsGroupAdminService.getActualNumSkillsRequred(skillsGroupSkillDef.numSkillsRequired, skillsGroupSkillDef.id)
-            log.info("Identifying group achievements userId=[{}], groupRefId=[{}], groupId=[{}.{}], numSkillsRequired=[{}]",
+            log.debug("Identifying group achievements userId=[{}], groupRefId=[{}], groupId=[{}.{}], numSkillsRequired=[{}]",
                     userId, skillsGroupSkillDef.id, skillsGroupSkillDef.projectId, skillsGroupSkillDef.skillId, numSkillsRequired)
             userAchievedLevelRepo.identifyAndAddGroupAchievementsForSingleUser(
                     userId,
@@ -362,7 +362,7 @@ class BatchOperationsTransactionalAccessor {
                     numSkillsRequired,
                     Boolean.FALSE.toString(),
             )
-            log.info("Finished identifying group achievements userId=[{}], groupRefId=[{}], groupId=[{}.{}], numSkillsRequired=[{}]",
+            log.debug("Finished identifying group achievements userId=[{}], groupRefId=[{}], groupId=[{}.{}], numSkillsRequired=[{}]",
                     userId, skillsGroupSkillDef.id, skillsGroupSkillDef.projectId, skillsGroupSkillDef.skillId, numSkillsRequired)
         }
     }
@@ -379,10 +379,10 @@ class BatchOperationsTransactionalAccessor {
     @Transactional
     @Profile
     void identifyAndAddSubjectLevelAchievementsForSingleUser(String userId, String projectId, String subjectId) {
-        log.info("Identifying subject level achievements for [{}-{}] subject for user=[{}]", projectId, subjectId, userId, )
+        log.debug("Identifying subject level achievements for [{}-{}] subject for user=[{}]", projectId, subjectId, userId)
         SkillDef subject = skillDefRepo.findByProjectIdAndSkillId(projectId, subjectId)
         userAchievementsAndPointsManagement.identifyAndAddSubjectLevelAchievementsForSingleUser(userId, subject)
-        log.info("Completed import for subject. projectIdTo=[{}], subjectIdTo=[{}] for user=[{}]", projectId, subjectId, userId)
+        log.debug("Completed import for subject. projectIdTo=[{}], subjectIdTo=[{}] for user=[{}]", projectId, subjectId, userId)
     }
 
     @Transactional
@@ -396,9 +396,9 @@ class BatchOperationsTransactionalAccessor {
     @Transactional
     @Profile
     void createProjectUserPointsForSingleNewUser(String userId, String toProjectId) {
-        log.info("Creating UserPoints for the new users for [{}] project for user [{}]", toProjectId, userId)
+        log.debug("Creating UserPoints for the new users for [{}] project for user [{}]", toProjectId, userId)
         userPointsRepo.createProjectUserPointsForSingleNewUser(userId, toProjectId)
-        log.info("Competed creating UserPoints for the new users for [{}] project for user [{}]", toProjectId, userId)
+        log.debug("Completed creating UserPoints for the new users for [{}] project for user [{}]", toProjectId, userId)
     }
 
     @Transactional
@@ -420,9 +420,9 @@ class BatchOperationsTransactionalAccessor {
     @Transactional
     @Profile
     void identifyAndAddProjectLevelAchievements(String userId, String projectId){
-        log.info("Identifying and adding project level achievements for [{}] project, userId=[{}]", projectId, userId)
+        log.debug("Identifying and adding project level achievements for [{}] project, userId=[{}]", projectId, userId)
         userAchievementsAndPointsManagement.identifyAndAddProjectLevelAchievementsForSingleUser(userId, projectId)
-        log.info("Completed identifying and adding project level achievements for [{}] project, userId=[{}]", projectId, userId)
+        log.debug("Completed identifying and adding project level achievements for [{}] project, userId=[{}]", projectId, userId)
     }
 
     @Transactional
