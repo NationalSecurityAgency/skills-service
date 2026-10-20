@@ -16,15 +16,24 @@
 package skills.storage.repos
 
 import org.springframework.data.jpa.repository.Modifying
+import org.springframework.data.domain.Pageable
 import org.springframework.data.jpa.repository.Query
 import org.springframework.data.repository.CrudRepository
 import skills.storage.model.ProjectParticipation
+import skills.storage.model.ProjectParticipation.BackfillStatus
 import org.springframework.lang.Nullable
 
 interface ProjectParticipationRepo extends CrudRepository<ProjectParticipation, Integer> {
     @Nullable
     ProjectParticipation findByProjectIdAndUserId(String projectId, String userId)
     boolean existsByProjectIdAndUserId(String projectId, String userId)
+
+    @Query(value = "select * from project_participation where project_id = ?1 and backfill_status = 'PENDING' and id > ?2 order by id", nativeQuery = true)
+    List<ProjectParticipation> findPending(String projectId, Integer afterId, Pageable pageable)
+
+    @Nullable
+    @Query('select p.backfillStatus from ProjectParticipation p where p.projectId = ?1 and p.userId = ?2')
+    BackfillStatus readStatus(String projectId, String userId)
 
     @Modifying
     @Query(value = '''update project_participation set updated = ?3

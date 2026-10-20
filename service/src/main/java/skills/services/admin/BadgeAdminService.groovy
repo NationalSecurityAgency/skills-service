@@ -95,6 +95,8 @@ class BadgeAdminService {
     @Autowired
     UserAchievedLevelRepo achievedLevelRepo
 
+    @Autowired UserCommunityService userCommunityService
+
     @Autowired
     GlobalBadgeLevelDefRepo globalBadgeLevelDefRepo
 
@@ -285,7 +287,7 @@ class BadgeAdminService {
     }
 
     @Transactional
-    public void awardBadgeToUsersMeetingRequirements(SkillDefParent badge) {
+    public void awardBadgeToUsersMeetingRequirements(SkillDefParent badge, boolean participantLimited = false) {
         if(!badge.projectId) {
             PostgresQlNativeRepo.addGlobalBadgeAchievementForEligibleUsers(badge.skillId,
                     badge.id,
@@ -300,7 +302,10 @@ class BadgeAdminService {
                     badge.id,
                     Boolean.FALSE,
                     badge.startDate,
-                    badge.endDate)
+                    badge.endDate,
+                    participantLimited,
+                    userCommunityService.userCommunityUserTagKey ?: '',
+                    userCommunityService.userCommunityUserTagValue ?: '')
         }
     }
 

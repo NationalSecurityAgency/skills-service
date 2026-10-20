@@ -29,6 +29,14 @@ import skills.storage.model.UserTagCount
 @CompileStatic
 interface UserPerformedSkillRepo extends JpaRepository<UserPerformedSkill, Integer> {
 
+    @Query(value = '''select distinct a.user_id from user_quiz_attempt a
+        join quiz_to_skill_definition q on q.quiz_ref_id = a.quiz_definition_ref_id
+        join skill_definition s on s.id = q.skill_ref_id
+        where s.project_id = ?1 and a.status = 'PASSED' and s.id = ?2
+          and not exists(select 1 from user_performed_skill e where e.project_id = ?1 and e.user_id = a.user_id)
+        order by a.user_id''', nativeQuery = true)
+    List<String> findNewLocalQuizUsers(String projectId, Integer skillRefId)
+
     // find an "exact" performed event;
     // may have more than 1 event with the same exact timestamp, this happens when multiple events may fall
     // within configured time window and client send the same timestamp (example UI calendar control)

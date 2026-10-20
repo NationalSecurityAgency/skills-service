@@ -17,10 +17,20 @@ package skills.intTests.catalog
 
 
 import skills.intTests.utils.DefaultIntSpec
+import skills.intTests.utils.SkillsService
 
 import static skills.intTests.utils.SkillsFactory.*
 
 class CatalogIntSpec extends DefaultIntSpec {
+
+    /** Register the learners whose imported progress is part of a catalog fixture. */
+    protected void participateInProject(String projectId, List<String> userIds) {
+        userIds.each { String userId ->
+            SkillsService learner = createService(userId)
+            learner.initializeProjectProgress(projectId)
+        }
+        waitForAsyncTasksCompletion.waitForAllScheduleTasks()
+    }
 
     protected createProjWithCatalogSkills ( Integer projNum, int numPerformToCompletion = 2, boolean disabledTimeWindow = false) {
         def proj = createProject(projNum)
@@ -51,5 +61,21 @@ class CatalogIntSpec extends DefaultIntSpec {
                 s2_skills: subj2_skills,
                 s3_skills: subj3_skills,
         ]
+    }
+
+    protected List<Map> backfillTasks() {
+        jdbcTemplate.queryForList("select task_instance, execution_time, consecutive_failures from scheduled_tasks where task_name = 'catalog-participant-backfill' order by task_instance")
+    }
+
+    // Call before qualification to hold newly scheduled backfills for pending-state assertions.
+    // Pair with releaseBackfill(), then waitForAllScheduleTasks() before asserting completed credit.
+    protected void queueBackfill() {
+        installTrigger('catalog_test_queue', 'scheduled_tasks', "if NEW.task_name = 'catalog-participant-backfill' then if NEW.execution_time > now() + interval '2 seconds' then raise exception 'backfill must not have an intentional delay'; end if; NEW.execution_time := now() + interval '1 hour'; end if; return NEW;")
+    }
+
+    // Remove the queueBackfill() barrier and make held tasks runnable; this does not wait for completion.
+    protected void releaseBackfill() {
+        removeTrigger('catalog_test_queue', 'scheduled_tasks')
+        jdbcTemplate.update("update scheduled_tasks set execution_time = now() where task_name = 'catalog-participant-backfill'")
     }
 }

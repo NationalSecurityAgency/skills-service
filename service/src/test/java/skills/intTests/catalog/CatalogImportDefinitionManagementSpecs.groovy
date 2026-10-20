@@ -1158,6 +1158,7 @@ class CatalogImportDefinitionManagementSpecs extends CatalogIntSpec {
                 ])
 
         List<String> users = getRandomUsers(2)
+        participateInProject(project2.projectId, users.take(1))
         skillsService.addSkill(project1.s1_skills[0], users[0])
         skillsService.addSkill(project1.s1_skills[1], users[0])
         waitForAsyncTasksCompletion.waitForAllScheduleTasks()
@@ -1194,6 +1195,7 @@ class CatalogImportDefinitionManagementSpecs extends CatalogIntSpec {
                 ])
 
         List<String> users = getRandomUsers(2)
+        participateInProject(project2.projectId, users.take(1))
         skillsService.addSkill(project1.s1_skills[0], users[0])
         skillsService.addSkill(project1.s1_skills[1], users[0])
         waitForAsyncTasksCompletion.waitForAllScheduleTasks()

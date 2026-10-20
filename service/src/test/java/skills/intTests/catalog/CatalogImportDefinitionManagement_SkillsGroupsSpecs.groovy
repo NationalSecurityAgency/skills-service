@@ -134,6 +134,7 @@ class CatalogImportDefinitionManagement_SkillsGroupsSpecs extends CatalogIntSpec
         skillsService.createProjectAndSubjectAndSkills(p2, p2subj1, [p2skillsGroup])
 
         String user = getRandomUsers(1)[0]
+        participateInProject(p2.projectId, [user])
         skillsService.bulkImportSkillsIntoGroupFromCatalogAndFinalize(p2.projectId, p2subj1.subjectId, p2skillsGroup.skillId,
                 p1Skills.collect { [projectId: it.projectId, skillId: it.skillId] })
         when:
@@ -201,6 +202,7 @@ class CatalogImportDefinitionManagement_SkillsGroupsSpecs extends CatalogIntSpec
         skillsService.createProjectAndSubjectAndSkills(p2, p2subj1, [p2skillsGroup])
 
         String user = getRandomUsers(1)[0]
+        participateInProject(p2.projectId, [user])
 
         skillsService.bulkImportSkillsIntoGroupFromCatalogAndFinalize(p2.projectId, p2subj1.subjectId, p2skillsGroup.skillId,
                 p1Skills.collect { [projectId: it.projectId, skillId: it.skillId] })
@@ -247,6 +249,7 @@ class CatalogImportDefinitionManagement_SkillsGroupsSpecs extends CatalogIntSpec
         skillsService.createProjectAndSubjectAndSkills(p2, p2subj1, [p2skillsGroup])
 
         String user = getRandomUsers(1)[0]
+        participateInProject(p2.projectId, [user])
 
         skillsService.bulkImportSkillsIntoGroupFromCatalogAndFinalize(p2.projectId, p2subj1.subjectId, p2skillsGroup.skillId,
                 p1Skills.collect { [projectId: it.projectId, skillId: it.skillId] })
@@ -293,6 +296,7 @@ class CatalogImportDefinitionManagement_SkillsGroupsSpecs extends CatalogIntSpec
         skillsService.createProjectAndSubjectAndSkills(p2, p2subj1, [p2skillsGroup])
 
         List<String> users = getRandomUsers(3)
+        participateInProject(p2.projectId, users.take(2))
         skillsService.addSkill([projectId: p1.projectId, skillId: p1Skills[1].skillId], users[0])
         skillsService.addSkill([projectId: p1.projectId, skillId: p1Skills[0].skillId], users[1])
         skillsService.addSkill([projectId: p1.projectId, skillId: p1Skills[1].skillId], users[1])
@@ -345,6 +349,7 @@ class CatalogImportDefinitionManagement_SkillsGroupsSpecs extends CatalogIntSpec
         skillsService.createProjectAndSubjectAndSkills(p2, p2subj2, [p2skillsGroup])
 
         List<String> users = getRandomUsers(3)
+        participateInProject(p2.projectId, users.take(2))
         skillsService.addSkill([projectId: p1.projectId, skillId: p1Skills[1].skillId], users[0])
         skillsService.addSkill([projectId: p1.projectId, skillId: p1Skills[0].skillId], users[1])
         skillsService.addSkill([projectId: p1.projectId, skillId: p1Skills[1].skillId], users[1])
@@ -370,5 +375,4 @@ class CatalogImportDefinitionManagement_SkillsGroupsSpecs extends CatalogIntSpec
         p2_subj2_t1.skills[0].children.skillId.sort() == [p1Skills[1].skillId, p1Skills[2].skillId]
     }
 }
-
 

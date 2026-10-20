@@ -100,6 +100,7 @@ class CatalogSkillsClientDisplaySpecs extends CatalogIntSpec {
         skillsService.bulkImportSkillsFromCatalogAndFinalize(project2.projectId, p2subj1.subjectId, p1_skills.collect { [projectId: it.projectId, skillId: it.skillId] })
 
         String user = getRandomUsers(1)[0]
+        participateInProject(project2.projectId, [user])
         when:
         def addSkill1 = skillsService.addSkill([projectId: project2.projectId, skillId: p1_skills[0].skillId], user)
         assert addSkill1.body.explanation == "Skill event was applied"
@@ -123,6 +124,7 @@ class CatalogSkillsClientDisplaySpecs extends CatalogIntSpec {
         skillsService.createProjectAndSubjectAndSkills(project2, p2subj1, p2_skills)
 
         String user = getRandomUsers(1)[0]
+        participateInProject(project2.projectId, [user])
         skillsService.addSkill([projectId: project1.projectId, skillId: p1_skills[0].skillId], user)
         skillsService.addSkill([projectId: project1.projectId, skillId: p1_skills[1].skillId], user, new Date() - 1)
         skillsService.addSkill([projectId: project1.projectId, skillId: p1_skills[2].skillId], user, new Date() - 1)

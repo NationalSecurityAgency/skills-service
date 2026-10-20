@@ -21,6 +21,11 @@ import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 import skills.services.LockingService
+import skills.services.ProjectParticipationService
+import skills.services.CatalogParticipantBackfillService
+import skills.services.admin.UserCommunityService
+import skills.storage.repos.ProjectParticipationRepo
+import skills.storage.model.ProjectParticipation.BackfillStatus
 import skills.services.RuleSetDefGraphService
 import skills.services.UserAchievementsAndPointsManagement
 import skills.services.events.AchievedBadgeHandler
@@ -61,11 +66,29 @@ class ImportedSkillsAchievementsHandler {
     @Autowired
     LockingService lockingService
 
+    @Autowired ProjectParticipationService participationService
+    @Autowired CatalogParticipantBackfillService backfillService
+    @Autowired ProjectParticipationRepo participationRepo
+    @Autowired UserCommunityService userCommunityService
+
     void handleAchievementsForImportedSkills(String userId, SkillDefMin skill, SkillDate incomingSkillDate, boolean thisRequestCompletedOriginalSkill, boolean isMotivationalSkill) {
         if (log.isDebugEnabled()) {
             log.debug("userId=[${userId}], skill=[${skill.skillId}], incomingSkillDate=[${incomingSkillDate}], thisRequestCompletedOriginalSkill=[${thisRequestCompletedOriginalSkill}]")
         }
         lockTransaction(userId, skill.projectId)
+        if (!Boolean.valueOf(skillDefRepo.findSkillDefMinById(skill.id).enabled) ||
+                (userCommunityService.isUserCommunityOnlyProject(skill.projectId) && !userCommunityService.isUserCommunityMember(userId))) {
+            return
+        }
+        if (skill.copiedFromProjectId != skill.projectId) {
+            if (!participationService.isEligible(skill.projectId, userId)) {
+                return
+            }
+            if (participationRepo.readStatus(skill.projectId, userId) == BackfillStatus.PENDING ||
+                    backfillService.hasApplicableFinalization(skill.projectId)) {
+                throw new IllegalStateException('Catalog participant initialization is pending')
+            }
+        }
 
         if (isMotivationalSkill && thisRequestCompletedOriginalSkill) {
             // just need to update the oldest performed_on date
