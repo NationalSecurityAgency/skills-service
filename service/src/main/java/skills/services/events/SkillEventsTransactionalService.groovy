@@ -28,6 +28,7 @@ import skills.controller.exceptions.SkillException
 import skills.controller.exceptions.SkillExceptionBuilder
 import skills.quizLoading.QuizRunService
 import skills.services.LockingService
+import skills.services.CatalogParticipantBackfillService
 import skills.services.SelfReportingService
 import skills.services.UserEventService
 import skills.services.admin.SkillCatalogService
@@ -123,6 +124,9 @@ class SkillEventsTransactionalService {
 
     @Autowired
     QuizRunService quizRunService
+
+    @Autowired
+    CatalogParticipantBackfillService catalogBackfillService
 
     @Transactional
     void notifyUserOfAchievements(String userId){
@@ -289,6 +293,7 @@ class SkillEventsTransactionalService {
             }
         }
 
+        boolean firstLocalAward = numExistingSkills == 0
         UserPerformedSkill performedSkill = new UserPerformedSkill(userId: userId,
                 skillId: skillId, projectId: skillDefinition.projectId,
                 performedOn: skillDate.date, skillRefId: skillDefinition.id)
@@ -319,6 +324,10 @@ class SkillEventsTransactionalService {
         }
 
         scheduleImportedSkills(skillDefinition, userId, skillDate, requestedSkillCompleted, false)
+
+        if (firstLocalAward) {
+            catalogBackfillService.qualify(skillDefinition.projectId, userId)
+        }
 
         return res
     }

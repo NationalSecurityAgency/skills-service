@@ -132,6 +132,7 @@ class OriginalProjectDeletionSpecs extends CatalogIntSpec {
         )
 
         List<String> users = getRandomUsers(2)
+        participateInProject(proj2.projectId, users.take(1))
         skillsService.addSkill(p1Skills[0], users[0], new Date() - 2)
         skillsService.addSkill(p1Skills[0], users[0], new Date() - 1)
         skillsService.addSkill(p1Skills[0], users[0])
@@ -191,6 +192,7 @@ class OriginalProjectDeletionSpecs extends CatalogIntSpec {
         )
 
         List<String> users = getRandomUsers(2)
+        participateInProject(proj2.projectId, users.take(1))
         skillsService.addSkill(p1Skills[0], users[0], new Date() - 2)
         skillsService.addSkill(p1Skills[0], users[0], new Date() - 1)
         skillsService.addSkill(p1Skills[0], users[0])
@@ -250,6 +252,7 @@ class OriginalProjectDeletionSpecs extends CatalogIntSpec {
         )
 
         List<String> users = getRandomUsers(2)
+        participateInProject(proj2.projectId, users.take(1))
         skillsService.addSkill(p1Skills[0], users[0], new Date() - 2)
         skillsService.addSkill(p1Skills[0], users[0], new Date() - 1)
         skillsService.addSkill(p1Skills[0], users[0])
@@ -387,6 +390,7 @@ class OriginalProjectDeletionSpecs extends CatalogIntSpec {
         )
 
         List<String> users = getRandomUsers(2)
+        participateInProject(proj2.projectId, users.take(1))
         skillsService.addSkill(p1Skills[0], users[0], new Date() - 2)
         skillsService.addSkill(p1Skills[0], users[0], new Date() - 1)
         skillsService.addSkill(p1Skills[0], users[0])
@@ -446,6 +450,7 @@ class OriginalProjectDeletionSpecs extends CatalogIntSpec {
         )
 
         List<String> users = getRandomUsers(2)
+        participateInProject(proj2.projectId, users.take(1))
         skillsService.addSkill(p1Skills[0], users[0], new Date() - 2)
         skillsService.addSkill(p1Skills[0], users[0], new Date() - 1)
         skillsService.addSkill(p1Skills[0], users[0])

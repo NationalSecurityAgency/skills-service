@@ -28,7 +28,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.http.HttpStatus;
 import skills.controller.result.model.ProjectProgressInitializationResult;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
@@ -116,9 +115,6 @@ class UserSkillsController {
                 projectId);
         ProjectProgressInitializationResult result = projectParticipationService.initialize(
                 projectId, userInfoService.getUserName(null));
-        if (!result.getReady()) {
-            return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).header("Retry-After", "1").body(result);
-        }
         return ResponseEntity.ok(result);
     }
 

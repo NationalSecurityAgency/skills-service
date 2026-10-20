@@ -23,6 +23,7 @@ import jakarta.persistence.PersistenceContext
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.web.server.LocalServerPort
+import org.springframework.jdbc.core.JdbcTemplate
 import org.springframework.transaction.PlatformTransactionManager
 import org.springframework.transaction.TransactionStatus
 import org.springframework.transaction.support.TransactionCallback
@@ -147,6 +148,8 @@ class DefaultIntSpec extends Specification {
     @Autowired
     UserTagRepo userTagRepo
 
+    @Autowired JdbcTemplate jdbcTemplate
+
     def setup() {
         // allows for over-ridding the setup method
         doSetup()
@@ -235,7 +238,15 @@ class DefaultIntSpec extends Specification {
         return skillsServiceFactory.getRandomUsers(numUsers, createEmail, exclude).collect { createService(it)}
     }
 
+    void installTrigger(String name, String table, String body) {
+        jdbcTemplate.execute("create function ${name}() returns trigger language plpgsql as \$\$ begin ${body} end; \$\$")
+        jdbcTemplate.execute("create trigger ${name} before insert on ${table} for each row execute function ${name}()")
+    }
 
+    void removeTrigger(String name, String table) {
+        jdbcTemplate.execute("drop trigger if exists ${name} on ${table}")
+        jdbcTemplate.execute("drop function if exists ${name}()")
+    }
 
     protected <T> T runInTransaction(Closure<T> inTransactionLogic) {
         TransactionTemplate transactionTemplate = new TransactionTemplate(transactionManager)

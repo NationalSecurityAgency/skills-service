@@ -39,8 +39,10 @@ import org.springframework.boot.context.properties.bind.Binder
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.core.env.Environment
+import org.springframework.jdbc.datasource.TransactionAwareDataSourceProxy
 import skills.tasks.JsonSerializer
 import skills.tasks.data.CatalogFinalizeRequest
+import skills.tasks.data.CatalogParticipantBackfillRequest
 import skills.tasks.data.CatalogSkillDefinitionUpdated
 import skills.tasks.data.ExpireUserAchievements
 import skills.tasks.data.ImportedSkillAchievement
@@ -49,6 +51,7 @@ import skills.tasks.data.RemoveSkillEventsForUserRequest
 import skills.tasks.data.TextInputAiGradingRequest
 import skills.tasks.data.UnachievableLevelIdentification
 import skills.tasks.executors.CatalogSkillUpdatedTaskExecutor
+import skills.tasks.executors.CatalogParticipantBackfillExecutor
 import skills.tasks.executors.ExpireUserAchievementsTaskExecutor
 import skills.tasks.executors.FinalizeCatalogSkillsImportExecutor
 import skills.tasks.executors.ImportedSkillAchievementTaskExecutor
@@ -113,7 +116,7 @@ class TaskConfig {
     @Bean(initMethod = 'start', destroyMethod = 'stop')
     @ConditionalOnMissingBean(Scheduler)
     Scheduler scheduler(DataSource dataSource, List<Task<?>> tasks, DbSchedulerProperties dbSchedulerProperties, ObjectProvider<DbSchedulerCustomizer> customizerProvider) {
-        SchedulerBuilder builder = Scheduler.create(dataSource, tasks)
+        SchedulerBuilder builder = Scheduler.create(new TransactionAwareDataSourceProxy(dataSource), tasks)
         if (dbSchedulerProperties.threads > 0) {
             builder.threads(dbSchedulerProperties.threads)
         }
@@ -213,6 +216,14 @@ class TaskConfig {
                     new FailureHandler.ExponentialBackoffFailureHandler(Duration.ofSeconds(exponentialBackOffSeconds), exponentialBackOffRate)))
             )
             .execute(importedSkillAchievementTaskExecutor)
+    }
+
+    @Bean
+    OneTimeTask<CatalogParticipantBackfillRequest> catalogParticipantBackfillOneTimeTask(CatalogParticipantBackfillExecutor executor) {
+        // Retain the durable obligation after failures; ordinary visits never repair or reset retries.
+        return Tasks.oneTime('catalog-participant-backfill', CatalogParticipantBackfillRequest)
+                .onFailure(new FailureHandler.ExponentialBackoffFailureHandler(Duration.ofSeconds(exponentialBackOffSeconds), exponentialBackOffRate))
+                .execute(executor)
     }
 
     @Bean
