@@ -1381,15 +1381,25 @@ class AdminController {
     }
 
     @RequestMapping(value = "/projects/{projectId}/shared", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
-    List<SharedSkillResult> getSharedSkills(@PathVariable("projectId") String projectId) {
+    TableResult getSharedSkills(@PathVariable("projectId") String projectId,
+                                            @RequestParam int limit,
+                                            @RequestParam int page,
+                                            @RequestParam String orderBy,
+                                            @RequestParam Boolean ascending) {
         SkillsValidator.isNotBlank(projectId, "Project Id")
-        return shareSkillsService.getSharedSkillsWithOtherProjects(projectId)
+        PageRequest pageRequest = TablePageUtil.createPagingRequest(limit, page, orderBy, ascending)
+        return shareSkillsService.getSharedSkillsWithOtherProjects(projectId, pageRequest)
     }
 
     @RequestMapping(value = "/projects/{projectId}/sharedWithMe", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
-    List<SharedSkillResult> getSharedWithMeSkills(@PathVariable("projectId") String projectId) {
+    TableResult getSharedWithMeSkills(@PathVariable("projectId") String projectId,
+                                                  @RequestParam int limit,
+                                                  @RequestParam int page,
+                                                  @RequestParam String orderBy,
+                                                  @RequestParam Boolean ascending) {
         SkillsValidator.isNotBlank(projectId, "Project Id")
-        return shareSkillsService.getSharedSkillsFromOtherProjects(projectId)
+        PageRequest pageRequest = TablePageUtil.createPagingRequest(limit, page, orderBy, ascending)
+        return shareSkillsService.getSharedSkillsFromOtherProjects(projectId, pageRequest)
     }
 
     @RequestMapping(value = "/projects/{projectId}/settings", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
