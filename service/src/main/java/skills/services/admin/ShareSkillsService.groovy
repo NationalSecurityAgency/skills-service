@@ -18,11 +18,15 @@ package skills.services.admin
 import groovy.util.logging.Slf4j
 import org.jsoup.helper.Validate
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.data.domain.Page
+import org.springframework.data.domain.PageRequest
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import skills.controller.exceptions.SkillException
 import skills.controller.exceptions.SkillsValidator
 import skills.controller.result.model.SharedSkillResult
+import skills.controller.result.model.TableResult
+import skills.controller.result.model.UserQuizAnswer
 import skills.storage.model.ProjDef
 import skills.storage.model.SkillDef
 import skills.storage.model.SkillShareDef
@@ -49,27 +53,33 @@ class ShareSkillsService {
     SkillsDepsService skillsDepsService
 
     @Transactional(readOnly = true)
-    List<SharedSkillResult> getSharedSkillsFromOtherProjects(String projectId) {
+    TableResult getSharedSkillsFromOtherProjects(String projectId, PageRequest pageRequest) {
         ProjDef projDef = projDefAccessor.getProjDef(projectId)
-        List<SkillShareDefRepo.SkillSharedMeta> sharedMetas = skillShareDefRepo.getSkillDefsSharedFromOtherProjectsByProjectId(projDef)
-        return sharedMetas.collect { SkillShareDefRepo.SkillSharedMeta meta ->
+        Page<SkillShareDefRepo.SkillSharedMeta> sharedMetaPage = skillShareDefRepo.getSkillDefsSharedFromOtherProjectsByProjectId(projDef, pageRequest)
+        List<SkillShareDefRepo.SkillSharedMeta> sharedMetas = sharedMetaPage.getContent()
+        List<SharedSkillResult> results = sharedMetas.collect { SkillShareDefRepo.SkillSharedMeta meta ->
             new SharedSkillResult(
                     skillName: meta.skillName, skillId: meta.skillId,
                     projectName: meta.projectName, projectId: meta.projectId
             )
         }
+
+        return new TableResult(totalCount: sharedMetaPage.getTotalElements(), data: results, count: sharedMetaPage.getTotalElements())
     }
 
     @Transactional(readOnly = true)
-    List<SharedSkillResult> getSharedSkillsWithOtherProjects(String projectId) {
-        List<SkillShareDef> shareDefs = skillShareDefRepo.getSkillShareDefsWithOtherProjectsByProjectId(projectId)
-        return shareDefs.collect { SkillShareDef shareDef ->
+    TableResult getSharedSkillsWithOtherProjects(String projectId, PageRequest pageRequest) {
+        Page<SkillShareDef> shareDefPage = skillShareDefRepo.getSkillShareDefsWithOtherProjectsByProjectId(projectId, pageRequest)
+        List<SkillShareDef> shareDefs = shareDefPage.getContent()
+        List<SharedSkillResult> results = shareDefs.collect { SkillShareDef shareDef ->
             new SharedSkillResult(
                     skillName: shareDef.skill.name, skillId: shareDef.skill.skillId,
                     projectName: shareDef.sharedToProject?.name, projectId: shareDef.sharedToProject?.projectId,
                     sharedWithAllProjects: shareDef.sharedToProject == null
             )
         }
+
+        return new TableResult(totalCount: shareDefPage.getTotalElements(), data: results, count: shareDefPage.getTotalElements())
     }
 
     @Transactional()

@@ -17,11 +17,11 @@ limitations under the License.
 import { computed, onMounted, ref } from 'vue'
 import Column from 'primevue/column'
 import { useResponsiveBreakpoints } from '@/components/utils/misc/UseResponsiveBreakpoints.js'
+import SkillsDataTable from "@/components/utils/table/SkillsDataTable.vue";
+import {useStorage} from "@vueuse/core";
 
-const props = defineProps(['sharedSkills', 'disableDelete'])
-const emit = defineEmits(['skill-removed'])
-const sortField = ref('')
-const sortOrder = ref(0)
+const props = defineProps(['sharedSkills', 'disableDelete', 'pageSize', 'possiblePageSizes', 'totalRecords', 'sortField', 'sortOrder'])
+const emit = defineEmits(['skill-removed', 'page-changed', 'sort-changed'])
 const responsive = useResponsiveBreakpoints()
 const isFlex = computed(() => responsive.lg.value)
 
@@ -49,17 +49,20 @@ const getProjectId = (row) => {
   return row.projectId
 }
 
-const sortTable = (criteria) => {
-  sortField.value = criteria.sortField
-  sortOrder.value = criteria.sortOrder
+const sortTable = (sortingInfo) => {
+  emit('sort-changed', sortingInfo)
 }
 
+const pageChanged = (pagingInfo) => {
+  emit('page-changed', pagingInfo);
+}
 </script>
 
 <template>
   <div id="shared-skills-table" v-if="sharedSkills && sharedSkills.length" data-cy="sharedSkillsTableDiv">
     <SkillsDataTable
-      v-if="loaded" :value="sharedSkills" :sortField="sortField" :sortOrder="sortOrder" @sort="sortTable"
+      v-if="loaded" :value="sharedSkills" :sortField="sortField" :sortOrder="sortOrder" @sort="sortTable" paginator
+      :totalRecords="totalRecords" :rows="pageSize" :rowsPerPageOptions="possiblePageSizes" lazy @page="pageChanged"
       data-cy="sharedSkillsTable" tableStoredStateId="sharedSkillsTable" aria-label="Skills Shared with Other Projects">
       <Column field="skillName" header="Shared Skill" sortable :class="{'flex': isFlex }">
         <template #body="slotProps">
