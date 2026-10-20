@@ -46,6 +46,7 @@ class ApplyEventsThatWereReportedDuringTheFinalizationSpecs extends CatalogIntSp
                 [projectId: proj1.projectId, skillId: skill2.skillId],
         ])
         String user = getRandomUsers(1)[0]
+        participateInProject(proj2.projectId, [user])
 
         skillsService.addSkill([projectId: proj1.projectId, skillId: skill2.skillId], user)
         Thread.sleep(100)
@@ -113,6 +114,7 @@ class ApplyEventsThatWereReportedDuringTheFinalizationSpecs extends CatalogIntSp
                 [projectId: proj1.projectId, skillId: skill2.skillId],
         ])
         String user = getRandomUsers(1)[0]
+        participateInProject(proj2.projectId, [user])
 
         skillsService.addSkill([projectId: proj1.projectId, skillId: skill2.skillId], user)
         Thread.sleep(100)

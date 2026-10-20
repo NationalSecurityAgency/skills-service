@@ -307,6 +307,7 @@ interface SkillEventsSupportRepo extends CrudRepository<SkillDef, Long> {
     List<TinyProjectDef> getTinyProjectDefForUserId(String userId)
 
 
+    @Nullable
     @Query('''select max(ups.performedOn)
     from UserPerformedSkill ups
       where
@@ -318,6 +319,12 @@ interface SkillEventsSupportRepo extends CrudRepository<SkillDef, Long> {
                     child.type = 'Skill' and parent.projectId = ?2
             )''')
     Date getUserPerformedSkillLatestDate(String userId, String projectId, Integer parentSkillId, SkillRelDef.RelationshipType type)
+
+    @Nullable
+    @Query('''select max(a.achievedOn) from UserAchievement a, SkillRelDef rel
+        where rel.parent.id = ?3 and rel.child.id = a.skillRefId and rel.type = ?4
+          and a.userId = ?1 and a.projectId = ?2 and a.level is null''')
+    Date getLatestChildAchievementDate(String userId, String projectId, Integer parentSkillId, SkillRelDef.RelationshipType type)
 
     @Query('''select max(ups.performedOn)
     from UserPerformedSkill ups

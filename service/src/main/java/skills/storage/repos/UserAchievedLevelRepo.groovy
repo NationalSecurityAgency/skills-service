@@ -469,13 +469,19 @@ select badgeDef.name as name,
     @Query(value = '''INSERT INTO user_achievement(user_id, project_id, skill_id, skill_ref_id, points_when_achieved, notified)
             SELECT achievementsByUserId.user_id, :projectId, :groupSkillId, :groupSkillRefId, -1, :notified
             FROM (
-                SELECT user_id, count(id) achievementCount
-                FROM user_achievement
+                SELECT ua.user_id, count(ua.id) achievementCount
+                FROM user_achievement ua
                 WHERE
                       skill_id IN (select sd.skill_id
                                     from skill_relationship_definition srd, skill_definition sd
                                     where srd.parent_ref_id = :groupSkillRefId and sd.id = srd.child_ref_id and srd.type='SkillsGroupRequirement') and
                       project_id = :projectId
+                  and (not exists(select 1 from skill_relationship_definition r join skill_definition imported on imported.id = r.child_ref_id
+                        where r.parent_ref_id = :groupSkillRefId and imported.copied_from_project_id <> imported.project_id)
+                    or ((exists(select 1 from user_performed_skill e where e.project_id = :projectId and e.user_id = ua.user_id)
+                      or exists(select 1 from project_participation p where p.project_id = :projectId and p.user_id = ua.user_id))
+                      and (not exists(select 1 from settings s where s.project_id = :projectId and s.setting = 'user_community' and s.value = 'true')
+                        or exists(select 1 from user_tags t where t.user_id = ua.user_id and t.key = :communityKey and t.value = :communityValue))))
                 GROUP BY user_id
                 ) achievementsByUserId
             WHERE
@@ -488,7 +494,9 @@ select badgeDef.name as name,
                                          @Param('groupSkillId') String groupSkillId,
                                          @Param('groupSkillRefId') Integer groupSkillRefId,
                                          @Param('numSkillsRequired') int numSkillsRequired,
-                                         @Param('notified') String notified)
+                                         @Param('notified') String notified,
+                                         @Param('communityKey') String communityKey,
+                                         @Param('communityValue') String communityValue)
 
     @Query(value = '''INSERT INTO user_achievement(user_id, project_id, skill_id, skill_ref_id, points_when_achieved, notified)
             SELECT achievementsByUserId.user_id, :projectId, :groupSkillId, :groupSkillRefId, -1, :notified
@@ -520,6 +528,7 @@ select badgeDef.name as name,
     @Query(value = '''
         WITH skills as (
             select case when s.copied_from_skill_ref is not null then s.copied_from_skill_ref else s.id end as id,
+                s.id as destination_id,
                 s.point_increment as point_increment
             from skill_definition s
             where s.project_id = :projectId
@@ -533,7 +542,11 @@ select badgeDef.name as name,
                         ups.created,
                         SUM(skills.point_increment) over (partition by user_id order by ups.performed_on, ups.created) as runningSum
                  FROM user_performed_skill ups, skills
-                 WHERE skills.id = ups.skill_ref_id
+                  WHERE skills.id = ups.skill_ref_id
+                    and exists(select 1 from user_points credited where credited.skill_ref_id = skills.destination_id and credited.user_id = ups.user_id)
+                    and (exists(select 1 from user_performed_skill e where e.project_id = :projectId and e.user_id = ups.user_id)
+                      or exists(select 1 from project_participation p where p.project_id = :projectId and p.user_id = ups.user_id))
+                    and exists(select 1 from user_points p where p.project_id = :projectId and p.user_id = ups.user_id and p.skill_id is null and p.points >= :fromPoints)
                    and not exists (select 1 from user_achievement ua where ua.user_id = ups.user_id and ua.project_id = :projectId and ua.skill_ref_id is null and ua.level = :level)
              ) as t
         where t.runningSum >= :fromPoints
@@ -547,6 +560,7 @@ select badgeDef.name as name,
     @Query(value = '''
         WITH skills as (
             select case when s.copied_from_skill_ref is not null then s.copied_from_skill_ref else s.id end as id,
+                s.id as destination_id,
                 s.point_increment as point_increment
             from skill_definition s
             where s.project_id = :projectId
@@ -560,7 +574,9 @@ select badgeDef.name as name,
                         ups.created,
                         SUM(skills.point_increment) over (partition by user_id order by ups.performed_on, ups.created) as runningSum
                  FROM user_performed_skill ups, skills
-                 WHERE skills.id = ups.skill_ref_id and ups.user_id = :userId
+                  WHERE skills.id = ups.skill_ref_id and ups.user_id = :userId
+                    and exists(select 1 from user_points credited where credited.skill_ref_id = skills.destination_id and credited.user_id = ups.user_id)
+                    and exists(select 1 from user_points p where p.project_id = :projectId and p.user_id = ups.user_id and p.skill_id is null and p.points >= :fromPoints)
                    and not exists (select 1 from user_achievement ua where ua.user_id = ups.user_id and ua.project_id = :projectId and ua.skill_ref_id is null and ua.level = :level)
              ) as t
         where t.runningSum >= :fromPoints
@@ -576,6 +592,7 @@ select badgeDef.name as name,
     @Query(value = '''
         WITH skills as (
           select case when child.copied_from_skill_ref is not null then child.copied_from_skill_ref else child.id end as id,
+                 child.id as destination_id,
                  child.point_increment as point_increment
                     from skill_relationship_definition rel,
                          skill_definition child
@@ -592,7 +609,11 @@ select badgeDef.name as name,
                         ups.created,
                         SUM(skills.point_increment) over (partition by user_id order by ups.performed_on, ups.created) as runningSum
                  FROM user_performed_skill ups, skills
-                 WHERE skills.id = ups.skill_ref_id
+                  WHERE skills.id = ups.skill_ref_id
+                    and exists(select 1 from user_points credited where credited.skill_ref_id = skills.destination_id and credited.user_id = ups.user_id)
+                    and (exists(select 1 from user_performed_skill e where e.project_id = :projectId and e.user_id = ups.user_id)
+                      or exists(select 1 from project_participation p where p.project_id = :projectId and p.user_id = ups.user_id))
+                    and exists(select 1 from user_points p where p.project_id = :projectId and p.user_id = ups.user_id and p.skill_ref_id = :subjectRefId and p.points >= :fromPoints)
                    and not exists (select 1 from user_achievement ua where ua.user_id = ups.user_id and ua.project_id = :projectId and ua.skill_ref_id = :subjectRefId and ua.level = :level)
              ) as t
         where t.runningSum >= :fromPoints
@@ -608,6 +629,7 @@ select badgeDef.name as name,
     @Query(value = '''
         WITH skills as (
           select case when child.copied_from_skill_ref is not null then child.copied_from_skill_ref else child.id end as id,
+                 child.id as destination_id,
                  child.point_increment as point_increment
                     from skill_relationship_definition rel,
                          skill_definition child
@@ -624,7 +646,9 @@ select badgeDef.name as name,
                         ups.created,
                         SUM(skills.point_increment) over (partition by user_id order by ups.performed_on, ups.created) as runningSum
                  FROM user_performed_skill ups, skills
-                 WHERE skills.id = ups.skill_ref_id and ups.user_id = :userId
+                  WHERE skills.id = ups.skill_ref_id and ups.user_id = :userId
+                    and exists(select 1 from user_points credited where credited.skill_ref_id = skills.destination_id and credited.user_id = ups.user_id)
+                    and exists(select 1 from user_points p where p.project_id = :projectId and p.user_id = ups.user_id and p.skill_ref_id = :subjectRefId and p.points >= :fromPoints)
                    and not exists (select 1 from user_achievement ua where ua.user_id = ups.user_id and ua.project_id = :projectId and ua.skill_ref_id = :subjectRefId and ua.level = :level)
              ) as t
         where t.runningSum >= :fromPoints
@@ -1018,8 +1042,12 @@ select count(distinct ua) from UserAchievement ua where ua.projectId = :projectI
             SELECT ua.user_id, toDef.project_id, toDef.skill_id, toDef.id, ua.points_when_achieved, ua.achieved_on
             FROM user_achievement ua,
                  skill_definition toDef
-            WHERE toDef.copied_from_skill_ref = ua.skill_ref_id
+            WHERE toDef.project_id = :toProjectId
+              and toDef.copied_from_skill_ref = ua.skill_ref_id
               and ua.skill_ref_id in (:fromSkillRefIds)
+              and (toDef.project_id = ua.project_id
+                or exists(select 1 from user_performed_skill localEvent where localEvent.project_id = toDef.project_id and localEvent.user_id = ua.user_id)
+                or exists(select 1 from project_participation participant where participant.project_id = toDef.project_id and participant.user_id = ua.user_id))
               and (not exists(
                     select 1
                     from settings s
@@ -1039,14 +1067,15 @@ select count(distinct ua) from UserAchievement ua where ua.projectId = :projectI
                       and toDef.skill_id = innerTable.skill_id
                 )
             ''', nativeQuery = true)
-    void copySkillAchievementsToTheImportedProjects(@Param('fromSkillRefIds') List<Integer> fromSkillRefIds, @Param('userCommunityUserTagKey') String userCommunityUserTagKey, @Param('userCommunityUserTagValue') String userCommunityUserTagValue)
+    void copySkillAchievementsToTheImportedProjects(@Param('toProjectId') String toProjectId, @Param('fromSkillRefIds') List<Integer> fromSkillRefIds, @Param('userCommunityUserTagKey') String userCommunityUserTagKey, @Param('userCommunityUserTagValue') String userCommunityUserTagValue)
 
     @Modifying
     @Query(value = '''INSERT INTO user_achievement(user_id, project_id, skill_id, skill_ref_id, points_when_achieved, achieved_on)
             SELECT ua.user_id, toDef.project_id, toDef.skill_id, toDef.id, ua.points_when_achieved, ua.achieved_on
             FROM user_achievement ua,
                  skill_definition toDef
-            WHERE toDef.copied_from_skill_ref = ua.skill_ref_id
+            WHERE toDef.project_id = :toProjectId and toDef.enabled = 'true'
+              and toDef.copied_from_skill_ref = ua.skill_ref_id
               and ua.skill_ref_id in (:fromSkillRefIds)
               and ua.user_id = :userId
               and not exists(
@@ -1057,11 +1086,30 @@ select count(distinct ua) from UserAchievement ua where ua.projectId = :projectI
                       and toDef.skill_id = innerTable.skill_id
                 )
             ''', nativeQuery = true)
-    void copyForSingleUserSkillAchievementsToTheImportedProjects(@Param('userId') userId, @Param('fromSkillRefIds') List<Integer> fromSkillRefIds)
+    void copyForSingleUserSkillAchievementsToTheImportedProjects(@Param('userId') String userId, @Param('toProjectId') String toProjectId, @Param('fromSkillRefIds') List<Integer> fromSkillRefIds)
 
     @Modifying
     @Query('''delete from UserAchievement ua where not exists (select 1 from UserPoints up where up.userId = ua.userId and up.projectId = ua.projectId) and ua.projectId = :projectId''')
     void deleteAchievementsWithNoPoints(@Param("projectId") String projectId)
+
+    // The normal event-history calculation runs first. Imported points can exist without
+    // performed rows; use committed aggregate credit/audit time for otherwise missing levels.
+    @Modifying
+    @Query(value = '''insert into user_achievement(user_id, project_id, skill_id, skill_ref_id, level,
+                    points_when_achieved, achieved_on, notified)
+        select p.user_id, p.project_id, p.skill_id, cast(:skillRefId as integer), :level,
+               p.points, p.updated, 'false'
+        from user_points p where p.project_id = :projectId
+          and p.skill_id is not distinct from cast(:skillId as varchar)
+          and (cast(:userId as varchar) is null or p.user_id = :userId)
+          and p.points >= :fromPoints
+          and (exists(select 1 from user_performed_skill e where e.project_id = p.project_id and e.user_id = p.user_id)
+            or exists(select 1 from project_participation member where member.project_id = p.project_id and member.user_id = p.user_id))
+          and not exists(select 1 from user_achievement a where a.project_id = p.project_id and a.user_id = p.user_id
+            and a.skill_id is not distinct from p.skill_id and a.level = :level)''', nativeQuery = true)
+    int addMissingCatalogLevel(@Param('projectId') String projectId, @Param('skillId') @Nullable String skillId,
+                               @Param('skillRefId') @Nullable Integer skillRefId, @Param('userId') @Nullable String userId,
+                               @Param('level') Integer level, @Param('fromPoints') Integer fromPoints)
 
 
 

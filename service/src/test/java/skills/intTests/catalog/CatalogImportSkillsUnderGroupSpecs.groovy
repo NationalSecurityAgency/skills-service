@@ -36,6 +36,7 @@ class CatalogImportSkillsUnderGroupSpecs extends CatalogIntSpec {
         skillsService.createProjectAndSubjectAndSkills(p2, p2subj1, [p2skillsGroup])
 
         String user = getRandomUsers(1)[0]
+        participateInProject(p2.projectId, [user])
         when:
         skillsService.addSkill(p1skills[0], user)
         skillsService.addSkill(p1skills[1], user)
@@ -174,6 +175,8 @@ class CatalogImportSkillsUnderGroupSpecs extends CatalogIntSpec {
         String user = users[0]
         String user2 = users[1]
         String user3 = users[2]
+        participateInProject(p2.projectId, [user2])
+        participateInProject(p3.projectId, [user, user2])
         when:
         // user 1
         skillsService.addSkill(p1skills[0], user)

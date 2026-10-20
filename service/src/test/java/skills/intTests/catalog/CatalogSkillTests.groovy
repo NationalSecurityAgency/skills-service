@@ -767,6 +767,7 @@ class CatalogSkillTests extends CatalogIntSpec {
 
         when:
         def user = getRandomUsers(1)[0]
+        participateInProject(project2.projectId, [user])
         def res = skillsService.addSkill([projectId: project1.projectId, skillId: skill.skillId], user)
         assert res.body.explanation == "Skill was submitted for approval"
 
@@ -1069,6 +1070,8 @@ class CatalogSkillTests extends CatalogIntSpec {
         when:
 
         def user = getRandomUsers(1)[0]
+        participateInProject(project2.projectId, [user])
+        participateInProject(project3.projectId, [user])
         Date skillDate = new Date()
         def res = skillsService.addSkill([projectId: project1.projectId, skillId: skill.skillId], user, skillDate)
         waitForAsyncTasksCompletion.waitForAllScheduleTasks()
@@ -1127,6 +1130,8 @@ class CatalogSkillTests extends CatalogIntSpec {
 
         when:
         def user = getRandomUsers(1)[0]
+        participateInProject(project2.projectId, [user])
+        participateInProject(project3.projectId, [user])
         def timestamp = new Date()
         def res = skillsService.addSkill([projectId: project2.projectId, skillId: skill.skillId], user, timestamp)
         waitForAsyncTasksCompletion.waitForAllScheduleTasks()
@@ -2330,6 +2335,7 @@ class CatalogSkillTests extends CatalogIntSpec {
         when:
         def user = getRandomUsers(1)[0]
 
+        participateInProject(project3.projectId, [user])
         skillsService.addSkill([projectId: project2.projectId, skillId: p2skill1.skillId], user)
         skillsService.addSkill([projectId: project1.projectId, skillId: skill.skillId], user)
 
@@ -2831,6 +2837,7 @@ class CatalogSkillTests extends CatalogIntSpec {
 
         when:
         Date date = new Date()
+        participateInProject(project2.projectId, [user])
         skillsService.addSkill([projectId: project1.projectId, skillId: skill.skillId], user, date)
         waitForAsyncTasksCompletion.waitForAllScheduleTasks()
         def subjectUsers = skillsService.getSubjectUsers(project2.projectId, p2subj1.subjectId)
@@ -2840,7 +2847,7 @@ class CatalogSkillTests extends CatalogIntSpec {
         subjectUsers.data[0].lastUpdated == date.toInstant().toString()
     }
 
-    def "project users should take into account users of imported skills"() {
+    def "project users include visiting participants with imported skill credit"() {
         def project1 = createProject(1)
         def project2 = createProject(2)
 
@@ -2863,6 +2870,7 @@ class CatalogSkillTests extends CatalogIntSpec {
 
         def users = getRandomUsers(6)
         def importUsers = users.subList(0, 5)
+        participateInProject(project2.projectId, importUsers)
         importUsers.eachWithIndex { user, index ->
             def skillId = ''
             if (index % 2 == 0) {
