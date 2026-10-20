@@ -66,11 +66,17 @@ const isLoading = computed(() => {
 const loadAllSkills = () => {
   loadingAllSkills.value = true;
   const getProjectSkillsAndBadges = SkillsService.getProjectSkillsAndBadgesWithImportedSkills(projectId);
-  const getSharedSkills = SkillsShareService.getSharedWithmeSkills(projectId);
+  const params = {
+    limit: 500,
+    ascending: false,
+    page: 1,
+    orderBy: 'skill.skillId',
+  };
+  const getSharedSkills = SkillsShareService.getSharedWithmeSkills(projectId, params);
 
   Promise.all([getProjectSkillsAndBadges, getSharedSkills]).then((results) => {
     const mainSkills = results[0];
-    const sharedSkills = results[1];
+    const sharedSkills = results[1].data;
     if (sharedSkills && sharedSkills.length > 0) {
       sharedSkills.forEach((skill) => {
         const newSkill = {

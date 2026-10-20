@@ -15,9 +15,12 @@
  */
 package skills.storage.repos
 
+import org.springframework.data.domain.Page
+import org.springframework.data.domain.PageRequest
 import org.springframework.data.jpa.repository.Query
 import org.springframework.data.repository.CrudRepository
 import org.springframework.lang.Nullable
+import skills.controller.result.model.UserQuizAnswer
 import skills.storage.model.ProjDef
 import skills.storage.model.SkillDef
 import skills.storage.model.SkillShareDef
@@ -27,13 +30,13 @@ interface SkillShareDefRepo extends CrudRepository<SkillShareDef, Long> {
 
     @Query('''select share from SkillShareDef share, SkillDef skill
         where share.skill = skill and skill.projectId=?1''')
-    List<SkillShareDef> getSkillShareDefsWithOtherProjectsByProjectId(String projectId)
+    Page<SkillShareDef> getSkillShareDefsWithOtherProjectsByProjectId(String projectId, PageRequest pageRequest)
 
     @Query('''select skill.id as id, skill.skillId as skillId, skill.name as skillName, proj.projectId as projectId, proj.name as projectName
         from SkillShareDef share, SkillDef skill, ProjDef proj
         where share.skill = skill and skill.projectId=proj.projectId 
             and (share.sharedToProject=?1 or share.sharedToProject is null) and proj <> ?1''')
-    List<SkillSharedMeta> getSkillDefsSharedFromOtherProjectsByProjectId(ProjDef sharedToProject)
+    Page<SkillSharedMeta> getSkillDefsSharedFromOtherProjectsByProjectId(ProjDef sharedToProject, PageRequest pageRequest)
 
     static interface SkillSharedMeta {
         Integer getId()

@@ -27,6 +27,7 @@ import SkillsSelector from '@/components/skills/SkillsSelector.vue'
 import ProjectSelector from '@/components/skills/crossProjects/ProjectSelector.vue'
 import SharedSkillsTable from '@/components/skills/crossProjects/SharedSkillsTable.vue'
 import InputSanitizer from "@/components/utils/InputSanitizer.js";
+import {useStorage} from "@vueuse/core";
 
 const route = useRoute()
 const projectId = route.params.projectId
@@ -48,6 +49,12 @@ const sharedSkills = ref([])
 const selectedProject = ref(null)
 const errorMessage = ref('')
 const shareWithAllProjects = ref(false)
+const possiblePageSizes = [5, 10, 15, 20, 50];
+const pageSize = useStorage('sharedSkillsTable-pageSize', 5)
+const totalRecords = ref(0)
+const currentPage = ref(1);
+const sortField = ref('skill.skillId')
+const sortOrder = ref(0)
 
 const shareButtonEnabled = computed(() => {
   return (selectedProject.value || shareWithAllProjects.value) && selectedSkill.value && !loading.value.sharedSkills
@@ -80,9 +87,18 @@ const loadAllSkills = () => {
 
 const loadSharedSkills = () => {
   loading.value.sharedSkills = true
-  return SkillsShareService.getSharedSkills(projectId)
+
+  const params = {
+    limit: pageSize.value,
+    ascending: sortOrder.value === 1,
+    page: currentPage.value,
+    orderBy: sortField.value,
+  };
+
+  return SkillsShareService.getSharedSkills(projectId, params)
     .then((data) => {
-      sharedSkills.value = data
+      sharedSkills.value = data.data;
+      totalRecords.value = data.totalCount;
       loading.value.sharedSkillsInit = false
       loading.value.sharedSkills = false
     })
@@ -156,6 +172,18 @@ const onShareWithAllProjects = (checked) => {
     selectedProject.value = null
   }
 }
+
+const pageChanged = (pagingInfo) => {
+  currentPage.value = pagingInfo.page + 1;
+  pageSize.value = pagingInfo.rows;
+  loadSharedSkills()
+}
+
+const sortChanged = (sortingInfo) => {
+  sortField.value = sortingInfo.sortField
+  sortOrder.value = sortingInfo.sortOrder
+  loadSharedSkills()
+}
 </script>
 
 <template>
@@ -216,8 +244,8 @@ const onShareWithAllProjects = (checked) => {
         </Message>
 
         <div v-if="sharedSkills && sharedSkills.length > 0" class="my-6">
-          <shared-skills-table :shared-skills="sharedSkills"
-                               v-on:skill-removed="deleteSharedSkill"></shared-skills-table>
+          <shared-skills-table :shared-skills="sharedSkills" v-on:skill-removed="deleteSharedSkill" :page-size="pageSize" @sort-changed="sortChanged"
+                               :possible-page-sizes="possiblePageSizes" :total-records="totalRecords" @page-changed="pageChanged"></shared-skills-table>
         </div>
         <div v-else>
           <no-content2 title="Not Selected Yet..." icon="fas fa-share-alt" class="p-8"
