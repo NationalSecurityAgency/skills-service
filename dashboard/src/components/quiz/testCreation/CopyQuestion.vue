@@ -15,13 +15,11 @@ limitations under the License.
 */
 <script setup>
 import SkillsDialog from "@/components/utils/inputForm/SkillsDialog.vue";
-import SkillsDropDown from "@/components/utils/inputForm/SkillsDropDown.vue";
 import {ref, onMounted, computed} from "vue";
 import QuizService from "@/components/quiz/QuizService.js";
-import {object, string} from "yup";
-import SkillsInputFormDialog from "@/components/utils/inputForm/SkillsInputFormDialog.vue";
 import SkillsSpinner from "@/components/utils/SkillsSpinner.vue";
 import InputSanitizer from "@/components/utils/InputSanitizer.js";
+import {usePluralize} from "@/components/utils/misc/UsePluralize.js";
 
 const emit = defineEmits(['copy-modal-closed'])
 const model = defineModel()
@@ -29,6 +27,8 @@ const props = defineProps({
   questionDef: Object,
   questionsToSave: Object,
 })
+const pluralize = usePluralize();
+
 const quizDefs = ref([]);
 const loadingComponent = ref(false)
 const copyInProgress = ref(false);
@@ -118,6 +118,11 @@ const canCopy = computed(() => {
   return canCopyQuestion.value && !loadError.value && !validatingQuiz.value && !copyInProgress.value && selectedQuiz.value
 })
 const showOkButton = computed(() => !copied.value)
+
+const currentQuizName = computed(() => {
+  const current = quizDefs.value.find((it) => it.id === selectedQuiz.value )
+  return current.label;
+})
 </script>
 
 <template>
@@ -138,13 +143,14 @@ const showOkButton = computed(() => !copied.value)
         :cancel-button-severity="!showOkButton ? 'success' : 'secondary'"
         :cancel-button-icon="!showOkButton ? 'fas fa-check' : 'far fa-times-circle'"
         header="Copy Questions"
+        :submitting="copyInProgress"
         :loading="loadingComponent"
         @on-ok="copyQuestions"
         @on-cancel="close">
 
     <div class="flex flex-col gap-1 mb-4" v-if="!copyInProgress && !copied">
       <Message severity="info" :closable="false">
-        This will copy {{ numberOfQuestions }} question(s), including attachments, to the selected quiz.
+        This will copy {{ numberOfQuestions }} {{pluralize.plural("question", numberOfQuestions)}} to the selected {{ props.questionDef.quizType }}.
       </Message>
       <div v-if="loadError" class="flex flex-col items-start gap-2">
         <Message severity="error" :closable="false" data-cy="quizDestinationsLoadError">
@@ -175,7 +181,7 @@ const showOkButton = computed(() => !copied.value)
     <skills-spinner :is-loading="copyInProgress" class="mt-6 mb-4"/>
     <div v-if="copied" class="mb-4">
       <Message severity="info" :closable="false">
-        Successfully copied {{ numberOfQuestions }} question(s) to {{ selectedQuiz }}.
+        Successfully copied {{ numberOfQuestions }} {{pluralize.plural("question", numberOfQuestions)}} to {{ currentQuizName }}.
       </Message>
     </div>
   </SkillsDialog>
