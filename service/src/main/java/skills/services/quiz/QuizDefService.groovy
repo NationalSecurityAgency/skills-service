@@ -316,6 +316,9 @@ class QuizDefService {
         }
         QuizDef originalQuizDef = findQuizDef(originalQuizId)
         QuizDef newQuizDef = findQuizDef(newQuizId)
+        if(originalQuizDef.type !== newQuizDef.type) {
+            throw new SkillQuizException("Can not copy questions between quizzes and surveys - [${originalQuizId}], [${newQuizId}]", ErrorCode.BadParam)
+        }
         CopyValidationRes copyValidation = validateCopyQuestionsToAnotherQuiz(originalQuizDef.quizId, newQuizDef.quizId)
         if (!copyValidation.isAllowed) {
             throw new SkillQuizException(copyValidation.validationErrors.join(' '), newQuizDef.quizId, ErrorCode.AccessDenied)
@@ -323,7 +326,7 @@ class QuizDefService {
 
         List<QuizQuestionDef> originalQuestions
         if(questionIdsToCopy != null) {
-            originalQuestions = quizQuestionRepo.findAllByQuizIdIgnoreCaseAndIds(originalQuizId, questionIdsToCopy)
+            originalQuestions = quizQuestionRepo.findAllByQuizIdAndIds(originalQuizId, questionIdsToCopy)
             Set<Integer> foundQuestionIds = originalQuestions.collect { it.id }.toSet()
             List<Integer> missingQuestionIds = questionIdsToCopy.findAll { !foundQuestionIds.contains(it) }
             QuizValidator.isTrue(missingQuestionIds.isEmpty(), "Question ids ${missingQuestionIds} do not belong to quiz [${originalQuizDef.quizId}]", originalQuizDef.quizId)
@@ -1328,6 +1331,7 @@ class QuizDefService {
         if(userCommunityService.isUserCommunityOnlyQuiz(fromQuiz) && !userCommunityService.isUserCommunityOnlyQuiz(toQuiz)) {
             String fromCommunity = userCommunityService.getQuizUserCommunity(fromQuiz)
             String toCommunity = userCommunityService.getQuizUserCommunity(toQuiz)
+
             String errorMessage = "Can not copy questions from ${fromCommunity} quizzes to ${toCommunity} quizzes."
             return new CopyValidationRes(isAllowed: false, validationErrors: [errorMessage])
         }

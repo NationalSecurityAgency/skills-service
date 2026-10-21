@@ -2152,6 +2152,10 @@ class SkillsService {
          wsHelper.adminPost(url, props)
     }
 
+    def copyQuizQuestion(String fromQuizId, String toQuizId, List<Integer> questions) {
+        return wsHelper.adminPost("/quiz-definitions/${fromQuizId}/questions/copy/${toQuizId}".toString(), questions)
+    }
+
     def changeQuizQuestionDisplayOrder(String quizId, Integer questionId, Integer newDisplayOrderIndex){
         assert quizId
         assert questionId
