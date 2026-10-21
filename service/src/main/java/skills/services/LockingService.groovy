@@ -100,12 +100,12 @@ class LockingService {
         return res
     }
 
-    SkillsDBLock lockForUpdatingCatalogSkills() {
-        long started = logLockRequest('lockForUpdatingCatalogSkills', 'catalog_skill_update_lock')
-        SkillsDBLock res = skillsDBLockRepo.findByLock('catalog_skill_update_lock')
-        assert res
-        logLockResult('lockForUpdatingCatalogSkills', 'catalog_skill_update_lock', started, res)
-        return res
+    SkillsDBLock lockForSkillsCatalogFinalizationInit(String projectId) {
+        String key = "skillsCatalogFinalization" + projectId?.toLowerCase()
+        long started = logLockRequest('lockForSkillsCatalogFinalizationInit', key)
+        SkillsDBLock lock = postgresQlNativeRepo.insertLockOrSelectExisting(key)
+        logLockResult('lockForSkillsCatalogFinalizationInit', key, started, lock)
+        return lock
     }
 
     @Profile
