@@ -33,6 +33,7 @@ import skills.storage.model.ProjectParticipation.BackfillStatus
 import skills.storage.model.SkillDef
 import skills.storage.model.UserAchievement
 import skills.storage.repos.ProjectParticipationRepo
+import skills.storage.repos.SettingRepo
 import skills.storage.repos.SkillDefRepo
 import skills.storage.repos.UserAchievedLevelRepo
 import skills.storage.repos.UserPerformedSkillRepo
@@ -43,6 +44,7 @@ import skills.tasks.TaskSchedulerService
 @Slf4j
 class CatalogParticipantBackfillService {
     @Autowired ProjectParticipationRepo participationRepo
+    @Autowired SettingRepo settingRepo
     @Autowired SkillDefRepo skillDefRepo
     @Autowired UserPerformedSkillRepo performedSkillRepo
     @Autowired UserPointsRepo userPointsRepo
@@ -71,6 +73,7 @@ class CatalogParticipantBackfillService {
     @Transactional
     BackfillStatus qualify(String projectId, String userId, boolean visit = false) {
         lockingService.lockForSkillReporting(userId, projectId)
+        // Order eligibility/status commits with finalization start: bulk-visible first, or PENDING for catch-up.
         lockingService.lockForSkillsCatalogFinalizationInit(projectId)
         ProjectParticipation participant = participationRepo.findByProjectIdAndUserId(projectId, userId)
         if (participant && participant.backfillStatus != BackfillStatus.NOT_REQUESTED) {
@@ -81,8 +84,7 @@ class CatalogParticipantBackfillService {
             log.debug('Skipping catalog qualification without participation or local events: projectId=[{}], userId=[{}]', projectId, userId)
             return null
         }
-        // Retain the foundation's reporting-before-activation lock convention. This
-        // does not define the Step 3 start/completion or copy/source-event boundary.
+        // Serialize pending claims with activation and its catch-up handoff.
         lockingService.lockCatalogActivation(projectId)
         boolean finalizing = hasApplicableFinalization(projectId)
         boolean imports = skillDefRepo.existsEnabledCatalogImport(projectId)
@@ -159,20 +161,43 @@ class CatalogParticipantBackfillService {
             log.debug('Blocking catalog participant backfill until finalization completes: projectId=[{}], userId=[{}]', projectId, userId)
             throw new IllegalStateException("Catalog finalization is not complete for [${projectId}]")
         }
+        // Keep the IDs evaluated by this attempt to detect a newer batch before committing completion.
+        List<SkillDef> imports = skillDefRepo.findAllByProjectIdAndTypeAndEnabledAndCopiedFromIsNotNull(
+                projectId, SkillDef.ContainerType.Skill, 'true')
+        Set<Integer> processedImportIds = imports.collect { SkillDef skill -> skill.id }.toSet()
         if (!userCommunityService.isUserCommunityOnlyProject(projectId) || userCommunityService.isUserCommunityMember(userId)) {
-            copyCredit(projectId, userId)
+            copyCredit(projectId, userId, imports)
         } else {
             log.debug('Excluding catalog credit for non-community member: projectId=[{}], userId=[{}]', projectId, userId)
         }
+        validateCompletion(projectId, processedImportIds)
         participant.backfillStatus = BackfillStatus.COMPLETED
         participationRepo.save(participant)
         log.debug('Marked catalog participant COMPLETED in current transaction: projectId=[{}], userId=[{}]', projectId, userId)
     }
 
-    private void copyCredit(String projectId, String userId) {
+    private void validateCompletion(String projectId, Set<Integer> processedImportIds) {
+        // Hold through commit so a new finalization cannot start after this completion check.
+        lockingService.lockForSkillsCatalogFinalizationInit(projectId)
+        // The scalar state read bypasses cached Setting values; query membership supplies current import IDs.
+        String state = settingRepo.findProjectSettingValue(projectId, SkillCatalogFinalizationService.PROJ_FINALIZE_STATE_PROP)
+        boolean finalizing = skillDefRepo.existsCatalogImport(projectId) &&
+                state in [FinalizeState.RUNNING.name(), FinalizeState.FAILED.name()]
+        // A run may already be COMPLETED; changed IDs still invalidate the older enabled-only calculation.
+        Set<Integer> enabledImportIds = skillDefRepo.findAllByProjectIdAndTypeAndEnabledAndCopiedFromIsNotNull(
+                projectId, SkillDef.ContainerType.Skill, 'true').collect { SkillDef skill -> skill.id }.toSet()
+        if (finalizing || processedImportIds != enabledImportIds) {
+            // Roll back credit/awards and retain PENDING for durable retry.
+            throw new IllegalStateException("Catalog finalization changed during backfill for [${projectId}]")
+        }
+    }
+
+    private void copyCredit(String projectId, String userId, List<SkillDef> imports = null) {
         long started = System.nanoTime()
-        List<SkillDef> imports = skillDefRepo.findAllByProjectIdAndTypeAndEnabledAndCopiedFromIsNotNull(
-                projectId, SkillDef.ContainerType.Skill, 'true')
+        if (imports == null) {
+            imports = skillDefRepo.findAllByProjectIdAndTypeAndEnabledAndCopiedFromIsNotNull(
+                    projectId, SkillDef.ContainerType.Skill, 'true')
+        }
         if (!imports) {
             log.debug('Skipping catalog credit copy without enabled imports: projectId=[{}], userId=[{}]', projectId, userId)
             return

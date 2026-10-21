@@ -28,6 +28,13 @@ interface SettingRepo extends CrudRepository<Setting, Integer> {
     @Nullable
     Setting findByTypeAndUserRefIdAndProjectIdIgnoreCaseAndSettingGroupAndSetting(Setting.SettingType type, @Nullable Integer userRefId, @Nullable String projectId, @Nullable String settingGroup, String setting)
 
+    // A scalar recheck observes state changes even when a worker has cached the Setting entity.
+    @Nullable
+    @Query('''select s.value from Setting s where lower(s.projectId) = lower(?1)
+        and s.setting = ?2 and s.type = 'Project'
+        and s.userRefId is null and s.settingGroup is null''')
+    String findProjectSettingValue(String projectId, String setting)
+
     @Nullable
     List<Setting> findByTypeAndUserRefIdAndProjectIdAndSettingGroupAndSettingIn(Setting.SettingType type, @Nullable Integer userRefId, @Nullable String projectId, @Nullable String settingGroup, List<String> settings)
 
