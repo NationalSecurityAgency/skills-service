@@ -23,6 +23,7 @@ import org.springframework.transaction.annotation.Transactional
 import skills.controller.exceptions.SkillException
 import skills.controller.request.model.ProjectSettingsRequest
 import skills.controller.result.model.SettingsResult
+import skills.services.LockingService
 import skills.services.RuleSetDefGraphService
 import skills.services.attributes.SkillAttributeService
 import skills.services.events.SkillDate
@@ -81,6 +82,8 @@ class SkillCatalogFinalizationService {
     @Autowired
     SkillAttributeService skillAttributeService
 
+    @Autowired LockingService lockingService
+
     final static String PROJ_FINALIZE_STATE_PROP = "catalog.finalize.state"
     static enum FinalizeState {
         NOT_RUNNING, RUNNING, COMPLETED, FAILED
@@ -89,6 +92,7 @@ class SkillCatalogFinalizationService {
     @Transactional
     @Profile
     void requestFinalizationOfImportedSkills(String projectId) {
+        lockingService.lockForSkillsCatalogFinalizationInit(projectId)
         if (getCurrentState(projectId) == FinalizeState.RUNNING) {
             throw new SkillException("Catalog import finalize is already running for [${projectId}]", projectId)
         }
