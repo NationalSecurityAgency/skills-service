@@ -74,7 +74,7 @@
     "postcss": "8.5.23",
     "prettier": "3.8.3",
     "rollup-plugin-visualizer": "7.0.1",
-    "vite": "8.0.16",
+    "vite": "8.1.6",
     "vitest": "4.1.11",
     "vue-eslint-parser": "10.4.0"
   }
