@@ -71,6 +71,7 @@ class CatalogParticipantBackfillService {
     @Transactional
     BackfillStatus qualify(String projectId, String userId, boolean visit = false) {
         lockingService.lockForSkillReporting(userId, projectId)
+        lockingService.lockForSkillsCatalogFinalizationInit(projectId)
         ProjectParticipation participant = participationRepo.findByProjectIdAndUserId(projectId, userId)
         if (participant && participant.backfillStatus != BackfillStatus.NOT_REQUESTED) {
             log.trace('Retaining catalog participation status: projectId=[{}], userId=[{}], status=[{}]', projectId, userId, participant.backfillStatus)
