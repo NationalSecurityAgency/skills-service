@@ -1,0 +1,755 @@
+/**
+ * Copyright 2026 SkillTree
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package skills.intTests.catalog
+
+import com.github.kagkarlsson.scheduler.task.TaskInstance
+import org.aspectj.lang.ProceedingJoinPoint
+import org.aspectj.lang.annotation.Around
+import org.aspectj.lang.annotation.Aspect
+import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.boot.test.context.TestConfiguration
+import org.springframework.context.annotation.Bean
+import org.springframework.context.annotation.Import
+import org.springframework.core.annotation.Order
+import org.springframework.http.HttpStatus
+import org.springframework.test.annotation.DirtiesContext
+import org.springframework.test.context.TestPropertySource
+import skills.intTests.utils.SkillsClientException
+import skills.intTests.utils.SkillsService
+import skills.intTests.utils.QuizDefFactory
+import skills.storage.model.ProjectParticipation.BackfillStatus
+import skills.storage.model.SkillDef
+import skills.storage.model.UserAchievement
+import skills.storage.repos.ProjectParticipationRepo
+import skills.tasks.data.CatalogParticipantBackfillRequest
+import spock.lang.IgnoreRest
+import spock.util.concurrent.PollingConditions
+
+import javax.sql.DataSource
+import java.sql.Connection
+import java.util.concurrent.Callable
+import java.util.concurrent.CountDownLatch
+import java.util.concurrent.ConcurrentHashMap
+import java.util.concurrent.ExecutorService
+import java.util.concurrent.Executors
+import java.util.concurrent.Future
+import java.util.concurrent.TimeUnit
+import java.util.concurrent.atomic.AtomicBoolean
+import java.util.concurrent.atomic.AtomicInteger
+import java.util.concurrent.atomic.AtomicReference
+
+import static skills.intTests.utils.SkillsFactory.*
+
+/**
+ * Regression cases for catalog participation races, asserting required outcomes before and after fixes.
+ * Test-only advice pauses real calls or injects an interrupted-run/acknowledgment failure; it does
+ * not manufacture credit or replace the production copy, propagation, or scheduler logic.
+ * Final assertions state the required outcome, rather than asserting the known defect.
+ */
+@TestPropertySource(properties = [
+        'db-scheduler.threads=3',
+        'skills.config.taskMaxRetries=2',
+        'skills.config.exponentialBackOffSeconds=1',
+        'skills.config.exponentialBackOffRate=1',
+])
+@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
+@Import(BoundaryConfiguration)
+class CatalogParticipantRaceFailuresIT extends CatalogIntSpec {
+    @Autowired RaceBoundaries boundaries
+    @Autowired ProjectParticipationRepo participationRepo
+    @Autowired DataSource dataSource
+
+    private List<String> users
+    private List<Gate> gates = []
+    private Map<String, String> triggers = [:]
+    private List<Connection> lockConnections = []
+    private ExecutorService callers
+    private final Date historicalDate = new Date(System.currentTimeMillis() - 3 * 86400000L)
+
+    def setup() {
+        boundaries.hooks.clear()
+        users = getRandomUsers(5)
+        callers = Executors.newFixedThreadPool(3)
+    }
+
+    def cleanup() {
+        // Always release barriers so failed race assertions do not strand requests or workers.
+        gates.each { Gate gate -> gate.open() }
+        lockConnections.each { Connection connection ->
+            connection.createStatement().execute('select pg_advisory_unlock_all()')
+            connection.close()
+        }
+        callers.shutdown()
+        assert callers.awaitTermination(30, TimeUnit.SECONDS)
+        triggers.each { String name, String table -> removeTrigger(name, table) }
+        jdbcTemplate.update("update scheduled_tasks set execution_time = now() where task_name in ('catalog-participant-backfill', 'imported-skill-achievement', 'finalize-catalog-imports')")
+        waitForAsyncTasksCompletion.waitForAllScheduleTasks()
+        boundaries.hooks.clear()
+    }
+
+    def "a visit qualified using old import state must receive the concurrently finalized batch"() {
+        Map fixture = fixture()
+        SkillsService learner = createService(users[0])
+        skillsService.addSkill(fixture.next, users[0], historicalDate)
+        importNext(fixture)
+        Gate beforeActivation = gate()
+        intercept('BatchOperationsTransactionalAccessor.completeCatalogFinalization', [fixture.projectId]) { BoundaryInvocation invocation ->
+            beforeActivation.pause()
+            invocation.callRealMethod()
+        }
+        long qualificationLock = 4073101L
+        holdAdvisoryLock(qualificationLock)
+        trigger('race_qualification', 'project_participation', "if NEW.project_id = '${fixture.projectId}' and NEW.user_id = '${users[0]}' then perform pg_advisory_xact_lock(${qualificationLock}); end if; return NEW;")
+
+        when: 'qualification has chosen COMPLETED against the old, empty enabled import'
+        Future<Map> qualification = submit { learner.initializeProjectProgress(fixture.projectId) }
+        awaitAdvisoryWait(qualificationLock)
+        Future<Map> finalizationRequest = submit { skillsService.finalizeSkillsImportFromCatalog(fixture.projectId, false) }
+        // A fixed start boundary waits for qualification. Without that protection, let
+        // bulk processing reach its old pre-activation boundary before releasing the visit.
+        new PollingConditions(timeout: 15).eventually {
+            assert beforeActivation.hasArrived() || jdbcTemplate.queryForObject('''
+                select count(*) from pg_stat_activity finalization
+                where finalization.datname = current_database()
+                  and finalization.wait_event_type = 'Lock'
+                  and lower(finalization.query) like '%f_select_lock_and_insert%'
+                  and exists(select 1 from pg_locks qualification
+                      where qualification.locktype = 'advisory'
+                        and qualification.objid = ? and not qualification.granted
+                        and qualification.pid = any(pg_blocking_pids(finalization.pid)))
+                ''', Integer, qualificationLock) > 0
+        }
+        releaseAdvisoryLock(qualificationLock)
+        Map initialized = qualification.get(20, TimeUnit.SECONDS)
+        Map finalized = finalizationRequest.get(20, TimeUnit.SECONDS)
+        beforeActivation.awaitArrival()
+        beforeActivation.open()
+        waitForAsyncTasksCompletion.waitForAllScheduleTasks()
+        Map summary = learner.getSkillsSummaryForCurrentUser(fixture.projectId)
+
+        then: 'bulk or catch-up must own the new participant without another visit'
+        initialized.backfillStatus == 'COMPLETED'
+        finalized.body.success
+        summary.points == 100
+    }
+
+    def "concurrent finalization requests must admit only one run"() {
+        Map fixture = fixture()
+        importNext(fixture)
+        queueTasks('finalize-catalog-imports')
+        Gate firstRequestBeforeStateWrite = gate()
+        AtomicBoolean pauseFirstAdmission = new AtomicBoolean(true)
+        intercept('SettingsService.saveSetting', [{ Object request ->
+            request.projectId == fixture.projectId && request.setting == 'catalog.finalize.state' && request.value == 'RUNNING'
+        }]) { BoundaryInvocation invocation ->
+            if (pauseFirstAdmission.compareAndSet(true, false)) {
+                firstRequestBeforeStateWrite.pause()
+            }
+            invocation.callRealMethod()
+        }
+        SkillsService otherAdmin = createService(skillsService.userName)
+
+        when:
+        Future<Map> first = submit { requestOutcome { skillsService.finalizeSkillsImportFromCatalog(fixture.projectId, false) } }
+        firstRequestBeforeStateWrite.awaitArrival()
+        Future<Map> second = submit { requestOutcome { otherAdmin.finalizeSkillsImportFromCatalog(fixture.projectId, false) } }
+        // Without serialization, let the second request finish so the regression fails
+        // on the outcome assertions rather than timing out at a lock-wait barrier.
+        new PollingConditions(timeout: 15).eventually {
+            assert second.isDone() || jdbcTemplate.queryForObject(
+                    "select count(*) from pg_stat_activity where datname = current_database() and wait_event_type = 'Lock' and lower(query) like '%f_select_lock_and_insert%'", Integer) > 0
+        }
+        firstRequestBeforeStateWrite.open()
+        List<Map> outcomes = [first.get(25, TimeUnit.SECONDS), second.get(25, TimeUnit.SECONDS)]
+        Map rejected = outcomes.find { Map outcome -> !outcome.success }
+        int admittedTasks = taskCount('finalize-catalog-imports')
+
+        then: 'the losing request is rejected specifically because finalization is already running'
+        outcomes.count { Map outcome -> outcome.success } == 1
+        outcomes.count { Map outcome -> !outcome.success } == 1
+        rejected.status == HttpStatus.BAD_REQUEST
+        rejected.response.body.success == false
+        rejected.response.body.projectId == fixture.projectId
+        rejected.response.body.explanation == "Catalog import finalize is already running for [${fixture.projectId}]"
+        admittedTasks == 1
+    }
+
+    def "bulk aggregate replacement must retain a local award committed while it waits for the row"() {
+        Map fixture = fixture()
+        SkillsService learner = createService(users[0])
+        learner.initializeProjectProgress(fixture.projectId)
+        skillsService.addSkill(fixture.local, users[0], historicalDate)
+        skillsService.addSkill(fixture.next, users[0], historicalDate)
+        importNext(fixture)
+        Gate localAwardBeforeCommit = gate()
+        Gate bulkBeforeAggregates = gate()
+        intercept('CatalogParticipantBackfillService.qualify', [fixture.projectId, users[0]]) { BoundaryInvocation invocation ->
+            localAwardBeforeCommit.pause()
+            invocation.callRealMethod()
+        }
+        intercept('BatchOperationsTransactionalAccessor.handleCatalogPointsAndAchievementsForSubject', []) { BoundaryInvocation invocation ->
+            bulkBeforeAggregates.pause()
+            invocation.callRealMethod()
+        }
+
+        when: 'definition updates finish before the local transaction takes foreign-key row locks'
+        skillsService.finalizeSkillsImportFromCatalog(fixture.projectId, false)
+        bulkBeforeAggregates.awaitArrival()
+        Future<Map> localAward = submit { skillsService.addSkill(fixture.otherLocal, users[0]).body }
+        localAwardBeforeCommit.awaitArrival()
+        // Sum before the local award commits, then verify the bulk UPDATE waits on its aggregate row.
+        bulkBeforeAggregates.open()
+        awaitSqlLockWait('%pointstoupdate%')
+        localAwardBeforeCommit.open()
+        localAward.get(20, TimeUnit.SECONDS)
+        waitForAsyncTasksCompletion.waitForAllScheduleTasks()
+        Map summary = learner.getSkillsSummaryForCurrentUser(fixture.projectId)
+
+        then: 'two native 100-point awards plus the new imported 100 points'
+        summary.subjects[0].points == 300
+        summary.points == 300
+    }
+
+    def "an older enabled-only backfill must not replace totals for the new pre-activation batch"() {
+        Map fixture = fixture()
+        SkillsService learner = createService(users[0])
+        skillsService.addSkill(fixture.source, users[0], historicalDate)
+        waitForAsyncTasksCompletion.waitForAllScheduleTasks()
+        skillsService.addSkill(fixture.next, users[0], historicalDate)
+        importNext(fixture)
+        Gate oldWorkerBeforeAggregates = gate()
+        Gate newRunBeforeActivation = gate()
+        AtomicReference<Integer> firstCopiedPointId = new AtomicReference<>()
+        intercept('BatchOperationsTransactionalAccessor.createSubjectUserPointsForSingleNewUser', [users[0], fixture.projectId, fixture.subjectId]) { BoundaryInvocation invocation ->
+            Integer copiedPointId = userPointsRepo.findByProjectIdAndUserIdAndSkillId(fixture.projectId, users[0], fixture.source.skillId).id
+            firstCopiedPointId.compareAndSet(null, copiedPointId)
+            oldWorkerBeforeAggregates.pause()
+            invocation.callRealMethod()
+        }
+        intercept('BatchOperationsTransactionalAccessor.completeCatalogFinalization', [fixture.projectId]) { BoundaryInvocation invocation ->
+            newRunBeforeActivation.pause()
+            invocation.callRealMethod()
+        }
+
+        when:
+        learner.initializeProjectProgress(fixture.projectId)
+        oldWorkerBeforeAggregates.awaitArrival()
+        skillsService.finalizeSkillsImportFromCatalog(fixture.projectId, false)
+        newRunBeforeActivation.awaitArrival()
+        if (finalizationCompletesBeforeWorker) {
+            newRunBeforeActivation.open()
+            awaitFinalization(fixture.projectId, 'COMPLETED')
+        }
+        oldWorkerBeforeAggregates.open()
+        BackfillStatus statusBeforeActivation = null
+        Integer oldPointsBeforeActivation = null
+        if (!finalizationCompletesBeforeWorker) {
+            // Also allow the broken worker to complete so the regression fails on an
+            // outcome assertion instead of waiting forever for a retry that never occurs.
+            new PollingConditions(timeout: 20).eventually {
+                assert participationRepo.readStatus(fixture.projectId, users[0]) == BackfillStatus.COMPLETED ||
+                        backfillTasks().any { Map task -> task.consecutive_failures > 0 }
+            }
+            statusBeforeActivation = participationRepo.readStatus(fixture.projectId, users[0])
+            oldPointsBeforeActivation = userPointsRepo.findByProjectIdAndUserIdAndSkillId(
+                    fixture.projectId, users[0], fixture.source.skillId)?.points ?: 0
+        }
+        newRunBeforeActivation.open()
+        waitForAsyncTasksCompletion.waitForAllScheduleTasks()
+        Map summary = learner.getSkillsSummaryForCurrentUser(fixture.projectId)
+
+        then: 'both imported skills have 100 earned points'
+        summary.subjects[0].points == 200
+        summary.points == 200
+        participationRepo.readStatus(fixture.projectId, users[0]) == BackfillStatus.COMPLETED
+        // The overtaken attempt must roll back its copied row, including when A has
+        // already completed and only the changed enabled-import set exposes the overlap.
+        userPointsRepo.findByProjectIdAndUserIdAndSkillId(fixture.projectId, users[0], fixture.source.skillId).id != firstCopiedPointId.get()
+        finalizationCompletesBeforeWorker || statusBeforeActivation == BackfillStatus.PENDING
+        finalizationCompletesBeforeWorker || oldPointsBeforeActivation == 0
+
+        where:
+        finalizationCompletesBeforeWorker << [false, true]
+    }
+
+    @IgnoreRest
+    def "a queued source event already copied by #entry backfill must not add its points again"() {
+        Map fixture = fixture()
+        SkillsService learner = createService(users[0])
+        queueTasks('imported-skill-achievement')
+        skillsService.addSkill(fixture.source, users[0], historicalDate)
+
+        when:
+        qualify(fixture, learner, entry)
+        awaitStatus(fixture.projectId, users[0], BackfillStatus.COMPLETED)
+        releaseTasks('imported-skill-achievement')
+        waitForAsyncTasksCompletion.waitForAllScheduleTasks()
+        Map summary = learner.getSkillsSummaryForCurrentUser(fixture.projectId)
+
+        then:
+        summary.points == (entry == 'award' ? 200 : 100)
+
+        where:
+        entry << ['visit', 'award']
+    }
+
+    def "finalization replay must not increment an event already included in bulk copy"() {
+        Map fixture = fixture(false)
+        SkillsService learner = createService(users[0])
+        learner.initializeProjectProgress(fixture.projectId)
+        Gate beforePointsCopy = gate()
+        intercept('BatchOperationsTransactionalAccessor.copySkillUserPointsToTheImportedProjects', [fixture.projectId]) { BoundaryInvocation invocation ->
+            beforePointsCopy.pause()
+            invocation.callRealMethod()
+        }
+
+        when:
+        skillsService.finalizeSkillsImportFromCatalog(fixture.projectId, false)
+        beforePointsCopy.awaitArrival()
+        skillsService.addSkill(fixture.source, users[0], historicalDate)
+        beforePointsCopy.open()
+        waitForAsyncTasksCompletion.waitForAllScheduleTasks()
+        Map summary = learner.getSkillsSummaryForCurrentUser(fixture.projectId)
+
+        then:
+        summary.points == 100
+    }
+
+    def "a source event after activation must not be delivered by both ordinary scheduling and replay"() {
+        Map fixture = fixture(false)
+        SkillsService learner = createService(users[0])
+        learner.initializeProjectProgress(fixture.projectId)
+        Gate committedActivationBeforeReturn = gate()
+        intercept('BatchOperationsTransactionalAccessor.completeCatalogFinalization', [fixture.projectId]) { BoundaryInvocation invocation ->
+            invocation.callRealMethod()
+            committedActivationBeforeReturn.pause()
+            null
+        }
+
+        when: 'activation is committed but the finalization end/replay window has not closed'
+        skillsService.finalizeSkillsImportFromCatalog(fixture.projectId, false)
+        committedActivationBeforeReturn.awaitArrival()
+        skillsService.addSkill(fixture.source, users[0], historicalDate)
+        committedActivationBeforeReturn.open()
+        waitForAsyncTasksCompletion.waitForAllScheduleTasks()
+        Map summary = learner.getSkillsSummaryForCurrentUser(fixture.projectId)
+
+        then:
+        summary.points == 100
+    }
+
+    def "source completion between points and achievement copy must create only one destination skill award"() {
+        Map fixture = fixture(false, 2)
+        SkillsService learner = createService(users[0])
+        learner.initializeProjectProgress(fixture.projectId)
+        skillsService.addSkill(fixture.source, users[0], historicalDate)
+        Gate beforeAchievementCopy = gate()
+        intercept('BatchOperationsTransactionalAccessor.copySkillAchievementsToTheImportedProjects', [fixture.projectId]) { BoundaryInvocation invocation ->
+            beforeAchievementCopy.pause()
+            invocation.callRealMethod()
+        }
+
+        when:
+        skillsService.finalizeSkillsImportFromCatalog(fixture.projectId, false)
+        beforeAchievementCopy.awaitArrival()
+        skillsService.addSkill(fixture.source, users[0], new Date(historicalDate.time + 1000))
+        beforeAchievementCopy.open()
+        waitForAsyncTasksCompletion.waitForAllScheduleTasks()
+        Map summary = learner.getSkillsSummaryForCurrentUser(fixture.projectId)
+        List<UserAchievement> skillAwards = userAchievedRepo.findAllByUserIdAndProjectIdAndSkillId(users[0], fixture.projectId, fixture.source.skillId)
+
+        then:
+        summary.points == 200
+        // The API does not expose duplicate persistence rows for a single skill completion.
+        skillAwards.size() == 1
+    }
+
+    def "retrying a failed bulk run must recover source events from its earlier copy window"() {
+        Map fixture = fixture(false)
+        SkillsService learner = createService(users[0])
+        learner.initializeProjectProgress(fixture.projectId)
+        skillsService.addSkill(fixture.source, users[0], historicalDate)
+        Gate afterCommittedPoints = gate()
+        AtomicBoolean failFirstRun = new AtomicBoolean(true)
+        intercept('BatchOperationsTransactionalAccessor.copySkillAchievementsToTheImportedProjects', [fixture.projectId]) { BoundaryInvocation invocation ->
+            if (failFirstRun.compareAndSet(true, false)) {
+                afterCommittedPoints.pause()
+                throw new IllegalStateException('Injected interruption after the independently committed points copy')
+            }
+            invocation.callRealMethod()
+        }
+
+        when:
+        skillsService.finalizeSkillsImportFromCatalog(fixture.projectId, false)
+        afterCommittedPoints.awaitArrival()
+        skillsService.addSkill(fixture.source, users[0], new Date(historicalDate.time + 1000))
+        afterCommittedPoints.open()
+        waitForAsyncTasksCompletion.waitForAllScheduleTasks()
+        assert skillsService.getSetting(fixture.projectId, 'catalog.finalize.state').value == 'FAILED'
+        skillsService.finalizeSkillsImportFromCatalog(fixture.projectId)
+        Map summary = learner.getSkillsSummaryForCurrentUser(fixture.projectId)
+
+        then:
+        summary.points == 200
+    }
+
+    def "scheduler retry after activation but before replay must recover the original run's uncopied event"() {
+        Map fixture = fixture(false)
+        SkillsService learner = createService(users[0])
+        learner.initializeProjectProgress(fixture.projectId)
+        skillsService.addSkill(fixture.source, users[0], historicalDate)
+        Gate afterCommittedPoints = gate()
+        intercept('BatchOperationsTransactionalAccessor.copySkillAchievementsToTheImportedProjects', [fixture.projectId]) { BoundaryInvocation invocation ->
+            afterCommittedPoints.pause()
+            invocation.callRealMethod()
+        }
+        AtomicBoolean interruptBeforeReplay = new AtomicBoolean(true)
+        intercept('SkillCatalogFinalizationService.applyEventsThatWereReportedDuringTheFinalizationRun', []) { BoundaryInvocation invocation ->
+            if (interruptBeforeReplay.compareAndSet(true, false)) {
+                throw new IllegalStateException('Injected interruption after activation commit, before replay')
+            }
+            invocation.callRealMethod()
+        }
+
+        when:
+        skillsService.finalizeSkillsImportFromCatalog(fixture.projectId, false)
+        afterCommittedPoints.awaitArrival()
+        skillsService.addSkill(fixture.source, users[0], new Date(historicalDate.time + 1000))
+        afterCommittedPoints.open()
+        waitForAsyncTasksCompletion.waitForAllScheduleTasks()
+        Map summary = learner.getSkillsSummaryForCurrentUser(fixture.projectId)
+
+        then:
+        summary.points == 200
+    }
+
+    def "a later finalization must not lose pending catch-up when the old project sweep is awaiting acknowledgment"() {
+        Map fixture = fixture(false)
+        SkillsService firstLearner = createService(users[0])
+        SkillsService lateLearner = createService(users[1])
+        [users[0], users[1]].each { String userId -> skillsService.addSkill(fixture.source, userId, historicalDate) }
+        Gate firstCopy = gate()
+        Gate secondCopy = gate()
+        Gate oldSweepBeforeAcknowledgment = gate()
+        AtomicInteger copies = new AtomicInteger()
+        intercept('BatchOperationsTransactionalAccessor.copySkillUserPointsToTheImportedProjects', [fixture.projectId]) { BoundaryInvocation invocation ->
+            (copies.incrementAndGet() == 1 ? firstCopy : secondCopy).pause()
+            invocation.callRealMethod()
+        }
+        AtomicBoolean stopOldSweep = new AtomicBoolean(true)
+        intercept('CatalogParticipantBackfillExecutor.execute', []) { BoundaryInvocation invocation ->
+            TaskInstance<CatalogParticipantBackfillRequest> task = invocation.getArgument(0)
+            invocation.callRealMethod()
+            if (!task.data.userId && stopOldSweep.compareAndSet(true, false)) {
+                oldSweepBeforeAcknowledgment.pause()
+            }
+            null
+        }
+
+        when:
+        skillsService.finalizeSkillsImportFromCatalog(fixture.projectId, false)
+        firstCopy.awaitArrival()
+        firstLearner.initializeProjectProgress(fixture.projectId)
+        firstCopy.open()
+        oldSweepBeforeAcknowledgment.awaitArrival()
+        skillsService.addSkill(fixture.next, users[1], historicalDate)
+        importNext(fixture)
+        skillsService.finalizeSkillsImportFromCatalog(fixture.projectId, false)
+        secondCopy.awaitArrival()
+        lateLearner.initializeProjectProgress(fixture.projectId)
+        secondCopy.open()
+        awaitFinalization(fixture.projectId, 'COMPLETED')
+        oldSweepBeforeAcknowledgment.open()
+        waitForAsyncTasksCompletion.waitForAllScheduleTasks()
+        Map summary = lateLearner.getSkillsSummaryForCurrentUser(fixture.projectId)
+
+        then: 'the late learner needs both the old and new imported skill'
+        summary.points == 200
+        participationRepo.readStatus(fixture.projectId, users[1]) == BackfillStatus.COMPLETED
+    }
+
+    def "expected waiting during finalization must not exhaust incremental work for a previously enabled import"() {
+        Map fixture = fixture()
+        SkillsService learner = createService(users[0])
+        learner.initializeProjectProgress(fixture.projectId)
+        importNext(fixture)
+        Gate lengthyFinalization = gate()
+        intercept('BatchOperationsTransactionalAccessor.copySkillUserPointsToTheImportedProjects', [fixture.projectId]) { BoundaryInvocation invocation ->
+            lengthyFinalization.pause()
+            invocation.callRealMethod()
+        }
+
+        when:
+        skillsService.finalizeSkillsImportFromCatalog(fixture.projectId, false)
+        lengthyFinalization.awaitArrival()
+        skillsService.addSkill(fixture.source, users[0], historicalDate)
+        awaitTaskCount('imported-skill-achievement', 0)
+        lengthyFinalization.open()
+        waitForAsyncTasksCompletion.waitForAllScheduleTasks()
+        Map summary = learner.getSkillsSummaryForCurrentUser(fixture.projectId)
+
+        then: 'finalizing the other skill does not copy or replay this enabled skill'
+        summary.points == 100
+    }
+
+    def "incremental redelivery after credit commit but before acknowledgment must not add credit twice"() {
+        Map fixture = fixture()
+        SkillsService learner = createService(users[0])
+        learner.initializeProjectProgress(fixture.projectId)
+        AtomicBoolean interruptAcknowledgment = new AtomicBoolean(true)
+        intercept('ImportedSkillAchievementTaskExecutor.execute', []) { BoundaryInvocation invocation ->
+            invocation.callRealMethod()
+            if (interruptAcknowledgment.compareAndSet(true, false)) {
+                throw new IllegalStateException('Injected interruption after credit commit, before task acknowledgment')
+            }
+            null
+        }
+
+        when:
+        skillsService.addSkill(fixture.source, users[0], historicalDate)
+        waitForAsyncTasksCompletion.waitForAllScheduleTasks()
+        Map summary = learner.getSkillsSummaryForCurrentUser(fixture.projectId)
+
+        then:
+        summary.points == 100
+    }
+
+    def "historical quiz awards and a concurrent visit must both commit despite opposite lock order"() {
+        Map fixture = fixture()
+        List<SkillsService> learners = users.take(2).collect { String userId -> createService(userId) }
+        Map quiz = QuizDefFactory.createQuiz(1)
+        skillsService.createQuizDef(quiz)
+        skillsService.createQuizQuestionDefs(QuizDefFactory.createChoiceQuestions(1, 1, 2))
+        learners.each { SkillsService learner -> passQuiz(learner, quiz) }
+        Gate batchAfterFirstQualification = gate()
+        AtomicBoolean pauseFirstQualification = new AtomicBoolean(true)
+        AtomicReference<String> firstUser = new AtomicReference<>()
+        intercept('CatalogParticipantBackfillService.qualify', [fixture.projectId]) { BoundaryInvocation invocation ->
+            BackfillStatus status = invocation.callRealMethod()
+            if (pauseFirstQualification.compareAndSet(true, false)) {
+                firstUser.set(invocation.getArgument(1) as String)
+                batchAfterFirstQualification.pause()
+            }
+            status
+        }
+
+        when:
+        // Unlike the ordinary bulk-report loop, historical quiz assignment retains one
+        // enclosing skill-save transaction across both users' qualification calls.
+        Future<Map> batch = submit { requestOutcome {
+            skillsService.createSkill(fixture.local + [selfReportingType: 'Quiz', quizId: quiz.quizId, numPerformToCompletion: 1])
+        } }
+        batchAfterFirstQualification.awaitArrival()
+        SkillsService visitor = learners.find { SkillsService learner -> learner.userName != firstUser.get() }
+        Future<Map> visit = submit { requestOutcome { visitor.initializeProjectProgress(fixture.projectId) } }
+        awaitSqlLockWait('%f_select_lock_and_insert%')
+        batchAfterFirstQualification.open()
+        List<Map> outcomes = [batch.get(25, TimeUnit.SECONDS), visit.get(25, TimeUnit.SECONDS)]
+        waitForAsyncTasksCompletion.waitForAllScheduleTasks()
+
+        then: 'an HTTP database/deadlock error is an outcome assertion, not an uncaught test error'
+        outcomes.every { Map outcome -> outcome.success }
+        visitor.getSkillsSummaryForCurrentUser(fixture.projectId).points == 100
+    }
+
+    def "achievement-only source credit must not be classified as empty during #entry qualification"() {
+        Map fixture = fixture()
+        SkillsService learner = createService(users[0])
+        SkillDef sourceDef = skillDefRepo.findByProjectIdAndSkillId(fixture.source.projectId, fixture.source.skillId)
+        userAchievedRepo.save(new UserAchievement(userId: users[0], projectId: sourceDef.projectId,
+                skillId: sourceDef.skillId, skillRefId: sourceDef.id, pointsWhenAchieved: sourceDef.totalPoints,
+                achievedOn: historicalDate))
+
+        when:
+        qualify(fixture, learner, entry)
+        waitForAsyncTasksCompletion.waitForAllScheduleTasks()
+        Map summary = learner.getSkillsSummaryForCurrentUser(fixture.projectId)
+
+        then:
+        summary.skillsAchieved == 1
+
+        where:
+        entry << ['visit', 'award']
+    }
+
+    private Map fixture(boolean finalize = true, int occurrences = 3) {
+        Map source = createSkill(1, 1, 11, 0, occurrences, 0, 100)
+        Map next = createSkill(1, 1, 12, 0, 3, 0, 100)
+        skillsService.createProjectAndSubjectAndSkills(createProject(1), createSubject(1, 1), [source, next])
+        [source, next].each { Map skill -> skillsService.exportSkillToCatalog(skill.projectId, skill.skillId) }
+        Map local = createSkill(2, 1, 21, 0, 5, 0, 100)
+        Map otherLocal = createSkill(2, 1, 22, 0, 5, 0, 100)
+        skillsService.createProjectAndSubjectAndSkills(createProject(2), createSubject(2, 1), [local, otherLocal])
+        skillsService.bulkImportSkillsFromCatalog('TestProject2', 'TestSubject1', [source])
+        if (finalize) {
+            skillsService.finalizeSkillsImportFromCatalog('TestProject2')
+        }
+        [projectId: 'TestProject2', subjectId: 'TestSubject1', source: source, next: next, local: local, otherLocal: otherLocal]
+    }
+
+    private void importNext(Map fixture) {
+        skillsService.bulkImportSkillsFromCatalog(fixture.projectId, fixture.subjectId, [fixture.next])
+    }
+
+    private Map qualify(Map fixture, SkillsService learner, String entry) {
+        entry == 'visit' ? learner.initializeProjectProgress(fixture.projectId) : skillsService.addSkill(fixture.local, learner.userName).body
+    }
+
+    private static void passQuiz(SkillsService learner, Map quiz) {
+        Map attempt = learner.startQuizAttempt(quiz.quizId).body
+        learner.reportQuizAnswer(quiz.quizId, attempt.id, attempt.questions[0].answerOptions[0].id)
+        assert learner.completeQuizAttempt(quiz.quizId, attempt.id).body.passed
+    }
+
+    private Future<Map> submit(Closure<Map> action) {
+        callers.submit(action as Callable<Map>)
+    }
+
+    private static Map requestOutcome(Closure action) {
+        try {
+            [success: true, response: action.call()]
+        } catch (SkillsClientException exception) {
+            [success: false, status: exception.httpStatus, response: exception.res,
+             error: exception.resBody ?: exception.message]
+        }
+    }
+
+    private Gate gate() {
+        Gate result = new Gate()
+        gates.add(result)
+        result
+    }
+
+    private void trigger(String name, String table, String body) {
+        triggers[name] = table
+        // An interrupted IDE run may leave this spec's named barrier behind.
+        removeTrigger(name, table)
+        installTrigger(name, table, body)
+    }
+
+    private void queueTasks(String taskName) {
+        String name = queueTriggerName(taskName)
+        trigger(name, 'scheduled_tasks', "if NEW.task_name = '${taskName}' then NEW.execution_time := now() + interval '1 hour'; end if; return NEW;")
+    }
+
+    private void releaseTasks(String taskName) {
+        String name = queueTriggerName(taskName)
+        removeTrigger(name, triggers.remove(name))
+        jdbcTemplate.update('update scheduled_tasks set execution_time = now() where task_name = ?', taskName)
+    }
+
+    private static String queueTriggerName(String taskName) {
+        'race_queue_' + taskName.replace('-', '_')
+    }
+
+    private int taskCount(String taskName) {
+        jdbcTemplate.queryForObject('select count(*) from scheduled_tasks where task_name = ?', Integer, taskName)
+    }
+
+    private void awaitTaskCount(String taskName, int expected) {
+        new PollingConditions(timeout: 20).eventually { assert taskCount(taskName) == expected }
+    }
+
+    private void awaitStatus(String projectId, String userId, BackfillStatus expected) {
+        new PollingConditions(timeout: 20).eventually { assert participationRepo.readStatus(projectId, userId) == expected }
+    }
+
+    private void awaitFinalization(String projectId, String expected) {
+        new PollingConditions(timeout: 20).eventually { assert skillsService.getSetting(projectId, 'catalog.finalize.state').value == expected }
+    }
+
+    private void awaitSqlLockWait(String queryPattern) {
+        new PollingConditions(timeout: 15).eventually {
+            assert jdbcTemplate.queryForObject("select count(*) from pg_stat_activity where datname = current_database() and wait_event_type = 'Lock' and lower(query) like ?", Integer, queryPattern) > 0
+        }
+    }
+
+    private void holdAdvisoryLock(long key) {
+        Connection connection = dataSource.connection
+        connection.createStatement().execute("select pg_advisory_lock(${key})")
+        lockConnections.add(connection)
+    }
+
+    private void releaseAdvisoryLock(long key) {
+        lockConnections.each { Connection connection -> connection.createStatement().execute("select pg_advisory_unlock(${key})") }
+    }
+
+    private void awaitAdvisoryWait(long key) {
+        new PollingConditions(timeout: 15).eventually {
+            assert jdbcTemplate.queryForObject("select count(*) from pg_locks where locktype = 'advisory' and objid = ? and not granted", Integer, key) > 0
+        }
+    }
+
+    private void intercept(String method, List expectedArguments, Closure action) {
+        boundaries.hooks[method] = { BoundaryInvocation invocation ->
+            boolean matches = expectedArguments.withIndex().every { Object expected, int index ->
+                Object actual = invocation.getArgument(index)
+                expected instanceof Closure ? expected.call(actual) : expected == actual
+            }
+            matches ? action.call(invocation) : invocation.callRealMethod()
+        }
+    }
+
+    @TestConfiguration
+    static class BoundaryConfiguration {
+        @Bean
+        RaceBoundaries catalogRaceBoundaries() { new RaceBoundaries() }
+    }
+
+    // Outside Spring's transaction advice: proceed() returns after a standalone worker/stage commits.
+    @Aspect
+    @Order(0)
+    static class RaceBoundaries {
+        final Map<String, Closure> hooks = new ConcurrentHashMap<>()
+
+        @Around('''execution(* skills.services.admin.BatchOperationsTransactionalAccessor.*(..)) ||
+                execution(* skills.services.CatalogParticipantBackfillService.qualify(..)) ||
+                execution(* skills.services.settings.SettingsService.saveSetting(..)) ||
+                execution(* skills.services.admin.SkillCatalogFinalizationService.applyEventsThatWereReportedDuringTheFinalizationRun(..)) ||
+                execution(* skills.tasks.executors.CatalogParticipantBackfillExecutor.execute(..)) ||
+                execution(* skills.tasks.executors.ImportedSkillAchievementTaskExecutor.execute(..))''')
+        Object atBoundary(ProceedingJoinPoint joinPoint) {
+            String method = "${joinPoint.signature.declaringType.simpleName}.${joinPoint.signature.name}"
+            Closure hook = hooks[method]
+            hook ? hook.call(new BoundaryInvocation(joinPoint: joinPoint)) : joinPoint.proceed()
+        }
+    }
+
+    private static class BoundaryInvocation {
+        ProceedingJoinPoint joinPoint
+
+        Object callRealMethod() { joinPoint.proceed() }
+        Object getArgument(int index) { joinPoint.args[index] }
+    }
+
+    private static class Gate {
+        private final CountDownLatch arrived = new CountDownLatch(1)
+        private final CountDownLatch released = new CountDownLatch(1)
+
+        void pause() {
+            arrived.countDown()
+            assert released.await(30, TimeUnit.SECONDS): 'Test boundary was not released'
+        }
+
+        void awaitArrival() {
+            assert arrived.await(20, TimeUnit.SECONDS): 'Production call did not reach the requested boundary'
+        }
+
+        boolean hasArrived() { arrived.count == 0 }
+
+        void open() { released.countDown() }
+    }
+}
