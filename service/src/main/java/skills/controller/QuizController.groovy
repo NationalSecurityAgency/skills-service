@@ -30,6 +30,7 @@ import skills.auth.UserAuthService
 import skills.auth.UserInfo
 import skills.auth.UserInfoService
 import skills.controller.request.model.TextInputAIGradingRequest
+import skills.services.admin.UserCommunityService
 import skills.services.openai.OpenAIService
 import skills.controller.exceptions.ErrorCode
 import skills.controller.exceptions.QuizValidator
@@ -127,6 +128,9 @@ class QuizController {
 
     @Autowired
     QuizRunsExportResult quizRunsExportResult
+
+    @Autowired
+    UserCommunityService userCommunityService
 
     @RequestMapping(value = "/{quizId}", method = [RequestMethod.PUT, RequestMethod.POST], produces = "application/json")
     @ResponseBody
@@ -226,6 +230,10 @@ class QuizController {
         if (!userAuthService.isUserQuizAdmin(currentUser, toQuizId)) {
             throw new AccessDeniedException("User [${currentUser.username}] is not an admin for quiz [${toQuizId}]")
         }
+        if (userCommunityService.isUserCommunityOnlyQuiz(toQuizId) && !userCommunityService.isUserCommunityMember(currentUser.username)) {
+            throw new AccessDeniedException("User [${currentUser.username}] can not copy questions to [${toQuizId}]")
+        }
+
         quizDefService.copyQuestions(quizId, toQuizId, ids)
         return RequestResult.success()
     }

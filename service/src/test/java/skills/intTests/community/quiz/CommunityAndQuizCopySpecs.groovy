@@ -50,7 +50,7 @@ class CommunityAndQuizCopySpecs extends CopyIntSpec {
         def sourceQuestion = pristineDragonsUser.createQuizQuestionDef(QuizDefFactory.createChoiceQuestion(1, 1, 2)).body
 
         when: 'a direct copy request targets an unrestricted quiz'
-        pristineDragonsUser.wsHelper.adminPost("/quiz-definitions/${protectedQuiz.quizId}/questions/copy/${unrestrictedQuiz.quizId}".toString(), [sourceQuestion.id])
+        pristineDragonsUser.copyQuizQuestion(protectedQuiz.quizId, unrestrictedQuiz.quizId, [sourceQuestion.id])
 
         then:
         SkillsClientException denied = thrown()

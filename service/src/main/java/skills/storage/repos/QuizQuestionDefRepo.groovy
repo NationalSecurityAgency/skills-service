@@ -30,8 +30,8 @@ interface QuizQuestionDefRepo extends JpaRepository<QuizQuestionDef, Long> {
     List<QuizQuestionDef> findAllByQuizIdIgnoreCase(String quizId)
 
     @Nullable
-    @Query('''select qDef from QuizQuestionDef as qDef where lower(qDef.quizId) = lower(?1) and qDef.id in ?2''')
-    List<QuizQuestionDef> findAllByQuizIdIgnoreCaseAndIds(String quizId, List<Integer> questionId)
+    @Query('''select qDef from QuizQuestionDef as qDef where qDef.quizId = ?1 and qDef.id in ?2''')
+    List<QuizQuestionDef> findAllByQuizIdAndIds(String quizId, List<Integer> questionId)
 
     @Nullable
     @Query('''select qDef from QuizQuestionDef as qDef, UserQuizQuestionAttempt qAttempt where qAttempt.quizQuestionDefinitionRefId=qDef.id and qAttempt.userQuizAttemptRefId = ?1''')

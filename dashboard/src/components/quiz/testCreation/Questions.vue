@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <script setup>
-import { computed, nextTick, onMounted, ref } from 'vue'
+import {computed, isReadonly, nextTick, onMounted, ref} from 'vue'
 import { useRoute } from 'vue-router'
 import { useQuizSummaryState } from '@/stores/UseQuizSummaryState.js';
 import { useQuizConfig } from '@/stores/UseQuizConfig.js';
@@ -381,6 +381,8 @@ const actionMenuOnBlur = () => {
             data-cy="toggleSelectionMode"
             aria-label="Toggle select questions"
             class="mr-2"
+            :disabled="!questions || questions.length === 0"
+            v-if="!quizConfig.isReadOnlyQuiz"
             v-on:update:modelValue="toggleSelectionMode"
             v-model="selectionModeEnabled" />
         <label id="toggleSelectMessage">Select Questions</label>
@@ -389,7 +391,7 @@ const actionMenuOnBlur = () => {
             id="questionActionsBtn"
             size="small"
             class="ml-3"
-            v-if="selectionModeEnabled"
+            v-if="!quizConfig.isReadOnlyQuiz && selectionModeEnabled"
             @click="toggleActionsMenu"
             aria-label="Question actions button"
             aria-haspopup="true"
@@ -398,10 +400,11 @@ const actionMenuOnBlur = () => {
             data-cy="questionActionsBtn">
           <i class="fas fa-tools" aria-hidden="true"></i>
           <span>Action</span>
+          <Tag data-cy="questionsNumSelected" severity="info">{{ Object.keys(selectedQuestions).length }}</Tag>
           <i class="fas fa-caret-down"></i>
         </SkillsButton>
         <Menu ref="questionsActionsMenu"
-              v-if="selectionModeEnabled"
+              v-if="!quizConfig.isReadOnlyQuiz && selectionModeEnabled"
               id="questions-actions-menu"
               data-cy="questionsActionsMenu"
               :model="actionsMenu"
