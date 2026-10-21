@@ -17,9 +17,11 @@ package skills.services.admin
 
 import callStack.profiler.Profile
 import groovy.util.logging.Slf4j
-import jakarta.transaction.Transactional
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Isolation
+import org.springframework.transaction.annotation.Propagation
+import org.springframework.transaction.annotation.Transactional
 import skills.controller.request.model.ProjectSettingsRequest
 import skills.controller.result.model.LevelDefinitionRes
 import skills.controller.result.model.SettingsResult
@@ -133,6 +135,20 @@ class BatchOperationsTransactionalAccessor {
             it.enabled = Boolean.TRUE.toString()
         }
         skillDefRepo.saveAll(disabledImportedSkills)
+    }
+
+    // Reject a stale bulk sum if a local award commits while its aggregate UPDATE waits for the row.
+    // Failed attempts roll back totals and awards together; retries get a fresh transaction and snapshot.
+    @Transactional(isolation = Isolation.REPEATABLE_READ, propagation = Propagation.REQUIRES_NEW)
+    void handleCatalogPointsAndAchievementsForSubject(String projectId, String subjectId) {
+        SkillDef subject = skillDefRepo.findByProjectIdAndSkillId(projectId, subjectId)
+        handlePointsAndAchievementsForSubject(subject)
+    }
+
+    // Project totals need the same protection against awards committing during bulk replacement.
+    @Transactional(isolation = Isolation.REPEATABLE_READ, propagation = Propagation.REQUIRES_NEW)
+    void handleCatalogPointsAndAchievementsForProject(String projectId) {
+        handlePointsAndAchievementsForProject(projectId)
     }
 
     /**
