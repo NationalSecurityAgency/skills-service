@@ -279,18 +279,18 @@ class GlobalReusedDataBaseIntSpec extends DefaultIntSpec {
     def runQuizOrSurvey(SkillsService user, def quiz, boolean pass = true, boolean complete = true) {
         attemptsUsers.push(user)
         attemptsQuizzes.push(quiz)
-        def quizInfo = user.getQuizInfo(quiz.quizId)
         def quizAttempt = user.startQuizAttempt(quiz.quizId).body
-        quizAttempt.questions.eachWithIndex { it, index ->
-            int answerIndex = 0
-            if (it.questionType == QuizQuestionType.SingleChoice.toString()) {
-                answerIndex = pass ? 0 : 1
-            }
-            user.reportQuizAnswer(quiz.quizId, quizAttempt.id, quizAttempt.questions[index].answerOptions[answerIndex].id, [isSelected: true, answerText: 'This is user provided answer'])
+        quizAttempt.questions.each { Map question ->
+            // QuizDefFactory marks Answer #1 correct; endpoint answer ordering is not guaranteed.
+            String answerText = question.questionType == QuizQuestionType.SingleChoice.toString() && !pass ? 'Answer #2' : 'Answer #1'
+            Map answer = question.answerOptions.find { Map option -> option.answerOption == answerText }
+            assert answer : "Expected fixture answer [${answerText}] for quiz [${quiz.quizId}]"
+            user.reportQuizAnswer(quiz.quizId, quizAttempt.id, answer.id, [isSelected: true, answerText: 'This is user provided answer'])
         }
 
         if (complete) {
-            user.completeQuizAttempt(quiz.quizId, quizAttempt.id).body
+            Map result = user.completeQuizAttempt(quiz.quizId, quizAttempt.id).body
+            assert result.passed == pass
         }
 
         attempts.push(quizAttempt)
