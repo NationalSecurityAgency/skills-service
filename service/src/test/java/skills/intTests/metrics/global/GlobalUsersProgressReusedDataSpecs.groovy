@@ -18,12 +18,33 @@ package skills.intTests.metrics.global
 import groovy.transform.Canonical
 import groovy.transform.ToString
 import org.springframework.http.HttpStatus
+import skills.intTests.utils.QuizDefFactory
 import skills.intTests.utils.SkillsClientException
 import spock.lang.IgnoreIf
 
 import static skills.metrics.GlobalProgressMetricsService.getUSER_PREF_GLOBAL_METRICS_EXCLUSION
 
 class GlobalUsersProgressReusedDataSpecs extends GlobalReusedDataBaseIntSpec {
+
+    def "fixture quiz outcomes do not depend on answer order"() {
+        given:
+        Map quiz = QuizDefFactory.createQuiz(30)
+        admins[0].createQuizDef(quiz)
+        Map question = QuizDefFactory.createChoiceQuestion(30, 1, 2)
+        question.answers = question.answers.reverse()
+        admins[0].createQuizQuestionDef(question)
+
+        when:
+        runQuizOrSurvey(users[7], quiz, false)
+        runQuizOrSurvey(users[7], quiz, true)
+        Map res = admins[0].getGlobalUserProgressMetrics("", 15, 1, "numSkillsEarned", false)
+        Map metric = res.metricItemsPage.find { Map row -> row.userId == users[7].userName }
+
+        then:
+        metric.numQuizAttempts == 2
+        metric.numQuizzesFailed == 1
+        metric.numQuizzesPassed == 1
+    }
 
     def "users progress from admins[0] point of view" () {
         when:
@@ -919,4 +940,3 @@ class GlobalUsersProgressReusedDataSpecs extends GlobalReusedDataBaseIntSpec {
         e.resBody.contains("Limit must be greater than 0, provided=[0]")
     }
 }
-
