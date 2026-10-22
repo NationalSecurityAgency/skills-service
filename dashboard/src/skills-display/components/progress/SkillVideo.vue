@@ -16,10 +16,8 @@ limitations under the License.
 <script setup>
 
 import { ref, computed, onMounted, nextTick, defineAsyncComponent } from 'vue';
-import { useRouter } from 'vue-router';
 import { useSkillsAnnouncer } from '@/common-components/utilities/UseSkillsAnnouncer.js';
 import { useSkillsDisplayService } from '@/skills-display/services/UseSkillsDisplayService.js'
-import { useSkillsDisplayInfo } from '@/skills-display/UseSkillsDisplayInfo.js';
 import { useSkillsDisplayAttributesState } from '@/skills-display/stores/UseSkillsDisplayAttributesState.js';
 import SkillsButton from '@/components/utils/inputForm/SkillsButton.vue';
 import SkillsOverlay from '@/components/utils/SkillsOverlay.vue';
@@ -45,9 +43,7 @@ const numFormat = useNumberFormat()
 const timeUtils = useTimeUtils()
 
 const emit = defineEmits(['points-earned'])
-const router = useRouter()
 const announcer = useSkillsAnnouncer()
-const skillsDisplayInfo = useSkillsDisplayInfo()
 const pluralize = usePluralize()
 const attributes = useSkillsDisplayAttributesState()
 
@@ -58,7 +54,11 @@ const percentWatched = ref(0);
 const errNotification = ref({
   enable: false,
   msg: '',
+  retryable: false,
 });
+const pendingReport = ref(null);
+const isReporting = ref(false);
+const reportedPoints = ref(0);
 const trackAchievement = ref(true);
 const justAchieved = ref(false);
 const transcript = ref({
@@ -107,7 +107,7 @@ const resetVideoProgress = () => {
 }
 
 const videoFinished = (watchProgress) => {
-  if (trackAchievement.value && watchProgress.percentWatched > 96 && !justAchieved.value) {
+  if (trackAchievement.value && watchProgress.percentWatched > 96 && !justAchieved.value && !pendingReport.value) {
     doReportSkill();
   }
 }
@@ -120,8 +120,11 @@ const updateVideoProgress = (watchProgress) => {
   percentWatched.value = watchProgress.percentWatched;
 };
 const achieveSkillByReadingTranscript = () => {
-  doReportSkill()
-      .then(() => {
+  doReportSkill('transcript')
+      .then((saved) => {
+        if (!saved) {
+          return;
+        }
         nextTick(() => {
           const element = document.getElementById('watchVideoAlert');
           if (element) {
@@ -130,34 +133,67 @@ const achieveSkillByReadingTranscript = () => {
         });
       });
 };
-const doReportSkill = () => {
+const doReportSkill = (source = 'playback') => {
+  if (isReporting.value) {
+    return Promise.resolve(false);
+  }
+  if (!pendingReport.value) {
+    pendingReport.value = { source };
+    errNotification.value = { enable: false, msg: '', retryable: false };
+  }
+  isReporting.value = true;
+  nextTick(() => announcer.polite(`Saving your ${attributes.pointDisplayNameLower} credit.`));
   const crossProjId = props.skill.crossProject ? props.skill.projectId : null
-  return skillsDisplayService.reportSkill(props.skill.skillId, null, crossProjId)
+  return skillsDisplayService.reportSkill(props.skill.skillId, null, crossProjId, {
+    handleError: false,
+    timeout: 30000,
+  })
       .then((res) => {
-        if (res.pointsEarned > 0) {
+        if (!res || typeof res.skillApplied !== 'boolean' || !Number.isFinite(res.pointsEarned)) {
+          throw new Error('Credit reporting did not return a confirmation');
+        }
+        pendingReport.value = null;
+        errNotification.value = { enable: false, msg: '', retryable: false };
+        if (res.skillApplied) {
           justAchieved.value = true;
+          reportedPoints.value = res.pointsEarned;
           emit('points-earned', res.pointsEarned);
-          nextTick(() => announcer.polite(`Congratulations! You just earned ${res.pointsEarned} ${attributes.pointDisplayNamePlural} and completed ${props.skill.skill} ${attributes.skillDisplayNameLower}`));
-        } else if(res.pointsEarned === 0 && !res.skillApplied) {
+          nextTick(() => announcer.polite(reportedPoints.value > 0
+              ? `Congratulations! You just earned ${reportedPoints.value} ${attributes.pointDisplayNamePlural} for ${props.skill.skill} ${attributes.skillDisplayNameLower}.`
+              : 'Your completion has been saved successfully.'));
+          return true;
+        } else {
           errNotification.value.msg = res.explanation;
           errNotification.value.enable = true;
           nextTick(() => announcer.polite(`Sorry, ${props.skill.skill} ${attributes.skillDisplayNameLower} could not be reported because ${res.explanation}`));
+          return false;
         }
       }).catch((e) => {
-        if (e.response.data && e.response.data.errorCode
-            && (e.response.data.errorCode === 'InsufficientProjectPoints' || e.response.data.errorCode === 'InsufficientSubjectPoints')) {
-          errNotification.value.msg = e.response.data.explanation;
-          errNotification.value.enable = true;
-        } else {
-          const errorMessage = (e.response && e.response.data && e.response.data.explanation) ? e.response.data.explanation : undefined;
-          router.push({
-            name: 'error',
-            params: {
-              errorMessage,
-            },
-          });
+        const status = e.response?.status;
+        const explanation = e.response?.data?.explanation;
+        const retryable = Number.isInteger(status) && status > 0 && (status < 200 || status >= 300);
+        if (!retryable) {
+          pendingReport.value = null;
         }
+        if (status === 401) {
+          errNotification.value.msg = 'Your session may have expired. Please sign in again, then retry saving your credit.';
+        } else {
+          errNotification.value.msg = explanation || (retryable
+              ? 'Your credit could not be saved. Please retry.'
+              : "We couldn't confirm that your credit was saved. Please refresh the page to check your progress.");
+        }
+        errNotification.value.enable = true;
+        errNotification.value.retryable = retryable;
+        nextTick(() => announcer.polite(errNotification.value.msg));
+        return false;
+      }).finally(() => {
+        isReporting.value = false;
       });
+};
+const retryReportSkill = () => {
+  if (pendingReport.value && errNotification.value.retryable) {
+    return doReportSkill();
+  }
 };
 const loadTranscript = () => {
   transcript.value.loading = true;
@@ -216,7 +252,7 @@ const pointsLbl = computed(() => pluralize.plural(attributes.pointDisplayNameLow
       </div>
     </SkillsOverlay>
     <div v-if="!videoCollapsed && !isLocked">
-      <div class="flex justify-center">
+      <div class="flex justify-center" :inert="pendingReport !== null">
         <div :class="{ 'flex-1' : !isConfiguredVideoSize }">
           <video-player :video-player-id="`skillVideoFor-${skill.projectId}-${skill.skillId}`"
                         :options="videoConf"
@@ -263,7 +299,8 @@ const pointsLbl = computed(() => pluralize.plural(attributes.pointDisplayNameLow
                   severity="success"
                   :label="`Claim ${attributes.pointDisplayNamePlural}`"
                   icon="fas fa-check-double"
-                  outlined :disabled="!transcriptReadCert"
+                  outlined :disabled="!transcriptReadCert || pendingReport !== null"
+                  :loading="isReporting"
                   data-cy="claimPtsByReadingTranscriptBtn"
                   @click="achieveSkillByReadingTranscript">
 
@@ -285,7 +322,7 @@ const pointsLbl = computed(() => pluralize.plural(attributes.pointDisplayNameLow
           </div>
         </template>
       </Message>
-      <Message v-if="isSelfReportTypeVideo && (!isAlreadyAchieved || justAchieved || skill.meta.inProgress)"
+      <Message v-if="isSelfReportTypeVideo && (!isAlreadyAchieved || justAchieved || skill.meta.inProgress || pendingReport)"
            class="mt-2"
            :severity="justAchieved ? 'success' : 'info'"
            ref="watchVideoAlert"
@@ -295,15 +332,18 @@ const pointsLbl = computed(() => pluralize.plural(attributes.pointDisplayNameLow
         <template #container>
           <div class="flex flex-col md:flex-row items-center p-4">
             <div class="flex-1" data-cy="watchVideoMsg">
-              <div v-if="!justAchieved">
+              <div v-if="isReporting" data-cy="videoCreditSaving">Saving your credit...</div>
+              <div v-else-if="pendingReport">Your completion is ready to save. Retry saving your credit below.</div>
+              <div v-else-if="!justAchieved">
                 <i class="fas fa-video font-size-2 mr-1 animate__bounceIn" aria-hidden="true"></i>
                 Earn <b>{{ skill.pointIncrement }}</b> {{ pointsLbl }} for the  {{ attributes.skillDisplayNameLower }} {{ videoConf.isAudio ? 'by listening to this Audio.' : 'by watching this Video.' }}
               </div>
-              <div v-if="justAchieved">
+              <div v-else-if="reportedPoints > 0">
                 <i class="fas fa-birthday-cake text-success mr-1 animate__bounceIn" style="font-size: 1.2rem"></i> Congrats! You just earned <span
-                  class="text-success font-weight-bold">{{ skill.pointIncrement }}</span> {{ pointsLbl }}<span><span v-if="skill.points === skill.totalPoints"> and <b>completed</b> the {{ attributes.skillDisplayNameLower }}</span>!</span>
+                  class="text-success font-weight-bold">{{ reportedPoints }}</span> {{ pointsLbl }}<span><span v-if="skill.points === skill.totalPoints"> and <b>completed</b> the {{ attributes.skillDisplayNameLower }}</span>!</span>
                 <span v-if="(justAchieved && skill.points !== skill.totalPoints)"> But you can still earn more points by {{ videoConf.isAudio ? 'listening to the Audio' : 'watching the Video' }} again!</span>
               </div>
+              <div v-else>Your completion has been saved successfully.</div>
             </div>
           </div>
         </template>
@@ -312,7 +352,23 @@ const pointsLbl = computed(() => pluralize.plural(attributes.pointDisplayNameLow
     </div>
 
     <Message v-if="errNotification.enable" severity="error" :closable="false" class="mt-2" role="alert" data-cy="videoError">
-      {{ errNotification.msg }}
+      <template #container>
+        <div class="flex flex-col sm:flex-row gap-4 items-start sm:items-center p-4">
+          <div class="flex-1">
+            {{ errNotification.msg }}
+            <div v-if="errNotification.retryable">
+              You don't need to {{ pendingReport?.source === 'transcript' ? 'read the transcript' : (videoConf.isAudio ? 'listen to the audio' : 'watch the video') }} again.
+            </div>
+          </div>
+          <SkillsButton v-if="errNotification.retryable"
+                        label="Retry Saving Credit"
+                        icon="fas fa-rotate-right"
+                        severity="danger"
+                        :loading="isReporting"
+                        @click="retryReportSkill"
+                        data-cy="retryVideoCreditBtn" />
+        </div>
+      </template>
     </Message>
   </div>
 </template>

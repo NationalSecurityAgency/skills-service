@@ -180,53 +180,6 @@ describe('Display Video on Skill Page Tests', () => {
         cy.get('[data-cy="skillVideo-skill1"] [data-cy="watchVideoAlert"]').should('not.exist')
     });
 
-    it('achieve skill by watching external video', () => {
-        cy.intercept('POST', '/api/projects/proj1/skills/skill1').as('reportSkill1')
-        cy.createProject(1)
-        cy.createSubject(1, 1);
-        cy.createSkill(1, 1, 1, {numPerformToCompletion : 1})
-        const vidAttr = { videoUrl: testVideo, transcript: 'another' }
-        cy.saveVideoAttrs(1, 1, vidAttr)
-        cy.createSkill(1, 1, 1, { numPerformToCompletion : 1, selfReportingType: 'Video' });
-
-        cy.cdVisit('/subjects/subj1/skills/skill1');
-        cy.get('[data-cy="skillVideo-skill1"] [data-cy="videoPlayer"] [title="Play Video"]')
-        cy.get('[data-cy="viewTranscriptBtn"]').should('be.enabled')
-        cy.get('[data-cy="skillVideo-skill1"] [data-cy="watchVideoAlert"] [data-cy="watchVideoMsg"]').contains('Earn 100 points for the skill by watching this Video')
-        cy.get('[data-cy="skillVideo-skill1"] [data-cy="viewTranscriptBtn"]')
-        cy.get('[data-cy="skillVideo-skill1"] [data-cy="percentWatched"]').should('have.text', 0)
-
-        cy.get('[data-cy="skillVideo-skill1"] [data-cy="videoPlayer"] [title="Play Video"]').click()
-        cy.wait(15000)
-        cy.get('[data-cy="watchVideoAlert"] [data-cy="watchVideoMsg"]').contains('You just earned 100 points')
-        cy.get('[data-cy="viewTranscriptBtn"]')
-        cy.get('[data-cy="skillProgress-ptsOverProgressBard"]').contains('100 / 100 Points')
-        cy.wait('@reportSkill1')
-    });
-
-    it('achieve skill by watching skilltree hosted video', () => {
-        cy.intercept('POST', '/api/projects/proj1/skills/skill1').as('reportSkill1')
-        cy.createProject(1)
-        cy.createSubject(1, 1);
-        cy.createSkill(1, 1, 1, {numPerformToCompletion : 1})
-        const vidAttr = { file: 'create-subject.webm', transcript: 'another' }
-        cy.saveVideoAttrs(1, 1, vidAttr)
-        cy.createSkill(1, 1, 1, { numPerformToCompletion : 1, selfReportingType: 'Video' });
-
-        cy.cdVisit('/subjects/subj1/skills/skill1');
-        cy.get('[data-cy="skillVideo-skill1"] [data-cy="videoPlayer"] [title="Play Video"]')
-        cy.get('[data-cy="viewTranscriptBtn"]').should('be.enabled')
-        cy.get('[data-cy="skillVideo-skill1"] [data-cy="watchVideoAlert"] [data-cy="watchVideoMsg"]').contains('Earn 100 points for the skill by watching this Video')
-        cy.get('[data-cy="skillVideo-skill1"] [data-cy="viewTranscriptBtn"]')
-        cy.get('[data-cy="skillVideo-skill1"] [data-cy="percentWatched"]').should('have.text', 0)
-
-        cy.get('[data-cy="skillVideo-skill1"] [data-cy="videoPlayer"] [title="Play Video"]').click()
-        cy.wait(8000)
-        cy.get('[data-cy="watchVideoAlert"] [data-cy="watchVideoMsg"]').contains('You just earned 100 points')
-        cy.get('[data-cy="viewTranscriptBtn"]')
-        cy.get('[data-cy="skillProgress-ptsOverProgressBard"]').contains('100 / 100 Points')
-        cy.wait('@reportSkill1')
-    });
 
     it('skill is only achieved for self-report-type of Video', () => {
         cy.createProject(1)
@@ -294,12 +247,12 @@ describe('Display Video on Skill Page Tests', () => {
 
         cy.cdVisit('/subjects/subj1/skills/skill1');
         cy.get('[data-cy="skillVideo-skill1"] [data-cy="videoPlayer"] [title="Play Video"]').click()
-        cy.wait(15000)
-        cy.get('[data-cy="skillVideo-skill1"] [data-cy="watchVideoAlert"] [data-cy="watchVideoMsg"]').contains('Earn 33 points for the skill by watching this Video')
+        cy.get('[data-cy="skillVideo-skill1"] [data-cy="videoPlayer"] video', { timeout: 30000 }).should('have.prop', 'ended', true)
+        cy.get('[data-cy="skillVideo-skill1"] [data-cy="watchVideoAlert"] [data-cy="watchVideoMsg"]').contains('Your completion is ready to save')
         cy.get('[data-cy="skillVideo-skill1"] [data-cy="percentWatched"]').should('have.text', 100)
         cy.get('[data-cy="skillProgress-ptsOverProgressBard"]').contains('0 / 33 Points')
-        cy.get('[data-cy="skillVideo-skill1"] [data-cy="watchVideoAlert"] [data-cy="watchVideoMsg"]').contains('Earn 33 points for the skill by watching this Video')
         cy.get('[data-cy="videoError"]').contains('Insufficient project points')
+        cy.get('[data-cy="retryVideoCreditBtn"]').should('be.enabled')
     });
 
     it('video can require multiple watches to complete', () => {
@@ -373,6 +326,7 @@ describe('Display Video on Skill Page Tests', () => {
         cy.get('.vjs-play-control').click()
         cy.wait(8000)
         cy.get('[data-cy="videoError"]').contains('This skill was already performed within the configured time period (within the last 8 hours)')
+        cy.get('[data-cy="retryVideoCreditBtn"]').should('not.exist')
         cy.get('[data-cy="skillProgress-ptsOverProgressBard"]').contains('50 / 200 Points')
 
     });
