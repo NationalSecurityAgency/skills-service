@@ -97,7 +97,7 @@ const onQuizChanged = async (value) => {
 
   validatingQuiz.value = true
   try {
-    const copyResult = await QuizService.validateQuizCopy(props.questionDef.quizId, value, "test")
+    const copyResult = await QuizService.validateQuizCopy(props.questionDef.quizId, value, numberOfQuestions.value)
     if (requestId !== validationRequestId) return
 
     canCopyQuestion.value = copyResult.isAllowed
