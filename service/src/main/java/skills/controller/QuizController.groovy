@@ -15,7 +15,7 @@
  */
 package skills.controller
 
-
+import groovy.transform.Canonical
 import groovy.transform.CompileStatic
 import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
@@ -29,6 +29,7 @@ import skills.PublicProps
 import skills.auth.UserAuthService
 import skills.auth.UserInfo
 import skills.auth.UserInfoService
+import skills.controller.request.model.CopyBatchQuestionsRequest
 import skills.controller.request.model.TextInputAIGradingRequest
 import skills.services.admin.UserCommunityService
 import skills.services.openai.OpenAIService
@@ -609,11 +610,11 @@ class QuizController {
         return new RequestResult(success: true, data: [ hasPendingGrades: quizDefService.hasUngradedQuestions(questionId) ])
     }
 
-    @RequestMapping(value = "/{quizId}/questions/{questionId}/{otherQuizId}/validateCopy", method = [RequestMethod.POST], produces = "application/json")
+    @RequestMapping(value = "/{quizId}/questions/validateCopy", method = [RequestMethod.POST], produces = "application/json")
     @ResponseBody
     CopyValidationRes validateCopyItemsToAnotherProject(
             @PathVariable("quizId") String quizId,
-            @PathVariable("otherQuizId") String otherQuizId) {
-        return quizDefService.validateCopyQuestionsToAnotherQuiz(quizId, otherQuizId)
+            @RequestBody CopyBatchQuestionsRequest copyRequest) {
+        return quizDefService.validateCopyQuestionsToAnotherQuiz(quizId, copyRequest.destinationQuizId, copyRequest.numberOfQuestions)
     }
 }

@@ -2,6 +2,7 @@ package skills.intTests.quiz
 
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpStatus
+import skills.PublicProps
 import skills.intTests.utils.DefaultIntSpec
 import skills.intTests.utils.QuizDefFactory
 import skills.intTests.utils.SkillsClientException
@@ -13,6 +14,9 @@ class QuizQuestionCopySpecs extends DefaultIntSpec  {
     @Autowired
     QuizQuestionDefRepo quizQuestionDefRepo
 
+    @Autowired
+    PublicProps publicProps
+
     def "empty selected question ids cannot copy the entire quiz"() {
         def sourceQuiz = QuizDefFactory.createQuiz(1)
         def destinationQuiz = QuizDefFactory.createQuiz(2)
@@ -21,8 +25,7 @@ class QuizQuestionCopySpecs extends DefaultIntSpec  {
         skillsService.createQuizQuestionDef(QuizDefFactory.createChoiceQuestion(1, 1, 2))
 
         when:
-        skillsService.wsHelper.adminPost(
-                "/quiz-definitions/${sourceQuiz.quizId}/questions/copy/${destinationQuiz.quizId}".toString(), [])
+        skillsService.copyQuestions(sourceQuiz.quizId, destinationQuiz.quizId, [])
 
         then:
         SkillsClientException error = thrown()
@@ -43,9 +46,7 @@ class QuizQuestionCopySpecs extends DefaultIntSpec  {
         def otherQuestion = skillsService.createQuizQuestionDef(QuizDefFactory.createChoiceQuestion(3, 1, 2)).body
 
         when: 'a request includes an id from another quiz'
-        skillsService.wsHelper.adminPost(
-                "/quiz-definitions/${sourceQuiz.quizId}/questions/copy/${destinationQuiz.quizId}".toString(),
-                [sourceQuestion.id, otherQuestion.id])
+        skillsService.copyQuestions(sourceQuiz.quizId, destinationQuiz.quizId, [sourceQuestion.id, otherQuestion.id])
 
         then:
         SkillsClientException foreignId = thrown()
@@ -55,15 +56,57 @@ class QuizQuestionCopySpecs extends DefaultIntSpec  {
 
         when: 'a request includes a nonexistent id'
         Integer nonexistentId = Math.max(sourceQuestion.id, otherQuestion.id) + 1_000_000
-        skillsService.wsHelper.adminPost(
-                "/quiz-definitions/${sourceQuiz.quizId}/questions/copy/${destinationQuiz.quizId}".toString(),
-                [sourceQuestion.id, nonexistentId])
+        skillsService.copyQuestions(sourceQuiz.quizId, destinationQuiz.quizId, [sourceQuestion.id, nonexistentId])
 
         then:
         SkillsClientException missingId = thrown()
         missingId.httpStatus == HttpStatus.BAD_REQUEST
         missingId.message.contains("Question ids [${nonexistentId}] do not belong to quiz [${sourceQuiz.quizId}]")
         skillsService.getQuizQuestionDefs(destinationQuiz.quizId).questions.empty
+    }
+
+    def "copy refuses questions that would exceed the maximum allowed in the destination quiz"() {
+        int maxQuestions = publicProps.getInt(PublicProps.UiProp.maxQuestionsPerQuiz)
+        def sourceQuiz = QuizDefFactory.createQuiz(1)
+        def destinationQuiz = QuizDefFactory.createQuiz(2)
+        skillsService.createQuizDef(sourceQuiz)
+        skillsService.createQuizDef(destinationQuiz)
+        def sourceQuestion = skillsService.createQuizQuestionDef(QuizDefFactory.createChoiceQuestion(1, 1, 2)).body
+        skillsService.createQuizQuestionDefs(QuizDefFactory.createChoiceQuestions(2, maxQuestions, 2))
+        def existingQuestions = skillsService.getQuizQuestionDefs(destinationQuiz.quizId).questions
+
+        when:
+        skillsService.copyQuestions(sourceQuiz.quizId, destinationQuiz.quizId, [sourceQuestion.id])
+
+        then:
+        SkillsClientException error = thrown()
+        error.httpStatus == HttpStatus.BAD_REQUEST
+        error.message.contains("Questions would exceed the maximum number of questions [${maxQuestions}] in [${destinationQuiz.quizId}]")
+        skillsService.getQuizQuestionDefs(destinationQuiz.quizId).questions*.id == existingQuestions*.id
+        skillsService.getQuizQuestionDefs(sourceQuiz.quizId).questions*.id == [sourceQuestion.id]
+    }
+
+    def "copy refuses a batch of questions that would exceed the maximum allowed in the destination quiz"() {
+        int maxQuestions = publicProps.getInt(PublicProps.UiProp.maxQuestionsPerQuiz)
+        def sourceQuiz = QuizDefFactory.createQuiz(1)
+        def destinationQuiz = QuizDefFactory.createQuiz(2)
+        skillsService.createQuizDef(sourceQuiz)
+        skillsService.createQuizDef(destinationQuiz)
+        def sourceQuestions = (1..2).collect { int number ->
+            skillsService.createQuizQuestionDef(QuizDefFactory.createChoiceQuestion(1, number, 2)).body
+        }
+        skillsService.createQuizQuestionDefs(QuizDefFactory.createChoiceQuestions(2, maxQuestions - 1, 2))
+        def existingQuestions = skillsService.getQuizQuestionDefs(destinationQuiz.quizId).questions
+
+        when:
+        skillsService.copyQuestions(sourceQuiz.quizId, destinationQuiz.quizId, sourceQuestions*.id)
+
+        then:
+        SkillsClientException error = thrown()
+        error.httpStatus == HttpStatus.BAD_REQUEST
+        error.message.contains("Questions would exceed the maximum number of questions [${maxQuestions}] in [${destinationQuiz.quizId}]")
+        skillsService.getQuizQuestionDefs(destinationQuiz.quizId).questions*.id == existingQuestions*.id
+        skillsService.getQuizQuestionDefs(sourceQuiz.quizId).questions*.id == sourceQuestions*.id
     }
 
     def "selected questions append in source order after existing destination questions"() {
@@ -79,8 +122,7 @@ class QuizQuestionCopySpecs extends DefaultIntSpec  {
         }
 
         when:
-        def copied = skillsService.wsHelper.adminPost(
-                "/quiz-definitions/${sourceQuiz.quizId}/questions/copy/${destinationQuiz.quizId}".toString(),
+        def copied = skillsService.copyQuestions(sourceQuiz.quizId, destinationQuiz.quizId,
                 [sourceQuestions[3].id, sourceQuestions[1].id])
         def destinationQuestions = skillsService.getQuizQuestionDefs(destinationQuiz.quizId).questions
 
@@ -103,8 +145,7 @@ class QuizQuestionCopySpecs extends DefaultIntSpec  {
         ].collect { skillsService.createQuizQuestionDef(it).body }
 
         when:
-        def copied = skillsService.wsHelper.adminPost(
-                "/quiz-definitions/${sourceQuiz.quizId}/questions/copy/${destinationQuiz.quizId}".toString(),
+        def copied = skillsService.copyQuestions(sourceQuiz.quizId, destinationQuiz.quizId,
                 [sourceQuestions[2].id, sourceQuestions[0].id])
         def destinationQuestions = skillsService.getQuizQuestionDefs(destinationQuiz.quizId).questions
 
@@ -137,9 +178,7 @@ class QuizQuestionCopySpecs extends DefaultIntSpec  {
         runInTransaction { quizQuestionDefRepo.updateQuestion(invalidQuestion.id, 'jabberwocky') }
 
         when:
-        skillsService.wsHelper.adminPost(
-                "/quiz-definitions/${sourceQuiz.quizId}/questions/copy/${destinationQuiz.quizId}".toString(),
-                [validQuestion.id, invalidQuestion.id])
+        skillsService.copyQuestions(sourceQuiz.quizId, destinationQuiz.quizId, [validQuestion.id, invalidQuestion.id])
 
         then:
         SkillsClientException error = thrown()
