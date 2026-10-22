@@ -23,6 +23,7 @@ enum ErrorCode {
     ConstraintViolation,
     BadParam,
     AccessDenied,
+    CsrfValidationFailed,
     UserNotFound,
     SkillNotFound,
     BadgeNotFound,
