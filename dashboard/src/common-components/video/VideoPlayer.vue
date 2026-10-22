@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <script setup>
-import {computed, nextTick, onBeforeUnmount, onMounted, onUnmounted, ref} from 'vue'
+import {computed, onBeforeUnmount, onMounted, onUnmounted, ref} from 'vue'
 import videojs from 'video.js';
 import WatchedSegmentsUtil from '@/common-components/video/WatchedSegmentsUtil';
 import {useStorage} from "@vueuse/core";
@@ -67,7 +67,7 @@ const resolution = computed(() => {
 })
 const isResizing = ref(false);
 
-const isPlaying = ref(false)
+const hasEnded = ref(false)
 
 const getVideoDuration = (player) => {
   try {
@@ -81,7 +81,7 @@ const getVideoDuration = (player) => {
 const getVideoCurrentTime = (player) => {
   try {
     const currentTime = player.currentTime();
-    return (currentTime && !isNaN(currentTime) && currentTime >= 0) ? currentTime : -1;
+    return (Number.isFinite(currentTime) && currentTime >= 0) ? currentTime : -1;
   } catch (e) {
     console.error('Error getting video current time:', e);
     return -1;
@@ -122,37 +122,46 @@ onMounted(() => {
     plugins: playerPlugins
   }, () => {
     player.on('durationchange', () => {
-      const videoDuration = getVideoDuration(player)
-      const videoCurrentTime = getVideoCurrentTime(player)
-      if (videoDuration > 0 && videoCurrentTime > 0) {
-        watchProgress.value.videoDuration = videoDuration
-        updateProgress(videoCurrentTime);
-      }
+      updateProgress(player);
     });
     player.on('loadedmetadata', () => {
-      const videoDuration = getVideoDuration(player)
-      if (videoDuration > 0) {
-        watchProgress.value.videoDuration = videoDuration;
-        emit('watched-progress', watchProgress.value);
-      }
+      updateProgress(player);
     });
     player.on('timeupdate', () => {
-      const videoCurrentTime = getVideoCurrentTime(player)
-      if (videoCurrentTime > 0) {
-        updateProgress(videoCurrentTime);
-      }
+      updateProgress(player);
     });
     player.on('play', () => {
-      if(watchProgress.value.percentWatched === 100) {
+      // Reset completed watches on replay, rather than on a pause/resume
+      // near the end or only when the rounded coverage is exactly 100%.
+      if (hasEnded.value && watchProgress.value.percentWatched > 96) {
         resetProgress()
       }
-      isPlaying.value = true
+      hasEnded.value = false;
+      startWatching(player);
+    });
+    player.on('playing', () => {
+      startWatching(player);
     });
     player.on('pause', () => {
-      isPlaying.value = false
+      updateProgress(player, true);
+    });
+    player.on('waiting', () => {
+      updateProgress(player, true);
+    });
+    player.on('seeking', () => {
+      updateProgress(player, true);
+    });
+    player.on('seeked', () => {
+      if (!player.paused() && !player.ended()) {
+        startWatching(player);
+      } else {
+        updateProgress(player);
+      }
     });
     player.on('ended', () => {
-      isPlaying.value = false;
+      // Reconcile the final position and duration before deciding credit.
+      updateProgress(player, true);
+      hasEnded.value = true;
       emit('video-ended', watchProgress.value);
     })
     playerContainer.player = player
@@ -190,8 +199,31 @@ onBeforeUnmount(() => {
 onUnmounted(() => {
   emit('player-destroyed', true)
 })
-const updateProgress = (currentTime) => {
-  WatchedSegmentsUtil.updateProgress(watchProgress.value, currentTime)
+const startWatching = (player) => {
+  const currentTime = getVideoCurrentTime(player);
+  if (currentTime >= 0 && !player.seeking()) {
+    WatchedSegmentsUtil.startSegment(watchProgress.value, currentTime);
+  }
+  updateProgress(player);
+}
+
+const updateProgress = (player, closeSegment = false) => {
+  const videoDuration = getVideoDuration(player);
+  if (videoDuration > 0) {
+    watchProgress.value.videoDuration = videoDuration;
+  }
+  // During a seek, currentTime is already the destination. Close the
+  // watched segment at its last playback position before reading it.
+  if (player.seeking()) {
+    WatchedSegmentsUtil.endSegment(watchProgress.value);
+  }
+  const currentTime = getVideoCurrentTime(player);
+  if (currentTime >= 0) {
+    WatchedSegmentsUtil.updateProgress(watchProgress.value, currentTime);
+  }
+  if (closeSegment) {
+    WatchedSegmentsUtil.endSegment(watchProgress.value);
+  }
   emit('watched-progress', watchProgress.value)
 }
 

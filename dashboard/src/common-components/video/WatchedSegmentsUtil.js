@@ -13,124 +13,65 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-const isLessOrEqual = (a, b, equalityThreshold = 0.2) => a < b || Math.abs(a - b) < equalityThreshold;
-const isStartWithin = (existingSegment, newSegment) => isLessOrEqual(existingSegment.start, newSegment.start) && isLessOrEqual(newSegment.start, existingSegment.stop);
-const isEndWithin = (existingSegment, newSegment) => isLessOrEqual(existingSegment.start, newSegment.stop) && isLessOrEqual(newSegment.stop, existingSegment.stop);
-const doesOverlap = (existingSegment, newSegment) => isStartWithin(existingSegment, newSegment) || isEndWithin(existingSegment, newSegment);
-const doesCover = (existingSegment, newSegment) => newSegment.start < existingSegment.start && newSegment.stop > existingSegment.stop;
-const isWithin = (existingSegment, newSegment) => isStartWithin(existingSegment, newSegment) && isEndWithin(existingSegment, newSegment);
+const mergeSegments = (segments) => {
+  const sorted = segments.map((segment) => ({ ...segment })).sort((a, b) => a.start - b.start);
+  const merged = [];
+  sorted.forEach((segment) => {
+    const last = merged[merged.length - 1];
+    if (last && segment.start <= last.stop) {
+      last.stop = Math.max(last.stop, segment.stop);
+    } else {
+      merged.push(segment);
+    }
+  });
+  return merged;
+};
+
+/* eslint-disable no-param-reassign */
 export default {
+  startSegment(watchProgress, currentTime) {
+    if (watchProgress.currentStart === null) {
+      watchProgress.currentStart = currentTime;
+      watchProgress.lastKnownStopPosition = currentTime;
+    }
+    this.updateProgress(watchProgress, currentTime);
+  },
+  endSegment(watchProgress) {
+    if (watchProgress.currentStart !== null && watchProgress.lastKnownStopPosition !== null) {
+      watchProgress.watchSegments = mergeSegments([
+        ...watchProgress.watchSegments,
+        { start: watchProgress.currentStart, stop: watchProgress.lastKnownStopPosition },
+      ]);
+    }
+    watchProgress.currentStart = null;
+    watchProgress.lastKnownStopPosition = null;
+    this.calculateProgress(watchProgress);
+  },
   updateProgress(watchProgress, currentTime) {
-    /* eslint-disable no-param-reassign */
     watchProgress.currentPosition = currentTime;
-    if (watchProgress.start !== null
-      && watchProgress.lastKnownStopPosition !== null
-      && watchProgress.start > currentTime
-      && currentTime < watchProgress.lastKnownStopPosition) {
-      // nothing to do
-      return;
+    // Playback and seeking events define segment boundaries. A delayed
+    // timeupdate during continuous playback must not discard watched time.
+    if (watchProgress.currentStart !== null && currentTime >= watchProgress.lastKnownStopPosition) {
+      watchProgress.lastKnownStopPosition = currentTime;
     }
-    if (this.isTimeInSegments(watchProgress.watchSegments, currentTime)) {
-      // if there is an existing segment then need to close it and join it with the next segment
-      if (watchProgress.currentStart !== null && watchProgress.currentStart >= 0) {
-        const newSegment = {
-          start: watchProgress.currentStart < 1 ? 0 : watchProgress.currentStart,
-          stop: watchProgress.lastKnownStopPosition,
-        };
-        watchProgress.watchSegments = this.addToSegments(watchProgress.watchSegments, newSegment);
-        watchProgress.currentStart = null;
-        watchProgress.lastKnownStopPosition = null;
-      }
-    } else {
-      // check to see if there is an existing segment to join
-      const existingBeforeSegment = watchProgress.watchSegments.findIndex((s) => {
-        const diff = currentTime - s.stop;
-        return diff > 0 && diff < 2;
-      });
-      const existingAfterSegment = watchProgress.watchSegments.findIndex((s) => {
-        const diff = s.start - currentTime;
-        return diff > 0 && diff < 2;
-      });
-
-      if (existingBeforeSegment > -1) {
-        const existingSegment = { ...watchProgress.watchSegments[existingBeforeSegment] };
-          const newSegment = watchProgress.currentStart && watchProgress.lastKnownStopPosition ? {
-            start: watchProgress.currentStart < 1 ? 0 : watchProgress.currentStart,
-            stop: watchProgress.lastKnownStopPosition,
-          } : null;
-          watchProgress.currentStart = existingSegment.start > 1 ? existingSegment.start : 0;
-          watchProgress.lastKnownStopPosition = currentTime;
-          watchProgress.watchSegments.splice(existingBeforeSegment, 1);
-          if (newSegment) {
-            watchProgress.watchSegments = this.addToSegments(watchProgress.watchSegments, newSegment);
-          }
-      } else if (existingAfterSegment > -1) {
-        const existingSegment = { ...watchProgress.watchSegments[existingAfterSegment] };
-        watchProgress.currentStart = Math.min(existingSegment.start, watchProgress.currentStart);
-        watchProgress.lastKnownStopPosition = Math.max(existingSegment.stop, watchProgress.lastKnownStopPosition);
-        watchProgress.watchSegments.splice(existingAfterSegment, 1);
-      } else {
-        if (watchProgress.currentStart === null || watchProgress.currentStart === undefined) {
-          watchProgress.currentStart = currentTime > 1 ? currentTime : 0;
-        }
-        if (watchProgress.lastKnownStopPosition && Math.abs(watchProgress.lastKnownStopPosition - currentTime) > 1.2) {
-          const newSegment = {
-            start: watchProgress.currentStart < 1 ? 0 : watchProgress.currentStart,
-            stop: watchProgress.lastKnownStopPosition,
-          };
-          watchProgress.watchSegments = this.addToSegments(watchProgress.watchSegments, newSegment);
-          watchProgress.currentStart = currentTime;
-        }
-        watchProgress.lastKnownStopPosition = currentTime;
-      }
-      const sum = watchProgress.watchSegments.map((segment) => segment.stop - segment.start)
-        .reduce((acc, cur) => acc + cur, 0);
-      watchProgress.totalWatchTime = sum + (watchProgress.lastKnownStopPosition - watchProgress.currentStart);
-
-      if (watchProgress.videoDuration !== Infinity) {
-        if (Math.abs(watchProgress.videoDuration - watchProgress.totalWatchTime) < 1) {
-          watchProgress.totalWatchTime = watchProgress.videoDuration;
-        }
-        watchProgress.percentWatched = Math.trunc((watchProgress.totalWatchTime / watchProgress.videoDuration) * 100);
-      }
-    }
-    /* eslint-enable no-param-reassign */
+    this.calculateProgress(watchProgress);
   },
-  isTimeInSegments(existingSegments, time) {
-    if (!existingSegments) {
-      return false;
+  calculateProgress(watchProgress) {
+    const segments = [...watchProgress.watchSegments];
+    if (watchProgress.currentStart !== null && watchProgress.lastKnownStopPosition !== null) {
+      segments.push({ start: watchProgress.currentStart, stop: watchProgress.lastKnownStopPosition });
     }
-    const foundIndex = existingSegments.findIndex((item) => isLessOrEqual(item.start, time) && isLessOrEqual(time, item.stop));
-    return foundIndex >= 0;
-  },
-  addToSegments(existingSegments, newSegement) {
-    const copy = existingSegments.map((item) => ({ ...item }));
-    const existingSegment = copy.find((item) => doesOverlap(item, newSegement) || doesCover(item, newSegement));
-    if (existingSegment) {
-      if (!isWithin(existingSegment, newSegement)) {
-        if (newSegement.start < existingSegment.start) {
-          existingSegment.start = newSegement.start;
-        }
-        if (newSegement.stop > existingSegment.stop) {
-          existingSegment.stop = newSegement.stop;
-        }
+    watchProgress.totalWatchTime = mergeSegments(segments)
+      .reduce((total, segment) => total + segment.stop - segment.start, 0);
+
+    if (Number.isFinite(watchProgress.videoDuration) && watchProgress.videoDuration > 0) {
+      if (Math.abs(watchProgress.videoDuration - watchProgress.totalWatchTime) < 1) {
+        watchProgress.totalWatchTime = watchProgress.videoDuration;
       }
+      watchProgress.percentWatched = Math.min(100, Math.trunc((watchProgress.totalWatchTime / watchProgress.videoDuration) * 100));
     } else {
-      copy.push(newSegement);
+      watchProgress.percentWatched = 0;
     }
-
-    const res = [];
-    copy.sort((a, b) => a.start - b.start);
-    let lastItem = null;
-    copy.forEach((item) => {
-      if (lastItem && isLessOrEqual(item.start, lastItem.stop, 2)) {
-        lastItem.stop = item.stop;
-      } else {
-        res.push(item);
-        lastItem = item;
-      }
-    });
-
-    return res;
   },
 };
+/* eslint-enable no-param-reassign */
