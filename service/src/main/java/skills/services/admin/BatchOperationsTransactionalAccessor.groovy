@@ -30,6 +30,7 @@ import skills.services.LevelDefinitionStorageService
 import skills.services.LockingService
 import skills.services.RuleSetDefGraphService
 import skills.services.RuleSetDefinitionScoreUpdater
+import skills.services.events.SkillDate
 import skills.services.UserAchievementsAndPointsManagement
 import skills.services.settings.Settings
 import skills.services.settings.SettingsService
@@ -42,8 +43,11 @@ import skills.storage.repos.UserAchievedLevelRepo
 import skills.storage.repos.UserEventsRepo
 import skills.storage.repos.UserPerformedSkillRepo
 import skills.storage.repos.UserPointsRepo
+import skills.storage.repos.UserPointsRepo.ImportedCreditDiscrepancy
 import skills.storage.repos.nativeSql.PostgresQlNativeRepo
 import skills.tasks.TaskSchedulerService
+
+import java.util.stream.Stream
 
 @Service
 @Slf4j
@@ -114,6 +118,15 @@ class BatchOperationsTransactionalAccessor {
                 setting: SkillCatalogFinalizationService.PROJ_FINALIZE_STATE_PROP,
                 value: FinalizeState.COMPLETED.toString()))
         taskSchedulerService.scheduleCatalogParticipantBackfill(projectId)
+        // Commit activation and its catch-up tasks together. Repeated finalization is safe:
+        // tasks reconcile current state, including changes missed during an earlier failed run.
+        userPointsRepo.findCatalogCreditDiscrepancies(projectId, userCommunityService.userCommunityUserTagKey ?: '',
+                userCommunityService.userCommunityUserTagValue ?: '').withCloseable { Stream<ImportedCreditDiscrepancy> discrepancies ->
+            discrepancies.forEach { ImportedCreditDiscrepancy discrepancy ->
+                taskSchedulerService.scheduleImportedSkillAchievement(discrepancy.userId, discrepancy.skillRefId,
+                        new SkillDate(date: new Date(), isProvided: false), false, false)
+            }
+        }
     }
 
     @Transactional
@@ -444,6 +457,7 @@ class BatchOperationsTransactionalAccessor {
     @Transactional
     @Profile
     void batchRemovePerformedSkillsForUserAndSpecificSkills(String userId, String projectId, List<Integer> skillRefIds) {
+        lockingService.lockForSkillReporting(userId, projectId)
         userPerformedSkillRepo.deleteAllByUserIdAndSkillRefIdIn(userId, skillRefIds)
         userEventsRepo.deleteAllByUserIdAndSkillRefIdIn(userId, skillRefIds)
         userPointsRepo.deleteAllByUserIdAndSkillRefIdIn(userId, skillRefIds)
@@ -457,6 +471,23 @@ class BatchOperationsTransactionalAccessor {
         userPointsRepo.updateUserPointsForProjectAndUser(projectId, userId)
         userPointsRepo.removeOrphanedProjectPointsForUser(projectId, userId)
         userAchievementsAndPointsManagement.removeProjectLevelAchievementsIfUserDoesNotQualify(userId, projectId)
+        // Quiz-linked source cleanup can run after an import's own cleanup task.
+        // Notify copies again after the actual source rows have been removed, including
+        // disabled copies whose activation snapshot may precede this transaction's commit.
+        skillRefIds.each { Integer skillRefId ->
+            skillDefRepo.findSkillDefIdsByCopiedFromIncludingDisabled(skillRefId).each { Integer importedId ->
+                taskSchedulerService.scheduleImportedSkillAchievement(userId, importedId,
+                        new SkillDate(date: new Date(), isProvided: false), false, false)
+            }
+        }
+    }
+
+    @Transactional
+    void removeCatalogSkillAchievements(String userId, String projectId, List<Integer> skillRefIds) {
+        userAchievedLevelRepo.deleteAllBySkillRefIdInAndUserId(skillRefIds, userId)
+        removeGroupAchievementsForSkillsForASpecificUser(skillRefIds, userId)
+        removeBadgeAchievementsForSkillsAndSpecificUser(skillRefIds, userId)
+        removeGlobalBadgeAchievementsForSkillsAndSpecificUser(skillRefIds, userId)
     }
 
     @Profile
