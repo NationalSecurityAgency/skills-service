@@ -87,13 +87,13 @@ const nextMonthlyExpirationDate = computed(() => {
   let nextExpirationDate = null
   if (expirationType.value === MONTHLY) {
     // calculate next expiration date
-    const now = dayjs().utc();
+    const now = dayjs();
     const currentDayOfMonth = now.date();
     let incrementMonthBy = monthlyMonths.value
     if (monthlyDayOption.value === LAST_DAY_OF_MONTH || (monthlyDayOption.value === SET_DAY_OF_MONTH && currentDayOfMonth <= monthlyDay.value)) {
       incrementMonthBy -= 1
     }
-    nextExpirationDate = dayjs(new Date(now.year(), now.month(), now.day())).date(1).add(incrementMonthBy, 'month');
+    nextExpirationDate = now.startOf('day').date(1).add(incrementMonthBy, 'month');
     if (monthlyDayOption.value === FIRST_DAY_OF_MONTH) {
       nextExpirationDate = nextExpirationDate.date(1)
     } else if (monthlyDayOption.value === LAST_DAY_OF_MONTH) {
