@@ -31,6 +31,15 @@ describe('Configure Skill Expiration Tests', () => {
         cy.intercept('DELETE', '/admin/projects/proj1/skills/skill1/expiration').as('deleteExpirationSettings')
     });
 
+    afterEach(() => {
+        if (Cypress.browser.name === 'chrome') {
+            cy.wrap(Cypress.automation('remote:debugger:protocol', {
+                command: 'Emulation.setTimezoneOverride',
+                params: { timezoneId: '' },
+            }))
+        }
+    })
+
     it('expiration type of NONE is selected by default', () => {
         cy.createProject(1)
         cy.createSubject(1, 1);
@@ -167,6 +176,41 @@ describe('Configure Skill Expiration Tests', () => {
         cy.get('[data-cy="nextMonthlyExpirationDate"]').should('be.visible');
         cy.get('[data-cy="nextMonthlyExpirationDate"]').should('contain.text', `Next expiration date: ${startOfNextMonth.format('YYYY-MM-DD')}`);
     });
+
+    it('uses the browser calendar month when UTC is already in the next month', { browser: 'chrome' }, () => {
+        cy.createProject(1)
+        cy.createSubject(1, 1)
+        cy.createSkill(1, 1, 1)
+
+        cy.wrap(Cypress.automation('remote:debugger:protocol', {
+            command: 'Emulation.setTimezoneOverride',
+            params: { timezoneId: 'America/New_York' },
+        }))
+        cy.visit('/administrator/projects/proj1/subjects/subj1/skills/skill1/config-expiration', {
+            onBeforeLoad(win) {
+                const RealDate = win.Date
+                const fixedTime = RealDate.parse('2026-11-01T00:30:00Z')
+                win.Date = class extends RealDate {
+                    constructor(...args) {
+                        super(...(args.length ? args : [fixedTime]))
+                    }
+
+                    static now() {
+                        return fixedTime
+                    }
+                }
+            }
+        })
+        cy.get('[data-cy="expirationTypeSelector"] [data-cy="monthlyRadio"]').click()
+        cy.get('[data-cy="nextMonthlyExpirationDate"]')
+            .should('be.visible')
+            .and('contain.text', 'Next expiration date: 2026-11-01')
+
+        cy.get('[data-cy="saveSettingsBtn"]').click()
+        cy.get('[data-cy="settingsSavedAlert"]').should('be.visible')
+        cy.get('[data-cy="nextMonthlyExpirationDate"]').should('contain.text', 'Next expiration date: 2026-11-01')
+
+    })
 
     it('changing monthlyMonths value enables save button on input', () => {
       cy.createProject(1)
