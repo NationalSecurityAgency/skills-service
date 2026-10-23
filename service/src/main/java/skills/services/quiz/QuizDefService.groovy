@@ -323,6 +323,7 @@ class QuizDefService {
         }
         QuizDef originalQuizDef = findQuizDef(originalQuizId)
         QuizDef newQuizDef = findQuizDef(newQuizId)
+        lockingService.lockQuizDef(newQuizDef.quizId)
 
         if(questionIdsToCopy?.size() > 0) {
             Integer questions = quizQuestionRepo.countByQuizId(newQuizId)
@@ -355,7 +356,6 @@ class QuizDefService {
         // validate questions
         validateQuestions(originalQuestions, originalQuizDef.quizId)
 
-        lockingService.lockQuizDef(newQuizDef.quizId)
         Integer nextDisplayOrder = quizQuestionRepo.getMaxQuestionDisplayOrderByQuizId(newQuizDef.quizId)
         nextDisplayOrder = nextDisplayOrder != null ? nextDisplayOrder + 1 : 0
 

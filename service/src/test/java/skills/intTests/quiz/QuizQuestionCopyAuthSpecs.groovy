@@ -29,6 +29,30 @@ class QuizQuestionCopyAuthSpecs extends DefaultIntSpec {
     @Autowired
     QuizQuestionDefRepo quizQuestionDefRepo
 
+    def "validating a copy requires destination quiz admin access"() {
+        SkillsService sourceAdmin = createService(getRandomUsers(1)[0])
+        def sourceQuiz = QuizDefFactory.createQuiz(1)
+        def destinationQuiz = QuizDefFactory.createQuiz(2)
+        sourceAdmin.createQuizDef(sourceQuiz)
+        skillsService.createQuizDef(destinationQuiz)
+        skillsService.createQuizQuestionDef(QuizDefFactory.createChoiceQuestion(2, 1, 2))
+
+        when: 'an admin of the source requests validation for a quiz they do not administer'
+        sourceAdmin.validateCopyQuestions(sourceQuiz.quizId, destinationQuiz.quizId, 1)
+
+        then:
+        SkillsClientException denied = thrown()
+        denied.httpStatus == HttpStatus.FORBIDDEN
+
+        when: 'the source admin is granted destination access'
+        skillsService.addQuizUserRole(destinationQuiz.quizId, sourceAdmin.userName, 'ROLE_QUIZ_ADMIN')
+        def validation = sourceAdmin.validateCopyQuestions(sourceQuiz.quizId, destinationQuiz.quizId, 1)
+
+        then:
+        validation.body.isAllowed
+        validation.body.validationErrors.empty
+    }
+
     def "copying questions requires destination quiz admin access"() {
         SkillsService sourceAdmin = createService(getRandomUsers(1)[0])
         def sourceQuiz = QuizDefFactory.createQuiz(1)
