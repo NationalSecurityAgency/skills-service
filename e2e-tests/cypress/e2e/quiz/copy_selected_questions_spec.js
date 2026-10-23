@@ -61,10 +61,10 @@ describe('Copy selected quiz questions', () => {
         cy.get(`${checkbox(4)} input`).should('be.checked');
         openCopyDialog();
         cy.get('[data-cy="saveDialogBtn"]').should('be.disabled');
-        cy.contains('This will copy 2 question(s)').should('be.visible');
+        cy.contains('This will copy 2 questions').should('be.visible');
         selectDestination('This is quiz 2');
         cy.get('[data-cy="saveDialogBtn"]').click();
-        cy.contains('Successfully copied 2 question(s)').should('be.visible');
+        cy.contains('Successfully copied 2 questions').should('be.visible');
         cy.get('[data-cy="closeDialogBtn"]').click();
         cy.get('[data-cy="questionActionsBtn"]').should('be.disabled');
         cy.get(`${checkbox(2)} input`).should('not.be.checked');
@@ -99,7 +99,7 @@ describe('Copy selected quiz questions', () => {
         cy.contains('.p-select-option', 'This is quiz 3').should('not.exist');
         cy.contains('.p-select-option', 'This is survey 2').click();
         cy.get('[data-cy="saveDialogBtn"]').should('be.enabled').click();
-        cy.contains('Successfully copied 2 question(s)').should('be.visible');
+        cy.contains('Successfully copied 2 questions').should('be.visible');
         cy.get('[data-cy="closeDialogBtn"]').click();
 
         cy.visit('/administrator/quizzes/quiz2');
@@ -122,7 +122,7 @@ describe('Copy selected quiz questions', () => {
         selectDestination('This is quiz 2');
         cy.get('[data-cy="validationFailedMsg"]').should('not.exist');
         cy.get('[data-cy="saveDialogBtn"]').click();
-        cy.contains('Successfully copied 1 question(s)').should('be.visible');
+        cy.contains('Successfully copied 1 question').should('be.visible');
         cy.get('[data-cy="closeDialogBtn"]').click();
 
         cy.visit('/administrator/quizzes/quiz2');
@@ -175,9 +175,9 @@ describe('Copy selected quiz questions', () => {
 
         cy.get('[data-cy="saveDialogBtn"]').click();
         cy.get('[data-cy="copyQuestionsFailedMsg"]').should('contain.text', 'Copy temporarily unavailable');
-        cy.contains('This will copy 1 question(s)').should('be.visible');
+        cy.contains('This will copy 1 question').should('be.visible');
         cy.get('[data-cy="saveDialogBtn"]').should('be.enabled').click();
-        cy.contains('Successfully copied 1 question(s)').should('be.visible');
+        cy.contains('Successfully copied 1 question').should('be.visible');
         cy.get('[data-cy="closeDialogBtn"]').click();
         cy.get('[data-cy="questionActionsBtn"]').should('be.disabled');
 
