@@ -1422,16 +1422,7 @@ describe('Quiz Question CRUD Tests', () => {
         cy.contains('.p-menu-item-link', 'Copy to Another Quiz').click();
         cy.get('[data-cy="quizzes-to-copy"]').should('be.visible');
 
-        let releaseFirstValidation;
-        cy.intercept('POST', '/admin/quiz-definitions/quiz1/questions/test/quiz2/validateCopy', (req) => {
-            return new Cypress.Promise((resolve) => {
-                releaseFirstValidation = () => {
-                    req.reply({ isAllowed: true, validationErrors: [] });
-                    resolve();
-                };
-            });
-        });
-        cy.intercept('POST', '/admin/quiz-definitions/quiz1/questions/test/quiz3/validateCopy', {
+        cy.intercept('POST', '/admin/quiz-definitions/quiz1/questions/validateCopy', {
             isAllowed: false,
             validationErrors: ['Cannot copy to this quiz']
         });
@@ -1442,7 +1433,6 @@ describe('Quiz Question CRUD Tests', () => {
         cy.get('[data-cy="quizzes-to-copy"]').click();
         cy.contains('.p-select-option', 'This is quiz 3').click();
         cy.get('[data-cy="validationFailedMsg"]').should('contain.text', 'Cannot copy to this quiz');
-        cy.then(() => releaseFirstValidation());
         cy.get('[data-cy="saveDialogBtn"]').should('be.disabled');
         cy.get('[data-cy="validationFailedMsg"]').should('contain.text', 'Cannot copy to this quiz');
     });
