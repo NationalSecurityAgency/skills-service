@@ -150,14 +150,14 @@ class SecurityConfiguration {
             CorsConfiguration adminConfiguration = buildCorsConfiguration(adminAllowedOriginPatterns)
             adminConfiguration.setAllowCredentials(true)
             source.registerCorsConfiguration('/admin/**', adminConfiguration)
+            source.registerCorsConfiguration('/performLogin', adminConfiguration)
+            source.registerCorsConfiguration('/logout', adminConfiguration)
             CorsConfiguration appReadConfiguration = buildCorsConfiguration(adminAllowedOriginPatterns)
             appReadConfiguration.setAllowCredentials(true)
             appReadConfiguration.setAllowedMethods([HttpMethod.GET.name()])
             ['/app/projects', '/app/quiz-definitions', '/app/badges'].each { String path ->
                 source.registerCorsConfiguration(path, appReadConfiguration)
             }
-            source.registerCorsConfiguration('/performLogin', adminConfiguration)
-            source.registerCorsConfiguration('/logout', adminConfiguration)
             log.info("Configuring admin/app CORS with allowed origin patterns: [${adminAllowedOriginPatterns}], allowCredentials: [true]")
         }
 
