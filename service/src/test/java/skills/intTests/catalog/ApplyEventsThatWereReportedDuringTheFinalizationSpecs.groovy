@@ -15,163 +15,172 @@
  */
 package skills.intTests.catalog
 
-
 import org.springframework.beans.factory.annotation.Autowired
-import skills.intTests.utils.SkillsFactory
+import skills.intTests.utils.SkillsService
 import skills.services.admin.SkillCatalogFinalizationService
 import skills.storage.model.SkillDef
 import skills.storage.model.UserAchievement
 import skills.storage.model.UserPerformedSkill
 import skills.storage.model.UserPoints
 
+import static skills.intTests.utils.SkillsFactory.*
+
 class ApplyEventsThatWereReportedDuringTheFinalizationSpecs extends CatalogIntSpec {
+    @Autowired SkillCatalogFinalizationService skillCatalogFinalizationService
 
-    @Autowired
-    SkillCatalogFinalizationService skillCatalogFinalizationService
+    def "replaying already propagated events must not add their points again"() {
+        Map fixture = fixture(10000)
+        List<UserPerformedSkill> events = reportSourceEvents(fixture, 4)
+        Map window = replayWindow(events[1..2])
+        assert readProgress(fixture, true).projectPoints == 40
+        assert readProgress(fixture) == [skillPoints: 40, subjectPoints: 40, projectPoints: 40,
+                                       skillsAchieved: 0, subjectLevel: 0, projectLevel: 0]
 
-
-    def "make sure to propagate events that were reported during finalization and were not accounted for during its data migration"() {
-        def proj1 = SkillsFactory.createProject(1)
-        def subj = SkillsFactory.createSubject(1)
-        def skill2 = SkillsFactory.createSkill(1, 1, 2, 1, 10000)
-        skill2.pointIncrementInterval = 0
-        skillsService.createProjectAndSubjectAndSkills(proj1, subj, [skill2])
-
-        def proj2 = SkillsFactory.createProject(2)
-        def p2_subj = SkillsFactory.createSubject(2)
-        skillsService.createProjectAndSubjectAndSkills(proj2, p2_subj, [])
-
-        skillsService.exportSkillToCatalog(proj1.projectId, skill2.skillId)
-        skillsService.bulkImportSkillsFromCatalogAndFinalize(proj2.projectId, p2_subj.subjectId, [
-                [projectId: proj1.projectId, skillId: skill2.skillId],
-        ])
-        String user = getRandomUsers(1)[0]
-        participateInProject(proj2.projectId, [user])
-
-        skillsService.addSkill([projectId: proj1.projectId, skillId: skill2.skillId], user)
-        Thread.sleep(100)
-
-        long start = System.currentTimeMillis()
-        skillsService.addSkill([projectId: proj1.projectId, skillId: skill2.skillId], user)
-        Thread.sleep(100)
-        skillsService.addSkill([projectId: proj1.projectId, skillId: skill2.skillId], user)
-        long end = System.currentTimeMillis()
-
-        Thread.sleep(100)
-        skillsService.addSkill([projectId: proj1.projectId, skillId: skill2.skillId], user)
-
-        waitForAsyncTasksCompletion.waitForAllScheduleTasks()
-
-        SkillDef skillDef = skillDefRepo.findByProjectIdAndSkillId(proj2.projectId, skill2.skillId)
-        assert skillDef
-
-        Closure<Integer> getPoints = { String userParam, String projectId, String skillId ->
-            List<UserPoints> points = userPointsRepo.findAll().findAll({it.userId == userParam && it.projectId == projectId && it.skillId == skillId })
-            if (points) {
-                assert points.size() == 1
-            }
-            return points ? points[0].points : 0
-        }
-
-        when:
-        def skillPts_before = getPoints(user, proj2.projectId, skill2.skillId)
-        def subjPts_before = getPoints(user, proj2.projectId, p2_subj.skillId)
-        def projPts_before = getPoints(user, proj2.projectId, null)
-
-        skillCatalogFinalizationService.applyEventsThatWereReportedDuringTheFinalizationRun([skillDef.id], start, end)
-        waitForAsyncTasksCompletion.waitForAllScheduleTasks()
+        when: 'two events in the finalization window have already reached the destination'
+        replay(fixture, window)
 
         then:
-        skillPts_before == 10 * 4
-        subjPts_before == 10 * 4
-        projPts_before == 10 * 4
+        readProgress(fixture) == [skillPoints: 40, subjectPoints: 40, projectPoints: 40,
+                                 skillsAchieved: 0, subjectLevel: 0, projectLevel: 0]
 
-        getPoints(user, proj2.projectId, skill2.skillId) == 10 * 6
-        getPoints(user, proj2.projectId, p2_subj.skillId) == 10 * 6
-        getPoints(user, proj2.projectId, null) == 10 * 6
+        when: 'the same window is replayed again'
+        replay(fixture, window)
 
-        !userAchievedRepo.findAll()
+        then:
+        readProgress(fixture) == [skillPoints: 40, subjectPoints: 40, projectPoints: 40,
+                                 skillsAchieved: 0, subjectLevel: 0, projectLevel: 0]
+        readProgress(fixture, true).skillPoints == 40
     }
 
-    def "post migration event propagation must be able to handle achievements"() {
-        def proj1 = SkillsFactory.createProject(1)
-        def subj = SkillsFactory.createSubject(1)
-        def skill1 = SkillsFactory.createSkill(1, 1, 1, 1, 6)
-        def skill2 = SkillsFactory.createSkill(1, 1, 2, 1, 6)
-        def skill3 = SkillsFactory.createSkill(1, 1, 3, 1, 6)
-        skill2.pointIncrementInterval = 0
-        skillsService.createProjectAndSubjectAndSkills(proj1, subj, [skill1, skill2, skill3])
+    def "replay recovers missing credit and a genuine completion without duplicating achievements"() {
+        Map fixture = fixture(6, true)
+        List<UserPerformedSkill> events = reportSourceEvents(fixture, 6)
+        Map window = replayWindow(events[4..5])
+        Date completionDate = events.last().performedOn
+        assert readProgress(fixture, true).skillPoints == 60
+        assert readProgress(fixture, true).skillsAchieved == 1
 
-        def proj2 = SkillsFactory.createProject(2)
-        def p2_subj = SkillsFactory.createSubject(2)
-        skillsService.createProjectAndSubjectAndSkills(proj2, p2_subj, [])
-
-        skillsService.exportSkillToCatalog(proj1.projectId, skill1.skillId)
-        skillsService.exportSkillToCatalog(proj1.projectId, skill2.skillId)
-        skillsService.exportSkillToCatalog(proj1.projectId, skill3.skillId)
-        skillsService.bulkImportSkillsFromCatalogAndFinalize(proj2.projectId, p2_subj.subjectId, [
-                [projectId: proj1.projectId, skillId: skill1.skillId],
-                [projectId: proj1.projectId, skillId: skill2.skillId],
-        ])
-        String user = getRandomUsers(1)[0]
-        participateInProject(proj2.projectId, [user])
-
-        skillsService.addSkill([projectId: proj1.projectId, skillId: skill2.skillId], user)
-        Thread.sleep(100)
-
-        long start = System.currentTimeMillis()
-        skillsService.addSkill([projectId: proj1.projectId, skillId: skill2.skillId], user)
-        Thread.sleep(100)
-        skillsService.addSkill([projectId: proj1.projectId, skillId: skill2.skillId], user)
-        long end = System.currentTimeMillis()
-
-        Thread.sleep(100)
-        skillsService.addSkill([projectId: proj1.projectId, skillId: skill2.skillId], user)
-
-        waitForAsyncTasksCompletion.waitForAllScheduleTasks()
-
-        SkillDef skillDef = skillDefRepo.findByProjectIdAndSkillId(proj2.projectId, skill2.skillId)
-        assert skillDef
-
-        Closure<Integer> getPoints = { String userParam, String projectId, String skillId ->
-            List<UserPoints> points = userPointsRepo.findAll().findAll({it.userId == userParam && it.projectId == projectId && it.skillId == skillId })
-            if (points) {
-                assert points.size() == 1
-            }
-            return points ? points[0].points : 0
-        }
+        // Model a migration snapshot taken after four reports, before the final two
+        // reports and completion. Source credit and its genuine award remain intact.
+        restoreDestinationSnapshot(fixture, 40)
+        assert readProgress(fixture) == [skillPoints: 40, subjectPoints: 40, projectPoints: 40,
+                                       skillsAchieved: 0, subjectLevel: 2, projectLevel: 2]
 
         when:
-        def skillPts_before = getPoints(user, proj2.projectId, skill2.skillId)
-        def subjPts_before = getPoints(user, proj2.projectId, p2_subj.skillId)
-        def projPts_before = getPoints(user, proj2.projectId, null)
-
-        // simulate skill2 achievement in proj1
-        List<UserPerformedSkill> performedSkills = userPerformedSkillRepo.findAll().sort({ it.performedOn })
-        UserAchievement skillAchieved = new UserAchievement(userId: user, projectId: proj1.projectId, skillId: skill2.skillId,
-                skillRefId: skillDefRepo.findByProjectIdAndSkillId(proj1.projectId, skill2.skillId).id, pointsWhenAchieved: 60, achievedOn: performedSkills[performedSkills.size() - 2].performedOn)
-        userAchievedRepo.save(skillAchieved)
-
-        List<UserAchievement> achievementsBefore = userAchievedRepo.findAll()
-
-        skillCatalogFinalizationService.applyEventsThatWereReportedDuringTheFinalizationRun([skillDef.id], start, end)
-        waitForAsyncTasksCompletion.waitForAllScheduleTasks()
-
-        List<UserAchievement> achievementsAfter = userAchievedRepo.findAll()
+        replay(fixture, window)
 
         then:
-        skillPts_before == 10 * 4
-        subjPts_before == 10 * 4
-        projPts_before == 10 * 4
-        !achievementsBefore.findAll( { it.skillId == skill2.skillId && it.projectId == proj2.projectId})
-        achievementsBefore.findAll( { it.skillId == p2_subj.subjectId && it.projectId == proj2.projectId}).level.sort() == [1, 2]
-        achievementsBefore.findAll( { !it.skillId && it.projectId == proj2.projectId}).level.sort() == [1, 2]
+        readProgress(fixture) == [skillPoints: 60, subjectPoints: 60, projectPoints: 60,
+                                 skillsAchieved: 1, subjectLevel: 3, projectLevel: 3]
+        assertDestinationAchievements(fixture, completionDate)
 
-        getPoints(user, proj2.projectId, skill2.skillId) == 10 * 6
-        getPoints(user, proj2.projectId, p2_subj.skillId) == 10 * 6
-        getPoints(user, proj2.projectId, null) == 10 * 6
-        achievementsAfter.findAll( { it.skillId == skill2.skillId && it.projectId == proj2.projectId}).pointsWhenAchieved == [60]
-        achievementsAfter.findAll( { it.skillId == p2_subj.subjectId && it.projectId == proj2.projectId}).level.sort() == [1, 2, 3]
-        achievementsAfter.findAll( { !it.skillId && it.projectId == proj2.projectId}).level.sort() == [1, 2, 3]
+        when: 'the recovered events are delivered again'
+        replay(fixture, window)
+
+        then:
+        readProgress(fixture) == [skillPoints: 60, subjectPoints: 60, projectPoints: 60,
+                                 skillsAchieved: 1, subjectLevel: 3, projectLevel: 3]
+        assertDestinationAchievements(fixture, completionDate)
+        readProgress(fixture, true).skillPoints == 60
+    }
+
+    private Map fixture(int occurrences, boolean includeOtherSkills = false) {
+        Map sourceProject = createProject(1)
+        Map sourceSubject = createSubject(1)
+        Map sourceSkill = createSkill(1, 1, 2, 1, occurrences)
+        sourceSkill.pointIncrementInterval = 0
+        List<Map> sourceSkills = includeOtherSkills ?
+                [createSkill(1, 1, 1, 1, occurrences), sourceSkill, createSkill(1, 1, 3, 1, occurrences)] : [sourceSkill]
+        skillsService.createProjectAndSubjectAndSkills(sourceProject, sourceSubject, sourceSkills)
+
+        Map destinationProject = createProject(2)
+        Map destinationSubject = createSubject(2)
+        skillsService.createProjectAndSubjectAndSkills(destinationProject, destinationSubject, [])
+        sourceSkills.each { Map skill -> skillsService.exportSkillToCatalog(sourceProject.projectId, skill.skillId) }
+        List<Map> imports = includeOtherSkills ? sourceSkills.take(2) : [sourceSkill]
+        skillsService.bulkImportSkillsFromCatalogAndFinalize(destinationProject.projectId, destinationSubject.subjectId, imports)
+
+        String userId = getRandomUsers(1)[0]
+        participateInProject(destinationProject.projectId, [userId])
+        SkillDef imported = skillDefRepo.findByProjectIdAndSkillId(destinationProject.projectId, sourceSkill.skillId)
+        [sourceSkill: sourceSkill, projectId: destinationProject.projectId, subjectId: destinationSubject.subjectId,
+         importedRefId: imported.id, userId: userId, learner: createService(userId)]
+    }
+
+    private List<UserPerformedSkill> reportSourceEvents(Map fixture, int count) {
+        Map sourceSkill = fixture.sourceSkill
+        Date firstDate = new Date(System.currentTimeMillis() - 3 * 86400000L)
+        (0..<count).each { int index ->
+            assert skillsService.addSkill(sourceSkill, fixture.userId, new Date(firstDate.time + index * 1000L)).body.skillApplied
+        }
+        waitForAsyncTasksCompletion.waitForAllScheduleTasks()
+        Integer sourceRefId = skillDefRepo.findByProjectIdAndSkillId(sourceSkill.projectId, sourceSkill.skillId).id
+        List<UserPerformedSkill> events = userPerformedSkillRepo.findAllBySkillRefIdAndUserId(sourceRefId, fixture.userId)
+                .sort { UserPerformedSkill event -> event.performedOn }
+        assert events.size() == count
+        // Replay selects report creation time. Give the real HTTP-created events explicit,
+        // separated creation times so window membership does not depend on execution speed.
+        events.each { UserPerformedSkill event -> event.created = event.performedOn }
+        userPerformedSkillRepo.saveAll(events)
+        return events
+    }
+
+    private Map replayWindow(List<UserPerformedSkill> selectedEvents) {
+        Date start = new Date(selectedEvents.first().created.time - 1)
+        Date end = new Date(selectedEvents.last().created.time + 1)
+        List<UserPerformedSkill> found = userPerformedSkillRepo.findAllBySkillRefIdWithinTimeRange(
+                selectedEvents.first().skillRefId, start, end)
+        assert found.collect { UserPerformedSkill event -> event.id }.sort() ==
+                selectedEvents.collect { UserPerformedSkill event -> event.id }.sort()
+        [start: start.time, end: end.time]
+    }
+
+    private void replay(Map fixture, Map window) {
+        skillCatalogFinalizationService.applyEventsThatWereReportedDuringTheFinalizationRun(
+                [fixture.importedRefId], window.start, window.end)
+        waitForAsyncTasksCompletion.waitForAllScheduleTasks()
+    }
+
+    private Map readProgress(Map fixture, boolean source = false) {
+        SkillsService learner = fixture.learner
+        Map sourceSkill = fixture.sourceSkill
+        String projectId = source ? sourceSkill.projectId : fixture.projectId
+        String subjectId = source ? sourceSkill.subjectId : fixture.subjectId
+        Map summary = learner.getSkillsSummaryForCurrentUser(projectId)
+        Map subject = summary.subjects.find { Map candidate -> candidate.subjectId == subjectId }
+        Map skill = learner.getSingleSkillSummaryForCurrentUser(projectId, sourceSkill.skillId)
+        [skillPoints: skill.points, subjectPoints: subject.points, projectPoints: summary.points,
+         skillsAchieved: summary.skillsAchieved, subjectLevel: subject.skillsLevel, projectLevel: summary.skillsLevel]
+    }
+
+    private void restoreDestinationSnapshot(Map fixture, int points) {
+        List<UserPoints> rows = [fixture.sourceSkill.skillId, fixture.subjectId, null].collect { String skillId ->
+            UserPoints row = userPointsRepo.findByProjectIdAndUserIdAndSkillId(fixture.projectId, fixture.userId, skillId)
+            assert row
+            row.points = points
+            return row
+        }
+        userPointsRepo.saveAll(rows)
+        List<UserAchievement> skillAwards = userAchievedRepo.findAllByUserIdAndProjectIdAndSkillId(
+                fixture.userId, fixture.projectId, fixture.sourceSkill.skillId)
+        List<UserAchievement> subjectLevels = userAchievedRepo.findAllByUserIdAndProjectIdAndSkillIdAndLevelNotNull(
+                fixture.userId, fixture.projectId, fixture.subjectId)
+        List<UserAchievement> projectLevels = userAchievedRepo.findAllByUserIdAndProjectIdAndSkillIdAndLevelNotNull(
+                fixture.userId, fixture.projectId, null)
+        userAchievedRepo.deleteAll(skillAwards + (subjectLevels + projectLevels).findAll { UserAchievement award -> award.level > 2 })
+    }
+
+    private void assertDestinationAchievements(Map fixture, Date completionDate) {
+        // The endpoints above expose completion and current levels, but not duplicate rows
+        // or all stored achievement dates. Check just those persistence guarantees here.
+        List<UserAchievement> skillAwards = userAchievedRepo.findAllByUserIdAndProjectIdAndSkillId(
+                fixture.userId, fixture.projectId, fixture.sourceSkill.skillId)
+        assert skillAwards.size() == 1
+        assert skillAwards.first().pointsWhenAchieved == 60
+        assert skillAwards.first().achievedOn == completionDate
+        assert userAchievedRepo.findAllByUserIdAndProjectIdAndSkillIdAndLevelNotNull(
+                fixture.userId, fixture.projectId, fixture.subjectId).collect { UserAchievement award -> award.level }.sort() == [1, 2, 3]
+        assert userAchievedRepo.findAllByUserIdAndProjectIdAndSkillIdAndLevelNotNull(
+                fixture.userId, fixture.projectId, null).collect { UserAchievement award -> award.level }.sort() == [1, 2, 3]
     }
 }

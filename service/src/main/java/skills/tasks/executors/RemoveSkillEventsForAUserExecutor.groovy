@@ -22,7 +22,13 @@ import com.github.kagkarlsson.scheduler.task.VoidExecutionHandler
 import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
+import org.springframework.transaction.annotation.Transactional
 import skills.services.admin.BatchOperationsTransactionalAccessor
+import skills.services.LockingService
+import skills.services.events.SkillDate
+import skills.services.events.pointsAndAchievements.ImportedSkillsAchievementsHandler
+import skills.storage.model.SkillDefMin
+import skills.storage.repos.SkillDefRepo
 import skills.tasks.data.RemoveSkillEventsForUserRequest
 
 @Component
@@ -31,8 +37,12 @@ class RemoveSkillEventsForAUserExecutor implements VoidExecutionHandler<RemoveSk
 
     @Autowired
     BatchOperationsTransactionalAccessor batchOperationsTransactionalAccessor
+    @Autowired SkillDefRepo skillDefRepo
+    @Autowired LockingService lockingService
+    @Autowired ImportedSkillsAchievementsHandler importedSkillsAchievementsHandler
 
     @Override
+    @Transactional
     void execute(TaskInstance<RemoveSkillEventsForUserRequest> taskInstance, ExecutionContext executionContext) {
         RemoveSkillEventsForUserRequest data = taskInstance.getData()
         log.debug("running async RemoveSkillEventsForAUserExecutor for userId=[{}], projId=[{}], skillRefIds={}", data.userId, data.projectId, data.skillRefIds)
@@ -41,7 +51,17 @@ class RemoveSkillEventsForAUserExecutor implements VoidExecutionHandler<RemoveSk
         String profName = "${data.projectId}-${data.userId}-RemoveSkillEventsForAUserExecutor".toString()
         CProf.start(profName)
 
-        batchOperationsTransactionalAccessor.batchRemovePerformedSkillsForUserAndSpecificSkills(data.userId, data.projectId, data.skillRefIds)
+        lockingService.lockForSkillReporting(data.userId, data.projectId)
+        List<SkillDefMin> skills = data.skillRefIds.collect { Integer id -> skillDefRepo.findSkillDefMinById(id) }.findAll { it != null }
+        List<Integer> localIds = skills.findAll { SkillDefMin skill -> !skill.copiedFrom }.collect { SkillDefMin skill -> skill.id }
+        if (localIds) {
+            batchOperationsTransactionalAccessor.batchRemovePerformedSkillsForUserAndSpecificSkills(data.userId, data.projectId, localIds)
+        }
+        skills.findAll { SkillDefMin skill -> skill.copiedFrom != null }.each { SkillDefMin skill ->
+            // An old deletion request must not erase newer source credit.
+            importedSkillsAchievementsHandler.handleAchievementsForImportedSkills(data.userId, skill,
+                    new SkillDate(date: new Date(), isProvided: false), false, false)
+        }
 
         CProf.stop(profName)
         log.info("Profiled RemoveSkillEventsForAUserExecutor for [{}-{}]:\n{}", data.projectId, data.userId, CProf.prettyPrint())
