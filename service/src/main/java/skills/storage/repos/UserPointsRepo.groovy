@@ -40,6 +40,75 @@ interface UserPointsRepo extends CrudRepository<UserPoints, Integer> {
     @Nullable
     UserPoints findByProjectIdAndUserIdAndSkillId(String projectId, String userId, @Nullable String skillId)
 
+    // Points, completion, and the latest credited event are read from one source snapshot.
+    @Query(value = '''select coalesce(source.points / original.point_increment, 0) * imported.point_increment as points,
+                            achievement.achieved_on as achievedOn,
+                            achievement.points_when_achieved as pointsWhenAchieved,
+                            (select max(event.performed_on) from user_performed_skill event
+                             where event.skill_ref_id = original.id and event.user_id = :userId) as performedOn
+                     from skill_definition imported
+                     join skill_definition original on original.id = imported.copied_from_skill_ref
+                     left join user_points source on source.skill_ref_id = original.id and source.user_id = :userId
+                     left join user_achievement achievement on achievement.skill_ref_id = original.id
+                          and achievement.user_id = :userId and achievement.level is null
+                     where imported.id = :skillRefId''', nativeQuery = true)
+    @Nullable
+    ImportedCreditSnapshot readImportedCredit(@Param('userId') String userId, @Param('skillRefId') Integer skillRefId)
+
+    interface ImportedCreditSnapshot {
+        Integer getPoints()
+        @Nullable
+        Date getAchievedOn()
+        @Nullable
+        Integer getPointsWhenAchieved()
+        @Nullable
+        Date getPerformedOn()
+    }
+
+    @Modifying
+    @Query(value = '''insert into user_points(user_id, project_id, skill_id, skill_ref_id, points, created, updated)
+                     values (:userId, :projectId, :skillId, :skillRefId, :points, :creditDate, :creditDate)
+                     on conflict (project_id, skill_id, user_id) do update
+                     set points = excluded.points, updated = excluded.updated
+                     where user_points.points <> excluded.points''', nativeQuery = true)
+    void reconcileImportedPoints(@Param('userId') String userId, @Param('projectId') String projectId,
+                                 @Param('skillId') String skillId, @Param('skillRefId') Integer skillRefId,
+                                 @Param('points') Integer points, @Param('creditDate') Date creditDate)
+
+    // Activation schedules only discrepancies, including work for previously enabled imports.
+    // This also recovers an earlier copy window after a failed/retried finalization.
+    @Query(value = '''with imports as (
+                         select * from skill_definition
+                         where project_id = :projectId and enabled = 'true' and copied_from_skill_ref is not null
+                     )
+                     select distinct imported.id as skillRefId, users.user_id as userId
+                     from imports imported
+                     join skill_definition original on original.id = imported.copied_from_skill_ref
+                     cross join lateral (
+                         select user_id from user_points where skill_ref_id in (original.id, imported.id)
+                         union select user_id from user_achievement where skill_ref_id in (original.id, imported.id) and level is null
+                     ) users
+                     left join user_points source on source.skill_ref_id = original.id and source.user_id = users.user_id
+                     left join user_points destination on destination.skill_ref_id = imported.id and destination.user_id = users.user_id
+                     left join user_achievement source_award on source_award.skill_ref_id = original.id and source_award.user_id = users.user_id and source_award.level is null
+                     left join user_achievement destination_award on destination_award.skill_ref_id = imported.id and destination_award.user_id = users.user_id and destination_award.level is null
+                     where (imported.project_id = original.project_id
+                         or exists(select 1 from project_participation p where p.project_id = :projectId and p.user_id = users.user_id)
+                         or exists(select 1 from user_performed_skill e where e.project_id = :projectId and e.user_id = users.user_id))
+                       and (not exists(select 1 from settings s where s.project_id = :projectId and s.setting = 'user_community' and s.value = 'true')
+                         or exists(select 1 from user_tags t where t.user_id = users.user_id and t.key = :userCommunityUserTagKey and t.value = :userCommunityUserTagValue))
+                       and (coalesce(destination.points, 0) <> coalesce(source.points / original.point_increment, 0) * imported.point_increment
+                         or source_award.achieved_on is distinct from destination_award.achieved_on)
+                     order by imported.id, users.user_id''', nativeQuery = true)
+    Stream<ImportedCreditDiscrepancy> findCatalogCreditDiscrepancies(@Param('projectId') String projectId,
+            @Param('userCommunityUserTagKey') String userCommunityUserTagKey,
+            @Param('userCommunityUserTagValue') String userCommunityUserTagValue)
+
+    interface ImportedCreditDiscrepancy {
+        Integer getSkillRefId()
+        String getUserId()
+    }
+
     @Modifying
     @Query(value = '''INSERT INTO user_points(user_id, project_id, skill_id, skill_ref_id, points)
             SELECT up.user_id, toDef.project_id, toDef.skill_id, toDef.id, (toDef.point_increment * (up.points / fromDef.point_increment))
@@ -63,13 +132,8 @@ interface UserPointsRepo extends CrudRepository<UserPoints, Integer> {
                         where ut.user_id = up.user_id
                           and ut.key = :userCommunityUserTagKey and ut.value = :userCommunityUserTagValue
                        )))     
-                    and not exists(
-                        select 1
-                        from user_points innerUP
-                        where toDef.project_id = innerUP.project_id
-                          and up.user_id = innerUP.user_id
-                          and toDef.skill_id = innerUP.skill_id
-                    )
+             ON CONFLICT (project_id, skill_id, user_id) DO UPDATE SET points = excluded.points
+             WHERE user_points.points <> excluded.points
                 ''', nativeQuery = true)
     void copySkillUserPointsToTheImportedProjects(@Param('toProjectId') String toProjectId, @Param('fromSkillRefIds') List<Integer> fromSkillRefIds, @Param('userCommunityUserTagKey') String userCommunityUserTagKey, @Param('userCommunityUserTagValue') String userCommunityUserTagValue)
 
@@ -84,13 +148,8 @@ interface UserPointsRepo extends CrudRepository<UserPoints, Integer> {
                     up.skill_ref_id in (:fromSkillRefIds) and 
                     toDef.enabled = 'true' and
                     up.user_id = :userId
-                    and not exists(
-                        select 1
-                        from user_points innerUP
-                        where toDef.project_id = innerUP.project_id
-                          and up.user_id = innerUP.user_id
-                          and toDef.skill_id = innerUP.skill_id
-                    )
+             ON CONFLICT (project_id, skill_id, user_id) DO UPDATE SET points = excluded.points
+             WHERE user_points.points <> excluded.points
                 ''', nativeQuery = true)
     void copySingleUserSkillUserPointsToTheImportedProjects(@Param('userId') String userId, @Param('toProjectId') String toProjectId, @Param('fromSkillRefIds') List<Integer> fromSkillRefIds)
 

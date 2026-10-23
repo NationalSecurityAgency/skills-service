@@ -22,7 +22,6 @@ import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import skills.controller.exceptions.SkillException
 import skills.controller.request.model.ProjectSettingsRequest
-import skills.controller.result.model.SettingsResult
 import skills.services.LockingService
 import skills.services.RuleSetDefGraphService
 import skills.services.attributes.SkillAttributeService
@@ -77,6 +76,9 @@ class SkillCatalogFinalizationService {
 
     @Autowired
     SettingsService settingsService
+
+    @Autowired
+    SettingRepo settingRepo
 
     @Autowired
     BatchOperationsTransactionalAccessor batchOperationsTransactionalAccessor
@@ -263,8 +265,10 @@ class SkillCatalogFinalizationService {
     }
 
     FinalizeState getCurrentState(String projectId) {
-        SettingsResult res = settingsService.getProjectSetting(projectId, PROJ_FINALIZE_STATE_PROP)
-        return res?.value ? FinalizeState.valueOf(res?.value) : FinalizeState.NOT_RUNNING
+        // Read a scalar so repeated state checks bypass cached Setting entities,
+        // including when another transaction completes finalization while a caller waits.
+        String state = settingRepo.findProjectSettingValue(projectId, PROJ_FINALIZE_STATE_PROP)
+        return state ? FinalizeState.valueOf(state) : FinalizeState.NOT_RUNNING
     }
 
     private void updateState(String projectId, FinalizeState state) {

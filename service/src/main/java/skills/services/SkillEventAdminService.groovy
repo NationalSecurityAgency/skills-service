@@ -22,6 +22,7 @@ import groovy.util.logging.Slf4j
 import jakarta.annotation.PostConstruct
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
+import org.springframework.context.annotation.Lazy
 import org.springframework.stereotype.Component
 import org.springframework.transaction.annotation.Transactional
 import skills.auth.UserInfoService
@@ -31,6 +32,7 @@ import skills.controller.result.model.RequestResult
 import skills.services.admin.BatchOperationsTransactionalAccessor
 import skills.services.admin.SkillCatalogService
 import skills.services.events.*
+import skills.services.events.pointsAndAchievements.ImportedSkillsAchievementsHandler
 import skills.services.userActions.DashboardAction
 import skills.services.userActions.DashboardItem
 import skills.services.userActions.UserActionInfo
@@ -123,6 +125,7 @@ class SkillEventAdminService {
 
     @Autowired CatalogParticipantBackfillService catalogBackfillService
     @Autowired LockingService lockingService
+    @Autowired @Lazy ImportedSkillsAchievementsHandler importedSkillsAchievementsHandler
 
     @Value('#{"${skills.bulkUserLookup.minNumOfThreads:1}"}')
     Integer minNumOfThreads
@@ -458,20 +461,14 @@ class SkillEventAdminService {
         String projectId = performedSkill.projectId;
         String skillId = performedSkill.skillId
         String userId = performedSkill.userId
+        lockingService.lockForSkillReporting(userId, projectId)
 
         SkillDefMin skillDefinitionMin = getSkillDef(projectId, skillId)
         Long numExistingSkills = performedSkillRepository.countByUserIdAndProjectIdAndSkillId(userId, projectId, skillId) ?: 0
         // account for null
 
         // handle catalog
-        List<SkillDefWithExtra> related = skillDefRepo.findSkillDefMinCopiedFrom(performedSkill.skillRefId)
-        if (related) {
-            log.info("Propagating event deletion to the catalog skills - [{}] copies imported", related?.size())
-            related?.each {
-                updateUserPointsAndAchievementsWhenPerformedSkillRemoved(userId, it, numExistingSkills)
-            }
-            log.info("Completed propagating event deletion to the catalog skills - [{}] copies imported", related?.size())
-        }
+        List<SkillDefMin> related = skillDefRepo.findSkillDefMinCopiedFrom(performedSkill.skillRefId)
 
         List<Integer> badgesSkillIsUsedIn = globalBadgesService.globalBadgesSkillIsUsedIn(projectId, skillId)
         if (badgesSkillIsUsedIn) {
@@ -484,6 +481,21 @@ class SkillEventAdminService {
         SkillEventResult skillEventResult = updateUserPointsAndAchievementsWhenPerformedSkillRemoved(userId, skillDefinitionMin, numExistingSkills)
         performedSkillRepository.delete(performedSkill)
         userEventService.removeEvent(performedSkill.performedOn, performedSkill.userId, performedSkill.skillRefId)
+
+        // Reconcile after changing source credit. A queued award may not have reached the
+        // destination yet, so blindly subtracting an increment is not valid either.
+        related.each { SkillDefMin imported ->
+            importedSkillsAchievementsHandler.handleAchievementsForImportedSkills(userId, imported,
+                    new SkillDate(date: performedSkill.performedOn, isProvided: true), false, false)
+        }
+        Set<Integer> enabledCopyIds = related.collect { SkillDefMin imported -> imported.id }.toSet()
+        // Enabled copies were reconciled above; notify the remaining copies after source
+        // commit so deletion cannot be missed by a concurrent activation snapshot.
+        skillDefRepo.findSkillDefIdsByCopiedFromIncludingDisabled(performedSkill.skillRefId)
+                .findAll { Integer id -> !enabledCopyIds.contains(id) }.each { Integer id ->
+            taskSchedulerService.scheduleImportedSkillAchievement(userId, id,
+                    new SkillDate(date: performedSkill.performedOn, isProvided: true), false, false)
+        }
 
         return skillEventResult
     }

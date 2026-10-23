@@ -334,7 +334,9 @@ class SkillEventsTransactionalService {
 
     @Profile
     private void scheduleImportedSkills(SkillDefMin skillDefinition, String userId, SkillDate skillDate, boolean requestedSkillCompleted, boolean isMotivationalSkill) {
-        List<Integer> importedSkillIds = skillDefRepo.findSkillDefIdsByCopiedFrom(skillDefinition.id)
+        // Queue synchronization even for disabled imports. The worker orders deferral
+        // with activation after source commit, without taking destination locks here.
+        List<Integer> importedSkillIds = skillDefRepo.findSkillDefIdsByCopiedFromIncludingDisabled(skillDefinition.id)
         if (importedSkillIds) {
             importedSkillIds.each { Integer importedSkillId ->
                 taskSchedulerService.scheduleImportedSkillAchievement(userId, importedSkillId, skillDate, requestedSkillCompleted, isMotivationalSkill)

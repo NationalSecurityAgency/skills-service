@@ -35,7 +35,6 @@ import skills.storage.model.SkillDef
 import skills.storage.model.UserAchievement
 import skills.storage.repos.ProjectParticipationRepo
 import skills.tasks.data.CatalogParticipantBackfillRequest
-import spock.lang.IgnoreRest
 import spock.util.concurrent.PollingConditions
 
 import javax.sql.DataSource
@@ -95,7 +94,7 @@ class CatalogParticipantRaceFailuresIT extends CatalogIntSpec {
         callers.shutdown()
         assert callers.awaitTermination(30, TimeUnit.SECONDS)
         triggers.each { String name, String table -> removeTrigger(name, table) }
-        jdbcTemplate.update("update scheduled_tasks set execution_time = now() where task_name in ('catalog-participant-backfill', 'imported-skill-achievement', 'finalize-catalog-imports')")
+        jdbcTemplate.update("update scheduled_tasks set execution_time = now() where task_name in ('catalog-participant-backfill', 'imported-skill-achievement', 'finalize-catalog-imports', 'remove-skill-events-for-user')")
         waitForAsyncTasksCompletion.waitForAllScheduleTasks()
         boundaries.hooks.clear()
     }
@@ -285,7 +284,6 @@ class CatalogParticipantRaceFailuresIT extends CatalogIntSpec {
         finalizationCompletesBeforeWorker << [false, true]
     }
 
-    @IgnoreRest
     def "a queued source event already copied by #entry backfill must not add its points again"() {
         Map fixture = fixture()
         SkillsService learner = createService(users[0])
@@ -304,6 +302,105 @@ class CatalogParticipantRaceFailuresIT extends CatalogIntSpec {
 
         where:
         entry << ['visit', 'award']
+    }
+
+    def "an older queued source request must reconcile the latest completion without adding credit again"() {
+        Map fixture = fixture()
+        SkillsService learner = createService(users[0])
+        learner.initializeProjectProgress(fixture.projectId)
+        Gate oldRequest = gate()
+        AtomicBoolean pauseFirst = new AtomicBoolean(true)
+        intercept('ImportedSkillAchievementTaskExecutor.execute', []) { BoundaryInvocation invocation ->
+            if (pauseFirst.compareAndSet(true, false)) {
+                oldRequest.pause()
+            }
+            invocation.callRealMethod()
+        }
+
+        when:
+        skillsService.addSkill(fixture.source, users[0], historicalDate)
+        oldRequest.awaitArrival()
+        skillsService.addSkill(fixture.source, users[0], new Date(historicalDate.time + 1000))
+        skillsService.addSkill(fixture.source, users[0], new Date(historicalDate.time + 2000))
+        new PollingConditions(timeout: 20).eventually {
+            assert learner.getSkillsSummaryForCurrentUser(fixture.projectId).points == 300
+        }
+        oldRequest.open()
+        waitForAsyncTasksCompletion.waitForAllScheduleTasks()
+        Map summary = learner.getSkillsSummaryForCurrentUser(fixture.projectId)
+
+        then:
+        summary.points == 300
+        summary.subjects[0].points == 300
+        summary.skillsAchieved == 1
+        userAchievedRepo.findAllByUserIdAndProjectIdAndSkillId(users[0], fixture.projectId, fixture.source.skillId).size() == 1
+    }
+
+    def "a queued source award deleted before propagation must not restore deleted credit"() {
+        Map fixture = fixture(true, 1)
+        SkillsService learner = createService(users[0])
+        learner.initializeProjectProgress(fixture.projectId)
+        queueTasks('imported-skill-achievement')
+        skillsService.addSkill(fixture.source, users[0], historicalDate)
+
+        when:
+        skillsService.deleteSkillEvent(fixture.source + [userId: users[0], timestamp: historicalDate.time])
+        releaseTasks('imported-skill-achievement')
+        waitForAsyncTasksCompletion.waitForAllScheduleTasks()
+        Map summary = learner.getSkillsSummaryForCurrentUser(fixture.projectId)
+
+        then:
+        summary.points == 0
+        summary.subjects[0].points == 0
+        summary.skillsAchieved == 0
+    }
+
+    def "a delayed source reset request must retain credit earned after the reset"() {
+        Map fixture = fixture(true, 1)
+        SkillsService learner = createService(users[0])
+        learner.initializeProjectProgress(fixture.projectId)
+        skillsService.addSkill(fixture.source, users[0], historicalDate)
+        waitForAsyncTasksCompletion.waitForAllScheduleTasks()
+        queueTasks('remove-skill-events-for-user')
+
+        when:
+        skillsService.deleteAllSkillEvents([projectId: fixture.source.projectId, userId: users[0]])
+        Date newDate = new Date(historicalDate.time + 1000)
+        skillsService.addSkill(fixture.source, users[0], newDate)
+        releaseTasks('remove-skill-events-for-user')
+        waitForAsyncTasksCompletion.waitForAllScheduleTasks()
+        Map summary = learner.getSkillsSummaryForCurrentUser(fixture.projectId)
+
+        then:
+        summary.points == 100
+        summary.subjects[0].points == 100
+        summary.skillsAchieved == 1
+        List<UserAchievement> awards = userAchievedRepo.findAllByUserIdAndProjectIdAndSkillId(users[0], fixture.projectId, fixture.source.skillId)
+        awards.size() == 1
+        awards.first().achievedOn == newDate
+    }
+
+    def "reconciliation updates same-project reuse when its imported source credit changes"() {
+        Map fixture = fixture()
+        SkillsService learner = createService(users[0])
+        Map secondSubject = createSubject(2, 2)
+        skillsService.createSubject(secondSubject)
+        skillsService.reuseSkillInAnotherSubject(fixture.projectId, fixture.source.skillId, secondSubject.subjectId)
+        skillsService.addSkill(fixture.source, users[0], historicalDate)
+        learner.initializeProjectProgress(fixture.projectId)
+        waitForAsyncTasksCompletion.waitForAllScheduleTasks()
+        assert learner.getSkillsSummaryForCurrentUser(fixture.projectId).points == 200
+
+        when:
+        skillsService.addSkill(fixture.source, users[0], new Date(historicalDate.time + 1000))
+        waitForAsyncTasksCompletion.waitForAllScheduleTasks()
+        Map summary = learner.getSkillsSummaryForCurrentUser(fixture.projectId)
+
+        then:
+        summary.points == 400
+        summary.subjects.find { Map subject -> subject.subjectId == fixture.subjectId }.points == 200
+        summary.subjects.find { Map subject -> subject.subjectId == secondSubject.subjectId }.points == 200
+        summary.skillsAchieved == 0
     }
 
     def "finalization replay must not increment an event already included in bulk copy"() {
@@ -349,6 +446,61 @@ class CatalogParticipantRaceFailuresIT extends CatalogIntSpec {
 
         then:
         summary.points == 100
+    }
+
+    def "a disabled import must not receive source credit until activation"() {
+        Map fixture = fixture(false, 1)
+        SkillsService learner = createService(users[0])
+        learner.initializeProjectProgress(fixture.projectId)
+
+        when: 'the source completes while its destination copy is disabled'
+        skillsService.addSkill(fixture.source, users[0], historicalDate)
+        waitForAsyncTasksCompletion.waitForAllScheduleTasks()
+        Map disabledSummary = learner.getSkillsSummaryForCurrentUser(fixture.projectId)
+
+        then:
+        learner.getSingleSkillSummaryForCurrentUser(fixture.source.projectId, fixture.source.skillId).points == 100
+        disabledSummary.points == 0
+        disabledSummary.subjects[0].points == 0
+        disabledSummary.skillsAchieved == 0
+        // Disabled credit is not exposed in learner summaries; verify no hidden rows were awarded.
+        userPointsRepo.findByProjectIdAndUserIdAndSkillId(fixture.projectId, users[0], fixture.source.skillId) == null
+        userAchievedRepo.findAllByUserIdAndProjectIdAndSkillId(users[0], fixture.projectId, fixture.source.skillId).isEmpty()
+
+        when: 'activation makes that source credit applicable'
+        skillsService.finalizeSkillsImportFromCatalog(fixture.projectId, false)
+        waitForAsyncTasksCompletion.waitForAllScheduleTasks()
+        Map activatedSummary = learner.getSkillsSummaryForCurrentUser(fixture.projectId)
+
+        then:
+        activatedSummary.points == 100
+        activatedSummary.subjects[0].points == 100
+        activatedSummary.skillsAchieved == 1
+    }
+
+    def "a source award uncommitted during activation catch-up must schedule synchronization after activation"() {
+        Map fixture = fixture(false)
+        SkillsService learner = createService(users[0])
+        learner.initializeProjectProgress(fixture.projectId)
+        Gate sourceBeforeCommit = gate()
+        intercept('CatalogParticipantBackfillService.qualify', [fixture.source.projectId, users[0]]) { BoundaryInvocation invocation ->
+            sourceBeforeCommit.pause()
+            invocation.callRealMethod()
+        }
+
+        when: 'the source has evaluated ordinary scheduling, but its credit/tasks remain uncommitted'
+        Future<Map> sourceAward = submit { skillsService.addSkill(fixture.source, users[0], historicalDate).body }
+        sourceBeforeCommit.awaitArrival()
+        skillsService.finalizeSkillsImportFromCatalog(fixture.projectId, false)
+        awaitFinalization(fixture.projectId, 'COMPLETED')
+        sourceBeforeCommit.open()
+        assert sourceAward.get(20, TimeUnit.SECONDS).skillApplied
+        waitForAsyncTasksCompletion.waitForAllScheduleTasks()
+        Map summary = learner.getSkillsSummaryForCurrentUser(fixture.projectId)
+
+        then:
+        summary.points == 100
+        summary.subjects[0].points == 100
     }
 
     def "source completion between points and achievement copy must create only one destination skill award"() {
