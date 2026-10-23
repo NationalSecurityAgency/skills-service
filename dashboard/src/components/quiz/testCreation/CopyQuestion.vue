@@ -158,10 +158,12 @@ const currentQuizName = computed(() => {
         </Message>
         <SkillsButton label="Retry" icon="fas fa-sync" size="small" data-cy="retryQuizDestinationsBtn" @click="loadQuizDefs" />
       </div>
-      <span v-else class="font-bold text-primary">Copy Question To:</span>
+      <label v-else for="quizzesToCopy" class="font-bold text-primary">Copy Question To:</label>
       <Select
           v-if="!loadError"
           :options="quizDefs"
+          inputId="quizzesToCopy"
+          labelId="quizzesToCopy"
           aria-label="Copy Question To"
           optionLabel="label"
           v-model="selectedQuiz"

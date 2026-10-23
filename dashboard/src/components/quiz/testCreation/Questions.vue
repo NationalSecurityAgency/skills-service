@@ -337,25 +337,6 @@ const actionsMenu = ref([
   //   }
   // },
 ])
-function handleKeyDown(event) {
-  // tab=9
-  if (event.keyCode === 9) {
-    event.preventDefault();
-    if (actionMenuFocused.value) {
-      focusState.focusOnLastElement()
-    }
-  }
-}
-const actionMenuFocused = ref(false)
-const actionMenuOnFocus = () => {
-  actionMenuFocused.value = true
-  document.addEventListener('keydown', handleKeyDown);
-}
-const actionMenuOnBlur = () => {
-  actionMenuFocused.value = false
-  document.removeEventListener('keydown', handleKeyDown);
-
-}
 </script>
 
 <template>
@@ -379,13 +360,13 @@ const actionMenuOnBlur = () => {
       <div class="flex-1 flex items-center content-center">
         <ToggleSwitch
             data-cy="toggleSelectionMode"
-            aria-label="Toggle select questions"
+            inputId="toggleSelectionMode"
             class="mr-2"
             :disabled="!questions || questions.length === 0"
             v-if="!quizConfig.isReadOnlyQuiz"
             v-on:update:modelValue="toggleSelectionMode"
             v-model="selectionModeEnabled" />
-        <label id="toggleSelectMessage">Select Questions</label>
+        <label for="toggleSelectionMode">Select Questions</label>
 
         <SkillsButton
             id="questionActionsBtn"
@@ -408,8 +389,6 @@ const actionMenuOnBlur = () => {
               id="questions-actions-menu"
               data-cy="questionsActionsMenu"
               :model="actionsMenu"
-              @focus="actionMenuOnFocus"
-              @blur="actionMenuOnBlur"
               aria-label="Menu to perform actions on selected questions"
               :popup="true">
           <template #item="{ item, props }">

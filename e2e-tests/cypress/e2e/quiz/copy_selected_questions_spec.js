@@ -199,4 +199,36 @@ describe('Copy selected quiz questions', () => {
         cy.get(`${checkbox(1)} input`).should('not.be.checked');
         cy.get('[data-cy="questionActionsBtn"]').should('be.disabled');
     });
+
+    it('supports keyboard selection, action menu navigation, and returning focus after closing', () => {
+        cy.createQuizDef(1);
+        cy.createQuizDef(2);
+        cy.createQuizQuestionDef(1, 1);
+        cy.visit('/administrator/quizzes/quiz1');
+        cy.get(questionCard(1)).should('be.visible');
+
+        cy.get('#toggleSelectionMode').focus().should('have.focus').type(' ');
+        cy.get('#toggleSelectionMode').should('be.checked');
+        cy.get(`${checkbox(1)} input`).focus().should('have.focus').type(' ');
+        cy.get(`${checkbox(1)} input`).should('be.checked');
+
+        cy.get('[data-cy="questionActionsBtn"]').focus().type('{enter}');
+        cy.contains('.p-menu-item-link', 'Copy to Another Quiz').should('be.visible');
+        cy.contains('.p-menu-item-link', 'Copy to Another Quiz').focus().should('have.focus').realPress('Tab');
+        cy.contains('.p-menu-item-link', 'Copy to Another Quiz').should('not.have.focus');
+
+        cy.get('[data-cy="questionActionsBtn"]').focus().type('{enter}');
+        cy.contains('.p-menu-item-link', 'Copy to Another Quiz').should('be.visible').click();
+        cy.get('[data-cy="quizzes-to-copy"]').should('be.visible');
+        cy.focused().closest('.p-dialog').should('be.visible');
+
+        cy.get('label[for="quizzesToCopy"]').click();
+        cy.get('[data-cy="quizzes-to-copy"]').should('have.class', 'p-focus');
+        cy.get('[data-cy="quizzes-to-copy"]').click();
+        cy.contains('.p-select-option', 'This is quiz 2').click();
+        cy.get('[data-cy="saveDialogBtn"]').should('be.enabled');
+        cy.get('[data-cy="closeDialogBtn"]').click();
+        cy.get('[data-cy="quizzes-to-copy"]').should('not.exist');
+        cy.get('[data-cy="questionActionsBtn"]').should('be.disabled');
+    });
 });
