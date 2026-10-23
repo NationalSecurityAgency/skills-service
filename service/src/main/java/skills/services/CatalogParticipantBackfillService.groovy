@@ -20,43 +20,28 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.Lazy
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
-import skills.services.admin.BatchOperationsTransactionalAccessor
 import skills.services.admin.SkillCatalogFinalizationService
 import skills.services.admin.SkillCatalogFinalizationService.FinalizeState
 import skills.services.admin.UserCommunityService
-import skills.services.events.AchievedBadgeHandler
-import skills.services.events.AchievedGlobalBadgeHandler
-import skills.services.events.SkillDate
-import skills.services.events.SkillEventResult
 import skills.storage.model.ProjectParticipation
 import skills.storage.model.ProjectParticipation.BackfillStatus
 import skills.storage.model.SkillDef
-import skills.storage.model.UserAchievement
 import skills.storage.repos.ProjectParticipationRepo
-import skills.storage.repos.SettingRepo
 import skills.storage.repos.SkillDefRepo
-import skills.storage.repos.UserAchievedLevelRepo
 import skills.storage.repos.UserPerformedSkillRepo
-import skills.storage.repos.UserPointsRepo
 import skills.tasks.TaskSchedulerService
 
 @Service
 @Slf4j
 class CatalogParticipantBackfillService {
     @Autowired ProjectParticipationRepo participationRepo
-    @Autowired SettingRepo settingRepo
     @Autowired SkillDefRepo skillDefRepo
     @Autowired UserPerformedSkillRepo performedSkillRepo
-    @Autowired UserPointsRepo userPointsRepo
-    @Autowired UserAchievedLevelRepo achievementRepo
     @Autowired LockingService lockingService
     @Autowired UserCommunityService userCommunityService
     @Autowired TaskSchedulerService taskSchedulerService
+    @Autowired CatalogImportedCreditService importedCreditService
     @Autowired @Lazy SkillCatalogFinalizationService finalizationService
-    @Autowired BatchOperationsTransactionalAccessor batchAccessor
-    @Autowired RuleSetDefGraphService graphService
-    @Autowired @Lazy AchievedBadgeHandler badgeHandler
-    @Autowired @Lazy AchievedGlobalBadgeHandler globalBadgeHandler
 
     boolean hasApplicableFinalization(String projectId) {
         skillDefRepo.existsCatalogImport(projectId) &&
@@ -179,10 +164,7 @@ class CatalogParticipantBackfillService {
     private void validateCompletion(String projectId, Set<Integer> processedImportIds) {
         // Hold through commit so a new finalization cannot start after this completion check.
         lockingService.lockForSkillsCatalogFinalizationInit(projectId)
-        // The scalar state read bypasses cached Setting values; query membership supplies current import IDs.
-        String state = settingRepo.findProjectSettingValue(projectId, SkillCatalogFinalizationService.PROJ_FINALIZE_STATE_PROP)
-        boolean finalizing = skillDefRepo.existsCatalogImport(projectId) &&
-                state in [FinalizeState.RUNNING.name(), FinalizeState.FAILED.name()]
+        boolean finalizing = hasApplicableFinalization(projectId)
         // A run may already be COMPLETED; changed IDs still invalidate the older enabled-only calculation.
         Set<Integer> enabledImportIds = skillDefRepo.findAllByProjectIdAndTypeAndEnabledAndCopiedFromIsNotNull(
                 projectId, SkillDef.ContainerType.Skill, 'true').collect { SkillDef skill -> skill.id }.toSet()
@@ -202,44 +184,14 @@ class CatalogParticipantBackfillService {
             log.debug('Skipping catalog credit copy without enabled imports: projectId=[{}], userId=[{}]', projectId, userId)
             return
         }
-        List<Integer> sourceIds = imports.collect { SkillDef skill -> skill.copiedFrom }
-        if (log.isTraceEnabled()) {
-            log.trace('Copying catalog credit: projectId=[{}], userId=[{}], sourceSkillRefIds=[{}]', projectId, userId, sourceIds)
+        // Restore external imports before same-project reuse, which can reference those rows.
+        List<SkillDef> orderedImports = imports.findAll { SkillDef skill -> skill.copiedFromProjectId != projectId } +
+                imports.findAll { SkillDef skill -> skill.copiedFromProjectId == projectId }
+        orderedImports.each { SkillDef skill ->
+            importedCreditService.reconcileSkillCredit(userId, skillDefRepo.findSkillDefMinById(skill.id))
         }
-        batchAccessor.copySingleUserSkillUserPointsToTheImportedProjects(userId, projectId, sourceIds)
-        batchAccessor.copyForSingleUserSkillAchievementsToTheImportedProjects(userId, projectId, sourceIds)
-        List<Integer> reuseSourceIds = imports.findAll { SkillDef skill -> skill.copiedFromProjectId == projectId }
-                .collect { SkillDef skill -> skill.copiedFrom }
-        if (reuseSourceIds) {
-            // Reused catalog skills reference destination rows restored by the first copy pass.
-            batchAccessor.copySingleUserSkillUserPointsToTheImportedProjects(userId, projectId, reuseSourceIds)
-            batchAccessor.copyForSingleUserSkillAchievementsToTheImportedProjects(userId, projectId, reuseSourceIds)
-        }
-        List<SkillDef> groups = imports.findAll { SkillDef skill -> skill.groupId != null }
-                .collect { SkillDef skill -> graphService.getMyGroupParent(skill.id) }.unique { SkillDef group -> group.id }
-        batchAccessor.identifyAndAddGroupAchievementsForSingleUser(userId, groups)
-        List<SkillDef> subjects = imports.collect { SkillDef skill -> graphService.getMySubjectParent(skill.id) }.unique { SkillDef subject -> subject.id }
-        subjects.each { SkillDef subject ->
-            log.trace('Recalculating catalog subject credit: projectId=[{}], userId=[{}], subjectId=[{}]', projectId, userId, subject.skillId)
-            batchAccessor.createSubjectUserPointsForSingleNewUser(userId, projectId, subject.skillId)
-            userPointsRepo.updateSubjectUserPointsForUser(userId, projectId, subject.skillId, true)
-            batchAccessor.identifyAndAddSubjectLevelAchievementsForSingleUser(userId, projectId, subject.skillId)
-            batchAccessor.addMissingCatalogLevels(projectId, subject.skillId, userId)
-        }
-        batchAccessor.createProjectUserPointsForSingleNewUser(userId, projectId)
-        userPointsRepo.updateUserPointsForProjectAndUser(projectId, userId)
-        batchAccessor.identifyAndAddProjectLevelAchievements(userId, projectId)
-        batchAccessor.addMissingCatalogLevels(projectId, null, userId)
-        imports.each { SkillDef skill ->
-            log.trace('Evaluating catalog badges: projectId=[{}], userId=[{}], skillId=[{}]', projectId, userId, skill.skillId)
-            List<UserAchievement> achievements = achievementRepo.findAllByUserIdAndProjectIdAndSkillId(userId, projectId, skill.skillId)
-            if (achievements) {
-                SkillDate date = new SkillDate(date: achievements.first().achievedOn, isProvided: true)
-                badgeHandler.checkForBadges(new SkillEventResult(), userId, skillDefRepo.findSkillDefMinById(skill.id), date)
-            }
-            globalBadgeHandler.checkForGlobalBadges(new SkillEventResult(), userId, projectId, skillDefRepo.findSkillDefMinById(skill.id))
-        }
-        log.debug('Finished catalog credit copy stages in current transaction: projectId=[{}], userId=[{}], imports=[{}], reusedSkills=[{}], groups=[{}], subjects=[{}], elapsedMs=[{}]',
-                projectId, userId, imports.size(), reuseSourceIds.size(), groups.size(), subjects.size(), (System.nanoTime() - started) / 1_000_000L)
+        importedCreditService.reconcileTotalsAndAchievements(projectId, userId, imports)
+        log.debug('Finished catalog credit reconciliation in current transaction: projectId=[{}], userId=[{}], imports=[{}], elapsedMs=[{}]',
+                projectId, userId, imports.size(), (System.nanoTime() - started) / 1_000_000L)
     }
 }
