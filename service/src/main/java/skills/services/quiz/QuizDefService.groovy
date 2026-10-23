@@ -320,7 +320,7 @@ class QuizDefService {
         QuizDef originalQuizDef = findQuizDef(originalQuizId)
         QuizDef newQuizDef = findQuizDef(newQuizId)
 
-        if(questionIdsToCopy.size() > 0) {
+        if(questionIdsToCopy?.size() > 0) {
             Integer questions = quizQuestionRepo.countByQuizId(newQuizId)
             Integer totalQuestions = questions + questionIdsToCopy.size()
             Integer maxQuestions = publicProps.getInt(PublicProps.UiProp.maxQuestionsPerQuiz)
@@ -333,7 +333,7 @@ class QuizDefService {
         if(originalQuizDef.type !== newQuizDef.type) {
             throw new SkillQuizException("Can not copy questions between quizzes and surveys - [${originalQuizId}], [${newQuizId}]", ErrorCode.BadParam)
         }
-        CopyValidationRes copyValidation = validateCopyQuestionsToAnotherQuiz(originalQuizDef.quizId, newQuizDef.quizId, questionIdsToCopy.size())
+        CopyValidationRes copyValidation = validateCopyQuestionsToAnotherQuiz(originalQuizDef.quizId, newQuizDef.quizId, questionIdsToCopy?.size())
         if (!copyValidation.isAllowed) {
             throw new SkillQuizException(copyValidation.validationErrors.join(' '), newQuizDef.quizId, ErrorCode.AccessDenied)
         }
@@ -1351,21 +1351,23 @@ class QuizDefService {
             return new CopyValidationRes(isAllowed: false, validationErrors: [errorMessage])
         }
 
-        QuizDefRepo.QuizDefSummaryRes destinationQuiz = quizDefRepo.getQuizDefSummary(toQuiz)
-        Integer questions = destinationQuiz.getNumQuestions()
-        Integer totalQuestions = questions + numberOfQuestions
-        Integer maxQuestions = publicProps.getInt(PublicProps.UiProp.maxQuestionsPerQuiz)
+        if(numberOfQuestions) {
+            QuizDefRepo.QuizDefSummaryRes destinationQuiz = quizDefRepo.getQuizDefSummary(toQuiz)
+            Integer questions = destinationQuiz.getNumQuestions()
+            Integer totalQuestions = questions + numberOfQuestions
+            Integer maxQuestions = publicProps.getInt(PublicProps.UiProp.maxQuestionsPerQuiz)
 
-        if(totalQuestions > maxQuestions) {
-            String quizName = destinationQuiz.name
-            String quizType = destinationQuiz.quizType
-            String errorMessage = "A ${quizType} can not have more than ${maxQuestions} questions. ${quizName} currently has ${questions} questions"
-            if(questions == maxQuestions) {
-                errorMessage += " and can not accept additional questions."
-            } else {
-                errorMessage += " and can not accept all the selected questions. Please select fewer questions to copy."
+            if (totalQuestions > maxQuestions) {
+                String quizName = destinationQuiz.name
+                String quizType = destinationQuiz.quizType
+                String errorMessage = "A ${quizType} can not have more than ${maxQuestions} questions. ${quizName} currently has ${questions} questions"
+                if (questions == maxQuestions) {
+                    errorMessage += " and can not accept additional questions."
+                } else {
+                    errorMessage += " and can not accept all the selected questions. Please select fewer questions to copy."
+                }
+                return new CopyValidationRes(isAllowed: false, validationErrors: [errorMessage])
             }
-            return new CopyValidationRes(isAllowed: false, validationErrors: [errorMessage])
         }
 
         CopyValidationRes res = new CopyValidationRes(isAllowed: true, validationErrors: [])
