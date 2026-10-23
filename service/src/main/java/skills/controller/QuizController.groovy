@@ -615,6 +615,13 @@ class QuizController {
     CopyValidationRes validateCopyItemsToAnotherProject(
             @PathVariable("quizId") String quizId,
             @RequestBody CopyBatchQuestionsRequest copyRequest) {
+        UserInfo currentUser = userInfoService.currentUser
+        if (!userAuthService.isUserQuizAdmin(currentUser, copyRequest.destinationQuizId)) {
+            throw new AccessDeniedException("User [${currentUser.username}] is not an admin for quiz [${copyRequest.destinationQuizId}]")
+        }
+        if (userCommunityService.isUserCommunityOnlyQuiz(copyRequest.destinationQuizId) && !userCommunityService.isUserCommunityMember(currentUser.username)) {
+            throw new AccessDeniedException("User [${currentUser.username}] can not copy questions to [${copyRequest.destinationQuizId}]")
+        }
         return quizDefService.validateCopyQuestionsToAnotherQuiz(quizId, copyRequest.destinationQuizId, copyRequest.numberOfQuestions)
     }
 }
