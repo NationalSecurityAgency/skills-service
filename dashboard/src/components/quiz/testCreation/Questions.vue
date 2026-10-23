@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <script setup>
-import { computed, nextTick, onMounted, ref } from 'vue'
+import {computed, isReadonly, nextTick, onMounted, ref} from 'vue'
 import { useRoute } from 'vue-router'
 import { useQuizSummaryState } from '@/stores/UseQuizSummaryState.js';
 import { useQuizConfig } from '@/stores/UseQuizConfig.js';
@@ -27,6 +27,7 @@ import SkillsSpinner from '@/components/utils/SkillsSpinner.vue';
 import NoContent2 from '@/components/utils/NoContent2.vue';
 import QuestionCard from '@/components/quiz/testCreation/QuestionCard.vue';
 import EditQuestion from '@/components/quiz/testCreation/EditQuestion.vue';
+import CopyQuestionModal from '@/components/quiz/testCreation/CopyQuestion.vue';
 import QuizService from '@/components/quiz/QuizService.js';
 import QuestionType from '@/skills-display/components/quiz/QuestionType.js';
 import {useStorage} from "@vueuse/core";
@@ -52,9 +53,14 @@ const editQuestionInfo = ref({
   isCopy: false,
   questionDef: {},
 })
+const copyQuestionInfo = ref({
+  showDialog: false,
+  questionDef: {},
+})
 const questionExpandedStates = useStorage(`questionStates-${route.params.quizId}`, {});
 const isLoading = computed(() => quizConfig.loadingQuizConfig || loadingQuestions.value);
 const hasData = computed(() => questions.value && questions.value.length > 0)
+const selectionModeEnabled = ref(false);
 
 onMounted(() => {
   loadQuestions(route.params.quizId)
@@ -105,6 +111,23 @@ function sortOrderUpdate(updateEvent) {
       });
 }
 
+function copySelectedQuestions() {
+  copyQuestionInfo.value.questionDef = {
+    quizId: route.params.quizId,
+    quizType: quizType.value
+  };
+  copyQuestionInfo.value.showDialog = true;
+}
+
+function toggleSelectionMode(value) {
+  if(value) {
+    collapseAllQuestions()
+  } else {
+    clearSelectedQuestions()
+    expandAllQuestions()
+  }
+}
+
 function openNewQuestionModal() {
   editQuestionInfo.value.questionDef = {
     id: null,
@@ -144,7 +167,9 @@ function questionDefSaved(questionDef) {
       });
     } else {
       // is new
-      questions.value.push(questionDef)
+      if(!questionDef.isCopyToAnotherQuiz) {
+        questions.value.push(questionDef)
+      }
     }
     if (questions.value && questions.value.length === 1) {
       enableDropAndDrop();
@@ -259,8 +284,6 @@ const areAllExpanded = computed(() => {
   return Object.keys(collapsed).length === Object.keys(questionExpandedStates.value).length
 })
 
-const isExpanded = ref(false);
-
 function toggleQuestions() {
   if(areAllCollapsed.value) {
     expandAllQuestions()
@@ -270,6 +293,50 @@ function toggleQuestions() {
     collapseAllQuestions();
   }
 }
+
+const selectedQuestions = ref({});
+function questionSelected({ questionId, selected }) {
+  if (selected) {
+    selectedQuestions.value[questionId] = true
+  } else {
+    delete selectedQuestions.value[questionId]
+  }
+}
+
+function clearSelectedQuestions() {
+  const questionIds = Object.keys(selectedQuestions.value);
+  questionIds.forEach((id) => {
+    delete selectedQuestions.value[id]
+  })
+}
+
+function selectAllQuestions() {
+  const ids = questions.value.map(question => question.id)
+  ids.forEach(id => {
+    selectedQuestions.value[id] = true;
+  })
+}
+
+const questionsActionsMenu = ref(false)
+const toggleActionsMenu = (event) => {
+  questionsActionsMenu.value.toggle(event)
+}
+const actionsMenu = ref([
+  {
+    label: 'Copy to Another Quiz',
+    icon: 'fas fa-user-plus',
+    command: () => {
+      copySelectedQuestions()
+    }
+  },
+  // {
+  //   label: 'Delete',
+  //   icon: 'fas fa-user-plus',
+  //   command: () => {
+  //     console.log('delete');
+  //   }
+  // },
+])
 </script>
 
 <template>
@@ -281,7 +348,7 @@ function toggleQuestions() {
 
       <template #nextToTitle>
         <SkillsButton @click="toggleQuestions"
-                      v-if="!quizConfig.isReadOnlyQuiz && questions && questions.length > 0"
+                      v-if="!quizConfig.isReadOnlyQuiz && questions && questions.length > 0 && !selectionModeEnabled"
                       :icon="areAllCollapsed ? 'fas fa-plus' : 'fas fa-minus'"
                       size="small"
                       data-cy="expandAllQuestions"
@@ -289,17 +356,62 @@ function toggleQuestions() {
                       class="ml-2"
                       aria-label="Expand/Collapse All Questions" />
       </template>
-      <SkillsButton v-if="!quizConfig.isReadOnlyQuiz"
-                    @click="openNewQuestionModal()"
-                    icon="fas fa-plus-circle"
-                    outlined
-                    size="small"
-                    data-cy="btn_Questions"
-                    id="btn_Questions"
-                    aria-label="Create new Question"
-                    :track-for-focus="true"
-                    label="Question">
-      </SkillsButton>
+
+      <div class="flex-1 flex items-center content-center">
+        <ToggleSwitch
+            data-cy="toggleSelectionMode"
+            inputId="toggleSelectionMode"
+            class="mr-2"
+            :disabled="!questions || questions.length === 0"
+            v-if="!quizConfig.isReadOnlyQuiz"
+            v-on:update:modelValue="toggleSelectionMode"
+            v-model="selectionModeEnabled" />
+        <label for="toggleSelectionMode">Select Questions</label>
+
+        <SkillsButton
+            id="questionActionsBtn"
+            size="small"
+            class="ml-3"
+            v-if="!quizConfig.isReadOnlyQuiz && selectionModeEnabled"
+            @click="toggleActionsMenu"
+            aria-label="Question actions button"
+            aria-haspopup="true"
+            :disabled="Object.keys(selectedQuestions).length === 0"
+            :track-for-focus="true"
+            data-cy="questionActionsBtn">
+          <i class="fas fa-tools" aria-hidden="true"></i>
+          <span>Action</span>
+          <Tag data-cy="questionsNumSelected" severity="info">{{ Object.keys(selectedQuestions).length }}</Tag>
+          <i class="fas fa-caret-down"></i>
+        </SkillsButton>
+        <Menu ref="questionsActionsMenu"
+              v-if="!quizConfig.isReadOnlyQuiz && selectionModeEnabled"
+              id="questions-actions-menu"
+              data-cy="questionsActionsMenu"
+              :model="actionsMenu"
+              aria-label="Menu to perform actions on selected questions"
+              :popup="true">
+          <template #item="{ item, props }">
+            <a :href="item.url" target="_blank" v-bind="props.action">
+              <span class="w-7 border text-center rounded-sm text-green-800 bg-green-50 dark:bg-gray-900 dark:text-green-500 dark:border-green-700"><i :class="item.icon"/></span>
+              <span class="">{{ item.label }}</span>
+            </a>
+          </template>
+        </Menu>
+
+        <SkillsButton v-if="!quizConfig.isReadOnlyQuiz && !selectionModeEnabled"
+                      @click="openNewQuestionModal()"
+                      icon="fas fa-plus-circle"
+                      outlined
+                      class="ml-3"
+                      size="small"
+                      data-cy="btn_Questions"
+                      id="btn_Questions"
+                      aria-label="Create new Question"
+                      :track-for-focus="true"
+                      label="Question">
+        </SkillsButton>
+      </div>
     </SubPageHeader>
 
     <BlockUI :blocked="operationInProgress">
@@ -308,6 +420,24 @@ function toggleQuestions() {
           <div>
             <SkillsSpinner :is-loading="isLoading" class="py-20"/>
             <div v-if="!isLoading">
+              <div v-if="selectionModeEnabled" class="mb-2 mt-1">
+                <SkillsButton
+                    label="Select All"
+                    icon="fas fa-check"
+                    size="small"
+                    class="ml-1"
+                    @click="selectAllQuestions"
+                    data-cy="selectAllQuestionsBtn"
+                />
+                <SkillsButton
+                    label="Deselect All"
+                    icon="fas fa-times"
+                    size="small"
+                    class="ml-2"
+                    @click="clearSelectedQuestions"
+                    data-cy="deselectAllQuestionsBtn"
+                />
+              </div>
               <NoContent2 v-if="!hasData"
                           title="No Questions Yet..."
                           class="mt-8 pt-8"
@@ -332,8 +462,11 @@ function toggleQuestions() {
                         @sort-change-requested="handleKeySortRequest"
                         @collapse-question="collapseQuestion"
                         @expand-question="expandQuestion"
+                        @question-select-toggled="questionSelected"
                         :question="q"
+                        :selection-mode="selectionModeEnabled"
                         :collapsed="questionExpandedStates[q.id]?.collapsed"
+                        :selected="selectedQuestions[q.id] === true"
                         :quiz-type="quizType"
                         :show-drag-and-drop-controls="questions && questions.length > 1"
                         :question-num="index+1"/>
@@ -347,6 +480,7 @@ function toggleQuestions() {
         <template #footer v-if="!quizConfig.isReadOnlyQuiz && !quizConfig.loadingQuizConfig">
           <div class="flex justify-end flex-wrap p-4">
             <SkillsButton @click="openNewQuestionModal()"
+                          v-if="!selectionModeEnabled"
                           icon="fas fa-plus-circle"
                           outlined
                           size="small"
@@ -372,6 +506,16 @@ function toggleQuestions() {
         :is-copy="editQuestionInfo.isCopy"
         :enable-return-focus="true"
         @question-saved="questionDefSaved" />
+
+    <copy-question-modal
+        data-cy="copyQuestionModal"
+        :question-def="copyQuestionInfo.questionDef"
+        :questions-to-save="selectedQuestions"
+        v-if="copyQuestionInfo.showDialog"
+        v-model="copyQuestionInfo.showDialog"
+        @copy-modal-closed="clearSelectedQuestions"
+        :enable-return-focus="true" />
+
   </div>
 </template>
 
