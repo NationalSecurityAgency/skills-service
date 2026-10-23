@@ -29,8 +29,7 @@ import skills.intTests.utils.SkillsFactory
 
 @SpringBootTest(properties = [
         'skills.authorization.corsAllowedOriginPatterns=https://trusted.example',
-        'skills.authorization.corsConf.allowCredentials=false',
-        'skills.h2.port=9096'
+        'skills.authorization.corsConf.allowCredentials=false'
 ], webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT, classes = SpringBootApp)
 class CorsEndpointIT extends DefaultIntSpec {
 
@@ -40,6 +39,25 @@ class CorsEndpointIT extends DefaultIntSpec {
         skillsService.wsHelper.restTemplateWrapper.setRequestFactory(isPkiMode
                 ? skillsService.wsHelper.oAuthRestTemplate.requestFactory
                 : new HttpComponentsClientHttpRequestFactory())
+    }
+
+    def 'admin and app cross-origin preflight is disabled by default for #path'() {
+        given:
+        HttpHeaders headers = new HttpHeaders()
+        headers.setOrigin('https://trusted.example')
+        headers.setAccessControlRequestMethod(HttpMethod.GET)
+
+        when:
+        ResponseEntity<String> response = skillsService.exchange(
+                "${skillsService.wsHelper.skillsService}${path}".toString(),
+                HttpMethod.OPTIONS, new HttpEntity<>(headers), String)
+
+        then:
+        response.headers.getFirst(HttpHeaders.ACCESS_CONTROL_ALLOW_ORIGIN) == null
+        response.headers.getFirst(HttpHeaders.ACCESS_CONTROL_ALLOW_CREDENTIALS) == null
+
+        where:
+        path << ['/admin/projects/TestProject', '/app/projects']
     }
 
     def 'API requests from an untrusted origin are denied'() {
