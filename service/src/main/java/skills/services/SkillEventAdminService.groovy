@@ -123,7 +123,7 @@ class SkillEventAdminService {
     @Autowired CatalogParticipantBackfillService catalogBackfillService
     @Autowired LockingService lockingService
     @Autowired @Lazy ImportedSkillsAchievementsHandler importedSkillsAchievementsHandler
-    @Autowired @Lazy AchievedGlobalBadgeHandler achievedGlobalBadgeHandler
+    @Autowired AchievedGlobalBadgeHandler achievedGlobalBadgeHandler
 
     @Value('#{"${skills.bulkUserLookup.minNumOfThreads:1}"}')
     Integer minNumOfThreads
