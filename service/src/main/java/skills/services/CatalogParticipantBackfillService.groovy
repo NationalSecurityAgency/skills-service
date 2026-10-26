@@ -155,13 +155,15 @@ class CatalogParticipantBackfillService {
         } else {
             log.debug('Excluding catalog credit for non-community member: projectId=[{}], userId=[{}]', projectId, userId)
         }
-        validateCompletion(projectId, processedImportIds)
+        validateCreditCompletion(projectId, processedImportIds)
         participant.backfillStatus = BackfillStatus.COMPLETED
         participationRepo.save(participant)
         log.debug('Marked catalog participant COMPLETED in current transaction: projectId=[{}], userId=[{}]', projectId, userId)
     }
 
-    private void validateCompletion(String projectId, Set<Integer> processedImportIds) {
+    // Joins the caller's credit transaction so an overtaken backfill or incremental attempt rolls back.
+    @Transactional
+    void validateCreditCompletion(String projectId, Set<Integer> processedImportIds) {
         // Hold through commit so a new finalization cannot start after this completion check.
         lockingService.lockForSkillsCatalogFinalizationInit(projectId)
         boolean finalizing = hasApplicableFinalization(projectId)
@@ -169,8 +171,8 @@ class CatalogParticipantBackfillService {
         Set<Integer> enabledImportIds = skillDefRepo.findAllByProjectIdAndTypeAndEnabledAndCopiedFromIsNotNull(
                 projectId, SkillDef.ContainerType.Skill, 'true').collect { SkillDef skill -> skill.id }.toSet()
         if (finalizing || processedImportIds != enabledImportIds) {
-            // Roll back credit/awards and retain PENDING for durable retry.
-            throw new IllegalStateException("Catalog finalization changed during backfill for [${projectId}]")
+            // Roll back credit/awards; backfill retains PENDING and incremental delivery can retry or defer.
+            throw new IllegalStateException("Expected transient catalog finalization overlap during credit reconciliation for [${projectId}]; rolling back this attempt for automatic retry or finalization catch-up")
         }
     }
 
