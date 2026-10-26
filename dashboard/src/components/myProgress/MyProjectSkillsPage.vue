@@ -29,6 +29,9 @@ import SkillsDisplaySearchButton from "@/skills-display/components/utilities/Ski
 const route = useRoute()
 const projectId = route.params.projectId
 const skillsDisplayAttributes = useSkillsDisplayAttributesState()
+// When navigating from an admin preview to your own Progress & Rankings page in the same session,
+// clear the preview target so progress requests use the authenticated user instead of the inspected user.
+skillsDisplayAttributes.userId = null
 const themeState = useSkillsDisplayThemeState()
 const appInfo = useAppInfoState()
 
