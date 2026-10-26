@@ -36,8 +36,10 @@ import skills.storage.model.UserAchievement
 import skills.storage.repos.ProjectParticipationRepo
 import skills.storage.repos.UserPointsRepo.ImportedCreditDiscrepancy
 import skills.tasks.data.CatalogFinalizeReplayRequest
+import skills.tasks.data.CatalogFinalizeRequest
 import skills.tasks.data.CatalogParticipantBackfillRequest
 import skills.tasks.data.ImportedSkillAchievement
+import spock.lang.IgnoreRest
 import spock.util.concurrent.PollingConditions
 
 import javax.sql.DataSource
@@ -1082,6 +1084,242 @@ class CatalogParticipantRaceFailuresIT extends CatalogIntSpec {
         'already matching bulk credit' | 300
     }
 
+
+    def "completion qualification and competing admission must not form a three-way lock cycle"() {
+        Map fixture = fixture(false, 1)
+        SkillsService learner = createService(users[0])
+        SkillsService competingAdmin = createService(skillsService.userName)
+        skillsService.addSkill(fixture.source, users[0], historicalDate)
+        waitForAsyncTasksCompletion.waitForAllScheduleTasks()
+        Gate completionHoldingActivation = gate()
+        Gate qualificationHoldingInit = gate()
+        Gate admissionRequestingProject = gate()
+        AtomicInteger completionPid = new AtomicInteger()
+        AtomicInteger qualificationPid = new AtomicInteger()
+        AtomicBoolean pauseCompletion = new AtomicBoolean(true)
+        AtomicReference<Map> firstFinalization = new AtomicReference<>()
+        AtomicReference<String> originalFinalizationId = new AtomicReference<>()
+        intercept('SettingsService.saveSetting', [{ Object request ->
+            request.projectId == fixture.projectId && request.setting == 'catalog.finalize.state' && request.value == 'COMPLETED'
+        }]) { BoundaryInvocation invocation ->
+            if (pauseCompletion.compareAndSet(true, false)) {
+                completionPid.set(jdbcTemplate.queryForObject('select pg_backend_pid()', Integer))
+                completionHoldingActivation.pause()
+            }
+            invocation.callRealMethod()
+        }
+        intercept('FinalizeCatalogSkillsImportExecutor.execute', []) { BoundaryInvocation invocation ->
+            TaskInstance<CatalogFinalizeRequest> task = invocation.getArgument(0)
+            originalFinalizationId.compareAndSet(null, task.id)
+            boolean original = task.id == originalFinalizationId.get()
+            try {
+                Object result = invocation.callRealMethod()
+                if (original) {
+                    firstFinalization.compareAndSet(null, [success: true])
+                }
+                return result
+            } catch (Exception failure) {
+                if (original) {
+                    firstFinalization.compareAndSet(null, [success: false, error: failure.message])
+                }
+                throw failure
+            }
+        }
+
+        when: 'completion holds project and activation while qualification and admission contend'
+        skillsService.finalizeSkillsImportFromCatalog(fixture.projectId, false)
+        completionHoldingActivation.awaitArrival()
+        AtomicBoolean pauseQualification = new AtomicBoolean(true)
+        intercept('LockingService.lockForSkillsCatalogFinalizationInit', [fixture.projectId]) { BoundaryInvocation invocation ->
+            Object result = invocation.callRealMethod()
+            if (pauseQualification.compareAndSet(true, false)) {
+                qualificationPid.set(jdbcTemplate.queryForObject('select pg_backend_pid()', Integer))
+                qualificationHoldingInit.pause()
+            }
+            result
+        }
+        Future<Map> qualification = submit { requestOutcome { learner.initializeProjectProgress(fixture.projectId) } }
+        qualificationHoldingInit.awaitArrival()
+        AtomicBoolean pauseAdmission = new AtomicBoolean(true)
+        intercept('LockingService.lockProject', [fixture.projectId]) { BoundaryInvocation invocation ->
+            if (pauseAdmission.compareAndSet(true, false)) {
+                admissionRequestingProject.pause()
+            }
+            invocation.callRealMethod()
+        }
+        Future<Map> admission = submit { requestOutcome { competingAdmin.finalizeSkillsImportFromCatalog(fixture.projectId, false) } }
+        admissionRequestingProject.awaitArrival()
+        admissionRequestingProject.open()
+        new PollingConditions(timeout: 15).eventually { assert hasLockWaitBlockedBy(completionPid.get()) }
+        qualificationHoldingInit.open()
+        new PollingConditions(timeout: 15).eventually {
+            assert jdbcTemplate.queryForObject('''select count(*) from pg_stat_activity
+                where pid = ? and wait_event_type = 'Lock' and ? = any(pg_blocking_pids(pid))''',
+                    Integer, qualificationPid.get(), completionPid.get()) == 1
+        }
+        completionHoldingActivation.open()
+        Map qualificationOutcome = qualification.get(25, TimeUnit.SECONDS)
+        Map admissionOutcome = admission.get(25, TimeUnit.SECONDS)
+        waitForAsyncTasksCompletion.waitForAllScheduleTasks()
+        Map originalRunOutcome = firstFinalization.get()
+        // Recover a failed run only after capturing its outcome, so cleanup can drain
+        // deferred PENDING work without hiding a failed original finalization attempt.
+        if (skillsService.getSetting(fixture.projectId, 'catalog.finalize.state').value == 'FAILED') {
+            skillsService.finalizeSkillsImportFromCatalog(fixture.projectId)
+            waitForAsyncTasksCompletion.waitForAllScheduleTasks()
+        }
+        Map summary = learner.getSkillsSummaryForCurrentUser(fixture.projectId)
+
+        then: 'automatic or explicit recovery must not mask a database lock failure'
+        originalRunOutcome.success
+        qualificationOutcome.success
+        admissionOutcome.success || admissionOutcome.error.contains('Catalog import finalize is already running')
+        summary.points == 100
+        summary.subjects[0].points == 100
+        summary.skillsAchieved == 1
+        participationRepo.readStatus(fixture.projectId, users[0]) == BackfillStatus.COMPLETED
+    }
+
+
+    def "source delivery resumed after activation and another learner qualification must not invert init and activation locks"() {
+        Map fixture = fixture(true, 1)
+        SkillsService creditedLearner = createService(users[0])
+        SkillsService newLearner = createService(users[1])
+        creditedLearner.initializeProjectProgress(fixture.projectId)
+        Gate completionHoldingActivation = gate()
+        Gate deliveryHoldingActivation = gate()
+        Gate qualificationRequestingInit = gate()
+        AtomicInteger completionPid = new AtomicInteger()
+        AtomicInteger deliveryPid = new AtomicInteger()
+        AtomicInteger qualificationPid = new AtomicInteger()
+        AtomicBoolean pauseCompletion = new AtomicBoolean(true)
+        AtomicReference<Map> firstDelivery = new AtomicReference<>()
+        AtomicReference<String> originalDeliveryId = new AtomicReference<>()
+        intercept('SettingsService.saveSetting', [{ Object request ->
+            request.projectId == fixture.projectId && request.setting == 'catalog.finalize.state' && request.value == 'COMPLETED'
+        }]) { BoundaryInvocation invocation ->
+            if (pauseCompletion.compareAndSet(true, false)) {
+                completionPid.set(jdbcTemplate.queryForObject('select pg_backend_pid()', Integer))
+                completionHoldingActivation.pause()
+            }
+            invocation.callRealMethod()
+        }
+        Integer importedId = skillDefRepo.findByProjectIdAndSkillId(fixture.projectId, fixture.source.skillId).id
+        intercept('ImportedSkillAchievementTaskExecutor.execute', []) { BoundaryInvocation invocation ->
+            TaskInstance<ImportedSkillAchievement> task = invocation.getArgument(0)
+            if (task.data.rawSkillId == importedId && task.data.userId == users[0]) {
+                originalDeliveryId.compareAndSet(null, task.id)
+            }
+            boolean observed = task.id == originalDeliveryId.get()
+            try {
+                Object result = invocation.callRealMethod()
+                if (observed) {
+                    firstDelivery.compareAndSet(null, [success: true])
+                }
+                return result
+            } catch (Exception failure) {
+                if (observed) {
+                    firstDelivery.compareAndSet(null, [success: false, error: failure.message])
+                }
+                throw failure
+            }
+        }
+
+        when: 'real source delivery waits for the completion transaction to release activation'
+        skillsService.finalizeSkillsImportFromCatalog(fixture.projectId, false)
+        completionHoldingActivation.awaitArrival()
+        AtomicBoolean pauseDelivery = new AtomicBoolean(true)
+        intercept('LockingService.lockCatalogActivation', [fixture.projectId]) { BoundaryInvocation invocation ->
+            Object result = invocation.callRealMethod()
+            if (pauseDelivery.compareAndSet(true, false)) {
+                deliveryPid.set(jdbcTemplate.queryForObject('select pg_backend_pid()', Integer))
+                deliveryHoldingActivation.pause()
+            }
+            result
+        }
+        skillsService.addSkill(fixture.source, users[0], historicalDate)
+        new PollingConditions(timeout: 15).eventually { assert hasLockWaitBlockedBy(completionPid.get()) }
+        completionHoldingActivation.open()
+        deliveryHoldingActivation.awaitArrival()
+        AtomicBoolean pauseQualification = new AtomicBoolean(true)
+        intercept('LockingService.lockForSkillsCatalogFinalizationInit', [fixture.projectId]) { BoundaryInvocation invocation ->
+            if (pauseQualification.compareAndSet(true, false)) {
+                qualificationPid.set(jdbcTemplate.queryForObject('select pg_backend_pid()', Integer))
+                qualificationRequestingInit.pause()
+            }
+            invocation.callRealMethod()
+        }
+        Future<Map> qualification = submit { requestOutcome { newLearner.initializeProjectProgress(fixture.projectId) } }
+        qualificationRequestingInit.awaitArrival()
+        qualificationRequestingInit.open()
+        new PollingConditions(timeout: 15).eventually {
+            assert jdbcTemplate.queryForObject('''select count(*) from pg_stat_activity
+                where pid = ? and wait_event_type = 'Lock' and ? = any(pg_blocking_pids(pid))''',
+                    Integer, qualificationPid.get(), deliveryPid.get()) == 1
+        }
+        deliveryHoldingActivation.open()
+        Map qualificationOutcome = qualification.get(25, TimeUnit.SECONDS)
+        waitForAsyncTasksCompletion.waitForAllScheduleTasks()
+        Map summary = creditedLearner.getSkillsSummaryForCurrentUser(fixture.projectId)
+        Map newSummary = newLearner.getSkillsSummaryForCurrentUser(fixture.projectId)
+        List<UserAchievement> awards = userAchievedRepo.findAllByUserIdAndProjectIdAndSkillId(users[0], fixture.projectId, fixture.source.skillId)
+
+        then: 'retrying a deadlocked delivery does not satisfy first-attempt success'
+        qualificationOutcome.success
+        firstDelivery.get().success
+        summary.points == 100
+        summary.subjects[0].points == 100
+        summary.skillsAchieved == 1
+        awards.size() == 1
+        awards.first().achievedOn == historicalDate
+        newSummary.points == 0
+        newSummary.skillsAchieved == 0
+        participationRepo.readStatus(fixture.projectId, users[1]) == BackfillStatus.COMPLETED
+    }
+
+    def "reducing imported credit must revoke a global badge requiring the lost destination project level"() {
+        Map fixture = fixture()
+        SkillsService learner = createService(users[0])
+        learner.initializeProjectProgress(fixture.projectId)
+        Map globalBadge = createBadge(1, 90)
+        skillsService.createGlobalBadge(globalBadge)
+        // Keep this separate skill requirement achieved throughout deletion. The
+        // importing project's level is the only badge requirement that becomes false.
+        skillsService.assignSkillToGlobalBadge([projectId: fixture.next.projectId, badgeId: globalBadge.badgeId,
+                                              skillId: fixture.next.skillId])
+        skillsService.assignProjectLevelToGlobalBadge([projectId: fixture.projectId, badgeId: globalBadge.badgeId, level: '1'])
+        skillsService.updateGlobalBadge(globalBadge + [enabled: 'true'])
+        3.times { int index -> skillsService.addSkill(fixture.next, users[0], new Date(historicalDate.time + index * 1000)) }
+        Date removedDate = new Date(historicalDate.time + 1000)
+        skillsService.addSkill(fixture.source, users[0], historicalDate)
+        skillsService.addSkill(fixture.source, users[0], removedDate)
+        waitForAsyncTasksCompletion.waitForAllScheduleTasks()
+        Map before = learner.getSkillsSummaryForCurrentUser(fixture.projectId)
+        Map awardedBadge = learner.getBadgeSummary(null, fixture.projectId, globalBadge.badgeId, -1, true)
+
+        expect:
+        before.points == 200
+        before.skillsLevel == 1
+        awardedBadge.badgeAchieved
+        awardedBadge.dateAchieved
+
+        when:
+        skillsService.deleteSkillEvent(fixture.source + [userId: users[0], timestamp: removedDate.time])
+        waitForAsyncTasksCompletion.waitForAllScheduleTasks()
+        Map after = learner.getSkillsSummaryForCurrentUser(fixture.projectId)
+        Map revokedBadge = learner.getBadgeSummary(null, fixture.projectId, globalBadge.badgeId, -1, true)
+        Map retainedRequirement = learner.getSingleSkillSummaryForCurrentUser(fixture.next.projectId, fixture.next.skillId)
+
+        then:
+        after.points == 100
+        after.subjects[0].points == 100
+        after.skillsLevel == 0
+        retainedRequirement.points == 300
+        retainedRequirement.achievedOn
+        !revokedBadge.badgeAchieved
+        !revokedBadge.dateAchieved
+    }
+
     private Map fixture(boolean finalize = true, int occurrences = 3) {
         Map source = createSkill(1, 1, 11, 0, occurrences, 0, 100)
         Map next = createSkill(1, 1, 12, 0, 3, 0, 100)
@@ -1230,6 +1468,8 @@ class CatalogParticipantRaceFailuresIT extends CatalogIntSpec {
                 execution(* skills.services.CatalogParticipantBackfillService.qualify(..)) ||
                 execution(* skills.services.CatalogImportedCreditService.reconcile(..)) ||
                 execution(* skills.services.LockingService.lockProject(..)) ||
+                execution(* skills.services.LockingService.lockCatalogActivation(..)) ||
+                execution(* skills.services.LockingService.lockForSkillsCatalogFinalizationInit(..)) ||
                 execution(* skills.storage.repos.UserPointsRepo.findCatalogCreditDiscrepancies(..)) ||
                 execution(* skills.services.settings.SettingsService.saveSetting(..)) ||
                 execution(* skills.services.admin.SkillCatalogFinalizationService.applyEventsThatWereReportedDuringTheFinalizationRun(..)) ||

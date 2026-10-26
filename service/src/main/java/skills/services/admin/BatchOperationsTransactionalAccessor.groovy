@@ -113,6 +113,8 @@ class BatchOperationsTransactionalAccessor {
 
     @Transactional
     void completeCatalogFinalization(String projectId, List<SkillDef> imports, long startOfFinalization) {
+        // State publication also locks the project; acquire it before activation to match admission ordering.
+        lockingService.lockProject(projectId)
         // Fence the completion snapshot and durable handoff even when there are no imports to enable.
         lockingService.lockCatalogActivation(projectId)
         enableSkills(imports)
