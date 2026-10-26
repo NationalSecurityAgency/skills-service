@@ -60,6 +60,8 @@ class ImportedSkillsAchievementsHandler {
         if (!enabled || finalizing) {
             // Order deferral with activation's durable handoff, without serializing
             // unrelated learners' ordinary reconciliation on a project-wide lock.
+            // Resumed delivery validates completion under init; acquire it before activation like qualification.
+            lockingService.lockForSkillsCatalogFinalizationInit(skill.projectId)
             lockingService.lockCatalogActivation(skill.projectId)
             enabled = Boolean.valueOf(skillDefRepo.findSkillDefMinById(skill.id).enabled)
             finalizing = backfillService.hasApplicableFinalization(skill.projectId)
