@@ -28,6 +28,7 @@ import skills.storage.repos.ProjectParticipationRepo
 import skills.storage.model.ProjectParticipation.BackfillStatus
 import skills.services.CatalogImportedCreditService
 import skills.services.events.SkillDate
+import skills.storage.model.SkillDef
 import skills.storage.model.SkillDefMin
 import skills.storage.repos.SkillDefRepo
 
@@ -87,7 +88,12 @@ class ImportedSkillsAchievementsHandler {
                 backfillService.backfill(skill.projectId, userId)
             }
         }
+        // The earlier state check does not fence a finalization starting during reconciliation.
+        // Keep the enabled set so a batch activated before our final check is also detected.
+        Set<Integer> processedImportIds = skillDefRepo.findAllByProjectIdAndTypeAndEnabledAndCopiedFromIsNotNull(
+                skill.projectId, SkillDef.ContainerType.Skill, 'true').collect { SkillDef imported -> imported.id }.toSet()
         importedCreditService.reconcile(userId, skill)
+        backfillService.validateCreditCompletion(skill.projectId, processedImportIds)
     }
 
     @Profile
