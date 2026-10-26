@@ -20,17 +20,11 @@ import groovy.transform.CompileStatic
 import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
-import skills.controller.result.model.GlobalBadgeLevelRes
-import skills.services.GlobalBadgesService
-import skills.skillLoading.SkillsLoader
 import skills.storage.model.SkillDefMin
 import skills.storage.model.SkillRelDef
 import skills.storage.model.UserAchievement
 import skills.storage.repos.SkillEventsSupportRepo
-import skills.storage.repos.SkillRelDefRepo
 import skills.storage.repos.UserAchievedLevelRepo
-
-import static skills.storage.repos.SkillEventsSupportRepo.*
 
 @Component
 @CompileStatic
@@ -38,20 +32,10 @@ import static skills.storage.repos.SkillEventsSupportRepo.*
 class AchievedGlobalBadgeHandler {
 
     @Autowired
-    SkillRelDefRepo skillRelDefRepo
-
-    @Autowired
     UserAchievedLevelRepo achievedLevelRepo
 
     @Autowired
     SkillEventsSupportRepo skillEventsSupportRepo
-
-    @Autowired
-    GlobalBadgesService globalBadgesService
-
-    @Autowired
-    SkillsLoader skillsLoader
-
 
     @Profile
     void checkForGlobalBadges(SkillEventResult res, String userId, String projectId, SkillDefMin currentSkillDef) {
@@ -91,10 +75,5 @@ class AchievedGlobalBadgeHandler {
                 }
             }
         }
-    }
-
-    @Profile
-    private List<TinyUserAchievement> loadOverallLevelAchievements(String userId, String projectId, List<Integer> skillRefIds) {
-        skillEventsSupportRepo.findTinyUserAchievementsByUserIdAndProjectId(userId, projectId)
     }
 }

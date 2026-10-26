@@ -45,7 +45,7 @@ class CatalogImportedCreditService {
     @Autowired BatchOperationsTransactionalAccessor batchAccessor
     @Autowired UserAchievementsAndPointsManagement pointsManagement
     @Autowired @Lazy AchievedBadgeHandler badgeHandler
-    @Autowired @Lazy AchievedGlobalBadgeHandler globalBadgeHandler
+    @Autowired AchievedGlobalBadgeHandler globalBadgeHandler
     @Autowired @Lazy TaskSchedulerService taskSchedulerService
 
     // The caller checks enabled/participation/community/finalization state under the same lock.
