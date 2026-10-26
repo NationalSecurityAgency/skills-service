@@ -28,11 +28,13 @@ import { useSkillsDisplayAttributesState } from '@/skills-display/stores/UseSkil
 import MyBadges from '@/skills-display/components/badges/MyBadges.vue'
 import TranscriptCard from '@/skills-display/components/userTranscript/TranscriptCard.vue'
 import TagList from "@/skills-display/components/skill/tags/TagList.vue";
+import { useUserProgressInitialization } from '@/skills-display/UseUserProgressInitialization.js'
 
 const skillsDisplayTheme = useSkillsDisplayThemeState()
 const userProgress = useUserProgressSummaryState()
 const attributes = useSkillsDisplayAttributesState()
 const log = useLog()
+const { isProgressPending } = useUserProgressInitialization()
 
 onMounted(() => {
   if (log.isDebugEnabled()) {
@@ -59,6 +61,26 @@ const hasBadges = computed(() => {
     <skills-spinner :is-loading="userProgress.loadingUserProgressSummary"/>
     <div v-if="!userProgress.loadingUserProgressSummary">
       <skills-title :back-button="false">{{ skillsDisplayTheme.landingPageTitle }}</skills-title>
+      <Card v-if="isProgressPending"
+               :pt="{ root: { role: 'status', 'aria-live': 'polite', 'aria-atomic': 'true' }, body: { class: 'p-0!' }, content: { class: 'p-0!' } }"
+               class="mt-3"
+               data-cy="userProgressLoading">
+        <template #content>
+          <div class="flex items-start gap-3 px-4 py-3">
+            <div class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-white text-sky-700 dark:bg-sky-900 dark:text-sky-200 sd-theme-background-color sd-theme-primary-color"
+                  aria-hidden="true">
+              <skills-spinner :is-loading="true" :size-in-rem="1.25" :is-centered="false"
+                              class="flex items-center justify-center leading-none [&_.p-progressspinner-circle]:stroke-current!" />
+            </div>
+            <div class="min-w-0">
+              <div class="text-sm font-semibold leading-5 text-sky-900 dark:text-sky-100 sd-theme-primary-color">Loading your latest progress</div>
+              <div class="mt-0.5 text-sm leading-5 text-muted-color">
+                You can keep exploring while we sync your points and achievements.
+              </div>
+            </div>
+          </div>
+        </template>
+      </Card>
       <project-description v-if="showDescription" :description="description" class="mt-4"/>
       <user-overall-progress class="mt-4"/>
 

@@ -30,6 +30,36 @@ describe('Client Display Theme Components Tests', () => {
     cy.reportSkill(1, 1, Cypress.env('proxyUser'), '2023-08-19 11:00')
   })
 
+  it('pending progress message respects the display theme', () => {
+    cy.configureDarkMode(false)
+    // Keep the message visible across background checks, independently of worker timing.
+    cy.intercept('POST', '/api/projects/proj1/progress/initialize', {
+      statusCode: 200,
+      body: { ready: false, backfillStatus: 'PENDING' }
+    })
+
+    const message = '[data-cy="userProgressLoading"]'
+    const captureMessage = (name) => {
+      cy.get('[data-cy="skillsTitle"]').should('contain.text', 'Themed User Skills')
+      cy.get(message).should('be.visible').and('contain.text', 'Loading your latest progress')
+        .and('contain.text', 'You can keep exploring while we sync your points and achievements.')
+      cy.get('[data-cy="overallPoints"] [data-cy="earnedPoints"]').should('have.text', '200')
+      cy.matchSnapshotImageForElement(message, {
+        name,
+        blackout: `${message} [data-pc-name="progressspinner"]`,
+        errorThreshold: 0.1
+      })
+    }
+
+    // Use visit directly: cdVisit expects every spinner to disappear, including the persistent message spinner.
+    cy.visit('/test-skills-display/proj1?enableTheme=true')
+    captureMessage('pending progress message - themed defaults')
+
+    const tiles = encodeURIComponent(JSON.stringify({ backgroundColor: '#152E4d', borderColor: '#ff0000' }))
+    cy.visit(`/test-skills-display/proj1?enableTheme=true&themeParam=tiles|${tiles}&themeParam=textPrimaryColor|white&themeParam=textSecondaryColor|${encodeURIComponent('#dbeafe')}`)
+    captureMessage('pending progress message - themed tile border and text colors')
+  })
+
   it('breadcrumb - linkColor and currentPageColor ', () => {
     const breadcrumb = JSON.stringify({
       linkColor: encodeURIComponent('#ffff69'),
