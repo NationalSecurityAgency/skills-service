@@ -35,8 +35,10 @@ interface SkillShareDefRepo extends CrudRepository<SkillShareDef, Long> {
     @Query('''select skill.id as id, skill.skillId as skillId, skill.name as skillName, proj.projectId as projectId, proj.name as projectName
         from SkillShareDef share, SkillDef skill, ProjDef proj
         where share.skill = skill and skill.projectId=proj.projectId 
-            and (share.sharedToProject=?1 or share.sharedToProject is null) and proj <> ?1''')
-    Page<SkillSharedMeta> getSkillDefsSharedFromOtherProjectsByProjectId(ProjDef sharedToProject, PageRequest pageRequest)
+            and (share.sharedToProject=?1 or share.sharedToProject is null) and proj <> ?1
+            and ('' = ?2 or lower(skill.name) like lower(CONCAT('%', ?2, '%')))
+    ''')
+    Page<SkillSharedMeta> getSkillDefsSharedFromOtherProjectsByProjectId(ProjDef sharedToProject, String filter, PageRequest pageRequest)
 
     static interface SkillSharedMeta {
         Integer getId()
