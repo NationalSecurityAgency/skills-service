@@ -42,6 +42,7 @@ import org.springframework.core.env.Environment
 import org.springframework.jdbc.datasource.TransactionAwareDataSourceProxy
 import skills.tasks.JsonSerializer
 import skills.tasks.data.CatalogFinalizeRequest
+import skills.tasks.data.CatalogFinalizeReplayRequest
 import skills.tasks.data.CatalogParticipantBackfillRequest
 import skills.tasks.data.CatalogSkillDefinitionUpdated
 import skills.tasks.data.ExpireUserAchievements
@@ -51,6 +52,7 @@ import skills.tasks.data.RemoveSkillEventsForUserRequest
 import skills.tasks.data.TextInputAiGradingRequest
 import skills.tasks.data.UnachievableLevelIdentification
 import skills.tasks.executors.CatalogSkillUpdatedTaskExecutor
+import skills.tasks.executors.CatalogFinalizeReplayExecutor
 import skills.tasks.executors.CatalogParticipantBackfillExecutor
 import skills.tasks.executors.ExpireUserAchievementsTaskExecutor
 import skills.tasks.executors.FinalizeCatalogSkillsImportExecutor
@@ -234,6 +236,14 @@ class TaskConfig {
                 )
                 .execute(finalizeCatalogSkillsImportExecutor)
     }
+    @Bean
+    OneTimeTask<CatalogFinalizeReplayRequest> catalogFinalizeReplayOneTimeTask(CatalogFinalizeReplayExecutor executor) {
+        return Tasks.oneTime('catalog-finalize-replay', CatalogFinalizeReplayRequest)
+                .onFailure(new DontRetryOnNoRetryExceptionHandler(new FailureHandler.MaxRetriesFailureHandler(maxRetries,
+                        new FailureHandler.ExponentialBackoffFailureHandler(Duration.ofSeconds(exponentialBackOffSeconds), exponentialBackOffRate))))
+                .execute(executor)
+    }
+
     @Bean
     OneTimeTask<RemoveSkillEventsForUserRequest> removeSkillEventsForAUser(RemoveSkillEventsForAUserExecutor removeSkillEventsForAUserExecutor) {
         return Tasks.oneTime("remove-skill-events-for-user", RemoveSkillEventsForUserRequest.class)
