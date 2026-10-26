@@ -23,6 +23,7 @@ import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
 import skills.services.events.SkillDate
 import skills.tasks.data.CatalogFinalizeRequest
+import skills.tasks.data.CatalogFinalizeReplayRequest
 import skills.tasks.data.CatalogParticipantBackfillRequest
 import skills.tasks.data.CatalogSkillDefinitionUpdated
 import skills.tasks.data.ImportedSkillAchievement
@@ -51,11 +52,17 @@ class TaskSchedulerService {
     OneTimeTask<CatalogFinalizeRequest> finalizeCatalogImportsOneTimeTask
 
     @Autowired
+    OneTimeTask<CatalogFinalizeReplayRequest> catalogFinalizeReplayOneTimeTask
+
+    @Autowired
     OneTimeTask<CatalogParticipantBackfillRequest> catalogParticipantBackfillOneTimeTask
 
     void scheduleCatalogParticipantBackfill(String projectId, String userId = null) {
         String key = userId ? "user:${projectId}:${userId}" : "project:${projectId}"
-        String id = UUID.nameUUIDFromBytes(key.getBytes('UTF-8')).toString()
+
+        // Give each project sweep a unique ID so a finishing sweep cannot suppress the next finalization's sweep.
+        // Reuse the ID for the same project/user to avoid duplicate user backfill tasks.
+        String id = userId ? UUID.nameUUIDFromBytes(key.getBytes('UTF-8')).toString() : "${key}:${UUID.randomUUID()}".toString()
         log.debug('Requesting catalog participant backfill scheduling if absent: taskId=[{}], projectId=[{}], userId=[{}], scope=[{}]', id, projectId, userId, userId ? 'user' : 'project')
         scheduler.scheduleIfNotExists(catalogParticipantBackfillOneTimeTask.instance(id,
                 new CatalogParticipantBackfillRequest(projectId: projectId, userId: userId)), Instant.now())
@@ -98,6 +105,13 @@ class TaskSchedulerService {
         scheduler.schedule(finalizeCatalogImportsOneTimeTask.instance(id, new CatalogFinalizeRequest(
                 projectId: projectId
         )), Instant.now().plusSeconds(schedulingDelaySeconds))
+    }
+
+    void scheduleCatalogFinalizationReplay(String projectId, List<Integer> skillRefIds, long start, long end) {
+        String id = "${projectId}-${UUID.randomUUID()}".toString()
+        scheduler.schedule(catalogFinalizeReplayOneTimeTask.instance(id, new CatalogFinalizeReplayRequest(
+                projectId: projectId, skillRefIds: skillRefIds, start: start, end: end)),
+                Instant.now().plusSeconds(schedulingDelaySeconds))
     }
 
     void removeSkillEventsForAUser(String userId, String projectId, List<Integer> skillRefIds) {

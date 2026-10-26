@@ -35,10 +35,9 @@ import skills.storage.model.SkillDef
 import skills.storage.model.UserAchievement
 import skills.storage.repos.ProjectParticipationRepo
 import skills.storage.repos.UserPointsRepo.ImportedCreditDiscrepancy
-import skills.tasks.data.CatalogFinalizeRequest
+import skills.tasks.data.CatalogFinalizeReplayRequest
 import skills.tasks.data.CatalogParticipantBackfillRequest
 import skills.tasks.data.ImportedSkillAchievement
-import spock.lang.IgnoreRest
 import spock.util.concurrent.PollingConditions
 
 import javax.sql.DataSource
@@ -99,7 +98,7 @@ class CatalogParticipantRaceFailuresIT extends CatalogIntSpec {
         callers.shutdown()
         assert callers.awaitTermination(30, TimeUnit.SECONDS)
         triggers.each { String name, String table -> removeTrigger(name, table) }
-        jdbcTemplate.update("update scheduled_tasks set execution_time = now() where task_name in ('catalog-participant-backfill', 'imported-skill-achievement', 'finalize-catalog-imports', 'remove-skill-events-for-user')")
+        jdbcTemplate.update("update scheduled_tasks set execution_time = now() where task_name in ('catalog-participant-backfill', 'imported-skill-achievement', 'finalize-catalog-imports', 'catalog-finalize-replay', 'remove-skill-events-for-user')")
         waitForAsyncTasksCompletion.waitForAllScheduleTasks()
         boundaries.hooks.clear()
     }
@@ -155,11 +154,13 @@ class CatalogParticipantRaceFailuresIT extends CatalogIntSpec {
         importNext(fixture)
         queueTasks('finalize-catalog-imports')
         Gate firstRequestBeforeStateWrite = gate()
+        AtomicInteger firstRequestPid = new AtomicInteger()
         AtomicBoolean pauseFirstAdmission = new AtomicBoolean(true)
         intercept('SettingsService.saveSetting', [{ Object request ->
             request.projectId == fixture.projectId && request.setting == 'catalog.finalize.state' && request.value == 'RUNNING'
         }]) { BoundaryInvocation invocation ->
             if (pauseFirstAdmission.compareAndSet(true, false)) {
+                firstRequestPid.set(jdbcTemplate.queryForObject('select pg_backend_pid()', Integer))
                 firstRequestBeforeStateWrite.pause()
             }
             invocation.callRealMethod()
@@ -173,8 +174,7 @@ class CatalogParticipantRaceFailuresIT extends CatalogIntSpec {
         // Without serialization, let the second request finish so the regression fails
         // on the outcome assertions rather than timing out at a lock-wait barrier.
         new PollingConditions(timeout: 15).eventually {
-            assert second.isDone() || jdbcTemplate.queryForObject(
-                    "select count(*) from pg_stat_activity where datname = current_database() and wait_event_type = 'Lock' and lower(query) like '%f_select_lock_and_insert%'", Integer) > 0
+            assert second.isDone() || hasLockWaitBlockedBy(firstRequestPid.get())
         }
         firstRequestBeforeStateWrite.open()
         List<Map> outcomes = [first.get(25, TimeUnit.SECONDS), second.get(25, TimeUnit.SECONDS)]
@@ -563,7 +563,7 @@ class CatalogParticipantRaceFailuresIT extends CatalogIntSpec {
         summary.points == 200
     }
 
-    def "scheduler retry after activation but before replay must recover the original run's uncopied event"() {
+    def "replay task retry must retain the original finalization window and recover uncopied events"() {
         Map fixture = fixture(false)
         SkillsService learner = createService(users[0])
         learner.initializeProjectProgress(fixture.projectId)
@@ -574,7 +574,15 @@ class CatalogParticipantRaceFailuresIT extends CatalogIntSpec {
             invocation.callRealMethod()
         }
         AtomicBoolean interruptBeforeReplay = new AtomicBoolean(true)
+        List<Map> replayWindows = Collections.synchronizedList([])
+        AtomicInteger finalizationExecutions = new AtomicInteger()
+        intercept('FinalizeCatalogSkillsImportExecutor.execute', []) { BoundaryInvocation invocation ->
+            finalizationExecutions.incrementAndGet()
+            invocation.callRealMethod()
+        }
         intercept('SkillCatalogFinalizationService.applyEventsThatWereReportedDuringTheFinalizationRun', []) { BoundaryInvocation invocation ->
+            replayWindows.add([skillRefIds: invocation.getArgument(0).collect(),
+                               start: invocation.getArgument(1), end: invocation.getArgument(2)])
             if (interruptBeforeReplay.compareAndSet(true, false)) {
                 throw new IllegalStateException('Injected interruption after activation commit, before replay')
             }
@@ -591,6 +599,39 @@ class CatalogParticipantRaceFailuresIT extends CatalogIntSpec {
 
         then:
         summary.points == 200
+        finalizationExecutions.get() == 1
+        replayWindows.size() == 2
+        replayWindows[0] == replayWindows[1]
+        replayWindows[0].skillRefIds == [skillDefRepo.findByProjectIdAndSkillId(fixture.projectId, fixture.source.skillId).id]
+        replayWindows[0].start < replayWindows[0].end
+    }
+
+    def "activation failure must roll back the follow-on replay task"() {
+        Map fixture = fixture(false)
+        SkillsService learner = createService(users[0])
+        queueTasks('catalog-finalize-replay')
+        AtomicInteger scheduledReplays = new AtomicInteger()
+        intercept('TaskSchedulerService.scheduleCatalogFinalizationReplay', [fixture.projectId]) { BoundaryInvocation invocation ->
+            Object result = invocation.callRealMethod()
+            scheduledReplays.incrementAndGet()
+            result
+        }
+        intercept('UserPointsRepo.findCatalogCreditDiscrepancies', [fixture.projectId]) { BoundaryInvocation invocation ->
+            throw new IllegalStateException('Injected activation failure after durable replay scheduling')
+        }
+
+        when:
+        skillsService.finalizeSkillsImportFromCatalog(fixture.projectId, false)
+        awaitFinalization(fixture.projectId, 'FAILED')
+        awaitTaskCount('finalize-catalog-imports', 0)
+        Map refreshed = learner.initializeProjectProgress(fixture.projectId)
+
+        then:
+        scheduledReplays.get() == 1
+        taskCount('catalog-finalize-replay') == 0
+        !Boolean.valueOf(skillDefRepo.findByProjectIdAndSkillId(fixture.projectId, fixture.source.skillId).enabled)
+        refreshed.backfillStatus == 'PENDING'
+        refreshed.ready == false
     }
 
     def "a later finalization must not lose pending catch-up when the old project sweep is awaiting acknowledgment"() {
@@ -910,21 +951,26 @@ class CatalogParticipantRaceFailuresIT extends CatalogIntSpec {
         participationRepo.readStatus(fixture.projectId, users[0]) == BackfillStatus.COMPLETED
     }
 
-    def "an older finalization retry must not complete a newly admitted run"() {
+    def "an older replay retry must not complete a newly admitted finalization run"() {
         Map fixture = fixture(false)
         SkillsService learner = createService(users[0])
         learner.initializeProjectProgress(fixture.projectId)
         skillsService.addSkill(fixture.source, users[0], historicalDate)
         skillsService.addSkill(fixture.next, users[0], historicalDate)
         waitForAsyncTasksCompletion.waitForAllScheduleTasks()
-        Gate staleRetryBeforeCompletion = gate()
+        Gate staleRetryBeforeReplay = gate()
         Gate newRunBeforeCopy = gate()
         AtomicBoolean failOriginalReplay = new AtomicBoolean(true)
         AtomicReference<String> originalTaskId = new AtomicReference<>()
         AtomicInteger originalExecutions = new AtomicInteger()
+        AtomicInteger finalizationExecutions = new AtomicInteger()
         AtomicBoolean retryReturned = new AtomicBoolean()
         intercept('FinalizeCatalogSkillsImportExecutor.execute', []) { BoundaryInvocation invocation ->
-            TaskInstance<CatalogFinalizeRequest> task = invocation.getArgument(0)
+            finalizationExecutions.incrementAndGet()
+            invocation.callRealMethod()
+        }
+        intercept('CatalogFinalizeReplayExecutor.execute', []) { BoundaryInvocation invocation ->
+            TaskInstance<CatalogFinalizeReplayRequest> task = invocation.getArgument(0)
             originalTaskId.compareAndSet(null, task.id)
             boolean original = task.id == originalTaskId.get()
             int attempt = original ? originalExecutions.incrementAndGet() : 0
@@ -934,16 +980,12 @@ class CatalogParticipantRaceFailuresIT extends CatalogIntSpec {
             }
             null
         }
-        intercept('SkillCatalogFinalizationService.applyEventsThatWereReportedDuringTheFinalizationRun', []) { BoundaryInvocation invocation ->
+        Integer originalImportId = skillDefRepo.findByProjectIdAndSkillId(fixture.projectId, fixture.source.skillId).id
+        intercept('SkillCatalogFinalizationService.applyEventsThatWereReportedDuringTheFinalizationRun', [[originalImportId]]) { BoundaryInvocation invocation ->
             if (failOriginalReplay.compareAndSet(true, false)) {
-                throw new IllegalStateException('Injected interruption after activation, before original task acknowledgment')
+                throw new IllegalStateException('Injected failure of the original follow-on replay task')
             }
-            invocation.callRealMethod()
-        }
-        intercept('BatchOperationsTransactionalAccessor.completeCatalogFinalization', [fixture.projectId, { Object imports -> imports.isEmpty() }]) { BoundaryInvocation invocation ->
-            // The older retry has already observed no disabled imports. A correct
-            // recovery path may acknowledge it without calling completion at all.
-            staleRetryBeforeCompletion.pause()
+            staleRetryBeforeReplay.pause()
             invocation.callRealMethod()
         }
         Integer nextSourceId = skillDefRepo.findByProjectIdAndSkillId(fixture.next.projectId, fixture.next.skillId).id
@@ -954,13 +996,12 @@ class CatalogParticipantRaceFailuresIT extends CatalogIntSpec {
 
         when:
         skillsService.finalizeSkillsImportFromCatalog(fixture.projectId, false)
-        new PollingConditions(timeout: 20).eventually {
-            assert staleRetryBeforeCompletion.hasArrived() || retryReturned.get()
-        }
+        staleRetryBeforeReplay.awaitArrival()
+        awaitTaskCount('finalize-catalog-imports', 0)
         importNext(fixture)
         skillsService.finalizeSkillsImportFromCatalog(fixture.projectId, false)
         newRunBeforeCopy.awaitArrival()
-        staleRetryBeforeCompletion.open()
+        staleRetryBeforeReplay.open()
         new PollingConditions(timeout: 20).eventually { assert retryReturned.get() }
         String stateWhileNewRunIsPaused = skillsService.getSetting(fixture.projectId, 'catalog.finalize.state').value
         newRunBeforeCopy.open()
@@ -969,6 +1010,8 @@ class CatalogParticipantRaceFailuresIT extends CatalogIntSpec {
 
         then: 'only the newly admitted run may publish its completion'
         stateWhileNewRunIsPaused == 'RUNNING'
+        finalizationExecutions.get() == 2
+        originalExecutions.get() == 2
         skillsService.getSetting(fixture.projectId, 'catalog.finalize.state').value == 'COMPLETED'
         summary.subjects[0].points == 200
         summary.points == 200
@@ -1191,6 +1234,8 @@ class CatalogParticipantRaceFailuresIT extends CatalogIntSpec {
                 execution(* skills.services.settings.SettingsService.saveSetting(..)) ||
                 execution(* skills.services.admin.SkillCatalogFinalizationService.applyEventsThatWereReportedDuringTheFinalizationRun(..)) ||
                 execution(* skills.tasks.executors.FinalizeCatalogSkillsImportExecutor.execute(..)) ||
+                execution(* skills.tasks.executors.CatalogFinalizeReplayExecutor.execute(..)) ||
+                execution(* skills.tasks.TaskSchedulerService.scheduleCatalogFinalizationReplay(..)) ||
                 execution(* skills.tasks.executors.CatalogParticipantBackfillExecutor.execute(..)) ||
                 execution(* skills.tasks.executors.ImportedSkillAchievementTaskExecutor.execute(..))''')
         Object atBoundary(ProceedingJoinPoint joinPoint) {

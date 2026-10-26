@@ -112,13 +112,18 @@ class BatchOperationsTransactionalAccessor {
     }
 
     @Transactional
-    void completeCatalogFinalization(String projectId, List<SkillDef> imports) {
+    void completeCatalogFinalization(String projectId, List<SkillDef> imports, long startOfFinalization) {
         // Fence the completion snapshot and durable handoff even when there are no imports to enable.
         lockingService.lockCatalogActivation(projectId)
         enableSkills(imports)
         settingsService.saveSetting(new ProjectSettingsRequest(projectId: projectId,
                 setting: SkillCatalogFinalizationService.PROJ_FINALIZE_STATE_PROP,
                 value: FinalizeState.COMPLETED.toString()))
+        if (imports) {
+            // Persist the original replay window with activation so acknowledgment failures cannot lose it.
+            taskSchedulerService.scheduleCatalogFinalizationReplay(projectId,
+                    imports.collect { SkillDef skill -> skill.id }, startOfFinalization, System.currentTimeMillis())
+        }
         taskSchedulerService.scheduleCatalogParticipantBackfill(projectId)
         // Commit activation and its catch-up tasks together. Repeated finalization is safe:
         // tasks reconcile current state, including changes missed during an earlier failed run.

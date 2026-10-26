@@ -41,8 +41,7 @@ class FinalizeCatalogSkillsImportExecutor implements VoidExecutionHandler<Catalo
         String profName = "${data.projectId}-finalize".toString()
         CProf.start(profName)
 
-        SkillCatalogFinalizationService.FinalizeCatalogSkillsImportResult res = skillCatalogFinalizationService.finalizeCatalogSkillsImport(data.projectId)
-        skillCatalogFinalizationService.applyEventsThatWereReportedDuringTheFinalizationRun(res.skillRefIds, res.start, res.end)
+        skillCatalogFinalizationService.finalizeCatalogSkillsImport(data.projectId)
 
         CProf.stop(profName)
         log.info("Profiled FinalizeCatalogSkillsImportExecutor for [{}]:\n{}", data.projectId, CProf.prettyPrint())

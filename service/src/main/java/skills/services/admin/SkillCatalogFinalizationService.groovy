@@ -97,6 +97,8 @@ class SkillCatalogFinalizationService {
     @Transactional
     @Profile
     void requestFinalizationOfImportedSkills(String projectId) {
+        // Match skill saves: project before init, since updating state also locks the project.
+        lockingService.lockProject(projectId)
         // Atomically order RUNNING/task creation with competing starts and learner qualification.
         lockingService.lockForSkillsCatalogFinalizationInit(projectId)
         if (getCurrentState(projectId) == FinalizeState.RUNNING) {
@@ -174,7 +176,7 @@ class SkillCatalogFinalizationService {
                 log.warn("Finalize was called for [{}] projectId but there were no disabled skills", projectId)
             }
 
-            batchOperationsTransactionalAccessor.completeCatalogFinalization(projectId, disabledImportedSkills)
+            batchOperationsTransactionalAccessor.completeCatalogFinalization(projectId, disabledImportedSkills, start)
         } catch (Throwable t) {
             updateState(projectId, FinalizeState.FAILED)
             throw new TaskConfig.DoNotRetryAsyncTaskException("Failed to finalize [${projectId}] project", t)
