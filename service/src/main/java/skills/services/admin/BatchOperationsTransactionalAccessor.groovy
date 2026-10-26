@@ -18,6 +18,7 @@ package skills.services.admin
 import callStack.profiler.Profile
 import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.context.annotation.Lazy
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Isolation
 import org.springframework.transaction.annotation.Propagation
@@ -31,6 +32,7 @@ import skills.services.LockingService
 import skills.services.RuleSetDefGraphService
 import skills.services.RuleSetDefinitionScoreUpdater
 import skills.services.events.SkillDate
+import skills.services.events.AchievedGlobalBadgeHandler
 import skills.services.UserAchievementsAndPointsManagement
 import skills.services.settings.Settings
 import skills.services.settings.SettingsService
@@ -98,6 +100,7 @@ class BatchOperationsTransactionalAccessor {
     @Autowired TaskSchedulerService taskSchedulerService
     @Autowired BadgeAdminService badgeAdminService
     @Autowired LevelDefinitionStorageService levelDefinitionStorageService
+    @Autowired @Lazy AchievedGlobalBadgeHandler achievedGlobalBadgeHandler
 
     @Transactional
     void addMissingCatalogLevels(String projectId, String subjectId = null, String userId = null) {
@@ -472,11 +475,11 @@ class BatchOperationsTransactionalAccessor {
         removeGroupAchievementsForSkillsForASpecificUser(skillRefIds, userId)
         updateSubjectPointsAndRemoveAchievementsForSkillsAndSpecificUser(skillRefIds, userId, projectId)
         removeBadgeAchievementsForSkillsAndSpecificUser(skillRefIds, userId)
-        removeGlobalBadgeAchievementsForSkillsAndSpecificUser(skillRefIds, userId)
 
         userPointsRepo.updateUserPointsForProjectAndUser(projectId, userId)
         userPointsRepo.removeOrphanedProjectPointsForUser(projectId, userId)
         userAchievementsAndPointsManagement.removeProjectLevelAchievementsIfUserDoesNotQualify(userId, projectId)
+        achievedGlobalBadgeHandler.reconcileGlobalBadgesForProject(userId, projectId)
         // Quiz-linked source cleanup can run after an import's own cleanup task.
         // Notify copies again after the actual source rows have been removed, including
         // disabled copies whose activation snapshot may precede this transaction's commit.
@@ -493,18 +496,6 @@ class BatchOperationsTransactionalAccessor {
         userAchievedLevelRepo.deleteAllBySkillRefIdInAndUserId(skillRefIds, userId)
         removeGroupAchievementsForSkillsForASpecificUser(skillRefIds, userId)
         removeBadgeAchievementsForSkillsAndSpecificUser(skillRefIds, userId)
-        removeGlobalBadgeAchievementsForSkillsAndSpecificUser(skillRefIds, userId)
-    }
-
-    @Profile
-    private void removeGlobalBadgeAchievementsForSkillsAndSpecificUser(List<Integer> skillRefIds, String userId) {
-        List<Integer> badgesSkillIsUsedIn = skillRelDefRepo.getGlobalBadgeIdsForSkills(skillRefIds)
-        if (badgesSkillIsUsedIn) {
-            // do a delete
-            badgesSkillIsUsedIn.forEach { it ->
-                userAchievedLevelRepo.deleteAllBySkillRefIdAndUserId(it, userId)
-            }
-        }
     }
 
     @Profile

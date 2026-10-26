@@ -39,7 +39,6 @@ import skills.tasks.data.CatalogFinalizeReplayRequest
 import skills.tasks.data.CatalogFinalizeRequest
 import skills.tasks.data.CatalogParticipantBackfillRequest
 import skills.tasks.data.ImportedSkillAchievement
-import spock.lang.IgnoreRest
 import spock.util.concurrent.PollingConditions
 
 import javax.sql.DataSource
@@ -1275,49 +1274,6 @@ class CatalogParticipantRaceFailuresIT extends CatalogIntSpec {
         newSummary.points == 0
         newSummary.skillsAchieved == 0
         participationRepo.readStatus(fixture.projectId, users[1]) == BackfillStatus.COMPLETED
-    }
-
-    def "reducing imported credit must revoke a global badge requiring the lost destination project level"() {
-        Map fixture = fixture()
-        SkillsService learner = createService(users[0])
-        learner.initializeProjectProgress(fixture.projectId)
-        Map globalBadge = createBadge(1, 90)
-        skillsService.createGlobalBadge(globalBadge)
-        // Keep this separate skill requirement achieved throughout deletion. The
-        // importing project's level is the only badge requirement that becomes false.
-        skillsService.assignSkillToGlobalBadge([projectId: fixture.next.projectId, badgeId: globalBadge.badgeId,
-                                              skillId: fixture.next.skillId])
-        skillsService.assignProjectLevelToGlobalBadge([projectId: fixture.projectId, badgeId: globalBadge.badgeId, level: '1'])
-        skillsService.updateGlobalBadge(globalBadge + [enabled: 'true'])
-        3.times { int index -> skillsService.addSkill(fixture.next, users[0], new Date(historicalDate.time + index * 1000)) }
-        Date removedDate = new Date(historicalDate.time + 1000)
-        skillsService.addSkill(fixture.source, users[0], historicalDate)
-        skillsService.addSkill(fixture.source, users[0], removedDate)
-        waitForAsyncTasksCompletion.waitForAllScheduleTasks()
-        Map before = learner.getSkillsSummaryForCurrentUser(fixture.projectId)
-        Map awardedBadge = learner.getBadgeSummary(null, fixture.projectId, globalBadge.badgeId, -1, true)
-
-        expect:
-        before.points == 200
-        before.skillsLevel == 1
-        awardedBadge.badgeAchieved
-        awardedBadge.dateAchieved
-
-        when:
-        skillsService.deleteSkillEvent(fixture.source + [userId: users[0], timestamp: removedDate.time])
-        waitForAsyncTasksCompletion.waitForAllScheduleTasks()
-        Map after = learner.getSkillsSummaryForCurrentUser(fixture.projectId)
-        Map revokedBadge = learner.getBadgeSummary(null, fixture.projectId, globalBadge.badgeId, -1, true)
-        Map retainedRequirement = learner.getSingleSkillSummaryForCurrentUser(fixture.next.projectId, fixture.next.skillId)
-
-        then:
-        after.points == 100
-        after.subjects[0].points == 100
-        after.skillsLevel == 0
-        retainedRequirement.points == 300
-        retainedRequirement.achievedOn
-        !revokedBadge.badgeAchieved
-        !revokedBadge.dateAchieved
     }
 
     private Map fixture(boolean finalize = true, int occurrences = 3) {

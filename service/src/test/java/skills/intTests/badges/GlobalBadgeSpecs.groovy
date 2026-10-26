@@ -32,6 +32,155 @@ class GlobalBadgeSpecs extends DefaultIntSpec {
     @Autowired
     UserAchievedLevelRepo userAchievedLevelRepo
 
+    def "reducing credit revokes a global badge requiring the lost project level - imported=#imported, deleteAll=#deleteAll"() {
+        Map fixture = creditReductionFixture(imported)
+        List<String> users = getRandomUsers(2)
+        SkillsService learner = createService(users[0])
+        SkillsService unaffectedLearner = createService(users[1])
+        [learner, unaffectedLearner].each { SkillsService client -> client.initializeProjectProgress(fixture.projectId) }
+        Map badge = createBadge(1, 90)
+        Map retainedBadge = createBadge(1, 91)
+        [badge, retainedBadge].each { Map definition ->
+            skillsService.createGlobalBadge(definition)
+            skillsService.assignSkillToGlobalBadge(fixture.required.projectId, definition.badgeId, fixture.required.skillId)
+        }
+        skillsService.assignProjectLevelToGlobalBadge(projectId: fixture.projectId, badgeId: badge.badgeId, level: '1')
+        [badge, retainedBadge].each { Map definition -> skillsService.updateGlobalBadge(definition + [enabled: 'true']) }
+        Date firstDate = new Date(System.currentTimeMillis() - 3 * 24 * 60 * 60 * 1000)
+        Date removedDate = new Date(firstDate.time + 1000)
+        users.each { String userId ->
+            3.times { int index -> skillsService.addSkill(fixture.required, userId, new Date(firstDate.time + index * 1000)) }
+            skillsService.addSkill(fixture.source, userId, firstDate)
+            skillsService.addSkill(fixture.source, userId, removedDate)
+        }
+        waitForAsyncTasksCompletion.waitForAllScheduleTasks()
+        Map before = learner.getSkillsSummaryForCurrentUser(fixture.projectId)
+        Map awarded = learner.getBadgeSummary(null, fixture.projectId, badge.badgeId, -1, true)
+        Object retainedDate = learner.getBadgeSummary(null, fixture.projectId, retainedBadge.badgeId, -1, true).dateAchieved
+
+        expect:
+        before.points == 200
+        before.skillsLevel == 1
+        awarded.badgeAchieved
+        awarded.dateAchieved
+        retainedDate
+
+        when:
+        if (deleteAll) {
+            skillsService.deleteAllSkillEvents(fixture.source + [userId: users[0]])
+        } else {
+            skillsService.deleteSkillEvent(fixture.source + [userId: users[0], timestamp: removedDate.time])
+        }
+        waitForAsyncTasksCompletion.waitForAllScheduleTasks()
+        Map after = learner.getSkillsSummaryForCurrentUser(fixture.projectId)
+        Map revoked = learner.getBadgeSummary(null, fixture.projectId, badge.badgeId, -1, true)
+        Map required = learner.getSingleSkillSummaryForCurrentUser(fixture.required.projectId, fixture.required.skillId)
+        Map retained = learner.getBadgeSummary(null, fixture.projectId, retainedBadge.badgeId, -1, true)
+
+        then:
+        after.points == (deleteAll ? 0 : 100)
+        after.subjects[0].points == (deleteAll ? 0 : 100)
+        after.skillsLevel == 0
+        required.points == 300
+        required.achievedOn
+        !revoked.badgeAchieved
+        !revoked.dateAchieved
+        retained.badgeAchieved
+        retained.dateAchieved == retainedDate
+        unaffectedLearner.getBadgeSummary(null, fixture.projectId, badge.badgeId, -1, true).badgeAchieved
+
+        when: 'restoring credit awards the badge again'
+        if (deleteAll) {
+            skillsService.addSkill(fixture.source, users[0], firstDate)
+        }
+        skillsService.addSkill(fixture.source, users[0], removedDate)
+        waitForAsyncTasksCompletion.waitForAllScheduleTasks()
+        Map restored = learner.getBadgeSummary(null, fixture.projectId, badge.badgeId, -1, true)
+
+        then:
+        learner.getSkillsSummaryForCurrentUser(fixture.projectId).points == 200
+        restored.badgeAchieved
+        restored.dateAchieved
+
+        where:
+        imported | deleteAll
+        false    | false
+        true     | false
+        false    | true
+        true     | true
+    }
+
+    def "losing a required skill revokes a global badge while its project level remains achieved - imported=#imported"() {
+        Map fixture = creditReductionFixture(imported)
+        String userId = getRandomUsers(1).first()
+        SkillsService learner = createService(userId)
+        learner.initializeProjectProgress(fixture.projectId)
+        Map badge = createBadge(1, 90)
+        skillsService.createGlobalBadge(badge)
+        skillsService.assignSkillToGlobalBadge(fixture.source.projectId, badge.badgeId, fixture.source.skillId)
+        skillsService.assignProjectLevelToGlobalBadge(projectId: fixture.projectId, badgeId: badge.badgeId, level: '1')
+        skillsService.updateGlobalBadge(badge + [enabled: 'true'])
+        Map levelOnlyBadge = createBadge(1, 91)
+        skillsService.createGlobalBadge(levelOnlyBadge)
+        skillsService.assignProjectLevelToGlobalBadge(projectId: fixture.projectId, badgeId: levelOnlyBadge.badgeId, level: '1')
+        skillsService.updateGlobalBadge(levelOnlyBadge + [enabled: 'true'])
+        Date firstDate = new Date(System.currentTimeMillis() - 3 * 24 * 60 * 60 * 1000)
+        Date removedDate = new Date(firstDate.time + 2000)
+        3.times { int index -> skillsService.addSkill(fixture.source, userId, new Date(firstDate.time + index * 1000)) }
+        waitForAsyncTasksCompletion.waitForAllScheduleTasks()
+        Object levelOnlyDate = learner.getBadgeSummary(null, fixture.projectId, levelOnlyBadge.badgeId, -1, true).dateAchieved
+
+        expect:
+        learner.getBadgeSummary(null, fixture.projectId, badge.badgeId, -1, true).badgeAchieved
+        levelOnlyDate
+
+        when:
+        skillsService.deleteSkillEvent(fixture.source + [userId: userId, timestamp: removedDate.time])
+        waitForAsyncTasksCompletion.waitForAllScheduleTasks()
+        Map after = learner.getSkillsSummaryForCurrentUser(fixture.projectId)
+        Map revoked = learner.getBadgeSummary(null, fixture.projectId, badge.badgeId, -1, true)
+        Map retained = learner.getBadgeSummary(null, fixture.projectId, levelOnlyBadge.badgeId, -1, true)
+
+        then:
+        after.points == 200
+        after.skillsLevel == 1
+        !learner.getSingleSkillSummaryForCurrentUser(fixture.source.projectId, fixture.source.skillId).achievedOn
+        !revoked.badgeAchieved
+        !revoked.dateAchieved
+        retained.badgeAchieved
+        retained.dateAchieved == levelOnlyDate
+
+        when:
+        skillsService.addSkill(fixture.source, userId, removedDate)
+        waitForAsyncTasksCompletion.waitForAllScheduleTasks()
+        Map restored = learner.getBadgeSummary(null, fixture.projectId, badge.badgeId, -1, true)
+
+        then:
+        restored.badgeAchieved
+        restored.dateAchieved
+
+        where:
+        imported << [false, true]
+    }
+
+    private Map creditReductionFixture(boolean imported) {
+        Map source = createSkill(1, 1, 11, 0, 3, 0, 100)
+        List<Map> local = [createSkill(1, 1, 21, 0, 5, 0, 100), createSkill(1, 1, 22, 0, 5, 0, 100)]
+        skillsService.createProjectAndSubjectAndSkills(createProject(1), createSubject(1, 1), [source] + local)
+        Map required = createSkill(3, 1, 12, 0, 3, 0, 100)
+        skillsService.createProjectAndSubjectAndSkills(createProject(3), createSubject(3, 1), [required])
+        String projectId = source.projectId
+        if (imported) {
+            skillsService.exportSkillToCatalog(source.projectId, source.skillId)
+            List<Map> destinationSkills = [createSkill(2, 1, 21, 0, 5, 0, 100), createSkill(2, 1, 22, 0, 5, 0, 100)]
+            skillsService.createProjectAndSubjectAndSkills(createProject(2), createSubject(2, 1), destinationSkills)
+            projectId = 'TestProject2'
+            skillsService.bulkImportSkillsFromCatalog(projectId, 'TestSubject1', [source])
+            skillsService.finalizeSkillsImportFromCatalog(projectId)
+        }
+        [projectId: projectId, source: source, required: required]
+    }
+
     def "removing level satisfies global badge for some of the existing users"() {
 
         def proj = createProject()

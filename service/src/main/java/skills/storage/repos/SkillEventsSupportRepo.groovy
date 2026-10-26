@@ -200,7 +200,7 @@ interface SkillEventsSupportRepo extends CrudRepository<SkillDef, Long> {
                     s1.id = sr1.child.id and 
                     sr1.type = 'BadgeRequirement' and 
                     s1.projectId = ?1 and 
-                    s1.skillId = ?2)
+                    (?2 is null or s1.skillId = ?2))
             OR EXISTS (SELECT true
                 from GlobalBadgeLevelDef gbld
                 where
@@ -208,7 +208,7 @@ interface SkillEventsSupportRepo extends CrudRepository<SkillDef, Long> {
                     gbld.projectId = ?1)
             )''')
     @Nullable
-    List<SkillDefMin> findGlobalBadgesForProjectIdAndSkillId(String projectId, String skillId)
+    List<SkillDefMin> findGlobalBadgesForProjectIdAndSkillId(String projectId, @Nullable String skillId)
 
     @Modifying
     @Query('''update UserPoints up set up.points = up.points + ?2 where up.id = ?1''')
