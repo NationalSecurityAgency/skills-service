@@ -109,9 +109,6 @@ class SkillEventAdminService {
     UserQuizAttemptRepo userQuizAttemptRepo
 
     @Autowired
-    GlobalBadgesService globalBadgesService
-
-    @Autowired
     TaskSchedulerService taskSchedulerService
 
     @Autowired
@@ -126,6 +123,7 @@ class SkillEventAdminService {
     @Autowired CatalogParticipantBackfillService catalogBackfillService
     @Autowired LockingService lockingService
     @Autowired @Lazy ImportedSkillsAchievementsHandler importedSkillsAchievementsHandler
+    @Autowired @Lazy AchievedGlobalBadgeHandler achievedGlobalBadgeHandler
 
     @Value('#{"${skills.bulkUserLookup.minNumOfThreads:1}"}')
     Integer minNumOfThreads
@@ -220,13 +218,12 @@ class SkillEventAdminService {
         performedSkillRepository.deleteAllByUserIdAndProjectId(userId, projectId)
         userEventService.removeAllEvents(projectId, userId)
         achievedLevelRepo.deleteAllByProjectIdAndUserId(projectId, userId)
-        List<Integer> globalBadges = achievedLevelRepo.getAchievedGlobalBadgeForUserIntersectingProjectId(userId, projectId)
-        achievedLevelRepo.deleteAllById(globalBadges)
         userPointsRepo.deleteAllByProjectIdAndUserId(projectId, userId)
         skillApprovalRepo.deleteAllByProjectIdAndUserId(projectId, userId)
         userQuizAttemptRepo.deleteAllAttemptsForQuizzesAssociatedToProjectAndByUserId(projectId, userId)
 
         catalogBackfillService.reset(projectId, userId, hadLocalEvents)
+        achievedGlobalBadgeHandler.reconcileGlobalBadgesForProject(userId, projectId)
 
         propagateUpdatesToQuizSkillsAndImportedSkills(projectId, userId)
 
@@ -470,15 +467,8 @@ class SkillEventAdminService {
         // handle catalog
         List<SkillDefMin> related = skillDefRepo.findSkillDefMinCopiedFrom(performedSkill.skillRefId)
 
-        List<Integer> badgesSkillIsUsedIn = globalBadgesService.globalBadgesSkillIsUsedIn(projectId, skillId)
-        if (badgesSkillIsUsedIn) {
-            // do a delete
-            badgesSkillIsUsedIn.forEach{ it ->
-                achievedLevelRepo.deleteAllBySkillRefIdAndUserId(it, userId)
-            }
-        }
-
         SkillEventResult skillEventResult = updateUserPointsAndAchievementsWhenPerformedSkillRemoved(userId, skillDefinitionMin, numExistingSkills)
+        achievedGlobalBadgeHandler.reconcileGlobalBadgesForProject(userId, projectId)
         performedSkillRepository.delete(performedSkill)
         userEventService.removeEvent(performedSkill.performedOn, performedSkill.userId, performedSkill.skillRefId)
 

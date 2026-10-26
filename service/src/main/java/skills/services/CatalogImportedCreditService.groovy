@@ -132,7 +132,7 @@ class CatalogImportedCreditService {
                 badgeHandler.checkForBadges(new SkillEventResult(), userId, min,
                         new SkillDate(date: achievements.first().achievedOn, isProvided: true))
             }
-            globalBadgeHandler.checkForGlobalBadges(new SkillEventResult(), userId, projectId, min)
         }
+        globalBadgeHandler.reconcileGlobalBadgesForProject(userId, projectId)
     }
 }
