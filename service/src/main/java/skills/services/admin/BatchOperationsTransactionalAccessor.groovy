@@ -113,6 +113,8 @@ class BatchOperationsTransactionalAccessor {
 
     @Transactional
     void completeCatalogFinalization(String projectId, List<SkillDef> imports) {
+        // Fence the completion snapshot and durable handoff even when there are no imports to enable.
+        lockingService.lockCatalogActivation(projectId)
         enableSkills(imports)
         settingsService.saveSetting(new ProjectSettingsRequest(projectId: projectId,
                 setting: SkillCatalogFinalizationService.PROJ_FINALIZE_STATE_PROP,
@@ -141,9 +143,6 @@ class BatchOperationsTransactionalAccessor {
     @Transactional
     @Profile
     void enableSkills(List<SkillDef> disabledImportedSkills) {
-        disabledImportedSkills.collect { SkillDef skill -> skill.projectId }.unique().sort().each { String projectId ->
-            lockingService.lockCatalogActivation(projectId)
-        }
         disabledImportedSkills.each {
             it.enabled = Boolean.TRUE.toString()
         }
