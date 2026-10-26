@@ -53,9 +53,9 @@ class ShareSkillsService {
     SkillsDepsService skillsDepsService
 
     @Transactional(readOnly = true)
-    TableResult getSharedSkillsFromOtherProjects(String projectId, PageRequest pageRequest) {
+    TableResult getSharedSkillsFromOtherProjects(String projectId, PageRequest pageRequest, String filter = '') {
         ProjDef projDef = projDefAccessor.getProjDef(projectId)
-        Page<SkillShareDefRepo.SkillSharedMeta> sharedMetaPage = skillShareDefRepo.getSkillDefsSharedFromOtherProjectsByProjectId(projDef, pageRequest)
+        Page<SkillShareDefRepo.SkillSharedMeta> sharedMetaPage = skillShareDefRepo.getSkillDefsSharedFromOtherProjectsByProjectId(projDef, filter, pageRequest)
         List<SkillShareDefRepo.SkillSharedMeta> sharedMetas = sharedMetaPage.getContent()
         List<SharedSkillResult> results = sharedMetas.collect { SkillShareDefRepo.SkillSharedMeta meta ->
             new SharedSkillResult(

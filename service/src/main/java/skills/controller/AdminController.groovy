@@ -1396,10 +1396,11 @@ class AdminController {
                                                   @RequestParam int limit,
                                                   @RequestParam int page,
                                                   @RequestParam String orderBy,
-                                                  @RequestParam Boolean ascending) {
+                                                  @RequestParam Boolean ascending,
+                                                  @RequestParam(required = false, defaultValue = '') String filter) {
         SkillsValidator.isNotBlank(projectId, "Project Id")
         PageRequest pageRequest = TablePageUtil.createPagingRequest(limit, page, orderBy, ascending)
-        return shareSkillsService.getSharedSkillsFromOtherProjects(projectId, pageRequest)
+        return shareSkillsService.getSharedSkillsFromOtherProjects(projectId, pageRequest, filter)
     }
 
     @RequestMapping(value = "/projects/{projectId}/settings", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
