@@ -55,30 +55,39 @@ class AchievedGlobalBadgeHandler {
 
     @Profile
     void checkForGlobalBadges(SkillEventResult res, String userId, String projectId, SkillDefMin currentSkillDef) {
-        List<SkillDefMin> globalBadges = skillEventsSupportRepo.findGlobalBadgesForProjectIdAndSkillId(projectId, currentSkillDef.skillId)
+        reconcileGlobalBadges(res, userId,
+                skillEventsSupportRepo.findGlobalBadgesForProjectIdAndSkillId(projectId, currentSkillDef.skillId))
+    }
+
+    // Credit reductions can invalidate a project-level requirement even when no
+    // directly required skill was completed or lost. Run after totals and levels settle.
+    @Profile
+    void reconcileGlobalBadgesForProject(String userId, String projectId) {
+        reconcileGlobalBadges(new SkillEventResult(), userId,
+                skillEventsSupportRepo.findGlobalBadgesForProjectIdAndSkillId(projectId, null))
+    }
+
+    private void reconcileGlobalBadges(SkillEventResult res, String userId, List<SkillDefMin> globalBadges) {
         if (globalBadges) {
             // make the processing order predictable
             globalBadges = globalBadges.sort { it.skillId }
 
-            badgeCheckLoop: for (SkillDefMin globalBadge : globalBadges) {
+            for (SkillDefMin globalBadge : globalBadges) {
                 if(globalBadge.enabled != null && !Boolean.valueOf(globalBadge.enabled)) {
                     log.debug("global badge [{}] isn't enabled yet, cannot be checked for achievement", globalBadge.skillId)
                     continue;
                 }
-                // first check required project levels
-                if (!achievedLevelRepo.didUserAchieveAllGlobalBadgeLevels(globalBadge.skillId, userId)){
-                    continue badgeCheckLoop
-                }
-
-                // all project level requirements met, check required skills
-                Long nonAchievedChildren = achievedLevelRepo.countNonAchievedGlobalSkills(userId, globalBadge.skillId, SkillRelDef.RelationshipType.BadgeRequirement)
-                if (nonAchievedChildren == 0) {
+                boolean qualifies = achievedLevelRepo.didUserAchieveAllGlobalBadgeLevels(globalBadge.skillId, userId) &&
+                        achievedLevelRepo.countNonAchievedGlobalSkills(userId, globalBadge.skillId, SkillRelDef.RelationshipType.BadgeRequirement) == 0
+                if (qualifies) {
                     if (!achievedLevelRepo.existsByUserIdAndSkillIdAndProjectIdIsNull(userId, globalBadge.skillId)) {
                         UserAchievement groupAchievement = new UserAchievement(userId: userId.toLowerCase(), projectId: null,
                                 skillId: globalBadge.skillId, skillRefId: globalBadge?.id, achievedOn: new Date())
                         achievedLevelRepo.save(groupAchievement)
                         res.completed.add(new CompletionItem(type: CompletionTypeUtil.getCompletionType(globalBadge.type), id: globalBadge.skillId, name: globalBadge.name))
                     }
+                } else {
+                    achievedLevelRepo.deleteAllBySkillRefIdAndUserId(globalBadge.id, userId)
                 }
             }
         }
