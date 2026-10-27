@@ -28,8 +28,10 @@ import skills.storage.model.SkillShareDef
 interface SkillShareDefRepo extends CrudRepository<SkillShareDef, Long> {
 
 
-    @Query('''select share from SkillShareDef share, SkillDef skill
-        where share.skill = skill and skill.projectId=?1''')
+    @Query('''select share from SkillShareDef share
+    join share.skill skill
+    left join share.sharedToProject sharedProject
+    where skill.projectId = ?1''')
     Page<SkillShareDef> getSkillShareDefsWithOtherProjectsByProjectId(String projectId, PageRequest pageRequest)
 
     @Query('''select skill.id as id, skill.skillId as skillId, skill.name as skillName, proj.projectId as projectId, proj.name as projectName
