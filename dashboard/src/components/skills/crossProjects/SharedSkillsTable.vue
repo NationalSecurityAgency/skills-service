@@ -64,12 +64,12 @@ const pageChanged = (pagingInfo) => {
       v-if="loaded" :value="sharedSkills" :sortField="sortField" :sortOrder="sortOrder" @sort="sortTable" paginator
       :totalRecords="totalRecords" :rows="pageSize" :rowsPerPageOptions="possiblePageSizes" lazy @page="pageChanged"
       data-cy="sharedSkillsTable" tableStoredStateId="sharedSkillsTable" aria-label="Skills Shared with Other Projects">
-      <Column field="skillName" header="Shared Skill" sortable :class="{'flex': isFlex }">
+      <Column field="skill.name" header="Shared Skill" sortable :class="{'flex': isFlex }">
         <template #body="slotProps">
           {{ slotProps.data.skillName }}
         </template>
       </Column>
-      <Column field="projectName" header="Project" sortable :class="{'flex': isFlex }">
+      <Column :field="disableDelete ? 'projectName' : 'sharedProject.name'" header="Project" sortable :class="{'flex': isFlex }">
         <template #body="slotProps">
           <div class="flex flex-col">
             <div>
