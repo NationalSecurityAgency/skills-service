@@ -20,7 +20,6 @@ describe('Learning Path Management Validation Tests', () => {
     
     const visitLearningPath = () => {
         cy.visit('/administrator/projects/proj1/learning-path')
-        cy.wait('@loadSharedSkills')
     }
 
     beforeEach(() => {
