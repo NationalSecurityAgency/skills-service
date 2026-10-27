@@ -148,6 +148,7 @@ const deleteSharedSkill = (itemToRemove) => {
   }
   SkillsShareService.deleteSkillShare(projectId, itemToRemove.skillId, sharedProjectId)
     .then(() => {
+      currentPage.value = 1
       loadSharedSkills()
     }).finally(() => {
     const sharedWith = sharedProjectId === allProjectsConstant ? 'All Projects' : sharedProjectId
