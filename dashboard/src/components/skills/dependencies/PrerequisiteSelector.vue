@@ -280,6 +280,7 @@ const updateSearch = (value) => {
                            v-on:added="onFromSelected"
                            :disabled="disabled"
                            :appendTo="appendTo"
+                           :after-list-slot-text="includeSharedSkills ? 'Enter text to search for shared skills' : null"
                            optionGroupLabel="label"
                            optionGroupChildren="items"
                            :showType=true />
