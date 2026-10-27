@@ -305,7 +305,10 @@ class QuizRunService {
         }
         List<QuizQuestionInfo> questions = dbQuestionDefs?.collect {
             List<QuizAnswerDef> quizAnswerDefs = byQuizId[it.id]
-            if(randomizeAnswers) {
+            if(it.type == QuizQuestionType.Rating) {
+                // Star selections map to answer positions, so the rating scale must stay ordered.
+                quizAnswerDefs?.sort { QuizAnswerDef answer -> answer.displayOrder }
+            } else if(randomizeAnswers) {
                 quizAnswerDefs?.shuffle()
             }
 
