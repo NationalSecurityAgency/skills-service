@@ -26,7 +26,6 @@ import NoContent2 from '@/components/utils/NoContent2.vue'
 import SkillsSelector from '@/components/skills/SkillsSelector.vue'
 import ProjectSelector from '@/components/skills/crossProjects/ProjectSelector.vue'
 import SharedSkillsTable from '@/components/skills/crossProjects/SharedSkillsTable.vue'
-import InputSanitizer from "@/components/utils/InputSanitizer.js";
 import {useStorage} from "@vueuse/core";
 
 const route = useRoute()
@@ -55,6 +54,10 @@ const totalRecords = ref(0)
 const currentPage = ref(1);
 const sortField = ref('skill.skillId')
 const sortOrder = ref(0)
+const doesShareAlreadyExist = ref(false);
+const validatingSkill = ref(false)
+const validationFailed = ref(false)
+let shareLookupId = 0
 
 const shareButtonEnabled = computed(() => {
   return (selectedProject.value || shareWithAllProjects.value) && selectedSkill.value && !loading.value.sharedSkills
@@ -125,20 +128,39 @@ const shareSkill = () => {
   }
 }
 
-const doesShareAlreadyExist = computed(() => {
-  if(!selectedSkill.value || (!selectedProject.value && !shareWithAllProjects.value)) {
-    return false;
+const isSkillAlreadyShared = async () => {
+  const lookupId = ++shareLookupId
+  const skillId = selectedSkill.value?.skillId
+  const destinationProjectId = selectedProject.value?.projectId || ''
+  doesShareAlreadyExist.value = false
+  validationFailed.value = false
+  errorMessage.value = ''
+
+  if (!skillId || (!destinationProjectId && !shareWithAllProjects.value)) {
+    validatingSkill.value = false
+    return
   }
-  const alreadyExist = sharedSkills.value.find((entry) => entry.skillId === selectedSkill.value.skillId && (!entry.projectId || shareWithAllProjects.value || entry.projectId === selectedProject.value.projectId))
-  if (alreadyExist) {
-    if (alreadyExist.sharedWithAllProjects) {
-      errorMessage.value = `Skill <strong>[${selectedSkill.value.name}]</strong> is already shared to <strong>[All Projects]</strong>.`
-    } else {
-      errorMessage.value = `Skill <strong>[${selectedSkill.value.name}]</strong> is already shared to project <strong>[${alreadyExist.projectName}]</strong>.`
+
+  validatingSkill.value = true
+  try {
+    const result = await SkillsShareService.isSkillShared(projectId, { skillId, destinationProjectId })
+    if (lookupId !== shareLookupId) {
+      return
+    }
+    doesShareAlreadyExist.value = result.data
+    errorMessage.value = result.explanation || ''
+  } catch (error) {
+    if (lookupId !== shareLookupId) {
+      return
+    }
+    validationFailed.value = true
+    errorMessage.value = 'Could not check whether this skill is already shared.'
+  } finally {
+    if (lookupId === shareLookupId) {
+      validatingSkill.value = false
     }
   }
-  return alreadyExist
-});
+}
 
 const deleteSharedSkill = (itemToRemove) => {
   loading.value.sharedSkills = true
@@ -158,20 +180,24 @@ const deleteSharedSkill = (itemToRemove) => {
 
 const onSelectedProject = (item) => {
   selectedProject.value = item
+  isSkillAlreadyShared()
 }
 
 const onUnSelectedProject = () => {
   selectedProject.value = null
+  isSkillAlreadyShared()
 }
 
 const onSelectedSkill = (item) => {
   selectedSkill.value = item
+  isSkillAlreadyShared()
 }
 
 const onShareWithAllProjects = (checked) => {
   if (checked) {
     selectedProject.value = null
   }
+  isSkillAlreadyShared()
 }
 
 const pageChanged = (pagingInfo) => {
@@ -234,14 +260,14 @@ const sortChanged = (sortingInfo) => {
                             icon="fas fa-share-alt"
                             label="Share"
                             aria-label="Share skill with another project"
-                            :disabled="!shareButtonEnabled || doesShareAlreadyExist"
+                            :disabled="!shareButtonEnabled || doesShareAlreadyExist || validatingSkill || validationFailed"
                             data-cy="shareButton">
               </SkillsButton>
             </div>
           </div>
         </div>
-        <Message v-if="doesShareAlreadyExist" severity="error">
-          <span v-html="InputSanitizer.sanitize(errorMessage)"></span>
+        <Message v-if="doesShareAlreadyExist || validationFailed" severity="error">
+          {{ errorMessage }}
         </Message>
 
         <div v-if="sharedSkills && sharedSkills.length > 0" class="my-6">

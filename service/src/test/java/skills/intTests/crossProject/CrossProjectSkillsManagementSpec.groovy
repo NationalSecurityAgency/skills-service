@@ -76,6 +76,49 @@ class CrossProjectSkillsManagementSpec extends DefaultIntSpec {
         proj2SharedWithMeSkills.data.get(0).projectId == "TestProject1"
     }
 
+    def "shared skill lookup explains which project a skill is shared with"() {
+        Map proj1 = SkillsFactory.createProject(1)
+        Map proj2 = SkillsFactory.createProject(2)
+        Map proj3 = SkillsFactory.createProject(3)
+        Map subject = SkillsFactory.createSubject(1, 1)
+        List<Map> skills = SkillsFactory.createSkills(2, 1, 1)
+
+        skillsService.createProject(proj1)
+        skillsService.createProject(proj2)
+        skillsService.createProject(proj3)
+        skillsService.createSubject(subject)
+        skillsService.createSkills(skills)
+
+        expect:
+        !skillsService.isSkillShared(proj1.projectId, skills[0].skillId, proj2.projectId).data
+        !skillsService.isSkillShared(proj1.projectId, skills[0].skillId, proj2.projectId).explanation
+
+        when:
+        skillsService.shareSkill(proj1.projectId, skills[0].skillId, proj2.projectId)
+        Map specificShare = skillsService.isSkillShared(proj1.projectId, skills[0].skillId, proj2.projectId)
+        Map anyShare = skillsService.isSkillShared(proj1.projectId, skills[0].skillId)
+        Map otherProject = skillsService.isSkillShared(proj1.projectId, skills[0].skillId, proj3.projectId)
+
+        then:
+        specificShare.data
+        specificShare.explanation == 'This skill is already shared with project Test Project#2.'
+        anyShare.data
+        anyShare.explanation == 'This skill is already shared with project Test Project#2.'
+        !otherProject.data
+        !otherProject.explanation
+
+        when:
+        skillsService.shareSkill(proj1.projectId, skills[1].skillId, 'ALL_SKILLS_PROJECTS')
+        Map globalShare = skillsService.isSkillShared(proj1.projectId, skills[1].skillId, proj3.projectId)
+        Map anyGlobalShare = skillsService.isSkillShared(proj1.projectId, skills[1].skillId)
+
+        then:
+        globalShare.data
+        globalShare.explanation == 'This skill is already shared with All Projects.'
+        anyGlobalShare.data
+        anyGlobalShare.explanation == 'This skill is already shared with All Projects.'
+    }
+
     def "shared skills must use doc root from project from which they are shared"() {
         def proj1 = SkillsFactory.createProject(1)
         def proj1_subj = SkillsFactory.createSubject(1, 1)

@@ -460,6 +460,11 @@ class SkillsService {
         wsHelper.adminGet(url)
     }
 
+    def isSkillShared(String projectId, String skillId, String destinationProjectId = '') {
+        String url = "/projects/${projectId}/isSkillShared?skillId=${skillId}&destinationProjectId=${destinationProjectId}".toString()
+        wsHelper.adminGet(url)
+    }
+
     def getSharedSkillSummary(String projectIdTo, String projectIdFrom, String skillId){
         ///projects/{projectId}/projects/{crossProjectId}/skills/{skillId}/summary
         String url = "/projects/${projectIdTo}/projects/${projectIdFrom}/skills/${skillId}/summary"

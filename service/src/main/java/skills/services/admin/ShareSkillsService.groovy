@@ -68,8 +68,29 @@ class ShareSkillsService {
     }
 
     @Transactional(readOnly = true)
-    TableResult getSharedSkillsWithOtherProjects(String projectId, PageRequest pageRequest) {
-        Page<SkillShareDef> shareDefPage = skillShareDefRepo.getSkillShareDefsWithOtherProjectsByProjectId(projectId, pageRequest)
+    String getExistingShareExplanation(String projectId, String skillId, String destinationProjectId = '') {
+        SkillDef skill = skillDefAccessor.getSkillDef(projectId, skillId)
+        SkillShareDef existing = skillShareDefRepo.findBySkillAndSharedToProjectIsNull(skill)
+
+        if (!existing && destinationProjectId) {
+            ProjDef destination = projDefAccessor.getProjDef(destinationProjectId)
+            existing = skillShareDefRepo.findBySkillAndSharedToProject(skill, destination)
+        } else if (!existing) {
+            existing = skillShareDefRepo.findFirstBySkillOrderByIdAsc(skill)
+        }
+
+        if (!existing) {
+            return null
+        }
+
+        return existing.sharedToProject == null
+                ? 'This skill is already shared with All Projects.'
+                : "This skill is already shared with project ${existing.sharedToProject.name}."
+    }
+
+    @Transactional(readOnly = true)
+    TableResult getSharedSkillsWithOtherProjects(String projectId, PageRequest pageRequest, String filter = '') {
+        Page<SkillShareDef> shareDefPage = skillShareDefRepo.getSkillShareDefsWithOtherProjectsByProjectId(projectId, filter, pageRequest)
         List<SkillShareDef> shareDefs = shareDefPage.getContent()
         List<SharedSkillResult> results = shareDefs.collect { SkillShareDef shareDef ->
             new SharedSkillResult(

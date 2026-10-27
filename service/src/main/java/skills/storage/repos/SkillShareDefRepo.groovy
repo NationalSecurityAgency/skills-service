@@ -31,8 +31,9 @@ interface SkillShareDefRepo extends CrudRepository<SkillShareDef, Long> {
     @Query('''select share from SkillShareDef share
     join share.skill skill
     left join share.sharedToProject sharedProject
-    where skill.projectId = ?1''')
-    Page<SkillShareDef> getSkillShareDefsWithOtherProjectsByProjectId(String projectId, PageRequest pageRequest)
+    where skill.projectId = ?1
+    and ('' = ?2 or lower(skill.skillId) like lower(CONCAT('%', ?2, '%')))''')
+    Page<SkillShareDef> getSkillShareDefsWithOtherProjectsByProjectId(String projectId, String filter, PageRequest pageRequest)
 
     @Query('''select skill.id as id, skill.skillId as skillId, skill.name as skillName, proj.projectId as projectId, proj.name as projectName
         from SkillShareDef share, SkillDef skill, ProjDef proj
@@ -55,6 +56,9 @@ interface SkillShareDefRepo extends CrudRepository<SkillShareDef, Long> {
 
     @Nullable
     SkillShareDef findBySkillAndSharedToProjectIsNull(SkillDef skill)
+
+    @Nullable
+    SkillShareDef findFirstBySkillOrderByIdAsc(SkillDef skill)
 
     @Nullable
     SkillShareDef findBySkillIdAndSharedToProjectIsNull(Integer skillId)
