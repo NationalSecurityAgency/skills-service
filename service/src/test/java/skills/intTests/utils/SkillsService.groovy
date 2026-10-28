@@ -19,7 +19,9 @@ import callStack.profiler.Profile
 import groovy.util.logging.Slf4j
 import org.apache.commons.codec.net.URLCodec
 import org.springframework.core.io.Resource
+import org.springframework.http.HttpEntity
 import org.springframework.http.HttpHeaders
+import org.springframework.http.HttpMethod
 import org.springframework.http.ResponseEntity
 import org.springframework.util.StreamUtils
 import skills.controller.request.model.ActionPatchRequest
@@ -71,6 +73,16 @@ class SkillsService {
                 lastName: userParams.lastName,
                 email: userParams.email ?: (userParams.username?.contains("@") ? userParams.username : "${userParams.username}@skills.org"),
                 certificateRegistry: certificateRegistry).init(certificateRegistry != null)
+    }
+
+    <T> ResponseEntity<T> exchange(String endpoint, HttpMethod method, HttpEntity<?> request, Class<T> responseType) {
+        return wsHelper.restTemplateWrapper.exchange(endpoint, method, request, responseType)
+    }
+
+    String getSessionCookie() {
+        String sessionCookie = wsHelper.restTemplateWrapper.authResponse?.headers?.get(HttpHeaders.SET_COOKIE)
+                ?.find { String cookie -> cookie.startsWith('JSESSIONID=') }
+        return sessionCookie?.split(';')?.getAt(0)
     }
 
     String getClientSecret(String projectId){

@@ -80,6 +80,9 @@ class SecurityConfiguration {
     @Value('${skills.authorization.corsAllowedOriginPatterns:*}')
     List<String> corsAllowedOriginPatterns
 
+    @Value('${skills.authorization.corsAdminEndpointsCredentialedAllowedOriginPatterns:}')
+    List<String> corsAdminEndpointsCredentialedAllowedOriginPatterns = []
+
     @Value('${skills.authorization.corsConf.allowCredentials:false}')
     Boolean corsConfAllowCredentials
 
@@ -141,6 +144,22 @@ class SecurityConfiguration {
     CorsConfigurationSource corsConfigurationSource() {
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource()
         List<String> allowedOriginPatterns = corsAllowedOriginPatterns.collect { it.trim() }.findAll { it }
+
+        List<String> adminAllowedOriginPatterns = corsAdminEndpointsCredentialedAllowedOriginPatterns.collect { it.trim() }.findAll { it }
+        if (adminAllowedOriginPatterns) {
+            CorsConfiguration adminConfiguration = buildCorsConfiguration(adminAllowedOriginPatterns)
+            adminConfiguration.setAllowCredentials(true)
+            source.registerCorsConfiguration('/admin/**', adminConfiguration)
+            source.registerCorsConfiguration('/performLogin', adminConfiguration)
+            source.registerCorsConfiguration('/logout', adminConfiguration)
+            CorsConfiguration appReadConfiguration = buildCorsConfiguration(adminAllowedOriginPatterns)
+            appReadConfiguration.setAllowCredentials(true)
+            appReadConfiguration.setAllowedMethods([HttpMethod.GET.name()])
+            ['/app/projects', '/app/quiz-definitions', '/app/badges'].each { String path ->
+                source.registerCorsConfiguration(path, appReadConfiguration)
+            }
+            log.info("Configuring admin/app CORS with allowed origin patterns: [${adminAllowedOriginPatterns}], allowCredentials: [true]")
+        }
 
         CorsConfiguration apiAndAppConfiguration = buildCorsConfiguration(allowedOriginPatterns)
         log.info("Configuring CORS with allowed origin patterns: [${allowedOriginPatterns}], API allowCredentials: [${corsConfAllowCredentials}]")
