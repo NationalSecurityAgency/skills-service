@@ -1366,6 +1366,11 @@ class AdminController {
             throw new SkillException("Projects with the community protection are not allowed to externally share skills", projectId, skillId, ErrorCode.AccessDenied)
         }
 
+        String explanation = shareSkillsService.getExistingShareExplanation(projectId, skillId, sharedProjectId)
+        if(explanation != null) {
+            throw new SkillException("Skill can not be shared with [${sharedProjectId}]: [${explanation}]", projectId, skillId, ErrorCode.AccessDenied)
+        }
+
         shareSkillsService.shareSkillToExternalProject(projectId, skillId, sharedProjectId)
     }
 

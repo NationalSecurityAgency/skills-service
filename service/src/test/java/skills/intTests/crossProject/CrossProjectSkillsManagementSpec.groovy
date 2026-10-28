@@ -119,6 +119,78 @@ class CrossProjectSkillsManagementSpec extends DefaultIntSpec {
         anyGlobalShare.explanation == 'This skill is already shared with All Projects.'
     }
 
+    def "a skill can be shared with distinct projects or all projects but not both"() {
+        Map sourceProject = SkillsFactory.createProject(1)
+        Map destination2 = SkillsFactory.createProject(2)
+        Map destination3 = SkillsFactory.createProject(3)
+        Map subject = SkillsFactory.createSubject(1, 1)
+        List<Map> skills = SkillsFactory.createSkills(2, 1, 1)
+        String allProjects = 'ALL_SKILLS_PROJECTS'
+
+        skillsService.createProject(sourceProject)
+        skillsService.createProject(destination2)
+        skillsService.createProject(destination3)
+        skillsService.createSubject(subject)
+        skillsService.createSkills(skills)
+
+        when: 'a skill is shared with a specific project'
+        skillsService.shareSkill(sourceProject.projectId, skills[0].skillId, destination2.projectId)
+
+        then:
+        skillsService.getSharedSkills(sourceProject.projectId).data.collect { it.projectId } == [destination2.projectId]
+
+        when: 'the same share is requested again'
+        skillsService.shareSkill(sourceProject.projectId, skills[0].skillId, destination2.projectId)
+
+        then:
+        SkillsClientException duplicateProjectShare = thrown()
+        duplicateProjectShare.httpStatus == HttpStatus.BAD_REQUEST
+        duplicateProjectShare.message.contains('This skill is already shared with project Test Project#2.')
+
+        when: 'the skill is shared with a different project'
+        skillsService.shareSkill(sourceProject.projectId, skills[0].skillId, destination3.projectId)
+
+        then:
+        skillsService.getSharedSkills(sourceProject.projectId).data.collect { it.projectId }.sort() == [destination2.projectId, destination3.projectId]
+
+        when: 'an all-projects share is requested for a skill already shared with specific projects'
+        skillsService.shareSkill(sourceProject.projectId, skills[0].skillId, allProjects)
+
+        then:
+        SkillsClientException conflictingGlobalShare = thrown()
+        conflictingGlobalShare.httpStatus == HttpStatus.BAD_REQUEST
+        conflictingGlobalShare.message.contains('This skill is already shared with project Test Project#2.')
+
+        when: 'an unshared skill is shared with all projects'
+        skillsService.shareSkill(sourceProject.projectId, skills[1].skillId, allProjects)
+
+        then:
+        skillsService.getSharedSkills(sourceProject.projectId).data.find { it.skillId == skills[1].skillId }.sharedWithAllProjects
+
+        when: 'the all-projects share is requested again'
+        skillsService.shareSkill(sourceProject.projectId, skills[1].skillId, allProjects)
+
+        then:
+        SkillsClientException duplicateGlobalShare = thrown()
+        duplicateGlobalShare.httpStatus == HttpStatus.BAD_REQUEST
+        duplicateGlobalShare.message.contains('This skill is already shared with All Projects.')
+
+        when: 'a specifically targeted share is requested for the globally shared skill'
+        skillsService.shareSkill(sourceProject.projectId, skills[1].skillId, destination2.projectId)
+
+        then:
+        SkillsClientException conflictingProjectShare = thrown()
+        conflictingProjectShare.httpStatus == HttpStatus.BAD_REQUEST
+        conflictingProjectShare.message.contains('This skill is already shared with All Projects.')
+        skillsService.getSharedSkills(sourceProject.projectId).data.collect {
+            [skillId: it.skillId, projectId: it.projectId, sharedWithAllProjects: it.sharedWithAllProjects]
+        }.sort { it.projectId ?: '' } == [
+                [skillId: skills[1].skillId, projectId: null, sharedWithAllProjects: true],
+                [skillId: skills[0].skillId, projectId: destination2.projectId, sharedWithAllProjects: false],
+                [skillId: skills[0].skillId, projectId: destination3.projectId, sharedWithAllProjects: false],
+        ]
+    }
+
     def "shared skills must use doc root from project from which they are shared"() {
         def proj1 = SkillsFactory.createProject(1)
         def proj1_subj = SkillsFactory.createSubject(1, 1)
