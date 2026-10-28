@@ -2656,9 +2656,9 @@ class CatalogSkillTests extends CatalogIntSpec {
         def sharedSkills = skillsService.getSharedWithMeSkills(project2.projectId)
 
         then:
-        sharedSkills.size() == 1
-        sharedSkills[0].skillName == skill.name
-        sharedSkills[0].projectId == project1.projectId
+        sharedSkills.count == 1
+        sharedSkills.data[0].skillName == skill.name
+        sharedSkills.data[0].projectId == project1.projectId
     }
 
     def "skills exported to the catalog can be shared as cross project dependencies with all projects"() {
@@ -2698,9 +2698,9 @@ class CatalogSkillTests extends CatalogIntSpec {
         def sharedSkills = skillsService.getSharedWithMeSkills(project2.projectId)
 
         then:
-        sharedSkills.size() == 1
-        sharedSkills[0].skillName == skill.name
-        sharedSkills[0].projectId == project1.projectId
+        sharedSkills.count == 1
+        sharedSkills.data[0].skillName == skill.name
+        sharedSkills.data[0].projectId == project1.projectId
     }
 
     def "changes in points per increment of exported skill are not replicated to imported skills (modifications are propagated to imported fields on async basis)"() {

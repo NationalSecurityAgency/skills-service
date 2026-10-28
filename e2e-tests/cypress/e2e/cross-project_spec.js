@@ -117,6 +117,7 @@ describe('Cross-project Skills Tests', () => {
     it('share skill with another project', () => {
         cy.viewport(1400, 1800)
         cy.intercept('/admin/projects/proj1/skillsAndBadges**').as('skillsAndBadges');
+        cy.intercept('GET', '/admin/projects/proj2/sharedWithMe**').as('loadSharedSkills');
         cy.visit('/administrator/projects/proj1/learning-path');
         cy.wait('@skillsAndBadges');
         cy.get('[data-cy="shareSkillsWithOtherProjectsCard"]')
@@ -156,6 +157,8 @@ describe('Cross-project Skills Tests', () => {
         ], 5, true, null, false);
 
         const sharedSkillSelector = '[data-cy="skillsSelectionItem-proj1-skill1"]'
+        cy.get('[data-cy="includeShared"]').click();
+        cy.wait('@loadSharedSkills')
         cy.get('[data-cy="learningPathFromSkillSelector"]').click()
         cy.get(`${sharedSkillSelector} [data-cy="skillsSelector-type"]`).contains('Shared Skill');
         cy.get(`${sharedSkillSelector} [data-cy="skillsSelector-projectName"]`).contains('Project 1')
@@ -175,6 +178,7 @@ describe('Cross-project Skills Tests', () => {
 
     it('share with all projects', () => {
         cy.visit('/administrator/projects/proj1/learning-path');
+        cy.intercept('GET', '/admin/projects/proj2/sharedWithMe**').as('loadSharedSkills');
 
         cy.get('[data-cy="shareSkillsWithOtherProjectsCard"]')
             .contains('Share skills from this project with other projects');
@@ -227,6 +231,8 @@ describe('Cross-project Skills Tests', () => {
         cy.contains('No Learning Path Yet');
         const sharedSkillSelector = '[data-cy="skillsSelectionItem-proj1-skill1"]'
         cy.get('[data-cy="learningPathFromSkillSelector"]').click()
+        cy.get('[data-cy="includeShared"]').click();
+        cy.wait('@loadSharedSkills')
         cy.get(`${sharedSkillSelector} [data-cy="skillsSelector-type"]`).contains('Shared Skill');
         cy.get(`${sharedSkillSelector} [data-cy="skillsSelector-projectName"]`).contains('Project 1')
         cy.get(sharedSkillSelector).contains('Very Great Skill # 1')
@@ -249,6 +255,8 @@ describe('Cross-project Skills Tests', () => {
         ], 5, true, null, false);
 
         cy.contains('No Learning Path Yet');
+        cy.get('[data-cy="includeShared"]').click();
+        cy.wait('@loadSharedSkills')
         cy.get('[data-cy="learningPathFromSkillSelector"]').click()
         cy.get(`${sharedSkillSelector} [data-cy="skillsSelector-type"]`).contains('Shared Skill');
         cy.get(`${sharedSkillSelector} [data-cy="skillsSelector-projectName"]`).contains('Project 1')
@@ -256,6 +264,7 @@ describe('Cross-project Skills Tests', () => {
     });
 
     it('remove share', () => {
+        cy.intercept('GET', '/admin/projects/proj2/sharedWithMe**').as('loadSharedSkills');
         cy.visit('/administrator/projects/proj1/learning-path');
 
         cy.get('[data-cy="shareSkillsWithOtherProjectsCard"]')
@@ -320,6 +329,9 @@ describe('Cross-project Skills Tests', () => {
                 value: 'Project 1'
             }],
         ], 5, true, null, false);
+
+        cy.get('[data-cy="includeShared"]').click();
+        cy.wait('@loadSharedSkills')
 
         cy.get('[data-cy="learningPathFromSkillSelector"]').click()
         cy.get('[data-cy="skillsSelectionItem-proj1-skill2"]')
