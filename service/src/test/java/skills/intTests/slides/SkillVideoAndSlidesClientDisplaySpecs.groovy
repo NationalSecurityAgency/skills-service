@@ -1,0 +1,312 @@
+/**
+ * Copyright 2026 SkillTree
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package skills.intTests.slides
+
+import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.core.io.ClassPathResource
+import org.springframework.core.io.Resource
+import skills.intTests.utils.DefaultIntSpec
+import skills.intTests.utils.SkillsService
+import skills.services.admin.skillReuse.SkillReuseIdUtil
+import skills.services.attributes.ExpirationAttrs
+import skills.tasks.config.TaskConfig
+import spock.lang.Unroll
+
+import java.nio.file.Files
+import java.time.Instant
+
+import static skills.intTests.utils.SkillsFactory.*
+
+class SkillVideoAndSlidesClientDisplaySpecs extends DefaultIntSpec {
+
+    private static final String VIDEO_URL = 'https://example.org/training.mp4'
+    private static final String TAG_ID = 'trainingmedia'
+
+    @Autowired
+    TaskConfig taskConfig
+
+    @Unroll
+    def "#endpoint summary lists a skill with video and PDF slides once (grouped=#grouped)"() {
+        given:
+        Map fixture = createMediaFixture(endpoint, grouped)
+        SkillsService learner = fixture.learner
+
+        when:
+        Map summary = loadSummary(learner, fixture, endpoint)
+        List<Map> displayedSkills = summary.skills
+        if (grouped && endpoint == 'subject') {
+            assert displayedSkills*.skillId == [fixture.group.skillId]
+            displayedSkills = displayedSkills.first().children
+        }
+
+        then:
+        // The fixture also includes video-only, slides-only, and no-media controls.
+        displayedSkills*.skillId.sort() == fixture.skills*.skillId.sort()
+        displayedSkills.every { Map skill -> skill.points == 0 && skill.totalPoints == 100 }
+        if (endpoint in ['subject', 'group']) {
+            assert summary.totalPoints == 400
+            assert summary.totalSkills == 4
+        } else if (endpoint == 'tag') {
+            assert summary.totalSkills == 4
+        } else {
+            assert summary.numTotalSkills == 4
+        }
+        if (endpoint == 'global badge') {
+            assert summary.projectLevelsAndSkillsSummaries.size() == 1
+            assert summary.projectLevelsAndSkillsSummaries.first().skills*.skillId.sort() == fixture.skills*.skillId.sort()
+        }
+
+        where:
+        endpoint       | grouped
+        'subject'      | false
+        'subject'      | true
+        'group'        | true
+        'badge'        | false
+        'tag'          | false
+        'global badge' | false
+    }
+
+    @Unroll
+    def "#endpoint descriptions return video and PDF slides on one skill (grouped=#grouped)"() {
+        given:
+        Map fixture = createMediaFixture(endpoint, grouped)
+        SkillsService learner = fixture.learner
+
+        when:
+        List<Map> descriptions = loadDescriptions(learner, fixture, endpoint)
+
+        then:
+        List<String> expectedIds = fixture.skills.collect { Map skill -> skill.skillId }
+        if (grouped && endpoint == 'subject') {
+            expectedIds.add(fixture.group.skillId)
+        }
+        descriptions*.skillId.sort() == expectedIds.sort()
+        fixture.skills.eachWithIndex { Map skill, int index ->
+            Map description = descriptions.find { Map item -> item.skillId == skill.skillId }
+            assert description.description == skill.description
+            assert description.href == skill.helpUrl
+            assertMediaSummaries(learner, description, index)
+        }
+
+        where:
+        endpoint  | grouped
+        'subject' | false
+        'subject' | true
+        'group'   | true
+        'badge'   | false
+        'tag'     | false
+    }
+
+    @Unroll
+    def "#endpoint summary retains expiration metadata when a skill also has video and slides"() {
+        given:
+        Map fixture = createMediaFixture(endpoint, false)
+        SkillsService learner = fixture.learner
+        Date nextExpiration = Date.parse('yyyy-MM-dd', '2100-01-15')
+        skillsService.saveSkillExpirationAttributes(fixture.project.projectId, fixture.skills.first().skillId,
+                [expirationType: ExpirationAttrs.YEARLY, every: 1, monthlyDay: 15, nextExpirationDate: nextExpiration])
+        Instant expectedExpiration = taskConfig.getExpireUserAchievementsTaskExecutionTime(nextExpiration.toInstant())
+
+        when:
+        Map summary = loadSummary(learner, fixture, endpoint)
+
+        then:
+        summary.skills*.skillId.sort() == fixture.skills*.skillId.sort()
+        Instant.parse(summary.skills.find { Map skill -> skill.skillId == fixture.skills.first().skillId }.expirationDate) == expectedExpiration
+        summary.skills.findAll { Map skill -> skill.skillId != fixture.skills.first().skillId }.every { Map skill ->
+            skill.expirationDate == null
+        }
+
+        where:
+        endpoint << ['subject', 'global badge']
+    }
+
+    @Unroll
+    def "#copyType skill descriptions retain both media configurations without duplicates (grouped=#grouped)"() {
+        given:
+        Map fixture = createMediaFixture('subject', false)
+        SkillsService learner = fixture.learner
+        Map targetProject = copyType == 'imported' ? createProject(2) : fixture.project
+        Map targetSubject = copyType == 'imported' ? createSubject(2, 1) : createSubject(1, 2)
+        Map targetGroup = createSkillsGroup(copyType == 'imported' ? 2 : 1, copyType == 'imported' ? 1 : 2, 50)
+        List<String> sourceSkillIds = fixture.skills*.skillId
+        List<String> expectedIds
+        if (copyType == 'imported') {
+            skillsService.bulkExportSkillsToCatalog(fixture.project.projectId, sourceSkillIds)
+            skillsService.createProjectAndSubjectAndSkills(targetProject, targetSubject, grouped ? [targetGroup] : [])
+            List<Map> skillsToImport = fixture.skills.collect { Map skill -> [projectId: skill.projectId, skillId: skill.skillId] }
+            if (grouped) {
+                skillsService.bulkImportSkillsIntoGroupFromCatalogAndFinalize(targetProject.projectId,
+                        targetSubject.subjectId, targetGroup.skillId, skillsToImport)
+            } else {
+                skillsService.bulkImportSkillsFromCatalogAndFinalize(targetProject.projectId, targetSubject.subjectId, skillsToImport)
+            }
+            expectedIds = sourceSkillIds
+        } else {
+            skillsService.createSubject(targetSubject)
+            if (grouped) {
+                skillsService.createSkill(targetGroup)
+            }
+            skillsService.reuseSkills(targetProject.projectId, sourceSkillIds, targetSubject.subjectId, grouped ? targetGroup.skillId : null)
+            expectedIds = sourceSkillIds.collect { String skillId -> SkillReuseIdUtil.addTag(skillId, 0) }
+        }
+
+        when:
+        List<Map> descriptions = learner.getSubjectDescriptions(targetProject.projectId, targetSubject.subjectId)
+
+        then:
+        descriptions*.skillId.sort() == (expectedIds + (grouped ? [targetGroup.skillId] : [])).sort()
+        expectedIds.eachWithIndex { String skillId, int index ->
+            Map description = descriptions.find { Map item -> item.skillId == skillId }
+            assertMediaSummaries(learner, description, index)
+        }
+
+        where:
+        copyType   | grouped
+        'reused'   | false
+        'reused'   | true
+        'imported' | false
+        'imported' | true
+    }
+
+    def "single skill summaries retain both media configurations"() {
+        given:
+        Map fixture = createMediaFixture('subject', false)
+        SkillsService learner = fixture.learner
+
+        when:
+        Map summary = learner.getSingleSkillSummaryForCurrentUser(fixture.project.projectId, fixture.skills.first().skillId)
+        Map subjectScopedSummary = skillsService.getSingleSkillSummaryWithSubject(learner.userName,
+                fixture.project.projectId, fixture.subject.subjectId, fixture.skills.first().skillId)
+
+        then:
+        summary.skillId == fixture.skills.first().skillId
+        subjectScopedSummary.skillId == fixture.skills.first().skillId
+        assertMediaSummaries(learner, summary, 0)
+        assertMediaSummaries(learner, subjectScopedSummary, 0)
+    }
+
+    def "global badge descriptions do not duplicate a skill with both media configurations"() {
+        given:
+        Map fixture = createMediaFixture('global badge', false)
+        SkillsService learner = fixture.learner
+
+        when:
+        List<Map> descriptions = learner.getBadgeDescriptions(fixture.project.projectId, fixture.badge.badgeId, true)
+
+        then:
+        // Global badge descriptions use a different query, which currently omits media attributes.
+        descriptions*.skillId.sort() == fixture.skills*.skillId.sort()
+        fixture.skills.each { Map skill ->
+            assert descriptions.find { Map item -> item.skillId == skill.skillId }.description == skill.description
+        }
+    }
+
+    private Map createMediaFixture(String endpoint, boolean grouped) {
+        Map project = createProject(1)
+        Map subject = createSubject(1, 1)
+        List<Map> skills = createSkills(4, 1, 1, 100)
+        Map group = createSkillsGroup(1, 1, 50)
+        if (grouped) {
+            skillsService.createProjectAndSubjectAndSkills(project, subject, [group])
+            skills.each { Map skill -> skillsService.assignSkillToSkillsGroup(group.skillId, skill) }
+        } else {
+            skillsService.createProjectAndSubjectAndSkills(project, subject, skills)
+        }
+
+        Resource pdfSlides = new ClassPathResource('/testSlides/test-slides-1.pdf')
+        [0, 1].each { int index ->
+            skillsService.saveSkillVideoAttributes(project.projectId, skills[index].skillId,
+                    [videoUrl: VIDEO_URL, captions: 'training captions', transcript: 'training transcript'])
+        }
+        [0, 2].each { int index ->
+            skillsService.saveSlidesAttributes(project.projectId, skills[index].skillId, [file: pdfSlides, width: 111])
+        }
+
+        Map badge = createBadge(1, 1)
+        if (endpoint == 'badge') {
+            skillsService.createBadge(badge)
+            skills.each { Map skill ->
+                skillsService.assignSkillToBadge(projectId: project.projectId, badgeId: badge.badgeId, skillId: skill.skillId)
+            }
+            badge.enabled = 'true'
+            skillsService.createBadge(badge)
+        } else if (endpoint == 'global badge') {
+            skillsService.createGlobalBadge(badge)
+            skills.each { Map skill -> skillsService.assignSkillToGlobalBadge(project.projectId, badge.badgeId, skill.skillId) }
+            badge.enabled = 'true'
+            skillsService.updateGlobalBadge(badge)
+        } else if (endpoint == 'tag') {
+            skillsService.addTagToSkills(project.projectId, skills*.skillId, 'Training Media', TAG_ID)
+        }
+
+        SkillsService learner = createService(getRandomUsers(1).first())
+        return [project: project, subject: subject, skills: skills, group: group, badge: badge, learner: learner]
+    }
+
+    private static Map loadSummary(SkillsService learner, Map fixture, String endpoint) {
+        String projectId = fixture.project.projectId
+        switch (endpoint) {
+            case 'subject':
+                return learner.getSkillSummary(null, projectId, fixture.subject.subjectId)
+            case 'group':
+                return learner.getSkillsGroupSummary(projectId, fixture.group.skillId)
+            case 'badge':
+                return learner.getBadgeSummary(null, projectId, fixture.badge.badgeId)
+            case 'global badge':
+                return learner.getBadgeSummary(null, projectId, fixture.badge.badgeId, -1, true)
+            case 'tag':
+                return learner.getSkillTagSummary(null, projectId, TAG_ID)
+            default:
+                throw new IllegalArgumentException("Unknown endpoint: ${endpoint}")
+        }
+    }
+
+    private static List<Map> loadDescriptions(SkillsService learner, Map fixture, String endpoint) {
+        String projectId = fixture.project.projectId
+        switch (endpoint) {
+            case 'subject':
+                return learner.getSubjectDescriptions(projectId, fixture.subject.subjectId)
+            case 'group':
+                return learner.getGroupDescriptions(projectId, fixture.group.skillId)
+            case 'badge':
+                return learner.getBadgeDescriptions(projectId, fixture.badge.badgeId)
+            case 'tag':
+                return learner.getSkillTagDescriptions(projectId, TAG_ID)
+            default:
+                throw new IllegalArgumentException("Unknown endpoint: ${endpoint}")
+        }
+    }
+
+    private static boolean assertMediaSummaries(SkillsService learner, Map skill, int index) {
+        if (index in [0, 1]) {
+            assert skill.videoSummary.videoUrl == VIDEO_URL
+            assert skill.videoSummary.hasCaptions
+            assert skill.videoSummary.hasTranscript
+        } else {
+            assert skill.videoSummary == null
+        }
+        if (index in [0, 2]) {
+            assert skill.slidesSummary.type == 'application/pdf'
+            assert skill.slidesSummary.width == 111.0
+            Resource pdfSlides = new ClassPathResource('/testSlides/test-slides-1.pdf')
+            assert learner.downloadAttachment(skill.slidesSummary.url).file.bytes == Files.readAllBytes(pdfSlides.getFile().toPath())
+        } else {
+            assert skill.slidesSummary == null
+        }
+        return true
+    }
+}
