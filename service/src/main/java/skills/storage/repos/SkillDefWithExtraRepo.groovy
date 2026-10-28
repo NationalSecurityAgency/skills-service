@@ -106,20 +106,23 @@ interface SkillDefWithExtraRepo extends JpaRepository<SkillDefWithExtra, Integer
                            c.justification_required as justificationRequired,
                            c.enabled               as enabled,
                            c.copied_from_skill_ref            as copiedFrom,
-                           sad.attributes ->> 'videoUrl' as videoUrl,
-                           sad.attributes ->> 'videoType'                                                 as videoType,
-                           sad.attributes ->> 'url' as slidesUrl,
-                           sad.attributes ->> 'type' as slidesType,
-                           sad.attributes ->> 'width' as slidesWidth,
-                           case when sad.attributes ->> 'captions' is not null then true else false end   as videoHasCaptions,
-                           case when sad.attributes ->> 'transcript' is not null then true else false end as videoHasTranscript
+                           video.attributes ->> 'videoUrl' as videoUrl,
+                           video.attributes ->> 'videoType' as videoType,
+                           slides.attributes ->> 'url' as slidesUrl,
+                           slides.attributes ->> 'type' as slidesType,
+                           slides.attributes ->> 'width' as slidesWidth,
+                           case when video.attributes ->> 'captions' is not null then true else false end as videoHasCaptions,
+                           case when video.attributes ->> 'transcript' is not null then true else false end as videoHasTranscript
                     from skill_definition s,
                          skill_relationship_definition r,
                          skill_definition c
                              left join user_achievement ua on c.skill_id = ua.skill_id and c.project_id = ua.project_id and ua.user_id = ?5
-                             left join skill_attributes_definition sad on
-                               (case when c.copied_from_skill_ref is not null then c.copied_from_skill_ref else c.id end) = sad.skill_ref_id 
-                               and sad.type in ('Video', 'Slides')
+                             left join skill_attributes_definition video on
+                               (case when c.copied_from_skill_ref is not null then c.copied_from_skill_ref else c.id end) = video.skill_ref_id
+                               and video.type = 'Video'
+                             left join skill_attributes_definition slides on
+                               (case when c.copied_from_skill_ref is not null then c.copied_from_skill_ref else c.id end) = slides.skill_ref_id
+                               and slides.type = 'Slides'
                     where s.id = r.parent_ref_id
                       and c.id = r.child_ref_id
                       and s.project_id = ?1
@@ -139,21 +142,23 @@ interface SkillDefWithExtraRepo extends JpaRepository<SkillDefWithExtra, Integer
                            c.self_reporting_type                                                          as selfReportingType,
                            c.type                                                                         as type,
                            c.justification_required                                                       as justificationRequired,
-                           sad.attributes ->> 'videoUrl'                                                  as videoUrl,
-                           sad.attributes ->> 'videoType'                                                 as videoType,
-                           case when sad.attributes ->> 'captions' is not null then true else false end   as videoHasCaptions,
-                           case when sad.attributes ->> 'transcript' is not null then true else false end as videoHasTranscript,
-                           sad.attributes ->> 'url' as slidesUrl,
-                           sad.attributes ->> 'type' as slidesType,
-                           sad.attributes ->> 'width' as slidesWidth
+                           video.attributes ->> 'videoUrl' as videoUrl,
+                           video.attributes ->> 'videoType' as videoType,
+                           case when video.attributes ->> 'captions' is not null then true else false end as videoHasCaptions,
+                           case when video.attributes ->> 'transcript' is not null then true else false end as videoHasTranscript,
+                           slides.attributes ->> 'url' as slidesUrl,
+                           slides.attributes ->> 'type' as slidesType,
+                           slides.attributes ->> 'width' as slidesWidth
                     from skill_definition s,
                          skill_relationship_definition r,
                          skill_definition c
                              left join user_achievement ua on c.skill_id = ua.skill_id and c.project_id = ua.project_id and ua.user_id = ?5
-                             left join skill_attributes_definition sad on
-                                     (case when c.copied_from_skill_ref is not null then c.copied_from_skill_ref else c.id end) =
-                                     sad.skill_ref_id
-                                 and sad.type in ('Video', 'Slides')
+                             left join skill_attributes_definition video on
+                               (case when c.copied_from_skill_ref is not null then c.copied_from_skill_ref else c.id end) = video.skill_ref_id
+                               and video.type = 'Video'
+                             left join skill_attributes_definition slides on
+                               (case when c.copied_from_skill_ref is not null then c.copied_from_skill_ref else c.id end) = slides.skill_ref_id
+                               and slides.type = 'Slides'
                     where s.id = r.parent_ref_id
                       and c.id = r.child_ref_id
                       and s.project_id = ?1

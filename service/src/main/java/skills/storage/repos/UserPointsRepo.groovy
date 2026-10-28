@@ -794,7 +794,7 @@ interface UserPointsRepo extends CrudRepository<UserPoints, Integer> {
      */
     @Query('''select sdChild, attributes, userPoints, pd.name, approval, ua.userIdForDisplay
     from SkillDef sdParent, SkillRelDef srd, SkillDef sdChild
-    left join SkillAttributesDef attributes on sdChild.id = attributes.skillRefId
+    left join SkillAttributesDef attributes on sdChild.id = attributes.skillRefId and attributes.type = 'AchievementExpiration'
     left join UserPoints userPoints on sdChild.projectId = userPoints.projectId and sdChild.skillId = userPoints.skillId and userPoints.userId=?1
     left join ProjDef pd on sdChild.copiedFromProjectId = pd.projectId
     left join SkillApproval approval on approval.id = (
@@ -816,7 +816,7 @@ interface UserPointsRepo extends CrudRepository<UserPoints, Integer> {
      */
     @Query('''select sdChild, attributes, userPoints, approval
     from SkillDef sdParent, SkillRelDef srd, SkillDef sdChild
-    left join SkillAttributesDef attributes on sdChild.id = attributes.skillRefId
+    left join SkillAttributesDef attributes on sdChild.id = attributes.skillRefId and attributes.type = 'AchievementExpiration'
     left join UserPoints userPoints on sdChild.projectId = userPoints.projectId and sdChild.skillId = userPoints.skillId and userPoints.userId=?1
     left join SkillApproval approval on sdChild.id = approval.skillRefId and approval.userId=?1 and approval.rejectedOn is null and approval.approverUserId is null
       where srd.parent=sdParent and  srd.child=sdChild and sdChild.enabled = 'true' and
