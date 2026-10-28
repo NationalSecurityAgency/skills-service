@@ -22,6 +22,7 @@ import skills.intTests.utils.DefaultIntSpec
 import skills.intTests.utils.SkillsService
 import skills.services.admin.skillReuse.SkillReuseIdUtil
 import skills.services.attributes.ExpirationAttrs
+import skills.services.settings.Settings
 import skills.tasks.config.TaskConfig
 import spock.lang.Unroll
 
@@ -41,8 +42,19 @@ class SkillVideoAndSlidesClientDisplaySpecs extends DefaultIntSpec {
     @Unroll
     def "#endpoint summary lists a skill with video and PDF slides once (grouped=#grouped)"() {
         given:
-        Map fixture = createMediaFixture(endpoint, grouped)
+        String fixtureEndpoint = endpoint in ['badges overview', 'my badges'] ? 'global badge' :
+                endpoint == 'tags overview' ? 'tag' : endpoint
+        Map fixture = createMediaFixture(fixtureEndpoint, grouped)
         SkillsService learner = fixture.learner
+        if (endpoint == 'tags overview') {
+            skillsService.addSkill(fixture.skills.first(), learner.userName)
+        }
+        if (endpoint == 'my badges') {
+            String productionMode = Settings.PRODUCTION_MODE.settingName
+            skillsService.changeSetting(fixture.project.projectId, productionMode,
+                    [projectId: fixture.project.projectId, setting: productionMode, value: 'true'])
+            learner.addMyProject(fixture.project.projectId)
+        }
 
         when:
         Map summary = loadSummary(learner, fixture, endpoint)
@@ -54,29 +66,43 @@ class SkillVideoAndSlidesClientDisplaySpecs extends DefaultIntSpec {
 
         then:
         // The fixture also includes video-only, slides-only, and no-media controls.
-        displayedSkills*.skillId.sort() == fixture.skills*.skillId.sort()
-        displayedSkills.every { Map skill -> skill.points == 0 && skill.totalPoints == 100 }
+        if (endpoint == 'tags overview') {
+            // Overview entries omit skill IDs, so verify their count and point values.
+            assert displayedSkills.size() == 4
+            assert displayedSkills*.points.sort() == [0, 0, 0, 100]
+            assert displayedSkills.every { Map skill -> skill.totalPoints == 100 }
+            assert displayedSkills*.points.sum() == 100
+            assert displayedSkills*.totalPoints.sum() == 400
+            assert summary.skillsAchieved == 1
+        } else {
+            assert displayedSkills*.skillId.sort() == fixture.skills*.skillId.sort()
+            assert displayedSkills.every { Map skill -> skill.points == 0 && skill.totalPoints == 100 }
+        }
         if (endpoint in ['subject', 'group']) {
             assert summary.totalPoints == 400
             assert summary.totalSkills == 4
-        } else if (endpoint == 'tag') {
+        } else if (endpoint in ['tag', 'tags overview']) {
             assert summary.totalSkills == 4
         } else {
             assert summary.numTotalSkills == 4
         }
-        if (endpoint == 'global badge') {
+        if (endpoint in ['global badge', 'badges overview', 'my badges']) {
             assert summary.projectLevelsAndSkillsSummaries.size() == 1
+            assert summary.projectLevelsAndSkillsSummaries.first().projectId == fixture.project.projectId
             assert summary.projectLevelsAndSkillsSummaries.first().skills*.skillId.sort() == fixture.skills*.skillId.sort()
         }
 
         where:
-        endpoint       | grouped
-        'subject'      | false
-        'subject'      | true
-        'group'        | true
-        'badge'        | false
-        'tag'          | false
-        'global badge' | false
+        endpoint          | grouped
+        'subject'         | false
+        'subject'         | true
+        'group'           | true
+        'badge'           | false
+        'tag'             | false
+        'global badge'    | false
+        'tags overview'   | false
+        'badges overview' | false
+        'my badges'       | false
     }
 
     @Unroll
@@ -270,6 +296,15 @@ class SkillVideoAndSlidesClientDisplaySpecs extends DefaultIntSpec {
                 return learner.getBadgeSummary(null, projectId, fixture.badge.badgeId, -1, true)
             case 'tag':
                 return learner.getSkillTagSummary(null, projectId, TAG_ID)
+            case 'tags overview':
+                List<Map> tags = learner.getSkillTagSummariesForProject(null, projectId)
+                assert tags*.tagId == [TAG_ID]
+                return tags.first()
+            case 'badges overview':
+            case 'my badges':
+                List<Map> badges = endpoint == 'badges overview' ? learner.getBadgesSummary(null, projectId) : learner.getMyProgressBadges()
+                assert badges*.badgeId == [fixture.badge.badgeId]
+                return badges.first()
             default:
                 throw new IllegalArgumentException("Unknown endpoint: ${endpoint}")
         }
