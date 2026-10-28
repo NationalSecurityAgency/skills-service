@@ -29,8 +29,6 @@ import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.Conditional
 import org.springframework.stereotype.Component
-import org.springframework.test.context.DynamicPropertyRegistrar
-import org.springframework.test.context.DynamicPropertyRegistry
 import org.springframework.util.ResourceUtils
 import skills.auth.SecurityMode
 import skills.auth.UserInfo
@@ -47,7 +45,7 @@ import static com.google.common.net.HttpHeaders.CONTENT_TYPE;
 @Slf4j
 @Conditional(SecurityMode.PkiAuth)
 @Component
-class MockUserInfoService implements DynamicPropertyRegistrar {
+class MockUserInfoService {
 
     @Autowired
     UserAttrsRepo userAttrsRepo
@@ -73,15 +71,6 @@ class MockUserInfoService implements DynamicPropertyRegistrar {
     ]
 
     WireMockServer mockServer
-
-    @Override
-    void accept(DynamicPropertyRegistry registry) {
-        // Spring eagerly initializes registrars before application beans resolve these URLs.
-        String baseUrl = "https://localhost:${mockServer.httpsPort()}"
-        registry.add('skills.authorization.userInfoUri', { "${baseUrl}/userInfo?dn={dn}".toString() })
-        registry.add('skills.authorization.userQueryUri', { "${baseUrl}/userQuery?query={query}".toString() })
-        registry.add('skills.authorization.userInfoHealthCheckUri', { "${baseUrl}/status".toString() })
-    }
 
     @PostConstruct
     void start() {

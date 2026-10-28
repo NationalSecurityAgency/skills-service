@@ -20,12 +20,16 @@ import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.test.context.TestConfiguration
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Import
+import org.springframework.context.support.GenericApplicationContext
+import org.springframework.context.support.PropertySourcesPlaceholderConfigurer
 import org.springframework.test.annotation.DirtiesContext
 import org.springframework.test.context.ContextConfiguration
 import org.springframework.test.context.TestContextManager
 import org.springframework.test.context.TestPropertySource
+import org.springframework.test.context.support.AnnotationConfigContextLoader
 import skills.intTests.utils.CertificateRegistry
 import skills.intTests.utils.MockUserInfoService
+import skills.intTests.utils.MockUserInfoServiceConfiguration
 import skills.storage.repos.UserAttrsRepo
 import spock.lang.Specification
 
@@ -76,7 +80,7 @@ class MockUserInfoServiceSpecs extends Specification {
         secondManager.afterTestClass()
     }
 
-    @ContextConfiguration(classes = MockConfiguration)
+    @ContextConfiguration(classes = MockConfiguration, loader = EarlyEndpointContextLoader)
     @TestPropertySource(properties = [
             'skills.authorization.authMode=PKI',
             // Stale fixed URLs must be overridden before endpoint consumers are initialized.
@@ -97,8 +101,13 @@ class MockUserInfoServiceSpecs extends Specification {
     static class SecondContext extends FirstContext {}
 
     @TestConfiguration(proxyBeanMethods = false)
-    @Import([MockUserInfoService, CertificateRegistry])
+    @Import([MockUserInfoService, MockUserInfoServiceConfiguration, CertificateRegistry])
     static class MockConfiguration {
+        @Bean
+        static PropertySourcesPlaceholderConfigurer propertySourcesPlaceholderConfigurer() {
+            return new PropertySourcesPlaceholderConfigurer()
+        }
+
         @Bean
         UserAttrsRepo userAttrsRepo() {
             return mock(UserAttrsRepo)
@@ -119,5 +128,19 @@ class MockUserInfoServiceSpecs extends Specification {
 
         @Value('${skills.authorization.userInfoHealthCheckUri}')
         String healthCheckUri
+    }
+
+    static class EarlyEndpointContextLoader extends AnnotationConfigContextLoader {
+        @Override
+        protected GenericApplicationContext createContext() {
+            return new GenericApplicationContext() {
+                @Override
+                protected void onRefresh() {
+                    super.onRefresh()
+                    // Reproduce servlet-filter initialization before singleton pre-instantiation.
+                    getBean(EndpointConsumer)
+                }
+            }
+        }
     }
 }
