@@ -1134,24 +1134,26 @@ class QuizDefService {
         List<QuizQuestionDef> dbQuestionDefs = quizQuestionRepo.findQuestionDefsForSpecificQuizAttempt(userQuizAttempt.id)
         List<QuizAnswerDef> dbAnswersDef = quizAnswerRepo.findAllByQuestionRefIdIn(dbQuestionDefs.collect({ it.id }))
         List<UserQuizQuestionAttempt> questionAttempts = userQuizQuestionAttemptRepo.findAllByUserQuizAttemptRefId(userQuizAttempt.id)
+        Map<Integer, UserQuizQuestionAttempt> questionAttemptsByQuestionId = questionAttempts.collectEntries { UserQuizQuestionAttempt attempt ->
+            [(attempt.quizQuestionDefinitionRefId): attempt]
+        }
         Map<Integer, List<QuizAnswerDef>> byQuestionId = dbAnswersDef.groupBy { it.questionRefId }
         Map<Integer, List<UserQuizAnswerGradedRepo.GradedInfo>> manuallyGradedAnswersByAnswerAttemptId = manuallyGradedAnswers.groupBy { it.answerAttemptId }
 
         List<UserGradedQuizQuestionResult> questions = dbQuestionDefs
-                .sort { it.displayOrder }
+                // Preserve the learner's question order, with a fallback for legacy attempts.
+                .sort { QuizQuestionDef questionDef -> questionAttemptsByQuestionId[questionDef.id]?.displayOrder ?: questionDef.displayOrder }
                 .withIndex()
                 .collect { QuizQuestionDef questionDef, int index ->
                     QuestionAttrs questionAttrs = questionDef.attributes ? mapper.readValue(questionDef.attributes, QuestionAttrs.class) : null
-                    List<QuizAnswerDef> quizAnswerDefs = byQuestionId[questionDef.id]
+                    // Answer order is not stored per attempt; history uses configured answer order.
+                    List<QuizAnswerDef> quizAnswerDefs = byQuestionId[questionDef.id].sort { QuizAnswerDef answer -> answer.displayOrder }
 
                     boolean isTextInput = questionDef.type == QuizQuestionType.TextInput
                     boolean isRating = questionDef.type == QuizQuestionType.Rating
                     boolean isMatching = questionDef.type == QuizQuestionType.Matching
                     boolean isFillInTheBlank = questionDef.type == QuizQuestionType.FillInTheBlank
 
-                    if(isFillInTheBlank) {
-                        quizAnswerDefs.sort{ it.displayOrder }
-                    }
                     List<UserGradedQuizAnswerResult> answers = quizAnswerDefs.collect { QuizAnswerDef answerDef ->
                         UserQuizAnswerAttemptRepo.AnswerIdAndAnswerText foundSelected = alreadySelected.find { it.answerId == answerDef.id }
 
@@ -1206,7 +1208,7 @@ class QuizDefService {
                         )
                     }
 
-                    UserQuizQuestionAttempt userQuizQuestionAttempt = questionAttempts.find { it.quizQuestionDefinitionRefId == questionDef.id }
+                    UserQuizQuestionAttempt userQuizQuestionAttempt = questionAttemptsByQuestionId[questionDef.id]
                     boolean isCorrect = false
                     if (isSurvey) {
                         isCorrect = true
@@ -1223,7 +1225,7 @@ class QuizDefService {
                     boolean needsGrading = answers.find { it.needsGrading } != null
                     return new UserGradedQuizQuestionResult(
                             id: questionDef.id,
-                            questionNum: index + 1,
+                            questionNum: userQuizQuestionAttempt?.displayOrder ?: index + 1,
                             question: InputSanitizer.unsanitizeForMarkdown(questionDef.question),
                             questionType: questionDef.type,
                             answers: answers,
