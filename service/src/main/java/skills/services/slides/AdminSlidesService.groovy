@@ -27,6 +27,7 @@ import org.springframework.web.multipart.MultipartFile
 import skills.auth.UserInfoService
 import skills.controller.exceptions.SkillException
 import skills.controller.exceptions.SkillsValidator
+import skills.services.LockingService
 import skills.services.attributes.SkillAttributeService
 import skills.services.attributes.SlidesAttrs
 import skills.services.userActions.DashboardAction
@@ -65,10 +66,12 @@ class AdminSlidesService {
     @Autowired
     SlidesHelper slidesHelper
 
+    @Autowired LockingService lockingService
+
     @Transactional
     SlidesAttrs saveSlides(String projectId, String skillId, Boolean isAlreadyHosted,
                               MultipartFile file, String slidesUrl, Double width) {
-
+        lockingService.lockProject(projectId)
         SlidesAttrs existingAttributes = skillAttributeService.getSlidesAttrs(projectId, skillId)
         final boolean isEdit = existingAttributes?.url
 

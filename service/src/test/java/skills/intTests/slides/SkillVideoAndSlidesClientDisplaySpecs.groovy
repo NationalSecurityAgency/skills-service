@@ -18,16 +18,27 @@ package skills.intTests.slides
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.core.io.ClassPathResource
 import org.springframework.core.io.Resource
+import org.springframework.jdbc.core.JdbcTemplate
 import skills.intTests.utils.DefaultIntSpec
 import skills.intTests.utils.SkillsService
 import skills.services.admin.skillReuse.SkillReuseIdUtil
 import skills.services.attributes.ExpirationAttrs
 import skills.services.settings.Settings
+import skills.storage.model.SkillAttributesDef
+import skills.storage.model.SkillAttributesDef.SkillAttributesType
+import skills.storage.model.SkillDef
+import skills.storage.repos.SkillAttributesDefRepo
 import skills.tasks.config.TaskConfig
 import spock.lang.Unroll
+import spock.util.concurrent.PollingConditions
 
 import java.nio.file.Files
 import java.time.Instant
+import java.util.concurrent.Callable
+import java.util.concurrent.ExecutorService
+import java.util.concurrent.Executors
+import java.util.concurrent.Future
+import java.util.concurrent.TimeUnit
 
 import static skills.intTests.utils.SkillsFactory.*
 
@@ -38,6 +49,94 @@ class SkillVideoAndSlidesClientDisplaySpecs extends DefaultIntSpec {
 
     @Autowired
     TaskConfig taskConfig
+
+    @Autowired
+    SkillAttributesDefRepo skillAttributesDefRepo
+
+    @Autowired
+    JdbcTemplate jdbcTemplate
+
+    def "concurrent first-time #attributeType saves create exactly one attribute row"() {
+        setup:
+        List<String> users = getRandomUsers(2)
+        List<SkillsService> clients = users.collect { String user -> createService(user) }
+        Map project = createProject(1)
+        Map subject = createSubject(1, 1)
+        Map skill = createSkills(1, 1, 1, 100)[0]
+        clients[0].createProjectAndSubjectAndSkills(project, subject, [skill])
+        clients[0].addProjectAdmin(project.projectId, users[1])
+        Integer skillRefId = skillDefRepo.getIdByProjectIdAndSkillIdAndType(project.projectId, skill.skillId, SkillDef.ContainerType.Skill)
+        assert skillAttributesDefRepo.findAllBySkillRefId(skillRefId).isEmpty()
+
+        ExecutorService executor = Executors.newFixedThreadPool(2)
+        List<Future<Map>> requests = []
+        List<String> urls = ['https://example.org/first', 'https://example.org/second']
+
+        when:
+        // Hold the real project lock in a test transaction. Both HTTP
+        // requests must queue behind it before either may create an attribute.
+        runInTransaction {
+            lockingService.lockProject(project.projectId)
+            Integer lockHolderPid = jdbcTemplate.queryForObject('select pg_backend_pid()', Integer)
+            requests = (0..1).collect { int index ->
+                executor.submit({ ->
+                    if (attributeType == SkillAttributesType.Video) {
+                        return clients[index].saveSkillVideoAttributes(project.projectId, skill.skillId, [videoUrl: urls[index]]) as Map
+                    }
+                    return clients[index].saveSlidesAttributes(project.projectId, skill.skillId, [url: urls[index]]) as Map
+                } as Callable<Map>)
+            }
+            // PostgreSQL can queue the second waiter behind the first waiter rather
+            // than directly behind the holder. Follow the whole blocking chain.
+            // pg_locks exposes live lock state without pg_stat_activity's cached
+            // statistics snapshot inside this coordinating transaction.
+            // SQL is only for lock observation; fixture and attribute checks use
+            // HTTP endpoints and repositories.
+            new PollingConditions(timeout: 10).eventually {
+                assert jdbcTemplate.queryForObject('''
+                    with recursive blocked(pid) as (
+                        select pid from pg_locks where ? = any(pg_blocking_pids(pid))
+                        union
+                        select locks.pid from pg_locks locks
+                            join blocked on blocked.pid = any(pg_blocking_pids(locks.pid))
+                    )
+                    select count(*) from blocked
+                ''', Integer, lockHolderPid) == 2
+            }
+            assert requests.every { Future<Map> request -> !request.isDone() }
+            assert skillAttributesDefRepo.findAllBySkillRefId(skillRefId).isEmpty()
+            return null
+        }
+        // Exiting the transaction releases the coordinating lock (rollback also
+        // releases it if any synchronization assertion fails).
+        List<Map> responses = requests.collect { Future<Map> request -> request.get(60, TimeUnit.SECONDS) }
+        List<SkillAttributesDef> rows = skillAttributesDefRepo.findAllBySkillRefId(skillRefId).findAll { SkillAttributesDef row -> row.type == attributeType }
+
+        then:
+        responses.every { Map response -> response.success }
+        responses.collect { Map response -> response[urlField] } == urls
+        rows.size() == 1
+
+        and: 'both admins can read the resulting settings through the endpoint'
+        List<Map> saved = clients.collect { SkillsService client ->
+            attributeType == SkillAttributesType.Video ?
+                    client.getSkillVideoAttributes(project.projectId, skill.skillId) :
+                    client.getSlidesAttributes(project.projectId, skill.skillId)
+        }
+        saved[0][urlField] in urls
+        saved[1][urlField] == saved[0][urlField]
+
+        cleanup:
+        executor?.shutdown()
+        if (executor) {
+            assert executor.awaitTermination(70, TimeUnit.SECONDS): 'Concurrent requests did not finish during cleanup'
+        }
+
+        where:
+        attributeType             | urlField
+        SkillAttributesType.Video | 'videoUrl'
+        SkillAttributesType.Slides | 'url'
+    }
 
     @Unroll
     def "#endpoint summary lists a skill with video and PDF slides once (grouped=#grouped)"() {

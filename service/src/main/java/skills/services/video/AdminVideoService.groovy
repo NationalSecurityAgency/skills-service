@@ -29,6 +29,7 @@ import skills.auth.UserInfoService
 import skills.controller.exceptions.AttachmentValidator
 import skills.controller.exceptions.SkillException
 import skills.controller.exceptions.SkillsValidator
+import skills.services.LockingService
 import skills.services.attributes.SkillAttributeService
 import skills.services.attributes.SkillVideoAttrs
 import skills.services.userActions.DashboardAction
@@ -68,11 +69,13 @@ class AdminVideoService {
     @Value('#{"${skills.config.allowedVideoUploadMimeTypes}"}')
     List<MediaType> allowedAttachmentMimeTypes;
 
+    @Autowired LockingService lockingService
+
     @Transactional
     SkillVideoAttrs saveVideo(String projectId, String skillId, Boolean isAlreadyHosted,
                               MultipartFile file, String videoUrl, String captions, String transcript,
                               Double width, Double height, Boolean allowDownloads) {
-
+        lockingService.lockProject(projectId)
         SkillVideoAttrs existingVideoAttributes = skillAttributeService.getVideoAttrs(projectId, skillId)
         final boolean isEdit = existingVideoAttributes?.videoUrl
 
