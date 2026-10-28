@@ -305,8 +305,12 @@ class QuizRunService {
         }
         List<QuizQuestionInfo> questions = dbQuestionDefs?.collect {
             List<QuizAnswerDef> quizAnswerDefs = byQuizId[it.id]
-            if(randomizeAnswers) {
+            boolean canRandomizeAnswers = it.type in [QuizQuestionType.SingleChoice, QuizQuestionType.MultipleChoice, QuizQuestionType.Matching]
+            if(randomizeAnswers && canRandomizeAnswers) {
                 quizAnswerDefs?.shuffle()
+            } else {
+                // Ratings and blanks map answer positions to their scale/blank and must stay ordered.
+                quizAnswerDefs?.sort { QuizAnswerDef answer -> answer.displayOrder }
             }
 
             def answerOptions
@@ -314,23 +318,19 @@ class QuizRunService {
 
             if(it.type == QuizQuestionType.Matching) {
                 JsonSlurper slurper = new JsonSlurper()
-                def values = []
-                quizAnswerDefs.collect { answer ->
-                    def parsedAnswer = slurper.parseText(answer.multiPartAnswer)
-                    parsedAnswer.id = answer.id
-                    matchingTerms.push(parsedAnswer.value)
-                    values.push([value: parsedAnswer.term, id: parsedAnswer.id])
-                }
-                matchingTerms.shuffle()
-
-                answerOptions = values.collect { answer ->
+                answerOptions = quizAnswerDefs.collect { QuizAnswerDef answer ->
+                    Map parsedAnswer = slurper.parseText(answer.multiPartAnswer)
+                    matchingTerms.add(parsedAnswer.value)
                     new QuizAnswerOptionsInfo(
                             id: answer.id,
-                            answerOption: answer.value
+                            answerOption: parsedAnswer.term
                     )
-                }.sort { it.id }
+                }
+                // Always shuffle the available matches so their order does not reveal the pairs.
+                // The prompt terms follow configured order unless Randomize Answers is enabled.
+                matchingTerms.shuffle()
             } else if( it.type == QuizQuestionType.FillInTheBlank) {
-                answerOptions = quizAnswerDefs.sort{it.displayOrder}.collect {
+                answerOptions = quizAnswerDefs.collect {
                     new QuizAnswerOptionsInfo(
                             id: it.id,
                             answerOption: ''

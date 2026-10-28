@@ -27,10 +27,7 @@ import static com.github.tomakehurst.wiremock.client.WireMock.*
         'skills.openai.limits.maxMessageCharacters=10',
         'skills.openai.limits.maxTotalMessageCharacters=20',
         'skills.openai.limits.maxRequestBytes=512',
-        'skills.openai.limits.maxOutputTokens=64',
-        'skills.authorization.userInfoHealthCheckUri=https://localhost:8190/status',
-        'skills.authorization.userInfoUri=https://localhost:8190/userInfo?dn={dn}',
-        'skills.authorization.userQueryUri=https://localhost:8190/userQuery?query={query}'
+        'skills.openai.limits.maxOutputTokens=64'
 ])
 class AiRequestLimitsIT extends DefaultAiIntSpec {
     ChatClient client

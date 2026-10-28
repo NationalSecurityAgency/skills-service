@@ -28,10 +28,7 @@ import skills.utils.WaitFor
 
 @Slf4j
 @SpringBootTest(properties = [
-        'skills.config.ui.limitAdminAccess=true',
-        'skills.authorization.userInfoUri=https://localhost:8187/userInfo?dn={dn}',
-        'skills.authorization.userQueryUri=https://localhost:8187/userQuery?query={query}',
-        'skills.authorization.userInfoHealthCheckUri=https://localhost:8187/status'
+        'skills.config.ui.limitAdminAccess=true'
 ], webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT, classes = SpringBootApp)
 class LimitAdminDashboardAccessIT extends InviteOnlyBaseSpec {
 
