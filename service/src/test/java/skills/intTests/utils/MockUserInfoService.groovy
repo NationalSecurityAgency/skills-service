@@ -27,9 +27,11 @@ import com.github.tomakehurst.wiremock.http.ResponseDefinition
 import groovy.json.JsonOutput
 import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Conditional
 import org.springframework.stereotype.Component
+import org.springframework.test.context.DynamicPropertyRegistrar
+import org.springframework.test.context.DynamicPropertyRegistry
+import org.springframework.util.ResourceUtils
 import skills.auth.SecurityMode
 import skills.auth.UserInfo
 import skills.storage.model.UserAttrs
@@ -45,10 +47,7 @@ import static com.google.common.net.HttpHeaders.CONTENT_TYPE;
 @Slf4j
 @Conditional(SecurityMode.PkiAuth)
 @Component
-class MockUserInfoService {
-
-    @Value('${skills.authorization.userInfoHealthCheckUri}')
-    String userInfoHealthCheckUri
+class MockUserInfoService implements DynamicPropertyRegistrar {
 
     @Autowired
     UserAttrsRepo userAttrsRepo
@@ -75,20 +74,24 @@ class MockUserInfoService {
 
     WireMockServer mockServer
 
+    @Override
+    void accept(DynamicPropertyRegistry registry) {
+        // Spring eagerly initializes registrars before application beans resolve these URLs.
+        String baseUrl = "https://localhost:${mockServer.httpsPort()}"
+        registry.add('skills.authorization.userInfoUri', { "${baseUrl}/userInfo?dn={dn}".toString() })
+        registry.add('skills.authorization.userQueryUri', { "${baseUrl}/userQuery?query={query}".toString() })
+        registry.add('skills.authorization.userInfoHealthCheckUri', { "${baseUrl}/status".toString() })
+    }
+
     @PostConstruct
     void start() {
-        def matcher = userInfoHealthCheckUri =~ /https:\/\/localhost:(\d\d\d\d)\/status/
-        int port = Integer.parseInt(matcher[0][1]);
-
-        log.info("starting mock user-info-service on port ${port}")
-
         mockServer = new WireMockServer(wireMockConfig()
-                .httpsPort(port)
-                .keystorePath("classpath:certs/test.skilltree.userinfoservice.p12")
+                .dynamicHttpsPort()
+                .keystorePath(ResourceUtils.getFile("classpath:certs/test.skilltree.userinfoservice.p12").path)
                 .keystorePassword("skillspass")
                 .keyManagerPassword("skillspass")
                 .keystoreType("PKCS12")
-                .trustStorePath("classpath:certs/truststore.jks")
+                .trustStorePath(ResourceUtils.getFile("classpath:certs/truststore.jks").path)
                 .trustStorePassword("skillspass")
                 .trustStoreType("JKS")
                 .httpDisabled(true)
@@ -113,11 +116,12 @@ class MockUserInfoService {
         );
 
         mockServer.start();
+        log.info("started mock user-info-service on port ${mockServer.httpsPort()}")
     }
 
     @PreDestroy
     void stop() {
-        mockServer.stop();
+        mockServer?.stop();
     }
 
     static class UserInfoResponseTransformer extends ResponseDefinitionTransformer {

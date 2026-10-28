@@ -45,10 +45,7 @@ import spock.lang.Unroll
 import spock.lang.Requires
 
 @SpringBootTest(properties = [
-        'skills.config.disableCsrfProtectionInPkiMode=true',
-        'skills.authorization.userInfoUri=https://localhost:8186/userInfo?dn={dn}',
-        'skills.authorization.userQueryUri=https://localhost:8186/userQuery?query={query}',
-        'skills.authorization.userInfoHealthCheckUri=https://localhost:8186/status'
+        'skills.config.disableCsrfProtectionInPkiMode=true'
 ], webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT, classes = SpringBootApp)
 class DisableCsrfProtectionInPkiModeIT extends DefaultIntSpec {
 

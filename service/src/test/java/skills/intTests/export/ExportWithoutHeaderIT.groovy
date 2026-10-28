@@ -30,10 +30,7 @@ import static skills.intTests.utils.SkillsFactory.*
 
 @Slf4j
 @SpringBootTest(properties = [
-        'skills.config.ui.exportHeaderAndFooter=',
-        'skills.authorization.userInfoUri=https://localhost:8177/userInfo?dn={dn}',
-        'skills.authorization.userQueryUri=https://localhost:8177/userQuery?query={query}',
-        'skills.authorization.userInfoHealthCheckUri=https://localhost:8177/status'
+        'skills.config.ui.exportHeaderAndFooter='
 ], webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT, classes = SpringBootApp)
 class ExportWithoutHeaderIT extends ExportBaseIntSpec {
 
