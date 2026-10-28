@@ -71,9 +71,14 @@ class ShareSkillsService {
     String getExistingShareExplanation(String projectId, String skillId, String destinationProjectId = '') {
         SkillDef skill = skillDefAccessor.getSkillDef(projectId, skillId)
         SkillShareDef existing = skillShareDefRepo.findBySkillAndSharedToProjectIsNull(skill)
+        String adjustedDestination = ''
 
-        if (!existing && destinationProjectId) {
-            ProjDef destination = projDefAccessor.getProjDef(destinationProjectId)
+        if(destinationProjectId != ALL_SKILLS_PROJECTS) {
+            adjustedDestination = destinationProjectId
+        }
+
+        if (!existing && adjustedDestination) {
+            ProjDef destination = projDefAccessor.getProjDef(adjustedDestination)
             existing = skillShareDefRepo.findBySkillAndSharedToProject(skill, destination)
         } else if (!existing) {
             existing = skillShareDefRepo.findFirstBySkillOrderByIdAsc(skill)

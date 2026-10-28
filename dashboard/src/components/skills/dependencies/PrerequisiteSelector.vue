@@ -70,7 +70,7 @@ const loadAllSkills = () => {
   loadingAllSkills.value = true;
   const getProjectSkillsAndBadges = SkillsService.getProjectSkillsAndBadgesWithImportedSkills(projectId);
   const params = {
-    limit: 10,
+    limit: 100,
     ascending: false,
     page: 1,
     orderBy: 'skill.skillId',
@@ -106,7 +106,7 @@ const loadAllSkills = () => {
 
 const loadSharedSkills = async () => {
   const params = {
-    limit: 10,
+    limit: 100,
     ascending: false,
     page: 1,
     orderBy: 'skill.skillId',
