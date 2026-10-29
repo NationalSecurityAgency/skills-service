@@ -17,6 +17,7 @@ package skills.intTests.quiz
 
 import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.http.HttpStatus
 import skills.PublicProps
 import skills.intTests.utils.DefaultIntSpec
 import skills.intTests.utils.QuizDefFactory
@@ -29,6 +30,217 @@ class QuestionDefValidationSpecs extends DefaultIntSpec {
 
     @Autowired
     PublicProps publicProps
+
+    def "matching question rejects identical terms with different values"() {
+        Map quiz = QuizDefFactory.createQuiz(1)
+        skillsService.createQuizDef(quiz)
+        Map question = QuizDefFactory.createMatchingQuestion(1, 1, 2)
+        question.answers[0].multiPartAnswer = [term: 'Repeated Term', value: 'First Answer']
+        question.answers[1].multiPartAnswer = [term: 'Repeated Term', value: 'Second Answer']
+
+        when:
+        skillsService.createQuizQuestionDef(question)
+
+        then:
+        SkillsClientException exception = thrown()
+        exception.httpStatus == HttpStatus.BAD_REQUEST
+        exception.message.contains('Answers can not contain duplicate terms or values')
+        skillsService.getQuizQuestionDefs(quiz.quizId).questions == []
+    }
+
+    def "matching question rejects duplicate terms regardless of case or surrounding whitespace: '#firstTerm' and '#secondTerm'"() {
+        Map quiz = QuizDefFactory.createQuiz(1)
+        skillsService.createQuizDef(quiz)
+        Map question = QuizDefFactory.createMatchingQuestion(1, 1, 2)
+        question.answers[0].multiPartAnswer = [term: firstTerm, value: 'b']
+        question.answers[1].multiPartAnswer = [term: secondTerm, value: 'c']
+
+        when:
+        skillsService.createQuizQuestionDef(question)
+
+        then:
+        SkillsClientException exception = thrown()
+        exception.httpStatus == HttpStatus.BAD_REQUEST
+        exception.message.contains('Answers can not contain duplicate terms or values')
+        skillsService.getQuizQuestionDefs(quiz.quizId).questions == []
+
+        where:
+        firstTerm | secondTerm
+        'a'       | 'A'
+        'a'       | '  a  '
+        '  a  '   | 'a'
+        '  A '    | ' a  '
+        'a'       | '\u00A0A\u00A0'
+        '\u202Fa' | 'A\u202F'
+        '\uFEFFa' | 'A\uFEFF'
+        'a'       | '\tA\n'
+    }
+
+    def "matching question rejects duplicate values regardless of case or surrounding whitespace: '#firstValue' and '#secondValue'"() {
+        Map quiz = QuizDefFactory.createQuiz(1)
+        skillsService.createQuizDef(quiz)
+        Map question = QuizDefFactory.createMatchingQuestion(1, 1, 2)
+        question.answers[0].multiPartAnswer = [term: 'First Term', value: firstValue]
+        question.answers[1].multiPartAnswer = [term: 'Second Term', value: secondValue]
+
+        when:
+        skillsService.createQuizQuestionDef(question)
+
+        then:
+        SkillsClientException exception = thrown()
+        exception.httpStatus == HttpStatus.BAD_REQUEST
+        exception.message.contains('Answers can not contain duplicate terms or values')
+        skillsService.getQuizQuestionDefs(quiz.quizId).questions == []
+
+        where:
+        firstValue   | secondValue
+        'answer'     | 'answer'
+        'answer'     | 'ANSWER'
+        'answer'     | '  answer  '
+        '  answer  ' | 'answer'
+        '  ANSWER '  | ' answer  '
+        'answer'     | '\u00A0ANSWER\u00A0'
+        '\u202Fanswer' | 'ANSWER\u202F'
+        '\uFEFFanswer' | 'ANSWER\uFEFF'
+        'answer'     | '\tANSWER\n'
+    }
+
+    def "matching question update rejects duplicate #field and preserves saved answers: '#duplicate'"() {
+        Map quiz = QuizDefFactory.createQuiz(1)
+        skillsService.createQuizDef(quiz)
+
+        Map question = QuizDefFactory.createMatchingQuestion(1, 1, 2)
+        question.answers[0].multiPartAnswer = [term: 'First Term', value: 'First Answer']
+        question.answers[1].multiPartAnswer = [term: 'Second Term', value: 'Second Answer']
+        question.id = skillsService.createQuizQuestionDef(question).body.id
+
+        Map savedQuestion = skillsService.getQuizQuestionDef(quiz.quizId, question.id)
+        List<Integer> originalAnswerIds = savedQuestion.answers.collect { Map answer ->
+            answer.id
+        }
+        question.answers.eachWithIndex { Map answer, int index ->
+            answer.id = originalAnswerIds[index]
+        }
+        question.answers[1].multiPartAnswer[field] = duplicate
+
+        when:
+        skillsService.updateQuizQuestionDef(question)
+
+        then:
+        SkillsClientException exception = thrown()
+        exception.httpStatus == HttpStatus.BAD_REQUEST
+        exception.message.contains('Answers can not contain duplicate terms or values')
+
+        Map retrieved = skillsService.getQuizQuestionDef(quiz.quizId, question.id)
+        retrieved.answers*.id == originalAnswerIds
+        retrieved.answers*.multiPartAnswer == [
+                [term: 'First Term', value: 'First Answer'],
+                [term: 'Second Term', value: 'Second Answer'],
+        ]
+
+        where:
+        field   | duplicate
+        'term'  | 'First Term'
+        'term'  | '  FIRST TERM  '
+        'term'  | '<b onclick="alert(1)">First Term</b>'
+        'value' | 'First Answer'
+        'value' | '  FIRST ANSWER  '
+        'value' | '<b onclick="alert(1)">First Answer</b>'
+    }
+
+    def "matching question update sanitizes existing and newly added answers"() {
+        Map quiz = QuizDefFactory.createQuiz(1)
+        skillsService.createQuizDef(quiz)
+        Map question = QuizDefFactory.createMatchingQuestion(1, 1, 2)
+        question.answers[0].multiPartAnswer = [term: 'First Term', value: 'First Answer']
+        question.answers[1].multiPartAnswer = [term: 'Second Term', value: 'Second Answer']
+        question.id = skillsService.createQuizQuestionDef(question).body.id
+
+        Map savedQuestion = skillsService.getQuizQuestionDef(quiz.quizId, question.id)
+        List<Integer> originalAnswerIds = savedQuestion.answers.collect { Map answer -> answer.id }
+        question.answers.eachWithIndex { Map answer, int index ->
+            answer.id = originalAnswerIds[index]
+        }
+        question.answers[0].multiPartAnswer = [
+                term: '<b onclick="alert(1)">Updated Term</b>',
+                value: '<img src="x" onerror="alert(1)">Updated Answer',
+        ]
+        question.answers.add([
+                multiPartAnswer: [
+                        term: '<img src="x" onerror="alert(1)">New Term',
+                        value: '<b onclick="alert(1)">New Answer</b>',
+                ],
+                isCorrect: true,
+        ])
+
+        when:
+        skillsService.updateQuizQuestionDef(question)
+
+        then:
+        Map retrieved = skillsService.getQuizQuestionDef(quiz.quizId, question.id)
+        retrieved.answers.take(2)*.id == originalAnswerIds
+        retrieved.answers*.multiPartAnswer == [
+                [term: 'Updated Term', value: 'Updated Answer'],
+                [term: 'Second Term', value: 'Second Answer'],
+                [term: 'New Term', value: 'New Answer'],
+        ]
+    }
+
+    def "matching question update rejects markup-only #field and preserves saved answers"() {
+        Map quiz = QuizDefFactory.createQuiz(1)
+        skillsService.createQuizDef(quiz)
+        Map question = QuizDefFactory.createMatchingQuestion(1, 1, 2)
+        question.answers[0].multiPartAnswer = [term: 'First Term', value: 'First Answer']
+        question.answers[1].multiPartAnswer = [term: 'Second Term', value: 'Second Answer']
+        question.id = skillsService.createQuizQuestionDef(question).body.id
+
+        Map savedQuestion = skillsService.getQuizQuestionDef(quiz.quizId, question.id)
+        List<Integer> originalAnswerIds = savedQuestion.answers.collect { Map answer -> answer.id }
+        question.answers.eachWithIndex { Map answer, int index ->
+            answer.id = originalAnswerIds[index]
+        }
+        question.answers[0].multiPartAnswer = [term: 'Changed Term', value: 'Changed Answer']
+        question.answers[1].multiPartAnswer[field] = '<img src="x" onerror="alert(1)"><b></b>'
+
+        when:
+        skillsService.updateQuizQuestionDef(question)
+
+        then:
+        SkillsClientException exception = thrown()
+        exception.httpStatus == HttpStatus.BAD_REQUEST
+        exception.message.contains("answers.multiPartAnswer.${field} was not provided")
+        Map retrieved = skillsService.getQuizQuestionDef(quiz.quizId, question.id)
+        retrieved.answers*.id == originalAnswerIds
+        retrieved.answers*.multiPartAnswer == [
+                [term: 'First Term', value: 'First Answer'],
+                [term: 'Second Term', value: 'Second Answer'],
+        ]
+
+        where:
+        field << ['term', 'value']
+    }
+
+    def "matching question rejects #field that is blank after normalization: '#blank'"() {
+        Map quiz = QuizDefFactory.createQuiz(1)
+        skillsService.createQuizDef(quiz)
+        Map question = QuizDefFactory.createMatchingQuestion(1, 1, 2)
+        question.answers[1].multiPartAnswer[field] = blank
+
+        when:
+        skillsService.createQuizQuestionDef(question)
+
+        then:
+        SkillsClientException exception = thrown()
+        exception.httpStatus == HttpStatus.BAD_REQUEST
+        exception.message.contains("answers.multiPartAnswer.${field} was not provided")
+        skillsService.getQuizQuestionDefs(quiz.quizId).questions == []
+
+        where:
+        [field, blank] << [['term', 'value'], [
+                '\u00A0', '\u202F', '\uFEFF', ' \t\u00A0\u202F\uFEFF\n ',
+                '&nbsp;', '&#160;&#x202F;', '<b></b>',
+        ]].combinations()
+    }
 
     def "question answer count cannot exceed configured maximum for #questionType"() {
         int maxAnswers = publicProps.getInt(PublicProps.UiProp.maxAnswersPerQuizQuestion)
@@ -269,13 +481,15 @@ class QuestionDefValidationSpecs extends DefaultIntSpec {
         skillsService.createQuizDef(quiz1)
         def question = QuizDefFactory.createChoiceQuestion(1, 1)
         skillsService.createQuizQuestionDef(question)
+        // Generated question IDs are positive; a fixed positive ID can exist as sequences advance.
+        int nonexistentQuestionId = -1
 
         when:
-        skillsService.getQuizQuestionDef(quiz1.quizId, 10000)
+        skillsService.getQuizQuestionDef(quiz1.quizId, nonexistentQuestionId)
 
         then:
         SkillsClientException skillsClientException = thrown()
-        skillsClientException.resBody.contains("Provided question id [10000] does not exist")
+        skillsClientException.resBody.contains("Provided question id [${nonexistentQuestionId}] does not exist")
     }
 
     def "try to retrieve quiz with question id from another quiz"() {
@@ -367,4 +581,3 @@ class QuestionDefValidationSpecs extends DefaultIntSpec {
     }
 
 }
-

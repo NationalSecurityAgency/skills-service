@@ -35,6 +35,7 @@
     "deep-equal": "2.2.3",
     "dompurify": "3.4.17",
     "enquire.js": "2.1.6",
+    "entities": "9.0.0",
     "idb-keyval": "6.2.2",
     "loglevel": "1.9.2",
     "material-icons": "1.13.14",

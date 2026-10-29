@@ -19,6 +19,7 @@ import {array, boolean, object, string} from 'yup'
 import {useRoute} from 'vue-router';
 import {useAppConfig} from '@/common-components/stores/UseAppConfig.js'
 import QuizService from '@/components/quiz/QuizService.js';
+import { decodeHtmlEntities } from '@/components/utils/HtmlEntityDecoder.js';
 import QuestionType from '@/skills-display/components/quiz/QuestionType.js';
 import MarkdownEditor from '@/common-components/utilities/markdown/MarkdownEditor.vue'
 import SkillsInputFormDialog from '@/components/utils/inputForm/SkillsInputFormDialog.vue'
@@ -268,16 +269,11 @@ const matchesMustNotBeBlank = (value) => {
     return true;
   }
 
-  let emptyAnswers = []
-  value.forEach((term) => {
-    let answer = term.multiPartAnswer
-    if(answer) {
-      if(!answer.term || !answer.value || answer.term.trim() === '' || answer.value.trim() === '') {
-        emptyAnswers.push(term);
-      }
-    }
-  })
-  return emptyAnswers.length === 0;
+  return value.every((answer) => {
+    const term = decodeHtmlEntities(answer.multiPartAnswer?.term)?.trim()
+    const matchingValue = decodeHtmlEntities(answer.multiPartAnswer?.value)?.trim()
+    return !!term && !!matchingValue
+  });
 }
 
 const allAnswersFilledIn = (value) => {
@@ -308,8 +304,8 @@ const noRepeatAnswers = (value) => {
   if(!isQuestionTypeMatching.value) {
     return true;
   }
-  const terms = value.map((term) => term.multiPartAnswer?.term)
-  const values = value.map((term) => term.multiPartAnswer?.value)
+  const terms = value.map((term) => decodeHtmlEntities(term.multiPartAnswer?.term)?.trim().toLowerCase())
+  const values = value.map((term) => decodeHtmlEntities(term.multiPartAnswer?.value)?.trim().toLowerCase())
   const hasDuplicateTerms = (new Set(terms)).size !== terms.length
   const hasDuplicateValues = (new Set(values)).size !== values.length
 
@@ -336,6 +332,16 @@ const schema = object({
           object({
             'answer': string().nullable().label('Answer'),
             'isCorrect': boolean().label('Is Correct'),
+            'multiPartAnswer': object({
+              term: string().nullable().when([], {
+                is: () => isQuestionTypeMatching.value,
+                then: (schema) => schema.noHtml(),
+              }),
+              value: string().nullable().when([], {
+                is: () => isQuestionTypeMatching.value,
+                then: (schema) => schema.noHtml(),
+              }),
+            }).nullable().default(undefined),
           })
       )
       .test('atLeastOneCorrectAnswer', 'Must have at least 1 correct answer selected', (value) => atLeastOneCorrectAnswer(value))

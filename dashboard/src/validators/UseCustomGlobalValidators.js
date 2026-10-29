@@ -108,12 +108,9 @@ export const useCustomGlobalValidators = () => {
   }
 
   function noHtml() {
-    const tagRegex = /^(?!.*<[^>]+>).*$/i;
+    const tagRegex = /<[^>]+>/;
     return this.test('noHtml', 'HTML tags are not allowed', (value) => {
-      if (value) {
-        return value.match(tagRegex) !== null;
-      }
-      return true;
+      return !value || !tagRegex.test(value);
     })
   }
 

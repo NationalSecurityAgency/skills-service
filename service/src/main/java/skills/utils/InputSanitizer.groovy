@@ -19,6 +19,7 @@ import groovy.util.logging.Slf4j
 import org.apache.commons.lang3.StringUtils
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
+import org.jsoup.parser.Parser
 import org.jsoup.safety.Safelist
 import org.springframework.web.util.UriComponents
 import org.springframework.web.util.UriComponentsBuilder
@@ -65,6 +66,22 @@ class InputSanitizer {
         }
 
         return Jsoup.clean(input, "", safelist, print)
+    }
+
+    /**
+     * Produces a comparison-only key using the default HTML sanitization policy,
+     * entity decoding, JavaScript-compatible surrounding whitespace trimming, and
+     * locale-independent lowercasing. Preserves null and internal whitespace.
+     * Entity decoding can reintroduce angle brackets; do not render this result as
+     * safe HTML or use it as a replacement for stored sanitized text.
+     */
+    static String normalizeForCaseInsensitiveComparison(String input) {
+        if (input == null) {
+            return null
+        }
+        String sanitized = sanitize(input)
+        String decoded = Parser.unescapeEntities(sanitized, false)
+        return StringNormalizer.trimUnicodeWhitespace(decoded).toLowerCase(Locale.ROOT)
     }
 
     private static class CodeBlockMatch {

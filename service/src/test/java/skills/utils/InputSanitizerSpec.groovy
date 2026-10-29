@@ -23,6 +23,24 @@ import spock.lang.Unroll
 
 class InputSanitizerSpec extends Specification{
 
+    def "normalize a comparison key with sanitization entity decoding Unicode trimming and lowercasing"() {
+        expect:
+        InputSanitizer.normalizeForCaseInsensitiveComparison(input) == expected
+
+        where:
+        input                              | expected
+        null                               | null
+        ''                                 | ''
+        '  Mixed CASE  '                   | 'mixed case'
+        '<b>ANSWER</b>'                    | 'answer'
+        '\u00A0ANSWER\u00A0'               | 'answer'
+        '&nbsp;ANSWER&nbsp;'               | 'answer'
+        '\u202FANSWER\uFEFF'               | 'answer'
+        'First  Answer'                    | 'first  answer'
+        'FIRST\u00A0ANSWER'                 | 'first\u00A0answer'
+        '&lt;b&gt;ANSWER&lt;/b&gt;'          | '<b>answer</b>'
+    }
+
     def "unsanitize url with html ampersand entity"() {
         def input = "http://somewhere.foo?p=1&amp;p2=v&amp;2"
 
