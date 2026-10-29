@@ -142,8 +142,82 @@ class QuestionDefValidationSpecs extends DefaultIntSpec {
         field   | duplicate
         'term'  | 'First Term'
         'term'  | '  FIRST TERM  '
+        'term'  | '<b onclick="alert(1)">First Term</b>'
         'value' | 'First Answer'
         'value' | '  FIRST ANSWER  '
+        'value' | '<b onclick="alert(1)">First Answer</b>'
+    }
+
+    def "matching question update sanitizes existing and newly added answers"() {
+        Map quiz = QuizDefFactory.createQuiz(1)
+        skillsService.createQuizDef(quiz)
+        Map question = QuizDefFactory.createMatchingQuestion(1, 1, 2)
+        question.answers[0].multiPartAnswer = [term: 'First Term', value: 'First Answer']
+        question.answers[1].multiPartAnswer = [term: 'Second Term', value: 'Second Answer']
+        question.id = skillsService.createQuizQuestionDef(question).body.id
+
+        Map savedQuestion = skillsService.getQuizQuestionDef(quiz.quizId, question.id)
+        List<Integer> originalAnswerIds = savedQuestion.answers.collect { Map answer -> answer.id }
+        question.answers.eachWithIndex { Map answer, int index ->
+            answer.id = originalAnswerIds[index]
+        }
+        question.answers[0].multiPartAnswer = [
+                term: '<b onclick="alert(1)">Updated Term</b>',
+                value: '<img src="x" onerror="alert(1)">Updated Answer',
+        ]
+        question.answers.add([
+                multiPartAnswer: [
+                        term: '<img src="x" onerror="alert(1)">New Term',
+                        value: '<b onclick="alert(1)">New Answer</b>',
+                ],
+                isCorrect: true,
+        ])
+
+        when:
+        skillsService.updateQuizQuestionDef(question)
+
+        then:
+        Map retrieved = skillsService.getQuizQuestionDef(quiz.quizId, question.id)
+        retrieved.answers.take(2)*.id == originalAnswerIds
+        retrieved.answers*.multiPartAnswer == [
+                [term: 'Updated Term', value: 'Updated Answer'],
+                [term: 'Second Term', value: 'Second Answer'],
+                [term: 'New Term', value: 'New Answer'],
+        ]
+    }
+
+    def "matching question update rejects markup-only #field and preserves saved answers"() {
+        Map quiz = QuizDefFactory.createQuiz(1)
+        skillsService.createQuizDef(quiz)
+        Map question = QuizDefFactory.createMatchingQuestion(1, 1, 2)
+        question.answers[0].multiPartAnswer = [term: 'First Term', value: 'First Answer']
+        question.answers[1].multiPartAnswer = [term: 'Second Term', value: 'Second Answer']
+        question.id = skillsService.createQuizQuestionDef(question).body.id
+
+        Map savedQuestion = skillsService.getQuizQuestionDef(quiz.quizId, question.id)
+        List<Integer> originalAnswerIds = savedQuestion.answers.collect { Map answer -> answer.id }
+        question.answers.eachWithIndex { Map answer, int index ->
+            answer.id = originalAnswerIds[index]
+        }
+        question.answers[0].multiPartAnswer = [term: 'Changed Term', value: 'Changed Answer']
+        question.answers[1].multiPartAnswer[field] = '<img src="x" onerror="alert(1)"><b></b>'
+
+        when:
+        skillsService.updateQuizQuestionDef(question)
+
+        then:
+        SkillsClientException exception = thrown()
+        exception.httpStatus == HttpStatus.BAD_REQUEST
+        exception.message.contains("answers.multiPartAnswer.${field} was not provided")
+        Map retrieved = skillsService.getQuizQuestionDef(quiz.quizId, question.id)
+        retrieved.answers*.id == originalAnswerIds
+        retrieved.answers*.multiPartAnswer == [
+                [term: 'First Term', value: 'First Answer'],
+                [term: 'Second Term', value: 'Second Answer'],
+        ]
+
+        where:
+        field << ['term', 'value']
     }
 
     def "matching question rejects #field that is blank after normalization: '#blank'"() {

@@ -728,9 +728,13 @@ class QuizDefService {
                 quizAnswerRepo.deleteAllById(idsToRemove)
             }
             List<QuizAnswerDef> answerDefs = questionDefRequest.answers.withIndex().collect { QuizAnswerDefRequest answerDefRequest, int index ->
+                QuizMultiPartAnswer multiPartAnswer = new QuizMultiPartAnswer(
+                        term: InputSanitizer.sanitize(answerDefRequest.multiPartAnswer?.term),
+                        value: InputSanitizer.sanitize(answerDefRequest.multiPartAnswer?.value)
+                )
                 QuizAnswerDef answerDef = existingAnswerDefs.find { it.id == answerDefRequest.id }
                 if (answerDef) {
-                    answerDef.multiPartAnswer = JsonOutput.toJson(answerDefRequest.multiPartAnswer)
+                    answerDef.multiPartAnswer = JsonOutput.toJson(multiPartAnswer)
                     answerDef.displayOrder = index + 1
                     return answerDef
                 } else {
@@ -740,7 +744,7 @@ class QuizDefService {
                             answer: null,
                             isCorrectAnswer: true,
                             displayOrder: index + 1,
-                            multiPartAnswer: JsonOutput.toJson(answerDefRequest.multiPartAnswer),
+                            multiPartAnswer: JsonOutput.toJson(multiPartAnswer),
                     )
                 }
             }
