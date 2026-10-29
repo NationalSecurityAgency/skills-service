@@ -46,7 +46,6 @@ describe('Client Display Theme Components Tests', () => {
       cy.get('[data-cy="overallPoints"] [data-cy="earnedPoints"]').should('have.text', '200')
       cy.matchSnapshotImageForElement(message, {
         name,
-        blackout: `${message} [data-pc-name="progressspinner"]`,
         errorThreshold: 0.1
       })
     }
