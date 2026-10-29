@@ -771,14 +771,34 @@ class CatalogParticipantRaceFailuresIT extends CatalogIntSpec {
         userAchievedRepo.save(new UserAchievement(userId: users[0], projectId: sourceDef.projectId,
                 skillId: sourceDef.skillId, skillRefId: sourceDef.id, pointsWhenAchieved: sourceDef.totalPoints,
                 achievedOn: historicalDate))
+        queueBackfill()
 
         when:
-        qualify(fixture, learner, entry)
+        Map qualification = qualify(fixture, learner, entry)
+        Map pending = entry == 'visit' ? qualification : learner.initializeProjectProgress(fixture.projectId)
+
+        then:
+        !pending.ready
+        pending.backfillStatus == 'PENDING'
+        backfillTasks().size() == 1
+        learner.getSkillsSummaryForCurrentUser(fixture.projectId).skillsAchieved == 0
+        !userPointsRepo.findByProjectIdAndUserIdAndSkillId(sourceDef.projectId, users[0], sourceDef.skillId)
+
+        when:
+        releaseBackfill()
         waitForAsyncTasksCompletion.waitForAllScheduleTasks()
+        Map completed = learner.initializeProjectProgress(fixture.projectId)
         Map summary = learner.getSkillsSummaryForCurrentUser(fixture.projectId)
 
         then:
+        completed.ready
+        completed.backfillStatus == 'COMPLETED'
         summary.skillsAchieved == 1
+        summary.points == (entry == 'award' ? 100 : 0)
+        !backfillTasks()
+
+        cleanup:
+        releaseBackfill()
 
         where:
         entry << ['visit', 'award']

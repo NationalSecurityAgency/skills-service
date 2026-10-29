@@ -238,6 +238,137 @@ class CatalogParticipantBackfillSpecs extends CatalogIntSpec {
         entry << ['visit', 'award']
     }
 
+    def "initialization ignores achievement-only credit belonging to #creditOwner on #creditedSkill skills"() {
+        Map fixture = catalogFixture()
+        Map unrelated = createSkill(1, 1, 99, 0, 2, 0, 100)
+        skillsService.createSkill(unrelated)
+        SkillsService learner = createService(users[0])
+        String creditedUserId = creditOwner == 'this user' ? users[0] : users[1]
+        SkillsService creditedLearner = createService(creditedUserId)
+        Map sourceSkill = creditedSkill == 'imported' ? fixture.sourceSkills[0] : unrelated
+        saveSourceAchievement(sourceSkill, creditedUserId)
+        queueBackfill()
+
+        when:
+        Map result = learner.initializeProjectProgress('TestProject2')
+        Map repeated = learner.initializeProjectProgress('TestProject2')
+        Map summary = learner.getSkillsSummaryForCurrentUser('TestProject2')
+        Map sourceSummary = creditedLearner.getSkillsSummaryForCurrentUser('TestProject1')
+
+        then:
+        result.ready
+        result.backfillStatus == 'COMPLETED'
+        repeated == result
+        !backfillTasks()
+        sourceSummary.points == 0
+        sourceSummary.skillsAchieved == 1
+        summary.points == 0
+        summary.skillsAchieved == 0
+        summary.badges.numBadgesCompleted == 0
+
+        where:
+        creditOwner  | creditedSkill
+        'other user' | 'imported'
+        'this user'  | 'unrelated'
+        'other user' | 'unrelated'
+    }
+
+    def "initialization ignores #creditType credit for a disabled import with enabled imports #enabledImports"() {
+        catalogFixture(enabledImports, false)
+        Map disabledSource = createSkill(1, 1, 99, 0, 2, 0, 100)
+        skillsService.createSkill(disabledSource)
+        SkillsService learner = createService(users[0])
+        if (creditType == 'points') {
+            skillsService.addSkill(disabledSource, users[0], firstDate)
+        } else {
+            saveSourceAchievement(disabledSource, users[0])
+        }
+        skillsService.exportSkillToCatalog('TestProject1', disabledSource.skillId)
+        skillsService.bulkImportSkillsFromCatalog('TestProject2', 'TestSubject1', [disabledSource])
+        waitForAsyncTasksCompletion.waitForAllScheduleTasks()
+        queueBackfill()
+
+        when:
+        Map result = learner.initializeProjectProgress('TestProject2')
+        Map sourceSummary = learner.getSkillsSummaryForCurrentUser('TestProject1')
+        Map summary = learner.getSkillsSummaryForCurrentUser('TestProject2')
+
+        then:
+        result.ready
+        result.backfillStatus == (enabledImports ? 'COMPLETED' : 'NOT_NEEDED')
+        !backfillTasks()
+        sourceSummary.points == (creditType == 'points' ? 100 : 0)
+        sourceSummary.skillsAchieved == (creditType == 'achievement' ? 1 : 0)
+        summary.points == 0
+        summary.skillsAchieved == 0
+        !achievement('TestProject2', users[0], disabledSource.skillId)
+
+        where:
+        enabledImports | creditType
+        false          | 'points'
+        false          | 'achievement'
+        true           | 'points'
+        true           | 'achievement'
+    }
+
+    def "initialization scopes #creditType source credit to the exact importing destination"() {
+        Map fixture = catalogFixture(false, false)
+        SkillsService learner = createService(users[0])
+        Map creditedSource = fixture.sourceSkills[0]
+        Map emptySource = fixture.sourceSkills[1]
+        skillsService.bulkImportSkillsFromCatalogAndFinalize('TestProject2', 'TestSubject1', [creditedSource])
+        skillsService.bulkImportSkillsFromCatalogAndFinalize('TestProject3', 'TestSubject1', [emptySource])
+        if (creditType == 'points') {
+            skillsService.addSkill(creditedSource, users[0], firstDate)
+        } else {
+            saveSourceAchievement(creditedSource, users[0])
+        }
+        waitForAsyncTasksCompletion.waitForAllScheduleTasks()
+        queueBackfill()
+
+        when: 'credit imported by another destination must not make this destination pending'
+        Map emptyResult = learner.initializeProjectProgress('TestProject3')
+        Map emptySummary = learner.getSkillsSummaryForCurrentUser('TestProject3')
+
+        then:
+        emptyResult.ready
+        emptyResult.backfillStatus == 'COMPLETED'
+        emptySummary.points == 0
+        emptySummary.skillsAchieved == 0
+        !backfillTasks()
+
+        when: 'the same learner initializes the destination importing the credited skill'
+        Map pending = learner.initializeProjectProgress('TestProject2')
+
+        then:
+        !pending.ready
+        pending.backfillStatus == 'PENDING'
+        backfillTasks().size() == 1
+        learner.getSkillsSummaryForCurrentUser('TestProject2').points == 0
+        learner.getSkillsSummaryForCurrentUser('TestProject2').skillsAchieved == 0
+
+        when:
+        releaseBackfill()
+        waitForAsyncTasksCompletion.waitForAllScheduleTasks()
+        Map completed = learner.initializeProjectProgress('TestProject2')
+        Map summary = learner.getSkillsSummaryForCurrentUser('TestProject2')
+        Map unchanged = learner.initializeProjectProgress('TestProject3')
+        Map unchangedSummary = learner.getSkillsSummaryForCurrentUser('TestProject3')
+
+        then:
+        completed.ready
+        completed.backfillStatus == 'COMPLETED'
+        summary.points == (creditType == 'points' ? 100 : 0)
+        summary.skillsAchieved == (creditType == 'achievement' ? 1 : 0)
+        unchanged == emptyResult
+        unchangedSummary.points == 0
+        unchangedSummary.skillsAchieved == 0
+        !backfillTasks()
+
+        where:
+        creditType << ['points', 'achievement']
+    }
+
     def "#entry backfills partially earned catalog points without granting unearned achievements"() {
         Map fixture = catalogFixture()
         SkillsService learner = createService(users[0])
@@ -1623,6 +1754,13 @@ class CatalogParticipantBackfillSpecs extends CatalogIntSpec {
         } else {
             skillsService.bulkImportSkillsFromCatalog('TestProject2', 'TestSubject1', fixture.sourceSkills)
         }
+    }
+
+    private void saveSourceAchievement(Map skill, String userId) {
+        SkillDef source = skillDefRepo.findByProjectIdAndSkillId(skill.projectId, skill.skillId)
+        userAchievedRepo.save(new UserAchievement(userId: userId, projectId: source.projectId,
+                skillId: source.skillId, skillRefId: source.id, pointsWhenAchieved: source.totalPoints,
+                achievedOn: completionDate))
     }
 
     private void earnSource(Map fixture, String userId) {
