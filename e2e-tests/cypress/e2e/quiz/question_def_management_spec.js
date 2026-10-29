@@ -1035,7 +1035,7 @@ describe('Quiz Question CRUD Tests', () => {
     });
 
     ['term', 'value'].forEach((field) => {
-        it.only(`matching question rejects HTML in ${field}s before backend sanitization can introduce duplicates`, function () {
+        it(`matching question rejects HTML in ${field}s before backend sanitization can introduce duplicates`, function () {
             cy.createQuizDef(1);
             cy.visit('/administrator/quizzes/quiz1');
             cy.openDialog('[data-cy="btn_Questions"]', true)
@@ -1064,7 +1064,7 @@ describe('Quiz Question CRUD Tests', () => {
         });
     });
 
-    it.only('matching question rejects duplicate terms and values regardless of case or surrounding whitespace', function () {
+    it('matching question rejects duplicate terms and values regardless of case or surrounding whitespace', function () {
         cy.createQuizDef(1);
         cy.visit('/administrator/quizzes/quiz1');
         cy.openDialog('[data-cy="btn_Questions"]', true)
