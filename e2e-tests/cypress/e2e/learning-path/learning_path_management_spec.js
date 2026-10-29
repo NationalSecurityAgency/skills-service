@@ -20,6 +20,7 @@ describe('Learning Path Management Validation Tests', () => {
     
     const visitLearningPath = () => {
         cy.visit('/administrator/projects/proj1/learning-path')
+        cy.wait('@loadSkills')
     }
 
     beforeEach(() => {
@@ -54,7 +55,7 @@ describe('Learning Path Management Validation Tests', () => {
         cy.assignSkillToBadge(1, 2, 4);
         cy.createBadge(1, 2, { enabled: true });
 
-        cy.intercept('GET', '/admin/projects/proj1/sharedWithMe').as('loadSharedSkills');
+        cy.intercept('GET', '/admin/projects/proj1/skills?excludeImportedSkills=true').as('loadSkills');
     });
 
     it('updates learning path rows when a route is replaced without changing the edge count', () => {
