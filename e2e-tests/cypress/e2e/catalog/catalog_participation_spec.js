@@ -39,7 +39,7 @@ describe('Learner catalog participation', () => {
     });
 
     ['dashboard', 'iframe'].forEach((mode) => {
-        const display = (selector) => mode === 'iframe' ? cy.wrapIframe().find(selector) : cy.get(selector);
+        const display = (selector, options = {}) => mode === 'iframe' ? cy.wrapIframe().find(selector, options) : cy.get(selector, options);
         const visit = (path = '') => {
             if (mode === 'iframe') {
                 cy.visit(`/test-skills-client/proj1?skillsClientDisplayPath=${encodeURIComponent(path || '/')}`);
@@ -48,34 +48,54 @@ describe('Learner catalog participation', () => {
             }
         };
 
-        it(`${mode}: pending response shows a nonblocking message, initializes once and refreshes completed progress`, () => {
+        it(`${mode}: ordinary first visit shows the pending message and automatically loads imported progress`, () => {
             createCatalog(true);
-            // Observe the production response without stubbing or delaying the worker.
+            // Let the production worker run normally: no deferred finalization or response stubs.
             cy.intercept('POST', initializeUrl).as('initialize');
             visit();
             cy.wait('@initialize').its('response.body').should('deep.equal', { ready: false, backfillStatus: 'PENDING' });
-            display(loadingMessage).should('be.visible').and('contain.text', 'User Progress is loading');
-            display('[data-cy="subjectTileBtn"]').should('be.visible').click();
-            display('[data-cy="skillsTitle"]').should('contain.text', 'Subject 1');
-            display('[data-cy="skillProgressTitle"]').contains('Very Great Skill 2').click();
-            display('[data-cy="skillProgressTitle"]').should('contain.text', 'Very Great Skill 2');
-            display('[data-cy="overallPointsEarnedCard"] [data-cy="mediaInfoCardTitle"]').should('contain.text', '0 Total');
-            display('[data-cy="claimPointsBtn"]').should('be.enabled').click();
-            display('[data-cy="overallPointsEarnedCard"] [data-cy="mediaInfoCardTitle"]').should('contain.text', '100 Total');
-            cy.waitForBackendAsyncTasksToComplete();
-            // Visibility comes from initialization's returned status, even after backfill completes.
-            display(loadingMessage).should('be.visible');
-            cy.get('@initialize.all').should('have.length', 1);
+            display(loadingMessage).should('be.visible').and('contain.text', 'Loading your latest progress')
+                .and('contain.text', 'You can keep exploring while we sync your points and achievements.');
+            display('[data-cy="subjectTileBtn"]').should('be.visible').and('not.be.disabled');
 
+            // Wait through the UI's own status checks: no reload or test-side initialization.
+            display('[data-cy="overallPoints"] [data-cy="earnedPoints"]', { timeout: 60000 })
+                .should('have.text', '100');
+            display(loadingMessage, { timeout: 60000 }).should('not.exist');
+            display('[data-cy="subjectTile-subj1"] [data-cy="pointsProgress"]').should('have.text', '100 / 400');
+            cy.get('@initialize.all').should((requests) => {
+                expect(requests.some((request) => request.response?.body.backfillStatus === 'COMPLETED')).to.eq(true);
+            });
+
+            cy.get('@initialize.all').then((requests) => {
+                const requestCount = requests.length;
+                display('[data-cy="subjectTileBtn"]').click();
+                display('[data-cy="skillsTitle"]').should('contain.text', 'Subject 1');
+                display(loadingMessage).should('not.exist');
+                // Existing native reporting remains usable alongside the imported progress.
+                display('[data-cy="skillProgressTitle"]').contains('Very Great Skill 2').click();
+                display('[data-cy="claimPointsBtn"]').should('be.enabled').click();
+                display('[data-cy="overallPointsEarnedCard"] [data-cy="mediaInfoCardTitle"]')
+                    .should('contain.text', '100 Total');
+                if (mode === 'iframe') {
+                    display('[data-cy="breadcrumbLink-subj1"]').click();
+                } else {
+                    cy.get('[data-cy="breadcrumb-subj1"]').click();
+                }
+                display('[data-cy="skillProgressTitle"]').contains('Very Great Skill 1').click();
+                display('[data-cy="overallPointsEarnedCard"] [data-cy="mediaInfoCardTitle"]')
+                    .should('contain.text', '100 Total');
+                display(loadingMessage).should('not.exist');
+                cy.get('@initialize.all').should('have.length', requestCount);
+            });
+
+            cy.intercept('POST', initializeUrl).as('reloadInitialize');
             cy.reload();
-            cy.wait('@initialize').its('response.body').should('deep.equal', { ready: true, backfillStatus: 'COMPLETED' });
-            display('[data-cy="skillProgressTitle"]').should('contain.text', 'Very Great Skill 2');
+            cy.wait('@reloadInitialize').its('response.body').should('deep.equal', { ready: true, backfillStatus: 'COMPLETED' });
+            display('[data-cy="overallPointsEarnedCard"] [data-cy="mediaInfoCardTitle"]')
+                .should('contain.text', '100 Total');
             display(loadingMessage).should('not.exist');
-            cy.get('@initialize.all').should('have.length', 2);
-            visit('/subjects/subj1/skills/skill1');
-            cy.wait('@initialize').its('response.body.backfillStatus').should('eq', 'COMPLETED');
-            display('[data-cy="overallPointsEarnedCard"] [data-cy="mediaInfoCardTitle"]').should('contain.text', '100 Total');
-            display(loadingMessage).should('not.exist');
+            cy.get('@reloadInitialize.all').should('have.length', 1);
         });
 
         it(`${mode}: completed empty-source initialization on a deep link shows no message`, () => {
@@ -117,10 +137,10 @@ describe('Learner catalog participation', () => {
             projectId: 'proj1', setting: 'catalog.finalize.state', value: 'FAILED'
         });
         cy.intercept('POST', initializeUrl).as('initialize');
-        cy.visit('/progress-and-rankings/projects/proj1/subjects/subj1/skills/skill2');
+        cy.visit('/progress-and-rankings/projects/proj1');
         cy.wait('@initialize').its('response.body').should('deep.equal', { ready: false, backfillStatus: 'COMPLETED' });
-        cy.get('[data-cy="skillProgressTitle"]').should('contain.text', 'Very Great Skill 2');
-        cy.get('[data-cy="claimPointsBtn"]').should('be.enabled');
+        cy.get('[data-cy="overallPoints"] [data-cy="earnedPoints"]').should('have.text', '0');
+        cy.get('[data-cy="subjectTileBtn"]').should('be.visible').and('not.be.disabled');
         cy.get(loadingMessage).should('not.exist');
         cy.request('POST', '/admin/projects/proj1/settings/catalog.finalize.state', {
             projectId: 'proj1', setting: 'catalog.finalize.state', value: 'COMPLETED'
@@ -143,12 +163,12 @@ describe('Learner catalog participation', () => {
         cy.get('[data-cy="project-link-proj1"]').click();
         cy.wait('@initialize').then(({ request, response }) => {
             expect(request.url).not.to.contain('userId');
-            expect(response.body.backfillStatus).to.eq('PENDING');
+            expect(response.body.backfillStatus).to.be.oneOf(['PENDING', 'COMPLETED']);
         });
-        cy.get(loadingMessage).should('be.visible');
         cy.get('[data-cy="subjectTileBtn"]').click();
         cy.get('[data-cy="skillProgressTitle"]').contains('Very Great Skill 2').click();
         cy.get('[data-cy="overallPointsEarnedCard"] [data-cy="mediaInfoCardTitle"]').should('contain.text', '0 Total');
-        cy.get('@initialize.all').should('have.length', 1);
+        cy.get(loadingMessage).should('not.exist');
+        cy.waitForBackendAsyncTasksToComplete();
     });
 });

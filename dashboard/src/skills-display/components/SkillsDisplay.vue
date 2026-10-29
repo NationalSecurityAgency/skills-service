@@ -66,11 +66,10 @@ const hasBadges = computed(() => {
                class="mt-3"
                data-cy="userProgressLoading">
         <template #content>
-          <div class="flex items-start gap-3 px-4 py-3">
+          <div class="flex items-start gap-2 px-4 py-3">
             <div class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-white text-sky-700 dark:bg-sky-900 dark:text-sky-200 sd-theme-background-color sd-theme-primary-color"
                   aria-hidden="true">
-              <skills-spinner :is-loading="true" :size-in-rem="1.25" :is-centered="false"
-                              class="flex items-center justify-center leading-none [&_.p-progressspinner-circle]:stroke-current!" />
+              <i class="fas fa-hourglass-half text-xl" />
             </div>
             <div class="min-w-0">
               <div class="text-sm font-semibold leading-5 text-sky-900 dark:text-sky-100 sd-theme-primary-color">Loading your latest progress</div>
