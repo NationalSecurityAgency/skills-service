@@ -1034,6 +1034,178 @@ describe('Quiz Question CRUD Tests', () => {
 
     });
 
+    ['term', 'value'].forEach((field) => {
+        it.only(`matching question rejects HTML in ${field}s before backend sanitization can introduce duplicates`, function () {
+            cy.createQuizDef(1);
+            cy.visit('/administrator/quizzes/quiz1');
+            cy.openDialog('[data-cy="btn_Questions"]', true)
+            cy.get('[data-cy="questionText"]').type('Match sanitized text')
+            cy.get('[data-cy="answerTypeSelector"]').click()
+            cy.get('[data-cy="selectionItem_Matching"]').click()
+
+            cy.get('[data-cy="termText-0"]').type('First Term')
+            cy.get('[data-cy="answerText-0"]').type('First Answer')
+            cy.get('[data-cy="termText-1"]').type(field === 'term' ? '<b>First Term</b>' : 'Second Term')
+            cy.get('[data-cy="answerText-1"]').type(field === 'value' ? '<b>First Answer</b>' : 'Second Answer')
+
+            // Reject HTML before the backend strips tags and makes the two entries identical.
+            const errorSelector = `[data-cy="answers[1].multiPartAnswer.${field}Error"]`
+            cy.get(errorSelector).should('be.visible').and('contain.text', 'HTML tags are not allowed')
+            cy.get('[data-cy="saveDialogBtn"]').should('be.disabled')
+
+            // Distinct plain text clears the field error and can be saved.
+            const inputSelector = field === 'term' ? '[data-cy="termText-1"]' : '[data-cy="answerText-1"]'
+            cy.get(inputSelector).clear().type(field === 'term' ? 'Second Term' : 'Second Answer')
+            cy.get(errorSelector).should('not.be.visible')
+            cy.get('[data-cy="saveDialogBtn"]').should('be.enabled')
+            cy.clickSaveDialogBtn()
+            cy.get('[data-cy="question-1-answer-1"]').should('contain.text', 'Second Term')
+                .and('contain.text', 'Second Answer')
+        });
+    });
+
+    it.only('matching question rejects duplicate terms and values regardless of case or surrounding whitespace', function () {
+        cy.createQuizDef(1);
+        cy.visit('/administrator/quizzes/quiz1');
+        cy.openDialog('[data-cy="btn_Questions"]', true)
+        cy.get('[data-cy="questionText"]').type('Match case-sensitive terms')
+        cy.get('[data-cy="answerTypeSelector"]').click()
+        cy.get('[data-cy="selectionItem_Matching"]').click()
+
+        cy.get('[data-cy="termText-0"]').type('a')
+        cy.get('[data-cy="answerText-0"]').type('b')
+        cy.get('[data-cy="termText-1"]').type('a')
+        cy.get('[data-cy="answerText-1"]').type('c')
+        cy.get('[data-cy="answersError"]').should('be.visible')
+            .and('contain.text', 'Answers can not contain duplicate terms or values')
+        cy.get('[data-cy="saveDialogBtn"]').should('be.disabled')
+
+        // Reset to a valid term before checking case-insensitive term validation.
+        cy.get('[data-cy="termText-1"]').clear().type('d')
+        cy.get('[data-cy="answersError"]').should('not.be.visible')
+        cy.get('[data-cy="saveDialogBtn"]').should('be.enabled')
+
+        cy.get('[data-cy="termText-1"]').clear().type('A')
+        cy.get('[data-cy="answersError"]').should('be.visible')
+            .and('contain.text', 'Answers can not contain duplicate terms or values')
+        cy.get('[data-cy="saveDialogBtn"]').should('be.disabled')
+
+        // Reset to a valid term before checking that surrounding whitespace is ignored.
+        cy.get('[data-cy="termText-1"]').clear().type('d')
+        cy.get('[data-cy="answersError"]').should('not.be.visible')
+        cy.get('[data-cy="saveDialogBtn"]').should('be.enabled')
+
+        cy.get('[data-cy="termText-1"]').clear().type('   a    ')
+        cy.get('[data-cy="answersError"]').should('be.visible')
+            .and('contain.text', 'Answers can not contain duplicate terms or values')
+        cy.get('[data-cy="saveDialogBtn"]').should('be.disabled')
+
+        // Clear the previous error before checking a case variant padded with nonbreaking spaces.
+        cy.get('[data-cy="termText-1"]').clear().type('d')
+        cy.get('[data-cy="answersError"]').should('not.be.visible')
+        cy.get('[data-cy="saveDialogBtn"]').should('be.enabled')
+
+        cy.get('[data-cy="termText-1"]').clear().type('\u00A0A\u00A0')
+        cy.get('[data-cy="termText-1"]').should('have.value', '\u00A0A\u00A0')
+        cy.get('[data-cy="answersError"]').should('be.visible')
+            .and('contain.text', 'Answers can not contain duplicate terms or values')
+        cy.get('[data-cy="saveDialogBtn"]').should('be.disabled')
+
+        // Decode named whitespace entities for comparison without rewriting the entered text.
+        cy.get('[data-cy="termText-1"]').clear().type('d')
+        cy.get('[data-cy="answersError"]').should('not.be.visible')
+        cy.get('[data-cy="saveDialogBtn"]').should('be.enabled')
+
+        cy.get('[data-cy="termText-1"]').clear().type('&nbsp;A&nbsp;')
+        cy.get('[data-cy="termText-1"]').should('have.value', '&nbsp;A&nbsp;')
+        cy.get('[data-cy="answersError"]').should('be.visible')
+            .and('contain.text', 'Answers can not contain duplicate terms or values')
+        cy.get('[data-cy="saveDialogBtn"]').should('be.disabled')
+
+        // Keep terms distinct and clear the previous error before checking case-insensitive value validation.
+        cy.get('[data-cy="termText-1"]').clear().type('d')
+        cy.get('[data-cy="answersError"]').should('not.be.visible')
+        cy.get('[data-cy="saveDialogBtn"]').should('be.enabled')
+
+        cy.get('[data-cy="answerText-1"]').clear().type('B')
+        cy.get('[data-cy="answersError"]').should('be.visible')
+            .and('contain.text', 'Answers can not contain duplicate terms or values')
+        cy.get('[data-cy="saveDialogBtn"]').should('be.disabled')
+
+        // Reset to a valid value before checking that surrounding whitespace is ignored.
+        cy.get('[data-cy="answerText-1"]').clear().type('c')
+        cy.get('[data-cy="answersError"]').should('not.be.visible')
+        cy.get('[data-cy="saveDialogBtn"]').should('be.enabled')
+
+        cy.get('[data-cy="answerText-1"]').clear().type('  b   ')
+        cy.get('[data-cy="answersError"]').should('be.visible')
+            .and('contain.text', 'Answers can not contain duplicate terms or values')
+        cy.get('[data-cy="saveDialogBtn"]').should('be.disabled')
+
+        // Clear the previous error before checking a case variant padded with narrow nonbreaking spaces.
+        cy.get('[data-cy="answerText-1"]').clear().type('c')
+        cy.get('[data-cy="answersError"]').should('not.be.visible')
+        cy.get('[data-cy="saveDialogBtn"]').should('be.enabled')
+
+        cy.get('[data-cy="answerText-1"]').clear().type('\u202FB\u202F')
+        cy.get('[data-cy="answerText-1"]').should('have.value', '\u202FB\u202F')
+        cy.get('[data-cy="answersError"]').should('be.visible')
+            .and('contain.text', 'Answers can not contain duplicate terms or values')
+        cy.get('[data-cy="saveDialogBtn"]').should('be.disabled')
+
+        // Decode decimal and hexadecimal whitespace entities before comparing values.
+        cy.get('[data-cy="answerText-1"]').clear().type('c')
+        cy.get('[data-cy="answersError"]').should('not.be.visible')
+        cy.get('[data-cy="saveDialogBtn"]').should('be.enabled')
+
+        cy.get('[data-cy="answerText-1"]').clear().type('&#160;B&#x202F;')
+        cy.get('[data-cy="answerText-1"]').should('have.value', '&#160;B&#x202F;')
+        cy.get('[data-cy="answersError"]').should('be.visible')
+            .and('contain.text', 'Answers can not contain duplicate terms or values')
+        cy.get('[data-cy="saveDialogBtn"]').should('be.disabled')
+
+        // Required-field validation must also reject Unicode and encoded whitespace-only text.
+        const whitespaceOnlyInputs = [
+            { selector: '[data-cy="termText-1"]', text: '\u00A0\uFEFF' },
+            { selector: '[data-cy="termText-1"]', text: '&nbsp;' },
+            { selector: '[data-cy="answerText-1"]', text: '\u202F' },
+            { selector: '[data-cy="answerText-1"]', text: '&#160;&#x202F;' }
+        ];
+        whitespaceOnlyInputs.forEach(({ selector, text }) => {
+            // Observe a valid state first so a stale error cannot satisfy the next assertion.
+            cy.get('[data-cy="termText-1"]').clear().type('d')
+            cy.get('[data-cy="answerText-1"]').clear().type('c')
+            cy.get('[data-cy="answersError"]').should('not.be.visible')
+            cy.get('[data-cy="saveDialogBtn"]').should('be.enabled')
+
+            cy.get(selector).clear().type(text)
+            cy.get(selector).should('have.value', text)
+            cy.get('[data-cy="answersError"]').should('be.visible')
+                .and('contain.text', 'Answers must include both a term and a value')
+            cy.get('[data-cy="saveDialogBtn"]').should('be.disabled')
+        })
+
+        // Distinct nonblank pairs resolve validation errors and allow the question to be saved.
+        cy.get('[data-cy="termText-1"]').clear().type('d')
+        cy.get('[data-cy="answerText-1"]').clear().type('c')
+        cy.get('[data-cy="answersError"]').should('not.be.visible')
+        cy.get('[data-cy="saveDialogBtn"]').should('be.enabled')
+        cy.clickSaveDialogBtn()
+
+        cy.get('[data-cy="question-1-answer-0"]').should('contain.text', 'a')
+            .and('contain.text', 'b')
+        cy.get('[data-cy="question-1-answer-1"]').should('contain.text', 'd')
+            .and('contain.text', 'c')
+
+        // Reload and reopen to confirm only the valid pairs were saved.
+        cy.reload()
+        cy.get('[data-cy="editQuestionButton_1"]').click()
+        cy.get('[data-cy="termText-0"]').should('have.value', 'a')
+        cy.get('[data-cy="answerText-0"]').should('have.value', 'b')
+        cy.get('[data-cy="termText-1"]').should('have.value', 'd')
+        cy.get('[data-cy="answerText-1"]').should('have.value', 'c')
+    });
+
     it('Edit a matching question', function () {
         cy.createQuizDef(1);
         cy.createQuizMatchingQuestionDef(1, 1)

@@ -152,7 +152,8 @@ const confirmCancel = () => {
   }
 }
 const close = () => {
-  skillsDialog.value.handleClose()
+  // A saved/cancelled listener may already have closed or unmounted the dialog.
+  skillsDialog.value?.handleClose()
   model.value = false
   if (props.enableInputFormResiliency) {
     inputFormResiliency.stop()

@@ -1349,6 +1349,8 @@ class QuizDefService {
         } else if (questionDefRequest.questionType != QuizQuestionType.TextInput && questionDefRequest.questionType != QuizQuestionType.Rating) {
             QuizValidator.isNotNull(questionDefRequest.answers, "answers", quizId)
             QuizValidator.isTrue(questionDefRequest.answers.size() >= 2, "Must have at least 2 answers", quizId)
+            Set<String> matchingTerms = new HashSet<>()
+            Set<String> matchingValues = new HashSet<>()
             questionDefRequest.answers.each {
                 if (questionDefRequest.questionType != QuizQuestionType.Matching) {
                     QuizValidator.isNotBlank(it.answer, "answers.answer", quizId, true)
@@ -1361,6 +1363,13 @@ class QuizDefService {
                     String value = it.multiPartAnswer?.value
                     QuizValidator.isNotBlank(value, "answers.multiPartAnswer.value", quizId, true)
                     propsBasedValidator.quizValidationMaxStrLength(PublicProps.UiProp.maxQuizTextAnswerLength, "answers.multiPartAnswer.value", value, quizDef.quizId)
+
+                    String normalizedTerm = InputSanitizer.normalizeForCaseInsensitiveComparison(term)
+                    String normalizedValue = InputSanitizer.normalizeForCaseInsensitiveComparison(value)
+                    QuizValidator.isNotBlank(normalizedTerm, "answers.multiPartAnswer.term", quizId, true)
+                    QuizValidator.isNotBlank(normalizedValue, "answers.multiPartAnswer.value", quizId, true)
+                    QuizValidator.isTrue(matchingTerms.add(normalizedTerm), "Answers can not contain duplicate terms or values", quizId)
+                    QuizValidator.isTrue(matchingValues.add(normalizedValue), "Answers can not contain duplicate terms or values", quizId)
                 }
             }
         }
