@@ -16,6 +16,8 @@
 package skills.metrics.builders
 
 import groovy.transform.CompileStatic
+import org.springframework.data.domain.PageRequest
+import org.springframework.data.domain.Sort
 import skills.controller.exceptions.ErrorCode
 import skills.controller.exceptions.SkillException
 
@@ -94,5 +96,48 @@ class MetricsPagingParamsHelper {
 
         Boolean sortDesc = Boolean.valueOf(sortDescStr)
         return sortDesc
+    }
+
+    /**
+     * Builds the PageRequest for the metrics builders that are driven by the <code>page</code> (1 based),
+     * <code>pageSize</code>, <code>sortBy</code> and <code>sortDesc</code> params. Invalid or missing values are
+     * reported as a BadParam rather than escaping as a NumberFormatException, NullPointerException or the
+     * IllegalArgumentException that PageRequest throws.
+     */
+    static PageRequest buildPageRequest(String projectId, String chartId, Map<String, ?> props) {
+        int page = parseRequiredInt("page", props, chartId, projectId)
+        if (page < 1) {
+            throw badParam("Metrics[${chartId}]: page must be >= 1. Provided [${page}]", projectId)
+        }
+        int pageSize = parseRequiredInt("pageSize", props, chartId, projectId)
+        if (pageSize < 1) {
+            throw badParam("Metrics[${chartId}]: pageSize must be >= 1. Provided [${pageSize}]", projectId)
+        }
+        String sortBy = props["sortBy"]
+        if (!sortBy) {
+            throw new SkillException("Metrics[${chartId}]: Must supply sortBy param", projectId)
+        }
+        Object sortDesc = props["sortDesc"]
+        if (sortDesc == null || sortDesc == "") {
+            throw new SkillException("Metrics[${chartId}]: Must supply sortDesc param", projectId)
+        }
+        Sort.Direction direction = sortDesc.toString().toBoolean() ? Sort.Direction.DESC : Sort.Direction.ASC
+        return PageRequest.of(page - 1, pageSize, direction, sortBy)
+    }
+
+    private static int parseRequiredInt(String paramId, Map<String, ?> props, String chartId, String projectId) {
+        Object value = props[paramId]
+        if (value == null || value == "") {
+            throw new SkillException("Metrics[${chartId}]: Must supply ${paramId} param", projectId)
+        }
+        try {
+            return Integer.valueOf(value.toString())
+        } catch (NumberFormatException ignored) {
+            throw badParam("Metrics[${chartId}]: ${paramId} must be a valid integer. Provided [${value}]", projectId)
+        }
+    }
+
+    private static SkillException badParam(String msg, String projectId) {
+        return new SkillException(msg, projectId, SkillException.NA, ErrorCode.BadParam)
     }
 }

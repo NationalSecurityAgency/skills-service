@@ -21,6 +21,7 @@ import org.springframework.data.domain.PageRequest
 import org.springframework.stereotype.Component
 import skills.controller.exceptions.ErrorCode
 import skills.controller.exceptions.SkillException
+import skills.metrics.builders.MetricsPagingParamsHelper
 import skills.metrics.builders.MetricsParams
 import skills.metrics.builders.ProjectMetricsBuilder
 import skills.storage.model.SkillDef
@@ -29,9 +30,6 @@ import skills.storage.model.UserMetrics
 import skills.storage.repos.SkillDefRepo
 import skills.storage.repos.UserAchievedLevelRepo
 import skills.storage.repos.UserEventsRepo
-
-import static org.springframework.data.domain.Sort.Direction.ASC
-import static org.springframework.data.domain.Sort.Direction.DESC
 
 @Component
 class UsagePostAchievementUsersBuilder implements ProjectMetricsBuilder{
@@ -54,7 +52,7 @@ class UsagePostAchievementUsersBuilder implements ProjectMetricsBuilder{
         if (!skillDef) {
             throw new SkillException("Skill does not exist", projectId, skillId, ErrorCode.SkillNotFound)
         }
-        PageRequest pageRequest = PageRequest.of(props.page.toInteger() - 1, props.pageSize.toInteger(), props.sortDesc.toBoolean() ? DESC : ASC, props.sortBy)
+        PageRequest pageRequest = MetricsPagingParamsHelper.buildPageRequest(projectId, chartId, props)
         List<UserMetrics> usersPostAchievement = userEventsRepo.getUsersUsingSkillAfterAchievement(skillDef.id, 1, pageRequest) ?: null
         def totalCount = userEventsRepo.countOfUsersUsingSkillAfterAchievement(skillDef.id, 1) ?: 0
 
