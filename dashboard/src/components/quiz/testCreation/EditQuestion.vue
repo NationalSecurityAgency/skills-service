@@ -313,6 +313,7 @@ const noRepeatAnswers = (value) => {
 }
 
 const schema = object({
+  'selectedQuiz': props.isCopy ? string().required().label('Copy Question To') : string().nullable(),
   'questionType': object()
       .required()
       .label('Type'),
@@ -357,6 +358,7 @@ const schema = object({
   ,
 })
 const initialQuestionData = {
+  selectedQuiz: props.isCopy ? quizId.value : undefined,
   questionType: props.isEdit || props.isCopy ? questionType.value.options.find((o) => o.id === props.questionDef.questionType) : questionType.value.selectedType,
   question: props.questionDef.question || '',
   answerHint: props.questionDef.answerHint || '',
@@ -367,7 +369,7 @@ const initialQuestionData = {
 const close = () => { model.value = false }
 
 const saveQuestionDef = (values) => {
-  const { question, answerHint, answers, currentScaleValue } = values
+  const { question, answerHint, answers, currentScaleValue, selectedQuiz } = values
   let processedAnswers = answers
   let { questionType : { id : questionType } } = values
 
@@ -410,6 +412,18 @@ const saveQuestionDef = (values) => {
             isEdit: props.isEdit,
           }
         });
+  } else if (props.isCopy) {
+      return QuizService.saveQuizQuestionDef(selectedQuiz, questionToSave)
+          .then((updatedQuizQuestionDef) => {
+            updatedQuizQuestionDef.quizId = selectedQuiz
+            if (selectedQuiz !== props.questionDef.quizId) {
+              updatedQuizQuestionDef.isCopyToAnotherQuiz = true
+            }
+            return {
+              ...updatedQuizQuestionDef,
+              isEdit: props.isEdit,
+            }
+          });
   } else {
     return QuizService.saveQuizQuestionDef(quizId.value, questionToSave)
         .then((updatedQuizQuestionDef) => {
@@ -520,6 +534,7 @@ const numberOfBlanks = computed(() => {
       <Message v-if="numberOfBlanks === 0 && isQuestionTypeFillInTheBlank" :closable="false">
         Insert blanks in your question by using underscores (___) where answers should go.
       </Message>
+
       <markdown-editor
           ref="markdownEditorRef"
           id="quizDescription"

@@ -2164,6 +2164,19 @@ class SkillsService {
          wsHelper.adminPost(url, props)
     }
 
+    def copyQuestions(String fromQuizId, String toQuizId, List<Integer> questions) {
+        return wsHelper.adminPost("/quiz-definitions/${fromQuizId}/questions/copy/${toQuizId}".toString(), questions)
+    }
+
+    def validateCopyQuestions(String fromQuizId, String toQuizId, Integer numberOfQuestions) {
+        return wsHelper.adminPost("/quiz-definitions/${fromQuizId}/questions/validateCopy".toString(),
+                [destinationQuizId: toQuizId, numberOfQuestions: numberOfQuestions])
+    }
+
+    def copyQuizQuestion(String fromQuizId, String toQuizId, List<Integer> questions) {
+        return copyQuestions(fromQuizId, toQuizId, questions)
+    }
+
     def changeQuizQuestionDisplayOrder(String quizId, Integer questionId, Integer newDisplayOrderIndex){
         assert quizId
         assert questionId

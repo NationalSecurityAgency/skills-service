@@ -123,6 +123,31 @@ describe('Accessibility Quiz Tests', () => {
             cy.customA11y();
         });
 
+        it(`question selection and copy dialog${darkMode}`, () => {
+            cy.setDarkModeIfNeeded(darkMode)
+            cy.createQuizDef(1)
+            cy.createQuizDef(2)
+            cy.createQuizQuestionDef(1, 1)
+            cy.visit('/administrator/quizzes/quiz1')
+            cy.get('[data-cy="questionDisplayCard-1"]').should('be.visible')
+
+            cy.injectAxe()
+            cy.customA11y()
+
+            cy.get('label[for="toggleSelectionMode"]').click()
+            cy.get('[data-cy="toggleSelectionMode"] input').should('be.checked')
+            cy.customA11y()
+
+            cy.get('[data-cy="questionDisplayCard-1"] [data-cy="selectSkillCheckbox"]').click()
+            cy.get('[data-cy="questionActionsBtn"]').should('be.enabled').click()
+            cy.contains('.p-menu-item-link', 'Copy to Another Quiz').should('be.visible')
+            cy.customA11yWithContext({ include: [['#questions-actions-menu']] }, {})
+
+            cy.contains('.p-menu-item-link', 'Copy to Another Quiz').click()
+            cy.get('[data-cy="quizzes-to-copy"]').should('be.visible')
+            cy.customA11y()
+        });
+
         it(`empty results page${darkMode}`, () => {
             cy.setDarkModeIfNeeded(darkMode)
             cy.createSurveyDef(1, { name: 'Test Your Trivia Knowledge' });
