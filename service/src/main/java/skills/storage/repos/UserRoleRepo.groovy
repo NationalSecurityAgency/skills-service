@@ -76,6 +76,12 @@ interface UserRoleRepo extends CrudRepository<UserRole, Integer> {
     @Query('''SELECT DISTINCT 'true' from UserRole ur where ur.userId = ?1 and ur.roleName = 'ROLE_GLOBAL_BADGE_ADMIN' and ur.globalBadgeId = ?2''')
     Boolean isUserGlobalBadgeAdmin(String userId, String projectId)
 
+    boolean existsByQuizIdAndAdminGroupIdAndRoleName(String quizId, String adminGroupId, RoleName roleName)
+
+    boolean existsByProjectIdAndAdminGroupIdAndRoleName(String projectId, String adminGroupId, RoleName roleName)
+
+    boolean existsByGlobalBadgeIdAndAdminGroupIdAndRoleName(String globalBadgeId, String adminGroupId, RoleName roleName)
+
     void deleteByQuizIdAndAdminGroupIdAndRoleName(String quizId, String adminGroupId, RoleName roleName)
 
     void deleteByProjectIdAndAdminGroupIdAndRoleName(String quizId, String adminGroupId, RoleName roleName)

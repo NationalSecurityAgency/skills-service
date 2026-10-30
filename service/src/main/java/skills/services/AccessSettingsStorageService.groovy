@@ -513,9 +513,10 @@ class AccessSettingsStorageService {
         log.debug("Deleted userRole [{}]", userRole)
     }
 
-    void deleteProjectAndQuizAdminUserRolesWithAdminGroupIdForUser(String userId, String adminGroupId) {
-        log.debug('Deleting project and quiz admin user-role for userId [{}] in admin group [{}]', userId, adminGroupId)
-        userRoleRepository.deleteByUserIdAndAdminGroupIdAndRoleNameIn(userId, adminGroupId, [RoleName.ROLE_PROJECT_ADMIN, RoleName.ROLE_QUIZ_ADMIN])
+    void deleteAdminGroupResourceUserRolesForUser(String userId, String adminGroupId) {
+        log.debug('Deleting resource admin user-roles for userId [{}] in admin group [{}]', userId, adminGroupId)
+        userRoleRepository.deleteByUserIdAndAdminGroupIdAndRoleNameIn(userId, adminGroupId,
+                [RoleName.ROLE_PROJECT_ADMIN, RoleName.ROLE_QUIZ_ADMIN, RoleName.ROLE_GLOBAL_BADGE_ADMIN])
     }
 
     List<UserRoleRes> findAllAdminGroupMembers(String adminGroupId) {
