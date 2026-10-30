@@ -1348,9 +1348,7 @@ Cypress.Commands.add('waitForBackendAsyncTasksToComplete', () => {
         interval: 500 // performs the check every 500 ms, default to 200
     };
 
-    // first call to npm fails, looks like this may be the bug: https://github.com/cypress-io/cypress/issues/6081
-    cy.exec('npm version', {failOnNonZeroExit: false})
-    cy.waitUntil(() => cy.exec('npm run backend:countScheduledTasks').then((result) => result.stdout.match(/.*------\s+(\d+)\s+\(/)[1] === '0'), waitConf);
+    cy.waitUntil(() => cy.task('countScheduledTasks').then((count) => count === 0), waitConf);
 });
 
 Cypress.Commands.add('execSql', (sql, isUpdate = false) => {

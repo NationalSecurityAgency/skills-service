@@ -33,6 +33,10 @@ const { makeBadge, ValidationError } = require('badge-maker');
 const moment = require('moment-timezone');
 const path = require('path')
 const { readPdf } = require('./read-pdf')
+const { execFile } = require('child_process');
+const { promisify } = require('util');
+
+const execFileAsync = promisify(execFile);
 
 const deleteFolderRecursive = function(path) {
     if (fs.existsSync(path)) {
@@ -106,6 +110,26 @@ module.exports = (on, config) => {
     }
 
     on("task", {
+        countScheduledTasks() {
+            // Reuse the existing SQL/exclusions without launching npm or a shell for each poll.
+            return execFileAsync('psql', [
+                '-X', '--no-password', '-v', 'ON_ERROR_STOP=1',
+                '-U', 'postgres',
+                '-h', process.env.npm_config_dbhost || 'localhost',
+                '-d', process.env.npm_config_dbname || 'skills',
+                '-t', '-A', '-f', path.join(__dirname, '../db/countScheduledTasks.sql')
+            ], {
+                env: { ...process.env, PGPASSWORD: 'skillsPassword', PGCONNECT_TIMEOUT: '5' },
+                timeout: 10000
+            }).then(({ stdout }) => {
+                const value = stdout.trim();
+                const count = Number(value);
+                if (!/^\d+$/.test(value) || !Number.isSafeInteger(count)) {
+                    throw new Error(`Unexpected scheduled task count: ${JSON.stringify(value)}`);
+                }
+                return count;
+            });
+        },
         createAverageAccessibilityScore: ()=> {
             generateAvgLighthouseScore();
             return null;
@@ -172,4 +196,3 @@ module.exports = (on, config) => {
         }
     });
 };
-
