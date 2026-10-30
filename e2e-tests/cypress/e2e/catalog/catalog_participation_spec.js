@@ -17,6 +17,8 @@
 describe('Learner catalog participation', () => {
     const initializeUrl = '/api/projects/proj1/progress/initialize';
     const loadingMessage = '[data-cy="userProgressLoading"]';
+    let deferredFinalization = false;
+    let displayClock;
 
     const createCatalog = (withSourceCredit = false) => {
         cy.createProject(2);
@@ -30,6 +32,35 @@ describe('Learner catalog participation', () => {
         cy.finalizeCatalogImport(1);
         cy.waitForBackendAsyncTasksToComplete();
     };
+
+    const deferCatalogBackfill = () => {
+        createCatalog(true);
+        // Hold real backfill at the existing failed-finalization boundary, not by stubbing responses.
+        cy.request('POST', '/admin/projects/proj1/settings/catalog.finalize.state', {
+            projectId: 'proj1', setting: 'catalog.finalize.state', value: 'FAILED'
+        }).then(() => {
+            deferredFinalization = true;
+        });
+    };
+
+    const releaseCatalogBackfill = () => {
+        // Real finalization completion schedules the pending-participant sweep, including an empty batch.
+        cy.finalizeCatalogImport(1);
+        cy.waitForBackendAsyncTasksToComplete().then(() => {
+            deferredFinalization = false;
+        });
+    };
+
+    afterEach(() => {
+        // Restore the display clock even when an assertion fails.
+        if (displayClock) {
+            displayClock.restore();
+            displayClock = undefined;
+        }
+        if (deferredFinalization) {
+            releaseCatalogBackfill();
+        }
+    });
 
     beforeEach(() => {
         cy.waitForBackendAsyncTasksToComplete();
@@ -54,6 +85,8 @@ describe('Learner catalog participation', () => {
             cy.intercept('POST', initializeUrl).as('initialize');
             visit();
             cy.wait('@initialize').its('response.body').should('deep.equal', { ready: false, backfillStatus: 'PENDING' });
+            // Establish incomplete rendered progress before validating the automatic summary refresh.
+            display('[data-cy="overallPoints"] [data-cy="earnedPoints"]').should('have.text', '0');
             display(loadingMessage).should('be.visible').and('contain.text', 'Loading your latest progress')
                 .and('contain.text', 'You can keep exploring while we sync your points and achievements.');
             display('[data-cy="subjectTileBtn"]').should('be.visible').and('not.be.disabled');
@@ -66,37 +99,12 @@ describe('Learner catalog participation', () => {
             cy.get('@initialize.all').should((requests) => {
                 expect(requests.some((request) => request.response?.body.backfillStatus === 'COMPLETED')).to.eq(true);
             });
-
-            cy.get('@initialize.all').then((requests) => {
-                const requestCount = requests.length;
-                display('[data-cy="subjectTileBtn"]').click();
-                display('[data-cy="skillsTitle"]').should('contain.text', 'Subject 1');
-                display(loadingMessage).should('not.exist');
-                // Existing native reporting remains usable alongside the imported progress.
-                display('[data-cy="skillProgressTitle"]').contains('Very Great Skill 2').click();
-                display('[data-cy="claimPointsBtn"]').should('be.enabled').click();
-                display('[data-cy="overallPointsEarnedCard"] [data-cy="mediaInfoCardTitle"]')
-                    .should('contain.text', '100 Total');
-                if (mode === 'iframe') {
-                    display('[data-cy="breadcrumbLink-subj1"]').click();
-                } else {
-                    cy.get('[data-cy="breadcrumb-subj1"]').click();
-                }
-                display('[data-cy="skillProgressTitle"]').contains('Very Great Skill 1').click();
-                display('[data-cy="overallPointsEarnedCard"] [data-cy="mediaInfoCardTitle"]')
-                    .should('contain.text', '100 Total');
-                display(loadingMessage).should('not.exist');
-                cy.get('@initialize.all').should('have.length', requestCount);
-            });
-
-            cy.intercept('POST', initializeUrl).as('reloadInitialize');
-            cy.reload();
-            cy.wait('@reloadInitialize').its('response.body').should('deep.equal', { ready: true, backfillStatus: 'COMPLETED' });
-            display('[data-cy="overallPointsEarnedCard"] [data-cy="mediaInfoCardTitle"]')
-                .should('contain.text', '100 Total');
-            display(loadingMessage).should('not.exist');
-            cy.get('@reloadInitialize.all').should('have.length', 1);
         });
+
+        // Keep one iframe integration flow; shared status variations and pending interactions run on the dashboard.
+        if (mode !== 'dashboard') {
+            return;
+        }
 
         it(`${mode}: completed empty-source initialization on a deep link shows no message`, () => {
             createCatalog();
@@ -107,6 +115,115 @@ describe('Learner catalog participation', () => {
             display('[data-cy="claimPointsBtn"]').should('be.enabled');
             display(loadingMessage).should('not.exist');
             cy.get('@initialize.all').should('have.length', 1);
+        });
+
+        const returnToSubject = () => cy.get('[data-cy="breadcrumb-subj1"]').click();
+        const returnHome = () => cy.get('[data-cy="breadcrumb-proj1"]').click();
+        const advanceRefreshTime = (milliseconds) => cy.then(() => {
+            displayClock.tick(milliseconds);
+        });
+
+        it(`${mode}: pending progress permits imported drilldown and native reporting without child initialization`, () => {
+            deferCatalogBackfill();
+            cy.intercept('POST', initializeUrl).as('initialize');
+            visit();
+            cy.wait('@initialize').its('response.body').should('deep.equal', { ready: false, backfillStatus: 'PENDING' });
+            display('[data-cy="overallPoints"] [data-cy="earnedPoints"]').should('have.text', '0');
+            display(loadingMessage).should('be.visible');
+            display('[data-cy="subjectTileBtn"]').should('be.visible')
+                .find('button').should('be.enabled').click();
+            display('[data-cy="skillsTitle"]').should('contain.text', 'Subject 1');
+            display(loadingMessage).should('not.exist');
+
+            cy.get('@initialize.all').then((requests) => {
+                const requestCount = requests.length;
+                display('[data-cy="skillProgressTitle"]').contains('Very Great Skill 1').click();
+                display('[data-cy="overallPointsEarnedCard"] [data-cy="mediaInfoCardTitle"]')
+                    .should(($title) => expect($title.text().trim()).to.eq('0 Total'));
+                display(loadingMessage).should('not.exist');
+                returnToSubject();
+                display('[data-cy="skillProgressTitle"]').contains('Very Great Skill 2').click();
+                display('[data-cy="claimPointsBtn"]').should('be.enabled').click();
+                display('[data-cy="overallPointsEarnedCard"] [data-cy="mediaInfoCardTitle"]')
+                    .should(($title) => expect($title.text().trim()).to.eq('100 Total'));
+                display(loadingMessage).should('not.exist');
+                cy.get('@initialize.all').should('have.length', requestCount);
+            });
+
+            returnHome();
+            display('[data-cy="overallPoints"] [data-cy="earnedPoints"]').should('have.text', '100');
+            display(loadingMessage).should('be.visible');
+            releaseCatalogBackfill();
+            // No reload or test-side learner initialization: the home page must refresh itself.
+            display('[data-cy="overallPoints"] [data-cy="earnedPoints"]', { timeout: 60000 })
+                .should('have.text', '200');
+            display(loadingMessage, { timeout: 60000 }).should('not.exist');
+            display('[data-cy="subjectTile-subj1"] [data-cy="pointsProgress"]').should('have.text', '200 / 400');
+            cy.get('@initialize.all').should((requests) => {
+                expect(requests.some((request) => request.response?.body.backfillStatus === 'COMPLETED')).to.eq(true);
+            });
+        });
+
+        it(`${mode}: pending home checks stop on child pages, resume on return and stop after completion`, () => {
+            deferCatalogBackfill();
+            cy.intercept('POST', initializeUrl).as('initialize');
+            visit();
+            cy.wait('@initialize').its('response.body').should('deep.equal', { ready: false, backfillStatus: 'PENDING' });
+            display(loadingMessage).should('be.visible');
+            display('[data-cy="subjectTileBtn"]').click();
+            display('[data-cy="skillsTitle"]').should('contain.text', 'Subject 1');
+
+            // Install after leaving home so its original real timer has been cleared.
+            // Control only the dashboard display's timeout APIs, not backend processing.
+            display('[data-cy="skillsTitle"]').then(($title) => {
+                displayClock = Cypress.sinon.useFakeTimers({
+                    global: $title[0].ownerDocument.defaultView,
+                    toFake: ['setTimeout', 'clearTimeout']
+                });
+            });
+            cy.get('@initialize.all').then((requests) => {
+                const initialCount = requests.length;
+                // Consume any real home checks that happened before the clock was installed.
+                // Later waits must observe the checks triggered by advancing this display's clock.
+                for (let index = 1; index < initialCount; index += 1) {
+                    cy.wait('@initialize').its('response.body.backfillStatus').should('eq', 'PENDING');
+                }
+                advanceRefreshTime(9000);
+                cy.get('@initialize.all').should('have.length', initialCount);
+                display(loadingMessage).should('not.exist');
+
+                returnHome();
+                display(loadingMessage).should('be.visible');
+                display('[data-cy="overallPoints"] [data-cy="earnedPoints"]').should('have.text', '0');
+                cy.get('@initialize.all').should('have.length', initialCount);
+                advanceRefreshTime(3000);
+                cy.wait('@initialize').its('response.body').should('deep.equal', { ready: false, backfillStatus: 'PENDING' });
+                cy.get('@initialize.all').should('have.length', initialCount + 1);
+
+                // Cancel a fake-clock-owned pending timer, then advance past several refresh intervals.
+                display('[data-cy="subjectTileBtn"]').click();
+                display('[data-cy="skillsTitle"]').should('contain.text', 'Subject 1');
+                advanceRefreshTime(9000);
+                cy.get('@initialize.all').should('have.length', initialCount + 1);
+                display(loadingMessage).should('not.exist');
+
+                returnHome();
+                display(loadingMessage).should('be.visible');
+                advanceRefreshTime(2999);
+                cy.get('@initialize.all').should('have.length', initialCount + 1);
+                advanceRefreshTime(1);
+                cy.wait('@initialize').its('response.body').should('deep.equal', { ready: false, backfillStatus: 'PENDING' });
+                cy.get('@initialize.all').should('have.length', initialCount + 2);
+
+                releaseCatalogBackfill();
+                advanceRefreshTime(3000);
+                cy.wait('@initialize').its('response.body').should('deep.equal', { ready: true, backfillStatus: 'COMPLETED' });
+                display('[data-cy="overallPoints"] [data-cy="earnedPoints"]').should('have.text', '100');
+                display(loadingMessage).should('not.exist');
+                advanceRefreshTime(9000);
+                cy.get('@initialize.all').should('have.length', initialCount + 3);
+                display('[data-cy="overallPoints"] [data-cy="earnedPoints"]').should('have.text', '100');
+            });
         });
     });
 
