@@ -462,13 +462,18 @@ class SkillsService {
         wsHelper.adminDelete(url)
     }
 
-    def getSharedSkills(String projectId) {
-        String url = "/projects/${projectId}/shared".toString()
+    def getSharedSkills(String projectId, int limit = 100, int page = 1, String orderBy = 'skill.skillId', Boolean ascending = true) {
+        String url = "/projects/${projectId}/shared?limit=${limit}&page=${page}&orderBy=${orderBy}&ascending=${ascending}".toString()
         wsHelper.adminGet(url)
     }
 
-    def getSharedWithMeSkills(String projectId) {
-        String url = "/projects/${projectId}/sharedWithMe".toString()
+    def getSharedWithMeSkills(String projectId, int limit = 100, int page = 1, String orderBy = 'skill.skillId', Boolean ascending = true) {
+        String url = "/projects/${projectId}/sharedWithMe?limit=${limit}&page=${page}&orderBy=${orderBy}&ascending=${ascending}".toString()
+        wsHelper.adminGet(url)
+    }
+
+    def isSkillShared(String projectId, String skillId, String destinationProjectId = '') {
+        String url = "/projects/${projectId}/isSkillShared?skillId=${skillId}&destinationProjectId=${destinationProjectId}".toString()
         wsHelper.adminGet(url)
     }
 

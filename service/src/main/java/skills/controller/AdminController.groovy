@@ -1366,6 +1366,11 @@ class AdminController {
             throw new SkillException("Projects with the community protection are not allowed to externally share skills", projectId, skillId, ErrorCode.AccessDenied)
         }
 
+        String explanation = shareSkillsService.getExistingShareExplanation(projectId, skillId, sharedProjectId)
+        if(explanation != null) {
+            throw new SkillException("Skill can not be shared with [${sharedProjectId}]: [${explanation}]", projectId, skillId, ErrorCode.AccessDenied)
+        }
+
         shareSkillsService.shareSkillToExternalProject(projectId, skillId, sharedProjectId)
     }
 
@@ -1380,16 +1385,39 @@ class AdminController {
         shareSkillsService.deleteSkillShare(projectId, skillId, sharedProjectId)
     }
 
-    @RequestMapping(value = "/projects/{projectId}/shared", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
-    List<SharedSkillResult> getSharedSkills(@PathVariable("projectId") String projectId) {
+    @RequestMapping(value = "/projects/{projectId}/isSkillShared", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
+    RequestResult isSkillAlreadyShared(@PathVariable("projectId") String projectId,
+                                @RequestParam String skillId,
+                                @RequestParam(required = false, defaultValue = '') String destinationProjectId) {
         SkillsValidator.isNotBlank(projectId, "Project Id")
-        return shareSkillsService.getSharedSkillsWithOtherProjects(projectId)
+        SkillsValidator.isNotBlank(skillId, "Skill Id", projectId)
+        String explanation = shareSkillsService.getExistingShareExplanation(projectId, skillId, destinationProjectId)
+
+        return new RequestResult(success: true, data: explanation != null, explanation: explanation)
+    }
+
+    @RequestMapping(value = "/projects/{projectId}/shared", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
+    TableResult getSharedSkills(@PathVariable("projectId") String projectId,
+                                            @RequestParam int limit,
+                                            @RequestParam int page,
+                                            @RequestParam String orderBy,
+                                            @RequestParam Boolean ascending,
+                                            @RequestParam(required = false, defaultValue = '') String filter) {
+        SkillsValidator.isNotBlank(projectId, "Project Id")
+        PageRequest pageRequest = TablePageUtil.createPagingRequest(limit, page, orderBy, ascending)
+        return shareSkillsService.getSharedSkillsWithOtherProjects(projectId, pageRequest, filter)
     }
 
     @RequestMapping(value = "/projects/{projectId}/sharedWithMe", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
-    List<SharedSkillResult> getSharedWithMeSkills(@PathVariable("projectId") String projectId) {
+    TableResult getSharedWithMeSkills(@PathVariable("projectId") String projectId,
+                                                  @RequestParam int limit,
+                                                  @RequestParam int page,
+                                                  @RequestParam String orderBy,
+                                                  @RequestParam Boolean ascending,
+                                                  @RequestParam(required = false, defaultValue = '') String filter) {
         SkillsValidator.isNotBlank(projectId, "Project Id")
-        return shareSkillsService.getSharedSkillsFromOtherProjects(projectId)
+        PageRequest pageRequest = TablePageUtil.createPagingRequest(limit, page, orderBy, ascending)
+        return shareSkillsService.getSharedSkillsFromOtherProjects(projectId, pageRequest, filter)
     }
 
     @RequestMapping(value = "/projects/{projectId}/settings", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
@@ -2086,4 +2114,3 @@ class AdminController {
         return batchReportService.addBatchSkillsForBatchUsers(projectId, batchSkillEventRequest);
     }
 }
-

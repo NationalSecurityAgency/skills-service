@@ -26,7 +26,7 @@ import NoContent2 from '@/components/utils/NoContent2.vue'
 import SkillsSelector from '@/components/skills/SkillsSelector.vue'
 import ProjectSelector from '@/components/skills/crossProjects/ProjectSelector.vue'
 import SharedSkillsTable from '@/components/skills/crossProjects/SharedSkillsTable.vue'
-import InputSanitizer from "@/components/utils/InputSanitizer.js";
+import {useStorage} from "@vueuse/core";
 
 const route = useRoute()
 const projectId = route.params.projectId
@@ -48,6 +48,16 @@ const sharedSkills = ref([])
 const selectedProject = ref(null)
 const errorMessage = ref('')
 const shareWithAllProjects = ref(false)
+const possiblePageSizes = [5, 10, 15, 20, 50];
+const pageSize = useStorage('sharedSkillsTable-pageSize', 5)
+const totalRecords = ref(0)
+const currentPage = ref(1);
+const sortField = ref('skill.skillId')
+const sortOrder = ref(0)
+const doesShareAlreadyExist = ref(false);
+const validatingSkill = ref(false)
+const validationFailed = ref(false)
+let shareLookupId = 0
 
 const shareButtonEnabled = computed(() => {
   return (selectedProject.value || shareWithAllProjects.value) && selectedSkill.value && !loading.value.sharedSkills
@@ -80,9 +90,18 @@ const loadAllSkills = () => {
 
 const loadSharedSkills = () => {
   loading.value.sharedSkills = true
-  return SkillsShareService.getSharedSkills(projectId)
+
+  const params = {
+    limit: pageSize.value,
+    ascending: sortOrder.value === 1,
+    page: currentPage.value,
+    orderBy: sortField.value,
+  };
+
+  return SkillsShareService.getSharedSkills(projectId, params)
     .then((data) => {
-      sharedSkills.value = data
+      sharedSkills.value = data.data;
+      totalRecords.value = data.totalCount;
       loading.value.sharedSkillsInit = false
       loading.value.sharedSkills = false
     })
@@ -109,20 +128,39 @@ const shareSkill = () => {
   }
 }
 
-const doesShareAlreadyExist = computed(() => {
-  if(!selectedSkill.value || (!selectedProject.value && !shareWithAllProjects.value)) {
-    return false;
+const isSkillAlreadyShared = async () => {
+  const lookupId = ++shareLookupId
+  const skillId = selectedSkill.value?.skillId
+  const destinationProjectId = selectedProject.value?.projectId || ''
+  doesShareAlreadyExist.value = false
+  validationFailed.value = false
+  errorMessage.value = ''
+
+  if (!skillId || (!destinationProjectId && !shareWithAllProjects.value)) {
+    validatingSkill.value = false
+    return
   }
-  const alreadyExist = sharedSkills.value.find((entry) => entry.skillId === selectedSkill.value.skillId && (!entry.projectId || shareWithAllProjects.value || entry.projectId === selectedProject.value.projectId))
-  if (alreadyExist) {
-    if (alreadyExist.sharedWithAllProjects) {
-      errorMessage.value = `Skill <strong>[${selectedSkill.value.name}]</strong> is already shared to <strong>[All Projects]</strong>.`
-    } else {
-      errorMessage.value = `Skill <strong>[${selectedSkill.value.name}]</strong> is already shared to project <strong>[${alreadyExist.projectName}]</strong>.`
+
+  validatingSkill.value = true
+  try {
+    const result = await SkillsShareService.isSkillShared(projectId, { skillId, destinationProjectId })
+    if (lookupId !== shareLookupId) {
+      return
+    }
+    doesShareAlreadyExist.value = result.data
+    errorMessage.value = result.explanation || ''
+  } catch (error) {
+    if (lookupId !== shareLookupId) {
+      return
+    }
+    validationFailed.value = true
+    errorMessage.value = 'Could not check whether this skill is already shared.'
+  } finally {
+    if (lookupId === shareLookupId) {
+      validatingSkill.value = false
     }
   }
-  return alreadyExist
-});
+}
 
 const deleteSharedSkill = (itemToRemove) => {
   loading.value.sharedSkills = true
@@ -132,6 +170,7 @@ const deleteSharedSkill = (itemToRemove) => {
   }
   SkillsShareService.deleteSkillShare(projectId, itemToRemove.skillId, sharedProjectId)
     .then(() => {
+      currentPage.value = 1
       loadSharedSkills()
     }).finally(() => {
     const sharedWith = sharedProjectId === allProjectsConstant ? 'All Projects' : sharedProjectId
@@ -141,20 +180,36 @@ const deleteSharedSkill = (itemToRemove) => {
 
 const onSelectedProject = (item) => {
   selectedProject.value = item
+  isSkillAlreadyShared()
 }
 
 const onUnSelectedProject = () => {
   selectedProject.value = null
+  isSkillAlreadyShared()
 }
 
 const onSelectedSkill = (item) => {
   selectedSkill.value = item
+  isSkillAlreadyShared()
 }
 
 const onShareWithAllProjects = (checked) => {
   if (checked) {
     selectedProject.value = null
   }
+  isSkillAlreadyShared()
+}
+
+const pageChanged = (pagingInfo) => {
+  currentPage.value = pagingInfo.page + 1;
+  pageSize.value = pagingInfo.rows;
+  loadSharedSkills()
+}
+
+const sortChanged = (sortingInfo) => {
+  sortField.value = sortingInfo.sortField
+  sortOrder.value = sortingInfo.sortOrder
+  loadSharedSkills()
 }
 </script>
 
@@ -205,19 +260,19 @@ const onShareWithAllProjects = (checked) => {
                             icon="fas fa-share-alt"
                             label="Share"
                             aria-label="Share skill with another project"
-                            :disabled="!shareButtonEnabled || doesShareAlreadyExist"
+                            :disabled="!shareButtonEnabled || doesShareAlreadyExist || validatingSkill || validationFailed"
                             data-cy="shareButton">
               </SkillsButton>
             </div>
           </div>
         </div>
-        <Message v-if="doesShareAlreadyExist" severity="error">
-          <span v-html="InputSanitizer.sanitize(errorMessage)"></span>
+        <Message v-if="doesShareAlreadyExist || validationFailed" severity="error">
+          {{ errorMessage }}
         </Message>
 
         <div v-if="sharedSkills && sharedSkills.length > 0" class="my-6">
-          <shared-skills-table :shared-skills="sharedSkills"
-                               v-on:skill-removed="deleteSharedSkill"></shared-skills-table>
+          <shared-skills-table :shared-skills="sharedSkills" v-on:skill-removed="deleteSharedSkill" :page-size="pageSize" @sort-changed="sortChanged"
+                               :possible-page-sizes="possiblePageSizes" :total-records="totalRecords" @page-changed="pageChanged"></shared-skills-table>
         </div>
         <div v-else>
           <no-content2 title="Not Selected Yet..." icon="fas fa-share-alt" class="p-8"

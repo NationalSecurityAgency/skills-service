@@ -37,6 +37,7 @@ const { errors, defineField } = useForm({
 });
 const [toSkillId, toSkillIdAttrs] = defineField('toSkillId');
 
+const includeSharedSkills = ref(false);
 const allSkills = ref([]);
 const allPotentialSkills = ref([]);
 const selectedToSkills = ref([]);
@@ -45,6 +46,8 @@ const toProjectId = ref(null);
 const loadingPotentialSkills = ref(false);
 const loadingAllSkills = ref(false);
 const projectId = route.params.projectId;
+const filterValue = ref('');
+const savedMainSkills = ref(null)
 
 const fromSelector = ref();
 const toSelector = ref();
@@ -66,11 +69,23 @@ const isLoading = computed(() => {
 const loadAllSkills = () => {
   loadingAllSkills.value = true;
   const getProjectSkillsAndBadges = SkillsService.getProjectSkillsAndBadgesWithImportedSkills(projectId);
-  const getSharedSkills = SkillsShareService.getSharedWithmeSkills(projectId);
+  const params = {
+    limit: 100,
+    ascending: false,
+    page: 1,
+    orderBy: 'skill.skillId',
+    filter: filterValue.value,
+  };
+  const promises = [getProjectSkillsAndBadges];
+  if(includeSharedSkills.value) {
+    promises.push(SkillsShareService.getSharedWithmeSkills(projectId, params));
+  }
 
-  Promise.all([getProjectSkillsAndBadges, getSharedSkills]).then((results) => {
+  Promise.all(promises).then((results) => {
     const mainSkills = results[0];
-    const sharedSkills = results[1];
+    savedMainSkills.value = mainSkills;
+    const sharedSkills = results[1]?.data;
+    const processedSkills = []
     if (sharedSkills && sharedSkills.length > 0) {
       sharedSkills.forEach((skill) => {
         const newSkill = {
@@ -78,13 +93,50 @@ const loadAllSkills = () => {
           type: 'Shared Skill',
           ...skill,
         };
-        mainSkills.push(newSkill);
+        processedSkills.push(newSkill);
       });
     }
-    allSkills.value = mainSkills;
+    allSkills.value = [{ label: "This Project", items: mainSkills }];
+    if(processedSkills.length > 0) {
+      allSkills.value.push({ label: "Shared Skills", items: processedSkills});
+    }
     loadingAllSkills.value = false;
   });
 };
+
+const loadSharedSkills = async () => {
+  const params = {
+    limit: 100,
+    ascending: false,
+    page: 1,
+    orderBy: 'skill.skillId',
+    filter: filterValue.value,
+  };
+
+  const mainSkills = allSkills.value[0]
+  allSkills.value = [mainSkills];
+
+  if(includeSharedSkills.value) {
+    const result = await SkillsShareService.getSharedWithmeSkills(projectId, params);
+    const sharedSkills = result.data;
+    const processedSkills = []
+    sharedSkills.forEach((skill) => {
+      const newSkill = {
+        name: skill.skillName,
+        type: 'Shared Skill',
+        ...skill,
+      };
+      processedSkills.push(newSkill);
+    });
+
+    if(processedSkills.length > 0) {
+      allSkills.value.push({
+        label: "Shared Skills",
+        items: processedSkills,
+      })
+    }
+  }
+}
 
 const updatePotentialSkills = () => {
   loadingPotentialSkills.value = true;
@@ -185,6 +237,23 @@ function validate(value, ctx) {
     return ctx.createError({ message: reason });
   });
 }
+
+const filterProjectSkills = () => {
+  if(allSkills.value[0]) {
+    const filtered = savedMainSkills.value.filter((it) => {
+      return it.name?.toLowerCase().includes(filterValue.value.toLowerCase())
+    })
+    allSkills.value[0].items = filtered;
+  }
+}
+
+const updateSearch = (value) => {
+  if(filterValue.value !== value) {
+    filterValue.value = value;
+    filterProjectSkills()
+    loadSharedSkills()
+  }
+}
 </script>
 
 <template>
@@ -205,10 +274,15 @@ function validate(value, ctx) {
                            inputId="learningItemFromInput"
                            placeholder="From Skill or Badge"
                            placeholder-icon="fas fa-search"
+                           @search-change="updateSearch"
+                           :internal-search="false"
                            aria-label="Select a skill or a badge for the Learning Path's from step"
                            v-on:added="onFromSelected"
                            :disabled="disabled"
                            :appendTo="appendTo"
+                           :after-list-slot-text="includeSharedSkills ? 'Enter text to search for shared skills' : null"
+                           optionGroupLabel="label"
+                           optionGroupChildren="items"
                            :showType=true />
         </div>
         <div class="flex-1 field">
@@ -237,6 +311,10 @@ function validate(value, ctx) {
                         :disabled="!selectedFromSkills || !selectedFromSkills.skillId || !toSkillId || !!errors.toSkillId || disabled">
           </SkillsButton>
         </div>
+      </div>
+      <div class="flex flex-1 gap-2 mt-2">
+        <Checkbox id="includeShared" v-model="includeSharedSkills" binary data-cy="includeShared" aria-label="Include skills shared from other projects" @change="loadSharedSkills"/>
+        <label for="includeShared">Include skills shared from other projects</label>
       </div>
       <div>
         <input v-model="toSkillId" v-bind="toSkillIdAttrs" class="hidden" aria-hidden="true" aria-label="Used to validate learning path route"/>
