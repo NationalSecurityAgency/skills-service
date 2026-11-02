@@ -157,6 +157,8 @@ const isProjectLevel = computed(() => {
   return !(route.params.skillId || route.params.badgeId || route.params.subjectId || (route.params.tagKey && route.params.tagFilter)) && !isSkillsTagPage.value
 })
 
+const isProjectUsersPage = computed(() => route.name === 'ProjectUsers')
+
 const isUserTagsMetricsPage = computed(() => {
   return route.params.tagKey && route.params.tagFilter
 })
@@ -214,7 +216,7 @@ const getOrderBy = (orderBy) => {
 
 const calcPercent = (userPoints) => {
   if (!totalPoints.value) {
-    return 'N/A'
+    return isProjectUsersPage.value ? 0 : 'N/A'
   }
   return Math.trunc((userPoints / totalPoints.value) * 100)
 }
@@ -509,7 +511,7 @@ const tableStoredStateId = computed(() => {
             </div>
           </template>
         </Column>
-        <Column v-if="!isGlobalBadgePage" field="firstUpdated" header="Points First Earned" :sortable="true" :class="{'flex': responsive.md.value }">
+        <Column v-if="!isGlobalBadgePage" field="firstUpdated" :header="isProjectUsersPage ? 'First Seen' : 'Points First Earned'" :sortable="true" :class="{'flex': responsive.md.value }">
           <template #header>
             <i class="far fa-clock mr-1" :class="colors.getTextClass(3)" aria-hidden="true"></i>
           </template>
@@ -522,7 +524,8 @@ const tableStoredStateId = computed(() => {
             <i class="far fa-clock mr-1" :class="colors.getTextClass(3)" aria-hidden="true"></i>
           </template>
           <template #body="slotProps">
-            <date-cell :value="slotProps.data.lastUpdated" />
+            <span v-if="isProjectUsersPage && !slotProps.data.lastUpdated">N/A</span>
+            <date-cell v-else :value="slotProps.data.lastUpdated" />
           </template>
         </Column>
 
