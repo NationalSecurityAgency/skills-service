@@ -75,6 +75,10 @@ interface UserPerformedSkillRepo extends JpaRepository<UserPerformedSkill, Integ
                 s.skillId = ?2 and
                 s.enabled = 'true'
               ) and ut.key = ?3
+               and exists(select 1 from SkillDef destination where destination.projectId = ?1 and destination.skillId = ?2
+                 and (destination.copiedFromProjectId is null or destination.copiedFromProjectId = destination.projectId
+                   or exists(select 1 from UserPerformedSkill localEvent where localEvent.projectId = destination.projectId and localEvent.userId = u.userId)
+                   or exists(select 1 from ProjectParticipation participant where participant.projectId = destination.projectId and participant.userId = u.userId)))
               and not exists (select 1 from ArchivedUser au where au.userId = u.userId and au.projectId = ?1)
               group by ut.value order by userCount desc''')
     @Nullable
@@ -100,7 +104,12 @@ interface UserPerformedSkillRepo extends JpaRepository<UserPerformedSkill, Integ
                     OR lower(s.name) like lower(concat('%',?3,'%'))
                 ) 
               ) and
-              u.userId = ?1''')
+              u.userId = ?1 and
+              exists(select 1 from SkillDef destination where destination.projectId = ?2 and destination.enabled = 'true'
+                and u.skillRefId = case when destination.copiedFrom is not null then destination.copiedFrom else destination.id end
+                and (destination.copiedFromProjectId is null or destination.copiedFromProjectId = destination.projectId
+                  or exists(select 1 from UserPerformedSkill localEvent where localEvent.projectId = destination.projectId and localEvent.userId = u.userId)
+                  or exists(select 1 from ProjectParticipation participant where participant.projectId = destination.projectId and participant.userId = u.userId)))''')
     Long countByUserIdAndProjectIdAndSkillIdIgnoreCaseContaining(String userId, String projectId, String skillId)
 
     @Query('''select count(u.id) from UserPerformedSkill u
@@ -110,7 +119,12 @@ interface UserPerformedSkillRepo extends JpaRepository<UserPerformedSkill, Integ
                 where s.projectId = ?2 and
                 s.enabled = 'true'
               ) and
-              u.userId = ?1''')
+              u.userId = ?1 and
+              exists(select 1 from SkillDef destination where destination.projectId = ?2 and destination.enabled = 'true'
+                and u.skillRefId = case when destination.copiedFrom is not null then destination.copiedFrom else destination.id end
+                and (destination.copiedFromProjectId is null or destination.copiedFromProjectId = destination.projectId
+                  or exists(select 1 from UserPerformedSkill localEvent where localEvent.projectId = destination.projectId and localEvent.userId = u.userId)
+                  or exists(select 1 from ProjectParticipation participant where participant.projectId = destination.projectId and participant.userId = u.userId)))''')
     Long countByUserIdAndProjectId(String userId, String projectId)
 
     @Query('''select count(u.id) from UserPerformedSkill u
@@ -175,6 +189,11 @@ interface UserPerformedSkillRepo extends JpaRepository<UserPerformedSkill, Integ
                 )
               ) 
               and u.userId = ?1
+              and exists(select 1 from SkillDef destination where destination.projectId = ?2 and destination.enabled = 'true'
+                and u.skillRefId = case when destination.copiedFrom is not null then destination.copiedFrom else destination.id end
+                and (destination.copiedFromProjectId is null or destination.copiedFromProjectId = destination.projectId
+                  or exists(select 1 from UserPerformedSkill localEvent where localEvent.projectId = destination.projectId and localEvent.userId = u.userId)
+                  or exists(select 1 from ProjectParticipation participant where participant.projectId = destination.projectId and participant.userId = u.userId)))
               and u.skillRefId = s.id
               AND subjectDef = srd.parent AND 
                   s = srd.child AND
@@ -184,10 +203,13 @@ interface UserPerformedSkillRepo extends JpaRepository<UserPerformedSkill, Integ
 
     @Query('''SELECT COUNT(DISTINCT p.skillId) from UserPerformedSkill p where p.userId = ?2 
             and p.skillRefId in (
-                select case when copiedFrom is not null then copiedFrom else id end as id 
-                from SkillDef 
-                where type = 'Skill' and projectId = ?1 and
-                enabled = 'true'
+                select case when s.copiedFrom is not null then s.copiedFrom else s.id end as id
+                from SkillDef s
+                where s.type = 'Skill' and s.projectId = ?1 and
+                s.enabled = 'true' and
+                (s.copiedFromProjectId is null or s.copiedFromProjectId = s.projectId
+                  or exists(select 1 from UserPerformedSkill localEvent where localEvent.projectId = s.projectId and localEvent.userId = p.userId)
+                  or exists(select 1 from ProjectParticipation participant where participant.projectId = s.projectId and participant.userId = p.userId))
             )'''
     )
     Integer countDistinctSkillIdByProjectIdAndUserId(String projectId, String userId)
@@ -201,6 +223,9 @@ interface UserPerformedSkillRepo extends JpaRepository<UserPerformedSkill, Integ
                     s.projectId=?1 and 
                     s.skillId = ?2 and
                     s.enabled = 'true'
+                    and (s.copiedFromProjectId is null or s.copiedFromProjectId = s.projectId
+                      or exists(select 1 from UserPerformedSkill localEvent where localEvent.projectId = s.projectId and localEvent.userId = p.userId)
+                      or exists(select 1 from ProjectParticipation participant where participant.projectId = s.projectId and participant.userId = p.userId))
                 ) AND not exists (select 1 from ArchivedUser au where au.userId = p.userId and au.projectId = ?1)''')
     Integer countDistinctUserIdByProjectIdAndSkillId(String projectId, String skillId)
 
@@ -242,7 +267,8 @@ interface UserPerformedSkillRepo extends JpaRepository<UserPerformedSkill, Integ
     @Query(value = '''
         WITH skills AS (
             select case when child.copied_from_skill_ref is not null then child.copied_from_skill_ref else child.id end as id,
-                   child.point_increment                                                                                as pointIncrement
+                   child.point_increment as pointIncrement,
+                   child.project_id, child.copied_from_project_id
             from skill_definition parent,
                  skill_relationship_definition rel,
                  skill_definition child
@@ -260,6 +286,9 @@ interface UserPerformedSkillRepo extends JpaRepository<UserPerformedSkill, Integ
              skills
         where ups.user_id = :userId
           and ups.skill_ref_id = skills.id
+          and (skills.copied_from_project_id is null or skills.copied_from_project_id = skills.project_id
+            or exists(select 1 from user_performed_skill local_event where local_event.project_id = skills.project_id and local_event.user_id = ups.user_id)
+            or exists(select 1 from project_participation participant where participant.project_id = skills.project_id and participant.user_id = ups.user_id))
         group by CAST(ups.performed_on as date)''', nativeQuery = true)
     List<DayCountItem> calculatePointHistoryForSubject(@Param('projectId') String projectId,
                                                                            @Param('userId') String userId,
@@ -270,7 +299,8 @@ interface UserPerformedSkillRepo extends JpaRepository<UserPerformedSkill, Integ
     @Query(value = '''
         WITH skills AS (
             select case when copied_from_skill_ref is not null then copied_from_skill_ref else id end as id,
-                   point_increment as pointIncrement
+                   point_increment as pointIncrement,
+                   child.project_id, child.copied_from_project_id
             from skill_definition child
             where project_id = :projectId
               and type = 'Skill'
@@ -282,6 +312,9 @@ interface UserPerformedSkillRepo extends JpaRepository<UserPerformedSkill, Integ
              skills
         where ups.user_id = :userId
           and ups.skill_ref_id = skills.id
+          and (skills.copied_from_project_id is null or skills.copied_from_project_id = skills.project_id
+            or exists(select 1 from user_performed_skill local_event where local_event.project_id = skills.project_id and local_event.user_id = ups.user_id)
+            or exists(select 1 from project_participation participant where participant.project_id = skills.project_id and participant.user_id = ups.user_id))
         group by CAST(ups.performed_on as date)''', nativeQuery = true)
     List<DayCountItem> calculatePointHistoryForProject(@Param('projectId') String projectId,
                                                        @Param('userId') String userId,
@@ -291,12 +324,15 @@ interface UserPerformedSkillRepo extends JpaRepository<UserPerformedSkill, Integ
         from UserPerformedSkill ups
         where
         ups.skillRefId in (
-            select case when copiedFrom is not null then copiedFrom else id end as id 
-            from SkillDef 
-            where type = 'Skill' and 
-            skillId = :skillId and 
-            projectId = :projectId and
-            enabled = 'true'
+            select case when s.copiedFrom is not null then s.copiedFrom else s.id end as id
+            from SkillDef s
+            where s.type = 'Skill' and
+            s.skillId = :skillId and
+            s.projectId = :projectId and
+            s.enabled = 'true' and
+            (s.copiedFromProjectId is null or s.copiedFromProjectId = s.projectId
+              or exists(select 1 from UserPerformedSkill localEvent where localEvent.projectId = s.projectId and localEvent.userId = ups.userId)
+              or exists(select 1 from ProjectParticipation participant where participant.projectId = s.projectId and participant.userId = ups.userId))
         ) and
         ups.performedOn > :from and 
         not exists (select 1 from ArchivedUser au where au.userId = ups.userId and au.projectId = :projectId)

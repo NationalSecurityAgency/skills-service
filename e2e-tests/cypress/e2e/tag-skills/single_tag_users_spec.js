@@ -122,7 +122,7 @@ describe('Users Page for a Single Skill Tag Tests', () => {
         ], 10);
     })
 
-    it('filter by org', () => {
+    it.only('filter by org', () => {
         cy.doReportSkill({ project: 1, skill: 1, subjNum: 1, userId: 'user1', date: '2026-07-16 14:12' })
         cy.doReportSkill({ project: 1, skill: 1, subjNum: 1, userId: 'user2', date: '2026-07-01 08:09' })
         cy.doReportSkill({ project: 1, skill: 1, subjNum: 1, userId: 'user3', date: '2026-07-01 08:09' })

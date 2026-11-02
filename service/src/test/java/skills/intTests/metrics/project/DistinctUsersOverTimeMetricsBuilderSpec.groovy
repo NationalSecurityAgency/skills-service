@@ -427,6 +427,7 @@ class DistinctUsersOverTimeMetricsBuilderSpec extends DefaultIntSpec {
         skillsService.importSkillFromCatalog(proj.projectId, subj.subjectId, proj2.projectId, p2skills[3].skillId)
         skillsService.importSkillFromCatalog(proj.projectId, subj.subjectId, proj2.projectId, p2skills[4].skillId)
         skillsService.finalizeSkillsImportFromCatalog(proj.projectId)
+        users.each { String user -> createService(user).initializeProjectProgress(proj.projectId) }
         //imported after finalize without another finalize, should not be included in metrics
         skillsService.importSkillFromCatalog(proj.projectId, subj.subjectId, proj2.projectId, p2skills[5].skillId)
 

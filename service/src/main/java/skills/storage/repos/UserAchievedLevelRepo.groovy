@@ -979,6 +979,9 @@ select badgeDef.name as name,
                   and skill.type = 'Skill'
                   and skill.enabled = 'true'
                   and ups.skill_ref_id = case when skill.copied_from_skill_ref is not null then skill.copied_from_skill_ref else skill.id end
+                  and (skill.copied_from_project_id is null or skill.copied_from_project_id = skill.project_id
+                    or exists(select 1 from user_performed_skill local_event where local_event.project_id = skill.project_id and local_event.user_id = ups.user_id)
+                    or exists(select 1 from project_participation participant where participant.project_id = skill.project_id and participant.user_id = ups.user_id))
                   and not exists (select 1 from archived_users au where au.user_id = ups.user_id and au.project_id = :projectId)
                 group by skill.skill_id
             ) performedSkills
