@@ -52,8 +52,7 @@ const possiblePageSizes = [5, 10, 15, 20, 50];
 const pageSize = useStorage('sharedSkillsTable-pageSize', 5)
 const totalRecords = ref(0)
 const currentPage = ref(1);
-const sortField = ref('skill.skillId')
-const sortOrder = ref(0)
+const sortInfo = useStorage('skillsTable-sort-sharedSkillsTable', {'sortOrder': 0, 'sortBy': 'skill.name'})
 const doesShareAlreadyExist = ref(false);
 const validatingSkill = ref(false)
 const validationFailed = ref(false)
@@ -93,9 +92,9 @@ const loadSharedSkills = () => {
 
   const params = {
     limit: pageSize.value,
-    ascending: sortOrder.value === 1,
+    ascending: sortInfo.value.sortOrder === 1,
     page: currentPage.value,
-    orderBy: sortField.value,
+    orderBy: sortInfo.value.sortBy,
   };
 
   return SkillsShareService.getSharedSkills(projectId, params)
@@ -170,6 +169,9 @@ const deleteSharedSkill = (itemToRemove) => {
   }
   SkillsShareService.deleteSkillShare(projectId, itemToRemove.skillId, sharedProjectId)
     .then(() => {
+      if(selectedSkill.value !== null) {
+        isSkillAlreadyShared()
+      }
       currentPage.value = 1
       loadSharedSkills()
     }).finally(() => {
@@ -207,8 +209,8 @@ const pageChanged = (pagingInfo) => {
 }
 
 const sortChanged = (sortingInfo) => {
-  sortField.value = sortingInfo.sortField
-  sortOrder.value = sortingInfo.sortOrder
+  sortInfo.value.sortBy = sortingInfo.sortField
+  sortInfo.value.sortOrder = sortingInfo.sortOrder
   loadSharedSkills()
 }
 </script>

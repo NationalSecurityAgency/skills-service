@@ -48,6 +48,7 @@ const loadingAllSkills = ref(false);
 const projectId = route.params.projectId;
 const filterValue = ref('');
 const savedMainSkills = ref(null)
+let sharedSkillsRequestId = 0;
 
 const fromSelector = ref();
 const toSelector = ref();
@@ -68,73 +69,45 @@ const isLoading = computed(() => {
 
 const loadAllSkills = () => {
   loadingAllSkills.value = true;
-  const getProjectSkillsAndBadges = SkillsService.getProjectSkillsAndBadgesWithImportedSkills(projectId);
-  const params = {
-    limit: 100,
-    ascending: false,
-    page: 1,
-    orderBy: 'skill.skillId',
-    filter: filterValue.value,
-  };
-  const promises = [getProjectSkillsAndBadges];
-  if(includeSharedSkills.value) {
-    promises.push(SkillsShareService.getSharedWithmeSkills(projectId, params));
-  }
-
-  Promise.all(promises).then((results) => {
-    const mainSkills = results[0];
+  SkillsService.getProjectSkillsAndBadgesWithImportedSkills(projectId).then((mainSkills) => {
     savedMainSkills.value = mainSkills;
-    const sharedSkills = results[1]?.data;
-    const processedSkills = []
-    if (sharedSkills && sharedSkills.length > 0) {
-      sharedSkills.forEach((skill) => {
-        const newSkill = {
-          name: skill.skillName,
-          type: 'Shared Skill',
-          ...skill,
-        };
-        processedSkills.push(newSkill);
-      });
-    }
     allSkills.value = [{ label: "This Project", items: mainSkills }];
-    if(processedSkills.length > 0) {
-      allSkills.value.push({ label: "Shared Skills", items: processedSkills});
-    }
+    filterProjectSkills();
+    loadSharedSkills();
     loadingAllSkills.value = false;
   });
 };
 
 const loadSharedSkills = async () => {
+  const requestId = ++sharedSkillsRequestId;
+  const filter = filterValue.value;
+  allSkills.value = allSkills.value.filter((group) => group?.label !== 'Shared Skills');
+
+  if (!includeSharedSkills.value || !savedMainSkills.value) {
+    return;
+  }
+
   const params = {
     limit: 100,
     ascending: false,
     page: 1,
     orderBy: 'skill.skillId',
-    filter: filterValue.value,
+    filter,
   };
 
-  const mainSkills = allSkills.value[0]
-  allSkills.value = [mainSkills];
+  const result = await SkillsShareService.getSharedWithmeSkills(projectId, params);
+  if (requestId !== sharedSkillsRequestId || !includeSharedSkills.value) {
+    return;
+  }
 
-  if(includeSharedSkills.value) {
-    const result = await SkillsShareService.getSharedWithmeSkills(projectId, params);
-    const sharedSkills = result.data;
-    const processedSkills = []
-    sharedSkills.forEach((skill) => {
-      const newSkill = {
-        name: skill.skillName,
-        type: 'Shared Skill',
-        ...skill,
-      };
-      processedSkills.push(newSkill);
-    });
+  const processedSkills = result.data.map((skill) => ({
+    name: skill.skillName,
+    type: 'Shared Skill',
+    ...skill,
+  }));
 
-    if(processedSkills.length > 0) {
-      allSkills.value.push({
-        label: "Shared Skills",
-        items: processedSkills,
-      })
-    }
+  if (processedSkills.length > 0) {
+    allSkills.value.push({ label: "Shared Skills", items: processedSkills });
   }
 }
 
