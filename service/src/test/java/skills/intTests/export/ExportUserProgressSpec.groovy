@@ -375,7 +375,7 @@ class ExportUserProgressSpec extends ExportBaseIntSpec {
     }
 
 
-    def 'ability to exclude users that only earned points in imported skills'() {
+    def 'export includes imported-only participants and preserves filters'() {
         List<String> users = getRandomUsers(5)
 
         def p1 = createProject(10)
@@ -394,6 +394,7 @@ class ExportUserProgressSpec extends ExportBaseIntSpec {
         skillsService.importSkillFromCatalog(p2.projectId, p2_subj1.subjectId, p1_skills[0].projectId, p1_skills[0].skillId)
         skillsService.importSkillFromCatalog(p2.projectId, p2_subj1.subjectId, p1_skills[0].projectId, p1_skills[1].skillId)
         skillsService.finalizeSkillsImportFromCatalog(p2.projectId)
+        users[0..1].each { String user -> createService(user).initializeProjectProgress(p2.projectId) }
 
         skillsService.addSkill(p1_skills[0], users[0], today)
         skillsService.addSkill(p1_skills[1], users[0], today)
@@ -403,18 +404,35 @@ class ExportUserProgressSpec extends ExportBaseIntSpec {
 
         skillsService.addSkill(p2_skills[2], users[2], today)
         skillsService.addSkill(p2_skills[2], users[3], today)
+        waitForAsyncTasksCompletion.waitForAllScheduleTasks()
+        rootSkillsService.saveUserTag(users[0], 'dutyOrganization', ['export-team'])
+
+        Map<String, List<String>> expectedRows = [
+                (users[0]): [getUserIdForDisplay(users[0]), getName(users[0], false), getName(users[0]), 'export-team', '2.0', '200.0', '0.3333333333', formatDate(today), formatDate(today)],
+                (users[1]): [getUserIdForDisplay(users[1]), getName(users[1], false), getName(users[1]), '', '1.0', '100.0', '0.1666666667', formatDate(today), formatDate(today)],
+                (users[2]): [getUserIdForDisplay(users[2]), getName(users[2], false), getName(users[2]), '', '3.0', '300.0', '0.5', formatDate(today), formatDate(today)],
+                (users[3]): [getUserIdForDisplay(users[3]), getName(users[3], false), getName(users[3]), '', '1.0', '100.0', '0.1666666667', formatDate(today), formatDate(today)],
+        ]
+        List<List<String>> header = [
+                ['For All Dragons Only'],
+                ['User ID', 'Last Name', 'First Name', 'Org', 'Level', 'Current Points', 'Percent Complete', 'Points First Earned (UTC)', 'Points Last Earned (UTC)'],
+        ]
+        List<List<String>> footer = [['For All Dragons Only']]
 
         when:
-        def excelExport = skillsService.getUserProgressExcelExport(p2.projectId, 'totalPoints', true, '', 0, 100, '', false)
+        def excelExport = skillsService.getUserProgressExcelExport(p2.projectId, 'userId', true, '', 0, 100, '')
+        def queryExport = skillsService.getUserProgressExcelExport(p2.projectId, 'userId', true, users[0], 0, 100, '')
+        def minExport = skillsService.getUserProgressExcelExport(p2.projectId, 'userId', true, '', 17, 100, '')
+        def maxExport = skillsService.getUserProgressExcelExport(p2.projectId, 'userId', true, '', 0, 49, '')
+        def tagExport = skillsService.getUserProgressExcelExport(p2.projectId, 'userId', true, '', 0, 100, 'EXPORT-TEAM')
 
         then:
-        validateExport(excelExport.file, [
-                ["For All Dragons Only"],
-                ["User ID", "Last Name", "First Name", "Org", "Level", "Current Points", "Percent Complete", "Points First Earned (UTC)", "Points Last Earned (UTC)"],
-                [getUserIdForDisplay(users[3]), getName(users[3], false), getName(users[3]), "", "1.0", "100.0", "0.1666666667", formatDate(today), formatDate(today)],
-                [getUserIdForDisplay(users[2]), getName(users[2], false), getName(users[2]), "", "1.0", "300.0", "0.5", formatDate(today), formatDate(today)],
-                ["For All Dragons Only"],
-        ])
+        validateExport(excelExport.file, header + users[0..3].sort().collect { expectedRows[it] } + footer)
+        validateExport(queryExport.file, header + [expectedRows[users[0]]] + footer)
+        validateExport(minExport.file, header + [users[0], users[2]].sort().collect { expectedRows[it] } + footer)
+        validateExport(maxExport.file, header + [users[0], users[1], users[3]].sort().collect { expectedRows[it] } + footer)
+        validateExport(tagExport.file, header + [expectedRows[users[0]]] + footer)
+
     }
 
     def 'getUserProgressExcelExport allows userTagFilter to be omitted'() {
