@@ -15,17 +15,23 @@
  */
 package skills.controller
 
-
+import groovy.transform.Canonical
 import groovy.transform.CompileStatic
 import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.domain.PageRequest
 import org.springframework.http.MediaType
+import org.springframework.security.access.AccessDeniedException
 import org.springframework.web.bind.annotation.*
 import org.springframework.web.multipart.MultipartFile
 import org.springframework.web.servlet.ModelAndView
 import skills.PublicProps
+import skills.auth.UserAuthService
+import skills.auth.UserInfo
+import skills.auth.UserInfoService
+import skills.controller.request.model.CopyBatchQuestionsRequest
 import skills.controller.request.model.TextInputAIGradingRequest
+import skills.services.admin.UserCommunityService
 import skills.services.openai.OpenAIService
 import skills.controller.exceptions.ErrorCode
 import skills.controller.exceptions.QuizValidator
@@ -77,6 +83,12 @@ class QuizController {
     QuizDefService quizDefService
 
     @Autowired
+    UserAuthService userAuthService
+
+    @Autowired
+    UserInfoService userInfoService
+
+    @Autowired
     QuizRunService quizRunService
 
     @Autowired
@@ -117,6 +129,9 @@ class QuizController {
 
     @Autowired
     QuizRunsExportResult quizRunsExportResult
+
+    @Autowired
+    UserCommunityService userCommunityService
 
     @RequestMapping(value = "/{quizId}", method = [RequestMethod.PUT, RequestMethod.POST], produces = "application/json")
     @ResponseBody
@@ -205,6 +220,23 @@ class QuizController {
                                             @PathVariable("questionId") Integer questionId,
                                             @RequestBody QuizQuestionDefRequest questionDefRequest) {
         return quizDefService.saveQuestion(quizId, questionDefRequest, questionId)
+    }
+
+    @RequestMapping(value = "/{quizId}/questions/copy/{toQuizId}", method = [RequestMethod.PUT, RequestMethod.POST], produces = "application/json")
+    @ResponseBody
+    RequestResult copyQuestionDefToAnotherProject(@PathVariable("quizId") String quizId,
+                                                          @PathVariable("toQuizId") String toQuizId,
+                                                          @RequestBody List<Integer> ids) {
+        UserInfo currentUser = userInfoService.currentUser
+        if (!userAuthService.isUserQuizAdmin(currentUser, toQuizId)) {
+            throw new AccessDeniedException("User [${currentUser.username}] is not an admin for quiz [${toQuizId}]")
+        }
+        if (userCommunityService.isUserCommunityOnlyQuiz(toQuizId) && !userCommunityService.isUserCommunityMember(currentUser.username)) {
+            throw new AccessDeniedException("User [${currentUser.username}] can not copy questions to [${toQuizId}]")
+        }
+
+        quizDefService.copyQuestions(quizId, toQuizId, ids)
+        return RequestResult.success()
     }
 
     @RequestMapping(value = "/{quizId}/questions/{questionRefId}", method = [RequestMethod.DELETE], produces = "application/json")
@@ -576,5 +608,20 @@ class QuizController {
         QuizValidator.isNotNull(questionId, "Question Id")
 
         return new RequestResult(success: true, data: [ hasPendingGrades: quizDefService.hasUngradedQuestions(questionId) ])
+    }
+
+    @RequestMapping(value = "/{quizId}/questions/validateCopy", method = [RequestMethod.POST], produces = "application/json")
+    @ResponseBody
+    CopyValidationRes validateCopyItemsToAnotherProject(
+            @PathVariable("quizId") String quizId,
+            @RequestBody CopyBatchQuestionsRequest copyRequest) {
+        UserInfo currentUser = userInfoService.currentUser
+        if (!userAuthService.isUserQuizAdmin(currentUser, copyRequest.destinationQuizId)) {
+            throw new AccessDeniedException("User [${currentUser.username}] is not an admin for quiz [${copyRequest.destinationQuizId}]")
+        }
+        if (userCommunityService.isUserCommunityOnlyQuiz(copyRequest.destinationQuizId) && !userCommunityService.isUserCommunityMember(currentUser.username)) {
+            throw new AccessDeniedException("User [${currentUser.username}] can not copy questions to [${copyRequest.destinationQuizId}]")
+        }
+        return quizDefService.validateCopyQuestionsToAnotherQuiz(quizId, copyRequest.destinationQuizId, copyRequest.numberOfQuestions)
     }
 }

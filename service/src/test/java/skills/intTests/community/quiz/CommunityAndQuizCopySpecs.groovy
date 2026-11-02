@@ -34,6 +34,38 @@ class CommunityAndQuizCopySpecs extends CopyIntSpec {
     @Autowired
     JdbcTemplate jdbcTemplate
 
+    def "copying selected questions cannot downgrade their user community"() {
+        SkillsService pristineDragonsUser = createService(getRandomUsers(1)[0])
+        SkillsService rootUser = createRootSkillService()
+        rootUser.saveUserTag(pristineDragonsUser.userName, 'dragons', ['DivineDragon'])
+
+        def protectedQuiz = QuizDefFactory.createQuiz(1)
+        protectedQuiz.enableProtectedUserCommunity = true
+        pristineDragonsUser.createQuizDef(protectedQuiz)
+        def unrestrictedQuiz = QuizDefFactory.createQuiz(2)
+        pristineDragonsUser.createQuizDef(unrestrictedQuiz)
+        def protectedDestination = QuizDefFactory.createQuiz(3)
+        protectedDestination.enableProtectedUserCommunity = true
+        pristineDragonsUser.createQuizDef(protectedDestination)
+        def sourceQuestion = pristineDragonsUser.createQuizQuestionDef(QuizDefFactory.createChoiceQuestion(1, 1, 2)).body
+
+        when: 'a direct copy request targets an unrestricted quiz'
+        pristineDragonsUser.copyQuizQuestion(protectedQuiz.quizId, unrestrictedQuiz.quizId, [sourceQuestion.id])
+
+        then:
+        SkillsClientException denied = thrown()
+        denied.message.contains('errorCode:AccessDenied')
+        denied.message.contains('Can not copy questions')
+        pristineDragonsUser.getQuizQuestionDefs(unrestrictedQuiz.quizId).questions.empty
+
+        when: 'the destination is also community-protected'
+        def copied = pristineDragonsUser.wsHelper.adminPost("/quiz-definitions/${protectedQuiz.quizId}/questions/copy/${protectedDestination.quizId}".toString(), [sourceQuestion.id])
+
+        then:
+        copied.body.success
+        pristineDragonsUser.getQuizQuestionDefs(protectedDestination.quizId).questions.size() == 1
+    }
+
     def "non-UC user cannot copy non-uc quiz to uc"() {
         def q1 = QuizDefFactory.createQuiz(1)
         skillsService.createQuizDef(q1)
