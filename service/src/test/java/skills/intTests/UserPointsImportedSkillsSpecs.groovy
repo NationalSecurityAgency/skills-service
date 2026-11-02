@@ -21,7 +21,7 @@ import static skills.intTests.utils.SkillsFactory.*
 
 class UserPointsImportedSkillsSpecs extends DefaultIntSpec {
 
-    def 'do not return users for disabled imported skills'() {
+    def 'disabled imports contribute no progress while project Users retains explicit participants'() {
         List<String> randos = getRandomUsers(2)
 
         def project = createProject(10)
@@ -50,10 +50,12 @@ class UserPointsImportedSkillsSpecs extends DefaultIntSpec {
         def results_skill_t1 = skillsService.getSkillUsers(project2.projectId, skill1.skillId)
 
         then:
-        results_t0.count == 1
-        results_t0.totalCount == 1
+        results_t0.count == 2
+        results_t0.totalCount == 2
         results_t0.totalPoints == 1000
-        results_t0.data.size() == 1
+        results_t0.data.size() == 2
+        results_t0.data.find { it.userId == randos[0].toLowerCase() }.totalPoints == 0
+        results_t0.data.find { it.userId == randos[0].toLowerCase() }.lastUpdated == null
         results_t0.data.find { it.userId == randos[1].toLowerCase() }.totalPoints == 100
         results_subject_t0.count == 1
         results_subject_t0.totalPoints == 1000

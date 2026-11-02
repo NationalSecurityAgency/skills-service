@@ -16,6 +16,7 @@
 package skills.services
 
 import groovy.util.logging.Slf4j
+import org.apache.commons.lang3.tuple.Pair
 import org.apache.poi.ss.usermodel.*
 import org.apache.poi.ss.util.CellRangeAddress
 import org.springframework.beans.factory.annotation.Autowired
@@ -94,9 +95,9 @@ class ExcelExportService {
         Sheet sheet = workbook.createSheet()
         List<String> headers
         if (userTagLabel) {
-            headers = ["User ID", "Last Name", "First Name", userTagLabel, "Level", "Current Points", "Percent Complete", "Points First Earned (UTC)", "Points Last Earned (UTC)"]
+            headers = ["User ID", "Last Name", "First Name", userTagLabel, "Level", "Current Points", "Percent Complete", "First Seen (UTC)", "Points Last Earned (UTC)"]
         } else {
-            headers = ["User ID", "Last Name", "First Name", "Level", "Current Points", "Percent Complete", "Points First Earned (UTC)", "Points Last Earned (UTC)"]
+            headers = ["User ID", "Last Name", "First Name", "Level", "Current Points", "Percent Complete", "First Seen (UTC)", "Points Last Earned (UTC)"]
         }
         Integer columnNumber = 0
         Integer rowNum = initializeSheet(sheet, headers, projectExportHeaderAndFooter)
@@ -110,13 +111,9 @@ class ExcelExportService {
         Cell cell = null
 
         Integer projectPoints = projDefRepo.getTotalPointsByProjectId(projectId) ?: 0
-        int minimumPoints = Math.floor((minimumPointsPercent / 100) * projectPoints)
-        int maximumPoints = Math.ceil((maximumPointsPercent / 100) * projectPoints)
-        // need to artificially increase the maximum points to include users who have reached 100% completion
-        // because the database query uses "less than" logic
-        if (maximumPointsPercent == 100) {
-            maximumPoints = maximumPoints + 1
-        }
+        Pair<Integer, Integer> bounds = AdminUsersService.calcProjectMinMaxPoints(projectPoints, minimumPointsPercent, maximumPointsPercent)
+        int minimumPoints = bounds.left
+        int maximumPoints = bounds.right
         Stream<ProjectUser> projectUsers = adminUsersService.streamAllDistinctUsersForProject(projectId, query, pageRequest, minimumPoints, maximumPoints, userTagFilter)
         try {
             projectUsers.each { ProjectUser user ->
@@ -130,7 +127,7 @@ class ExcelExportService {
                 }
                 row.createCell(columnNumber++).setCellValue(user.userMaxLevel)
                 row.createCell(columnNumber++).setCellValue(user.totalPoints)
-                Double percentage = (user.totalPoints / projectPoints)
+                Double percentage = projectPoints ? (user.totalPoints / projectPoints) : 0d
                 cell = row.createCell(columnNumber++)
                 cell.setCellStyle(percentStyle)
                 cell.setCellValue(percentage)
@@ -139,8 +136,12 @@ class ExcelExportService {
                 cell.setCellStyle(dateStyle)
                 cell.setCellValue(user.firstUpdated)
                 cell = row.createCell(columnNumber++)
-                cell.setCellStyle(dateStyle)
-                cell.setCellValue(user.lastUpdated)
+                if (user.lastUpdated) {
+                    cell.setCellStyle(dateStyle)
+                    cell.setCellValue(user.lastUpdated)
+                } else {
+                    cell.setCellValue('N/A')
+                }
             }
         } finally {
             projectUsers.close()

@@ -933,18 +933,11 @@ interface UserPointsRepo extends CrudRepository<UserPoints, Integer> {
             nativeQuery = true)
     Long countDistinctUserIdByProjectId(String projectId)
 
-    static final String FIND_DISTINCT_USERS_SQL = '''SELECT
-    upa.user_id as userId,
-    min(upa.performed_on) as firstUpdated,
-    max(upa.performed_on) as lastUpdated,
-    sum(skill.point_increment) as totalPoints,
-    max(ua.first_name) as firstName,
-    max(ua.last_name) as lastName,
-    max(ua.dn) as dn,
-    max(ua.email) as email,
-    max(ua.user_id_for_display) as userIdForDisplay,
-    case when max(uAchievement.level) is not null then max(uAchievement.level) else 0 end as userMaxLevel,
-    max(ut.value) as userTag
+    static final String PROJECT_USERS_CTE = '''WITH activity AS (
+SELECT upa.user_id,
+    min(case when skill.point_increment > 0 then upa.performed_on end) as first_earned,
+    max(case when skill.point_increment > 0 then upa.performed_on end) as last_earned,
+    sum(skill.point_increment) as total_points
 FROM user_performed_skill upa
     JOIN skill_definition skill on (
         upa.skill_ref_id = CASE when skill.copied_from_skill_ref is not null then skill.copied_from_skill_ref ELSE skill.id end
@@ -953,6 +946,28 @@ FROM user_performed_skill upa
           or exists(select 1 from user_performed_skill local_event where local_event.project_id = skill.project_id and local_event.user_id = upa.user_id)
           or exists(select 1 from project_participation participant where participant.project_id = skill.project_id and participant.user_id = upa.user_id))
     )
+WHERE skill.enabled = 'true'
+GROUP BY upa.user_id
+), population AS (
+    SELECT user_id FROM activity
+    UNION
+    SELECT user_id FROM project_participation WHERE project_id = :projectId
+), project_users AS (
+SELECT population.user_id as userId,
+    least(activity.first_earned, participant.created) as firstUpdated,
+    activity.last_earned as lastUpdated,
+    case when activity.last_earned is null then 1 else 0 end as lastUpdatedMissing,
+    coalesce(activity.total_points, 0) as totalPoints,
+    ua.first_name as firstName,
+    ua.last_name as lastName,
+    ua.dn as dn,
+    ua.email as email,
+    ua.user_id_for_display as userIdForDisplay,
+    coalesce(uAchievement.level, 0) as userMaxLevel,
+    ut.value as userTag
+FROM population
+    LEFT JOIN activity ON activity.user_id = population.user_id
+    LEFT JOIN project_participation participant ON participant.project_id = :projectId and participant.user_id = population.user_id
     LEFT JOIN (
         SELECT uAchievement.user_id, max(uAchievement.level) as level
         FROM user_achievement uAchievement
@@ -960,23 +975,24 @@ FROM user_performed_skill upa
           and uAchievement.skill_id is null
           and uAchievement.level is not null
         GROUP BY uAchievement.user_id
-    ) uAchievement ON uAchievement.user_id = upa.user_id
-         JOIN user_attrs ua ON ua.user_id=upa.user_id
+    ) uAchievement ON uAchievement.user_id = population.user_id
+         JOIN user_attrs ua ON ua.user_id=population.user_id
          LEFT JOIN (SELECT ut.user_id, max(ut.value) AS value FROM user_tags ut WHERE ut.key = :usersTableAdditionalUserTagKey group by ut.user_id) ut ON ut.user_id=ua.user_id
 WHERE
-    skill.enabled = 'true' and
     ((lower(CONCAT(ua.first_name, ' ', ua.last_name, ' (',  ua.user_id_for_display, ')')) like lower(CONCAT('%', :query, '%'))) OR
      (lower(CONCAT(ua.user_id_for_display, ' (', ua.last_name, ', ', ua.first_name,  ')')) like lower(CONCAT('%', :query, '%'))) OR
      (lower(ua.user_id_for_display) like lower(CONCAT('%', :query, '%')))
         ) and
     (:userTagFilter = '' or lower(ut.value) like lower(CONCAT('%', :userTagFilter, '%'))) and
-    not exists (select 1 from archived_users au where au.user_id = upa.user_id and au.project_id = :projectId)
-GROUP BY upa.user_id
-HAVING
-   sum(skill.point_increment) >= :minimumPoints
-   and sum(skill.point_increment) < :maximumPoints'''
+    not exists (select 1 from archived_users au where au.user_id = population.user_id and au.project_id = :projectId)
+    and coalesce(activity.total_points, 0) >= :minimumPoints
+    and coalesce(activity.total_points, 0) < :maximumPoints
+) '''
 
-    @Query(value = FIND_DISTINCT_USERS_SQL, nativeQuery = true)
+    static final String FIND_DISTINCT_USERS_SQL = PROJECT_USERS_CTE + 'SELECT * FROM project_users'
+    static final String COUNT_DISTINCT_USERS_SQL = PROJECT_USERS_CTE + 'SELECT count(*) FROM project_users'
+
+    @Query(value = FIND_DISTINCT_USERS_SQL, countQuery = COUNT_DISTINCT_USERS_SQL, nativeQuery = true)
     Page<ProjectUser> findDistinctProjectUsersAndUserIdLike(@Param("projectId") String projectId,
                                                             @Param("usersTableAdditionalUserTagKey") String usersTableAdditionalUserTagKey,
                                                             @Param("query") String query,

@@ -53,7 +53,7 @@ class ExportUserProgressSpec extends ExportBaseIntSpec {
         then:
         validateExport(excelExport.file, [
                 ["For All Dragons Only"],
-                ["User ID", "Last Name", "First Name", "Org", "Level", "Current Points", "Percent Complete", "Points First Earned (UTC)", "Points Last Earned (UTC)"],
+                ["User ID", "Last Name", "First Name", "Org", "Level", "Current Points", "Percent Complete", "First Seen (UTC)", "Points Last Earned (UTC)"],
                 [getUserIdForDisplay(user2), getName(user2, false), getName(user2), "", "1.0", "60.0", "0.2", formatDate(today), formatDate(today)],
                 [getUserIdForDisplay(user1), getName(user1, false), getName(user1), "", "2.0", "100.0", "0.3333333333", formatDate(fiveDaysAgo), formatDate(oneDayAgo)],
                 ["For All Dragons Only"],
@@ -61,7 +61,7 @@ class ExportUserProgressSpec extends ExportBaseIntSpec {
 
         validateExport(excelExportAfterDelete.file, [
                 ["For All Dragons Only"],
-                ["User ID", "Last Name", "First Name", "Org", "Level", "Current Points", "Percent Complete", "Points First Earned (UTC)", "Points Last Earned (UTC)"],
+                ["User ID", "Last Name", "First Name", "Org", "Level", "Current Points", "Percent Complete", "First Seen (UTC)", "Points Last Earned (UTC)"],
                 [getUserIdForDisplay(user2), getName(user2, false), getName(user2), "", "1.0", "10.0", "0.2", formatDate(today), formatDate(today)],
                 ["For All Dragons Only"],
         ])
@@ -120,7 +120,7 @@ class ExportUserProgressSpec extends ExportBaseIntSpec {
         then:
         validateExport(excelExport.file, [
                 ["For All Dragons Only"],
-                ["User ID", "Last Name", "First Name", "Org", "Level", "Current Points", "Percent Complete", "Points First Earned (UTC)", "Points Last Earned (UTC)"],
+                ["User ID", "Last Name", "First Name", "Org", "Level", "Current Points", "Percent Complete", "First Seen (UTC)", "Points Last Earned (UTC)"],
                 [getUserIdForDisplay(users[0]), getName(users[0], false), getName(users[0]), "tag0", "0.0", "10.0", "0.05", formatDate(today), formatDate(today)],
                 [getUserIdForDisplay(users[1]), getName(users[1], false), getName(users[1]), "tag1", "1.0", "20.0", "0.1", formatDate(oneDayAgo), formatDate(today)],
                 [getUserIdForDisplay(users[2]), getName(users[2], false), getName(users[2]), "tag2", "1.0", "30.0", "0.15", (oneDayAgo-1).format("M/d/yy H:mm"), formatDate(today)],
@@ -184,7 +184,7 @@ class ExportUserProgressSpec extends ExportBaseIntSpec {
         then:
         validateExport(excelExport.file, [
                 ["For All Dragons Only"],
-                ["User ID", "Last Name", "First Name", "Org", "Level", "Current Points", "Percent Complete", "Points First Earned (UTC)", "Points Last Earned (UTC)"],
+                ["User ID", "Last Name", "First Name", "Org", "Level", "Current Points", "Percent Complete", "First Seen (UTC)", "Points Last Earned (UTC)"],
 //                [getUserIdForDisplay(users[0]), getName(users[0], false), getName(users[0]), "tag0", "0.0", "10.0", "0.05", formatDate(today), formatDate(today)],
 //                [getUserIdForDisplay(users[1]), getName(users[1], false), getName(users[1]), "tag1", "1.0", "20.0", "0.1", formatDate(oneDayAgo), formatDate(today)],
 //                [getUserIdForDisplay(users[2]), getName(users[2], false), getName(users[2]), "tag2", "1.0", "30.0", "0.15", (oneDayAgo-1).format("M/d/yy H:mm"), formatDate(today)],
@@ -223,7 +223,7 @@ class ExportUserProgressSpec extends ExportBaseIntSpec {
         then:
         validateExport(excelExport.file, [
                 ["For Divine Dragon Only"],
-                ["User ID", "Last Name", "First Name", "Org", "Level", "Current Points", "Percent Complete", "Points First Earned (UTC)", "Points Last Earned (UTC)"],
+                ["User ID", "Last Name", "First Name", "Org", "Level", "Current Points", "Percent Complete", "First Seen (UTC)", "Points Last Earned (UTC)"],
                 [getUserIdForDisplay(user2), getName(user2, false), getName(user2), "", "1.0", "60.0", "0.2", formatDate(today), formatDate(today)],
                 [getUserIdForDisplay(user1), getName(user1, false), getName(user1), "", "2.0", "100.0", "0.3333333333", formatDate(fiveDaysAgo), formatDate(oneDayAgo)],
                 ["For Divine Dragon Only"],
@@ -288,7 +288,7 @@ class ExportUserProgressSpec extends ExportBaseIntSpec {
 
         List<List<String>> expectedDataForSortAsc = [
                 ["For All Dragons Only"],
-                ["User ID", "Last Name", "First Name", "Org", "Level", "Current Points", "Percent Complete", "Points First Earned (UTC)", "Points Last Earned (UTC)"],
+                ["User ID", "Last Name", "First Name", "Org", "Level", "Current Points", "Percent Complete", "First Seen (UTC)", "Points Last Earned (UTC)"],
                 [getUserIdForDisplay(users[0]), getName(users[0], false), getName(users[0]), "tag00", "0.0", "10.0", "0.05", formatDate(today), formatDate(today)],
                 [getUserIdForDisplay(users[1]), getName(users[1], false), getName(users[1]), "tag01", "1.0", "20.0", "0.1", formatDate(oneDayAgo), formatDate(today)],
                 [getUserIdForDisplay(users[2]), getName(users[2], false), getName(users[2]), "tag02", "1.0", "30.0", "0.15", (oneDayAgo-1).format("M/d/yy H:mm"), formatDate(today)],
@@ -299,7 +299,7 @@ class ExportUserProgressSpec extends ExportBaseIntSpec {
         ]
         List<List<String>> expectedDataForSortDesc = [
                 ["For All Dragons Only"],
-                ["User ID", "Last Name", "First Name", "Org", "Level", "Current Points", "Percent Complete", "Points First Earned (UTC)", "Points Last Earned (UTC)"],
+                ["User ID", "Last Name", "First Name", "Org", "Level", "Current Points", "Percent Complete", "First Seen (UTC)", "Points Last Earned (UTC)"],
                 [getUserIdForDisplay(users[5]), getName(users[5], false), getName(users[5]), "tag10", "4.0", "140.0", "0.7", (tenDaysAgo).format("M/d/yy H:mm"), formatDate(oneDayAgo)],
                 [getUserIdForDisplay(users[4]), getName(users[4], false), getName(users[4]), "tag04", "3.0", "130.0", "0.65", (tenDaysAgo+1).format("M/d/yy H:mm"), formatDate(oneDayAgo)],
                 [getUserIdForDisplay(users[3]), getName(users[3], false), getName(users[3]), "tag03", "2.0", "50.0", "0.25", formatDate(fiveDaysAgo), formatDate(oneDayAgo)],
@@ -310,13 +310,13 @@ class ExportUserProgressSpec extends ExportBaseIntSpec {
         ]
         List<List<String>> expectedDataForQuery = [
                 ["For All Dragons Only"],
-                ["User ID", "Last Name", "First Name", "Org", "Level", "Current Points", "Percent Complete", "Points First Earned (UTC)", "Points Last Earned (UTC)"],
+                ["User ID", "Last Name", "First Name", "Org", "Level", "Current Points", "Percent Complete", "First Seen (UTC)", "Points Last Earned (UTC)"],
                 [getUserIdForDisplay(users[0]), getName(users[0], false), getName(users[0]), "tag00", "0.0", "10.0", "0.05", formatDate(today), formatDate(today)],
                 ["For All Dragons Only"],
         ]
         List<List<String>> expectedDataForMinPointsFilter = [
                 ["For All Dragons Only"],
-                ["User ID", "Last Name", "First Name", "Org", "Level", "Current Points", "Percent Complete", "Points First Earned (UTC)", "Points Last Earned (UTC)"],
+                ["User ID", "Last Name", "First Name", "Org", "Level", "Current Points", "Percent Complete", "First Seen (UTC)", "Points Last Earned (UTC)"],
                 [getUserIdForDisplay(users[3]), getName(users[3], false), getName(users[3]), "tag03", "2.0", "50.0", "0.25", formatDate(fiveDaysAgo), formatDate(oneDayAgo)],
                 [getUserIdForDisplay(users[4]), getName(users[4], false), getName(users[4]), "tag04", "3.0", "130.0", "0.65", (tenDaysAgo+1).format("M/d/yy H:mm"), formatDate(oneDayAgo)],
                 [getUserIdForDisplay(users[5]), getName(users[5], false), getName(users[5]), "tag10", "4.0", "140.0", "0.7", (tenDaysAgo).format("M/d/yy H:mm"), formatDate(oneDayAgo)],
@@ -365,7 +365,7 @@ class ExportUserProgressSpec extends ExportBaseIntSpec {
         then:
         validateExport(excelExport.file, [
                 ["For All Dragons Only"],
-                ["User ID", "Last Name", "First Name", "Org", "Level", "Current Points", "Percent Complete", "Points First Earned (UTC)", "Points Last Earned (UTC)"],
+                ["User ID", "Last Name", "First Name", "Org", "Level", "Current Points", "Percent Complete", "First Seen (UTC)", "Points Last Earned (UTC)"],
                 [getUserIdForDisplay(user2), getName(user2, false), getName(user2), "", "1.0", "60.0", "0.2", formatDate(today), formatDate(today)],
                 [getUserIdForDisplay(user1), getName(user1, false), getName(user1), "", "2.0", "100.0", "0.3333333333", formatDate(fiveDaysAgo), formatDate(oneDayAgo)],
                 [getUserIdForDisplay(user3), getName(user3, false), getName(user3), "", "5.0", "300.0", "1.0", formatDate(fiveDaysAgo), formatDate(oneDayAgo)],
@@ -415,7 +415,7 @@ class ExportUserProgressSpec extends ExportBaseIntSpec {
         ]
         List<List<String>> header = [
                 ['For All Dragons Only'],
-                ['User ID', 'Last Name', 'First Name', 'Org', 'Level', 'Current Points', 'Percent Complete', 'Points First Earned (UTC)', 'Points Last Earned (UTC)'],
+                ['User ID', 'Last Name', 'First Name', 'Org', 'Level', 'Current Points', 'Percent Complete', 'First Seen (UTC)', 'Points Last Earned (UTC)'],
         ]
         List<List<String>> footer = [['For All Dragons Only']]
 

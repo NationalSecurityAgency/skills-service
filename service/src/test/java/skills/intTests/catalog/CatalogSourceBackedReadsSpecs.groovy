@@ -329,7 +329,7 @@ class CatalogSourceBackedReadsSpecs extends CatalogIntSpec {
         !participationRepo.existsByProjectIdAndUserId(fixture.destination.projectId, user)
     }
 
-    def "repository-seeded achievement-only credit is defensive backfill evidence not event-list enrollment"() {
+    def "repository-seeded achievement-only credit needs participation and does not create event-list progress"() {
         Map fixture = readsFixture()
         String user = getRandomUsers(7)[6]
         SkillDef source = skillDefRepo.findByProjectIdAndSkillId(fixture.source.projectId, fixture.imports[0].skillId)
@@ -353,7 +353,9 @@ class CatalogSourceBackedReadsSpecs extends CatalogIntSpec {
         skillsService.getSkillSummary(user, fixture.destination.projectId).skillsAchieved == 1
         skillsService.getPerformedSkills(user, fixture.destination.projectId).totalCount == 0
         skillsService.getUserStats(fixture.destination.projectId, user).numSkills == 0
-        skillsService.getProjectUsers(fixture.destination.projectId).count == 5
+        skillsService.getProjectUsers(fixture.destination.projectId).count == 6
+        skillsService.getProjectUsers(fixture.destination.projectId).data.find { it.userId == user }.totalPoints == 0
+        skillsService.getProjectUsers(fixture.destination.projectId).data.find { it.userId == user }.lastUpdated == null
         !userPerformedSkillRepo.existsLocalEventByProjectIdAndUserId(fixture.source.projectId, user)
     }
 
