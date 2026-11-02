@@ -135,22 +135,22 @@ class AdminUsersService {
     }
 
     @Transactional(readOnly = true)
-    TableResultWithTotalPoints loadUsersPageForProject(String projectId, String userFilter, PageRequest pageRequest, int minimumPointsPercent, int maximumPointsPercent, String userTagFilter, boolean includeImported) {
+    TableResultWithTotalPoints loadUsersPageForProject(String projectId, String userFilter, PageRequest pageRequest, int minimumPointsPercent, int maximumPointsPercent, String userTagFilter) {
         userFilter = userFilter ? userFilter.trim() : ''
         Integer totalPoints = projDefRepo.getTotalPointsByProjectId(projectId) ?: 0
         Pair<Integer, Integer> minMax = calcMinMaxPointsQueryParams(totalPoints, minimumPointsPercent, maximumPointsPercent)
-        Page<ProjectUser> usersPage = findDistinctUsersForProject(projectId, userFilter, pageRequest, minMax.left, minMax.right, userTagFilter, includeImported)
+        Page<ProjectUser> usersPage = findDistinctUsersForProject(projectId, userFilter, pageRequest, minMax.left, minMax.right, userTagFilter)
         return new TableResultWithTotalPoints(usersPage, totalPoints)
     }
 
     @Profile
-    private Page<ProjectUser> findDistinctUsersForProject(String projectId, String query, PageRequest pageRequest, int minimumPoints, int maximumPoints, String userTagFilter, boolean includeImported) {
-        return userPointsRepo.findDistinctProjectUsersAndUserIdLike(projectId, usersTableAdditionalUserTagKey, query, minimumPoints, maximumPoints, userTagFilter, includeImported, pageRequest)
+    private Page<ProjectUser> findDistinctUsersForProject(String projectId, String query, PageRequest pageRequest, int minimumPoints, int maximumPoints, String userTagFilter) {
+        return userPointsRepo.findDistinctProjectUsersAndUserIdLike(projectId, usersTableAdditionalUserTagKey, query, minimumPoints, maximumPoints, userTagFilter, pageRequest)
     }
 
     @Profile
-    Stream<ProjectUser> streamAllDistinctUsersForProject(String projectId, String query, PageRequest pageRequest, int minimumPoints, int maximumPoints, String userTagFilter, boolean includeImported) {
-        return userPointsRepo.streamDistinctProjectUsersAndUserIdLike(projectId, usersTableAdditionalUserTagKey, query, minimumPoints, maximumPoints, userTagFilter, includeImported, pageRequest)
+    Stream<ProjectUser> streamAllDistinctUsersForProject(String projectId, String query, PageRequest pageRequest, int minimumPoints, int maximumPoints, String userTagFilter) {
+        return userPointsRepo.streamDistinctProjectUsersAndUserIdLike(projectId, usersTableAdditionalUserTagKey, query, minimumPoints, maximumPoints, userTagFilter, pageRequest)
     }
 
     @Profile
@@ -169,7 +169,7 @@ class AdminUsersService {
         return new TableResultWithTotalPoints(usersPage, totalPoints)
     }
 
-    TableResultWithTotalPoints loadUsersPageForSkills(String projectId, List<String> skillIds, String query, PageRequest pageRequest, int minimumPointsPercent, int maximumPointsPercent, String userTagFilter, boolean includeImported, includeAchievedSkills=false) {
+    TableResultWithTotalPoints loadUsersPageForSkills(String projectId, List<String> skillIds, String query, PageRequest pageRequest, int minimumPointsPercent, int maximumPointsPercent, String userTagFilter, includeAchievedSkills=false) {
         if (!skillIds) {
             return TableResultWithTotalPoints.EMPTY
         }
@@ -178,32 +178,32 @@ class AdminUsersService {
         Pair<Integer, Integer> minMax = calcMinMaxPointsQueryParams(totalPoints, minimumPointsPercent, maximumPointsPercent)
 
         Page<ProjectUser> usersPage = includeAchievedSkills
-                        ? userPointsRepo.findDistinctProjectUsersByProjectIdAndSkillIdInAndUserIdLikeWithAchievedSkills(projectId, usersTableAdditionalUserTagKey, skillIds, query, minMax.left, minMax.right, userTagFilter, includeImported, pageRequest)
-                        : userPointsRepo.findDistinctProjectUsersByProjectIdAndSkillIdInAndUserIdLikeWithoutAchievedSkills(projectId, usersTableAdditionalUserTagKey, skillIds, query, minMax.left, minMax.right, userTagFilter, includeImported, pageRequest)
+                        ? userPointsRepo.findDistinctProjectUsersByProjectIdAndSkillIdInAndUserIdLikeWithAchievedSkills(projectId, usersTableAdditionalUserTagKey, skillIds, query, minMax.left, minMax.right, userTagFilter, pageRequest)
+                        : userPointsRepo.findDistinctProjectUsersByProjectIdAndSkillIdInAndUserIdLikeWithoutAchievedSkills(projectId, usersTableAdditionalUserTagKey, skillIds, query, minMax.left, minMax.right, userTagFilter, pageRequest)
 
         return new TableResultWithTotalPoints(usersPage, totalPoints, skillIds.size())
     }
 
-    TableResultWithTotalPoints loadUsersPageForSubject(String projectId, String subjectId, String query, PageRequest pageRequest, int minimumPointsPercent, int maximumPointsPercent, String userTagFilter, Boolean includeImported) {
+    TableResultWithTotalPoints loadUsersPageForSubject(String projectId, String subjectId, String query, PageRequest pageRequest, int minimumPointsPercent, int maximumPointsPercent, String userTagFilter) {
         if (!subjectId) {
             return TableResultWithTotalPoints.EMPTY
         }
         query = query ? query.trim() : ''
         Integer totalPoints = skillDefRepo.getTotalPointsByProjectIdAndSkillId(projectId, subjectId) ?: 0
         Pair<Integer, Integer> minMax = calcMinMaxPointsQueryParams(totalPoints, minimumPointsPercent, maximumPointsPercent)
-        Page<ProjectUser> usersDataPage = userPointsRepo.findDistinctProjectUsersByProjectIdAndParentSkillIdAndUserIdLike(projectId, usersTableAdditionalUserTagKey, subjectId, query, minMax.left, minMax.right, userTagFilter, includeImported, pageRequest)
+        Page<ProjectUser> usersDataPage = userPointsRepo.findDistinctProjectUsersByProjectIdAndParentSkillIdAndUserIdLike(projectId, usersTableAdditionalUserTagKey, subjectId, query, minMax.left, minMax.right, userTagFilter, pageRequest)
         return new TableResultWithTotalPoints(usersDataPage, totalPoints)
     }
 
-    TableResultWithTotalPoints loadUsersPageForSkillTag(String projectId, String tagId, String query, PageRequest pageRequest, int minimumPointsPercent, int maximumPointsPercent, String userTagFilter, Boolean includeImported) {
+    TableResultWithTotalPoints loadUsersPageForSkillTag(String projectId, String tagId, String query, PageRequest pageRequest, int minimumPointsPercent, int maximumPointsPercent, String userTagFilter) {
         if (!tagId) {
             return TableResultWithTotalPoints.EMPTY
         }
         tagId = tagId.toLowerCase()
         query = query ? query.trim() : ''
-        Integer totalPoints = skillDefRepo.getTotalPointsForTag(projectId, tagId, includeImported) ?: 0
+        Integer totalPoints = skillDefRepo.getTotalPointsForTag(projectId, tagId) ?: 0
         Pair<Integer, Integer> minMax = calcMinMaxPointsQueryParams(totalPoints, minimumPointsPercent, maximumPointsPercent)
-        Page<ProjectUser> usersDataPage = userPointsRepo.findDistinctProjectUsersByProjectIdAndParentSkillIdAndUserIdLike(projectId, usersTableAdditionalUserTagKey, tagId, query, minMax.left, minMax.right, userTagFilter, includeImported, pageRequest)
+        Page<ProjectUser> usersDataPage = userPointsRepo.findDistinctProjectUsersByProjectIdAndParentSkillIdAndUserIdLike(projectId, usersTableAdditionalUserTagKey, tagId, query, minMax.left, minMax.right, userTagFilter, pageRequest)
         return new TableResultWithTotalPoints(usersDataPage, totalPoints)
     }
 

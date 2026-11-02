@@ -964,8 +964,7 @@ WHERE
 GROUP BY upa.user_id
 HAVING
    sum(skill.point_increment) >= :minimumPoints
-   and sum(skill.point_increment) < :maximumPoints
-   and (:includeImported = true or sum(CASE when skill.copied_from_skill_ref is null then skill.point_increment else 0 end) > 0)'''
+   and sum(skill.point_increment) < :maximumPoints'''
 
     @Query(value = FIND_DISTINCT_USERS_SQL, nativeQuery = true)
     Page<ProjectUser> findDistinctProjectUsersAndUserIdLike(@Param("projectId") String projectId,
@@ -974,7 +973,6 @@ HAVING
                                                             @Param("minimumPoints") int minimumPoints,
                                                             @Param("maximumPoints") int maximumPoints,
                                                             @Param("userTagFilter") String userTagFilter,
-                                                            @Param("includeImported") boolean includeImported,
                                                             Pageable pageable)
 
     @QueryHints(
@@ -987,7 +985,6 @@ HAVING
                                                                 @Param("minimumPoints") int minimumPoints,
                                                                 @Param("maximumPoints") int maximumPoints,
                                                                 @Param("userTagFilter") String userTagFilter,
-                                                                @Param("includeImported") boolean includeImported,
                                                                 Pageable pageable)
 
     static final String FIND_DISTINCT_PROJECT_USERS_BY_SKILLS_WITH_ACHIEVED_SQL = '''
@@ -1043,7 +1040,6 @@ HAVING
           ) 
           and (:userTagFilter = '' or lower(ut.value) like lower(CONCAT('%', :userTagFilter, '%'))) 
           and not exists (select 1 from archived_users au where au.user_id = upa.user_id and au.project_id = :projectId) 
-          and (:includeImported = true OR exists(select 1 from user_performed_skill upa2 where upa2.project_id = :projectId and upa2.user_id = upa.user_id)) 
         GROUP BY upa.user_id 
         HAVING sum(skill.point_increment) >= :minimumPoints and sum(skill.point_increment) < :maximumPoints
     ) as user_results
@@ -1074,7 +1070,6 @@ HAVING
           ) 
           and (:userTagFilter = '' or lower(ut.value) like lower(CONCAT('%', :userTagFilter, '%'))) 
           and not exists (select 1 from archived_users au where au.user_id = upa.user_id and au.project_id = :projectId) 
-          and (:includeImported = true OR exists(select 1 from user_performed_skill upa2 where upa2.project_id = :projectId and upa2.user_id = upa.user_id)) 
         GROUP BY upa.user_id 
         HAVING sum(skill.point_increment) >= :minimumPoints and sum(skill.point_increment) < :maximumPoints
     ) as count_results
@@ -1108,7 +1103,6 @@ HAVING
             ) and
         (:userTagFilter = '' or lower(ut.value) like lower(CONCAT('%', :userTagFilter, '%')))
         and not exists (select 1 from archived_users au where au.user_id = upa.user_id and au.project_id = :projectId)
-        and (:includeImported = true OR exists( select 1 from user_performed_skill upa2 where upa2.project_id = :projectId and upa2.user_id = upa.user_id) )
     GROUP BY upa.user_id
     HAVING sum(skill.point_increment) >= :minimumPoints
        and sum(skill.point_increment) < :maximumPoints
@@ -1126,7 +1120,6 @@ HAVING
                                                                                                       @Param("minimumPoints") int minimumPoints,
                                                                                                       @Param("maximumPoints") int maximumPoints,
                                                                                                       @Param("userTagFilter") String userTagFilter,
-                                                                                                      @Param("includeImported") boolean includeImported,
                                                                                                       Pageable pageable)
 
     @Query(value = FIND_DISTINCT_PROJECT_USERS_BY_SKILLS_WITHOUT_ACHIEVED_SQL, nativeQuery = true)
@@ -1137,7 +1130,6 @@ HAVING
                                                                                                          @Param("minimumPoints") int minimumPoints,
                                                                                                          @Param("maximumPoints") int maximumPoints,
                                                                                                          @Param("userTagFilter") String userTagFilter,
-                                                                                                         @Param("includeImported") boolean includeImported,
                                                                                                          Pageable pageable)
 
     static final String FIND_DISTINCT_GLOBAL_BADGE_USERS_SQL = '''
@@ -1366,7 +1358,6 @@ WHERE
     ) 
     and (:userTagFilter = '' or lower(ut.value) like lower(CONCAT('%', :userTagFilter, '%'))) 
     and not exists (select 1 from archived_users au where au.user_id = upa.user_id and au.project_id = :projectId)
-    and (:includeImported = true OR exists( select 1 from user_performed_skill upa2 where upa2.project_id = :projectId and upa2.user_id = upa.user_id) )
 GROUP BY upa.user_id
 HAVING
     sum(skill.point_increment) >= :minimumPoints
@@ -1379,7 +1370,6 @@ HAVING
                                                                                        @Param("minimumPoints") int minimumPoints,
                                                                                        @Param("maximumPoints") int maximumPoints,
                                                                                        @Param("userTagFilter") String userTagFilter,
-                                                                                       @Param("includeImported") Boolean includeImported,
                                                                                        Pageable pageable)
 
     @Nullable
