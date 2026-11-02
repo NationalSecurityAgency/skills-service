@@ -818,7 +818,8 @@ interface UserPointsRepo extends CrudRepository<UserPoints, Integer> {
     @Query(value ='''WITH skills AS (
                 select case when child.copied_from_skill_ref is not null then child.copied_from_skill_ref else child.id end as id,
                        child.point_increment as point_increment,
-                       child.id as originalRefId
+                       child.id as originalRefId,
+                       child.project_id, child.copied_from_project_id
                 from skill_relationship_definition rel,
                      skill_definition child
                 where rel.parent_ref_id = :parentSkillRefId
@@ -832,6 +833,9 @@ interface UserPointsRepo extends CrudRepository<UserPoints, Integer> {
                  skills
             where up.user_id =:userId
               and up.skill_ref_id = skills.id
+              and (skills.copied_from_project_id is null or skills.copied_from_project_id = skills.project_id
+                or exists(select 1 from user_performed_skill local_event where local_event.project_id = skills.project_id and local_event.user_id = up.user_id)
+                or exists(select 1 from project_participation participant where participant.project_id = skills.project_id and participant.user_id = up.user_id))
               and DATE_TRUNC('DAY', up.performed_on) = :day
             group by skills.originalRefId''', nativeQuery = true)
     List<SkillRefIdWithPoints> calculatePointsForChildSkillsForADay(@Param("userId") String userId,
@@ -847,6 +851,9 @@ interface UserPointsRepo extends CrudRepository<UserPoints, Integer> {
                  skill_definition sd
             where up.user_id =:userId
               and sd.id = :skillRefId
+              and (sd.copied_from_project_id is null or sd.copied_from_project_id = sd.project_id
+                or exists(select 1 from user_performed_skill local_event where local_event.project_id = sd.project_id and local_event.user_id = up.user_id)
+                or exists(select 1 from project_participation participant where participant.project_id = sd.project_id and participant.user_id = up.user_id))
               and up.skill_ref_id = (case when sd.copied_from_skill_ref is not null then sd.copied_from_skill_ref else sd.id end)
               and DATE_TRUNC('DAY', up.performed_on) = :day 
             group by up.skill_ref_id''', nativeQuery = true)
@@ -942,6 +949,9 @@ FROM user_performed_skill upa
     JOIN skill_definition skill on (
         upa.skill_ref_id = CASE when skill.copied_from_skill_ref is not null then skill.copied_from_skill_ref ELSE skill.id end
         and type = 'Skill' and skill.project_id = :projectId
+        and (skill.copied_from_project_id is null or skill.copied_from_project_id = skill.project_id
+          or exists(select 1 from user_performed_skill local_event where local_event.project_id = skill.project_id and local_event.user_id = upa.user_id)
+          or exists(select 1 from project_participation participant where participant.project_id = skill.project_id and participant.user_id = upa.user_id))
     )
     LEFT JOIN (
         SELECT uAchievement.user_id, max(uAchievement.level) as level
@@ -1007,6 +1017,9 @@ HAVING
             and type = 'Skill' 
             and skill.project_id = :projectId 
             and skill.skill_id in :skillIds 
+            and (skill.copied_from_project_id is null or skill.copied_from_project_id = skill.project_id
+              or exists(select 1 from user_performed_skill local_event where local_event.project_id = skill.project_id and local_event.user_id = upa.user_id)
+              or exists(select 1 from project_participation participant where participant.project_id = skill.project_id and participant.user_id = upa.user_id))
         ) 
         JOIN user_attrs ua ON ua.user_id=upa.user_id 
         LEFT JOIN (
@@ -1026,6 +1039,9 @@ HAVING
                     and skill_inner.project_id = :projectId 
                     and skill_inner.skill_id in :skillIds 
                     and skill_inner.enabled = 'true' 
+                    and (skill_inner.copied_from_project_id is null or skill_inner.copied_from_project_id = skill_inner.project_id
+                      or exists(select 1 from user_performed_skill local_event where local_event.project_id = skill_inner.project_id and local_event.user_id = upa_inner.user_id)
+                      or exists(select 1 from project_participation participant where participant.project_id = skill_inner.project_id and participant.user_id = upa_inner.user_id))
                 ) 
                 GROUP BY upa_inner.user_id, skill_inner.skill_id, skill_inner.total_points 
                 HAVING sum(skill_inner.point_increment) = skill_inner.total_points 
@@ -1054,6 +1070,9 @@ HAVING
             and type = 'Skill' 
             and skill.project_id = :projectId 
             and skill.skill_id in :skillIds 
+            and (skill.copied_from_project_id is null or skill.copied_from_project_id = skill.project_id
+              or exists(select 1 from user_performed_skill local_event where local_event.project_id = skill.project_id and local_event.user_id = upa.user_id)
+              or exists(select 1 from project_participation participant where participant.project_id = skill.project_id and participant.user_id = upa.user_id))
         ) 
         JOIN user_attrs ua ON ua.user_id=upa.user_id 
         LEFT JOIN (
@@ -1092,6 +1111,9 @@ HAVING
         JOIN skill_definition skill on (
             upa.skill_ref_id = CASE when skill.copied_from_skill_ref is not null then skill.copied_from_skill_ref ELSE skill.id end
             and type = 'Skill' and skill.project_id = :projectId and skill.skill_id in :skillIds
+            and (skill.copied_from_project_id is null or skill.copied_from_project_id = skill.project_id
+              or exists(select 1 from user_performed_skill local_event where local_event.project_id = skill.project_id and local_event.user_id = upa.user_id)
+              or exists(select 1 from project_participation participant where participant.project_id = skill.project_id and participant.user_id = upa.user_id))
         )
         JOIN user_attrs ua ON ua.user_id=upa.user_id
         LEFT JOIN (SELECT ut.user_id, max(ut.value) AS value FROM user_tags ut WHERE ut.key = :usersTableAdditionalUserTagKey group by ut.user_id) ut ON ut.user_id=ua.user_id
@@ -1336,7 +1358,10 @@ FROM user_performed_skill upa
               and rel.type in ('RuleSetDefinition', 'GroupSkillToSubject', 'Tag')
               and child.type = 'Skill'
               and child.enabled = 'true'
-    ) skill on ( upa.skill_ref_id = CASE when skill.copied_from_skill_ref is not null then skill.copied_from_skill_ref ELSE skill.id end)
+    ) skill on ( upa.skill_ref_id = CASE when skill.copied_from_skill_ref is not null then skill.copied_from_skill_ref ELSE skill.id end
+        and (skill.copied_from_project_id is null or skill.copied_from_project_id = skill.project_id
+          or exists(select 1 from user_performed_skill local_event where local_event.project_id = skill.project_id and local_event.user_id = upa.user_id)
+          or exists(select 1 from project_participation participant where participant.project_id = skill.project_id and participant.user_id = upa.user_id)))
     LEFT JOIN (
         SELECT uAchievement.user_id, max(uAchievement.level) as level
         FROM user_achievement uAchievement
@@ -1383,7 +1408,8 @@ HAVING
     @Nullable
     @Query(value ='''WITH skills AS (
                 select case when child.copied_from_skill_ref is not null then child.copied_from_skill_ref else child.id end as id,
-                       child.point_increment as point_increment
+                       child.point_increment as point_increment,
+                       child.project_id, child.copied_from_project_id
                 from skill_relationship_definition rel,
                      skill_definition child
                 where rel.parent_ref_id = :parentSkillRefId
@@ -1397,6 +1423,9 @@ HAVING
                  skills
             where up.user_id =:userId
               and up.skill_ref_id = skills.id
+              and (skills.copied_from_project_id is null or skills.copied_from_project_id = skills.project_id
+                or exists(select 1 from user_performed_skill local_event where local_event.project_id = skills.project_id and local_event.user_id = up.user_id)
+                or exists(select 1 from project_participation participant where participant.project_id = skills.project_id and participant.user_id = up.user_id))
               and DATE_TRUNC('DAY', up.performed_on) = :day ''', nativeQuery = true)
     Integer getParentsPointsForAGivenDay(@Param("userId") String userId, @Param("parentSkillRefId") Integer parentSkillRefId, @Param("day") Date day)
 

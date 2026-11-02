@@ -114,11 +114,14 @@ interface UserEventsRepo extends CrudRepository<UserEvent, Integer> {
                    uue.week_number AS week_number
             FROM user_events uue 
                 INNER JOIN (
-                    select case when sd.copied_from_skill_ref is not null then sd.copied_from_skill_ref else sd.id end as id, sd.project_id 
+                    select case when sd.copied_from_skill_ref is not null then sd.copied_from_skill_ref else sd.id end as id, sd.project_id, sd.copied_from_project_id
                     from skill_definition sd 
                     where sd.type = 'Skill' and sd.id = :skillRefId and 
                     sd.enabled = 'true'
                 ) def ON uue.skill_ref_id = def.id
+                  AND (def.copied_from_project_id IS NULL OR def.copied_from_project_id = def.project_id
+                    OR EXISTS(SELECT 1 FROM user_performed_skill local_event WHERE local_event.project_id = def.project_id AND local_event.user_id = uue.user_id)
+                    OR EXISTS(SELECT 1 FROM project_participation participant WHERE participant.project_id = def.project_id AND participant.user_id = uue.user_id))
             WHERE
                 uue.event_time >= :start AND
                 not exists (select 1 from archived_users au where au.user_id = uue.user_id and au.project_id = def.project_id)
@@ -140,11 +143,14 @@ interface UserEventsRepo extends CrudRepository<UserEvent, Integer> {
                    uue.week_number AS week_number
             FROM user_events uue 
                 INNER JOIN (
-                    select case when sd.copied_from_skill_ref is not null then sd.copied_from_skill_ref else sd.id end as id, sd.project_id 
+                    select case when sd.copied_from_skill_ref is not null then sd.copied_from_skill_ref else sd.id end as id, sd.project_id, sd.copied_from_project_id
                     from skill_definition sd 
                     where sd.type = 'Skill' and sd.id = :skillRefId and 
                     sd.enabled = 'true'
                 ) def ON uue.skill_ref_id = def.id
+                  AND (def.copied_from_project_id IS NULL OR def.copied_from_project_id = def.project_id
+                    OR EXISTS(SELECT 1 FROM user_performed_skill local_event WHERE local_event.project_id = def.project_id AND local_event.user_id = uue.user_id)
+                    OR EXISTS(SELECT 1 FROM project_participation participant WHERE participant.project_id = def.project_id AND participant.user_id = uue.user_id))
             WHERE
                     uue.event_time >= :start AND 
                     uue.event_type = :#{#type.name()} AND
@@ -167,11 +173,14 @@ interface UserEventsRepo extends CrudRepository<UserEvent, Integer> {
                    uue.week_number AS week_number
             FROM user_events uue 
                 INNER JOIN (
-                    select case when sd.copied_from_skill_ref is not null then sd.copied_from_skill_ref else sd.id end as id, sd.project_id 
+                    select case when sd.copied_from_skill_ref is not null then sd.copied_from_skill_ref else sd.id end as id, sd.project_id, sd.copied_from_project_id
                     from skill_definition sd 
                     where sd.type = 'Skill' and (sd.id = :skillRefId or sd.copied_from_skill_ref = :skillRefId) and 
                     sd.enabled = 'true'
                 ) def ON uue.skill_ref_id = def.id
+                  AND (def.copied_from_project_id IS NULL OR def.copied_from_project_id = def.project_id
+                    OR EXISTS(SELECT 1 FROM user_performed_skill local_event WHERE local_event.project_id = def.project_id AND local_event.user_id = uue.user_id)
+                    OR EXISTS(SELECT 1 FROM project_participation participant WHERE participant.project_id = def.project_id AND participant.user_id = uue.user_id))
             WHERE
                 uue.event_time >= :start AND
                 uue.event_type = :#{#type.name()} AND
@@ -198,11 +207,14 @@ interface UserEventsRepo extends CrudRepository<UserEvent, Integer> {
                    uue.week_number AS week_number
             FROM user_events uue 
                 INNER JOIN (
-                    select case when sd.copied_from_skill_ref is not null then sd.copied_from_skill_ref else sd.id end as id, sd.project_id 
+                    select case when sd.copied_from_skill_ref is not null then sd.copied_from_skill_ref else sd.id end as id, sd.project_id, sd.copied_from_project_id
                     from skill_definition sd 
                     where sd.type = 'Skill' and (sd.id = :skillRefId or sd.copied_from_skill_ref = :skillRefId) and 
                     sd.enabled = 'true'
                 ) def ON uue.skill_ref_id = def.id
+                  AND (def.copied_from_project_id IS NULL OR def.copied_from_project_id = def.project_id
+                    OR EXISTS(SELECT 1 FROM user_performed_skill local_event WHERE local_event.project_id = def.project_id AND local_event.user_id = uue.user_id)
+                    OR EXISTS(SELECT 1 FROM project_participation participant WHERE participant.project_id = def.project_id AND participant.user_id = uue.user_id))
             WHERE
                 uue.event_time >= :start AND
                 not exists (select 1 from archived_users au where au.user_id = uue.user_id and au.project_id = def.project_id)
@@ -227,12 +239,15 @@ interface UserEventsRepo extends CrudRepository<UserEvent, Integer> {
                    uue.week_number AS week_number
             FROM user_events uue 
                 INNER JOIN (
-                    select case when sd.copied_from_skill_ref is not null then sd.copied_from_skill_ref else sd.id end as id, sd.project_id 
+                    select case when sd.copied_from_skill_ref is not null then sd.copied_from_skill_ref else sd.id end as id, sd.project_id, sd.copied_from_project_id
                     from skill_definition sd 
                     where sd.type = 'Skill' and 
                     sd.enabled = 'true' and
                     sd.id in (select rel.child_ref_id from skill_relationship_definition rel where rel.parent_ref_id = :subjectRawId)
                 ) def ON uue.skill_ref_id = def.id
+                  AND (def.copied_from_project_id IS NULL OR def.copied_from_project_id = def.project_id
+                    OR EXISTS(SELECT 1 FROM user_performed_skill local_event WHERE local_event.project_id = def.project_id AND local_event.user_id = uue.user_id)
+                    OR EXISTS(SELECT 1 FROM project_participation participant WHERE participant.project_id = def.project_id AND participant.user_id = uue.user_id))
             WHERE
                 uue.event_time >= :start AND
                 uue.event_type = :#{#type.name()} AND
@@ -255,12 +270,15 @@ interface UserEventsRepo extends CrudRepository<UserEvent, Integer> {
                    uue.week_number AS week_number
             FROM user_events uue 
                 INNER JOIN (
-                    select case when sd.copied_from_skill_ref is not null then sd.copied_from_skill_ref else sd.id end as id, sd.project_id 
+                    select case when sd.copied_from_skill_ref is not null then sd.copied_from_skill_ref else sd.id end as id, sd.project_id, sd.copied_from_project_id
                     from skill_definition sd 
                     where sd.type = 'Skill' and 
                     sd.enabled = 'true' and
                     sd.id in (select rel.child_ref_id from skill_relationship_definition rel where rel.parent_ref_id = :subjectRawId)
                 ) def ON uue.skill_ref_id = def.id
+                  AND (def.copied_from_project_id IS NULL OR def.copied_from_project_id = def.project_id
+                    OR EXISTS(SELECT 1 FROM user_performed_skill local_event WHERE local_event.project_id = def.project_id AND local_event.user_id = uue.user_id)
+                    OR EXISTS(SELECT 1 FROM project_participation participant WHERE participant.project_id = def.project_id AND participant.user_id = uue.user_id))
             WHERE
                 uue.event_time >= :start AND
                 not exists (select 1 from archived_users au where au.user_id = uue.user_id and au.project_id = def.project_id)
@@ -281,12 +299,15 @@ interface UserEventsRepo extends CrudRepository<UserEvent, Integer> {
                    uue.week_number AS week_number
             FROM user_events uue 
                 INNER JOIN (
-                    select case when sd.copied_from_skill_ref is not null then sd.copied_from_skill_ref else sd.id end as id, sd.project_id 
+                    select case when sd.copied_from_skill_ref is not null then sd.copied_from_skill_ref else sd.id end as id, sd.project_id, sd.copied_from_project_id
                     from skill_definition sd 
                     where sd.type = 'Skill' and 
                     sd.enabled = 'true' and
                     sd.id in (select rel.child_ref_id from skill_relationship_definition rel where rel.parent_ref_id = :skillRefId)
                 ) def ON uue.skill_ref_id = def.id
+                  AND (def.copied_from_project_id IS NULL OR def.copied_from_project_id = def.project_id
+                    OR EXISTS(SELECT 1 FROM user_performed_skill local_event WHERE local_event.project_id = def.project_id AND local_event.user_id = uue.user_id)
+                    OR EXISTS(SELECT 1 FROM project_participation participant WHERE participant.project_id = def.project_id AND participant.user_id = uue.user_id))
             WHERE
                 uue.event_time >= :start AND
                 not exists (select 1 from archived_users au where au.user_id = uue.user_id and au.project_id = def.project_id)
@@ -319,12 +340,15 @@ interface UserEventsRepo extends CrudRepository<UserEvent, Integer> {
                    uue.week_number AS week_number
             FROM user_events uue 
                 INNER JOIN (
-                    select case when sd.copied_from_skill_ref is not null then sd.copied_from_skill_ref else sd.id end as id, sd.project_id 
+                    select case when sd.copied_from_skill_ref is not null then sd.copied_from_skill_ref else sd.id end as id, sd.project_id, sd.copied_from_project_id
                     from skill_definition sd 
                     where sd.type = 'Skill' and 
                     sd.enabled = 'true' and
                     sd.id in (select rel.child_ref_id from skill_relationship_definition rel where rel.parent_ref_id = :skillRefId)
                 ) def ON uue.skill_ref_id = def.id
+                  AND (def.copied_from_project_id IS NULL OR def.copied_from_project_id = def.project_id
+                    OR EXISTS(SELECT 1 FROM user_performed_skill local_event WHERE local_event.project_id = def.project_id AND local_event.user_id = uue.user_id)
+                    OR EXISTS(SELECT 1 FROM project_participation participant WHERE participant.project_id = def.project_id AND participant.user_id = uue.user_id))
             WHERE
                 uue.event_time > :start AND
                 uue.event_type = :#{#type.name()} AND
@@ -360,12 +384,15 @@ interface UserEventsRepo extends CrudRepository<UserEvent, Integer> {
                    uue.week_number AS week_number
             FROM user_events uue 
             INNER JOIN (
-                select case when sd.copied_from_skill_ref is not null then sd.copied_from_skill_ref else sd.id end as id, sd.project_id 
+                select case when sd.copied_from_skill_ref is not null then sd.copied_from_skill_ref else sd.id end as id, sd.project_id, sd.copied_from_project_id
                 from skill_definition sd 
                 where sd.type = 'Skill' 
                 and sd.project_id in :projectIds
                 and sd.enabled = 'true'
             ) def ON uue.skill_ref_id = def.id
+              AND (def.copied_from_project_id IS NULL OR def.copied_from_project_id = def.project_id
+                OR EXISTS(SELECT 1 FROM user_performed_skill local_event WHERE local_event.project_id = def.project_id AND local_event.user_id = uue.user_id)
+                OR EXISTS(SELECT 1 FROM project_participation participant WHERE participant.project_id = def.project_id AND participant.user_id = uue.user_id))
             WHERE
                 uue.event_time > :start AND
                 uue.event_type = :#{#type.name()} AND
@@ -387,12 +414,15 @@ interface UserEventsRepo extends CrudRepository<UserEvent, Integer> {
                    uue.count AS count,
                    uue.week_number AS week_number
             FROM user_events uue INNER JOIN (
-                    select case when sd.copied_from_skill_ref is not null then sd.copied_from_skill_ref else sd.id end as id, sd.project_id 
+                    select case when sd.copied_from_skill_ref is not null then sd.copied_from_skill_ref else sd.id end as id, sd.project_id, sd.copied_from_project_id
                     from skill_definition sd 
                     where sd.type = 'Skill' 
                     and sd.project_id in :projectIds
                     and sd.enabled = 'true'
                 ) def ON uue.skill_ref_id = def.id
+                  AND (def.copied_from_project_id IS NULL OR def.copied_from_project_id = def.project_id
+                    OR EXISTS(SELECT 1 FROM user_performed_skill local_event WHERE local_event.project_id = def.project_id AND local_event.user_id = uue.user_id)
+                    OR EXISTS(SELECT 1 FROM project_participation participant WHERE participant.project_id = def.project_id AND participant.user_id = uue.user_id))
             WHERE
                     uue.event_time >= :start AND
                     uue.user_id = :userId
@@ -415,12 +445,15 @@ interface UserEventsRepo extends CrudRepository<UserEvent, Integer> {
                    uue.week_number AS week_number
             FROM user_events uue 
                 INNER JOIN (
-                    select case when sd.copied_from_skill_ref is not null then sd.copied_from_skill_ref else sd.id end as id, sd.project_id 
+                    select case when sd.copied_from_skill_ref is not null then sd.copied_from_skill_ref else sd.id end as id, sd.project_id, sd.copied_from_project_id
                     from skill_definition sd 
                     where sd.type = 'Skill' 
                     and sd.project_id = :projectId
                     and sd.enabled = 'true'
                 ) def ON uue.skill_ref_id = def.id
+                  AND (def.copied_from_project_id IS NULL OR def.copied_from_project_id = def.project_id
+                    OR EXISTS(SELECT 1 FROM user_performed_skill local_event WHERE local_event.project_id = def.project_id AND local_event.user_id = uue.user_id)
+                    OR EXISTS(SELECT 1 FROM project_participation participant WHERE participant.project_id = def.project_id AND participant.user_id = uue.user_id))
             WHERE
                 uue.event_time >= :start AND
                 uue.event_type = :#{#type.name()} AND
@@ -445,6 +478,9 @@ interface UserEventsRepo extends CrudRepository<UserEvent, Integer> {
             WHERE sd.projectId = :projectId 
             AND sd.type = 'Skill'
             AND sd.enabled = 'true'
+            AND (sd.copiedFromProjectId is null OR sd.copiedFromProjectId = sd.projectId
+              OR exists(select 1 from UserPerformedSkill localEvent where localEvent.projectId = sd.projectId and localEvent.userId = ue.userId)
+              OR exists(select 1 from ProjectParticipation participant where participant.projectId = sd.projectId and participant.userId = ue.userId))
         )   
         AND not exists (select 1 from ArchivedUser au where au.userId = ue.userId and au.projectId = :projectId)
         AND (

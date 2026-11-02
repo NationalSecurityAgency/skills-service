@@ -49,7 +49,8 @@ interface UserTagRepo extends CrudRepository<UserTag, Integer> {
 
     final static String SELECT_DISTINCT_USER_BY_TAG_SQL = '''WITH
         valid_skills AS (
-            SELECT CASE WHEN sd.copied_from_skill_ref IS NOT NULL THEN sd.copied_from_skill_ref ELSE sd.id END as skill_ref_id
+            SELECT CASE WHEN sd.copied_from_skill_ref IS NOT NULL THEN sd.copied_from_skill_ref ELSE sd.id END as skill_ref_id,
+                   sd.project_id, sd.copied_from_project_id
             FROM skill_definition sd
             WHERE sd.type = 'Skill'
               AND sd.project_id = :projectId
@@ -58,7 +59,10 @@ interface UserTagRepo extends CrudRepository<UserTag, Integer> {
         users_tmp AS (
              SELECT DISTINCT up.user_id
              FROM user_performed_skill up
-                      JOIN valid_skills vs ON up.skill_ref_id = vs.skill_ref_id
+                       JOIN valid_skills vs ON up.skill_ref_id = vs.skill_ref_id
+                         AND (vs.copied_from_project_id IS NULL OR vs.copied_from_project_id = vs.project_id
+                           OR EXISTS(SELECT 1 FROM user_performed_skill local_event WHERE local_event.project_id = vs.project_id AND local_event.user_id = up.user_id)
+                           OR EXISTS(SELECT 1 FROM project_participation participant WHERE participant.project_id = vs.project_id AND participant.user_id = up.user_id))
                       LEFT JOIN archived_users au ON (au.user_id = up.user_id AND au.project_id = :projectId)
              WHERE up.performed_on >= :startDate
                AND up.performed_on <= :endDate
@@ -77,7 +81,8 @@ interface UserTagRepo extends CrudRepository<UserTag, Integer> {
 
     final static String COUNT_DISTINCT_USER_BY_TAG_SQL = '''WITH
         valid_skills AS (
-            SELECT CASE WHEN sd.copied_from_skill_ref IS NOT NULL THEN sd.copied_from_skill_ref ELSE sd.id END as skill_ref_id
+            SELECT CASE WHEN sd.copied_from_skill_ref IS NOT NULL THEN sd.copied_from_skill_ref ELSE sd.id END as skill_ref_id,
+                   sd.project_id, sd.copied_from_project_id
             FROM skill_definition sd
             WHERE sd.type = 'Skill'
               AND sd.project_id = :projectId
@@ -86,7 +91,10 @@ interface UserTagRepo extends CrudRepository<UserTag, Integer> {
         users_tmp AS (
              SELECT DISTINCT up.user_id
              FROM user_performed_skill up
-                      JOIN valid_skills vs ON up.skill_ref_id = vs.skill_ref_id
+                       JOIN valid_skills vs ON up.skill_ref_id = vs.skill_ref_id
+                         AND (vs.copied_from_project_id IS NULL OR vs.copied_from_project_id = vs.project_id
+                           OR EXISTS(SELECT 1 FROM user_performed_skill local_event WHERE local_event.project_id = vs.project_id AND local_event.user_id = up.user_id)
+                           OR EXISTS(SELECT 1 FROM project_participation participant WHERE participant.project_id = vs.project_id AND participant.user_id = up.user_id))
                       LEFT JOIN archived_users au ON (au.user_id = up.user_id AND au.project_id = :projectId)
              WHERE up.performed_on >= :startDate
                AND up.performed_on <= :endDate

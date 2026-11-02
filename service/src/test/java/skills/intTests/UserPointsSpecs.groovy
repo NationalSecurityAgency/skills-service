@@ -186,6 +186,7 @@ class UserPointsSpecs extends DefaultIntSpec {
         def project2_subject = SkillsFactory.createSubject(11, 1)
         def project2_skill2 = SkillsFactory.createSkill(11, 1, 2, 0, 10, 0, 100)
         skillsService.createProjectAndSubjectAndSkills(project2, project2_subject, [project2_skill2])
+        createService(sampleUserIds.get(0)).initializeProjectProgress(project2.projectId)
 
         skillsService.exportSkillToCatalog(projId, subj1_skills[0].skillId)
         skillsService.importSkillFromCatalog(project2.projectId, project2_subject.subjectId, subj1_skills[0].projectId, subj1_skills[0].skillId)
