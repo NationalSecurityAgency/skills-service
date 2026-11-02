@@ -47,6 +47,7 @@ import skills.storage.model.UserAttrs
 import skills.storage.model.auth.RoleName
 import skills.storage.repos.AdminGroupDefRepo
 import skills.storage.repos.ProjDefRepo
+import skills.storage.repos.QuizDefRepo
 import skills.storage.repos.UserAttrsRepo
 import skills.storage.repos.UserRoleRepo
 
@@ -66,6 +67,9 @@ class AdminGroupRoleService {
 
     @Autowired
     QuizDefService quizDefService
+
+    @Autowired
+    QuizDefRepo quizDefRepo
 
     @Autowired
     QuizRoleService quizRoleService
@@ -159,7 +163,7 @@ class AdminGroupRoleService {
             throw new SkillException("Cannot delete roles for myself when there are no other admins. userId=[${userId}], adminGroupName=[${adminGroupDef.name}]", ErrorCode.AccessDenied)
         }
         accessSettingsStorageService.deleteAdminGroupUserRole(userId, adminGroupDef.adminGroupId, roleName)
-        accessSettingsStorageService.deleteProjectAndQuizAdminUserRolesWithAdminGroupIdForUser(userId, adminGroupDef.adminGroupId)
+        accessSettingsStorageService.deleteAdminGroupResourceUserRolesForUser(userId, adminGroupDef.adminGroupId)
 
         UserAttrs userAttrs = userAttrsRepo.findByUserIdIgnoreCase(userId)
         String userIdForDisplay = userAttrs?.userIdForDisplay ?: userId
@@ -194,7 +198,10 @@ class AdminGroupRoleService {
 
     @Transactional()
     void removeQuizFromAdminGroup(String adminGroupId, String quizId) {
-        QuizDef quizDef = quizDefService.findQuizDef(quizId)
+        QuizDef quizDef = quizDefRepo.findByQuizIdIgnoreCase(quizId)
+        if (!quizDef || !userAuthService.isUserQuizAdmin(userInfoService.currentUser, quizDef.quizId)) {
+            throw new AccessDeniedException("Access is denied")
+        }
         removeProjectOrQuizOrGlobalBadgeFromAdminGroup(adminGroupId, quizDef.quizId, RoleName.ROLE_QUIZ_ADMIN)
     }
 
@@ -216,7 +223,10 @@ class AdminGroupRoleService {
 
     @Transactional()
     void removeProjectFromAdminGroup(String adminGroupId, String projectId) {
-        ProjDef projDef = projectDefRepo.findByProjectId(projectId)
+        ProjDef projDef = projectDefRepo.findByProjectIdIgnoreCase(projectId)
+        if (!projDef || !userAuthService.isUserProjectAdmin(userInfoService.currentUser, projDef.projectId)) {
+            throw new AccessDeniedException("Access is denied")
+        }
         removeProjectOrQuizOrGlobalBadgeFromAdminGroup(adminGroupId, projDef.projectId, RoleName.ROLE_PROJECT_ADMIN)
     }
 
@@ -239,7 +249,10 @@ class AdminGroupRoleService {
 
     @Transactional()
     void removeGlobalBadgeFromAdminGroup(String adminGroupId, String badgeId) {
-        GlobalBadgeResult globalBadgeDef = findGlobalBadgeResult(badgeId)
+        GlobalBadgeResult globalBadgeDef = globalBadgesService.getBadge(badgeId)
+        if (!globalBadgeDef || !userAuthService.isUserGlobalBadgeAdmin(userInfoService.currentUser, globalBadgeDef.badgeId)) {
+            throw new AccessDeniedException("Access is denied")
+        }
         removeProjectOrQuizOrGlobalBadgeFromAdminGroup(adminGroupId, globalBadgeDef.badgeId, RoleName.ROLE_GLOBAL_BADGE_ADMIN)
     }
 
@@ -248,16 +261,25 @@ class AdminGroupRoleService {
         String currentUser = userInfoService.getCurrentUserId()
         // remove all members of this admin group, except current user (unless the current user remains an admin from a different group)
         if (roleName == RoleName.ROLE_QUIZ_ADMIN) {
+            if (!userRoleRepo.existsByQuizIdAndAdminGroupIdAndRoleName(projectOrQuizOrGlobalBadgeId, adminGroupDef.adminGroupId, roleName)) {
+                throw new AccessDeniedException("Quiz [${projectOrQuizOrGlobalBadgeId}] is not assigned to admin group [${adminGroupDef.adminGroupId}]")
+            }
             userRoleRepo.deleteByQuizIdAndAdminGroupIdAndRoleName(projectOrQuizOrGlobalBadgeId, adminGroupDef.adminGroupId, RoleName.ROLE_QUIZ_ADMIN)
             if (!userRoleRepo.isUserQuizGroupAdmin(currentUser, projectOrQuizOrGlobalBadgeId)) {
                 accessSettingsStorageService.addQuizDefUserRoleForUser(currentUser, projectOrQuizOrGlobalBadgeId, RoleName.ROLE_QUIZ_ADMIN)
             }
         } else if (roleName == RoleName.ROLE_PROJECT_ADMIN) {
+            if (!userRoleRepo.existsByProjectIdAndAdminGroupIdAndRoleName(projectOrQuizOrGlobalBadgeId, adminGroupDef.adminGroupId, roleName)) {
+                throw new AccessDeniedException("Project [${projectOrQuizOrGlobalBadgeId}] is not assigned to admin group [${adminGroupDef.adminGroupId}]")
+            }
             userRoleRepo.deleteByProjectIdAndAdminGroupIdAndRoleName(projectOrQuizOrGlobalBadgeId, adminGroupDef.adminGroupId, RoleName.ROLE_PROJECT_ADMIN)
             if (!userRoleRepo.isUserProjectGroupAdmin(currentUser, projectOrQuizOrGlobalBadgeId)) {
                 accessSettingsStorageService.addUserRole(currentUser, projectOrQuizOrGlobalBadgeId, RoleName.ROLE_PROJECT_ADMIN)
             }
         } else if (roleName == RoleName.ROLE_GLOBAL_BADGE_ADMIN) {
+            if (!userRoleRepo.existsByGlobalBadgeIdAndAdminGroupIdAndRoleName(projectOrQuizOrGlobalBadgeId, adminGroupDef.adminGroupId, roleName)) {
+                throw new AccessDeniedException("Global badge [${projectOrQuizOrGlobalBadgeId}] is not assigned to admin group [${adminGroupDef.adminGroupId}]")
+            }
             userRoleRepo.deleteByGlobalBadgeIdAndAdminGroupIdAndRoleName(projectOrQuizOrGlobalBadgeId, adminGroupDef.adminGroupId, RoleName.ROLE_GLOBAL_BADGE_ADMIN)
             if (!userRoleRepo.isUserGlobalBadgeGroupAdmin(currentUser, projectOrQuizOrGlobalBadgeId)) {
                 accessSettingsStorageService.addGlobalBadgeAdminUserRoleForUser(currentUser, projectOrQuizOrGlobalBadgeId, RoleName.ROLE_GLOBAL_BADGE_ADMIN)

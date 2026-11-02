@@ -22,7 +22,9 @@ import skills.intTests.utils.QuizDefFactory
 import skills.intTests.utils.SkillsClientException
 import skills.intTests.utils.SkillsService
 import skills.storage.model.auth.RoleName
+import skills.storage.model.auth.UserRole
 import skills.storage.repos.UserRoleRepo
+import spock.lang.Unroll
 
 import static skills.intTests.utils.AdminGroupDefFactory.createAdminGroup
 import static skills.intTests.utils.SkillsFactory.*
@@ -1095,6 +1097,401 @@ class AdminGroupDefManagementSpecs extends DefaultIntSpec {
         then:
         SkillsClientException skillsClientException = thrown()
         skillsClientException.message.contains("Cannot delete roles for myself when there are no other admins")
+    }
+
+    @Unroll
+    def "removing unrelated #resourceType must not grant admin after a denied add - resource group assigned=#assignedToResourceGroup, group casing=#groupCasing, resource casing=#resourceCasing"() {
+        List<String> users = getRandomUsers(3)
+        SkillsService resourceOwner = createService(users[0])
+        SkillsService groupOwner = createService(users[1])
+        SkillsService resourceGroupMember = createService(users[2])
+        Map resource = createRemovalTestResource(resourceOwner, resourceType)
+        Map unrelatedGroup = createAdminGroup(1)
+        Map resourceGroup = createAdminGroup(2)
+        groupOwner.createAdminGroupDef(unrelatedGroup)
+        if (assignedToResourceGroup) {
+            resourceOwner.createAdminGroupDef(resourceGroup)
+            resourceOwner.addAdminGroupMember(resourceGroup.adminGroupId, users[2])
+            addRemovalTestResource(resourceOwner, resourceType, resourceGroup.adminGroupId, resource.id)
+            assert readRemovalTestResource(resourceGroupMember, resourceType, resource.id).name == resource.name
+        }
+        assert !groupOwner.isRoot()
+        assert groupOwner.getAdminGroupMembers(unrelatedGroup.adminGroupId).find {
+            it.userId == groupOwner.userName.toLowerCase() && it.roleName == RoleName.ROLE_ADMIN_GROUP_OWNER.name()
+        }
+        assert !assignedRemovalTestResources(groupOwner, resourceType, unrelatedGroup.adminGroupId)
+        assert removalRequestFailure { readRemovalTestResource(groupOwner, resourceType, resource.id) }?.httpStatus?.value() == 403
+        assert removalRequestFailure {
+            addRemovalTestResource(groupOwner, resourceType, unrelatedGroup.adminGroupId, resource.id)
+        }?.httpStatus?.value() == 403
+        List<Map> rolesBefore = removalTestRoleSnapshot(resourceType, resource.id)
+
+        when:
+        SkillsClientException removalFailure = removalRequestFailure {
+            removeRemovalTestResource(groupOwner, resourceType, removalTestIdCasing(unrelatedGroup.adminGroupId, groupCasing), removalTestIdCasing(resource.id, resourceCasing))
+        }
+
+        then:
+        // Check all outcomes even when DELETE incorrectly succeeds, including subsequent resource access.
+        verifyAll {
+            removalFailure?.httpStatus?.value() == 403
+            removalRequestFailure { readRemovalTestResource(groupOwner, resourceType, resource.id) }?.httpStatus?.value() == 403
+            removalTestRoleSnapshot(resourceType, resource.id) == rolesBefore
+            readRemovalTestResource(resourceOwner, resourceType, resource.id).name == resource.name
+            !assignedRemovalTestResources(groupOwner, resourceType, unrelatedGroup.adminGroupId)
+            if (assignedToResourceGroup) {
+                assert assignedRemovalTestResources(resourceOwner, resourceType, resourceGroup.adminGroupId)*.name == [resource.name]
+                assert readRemovalTestResource(resourceGroupMember, resourceType, resource.id).name == resource.name
+            }
+        }
+
+        where:
+        [resourceType, assignedToResourceGroup, groupCasing, resourceCasing] << [
+                ['project', 'quiz', 'survey', 'global badge'], [false, true],
+                ['original', 'lower', 'upper'], ['original', 'lower', 'upper']
+        ].combinations()
+    }
+
+    @Unroll
+    def "community membership alone must not authorize removing unrelated protected #resourceType - member=#communityMember"() {
+        List<String> users = getRandomUsers(2)
+        SkillsService resourceOwner = createService(users[0])
+        SkillsService groupOwner = createService(users[1])
+        SkillsService root = createRootSkillService()
+        root.saveUserTag(resourceOwner.userName, 'dragons', ['DivineDragon'])
+        if (communityMember) {
+            root.saveUserTag(groupOwner.userName, 'dragons', ['DivineDragon'])
+        }
+        Map resource = createRemovalTestResource(resourceOwner, resourceType, true)
+        Map unrelatedGroup = createAdminGroup(1)
+        groupOwner.createAdminGroupDef(unrelatedGroup)
+        assert !groupOwner.isRoot()
+        assert removalRequestFailure { readRemovalTestResource(groupOwner, resourceType, resource.id) }?.httpStatus?.value() == 403
+        List<Map> rolesBefore = removalTestRoleSnapshot(resourceType, resource.id)
+
+        when:
+        SkillsClientException removalFailure = removalRequestFailure {
+            removeRemovalTestResource(groupOwner, resourceType, unrelatedGroup.adminGroupId, resource.id)
+        }
+
+        then:
+        verifyAll {
+            // Existing community checks can return a structured AccessDenied response with HTTP 400.
+            removalFailure?.httpStatus?.value() in [403, 400]
+            removalRequestFailure { readRemovalTestResource(groupOwner, resourceType, resource.id) }?.httpStatus?.value() == 403
+            removalTestRoleSnapshot(resourceType, resource.id) == rolesBefore
+            readRemovalTestResource(resourceOwner, resourceType, resource.id).name == resource.name
+            !assignedRemovalTestResources(groupOwner, resourceType, unrelatedGroup.adminGroupId)
+        }
+
+        where:
+        [resourceType, communityMember] << [['project', 'quiz', 'survey', 'global badge'], [false, true]].combinations()
+    }
+
+    @Unroll
+    def "resource admin cannot remove #resourceType through an unrelated group they own - group casing=#groupCasing, resource casing=#resourceCasing"() {
+        List<String> users = getRandomUsers(2)
+        SkillsService owner = createService(users[0])
+        SkillsService member = createService(users[1])
+        Map resource = createRemovalTestResource(owner, resourceType)
+        Map assignedGroup = createAdminGroup(1)
+        Map unrelatedGroup = createAdminGroup(2)
+        owner.createAdminGroupDef(assignedGroup)
+        owner.createAdminGroupDef(unrelatedGroup)
+        owner.addAdminGroupMember(assignedGroup.adminGroupId, users[1])
+        addRemovalTestResource(owner, resourceType, assignedGroup.adminGroupId, resource.id)
+        List<Map> rolesBefore = removalTestRoleSnapshot(resourceType, resource.id)
+
+        when:
+        SkillsClientException removalFailure = removalRequestFailure {
+            removeRemovalTestResource(owner, resourceType, removalTestIdCasing(unrelatedGroup.adminGroupId, groupCasing), removalTestIdCasing(resource.id, resourceCasing))
+        }
+
+        then:
+        verifyAll {
+            removalFailure?.httpStatus?.value() in [403, 400]
+            removalTestRoleSnapshot(resourceType, resource.id) == rolesBefore
+            assignedRemovalTestResources(owner, resourceType, assignedGroup.adminGroupId)*.name == [resource.name]
+            !assignedRemovalTestResources(owner, resourceType, unrelatedGroup.adminGroupId)
+            readRemovalTestResource(member, resourceType, resource.id).name == resource.name
+        }
+
+        where:
+        [resourceType, groupCasing, resourceCasing] << [
+                ['project', 'quiz', 'survey', 'global badge'],
+                ['original', 'lower', 'upper'], ['original', 'lower', 'upper']
+        ].combinations()
+    }
+
+    @Unroll
+    def "group member cannot detach #resourceType despite having resource admin access"() {
+        List<String> users = getRandomUsers(2)
+        SkillsService owner = createService(users[0])
+        SkillsService member = createService(users[1])
+        Map resource = createRemovalTestResource(owner, resourceType)
+        Map group = createAdminGroup(1)
+        owner.createAdminGroupDef(group)
+        owner.addAdminGroupMember(group.adminGroupId, users[1])
+        addRemovalTestResource(owner, resourceType, group.adminGroupId, resource.id)
+        assert readRemovalTestResource(member, resourceType, resource.id).name == resource.name
+        List<Map> rolesBefore = removalTestRoleSnapshot(resourceType, resource.id)
+
+        when:
+        removeRemovalTestResource(member, resourceType, group.adminGroupId, resource.id)
+
+        then:
+        SkillsClientException removalFailure = thrown(SkillsClientException)
+        removalFailure.httpStatus.value() == 403
+        removalTestRoleSnapshot(resourceType, resource.id) == rolesBefore
+        assignedRemovalTestResources(owner, resourceType, group.adminGroupId)*.name == [resource.name]
+        readRemovalTestResource(member, resourceType, resource.id).name == resource.name
+
+        where:
+        resourceType << ['project', 'quiz', 'survey', 'global badge']
+    }
+
+    @Unroll
+    def "legitimate #resourceType removal retains direct owner admin and revokes group member access - group casing=#groupCasing, resource casing=#resourceCasing"() {
+        List<String> users = getRandomUsers(2)
+        SkillsService owner = createService(users[0])
+        SkillsService member = createService(users[1])
+        Map resource = createRemovalTestResource(owner, resourceType)
+        Map group = createAdminGroup(1)
+        owner.createAdminGroupDef(group)
+        owner.addAdminGroupMember(group.adminGroupId, users[1])
+        addRemovalTestResource(owner, resourceType, group.adminGroupId, resource.id)
+        assert assignedRemovalTestResources(owner, resourceType, group.adminGroupId)*.name == [resource.name]
+        assert readRemovalTestResource(member, resourceType, resource.id).name == resource.name
+
+        when:
+        removeRemovalTestResource(owner, resourceType, removalTestIdCasing(group.adminGroupId, groupCasing), removalTestIdCasing(resource.id, resourceCasing))
+
+        then:
+        readRemovalTestResource(owner, resourceType, resource.id).name == resource.name
+        !assignedRemovalTestResources(owner, resourceType, group.adminGroupId)
+        removalRequestFailure { readRemovalTestResource(member, resourceType, resource.id) }?.httpStatus?.value() == 403
+        owner.getAdminGroupMembers(group.adminGroupId)*.userId.toSet() == users.collect { String user -> user.toLowerCase() }.toSet()
+        // The API does not expose whether retained administration is standalone or group-derived.
+        List<Map> rolesAfter = removalTestRoleSnapshot(resourceType, resource.id)
+        rolesAfter.size() == 1
+        rolesAfter[0].userId == owner.userName.toLowerCase()
+        rolesAfter[0].adminGroupId == null
+        rolesAfter[0].roleName == resource.roleName
+
+        where:
+        [resourceType, groupCasing, resourceCasing] << [
+                ['project', 'quiz', 'survey', 'global badge'],
+                ['original', 'lower', 'upper'], ['original', 'lower', 'upper']
+        ].combinations()
+    }
+
+    @Unroll
+    def "removing a #membershipRole revokes #resourceType group access and preserves other group access=#retainOtherGroupAccess"() {
+        List<String> users = getRandomUsers(2)
+        SkillsService owner = createService(users[0])
+        SkillsService groupUser = createService(users[1])
+        Map resource = createRemovalTestResource(owner, resourceType)
+        Map group = createAdminGroup(1)
+        Map otherGroup = createAdminGroup(2)
+        owner.createAdminGroupDef(group)
+        if (membershipRole == 'owner') {
+            owner.addAdminGroupOwner(group.adminGroupId, groupUser.userName)
+        } else {
+            owner.addAdminGroupMember(group.adminGroupId, groupUser.userName)
+        }
+        addRemovalTestResource(owner, resourceType, group.adminGroupId, resource.id)
+        if (retainOtherGroupAccess) {
+            owner.createAdminGroupDef(otherGroup)
+            owner.addAdminGroupMember(otherGroup.adminGroupId, groupUser.userName)
+            addRemovalTestResource(owner, resourceType, otherGroup.adminGroupId, resource.id)
+        }
+        assert readRemovalTestResource(groupUser, resourceType, resource.id).name == resource.name
+
+        when:
+        if (membershipRole == 'owner') {
+            owner.deleteAdminGroupOwner(group.adminGroupId, groupUser.userName)
+        } else {
+            owner.deleteAdminGroupMember(group.adminGroupId, groupUser.userName)
+        }
+
+        then:
+        !owner.getAdminGroupMembers(group.adminGroupId).find { it.userId == groupUser.userName.toLowerCase() }
+        readRemovalTestResource(owner, resourceType, resource.id).name == resource.name
+        assignedRemovalTestResources(owner, resourceType, group.adminGroupId)*.name == [resource.name]
+        if (retainOtherGroupAccess) {
+            assert readRemovalTestResource(groupUser, resourceType, resource.id).name == resource.name
+            assert owner.getAdminGroupMembers(otherGroup.adminGroupId).find { it.userId == groupUser.userName.toLowerCase() }
+            assert assignedRemovalTestResources(owner, resourceType, otherGroup.adminGroupId)*.name == [resource.name]
+        } else {
+            assert removalRequestFailure { readRemovalTestResource(groupUser, resourceType, resource.id) }?.httpStatus == HttpStatus.FORBIDDEN
+        }
+        // Confirm that any retained administration is not derived from the removed membership.
+        !removalTestRoleSnapshot(resourceType, resource.id).find { Map role ->
+            role.userId == groupUser.userName.toLowerCase() && role.adminGroupId == group.adminGroupId
+        }
+
+        where:
+        [resourceType, membershipRole, retainOtherGroupAccess] << [
+                ['project', 'quiz', 'survey', 'global badge'], ['member', 'owner'], [false, true]
+        ].combinations()
+    }
+
+    @Unroll
+    def "removing missing or unauthorized #resourceType returns the same denial - casing=#casing"() {
+        List<String> users = getRandomUsers(2)
+        SkillsService resourceOwner = createService(users[0])
+        SkillsService groupOwner = createService(users[1])
+        Map resource = createRemovalTestResource(resourceOwner, resourceType)
+        Map group = createAdminGroup(1)
+        groupOwner.createAdminGroupDef(group)
+        List<Map> rolesBefore = removalTestRoleSnapshot(resourceType, resource.id)
+        String requestedGroupId = removalTestIdCasing(group.adminGroupId, casing)
+        String requestedResourceId = removalTestIdCasing(resource.id, casing)
+        String missingResourceId = removalTestIdCasing("Missing${resource.id}".toString(), casing)
+
+        when:
+        SkillsClientException existingFailure = removalRequestFailure {
+            removeRemovalTestResource(groupOwner, resourceType, requestedGroupId, requestedResourceId)
+        }
+        SkillsClientException missingFailure = removalRequestFailure {
+            removeRemovalTestResource(groupOwner, resourceType, requestedGroupId, missingResourceId)
+        }
+
+        then:
+        existingFailure?.httpStatus == HttpStatus.FORBIDDEN
+        missingFailure?.httpStatus == HttpStatus.FORBIDDEN
+        existingFailure.res.body == [errorCode: 'AccessDenied', explanation: 'Access Denied', success: false]
+        missingFailure.res.body == existingFailure.res.body
+        removalTestRoleSnapshot(resourceType, resource.id) == rolesBefore
+        readRemovalTestResource(resourceOwner, resourceType, resource.id).name == resource.name
+        removalRequestFailure { readRemovalTestResource(groupOwner, resourceType, resource.id) }?.httpStatus == HttpStatus.FORBIDDEN
+        !assignedRemovalTestResources(groupOwner, resourceType, group.adminGroupId)
+
+        where:
+        [resourceType, casing] << [['project', 'quiz', 'survey', 'global badge'], ['original', 'lower', 'upper']].combinations()
+    }
+
+    private static String removalTestIdCasing(String id, String casing) {
+        switch (casing) {
+            case 'original': return id
+            case 'lower': return id.toLowerCase(Locale.ROOT)
+            case 'upper': return id.toUpperCase(Locale.ROOT)
+            default: throw new IllegalArgumentException("Unsupported ID casing [${casing}]")
+        }
+    }
+
+    private Map createRemovalTestResource(SkillsService owner, String resourceType, boolean protectedCommunity = false) {
+        Map definition
+        RoleName roleName
+        String id
+        switch (resourceType) {
+            case 'project':
+                definition = createProject(1)
+                definition.enableProtectedUserCommunity = protectedCommunity
+                owner.createProject(definition)
+                id = definition.projectId
+                roleName = RoleName.ROLE_PROJECT_ADMIN
+                break
+            case 'quiz':
+            case 'survey':
+                definition = resourceType == 'quiz' ? QuizDefFactory.createQuiz(1) : QuizDefFactory.createQuizSurvey(1)
+                definition.enableProtectedUserCommunity = protectedCommunity
+                owner.createQuizDef(definition)
+                id = definition.quizId
+                roleName = RoleName.ROLE_QUIZ_ADMIN
+                break
+            case 'global badge':
+                definition = createBadge(1, 1)
+                definition.enableProtectedUserCommunity = protectedCommunity
+                owner.createGlobalBadge(definition)
+                id = definition.badgeId
+                roleName = RoleName.ROLE_GLOBAL_BADGE_ADMIN
+                break
+            default:
+                throw new IllegalArgumentException("Unsupported resource type [${resourceType}]")
+        }
+        return [id: id, name: definition.name, roleName: roleName]
+    }
+
+    private static Map readRemovalTestResource(SkillsService client, String resourceType, String resourceId) {
+        switch (resourceType) {
+            case 'project': return client.getProject(resourceId)
+            case 'quiz':
+            case 'survey': return client.getQuizDef(resourceId)
+            case 'global badge': return client.getGlobalBadge(resourceId)
+            default: throw new IllegalArgumentException("Unsupported resource type [${resourceType}]")
+        }
+    }
+
+    private static void addRemovalTestResource(SkillsService client, String resourceType, String adminGroupId, String resourceId) {
+        switch (resourceType) {
+            case 'project':
+                client.addProjectToAdminGroup(adminGroupId, resourceId)
+                break
+            case 'quiz':
+            case 'survey':
+                client.addQuizToAdminGroup(adminGroupId, resourceId)
+                break
+            case 'global badge':
+                client.addGlobalBadgeToAdminGroup(adminGroupId, resourceId)
+                break
+            default: throw new IllegalArgumentException("Unsupported resource type [${resourceType}]")
+        }
+    }
+
+    private static void removeRemovalTestResource(SkillsService client, String resourceType, String adminGroupId, String resourceId) {
+        switch (resourceType) {
+            case 'project':
+                client.deleteProjectFromAdminGroup(adminGroupId, resourceId)
+                break
+            case 'quiz':
+            case 'survey':
+                client.deleteQuizFromAdminGroup(adminGroupId, resourceId)
+                break
+            case 'global badge':
+                client.deleteGlobalBadgeFromAdminGroup(adminGroupId, resourceId)
+                break
+            default: throw new IllegalArgumentException("Unsupported resource type [${resourceType}]")
+        }
+    }
+
+    private static List<Map> assignedRemovalTestResources(SkillsService client, String resourceType, String adminGroupId) {
+        switch (resourceType) {
+            case 'project': return client.getAdminGroupProjects(adminGroupId).assignedProjects
+            case 'quiz':
+            case 'survey': return client.getAdminGroupQuizzesAndSurveys(adminGroupId).assignedQuizzes
+            case 'global badge': return client.getAdminGroupGlobalBadges(adminGroupId).assignedGlobalBadges
+            default: throw new IllegalArgumentException("Unsupported resource type [${resourceType}]")
+        }
+    }
+
+    private List<Map> removalTestRoleSnapshot(String resourceType, String resourceId) {
+        List<UserRole> roles
+        switch (resourceType) {
+            case 'project':
+                roles = userRoleRepository.findAllByProjectIdIgnoreCase(resourceId)
+                break
+            case 'quiz':
+            case 'survey':
+                roles = userRoleRepository.findAllByQuizIdIgnoreCase(resourceId)
+                break
+            case 'global badge':
+                roles = userRoleRepository.findAllByGlobalBadgeIdIgnoreCase(resourceId)
+                break
+            default: throw new IllegalArgumentException("Unsupported resource type [${resourceType}]")
+        }
+        return roles.sort { UserRole role -> role.id }.collect { UserRole role ->
+            [id: role.id, userId: role.userId, roleName: role.roleName, adminGroupId: role.adminGroupId]
+        }
+    }
+
+    private static SkillsClientException removalRequestFailure(Closure request) {
+        try {
+            request.call()
+            return null
+        } catch (SkillsClientException exception) {
+            return exception
+        }
     }
 
     def "owner cannot add project they do not administrate to admin group"() {
