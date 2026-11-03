@@ -28,16 +28,19 @@ const possiblePageSizes = [5, 10, 15, 20, 50];
 const pageSize = useStorage('sharedSkillsTable-pageSize', 5)
 const totalRecords = ref(0)
 const currentPage = ref(1);
-const sortField = ref('skill.skillId')
-const sortOrder = ref(0)
+const defaultSort = { sortOrder: -1, sortBy: 'skill.skillId' }
+const sortInfo = useStorage('skillsTable-sort-sharedWithMeSkillsTable', defaultSort)
+if (!['skill.skillId', 'skill.name', 'projectName'].includes(sortInfo.value?.sortBy)) {
+  sortInfo.value = { ...defaultSort }
+}
 
 const loadSharedSkills = () => {
   loading.value = true;
   const params = {
     limit: pageSize.value,
-    ascending: sortOrder.value === 1,
+    ascending: sortInfo.value.sortOrder === 1,
     page: currentPage.value,
-    orderBy: sortField.value,
+    orderBy: sortInfo.value.sortBy,
   };
 
   SkillsShareService.getSharedWithmeSkills(props.projectId, params)
@@ -55,8 +58,9 @@ const pageChanged = (pagingInfo) => {
 }
 
 const sortChanged = (sortingInfo) => {
-  sortField.value = sortingInfo.sortField
-  sortOrder.value = sortingInfo.sortOrder
+  sortInfo.value.sortBy = sortingInfo.sortField
+  sortInfo.value.sortOrder = sortingInfo.sortOrder
+  currentPage.value = 1
   loadSharedSkills()
 }
 
@@ -75,7 +79,8 @@ onMounted(() => {
     <template #content>
       <div v-if="sharedSkills && sharedSkills.length > 0">
         <shared-skills-table :shared-skills="sharedSkills" :disable-delete="true" :page-size="pageSize" :possible-page-sizes="possiblePageSizes"
-                             :total-records="totalRecords" @page-changed="pageChanged" @sort-changed="sortChanged"></shared-skills-table>
+                             :total-records="totalRecords" :sort-field="sortInfo.sortBy" :sort-order="sortInfo.sortOrder"
+                             @page-changed="pageChanged" @sort-changed="sortChanged"></shared-skills-table>
       </div>
       <div v-else>
         <no-content2 title="No Skills Available Yet..." icon="far fa-handshake"
