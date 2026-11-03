@@ -171,7 +171,13 @@ class QuizSettingsService {
                 throw new SkillQuizException("Provided value [${quizSettingsRequest.value}] for [${quizSettingsRequest.setting}] setting must be numeric", quizId, ErrorCode.BadParam)
             }
 
-            Integer maxNumAttempts = Integer.valueOf(quizSettingsRequest.value)
+            // isCreatable also accepts values such as 1.5, 0x10, 1e3 and numbers outside of the Integer range
+            Integer maxNumAttempts
+            try {
+                maxNumAttempts = Integer.valueOf(quizSettingsRequest.value)
+            } catch (NumberFormatException ignored) {
+                throw new SkillQuizException("Provided value [${quizSettingsRequest.value}] for [${quizSettingsRequest.setting}] setting must be an integer", quizId, ErrorCode.BadParam)
+            }
             if (maxNumAttempts < -1) {
                 throw new SkillQuizException("Provided value [${quizSettingsRequest.value}] for [${quizSettingsRequest.setting}] setting must be >= -1", quizId, ErrorCode.BadParam)
             }
