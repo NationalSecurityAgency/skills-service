@@ -211,6 +211,7 @@ const pageChanged = (pagingInfo) => {
 const sortChanged = (sortingInfo) => {
   sortInfo.value.sortBy = sortingInfo.sortField
   sortInfo.value.sortOrder = sortingInfo.sortOrder
+  currentPage.value = 1
   loadSharedSkills()
 }
 </script>
