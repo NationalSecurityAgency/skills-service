@@ -65,7 +65,8 @@ const pageChanged = (pagingInfo) => {
     <SkillsDataTable
       v-if="loaded" :value="sharedSkills" :sortField="sortField" :sortOrder="sortOrder" @sort="sortTable" paginator
       :totalRecords="totalRecords" :rows="pageSize" :rowsPerPageOptions="possiblePageSizes" lazy @page="pageChanged" v-model:first="firstRow"
-      data-cy="sharedSkillsTable" tableStoredStateId="sharedSkillsTable" aria-label="Skills Shared with Other Projects">
+      data-cy="sharedSkillsTable" :tableStoredStateId="disableDelete ? 'sharedWithMeSkillsTable' : 'sharedSkillsTable'"
+      aria-label="Skills Shared with Other Projects">
       <Column field="skill.name" header="Shared Skill" sortable :class="{'flex': isFlex }">
         <template #body="slotProps">
           {{ slotProps.data.skillName }}

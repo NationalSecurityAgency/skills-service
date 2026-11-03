@@ -114,6 +114,33 @@ describe('Cross-project Skills Tests', () => {
         });
     });
 
+    it('loads shared skills after an incompatible sort was saved', () => {
+        cy.request('PUT', '/admin/projects/proj1/skills/skill1/shared/projects/proj2');
+
+        cy.visit('/administrator/projects/proj1/learning-path', {
+            onBeforeLoad(win) {
+                win.localStorage.setItem('skillsTable-sort-sharedSkillsTable', JSON.stringify({
+                    sortOrder: 1,
+                    sortBy: 'projectName',
+                }));
+            },
+        });
+
+        cy.get('[data-cy="shareSkillsWithOtherProjectsCard"] [data-cy="sharedSkillsTable"]')
+            .should('contain', 'Very Great Skill # 1');
+        cy.window().then((win) => {
+            expect(JSON.parse(win.localStorage.getItem('skillsTable-sort-sharedSkillsTable')))
+                .to.deep.equal({ sortOrder: -1, sortBy: 'skill.name' });
+        });
+
+        cy.visit('/administrator/projects/proj2/learning-path');
+        cy.get(sharedWithMeTableSelector).should('contain', 'Very Great Skill # 1');
+        cy.window().then((win) => {
+            expect(JSON.parse(win.localStorage.getItem('skillsTable-sort-sharedWithMeSkillsTable')))
+                .to.deep.equal({ sortOrder: -1, sortBy: 'skill.skillId' });
+        });
+    });
+
     it('share skill with another project', () => {
         cy.viewport(1400, 1800)
         cy.intercept('/admin/projects/proj1/skillsAndBadges**').as('skillsAndBadges');

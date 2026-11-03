@@ -45,6 +45,7 @@ const restrictedUserCommunity = ref(false)
 const allSkills = ref([])
 const selectedSkill = ref(null)
 const sharedSkills = ref([])
+const sharedSkillsLoadFailed = ref(false)
 const selectedProject = ref(null)
 const errorMessage = ref('')
 const shareWithAllProjects = ref(false)
@@ -52,7 +53,11 @@ const possiblePageSizes = [5, 10, 15, 20, 50];
 const pageSize = useStorage('sharedSkillsTable-pageSize', 5)
 const totalRecords = ref(0)
 const currentPage = ref(1);
-const sortInfo = useStorage('skillsTable-sort-sharedSkillsTable', {'sortOrder': -1, 'sortBy': 'skill.name'})
+const defaultSort = { sortOrder: -1, sortBy: 'skill.name' }
+const sortInfo = useStorage('skillsTable-sort-sharedSkillsTable', defaultSort)
+if (!['skill.name', 'sharedProject.name'].includes(sortInfo.value?.sortBy)) {
+  sortInfo.value = { ...defaultSort }
+}
 const doesShareAlreadyExist = ref(false);
 const validatingSkill = ref(false)
 const validationFailed = ref(false)
@@ -89,6 +94,7 @@ const loadAllSkills = () => {
 
 const loadSharedSkills = () => {
   loading.value.sharedSkills = true
+  sharedSkillsLoadFailed.value = false
 
   const params = {
     limit: pageSize.value,
@@ -101,6 +107,9 @@ const loadSharedSkills = () => {
     .then((data) => {
       sharedSkills.value = data.data;
       totalRecords.value = data.totalCount;
+    }).catch(() => {
+      sharedSkillsLoadFailed.value = true
+    }).finally(() => {
       loading.value.sharedSkillsInit = false
       loading.value.sharedSkills = false
     })
@@ -120,8 +129,10 @@ const shareSkill = () => {
         const skillId = selectedSkill.value.skillId
         selectedSkill.value = null
         loadSharedSkills().then(() => {
-          const sharedWith = sharedProjectId === allProjectsConstant ? 'All Projects' : sharedProjectId
-          announcer.assertive(`Skill with id of ${skillId} was shared with ${sharedWith}`)
+          if (!sharedSkillsLoadFailed.value) {
+            const sharedWith = sharedProjectId === allProjectsConstant ? 'All Projects' : sharedProjectId
+            announcer.assertive(`Skill with id of ${skillId} was shared with ${sharedWith}`)
+          }
         })
       })
   }
@@ -272,12 +283,16 @@ const sortChanged = (sortingInfo) => {
         <Message v-if="doesShareAlreadyExist || validationFailed" severity="error">
           {{ errorMessage }}
         </Message>
+        <Message v-if="sharedSkillsLoadFailed" severity="error">
+          Could not load shared skills. Please try again.
+        </Message>
 
         <div v-if="sharedSkills && sharedSkills.length > 0" class="my-6">
           <shared-skills-table :shared-skills="sharedSkills" v-on:skill-removed="deleteSharedSkill" :page-size="pageSize" @sort-changed="sortChanged"
-                               :possible-page-sizes="possiblePageSizes" :total-records="totalRecords" @page-changed="pageChanged"></shared-skills-table>
+                               :possible-page-sizes="possiblePageSizes" :total-records="totalRecords" :sort-field="sortInfo.sortBy" :sort-order="sortInfo.sortOrder"
+                               @page-changed="pageChanged"></shared-skills-table>
         </div>
-        <div v-else>
+        <div v-else-if="!sharedSkillsLoadFailed">
           <no-content2 title="Not Selected Yet..." icon="fas fa-share-alt" class="p-8"
                        message="To make your project's skills eligible please select a skill and then the project that you want to share this skill with." />
         </div>
