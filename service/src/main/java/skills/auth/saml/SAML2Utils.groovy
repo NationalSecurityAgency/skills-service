@@ -55,7 +55,7 @@ class SAML2Utils {
                 String firstName = principal.getFirstAttribute(FIRST_NAME)
                 String lastName = principal.getFirstAttribute(LAST_NAME)
                 String email  = principal.getFirstAttribute(EMAIL)
-                String displayName = firstName + ' ' + lastName
+                String displayName = buildDisplayName(firstName, lastName, username)
 
                 if (!username) {
                     throw new SkillsAuthorizationException("Username must be available for your SSO profile")
@@ -88,7 +88,7 @@ class SAML2Utils {
                 String firstName = principal.getFirstAttribute(FIRST_NAME)
                 String lastName = principal.getFirstAttribute(LAST_NAME)
                 String email  = principal.getFirstAttribute(EMAIL)
-                String displayName = firstName + ' ' + lastName
+                String displayName = buildDisplayName(firstName, lastName, username)
 
                 if (!username) {
                     throw new SkillsAuthorizationException("Username must be available for your SSO profile")
@@ -110,5 +110,13 @@ class SAML2Utils {
 
     }
 
+    /**
+     * The IdP is not guaranteed to send the first and last name attributes. Groovy would turn a missing
+     * one into the literal text "null", so only use the parts that are present and fall back to the username.
+     */
+    private static String buildDisplayName(String firstName, String lastName, String username) {
+        String name = [firstName, lastName].findAll { it?.trim() }.collect { it.trim() }.join(' ')
+        return name ?: username
+    }
 
 }
