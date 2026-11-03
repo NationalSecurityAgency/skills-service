@@ -1404,7 +1404,7 @@ class AdminController {
                                             @RequestParam Boolean ascending,
                                             @RequestParam(required = false, defaultValue = '') String filter) {
         SkillsValidator.isNotBlank(projectId, "Project Id")
-        PageRequest pageRequest = TablePageUtil.createPagingRequest(limit, page, orderBy, ascending)
+        PageRequest pageRequest = TablePageUtil.createPagingRequestWithValidation(limit, page, orderBy, ascending)
         return shareSkillsService.getSharedSkillsWithOtherProjects(projectId, pageRequest, filter)
     }
 
@@ -1416,7 +1416,7 @@ class AdminController {
                                                   @RequestParam Boolean ascending,
                                                   @RequestParam(required = false, defaultValue = '') String filter) {
         SkillsValidator.isNotBlank(projectId, "Project Id")
-        PageRequest pageRequest = TablePageUtil.createPagingRequest(limit, page, orderBy, ascending)
+        PageRequest pageRequest = TablePageUtil.createPagingRequestWithValidation(limit, page, orderBy, ascending)
         return shareSkillsService.getSharedSkillsFromOtherProjects(projectId, pageRequest, filter)
     }
 
