@@ -37,6 +37,8 @@ import skills.dbupgrade.ReportedSkillEventQueue
 import skills.profile.EnableCallStackProf
 import skills.services.*
 import skills.services.admin.ProjAdminService
+import skills.services.admin.CatalogParticipationCleanupService
+import skills.services.admin.CatalogParticipationFixService
 import skills.services.settings.SettingsService
 import skills.services.userActions.DashboardAction
 import skills.services.userActions.DashboardItem
@@ -64,6 +66,22 @@ import static org.springframework.data.domain.Sort.Direction.DESC
 @Slf4j
 @EnableCallStackProf
 class RootController {
+
+    @Autowired CatalogParticipationCleanupService catalogCleanupService
+    @Autowired CatalogParticipationFixService catalogFixService
+
+    // Temporary pre-5.1 remediation endpoints; retire after the remediation window.
+    @PostMapping('/cleanupImportedSkillProgress')
+    Map cleanupImportedSkillProgress(@RequestBody(required = false) Object request) {
+        SkillsValidator.isTrue(request == null || request instanceof Map, 'Cleanup request must be a JSON object with optional projectIds')
+        catalogCleanupService.cleanup((Map) request)
+    }
+
+    @PostMapping('/projects/{projectId}/users/{userId}/fixImportedSkillProgress')
+    RequestResult fixImportedSkillProgress(@PathVariable String projectId, @PathVariable String userId) {
+        catalogFixService.fix(catalogCleanupService.canonicalProject(projectId), userId.toLowerCase())
+        new RequestResult(success: true)
+    }
 
     @Autowired
     AccessSettingsStorageService accessSettingsStorageService
