@@ -52,6 +52,7 @@ const shareWithAllProjects = ref(false)
 const possiblePageSizes = [5, 10, 15, 20, 50];
 const pageSize = useStorage('sharedSkillsTable-pageSize', 5)
 const totalRecords = ref(0)
+let sharedSkillsRequestId = 0
 const currentPage = ref(1);
 const defaultSort = { sortOrder: -1, sortBy: 'skill.name' }
 const sortInfo = useStorage('skillsTable-sort-sharedSkillsTable', defaultSort)
@@ -93,6 +94,7 @@ const loadAllSkills = () => {
 }
 
 const loadSharedSkills = () => {
+  const requestId = ++sharedSkillsRequestId
   loading.value.sharedSkills = true
   sharedSkillsLoadFailed.value = false
 
@@ -103,15 +105,22 @@ const loadSharedSkills = () => {
     orderBy: sortInfo.value.sortBy,
   };
 
-  return SkillsShareService.getSharedSkills(projectId, params)
+  return SkillsShareService.getSharedSkills(projectId, params, false)
     .then((data) => {
+      if (requestId !== sharedSkillsRequestId) {
+        return
+      }
       sharedSkills.value = data.data;
       totalRecords.value = data.totalCount;
     }).catch(() => {
-      sharedSkillsLoadFailed.value = true
+      if (requestId === sharedSkillsRequestId) {
+        sharedSkillsLoadFailed.value = true
+      }
     }).finally(() => {
-      loading.value.sharedSkillsInit = false
-      loading.value.sharedSkills = false
+      if (requestId === sharedSkillsRequestId) {
+        loading.value.sharedSkillsInit = false
+        loading.value.sharedSkills = false
+      }
     })
 }
 

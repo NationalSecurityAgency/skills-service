@@ -22,12 +22,12 @@ export default {
   deleteSkillShare(projectId, skillId, shareToProjectId) {
     return axios.delete(`/admin/projects/${encodeURIComponent(projectId)}/skills/${encodeURIComponent(skillId)}/shared/projects/${encodeURIComponent(shareToProjectId)}`);
   },
-  getSharedSkills(projectId, params) {
-    return axios.get(`/admin/projects/${encodeURIComponent(projectId)}/shared`, { params })
+  getSharedSkills(projectId, params, handleError = true) {
+    return axios.get(`/admin/projects/${encodeURIComponent(projectId)}/shared`, { params, handleError })
       .then((response) => response.data);
   },
-  getSharedWithmeSkills(projectId, params) {
-    return axios.get(`/admin/projects/${encodeURIComponent(projectId)}/sharedWithMe`, { params })
+  getSharedWithmeSkills(projectId, params, handleError = true) {
+    return axios.get(`/admin/projects/${encodeURIComponent(projectId)}/sharedWithMe`, { params, handleError })
       .then((response) => response.data);
   },
   isSkillShared(projectId, params) {

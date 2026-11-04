@@ -869,6 +869,73 @@ describe('Shared skills pagination and request recovery', () => {
             expectFirstSkill(card, 'Shared Skill 1');
             cy.get(`${card} [aria-label="Page 1"]`).should('have.attr', 'aria-current', 'page');
         });
+
+        ['page', 'sort', 'failed page'].forEach((olderRequest) => {
+            it(`ignores an older ${olderRequest} response in the ${project === 1 ? 'outgoing' : 'incoming'} table`, () => {
+                const endpoint = project === 1 ? 'shared' : 'sharedWithMe';
+                let releaseRequest;
+                visit(project);
+                expectFirstSkill(card, 'Shared Skill 6');
+
+                cy.intercept('GET', `/admin/projects/proj${project}/${endpoint}?*`, (request) => {
+                    const isOlderRequest = olderRequest === 'sort'
+                        ? request.query.ascending === 'true'
+                        : request.query.page === '2';
+                    if (isOlderRequest) {
+                        request.alias = 'olderTableRequest';
+                        return new Cypress.Promise((resolve) => {
+                            releaseRequest = () => {
+                                if (olderRequest === 'failed page') {
+                                    request.reply({ statusCode: 500, body: { explanation: 'Older request failed' } });
+                                } else {
+                                    request.continue();
+                                }
+                                resolve();
+                            };
+                        });
+                    }
+                    request.alias = 'newerTableRequest';
+                });
+
+                if (olderRequest === 'sort') {
+                    cy.get(`${card} th`).contains('Shared Skill').click();
+                } else {
+                    cy.get(`${card} [aria-label="Page 2"]`).click();
+                }
+                cy.wrap({ ready: () => Boolean(releaseRequest) }).invoke('ready').should('eq', true);
+
+                if (olderRequest === 'sort') {
+                    cy.get(`${card} th`).contains('Shared Skill').click();
+                    cy.get(`${card} th`).contains('Shared Skill').closest('th')
+                        .should('have.attr', 'aria-sort', 'descending');
+                } else {
+                    cy.get(`${card} [aria-label="Page 1"]`).click();
+                }
+                cy.wait('@newerTableRequest');
+                expectFirstSkill(card, 'Shared Skill 6');
+                cy.then(() => releaseRequest());
+                cy.wait('@olderTableRequest');
+                expectFirstSkill(card, 'Shared Skill 6');
+                cy.get(`${card} [aria-label="Page 1"]`).should('have.attr', 'aria-current', 'page');
+                cy.get(card).should('not.contain', 'Could not load shared skills');
+            });
+        });
+
+        it(`recovers after the latest ${project === 1 ? 'outgoing' : 'incoming'} table request fails`, () => {
+            const endpoint = project === 1 ? 'shared' : 'sharedWithMe';
+            visit(project);
+            expectFirstSkill(card, 'Shared Skill 6');
+            cy.intercept('GET', `/admin/projects/proj${project}/${endpoint}?*`, (request) => {
+                if (request.query.page === '2') {
+                    request.reply({ statusCode: 500, body: { explanation: 'Latest request failed' } });
+                }
+            });
+            cy.get(`${card} [aria-label="Page 2"]`).click();
+            cy.get(card).should('contain', 'Could not load shared skills. Please try again.');
+            cy.get(`${card} [aria-label="Page 1"]`).click();
+            expectFirstSkill(card, 'Shared Skill 6');
+            cy.get(card).should('not.contain', 'Could not load shared skills');
+        });
     });
 
     it('keeps incoming and outgoing page sizes independent across reloads', () => {
