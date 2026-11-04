@@ -925,6 +925,15 @@ class SkillsService {
         wsHelper.apiPost("/projects/${projectId}/progress/initialize${query}", body).body
     }
 
+    // Temporary pre-5.1 root remediation helpers; remove with the endpoints.
+    Map cleanupImportedSkillProgress(Object selection = null) {
+        wsHelper.rootPost('/cleanupImportedSkillProgress', selection)?.body
+    }
+
+    Map fixImportedSkillProgress(String projectId, String userId) {
+        wsHelper.rootPost("/projects/${projectId}/users/${userId}/fixImportedSkillProgress", [:])?.body
+    }
+
     Map initializeProjectProgressAsProxy(String projectId, String userId) {
         String token = wsHelper.getTokenForUser(userId)
         return wsHelper.proxyApiPost(token, "/projects/${projectId}/progress/initialize", [:]).body

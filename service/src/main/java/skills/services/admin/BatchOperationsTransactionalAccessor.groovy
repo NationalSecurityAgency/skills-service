@@ -18,6 +18,7 @@ package skills.services.admin
 import callStack.profiler.Profile
 import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.context.annotation.Lazy
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Isolation
 import org.springframework.transaction.annotation.Propagation
@@ -39,6 +40,7 @@ import skills.services.admin.SkillCatalogFinalizationService.FinalizeState
 import skills.storage.model.SkillDef
 import skills.storage.model.SkillRelDef
 import skills.storage.repos.SkillDefRepo
+import skills.storage.repos.CatalogParticipationCleanupRepo
 import skills.storage.repos.SkillRelDefRepo
 import skills.storage.repos.UserAchievedLevelRepo
 import skills.storage.repos.UserEventsRepo
@@ -53,6 +55,30 @@ import java.util.stream.Stream
 @Service
 @Slf4j
 class BatchOperationsTransactionalAccessor {
+
+    @Autowired CatalogParticipationCleanupRepo catalogCleanupRepo
+    @Autowired @Lazy SkillCatalogFinalizationService catalogFinalizationService
+
+    /** Temporary pre-5.1 remediation. No reporting/init gate; later admission may overlap. */
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    Map cleanupCatalogParticipation(String projectId) {
+        Map result = [projectId: projectId, status: 'SKIPPED', deletedRecords: 0L,
+                      deletedPointRows: 0, deletedAchievementRows: 0]
+        if (catalogFinalizationService.getCurrentState(projectId) in [FinalizeState.RUNNING, FinalizeState.FAILED]) {
+            return result + [reason: 'Catalog finalization is RUNNING or FAILED; retry after recovery']
+        }
+        if (!skillDefRepo.existsEnabledCatalogImport(projectId)) {
+            return result + [reason: 'No enabled cross-project catalog imports']
+        }
+        result.deletedPointRows = catalogCleanupRepo.deletePoints(projectId)
+        log.info('Legacy catalog cleanup UNCOMMITTED points delete: project=[{}], deletedPointRows=[{}]', projectId, result.deletedPointRows)
+        result.deletedAchievementRows = catalogCleanupRepo.deleteAchievements(projectId)
+        result.deletedRecords = (long) result.deletedPointRows + result.deletedAchievementRows
+        log.info('Legacy catalog cleanup UNCOMMITTED achievements delete: project=[{}], counts=[{}]', projectId, result)
+        result.status = result.deletedRecords > 0 ? 'CLEANED' : 'SKIPPED'
+        if (result.status == 'SKIPPED') { result.reason = 'No removable destination credit' }
+        result
+    }
 
     @Autowired
     LockingService lockingService

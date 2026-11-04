@@ -29,6 +29,7 @@ import skills.storage.model.SkillDefMin
 import skills.storage.model.UserAchievement
 import skills.storage.model.UserPoints
 import skills.storage.repos.SkillDefRepo
+import skills.storage.repos.CatalogParticipationCleanupRepo
 import skills.storage.repos.UserAchievedLevelRepo
 import skills.storage.repos.UserPointsRepo
 import skills.storage.repos.UserPointsRepo.ImportedCreditSnapshot
@@ -40,6 +41,7 @@ class CatalogImportedCreditService {
     @Autowired UserPointsRepo userPointsRepo
     @Autowired UserAchievedLevelRepo achievementRepo
     @Autowired SkillDefRepo skillDefRepo
+    @Autowired CatalogParticipationCleanupRepo cleanupRepo
     @Autowired LockingService lockingService
     @Autowired RuleSetDefGraphService graphService
     @Autowired BatchOperationsTransactionalAccessor batchAccessor
@@ -59,8 +61,9 @@ class CatalogImportedCreditService {
 
     // Backfill also uses this source snapshot/absolute-credit path, then recalculates totals once.
     // Both callers hold the destination user/project lock for the enclosing transaction.
+    // explicitRepair is temporary pre-5.1 root Fix mode; retire its branches/argument with those endpoints.
     @Transactional
-    boolean reconcileSkillCredit(String userId, SkillDefMin skill) {
+    boolean reconcileSkillCredit(String userId, SkillDefMin skill, boolean explicitRepair = false) {
         ImportedCreditSnapshot source = userPointsRepo.readImportedCredit(userId, skill.id)
         if (!source) {
             return false
@@ -71,7 +74,9 @@ class CatalogImportedCreditService {
                 (source.achievedOn != null) != !awards.isEmpty() ||
                 awards.any { UserAchievement award -> award.achievedOn != source.achievedOn || award.pointsWhenAchieved != source.pointsWhenAchieved }
         boolean clearedByBatch = source.points == 0 && destination != null && source.achievedOn == null
-        if (!source.achievedOn && awards && !clearedByBatch) {
+        if (explicitRepair && !source.achievedOn && awards) {
+            achievementRepo.deleteAll(awards)
+        } else if (!source.achievedOn && awards && !clearedByBatch) {
             batchAccessor.removeCatalogSkillAchievements(userId, skill.projectId, [skill.id])
         } else if (source.achievedOn && !awards) {
             achievementRepo.save(new UserAchievement(userId: userId, projectId: skill.projectId,
@@ -89,12 +94,15 @@ class CatalogImportedCreditService {
         if (source.points > 0) {
             userPointsRepo.reconcileImportedPoints(userId, skill.projectId, skill.skillId, skill.id,
                     source.points, source.performedOn ?: source.achievedOn ?: new Date())
+        } else if (explicitRepair && destination) {
+            // Repair must not enter ordinary deletion's global-badge or downstream scheduling paths.
+            userPointsRepo.delete(destination)
         } else if (destination && !source.achievedOn) {
             batchAccessor.batchRemovePerformedSkillsForUserAndSpecificSkills(userId, skill.projectId, [skill.id])
         } else if (destination) {
             userPointsRepo.delete(destination)
         }
-        if (creditChanged && !clearedByBatch) {
+        if (creditChanged && !clearedByBatch && !explicitRepair) {
             // Same-project reuse can reference this imported row. Notify downstream copies
             // only when source state changed, so duplicate delivery does not fan out again.
             // Include disabled copies to cover changes committed after their activation snapshot.
@@ -107,32 +115,45 @@ class CatalogImportedCreditService {
     }
 
     @Transactional
-    void reconcileTotalsAndAchievements(String projectId, String userId, List<SkillDef> imports) {
-        List<SkillDef> groups = imports.findAll { SkillDef skill -> skill.groupId != null }
+    void reconcileTotalsAndAchievements(String projectId, String userId, List<SkillDef> imports, boolean explicitRepair = false) {
+        List<SkillDef> groups = explicitRepair ? skillDefRepo.findAllByProjectIdAndType(projectId, SkillDef.ContainerType.SkillsGroup) :
+                imports.findAll { SkillDef skill -> skill.groupId != null }
                 .collect { SkillDef skill -> graphService.getMyGroupParent(skill.id) }.unique { SkillDef group -> group.id }
         batchAccessor.identifyAndAddGroupAchievementsForSingleUser(userId, groups)
-        List<SkillDef> subjects = imports.collect { SkillDef skill -> graphService.getMySubjectParent(skill.id) }
-                .unique { SkillDef subject -> subject.id }
+        List<SkillDef> subjects = explicitRepair ? skillDefRepo.findAllByProjectIdAndType(projectId, SkillDef.ContainerType.Subject) :
+                imports.collect { SkillDef skill -> graphService.getMySubjectParent(skill.id) }.unique { SkillDef subject -> subject.id }
+        if (explicitRepair) {
+            subjects.each { SkillDef subject -> batchAccessor.createSubjectUserPointsForSingleNewUser(userId, projectId, subject.skillId) }
+            cleanupRepo.repairContainerTotals(projectId, userId)
+        }
         subjects.each { SkillDef subject ->
-            batchAccessor.createSubjectUserPointsForSingleNewUser(userId, projectId, subject.skillId)
-            userPointsRepo.updateSubjectUserPointsForUser(userId, projectId, subject.skillId, true)
+            if (!explicitRepair) {
+                batchAccessor.createSubjectUserPointsForSingleNewUser(userId, projectId, subject.skillId)
+                userPointsRepo.updateSubjectUserPointsForUser(userId, projectId, subject.skillId, true)
+            }
             pointsManagement.removeSubjectLevelAchievementsIfThisUserDoesNotQualify(userId, subject)
             batchAccessor.identifyAndAddSubjectLevelAchievementsForSingleUser(userId, projectId, subject.skillId)
             batchAccessor.addMissingCatalogLevels(projectId, subject.skillId, userId)
         }
         batchAccessor.createProjectUserPointsForSingleNewUser(userId, projectId)
-        userPointsRepo.updateUserPointsForProjectAndUser(projectId, userId)
+        if (explicitRepair) {
+            cleanupRepo.repairProjectTotal(projectId, userId)
+        } else {
+            userPointsRepo.updateUserPointsForProjectAndUser(projectId, userId)
+        }
         pointsManagement.removeProjectLevelAchievementsIfUserDoesNotQualify(userId, projectId)
         batchAccessor.identifyAndAddProjectLevelAchievements(userId, projectId)
         batchAccessor.addMissingCatalogLevels(projectId, null, userId)
         imports.each { SkillDef skill ->
             List<UserAchievement> achievements = achievementRepo.findAllByUserIdAndProjectIdAndSkillId(userId, projectId, skill.skillId)
             SkillDefMin min = skillDefRepo.findSkillDefMinById(skill.id)
-            if (achievements) {
+            if (achievements && !explicitRepair) {
                 badgeHandler.checkForBadges(new SkillEventResult(), userId, min,
                         new SkillDate(date: achievements.first().achievedOn, isProvided: true))
             }
         }
-        globalBadgeHandler.reconcileGlobalBadgesForProject(userId, projectId)
+        if (!explicitRepair) {
+            globalBadgeHandler.reconcileGlobalBadgesForProject(userId, projectId)
+        }
     }
 }

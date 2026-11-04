@@ -36,6 +36,7 @@ import java.util.stream.Stream
 @CompileStatic
 interface UserAchievedLevelRepo extends CrudRepository<UserAchievement, Integer>, JpaSpecificationExecutor<UserAchievement> {
 
+    List<UserAchievement> findAllByUserIdAndProjectId(String userId, @Nullable String projectId)
     List<UserAchievement> findAllByUserIdAndProjectIdAndSkillId(String userId, @Nullable String projectId, @Nullable String skillId)
     List<UserAchievement> findAllByUserIdAndProjectIdAndSkillIdAndLevelNotNull(String userId, @Nullable String projectId, @Nullable String skillId)
     List<UserAchievement> findAllByUserIdAndProjectIdAndSkillIdAndLevelNotNullAndAchievedOnAfter(String userId, @Nullable String projectId, @Nullable String skillId, Date achievedOn)
