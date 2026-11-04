@@ -144,7 +144,7 @@ describe('Cross-project Skills Tests', () => {
     it('share skill with another project', () => {
         cy.viewport(1400, 1800)
         cy.intercept('/admin/projects/proj1/skillsAndBadges**').as('skillsAndBadges');
-        cy.intercept('GET', '/admin/projects/proj2/sharedWithMe**').as('loadSharedSkills');
+        cy.intercept('GET', '/admin/projects/**/sharedWithMe**').as('loadSharedSkills');
         cy.visit('/administrator/projects/proj1/learning-path');
         cy.wait('@skillsAndBadges');
         cy.get('[data-cy="shareSkillsWithOtherProjectsCard"]')
@@ -205,7 +205,7 @@ describe('Cross-project Skills Tests', () => {
 
     it('share with all projects', () => {
         cy.visit('/administrator/projects/proj1/learning-path');
-        cy.intercept('GET', '/admin/projects/proj2/sharedWithMe**').as('loadSharedSkills');
+        cy.intercept('GET', '/admin/projects/**/sharedWithMe**').as('loadSharedSkills');
 
         cy.get('[data-cy="shareSkillsWithOtherProjectsCard"]')
             .contains('Share skills from this project with other projects');
@@ -260,7 +260,6 @@ describe('Cross-project Skills Tests', () => {
         cy.get('[data-cy="learningPathFromSkillSelector"]').click()
         cy.get('[data-cy="includeShared"]').click();
         cy.wait('@loadSharedSkills')
-        cy.get(`${sharedSkillSelector} [data-cy="skillsSelector-type"]`).contains('Shared Skill');
         cy.get(`${sharedSkillSelector} [data-cy="skillsSelector-projectName"]`).contains('Project 1')
         cy.get(sharedSkillSelector).contains('Very Great Skill # 1')
 
@@ -285,13 +284,12 @@ describe('Cross-project Skills Tests', () => {
         cy.get('[data-cy="includeShared"]').click();
         cy.wait('@loadSharedSkills')
         cy.get('[data-cy="learningPathFromSkillSelector"]').click()
-        cy.get(`${sharedSkillSelector} [data-cy="skillsSelector-type"]`).contains('Shared Skill');
         cy.get(`${sharedSkillSelector} [data-cy="skillsSelector-projectName"]`).contains('Project 1')
         cy.get(sharedSkillSelector).contains('Very Great Skill # 1')
     });
 
     it('remove share', () => {
-        cy.intercept('GET', '/admin/projects/proj2/sharedWithMe**').as('loadSharedSkills');
+        cy.intercept('GET', '/admin/projects/**/sharedWithMe**').as('loadSharedSkills');
         cy.visit('/administrator/projects/proj1/learning-path');
 
         cy.get('[data-cy="shareSkillsWithOtherProjectsCard"]')
@@ -766,4 +764,198 @@ describe('Cross-project Skills Tests', () => {
         cy.wrapIframe().find('[data-cy="viewQuizAttemptInfo"]').click()
         cy.wrapIframe().find('[data-cy="questionDisplayCard-1"] [data-cy="answerDisplay-0"] [data-cy="selectCorrectAnswer"]')
     })
+});
+
+describe('Shared skills pagination and request recovery', () => {
+    const outgoingCard = '[data-cy="shareSkillsWithOtherProjectsCard"]';
+    const incomingCard = '[data-cy="skillsSharedWithMeCard"]';
+    const table = '[data-cy="sharedSkillsTable"]';
+    const rows = '[data-pc-section="bodyrow"]';
+    const fromInput = '[data-cy="learningPathFromSkillSelector"] input';
+    const option = (project, skill) => `[data-cy="skillsSelectionItem-proj${project}-skill${skill}"]`;
+    const outgoingSortKey = 'skillsTable-sort-sharedSkillsTable';
+    const incomingSortKey = 'skillsTable-sort-sharedWithMeSkillsTable';
+
+    const visit = (project = 1, savedSorts = {}) => {
+        cy.visit(`/administrator/projects/proj${project}/learning-path`, {
+            onBeforeLoad(win) {
+                win.localStorage.setItem('sharedSkillsTable-pageSize', '5');
+                Object.entries(savedSorts).forEach(([key, value]) => {
+                    win.localStorage.setItem(key, JSON.stringify(value));
+                });
+            },
+        });
+    };
+
+    const expectFirstSkill = (card, name, rowCount = 5) => {
+        cy.get(`${card} ${table} ${rows}`).should('have.length', rowCount)
+            .first().should('contain', name);
+    };
+
+    const selectShare = () => {
+        cy.get(`${outgoingCard} [data-cy="skillsSelector"] input`).type('Shared Skill 1');
+        cy.get(option(1, 1)).click();
+        cy.get(`${outgoingCard} [data-cy="projectSelector"]`).click();
+        cy.get('[data-cy="projectSelector-projectName"]').contains('Project 3').click();
+        cy.get(`${outgoingCard} [data-cy="shareButton"]`).should('be.enabled');
+    };
+
+    const allowExpectedRejection = (status) => {
+        cy.on('uncaught:exception', (error) => {
+            if (error.message.includes(`Request failed with status code ${status}`)) {
+                return false;
+            }
+        });
+    };
+
+    beforeEach(() => {
+        cy.createProject(1, { name: 'Project 1' });
+        cy.createProject(2, { name: 'Project 2' });
+        cy.createProject(3, { name: 'Project 3' });
+        cy.createSubject(1, 1);
+        cy.createSubject(2, 1);
+        for (let skill = 1; skill <= 6; skill += 1) {
+            cy.createSkill(1, 1, skill, { name: `Shared Skill ${skill}` });
+            cy.request('PUT', `/admin/projects/proj1/skills/skill${skill}/shared/projects/proj2`);
+        }
+        cy.createSkill(2, 1, 1, { name: 'Local destination skill' });
+    });
+
+    ['skillName', 'notAField'].forEach((sortBy) => {
+        it(`recovers from legacy or invalid outgoing sort ${sortBy}`, () => {
+            visit(1, { [outgoingSortKey]: { sortOrder: 1, sortBy } });
+            expectFirstSkill(outgoingCard, 'Shared Skill 6');
+            cy.reload();
+            expectFirstSkill(outgoingCard, 'Shared Skill 6');
+        });
+    });
+
+    it('recovers from an outgoing query alias saved for the incoming table', () => {
+        visit(2, { [incomingSortKey]: { sortOrder: 1, sortBy: 'sharedProject.name' } });
+        expectFirstSkill(incomingCard, 'Shared Skill 6');
+        cy.reload();
+        expectFirstSkill(incomingCard, 'Shared Skill 6');
+    });
+
+    it('retains independent valid sort preferences across reloads', () => {
+        // Make name ordering differ from ID ordering so the incoming request
+        // cannot pass by accidentally using its default skill.skillId sort.
+        cy.createSkill(1, 1, 6, { name: 'Aardvark Shared Skill 6' });
+        const sorts = {
+            [outgoingSortKey]: { sortOrder: 1, sortBy: 'skill.name' },
+            [incomingSortKey]: { sortOrder: -1, sortBy: 'skill.name' },
+        };
+        visit(1, sorts);
+        expectFirstSkill(outgoingCard, 'Aardvark Shared Skill 6');
+        cy.reload();
+        expectFirstSkill(outgoingCard, 'Aardvark Shared Skill 6');
+        visit(2);
+        expectFirstSkill(incomingCard, 'Shared Skill 5');
+        cy.reload();
+        expectFirstSkill(incomingCard, 'Shared Skill 5');
+    });
+
+    [
+        { project: 1, card: outgoingCard },
+        { project: 2, card: incomingCard },
+    ].forEach(({ project, card }) => {
+        it(`resets the ${project === 1 ? 'outgoing' : 'incoming'} table to page one when sorting`, () => {
+            visit(project);
+            expectFirstSkill(card, 'Shared Skill 6');
+            cy.get(`${card} [aria-label="Page 2"]`).click();
+            expectFirstSkill(card, 'Shared Skill 1', 1);
+            cy.get(`${card} th`).contains('Shared Skill').click();
+            expectFirstSkill(card, 'Shared Skill 1');
+            cy.get(`${card} [aria-label="Page 1"]`).should('have.attr', 'aria-current', 'page');
+        });
+    });
+
+    it('returns to page one after deleting the last row on page two', () => {
+        visit();
+        expectFirstSkill(outgoingCard, 'Shared Skill 6');
+        cy.get(`${outgoingCard} [aria-label="Page 2"]`).click();
+        expectFirstSkill(outgoingCard, 'Shared Skill 1', 1);
+        cy.get(`${outgoingCard} [data-cy="sharedSkillsTable-removeBtn"]`).click();
+        expectFirstSkill(outgoingCard, 'Shared Skill 6');
+        cy.get(`${outgoingCard} ${table}`).should('not.contain', 'Shared Skill 1');
+        cy.get(`${outgoingCard} [aria-label="Page 2"]`).should('not.exist');
+    });
+
+    it('ignores an older duplicate-share lookup after a different skill is selected', () => {
+        let releaseLookup;
+        cy.request('PUT', '/admin/projects/proj1/skills/skill1/shared/projects/proj3');
+        cy.intercept('GET', '/admin/projects/proj1/isSkillShared?*', (request) => {
+            if (request.query.skillId === 'skill1') {
+                request.alias = 'oldLookup';
+                return new Cypress.Promise((resolve) => {
+                    releaseLookup = () => {
+                        request.continue();
+                        resolve();
+                    };
+                });
+            }
+        });
+        visit();
+        cy.get(`${outgoingCard} [data-cy="skillsSelector"] input`).type('Shared Skill 1');
+        cy.get(option(1, 1)).click();
+        cy.get(`${outgoingCard} [data-cy="projectSelector"]`).click();
+        cy.get('[data-cy="projectSelector-projectName"]').contains('Project 3').click();
+        cy.wrap({ ready: () => Boolean(releaseLookup) }).invoke('ready').should('eq', true);
+        cy.get(`${outgoingCard} [data-cy="skillsSelector"] input`).type('{selectall}Shared Skill 2');
+        cy.get(option(1, 2)).click();
+        cy.get(`${outgoingCard} [data-cy="shareButton"]`).should('be.enabled');
+        cy.then(() => releaseLookup());
+        cy.wait('@oldLookup');
+        cy.get(`${outgoingCard} [data-cy="shareButton"]`).should('be.enabled');
+        cy.get(outgoingCard).should('not.contain', 'already shared');
+    });
+
+    it('ignores an older shared search after a newer search completes', () => {
+        let releaseSearch;
+        cy.intercept('GET', '/admin/projects/proj2/sharedWithMe?*', (request) => {
+            if (request.query.filter === 'skill1') {
+                request.alias = 'oldSearch';
+                return new Cypress.Promise((resolve) => {
+                    releaseSearch = () => {
+                        request.continue();
+                        resolve();
+                    };
+                });
+            }
+        });
+        visit(2);
+        cy.get('[data-cy="includeShared"]').click();
+        cy.get(fromInput).type('skill1');
+        cy.wrap({ ready: () => Boolean(releaseSearch) }).invoke('ready').should('eq', true);
+        cy.get(fromInput).type('{selectall}skill2');
+        cy.get(option(1, 2)).should('be.visible');
+        cy.then(() => releaseSearch());
+        cy.wait('@oldSearch');
+        cy.get(option(1, 2)).should('be.visible');
+        cy.get(option(1, 1)).should('not.exist');
+    });
+
+    it('does not reintroduce shared options when sharing is toggled off during a search', () => {
+        let releaseSearch;
+        cy.intercept('GET', '/admin/projects/proj2/sharedWithMe?*', (request) => {
+            if (request.query.filter === 'skill1') {
+                request.alias = 'disabledSearch';
+                return new Cypress.Promise((resolve) => {
+                    releaseSearch = () => {
+                        request.continue();
+                        resolve();
+                    };
+                });
+            }
+        });
+        visit(2);
+        cy.get('[data-cy="includeShared"]').click();
+        cy.get(fromInput).type('skill1');
+        cy.wrap({ ready: () => Boolean(releaseSearch) }).invoke('ready').should('eq', true);
+        cy.get('[data-cy="includeShared"]').click();
+        cy.then(() => releaseSearch());
+        cy.wait('@disabledSearch');
+        cy.get(fromInput).click();
+        cy.get(option(1, 1)).should('not.exist');
+    });
 });
