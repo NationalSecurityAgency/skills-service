@@ -780,6 +780,7 @@ describe('Shared skills pagination and request recovery', () => {
         cy.visit(`/administrator/projects/proj${project}/learning-path`, {
             onBeforeLoad(win) {
                 win.localStorage.setItem('sharedSkillsTable-pageSize', '5');
+                win.localStorage.setItem('sharedWithMeSkillsTable-pageSize', '5');
                 Object.entries(savedSorts).forEach(([key, value]) => {
                     win.localStorage.setItem(key, JSON.stringify(value));
                 });
@@ -868,6 +869,31 @@ describe('Shared skills pagination and request recovery', () => {
             expectFirstSkill(card, 'Shared Skill 1');
             cy.get(`${card} [aria-label="Page 1"]`).should('have.attr', 'aria-current', 'page');
         });
+    });
+
+    it('keeps incoming and outgoing page sizes independent across reloads', () => {
+        for (let skill = 1; skill <= 6; skill += 1) {
+            cy.createSkill(2, 1, skill, { name: `Incoming Skill ${skill}` });
+            cy.request('PUT', `/admin/projects/proj2/skills/skill${skill}/shared/projects/proj1`);
+        }
+
+        visit();
+        expectFirstSkill(outgoingCard, 'Shared Skill 6');
+        expectFirstSkill(incomingCard, 'Incoming Skill 6');
+
+        cy.get(`${outgoingCard} [aria-label="Rows per page"]`).click();
+        cy.get('[role="option"]').contains(/^10$/).click();
+        expectFirstSkill(outgoingCard, 'Shared Skill 6', 6);
+        cy.get(`${incomingCard} [aria-label="Rows per page"]`).should('have.text', '5');
+        expectFirstSkill(incomingCard, 'Incoming Skill 6');
+        cy.get(`${incomingCard} [aria-label="Page 2"]`).click();
+        expectFirstSkill(incomingCard, 'Incoming Skill 1', 1);
+
+        cy.reload();
+        cy.get(`${outgoingCard} [aria-label="Rows per page"]`).should('have.text', '10');
+        expectFirstSkill(outgoingCard, 'Shared Skill 6', 6);
+        cy.get(`${incomingCard} [aria-label="Rows per page"]`).should('have.text', '5');
+        expectFirstSkill(incomingCard, 'Incoming Skill 6');
     });
 
     it('returns to page one after deleting the last row on page two', () => {

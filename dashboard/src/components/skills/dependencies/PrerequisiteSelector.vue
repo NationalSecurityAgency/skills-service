@@ -88,7 +88,7 @@ const loadSharedSkills = async () => {
   }
 
   const params = {
-    limit: 100,
+    limit: 200,
     ascending: false,
     page: 1,
     orderBy: 'skill.skillId',
