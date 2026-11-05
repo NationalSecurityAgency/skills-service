@@ -216,6 +216,8 @@ class RecurringSkillExpirationSpecs extends DefaultIntSpec {
         skillsService.bulkImportSkillsFromCatalog(proj4.projectId, proj4_subj2.subjectId, subj2_skills.collect { [projectId: proj.projectId, skillId: it.skillId] })
         skillsService.finalizeSkillsImportFromCatalog(proj4.projectId)
 
+        users.each { String userId -> createService(userId).initializeProjectProgress(proj4.projectId) }
+
         skillsService.addSkill([projectId: proj.projectId, skillId: skills[0].skillId], users[0], new Date())
         skillsService.addSkill([projectId: proj.projectId, skillId: skills[1].skillId], users[0], new Date())
         skillsService.addSkill([projectId: proj.projectId, skillId: skills[0].skillId], users[1], new Date())
@@ -420,6 +422,8 @@ class RecurringSkillExpirationSpecs extends DefaultIntSpec {
         skillsService.bulkImportSkillsFromCatalog(proj4.projectId, proj4_subj.subjectId, skills.collect { [projectId: proj.projectId, skillId: it.skillId] })
         skillsService.bulkImportSkillsFromCatalog(proj4.projectId, proj4_subj2.subjectId, subj2_skills.collect { [projectId: proj.projectId, skillId: it.skillId] })
         skillsService.finalizeSkillsImportFromCatalog(proj4.projectId)
+
+        users.each { String userId -> createService(userId).initializeProjectProgress(proj4.projectId) }
 
         skillsService.addSkill([projectId: proj.projectId, skillId: skills[0].skillId], users[0], new Date())
         skillsService.addSkill([projectId: proj.projectId, skillId: skills[1].skillId], users[0], new Date())
@@ -654,6 +658,8 @@ class RecurringSkillExpirationSpecs extends DefaultIntSpec {
         skillsService.bulkImportSkillsFromCatalog(proj4.projectId, proj4_subj.subjectId, skills[2..4].collect { [projectId: proj.projectId, skillId: it.skillId] })
         skillsService.bulkImportSkillsFromCatalog(proj4.projectId, proj4_subj2.subjectId, subj2_skills.collect { [projectId: proj.projectId, skillId: it.skillId] })
         skillsService.finalizeSkillsImportFromCatalog(proj4.projectId)
+
+        users.each { String userId -> createService(userId).initializeProjectProgress(proj4.projectId) }
 
         skillsService.addSkill([projectId: proj.projectId, skillId: skills[0].skillId], users[0], new Date())
         skillsService.addSkill([projectId: proj.projectId, skillId: skills[1].skillId], users[0], new Date())
@@ -971,6 +977,8 @@ class RecurringSkillExpirationSpecs extends DefaultIntSpec {
         skillsService.bulkImportSkillsFromCatalog(proj4.projectId, proj4_subj.subjectId, skills.collect { [projectId: proj.projectId, skillId: it.skillId] })
         skillsService.bulkImportSkillsFromCatalog(proj4.projectId, proj4_subj2.subjectId, subj2_skills.collect { [projectId: proj.projectId, skillId: it.skillId] })
         skillsService.finalizeSkillsImportFromCatalog(proj4.projectId)
+
+        users.each { String userId -> createService(userId).initializeProjectProgress(proj4.projectId) }
 
         def proj4_badge = SkillsFactory.createBadge(4, 1)
         skillsService.createBadge(proj4_badge)
