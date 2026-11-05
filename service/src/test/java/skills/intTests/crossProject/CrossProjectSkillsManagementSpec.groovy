@@ -661,6 +661,11 @@ class CrossProjectSkillsManagementSpec extends DefaultIntSpec {
         then:
         !results.find() { it.projectId.toLowerCase() == "inception" }
         results.size() == 1
+
+        cleanup:
+        // This is an empty stand-in, not the initialized built-in project. Do not leave
+        // it for the next application context's Inception startup listener to update.
+        skillsService.deleteProject(proj3.projectId)
     }
 
     def "removing shared skill removes it from learning paths"() {

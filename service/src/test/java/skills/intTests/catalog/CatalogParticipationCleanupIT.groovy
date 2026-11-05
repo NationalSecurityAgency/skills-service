@@ -87,11 +87,14 @@ class CatalogParticipationCleanupIT extends CatalogCleanupIntSpec {
         result.projects[1].deletedRecords == 0
         result.projects[1].deletedPointRows == 0
         result.projects[1].deletedAchievementRows == 0
+        root.getUserActionsForEverything(10, 1, 'created', false, '', null,
+                '', '', 'cleanupImportedSkillProgress').data.isEmpty()
         setup.destinations.every { Map destination ->
             controls.pointDeleteCalls[destination.projectId].get() == 1 &&
                     controls.achievementDeleteCalls[destination.projectId].get() == 1
         }
         cleanupOutcomeLogs(logs).size() == 3
+        cleanupOutcomeLogs(logs).every { ILoggingEvent event -> event.formattedMessage.contains("actor=[${root.userName.toLowerCase()}]") }
         ILoggingEvent failureLog = cleanupOutcomeLogs(logs).find { ILoggingEvent event -> event.level == Level.ERROR }
         failureLog.formattedMessage.contains('projectId=[TestProject3] status=[FAILED] reason=[Project transaction rolled back')
         failureLog.formattedMessage.contains('elapsedMs=[')

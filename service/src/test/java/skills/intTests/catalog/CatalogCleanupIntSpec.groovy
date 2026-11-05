@@ -20,6 +20,7 @@ import ch.qos.logback.classic.spi.ILoggingEvent
 import ch.qos.logback.core.read.ListAppender
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
+import skills.controller.RootController
 import skills.intTests.utils.SkillsService
 import skills.services.admin.CatalogParticipationCleanupService
 import skills.services.admin.skillReuse.SkillReuseIdUtil
@@ -39,11 +40,17 @@ class CatalogCleanupIntSpec extends CatalogIntSpec {
     @Autowired ProjectParticipationRepo participationRepo
     @Autowired ArchivedUsersRepo archiveRepo
     private final List<ListAppender<ILoggingEvent>> cleanupLogAppenders = []
+    private final List<ListAppender<ILoggingEvent>> fixLogAppenders = []
 
     def cleanup() {
         Logger logger = (Logger) LoggerFactory.getLogger(CatalogParticipationCleanupService)
         cleanupLogAppenders.each { ListAppender<ILoggingEvent> appender ->
             logger.detachAppender(appender)
+            appender.stop()
+        }
+        Logger fixLogger = (Logger) LoggerFactory.getLogger(RootController)
+        fixLogAppenders.each { ListAppender<ILoggingEvent> appender ->
+            fixLogger.detachAppender(appender)
             appender.stop()
         }
     }
@@ -59,6 +66,20 @@ class CatalogCleanupIntSpec extends CatalogIntSpec {
     protected List<ILoggingEvent> cleanupOutcomeLogs(ListAppender<ILoggingEvent> appender) {
         appender.list.findAll { ILoggingEvent event ->
             event.formattedMessage.startsWith('CATALOG_PARTICIPATION_CLEANUP_PROJECT_RESULT ')
+        }
+    }
+
+    protected ListAppender<ILoggingEvent> captureFixLogs() {
+        ListAppender<ILoggingEvent> appender = new ListAppender<>()
+        appender.start()
+        ((Logger) LoggerFactory.getLogger(RootController)).addAppender(appender)
+        fixLogAppenders.add(appender)
+        appender
+    }
+
+    protected List<ILoggingEvent> fixOutcomeLogs(ListAppender<ILoggingEvent> appender) {
+        appender.list.findAll { ILoggingEvent event ->
+            event.formattedMessage.startsWith('CATALOG_PARTICIPATION_FIX_RESULT ')
         }
     }
 
