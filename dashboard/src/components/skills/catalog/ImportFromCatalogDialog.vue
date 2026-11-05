@@ -237,7 +237,7 @@ const dialogUtils = useDialogUtils()
 
       <div v-if="showTable">
         <div class="md:flex gap-2">
-          <div class="field mt-2 md:mt-0 mb-0 w-full md:w-auto">
+          <div class="field mt-2 md:mt-0 mb-0 w-full md:w-auto md:flex-1 min-w-0">
             <label for="skill-name-filter">Skill Name:</label>
             <InputText
               id="skill-name-filter"
@@ -247,7 +247,7 @@ const dialogUtils = useDialogUtils()
               maxlength="50"
               class="w-full" />
           </div>
-          <div class="field mt-2 md:mt-0 mb-0 w-full md:w-auto">
+          <div class="field mt-2 md:mt-0 mb-0 w-full md:w-auto md:flex-1 min-w-0">
             <label for="project-name-filter">Project Name:</label>
             <InputText
               id="project-name-filter"
@@ -257,7 +257,7 @@ const dialogUtils = useDialogUtils()
               maxlength="50"
               class="w-full" />
           </div>
-          <div class="field mt-2 md:mt-0 mb-0 w-full md:w-auto">
+          <div class="field mt-2 md:mt-0 mb-0 w-full md:w-auto md:flex-1 min-w-0">
             <label for="subject-name-filter">Subject Name:</label>
             <InputText
               id="subject-name-filter"
