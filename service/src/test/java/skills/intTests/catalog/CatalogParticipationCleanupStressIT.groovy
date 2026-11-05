@@ -133,7 +133,7 @@ class CatalogParticipationCleanupStressIT extends CatalogCleanupIntSpec {
         controls.armDelete()
         Future cleanupRun = callers.submit({
             SkillsService cleanupRoot = boundedClient(root.userName, 'aaaaaaaa', true)
-            measured('cleanup-all', '*') { cleanupRoot.cleanupImportedSkillProgress() }
+            measured('cleanup-all', '*') { cleanupRoot.cleanupImportedSkillProgress([allProjects: true]) }
             measured('cleanup-targeted', setup.destinations[0].projectId) { cleanupRoot.cleanupImportedSkillProgress([projectIds: [setup.destinations[0].projectId]]) }
         } as Callable)
         assert controls.arrived.await(deadline, TimeUnit.SECONDS)

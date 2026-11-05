@@ -73,13 +73,24 @@ class RootController {
     // Temporary pre-5.1 remediation endpoints; retire after the remediation window.
     @PostMapping('/cleanupImportedSkillProgress')
     Map cleanupImportedSkillProgress(@RequestBody(required = false) Object request) {
-        SkillsValidator.isTrue(request == null || request instanceof Map, 'Cleanup request must be a JSON object with optional projectIds')
+        SkillsValidator.isTrue(request == null || request instanceof Map, 'Cleanup request must be a JSON object specifying projectIds or allProjects: true')
         catalogCleanupService.cleanup((Map) request)
     }
 
     @PostMapping('/projects/{projectId}/users/{userId}/fixImportedSkillProgress')
     RequestResult fixImportedSkillProgress(@PathVariable String projectId, @PathVariable String userId) {
-        catalogFixService.fix(catalogCleanupService.canonicalProject(projectId), userId.toLowerCase())
+        String canonicalProjectId = catalogCleanupService.canonicalProject(projectId)
+        String targetUserId = userId.toLowerCase()
+        String actor = userInfoService.currentUserId
+        try {
+            catalogFixService.fix(canonicalProjectId, targetUserId)
+        } catch (Exception failure) {
+            log.error('CATALOG_PARTICIPATION_FIX_RESULT actor=[{}] projectId=[{}] targetUserId=[{}] status=[FAILED]',
+                    actor, canonicalProjectId, targetUserId, failure)
+            throw failure
+        }
+        log.info('CATALOG_PARTICIPATION_FIX_RESULT actor=[{}] projectId=[{}] targetUserId=[{}] status=[FIXED]',
+                actor, canonicalProjectId, targetUserId)
         new RequestResult(success: true)
     }
 

@@ -19,6 +19,7 @@ import groovy.util.logging.Slf4j
 import org.slf4j.spi.LoggingEventBuilder
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
+import skills.auth.UserInfoService
 import skills.controller.exceptions.SkillsValidator
 import skills.storage.model.ProjDef
 import skills.storage.repos.ProjDefRepo
@@ -31,6 +32,7 @@ class CatalogParticipationCleanupService {
     @Autowired ProjDefRepo projectRepo
     @Autowired CatalogParticipationCleanupRepo cleanupRepo
     @Autowired BatchOperationsTransactionalAccessor batchAccessor
+    @Autowired UserInfoService userInfoService
 
     String canonicalProject(String projectId) {
         SkillsValidator.isTrue(projectId != null && !projectId.trim().isEmpty(), 'A nonblank project ID is required')
@@ -41,8 +43,13 @@ class CatalogParticipationCleanupService {
 
     // No encompassing transaction: validate everything first, then independently commit each project.
     Map cleanup(Map request) {
+        SkillsValidator.isTrue(request != null, 'Cleanup requires explicit projectIds or allProjects: true')
+        SkillsValidator.isTrue(request.keySet().every { Object key -> key in ['projectIds', 'allProjects'] },
+                'Cleanup request contains unknown fields; only projectIds or allProjects are supported')
+        SkillsValidator.isTrue(request.containsKey('projectIds') != request.containsKey('allProjects'),
+                'Specify exactly one of projectIds or allProjects: true')
         List<String> projects
-        if (request?.containsKey('projectIds')) {
+        if (request.containsKey('projectIds')) {
             Object selection = request.projectIds
             SkillsValidator.isTrue(selection instanceof List && !selection.isEmpty(), 'projectIds must be a nonempty list of project IDs')
             projects = selection.collect { Object id ->
@@ -50,10 +57,13 @@ class CatalogParticipationCleanupService {
                 canonicalProject((String) id)
             }.unique().sort()
         } else {
+            SkillsValidator.isTrue(Boolean.TRUE.equals(request.allProjects), 'allProjects must be the boolean true')
             projects = cleanupRepo.findProjectIdsWithEnabledCatalogImports()
         }
+        Map requestScope = request.containsKey('projectIds') ? [projectIds: projects] : [allProjects: true]
+        String actor = userInfoService.currentUserId
         long start = System.nanoTime()
-        log.info('Legacy catalog cleanup request: projects=[{}]', projects)
+        log.info('Legacy catalog cleanup request: actor=[{}], scope=[{}], projects=[{}]', actor, requestScope, projects)
         List<Map> results = projects.collect { String projectId ->
             long projectStart = System.nanoTime()
             Map result
@@ -70,8 +80,8 @@ class CatalogParticipationCleanupService {
             // One terminal outcome after the proxy commits/rolls back, including every skip path.
             LoggingEventBuilder outcomeLog = result.status == 'FAILED' ? log.atError().setCause(projectFailure) :
                     (result.status == 'SKIPPED' ? log.atWarn() : log.atInfo())
-            outcomeLog.log('CATALOG_PARTICIPATION_CLEANUP_PROJECT_RESULT projectId=[{}] status=[{}] reason=[{}] elapsedMs=[{}] deletedRecords=[{}] deletedPointRows=[{}] deletedAchievementRows=[{}]',
-                    projectId, result.status, result.reason ?: 'None', result.elapsedMs,
+            outcomeLog.log('CATALOG_PARTICIPATION_CLEANUP_PROJECT_RESULT actor=[{}] projectId=[{}] status=[{}] reason=[{}] elapsedMs=[{}] deletedRecords=[{}] deletedPointRows=[{}] deletedAchievementRows=[{}]',
+                    actor, projectId, result.status, result.reason ?: 'None', result.elapsedMs,
                     result.deletedRecords, result.deletedPointRows, result.deletedAchievementRows)
             result
         }
@@ -79,7 +89,7 @@ class CatalogParticipationCleanupService {
                        deletedRecords: results.sum { Map result -> result.deletedRecords } ?: 0L,
                        deletedPointRows: results.sum { Map result -> (long) result.deletedPointRows } ?: 0L,
                        deletedAchievementRows: results.sum { Map result -> (long) result.deletedAchievementRows } ?: 0L]
-        log.info('Legacy catalog cleanup finished: {}', summary)
+        log.info('Legacy catalog cleanup finished: actor=[{}], summary=[{}]', actor, summary)
         summary
     }
 }

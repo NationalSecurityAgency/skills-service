@@ -24,6 +24,7 @@ import org.apache.poi.ss.usermodel.Sheet
 import org.springframework.test.annotation.DirtiesContext
 import skills.intTests.utils.SkillsClientException
 import skills.intTests.utils.SkillsService
+import skills.services.userActions.DashboardItem
 import skills.storage.model.ProjectParticipation
 import skills.storage.model.ProjectParticipation.BackfillStatus
 import skills.storage.model.SkillDef
@@ -37,6 +38,107 @@ import static skills.intTests.utils.SkillsFactory.*
 // Close this context's scheduler before the dedicated IT context installs worker barriers.
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
 class CatalogParticipationCleanupSpecs extends CatalogCleanupIntSpec {
+    def "cleanup rejects unsafe or ambiguous scope #selection before changing credit"() {
+        Map setup = fixture(1)
+        String user = getRandomUsers(1)[0]
+        seedResidue(setup.destinations[0], user)
+        Map before = snapshot('TestProject2', user)
+        SkillsService root = createRootSkillService()
+
+        when:
+        root.cleanupImportedSkillProgress(selection)
+
+        then:
+        SkillsClientException failure = thrown()
+        failure.httpStatus.value() == 400
+        failure.message.contains('BadParam')
+        snapshot('TestProject2', user) == before
+        root.getUserActionsForEverything(10, 1, 'created', false, '', DashboardItem.SkillsBatch,
+                '', '', 'cleanupImportedSkillProgress').data.isEmpty()
+
+        where:
+        selection << [null, [:], [projectId: 'TestProject2'], [allProjects: false], [allProjects: 'true'],
+                      [allProjects: null], [projectIds: ['TestProject2'], allProjects: true],
+                      [projectIds: ['TestProject2'], typo: true], [allProjects: true, typo: true],
+                      [projectIds: []], [projectIds: 'TestProject2'], [projectIds: [123]], [projectIds: [' ']]]
+    }
+
+    def "cleanup logs committed and skipped outcomes with actor and explicit scope without storing user actions"() {
+        Map setup = fixture(1)
+        String user = getRandomUsers(1)[0]
+        seedResidue(setup.destinations[0], user)
+        SkillsService root = createRootSkillService()
+        ListAppender<ILoggingEvent> logs = captureCleanupLogs()
+
+        when:
+        Map cleaned = root.cleanupImportedSkillProgress([projectIds: [' testproject2 ', 'TESTPROJECT2']])
+        Map skipped = root.cleanupImportedSkillProgress([allProjects: true])
+
+        then:
+        cleaned.deletedRecords == 7
+        skipped.deletedRecords == 0
+        snapshot('TestProject2', user) == [points: [], awards: []]
+        List<ILoggingEvent> outcomes = cleanupOutcomeLogs(logs)
+        outcomes.size() == 2
+        outcomes.every { ILoggingEvent event ->
+            event.formattedMessage.contains("actor=[${root.userName.toLowerCase()}]") &&
+                    event.formattedMessage.contains('projectId=[TestProject2]')
+        }
+        ILoggingEvent committed = outcomes.find { ILoggingEvent event -> event.formattedMessage.contains('status=[CLEANED]') }
+        committed.level == Level.INFO
+        committed.formattedMessage.endsWith('deletedRecords=[7] deletedPointRows=[3] deletedAchievementRows=[4]')
+        ILoggingEvent unchanged = outcomes.find { ILoggingEvent event -> event.formattedMessage.contains('status=[SKIPPED]') }
+        unchanged.level == Level.WARN
+        unchanged.formattedMessage.endsWith('deletedRecords=[0] deletedPointRows=[0] deletedAchievementRows=[0]')
+        logs.list.any { ILoggingEvent event -> event.formattedMessage.contains('scope=[{projectIds=[TestProject2]}]') }
+        logs.list.any { ILoggingEvent event -> event.formattedMessage.contains('scope=[{allProjects=true}]') }
+        root.getUserActionsForEverything(10, 1, 'created', false, '', DashboardItem.SkillsBatch,
+                '', '', 'cleanupImportedSkillProgress').data.isEmpty()
+    }
+
+    def "Fix logs committed and rejected repair without storing user actions or claiming success for rollback"() {
+        Map setup = fixture(1)
+        List<String> users = getRandomUsers(2)
+        SkillsService learner = createService(users[0])
+        learner.initializeProjectProgress('TestProject2')
+        waitForAsyncTasksCompletion.waitForAllScheduleTasks()
+        SkillsService root = createRootSkillService()
+        ListAppender<ILoggingEvent> logs = captureFixLogs()
+
+        when:
+        root.fixImportedSkillProgress('testproject2', users[0])
+
+        then:
+        learner.getSkillsSummaryForCurrentUser('TestProject2').points == 0
+        fixOutcomeLogs(logs).size() == 1
+        ILoggingEvent committed = fixOutcomeLogs(logs)[0]
+        committed.level == Level.INFO
+        committed.formattedMessage.contains("actor=[${root.userName.toLowerCase()}]")
+        committed.formattedMessage.contains('projectId=[TestProject2]')
+        committed.formattedMessage.contains("targetUserId=[${users[0].toLowerCase()}] status=[FIXED]")
+        root.getUserActionsForEverything(10, 1, 'created', false, '', DashboardItem.SkillsBatch,
+                '', '', 'fixImportedSkillProgress').data.isEmpty()
+
+        when:
+        root.fixImportedSkillProgress('TestProject2', users[1])
+
+        then:
+        SkillsClientException failure = thrown()
+        failure.message.contains('does not enroll')
+        !membership('TestProject2', users[1])
+        List<ILoggingEvent> outcomes = fixOutcomeLogs(logs)
+        outcomes.size() == 2
+        outcomes.count { ILoggingEvent event -> event.formattedMessage.contains('status=[FIXED]') } == 1
+        ILoggingEvent rejected = outcomes.find { ILoggingEvent event -> event.formattedMessage.contains('status=[FAILED]') }
+        rejected.level == Level.ERROR
+        rejected.formattedMessage.contains("actor=[${root.userName.toLowerCase()}]")
+        rejected.formattedMessage.contains('projectId=[TestProject2]')
+        rejected.formattedMessage.contains("targetUserId=[${users[1].toLowerCase()}]")
+        rejected.throwableProxy != null
+        root.getUserActionsForEverything(10, 1, 'created', false, '', DashboardItem.SkillsBatch,
+                '', '', 'fixImportedSkillProgress').data.isEmpty()
+    }
+
     def "cleanup and Fix isolate two source projects and distinguish partial mixed group and badge requirements"() {
         List<String> users = getRandomUsers(4)
         Map setup = reuseFixture(['TestProject2': users.take(2), 'TestProject3': users.take(2)])
@@ -627,7 +729,7 @@ class CatalogParticipationCleanupSpecs extends CatalogCleanupIntSpec {
         membership(destination.projectId, user) == participant
     }
 
-    def "default cleanup has no projects to process when there are no enabled catalog imports"() {
+    def "explicit all-project cleanup has no projects to process when there are no enabled catalog imports"() {
         Map nativeSkill = createSkill(1, 1, 11, 0, 1, 0, 100)
         skillsService.createProjectAndSubjectAndSkills(createProject(1), createSubject(1, 1), [nativeSkill])
         String user = getRandomUsers(1)[0]
@@ -635,7 +737,7 @@ class CatalogParticipationCleanupSpecs extends CatalogCleanupIntSpec {
         Map before = snapshot(nativeSkill.projectId, user)
 
         when:
-        Map result = createRootSkillService().cleanupImportedSkillProgress()
+        Map result = createRootSkillService().cleanupImportedSkillProgress([allProjects: true])
 
         then:
         result.projects == []
@@ -858,7 +960,7 @@ class CatalogParticipationCleanupSpecs extends CatalogCleanupIntSpec {
         Map protectedRows = snapshot('TestProject2', users[0])
 
         when:
-        Map result = createRootSkillService().cleanupImportedSkillProgress()
+        Map result = createRootSkillService().cleanupImportedSkillProgress([allProjects: true])
 
         then:
         result.deletedRecords == 11
@@ -885,7 +987,7 @@ class CatalogParticipationCleanupSpecs extends CatalogCleanupIntSpec {
         ListAppender<ILoggingEvent> logs = captureCleanupLogs()
 
         when:
-        Map automatic = root.cleanupImportedSkillProgress()
+        Map automatic = root.cleanupImportedSkillProgress([allProjects: true])
         Map result = root.cleanupImportedSkillProgress([projectIds: ['TestProject3', 'TestProject4', 'TestProject5']])
 
         then:
@@ -922,7 +1024,7 @@ class CatalogParticipationCleanupSpecs extends CatalogCleanupIntSpec {
         Map nativeRows = setup.destinations.collectEntries { Map destination -> [(destination.projectId): snapshot(destination.projectId, users[1]).points.findAll { it.skillId == destination.nativeSkill.skillId }] }
 
         when:
-        Map result = createRootSkillService().cleanupImportedSkillProgress()
+        Map result = createRootSkillService().cleanupImportedSkillProgress([allProjects: true])
 
         then:
         result.deletedRecords == 14
@@ -1017,7 +1119,7 @@ class CatalogParticipationCleanupSpecs extends CatalogCleanupIntSpec {
         Map available = setup.destinations.collectEntries { Map destination -> [(destination.projectId): projDefRepo.findByProjectIdIgnoreCase(destination.projectId).totalPoints] }
 
         when:
-        Map result = root.cleanupImportedSkillProgress()
+        Map result = root.cleanupImportedSkillProgress([allProjects: true])
 
         then:
         result.projects.findAll { it.status == 'CLEANED' }*.projectId == setup.destinations*.projectId
@@ -1043,7 +1145,7 @@ class CatalogParticipationCleanupSpecs extends CatalogCleanupIntSpec {
                     skillsService.getLeaderboard(users[0], destination.projectId).rankedUsers*.userId.toSet() == users.take(5).collect { String user -> userAttrsRepo.findByUserIdIgnoreCase(user).userIdForDisplay }.toSet() &&
                     exportedUsers(destination.projectId).toSet() == users.take(5).collect { String user -> userAttrsRepo.findByUserIdIgnoreCase(user).userIdForDisplay }.toSet()
         }
-        root.cleanupImportedSkillProgress([:]).deletedRecords == 0
+        root.cleanupImportedSkillProgress([allProjects: true]).deletedRecords == 0
         // Archive records survived: restoring an event-free protected learner still finds their row.
         skillsService.restoreArchivedUser(users[5], setup.destinations[0].projectId)
         skillsService.getProjectUsers(setup.destinations[0].projectId).data*.userId.contains(users[5])
