@@ -943,8 +943,8 @@ FROM user_performed_skill upa
         upa.skill_ref_id = CASE when skill.copied_from_skill_ref is not null then skill.copied_from_skill_ref ELSE skill.id end
         and type = 'Skill' and skill.project_id = :projectId
         and (skill.copied_from_project_id is null or skill.copied_from_project_id = skill.project_id
-          or exists(select 1 from user_performed_skill local_event where local_event.project_id = skill.project_id and local_event.user_id = upa.user_id)
-          or exists(select 1 from project_participation participant where participant.project_id = skill.project_id and participant.user_id = upa.user_id))
+          or exists(select 1 from user_performed_skill local_event where local_event.project_id = :projectId and local_event.user_id = upa.user_id)
+          or exists(select 1 from project_participation participant where participant.project_id = :projectId and participant.user_id = upa.user_id))
     )
 WHERE skill.enabled = 'true'
 GROUP BY upa.user_id
