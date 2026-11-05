@@ -27,6 +27,8 @@ import skills.controller.request.model.SkillImportRequest
 import skills.controller.request.model.SkillProjectCopyRequest
 import skills.controller.request.model.SkillRequest
 import skills.services.BadgeUtils
+import skills.services.CatalogParticipantBackfillService
+import skills.services.LockingService
 import skills.services.RuleSetDefGraphService
 import skills.services.UserAchievementsAndPointsManagement
 import skills.services.admin.BatchOperationsTransactionalAccessor
@@ -81,6 +83,9 @@ class QuizToSkillService {
     @Autowired
     UserCommunityService userCommunityService
 
+    @Autowired CatalogParticipantBackfillService catalogBackfillService
+    @Autowired LockingService lockingService
+
     @Transactional
     void handleQuizToSkillRelationship(SkillDef savedSkill, SkillRequest skillRequest){
         QuizDef quizDef = getQuizDef(skillRequest.quizId)
@@ -128,12 +133,17 @@ class QuizToSkillService {
     private void updateAffectedUserPointsAndAchievements(QuizDef quizDef, SkillDef savedSkill) {
         Integer skillRef = savedSkill.id
 
+        List<String> firstLocalUsers = userPerformedSkillRepo.findNewLocalQuizUsers(savedSkill.projectId, skillRef)
+        // Qualification retains project locks across this multi-user transaction. Take
+        // all learner locks first so a concurrent visit cannot hold one while waiting on us.
+        firstLocalUsers.sort().each { String userId -> lockingService.lockForSkillReporting(userId, savedSkill.projectId) }
         batchOperationsTransactionalAccessor.createUserPerformedEntriesFromPassedQuizzes(quizDef.id, skillRef)
         batchOperationsTransactionalAccessor.createUserEventEntriesFromPassedQuizzes(quizDef.id, skillRef)
         batchOperationsTransactionalAccessor.createSkillUserPointsFromPassedQuizzes(quizDef.id, skillRef)
         batchOperationsTransactionalAccessor.createUserAchievementsFromPassedQuizzes(quizDef.id, skillRef)
 
         updateGroupSubjectAndProjectPointsAndAchievements(savedSkill)
+        firstLocalUsers.each { String userId -> catalogBackfillService.qualify(savedSkill.projectId, userId) }
     }
 
     private boolean doesQuizHasAtLeastOneRun(QuizDef quizDef) {

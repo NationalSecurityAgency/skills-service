@@ -188,6 +188,7 @@ class SkillStatsMetricsBuilderSpec extends DefaultIntSpec {
             skillsService.importSkillFromCatalog(proj2.projectId, subj2.subjectId, proj.projectId, it.skillId)
         }
         skillsService.finalizeSkillsImportFromCatalog(proj2.projectId, true)
+        users.each { String user -> createService(user).initializeProjectProgress(proj2.projectId) }
 
         List<Date> days
 

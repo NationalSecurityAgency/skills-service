@@ -40,6 +40,75 @@ interface UserPointsRepo extends CrudRepository<UserPoints, Integer> {
     @Nullable
     UserPoints findByProjectIdAndUserIdAndSkillId(String projectId, String userId, @Nullable String skillId)
 
+    // Points, completion, and the latest credited event are read from one source snapshot.
+    @Query(value = '''select coalesce(source.points / original.point_increment, 0) * imported.point_increment as points,
+                            achievement.achieved_on as achievedOn,
+                            achievement.points_when_achieved as pointsWhenAchieved,
+                            (select max(event.performed_on) from user_performed_skill event
+                             where event.skill_ref_id = original.id and event.user_id = :userId) as performedOn
+                     from skill_definition imported
+                     join skill_definition original on original.id = imported.copied_from_skill_ref
+                     left join user_points source on source.skill_ref_id = original.id and source.user_id = :userId
+                     left join user_achievement achievement on achievement.skill_ref_id = original.id
+                          and achievement.user_id = :userId and achievement.level is null
+                     where imported.id = :skillRefId''', nativeQuery = true)
+    @Nullable
+    ImportedCreditSnapshot readImportedCredit(@Param('userId') String userId, @Param('skillRefId') Integer skillRefId)
+
+    interface ImportedCreditSnapshot {
+        Integer getPoints()
+        @Nullable
+        Date getAchievedOn()
+        @Nullable
+        Integer getPointsWhenAchieved()
+        @Nullable
+        Date getPerformedOn()
+    }
+
+    @Modifying
+    @Query(value = '''insert into user_points(user_id, project_id, skill_id, skill_ref_id, points, created, updated)
+                     values (:userId, :projectId, :skillId, :skillRefId, :points, :creditDate, :creditDate)
+                     on conflict (project_id, skill_id, user_id) do update
+                     set points = excluded.points, updated = excluded.updated
+                     where user_points.points <> excluded.points''', nativeQuery = true)
+    void reconcileImportedPoints(@Param('userId') String userId, @Param('projectId') String projectId,
+                                 @Param('skillId') String skillId, @Param('skillRefId') Integer skillRefId,
+                                 @Param('points') Integer points, @Param('creditDate') Date creditDate)
+
+    // Activation schedules only discrepancies, including work for previously enabled imports.
+    // This also recovers an earlier copy window after a failed/retried finalization.
+    @Query(value = '''with imports as (
+                         select * from skill_definition
+                         where project_id = :projectId and enabled = 'true' and copied_from_skill_ref is not null
+                     )
+                     select distinct imported.id as skillRefId, users.user_id as userId
+                     from imports imported
+                     join skill_definition original on original.id = imported.copied_from_skill_ref
+                     cross join lateral (
+                         select user_id from user_points where skill_ref_id in (original.id, imported.id)
+                         union select user_id from user_achievement where skill_ref_id in (original.id, imported.id) and level is null
+                     ) users
+                     left join user_points source on source.skill_ref_id = original.id and source.user_id = users.user_id
+                     left join user_points destination on destination.skill_ref_id = imported.id and destination.user_id = users.user_id
+                     left join user_achievement source_award on source_award.skill_ref_id = original.id and source_award.user_id = users.user_id and source_award.level is null
+                     left join user_achievement destination_award on destination_award.skill_ref_id = imported.id and destination_award.user_id = users.user_id and destination_award.level is null
+                     where (imported.project_id = original.project_id
+                         or exists(select 1 from project_participation p where p.project_id = :projectId and p.user_id = users.user_id)
+                         or exists(select 1 from user_performed_skill e where e.project_id = :projectId and e.user_id = users.user_id))
+                       and (not exists(select 1 from settings s where s.project_id = :projectId and s.setting = 'user_community' and s.value = 'true')
+                         or exists(select 1 from user_tags t where t.user_id = users.user_id and t.key = :userCommunityUserTagKey and t.value = :userCommunityUserTagValue))
+                       and (coalesce(destination.points, 0) <> coalesce(source.points / original.point_increment, 0) * imported.point_increment
+                         or source_award.achieved_on is distinct from destination_award.achieved_on)
+                     order by imported.id, users.user_id''', nativeQuery = true)
+    Stream<ImportedCreditDiscrepancy> findCatalogCreditDiscrepancies(@Param('projectId') String projectId,
+            @Param('userCommunityUserTagKey') String userCommunityUserTagKey,
+            @Param('userCommunityUserTagValue') String userCommunityUserTagValue)
+
+    interface ImportedCreditDiscrepancy {
+        Integer getSkillRefId()
+        String getUserId()
+    }
+
     @Modifying
     @Query(value = '''INSERT INTO user_points(user_id, project_id, skill_id, skill_ref_id, points)
             SELECT up.user_id, toDef.project_id, toDef.skill_id, toDef.id, (toDef.point_increment * (up.points / fromDef.point_increment))
@@ -49,6 +118,9 @@ interface UserPointsRepo extends CrudRepository<UserPoints, Integer> {
                     toDef.copied_from_skill_ref = up.skill_ref_id and
                     toDef.copied_from_skill_ref = fromDef.id and
                     up.skill_ref_id in (:fromSkillRefIds)
+                    and (toDef.project_id = fromDef.project_id
+                      or exists(select 1 from user_performed_skill localEvent where localEvent.project_id = toDef.project_id and localEvent.user_id = up.user_id)
+                      or exists(select 1 from project_participation participant where participant.project_id = toDef.project_id and participant.user_id = up.user_id))
                    and (not exists(
                         select 1
                         from settings s
@@ -60,13 +132,8 @@ interface UserPointsRepo extends CrudRepository<UserPoints, Integer> {
                         where ut.user_id = up.user_id
                           and ut.key = :userCommunityUserTagKey and ut.value = :userCommunityUserTagValue
                        )))     
-                    and not exists(
-                        select 1
-                        from user_points innerUP
-                        where toDef.project_id = innerUP.project_id
-                          and up.user_id = innerUP.user_id
-                          and toDef.skill_id = innerUP.skill_id
-                    )
+             ON CONFLICT (project_id, skill_id, user_id) DO UPDATE SET points = excluded.points
+             WHERE user_points.points <> excluded.points
                 ''', nativeQuery = true)
     void copySkillUserPointsToTheImportedProjects(@Param('toProjectId') String toProjectId, @Param('fromSkillRefIds') List<Integer> fromSkillRefIds, @Param('userCommunityUserTagKey') String userCommunityUserTagKey, @Param('userCommunityUserTagValue') String userCommunityUserTagValue)
 
@@ -79,14 +146,10 @@ interface UserPointsRepo extends CrudRepository<UserPoints, Integer> {
                     toDef.copied_from_skill_ref = up.skill_ref_id and
                     toDef.copied_from_skill_ref = fromDef.id and
                     up.skill_ref_id in (:fromSkillRefIds) and 
+                    toDef.enabled = 'true' and
                     up.user_id = :userId
-                    and not exists(
-                        select 1
-                        from user_points innerUP
-                        where toDef.project_id = innerUP.project_id
-                          and up.user_id = innerUP.user_id
-                          and toDef.skill_id = innerUP.skill_id
-                    )
+             ON CONFLICT (project_id, skill_id, user_id) DO UPDATE SET points = excluded.points
+             WHERE user_points.points <> excluded.points
                 ''', nativeQuery = true)
     void copySingleUserSkillUserPointsToTheImportedProjects(@Param('userId') String userId, @Param('toProjectId') String toProjectId, @Param('fromSkillRefIds') List<Integer> fromSkillRefIds)
 
@@ -459,6 +522,9 @@ interface UserPointsRepo extends CrudRepository<UserPoints, Integer> {
             WHERE
                     up.project_id = :toProjectId and
                     sd.project_id = :toProjectId and sd.id = up.skill_ref_id and sd.type = 'Skill'
+            and (not exists(select 1 from skill_definition imported where imported.project_id = :toProjectId and imported.copied_from_project_id <> imported.project_id)
+              or exists(select 1 from user_performed_skill e where e.project_id = :toProjectId and e.user_id = up.user_id)
+              or exists(select 1 from project_participation p where p.project_id = :toProjectId and p.user_id = up.user_id))
             and not exists (select 1 from user_points innerUP where up.project_id = innerUP.project_id and up.user_id = innerUP.user_id and innerUP.skill_id is null)
             group by up.user_id;
             ''', nativeQuery = true)
@@ -486,6 +552,9 @@ interface UserPointsRepo extends CrudRepository<UserPoints, Integer> {
           and subject.project_id = :toProjectId and subject.skill_id = :toSubjectId
           and subject.id = srd.parent_ref_id and sd.id = srd.child_ref_id and srd.type in ('RuleSetDefinition', 'GroupSkillToSubject')
           and sd.id = up.skill_ref_id
+          and (not exists(select 1 from skill_definition imported where imported.project_id = :toProjectId and imported.copied_from_project_id <> imported.project_id)
+            or exists(select 1 from user_performed_skill e where e.project_id = :toProjectId and e.user_id = up.user_id)
+            or exists(select 1 from project_participation p where p.project_id = :toProjectId and p.user_id = up.user_id))
           and not exists (
             select 1 from user_points innerUP
             where
@@ -749,7 +818,8 @@ interface UserPointsRepo extends CrudRepository<UserPoints, Integer> {
     @Query(value ='''WITH skills AS (
                 select case when child.copied_from_skill_ref is not null then child.copied_from_skill_ref else child.id end as id,
                        child.point_increment as point_increment,
-                       child.id as originalRefId
+                       child.id as originalRefId,
+                       child.project_id, child.copied_from_project_id
                 from skill_relationship_definition rel,
                      skill_definition child
                 where rel.parent_ref_id = :parentSkillRefId
@@ -763,6 +833,9 @@ interface UserPointsRepo extends CrudRepository<UserPoints, Integer> {
                  skills
             where up.user_id =:userId
               and up.skill_ref_id = skills.id
+              and (skills.copied_from_project_id is null or skills.copied_from_project_id = skills.project_id
+                or exists(select 1 from user_performed_skill local_event where local_event.project_id = skills.project_id and local_event.user_id = up.user_id)
+                or exists(select 1 from project_participation participant where participant.project_id = skills.project_id and participant.user_id = up.user_id))
               and DATE_TRUNC('DAY', up.performed_on) = :day
             group by skills.originalRefId''', nativeQuery = true)
     List<SkillRefIdWithPoints> calculatePointsForChildSkillsForADay(@Param("userId") String userId,
@@ -778,6 +851,9 @@ interface UserPointsRepo extends CrudRepository<UserPoints, Integer> {
                  skill_definition sd
             where up.user_id =:userId
               and sd.id = :skillRefId
+              and (sd.copied_from_project_id is null or sd.copied_from_project_id = sd.project_id
+                or exists(select 1 from user_performed_skill local_event where local_event.project_id = sd.project_id and local_event.user_id = up.user_id)
+                or exists(select 1 from project_participation participant where participant.project_id = sd.project_id and participant.user_id = up.user_id))
               and up.skill_ref_id = (case when sd.copied_from_skill_ref is not null then sd.copied_from_skill_ref else sd.id end)
               and DATE_TRUNC('DAY', up.performed_on) = :day 
             group by up.skill_ref_id''', nativeQuery = true)
@@ -857,23 +933,41 @@ interface UserPointsRepo extends CrudRepository<UserPoints, Integer> {
             nativeQuery = true)
     Long countDistinctUserIdByProjectId(String projectId)
 
-    static final String FIND_DISTINCT_USERS_SQL = '''SELECT
-    upa.user_id as userId,
-    min(upa.performed_on) as firstUpdated,
-    max(upa.performed_on) as lastUpdated,
-    sum(skill.point_increment) as totalPoints,
-    max(ua.first_name) as firstName,
-    max(ua.last_name) as lastName,
-    max(ua.dn) as dn,
-    max(ua.email) as email,
-    max(ua.user_id_for_display) as userIdForDisplay,
-    case when max(uAchievement.level) is not null then max(uAchievement.level) else 0 end as userMaxLevel,
-    max(ut.value) as userTag
+    static final String PROJECT_USERS_CTE = '''WITH activity AS (
+SELECT upa.user_id,
+    min(case when skill.point_increment > 0 then upa.performed_on end) as first_earned,
+    max(case when skill.point_increment > 0 then upa.performed_on end) as last_earned,
+    sum(skill.point_increment) as total_points
 FROM user_performed_skill upa
     JOIN skill_definition skill on (
         upa.skill_ref_id = CASE when skill.copied_from_skill_ref is not null then skill.copied_from_skill_ref ELSE skill.id end
         and type = 'Skill' and skill.project_id = :projectId
+        and (skill.copied_from_project_id is null or skill.copied_from_project_id = skill.project_id
+          or exists(select 1 from user_performed_skill local_event where local_event.project_id = :projectId and local_event.user_id = upa.user_id)
+          or exists(select 1 from project_participation participant where participant.project_id = :projectId and participant.user_id = upa.user_id))
     )
+WHERE skill.enabled = 'true'
+GROUP BY upa.user_id
+), population AS (
+    SELECT user_id FROM activity
+    UNION
+    SELECT user_id FROM project_participation WHERE project_id = :projectId
+), project_users AS (
+SELECT population.user_id as userId,
+    least(activity.first_earned, participant.created) as firstUpdated,
+    activity.last_earned as lastUpdated,
+    case when activity.last_earned is null then 1 else 0 end as lastUpdatedMissing,
+    coalesce(activity.total_points, 0) as totalPoints,
+    ua.first_name as firstName,
+    ua.last_name as lastName,
+    ua.dn as dn,
+    ua.email as email,
+    ua.user_id_for_display as userIdForDisplay,
+    coalesce(uAchievement.level, 0) as userMaxLevel,
+    ut.value as userTag
+FROM population
+    LEFT JOIN activity ON activity.user_id = population.user_id
+    LEFT JOIN project_participation participant ON participant.project_id = :projectId and participant.user_id = population.user_id
     LEFT JOIN (
         SELECT uAchievement.user_id, max(uAchievement.level) as level
         FROM user_achievement uAchievement
@@ -881,31 +975,30 @@ FROM user_performed_skill upa
           and uAchievement.skill_id is null
           and uAchievement.level is not null
         GROUP BY uAchievement.user_id
-    ) uAchievement ON uAchievement.user_id = upa.user_id
-         JOIN user_attrs ua ON ua.user_id=upa.user_id
+    ) uAchievement ON uAchievement.user_id = population.user_id
+         JOIN user_attrs ua ON ua.user_id=population.user_id
          LEFT JOIN (SELECT ut.user_id, max(ut.value) AS value FROM user_tags ut WHERE ut.key = :usersTableAdditionalUserTagKey group by ut.user_id) ut ON ut.user_id=ua.user_id
 WHERE
-    skill.enabled = 'true' and
     ((lower(CONCAT(ua.first_name, ' ', ua.last_name, ' (',  ua.user_id_for_display, ')')) like lower(CONCAT('%', :query, '%'))) OR
      (lower(CONCAT(ua.user_id_for_display, ' (', ua.last_name, ', ', ua.first_name,  ')')) like lower(CONCAT('%', :query, '%'))) OR
      (lower(ua.user_id_for_display) like lower(CONCAT('%', :query, '%')))
         ) and
     (:userTagFilter = '' or lower(ut.value) like lower(CONCAT('%', :userTagFilter, '%'))) and
-    not exists (select 1 from archived_users au where au.user_id = upa.user_id and au.project_id = :projectId)
-GROUP BY upa.user_id
-HAVING
-   sum(skill.point_increment) >= :minimumPoints
-   and sum(skill.point_increment) < :maximumPoints
-   and (:includeImported = true or sum(CASE when skill.copied_from_skill_ref is null then skill.point_increment else 0 end) > 0)'''
+    not exists (select 1 from archived_users au where au.user_id = population.user_id and au.project_id = :projectId)
+    and coalesce(activity.total_points, 0) >= :minimumPoints
+    and coalesce(activity.total_points, 0) < :maximumPoints
+) '''
 
-    @Query(value = FIND_DISTINCT_USERS_SQL, nativeQuery = true)
+    static final String FIND_DISTINCT_USERS_SQL = PROJECT_USERS_CTE + 'SELECT * FROM project_users'
+    static final String COUNT_DISTINCT_USERS_SQL = PROJECT_USERS_CTE + 'SELECT count(*) FROM project_users'
+
+    @Query(value = FIND_DISTINCT_USERS_SQL, countQuery = COUNT_DISTINCT_USERS_SQL, nativeQuery = true)
     Page<ProjectUser> findDistinctProjectUsersAndUserIdLike(@Param("projectId") String projectId,
                                                             @Param("usersTableAdditionalUserTagKey") String usersTableAdditionalUserTagKey,
                                                             @Param("query") String query,
                                                             @Param("minimumPoints") int minimumPoints,
                                                             @Param("maximumPoints") int maximumPoints,
                                                             @Param("userTagFilter") String userTagFilter,
-                                                            @Param("includeImported") boolean includeImported,
                                                             Pageable pageable)
 
     @QueryHints(
@@ -918,7 +1011,6 @@ HAVING
                                                                 @Param("minimumPoints") int minimumPoints,
                                                                 @Param("maximumPoints") int maximumPoints,
                                                                 @Param("userTagFilter") String userTagFilter,
-                                                                @Param("includeImported") boolean includeImported,
                                                                 Pageable pageable)
 
     static final String FIND_DISTINCT_PROJECT_USERS_BY_SKILLS_WITH_ACHIEVED_SQL = '''
@@ -941,6 +1033,9 @@ HAVING
             and type = 'Skill' 
             and skill.project_id = :projectId 
             and skill.skill_id in :skillIds 
+            and (skill.copied_from_project_id is null or skill.copied_from_project_id = skill.project_id
+              or exists(select 1 from user_performed_skill local_event where local_event.project_id = skill.project_id and local_event.user_id = upa.user_id)
+              or exists(select 1 from project_participation participant where participant.project_id = skill.project_id and participant.user_id = upa.user_id))
         ) 
         JOIN user_attrs ua ON ua.user_id=upa.user_id 
         LEFT JOIN (
@@ -960,6 +1055,9 @@ HAVING
                     and skill_inner.project_id = :projectId 
                     and skill_inner.skill_id in :skillIds 
                     and skill_inner.enabled = 'true' 
+                    and (skill_inner.copied_from_project_id is null or skill_inner.copied_from_project_id = skill_inner.project_id
+                      or exists(select 1 from user_performed_skill local_event where local_event.project_id = skill_inner.project_id and local_event.user_id = upa_inner.user_id)
+                      or exists(select 1 from project_participation participant where participant.project_id = skill_inner.project_id and participant.user_id = upa_inner.user_id))
                 ) 
                 GROUP BY upa_inner.user_id, skill_inner.skill_id, skill_inner.total_points 
                 HAVING sum(skill_inner.point_increment) = skill_inner.total_points 
@@ -974,7 +1072,6 @@ HAVING
           ) 
           and (:userTagFilter = '' or lower(ut.value) like lower(CONCAT('%', :userTagFilter, '%'))) 
           and not exists (select 1 from archived_users au where au.user_id = upa.user_id and au.project_id = :projectId) 
-          and (:includeImported = true OR exists(select 1 from user_performed_skill upa2 where upa2.project_id = :projectId and upa2.user_id = upa.user_id)) 
         GROUP BY upa.user_id 
         HAVING sum(skill.point_increment) >= :minimumPoints and sum(skill.point_increment) < :maximumPoints
     ) as user_results
@@ -989,6 +1086,9 @@ HAVING
             and type = 'Skill' 
             and skill.project_id = :projectId 
             and skill.skill_id in :skillIds 
+            and (skill.copied_from_project_id is null or skill.copied_from_project_id = skill.project_id
+              or exists(select 1 from user_performed_skill local_event where local_event.project_id = skill.project_id and local_event.user_id = upa.user_id)
+              or exists(select 1 from project_participation participant where participant.project_id = skill.project_id and participant.user_id = upa.user_id))
         ) 
         JOIN user_attrs ua ON ua.user_id=upa.user_id 
         LEFT JOIN (
@@ -1005,7 +1105,6 @@ HAVING
           ) 
           and (:userTagFilter = '' or lower(ut.value) like lower(CONCAT('%', :userTagFilter, '%'))) 
           and not exists (select 1 from archived_users au where au.user_id = upa.user_id and au.project_id = :projectId) 
-          and (:includeImported = true OR exists(select 1 from user_performed_skill upa2 where upa2.project_id = :projectId and upa2.user_id = upa.user_id)) 
         GROUP BY upa.user_id 
         HAVING sum(skill.point_increment) >= :minimumPoints and sum(skill.point_increment) < :maximumPoints
     ) as count_results
@@ -1028,6 +1127,9 @@ HAVING
         JOIN skill_definition skill on (
             upa.skill_ref_id = CASE when skill.copied_from_skill_ref is not null then skill.copied_from_skill_ref ELSE skill.id end
             and type = 'Skill' and skill.project_id = :projectId and skill.skill_id in :skillIds
+            and (skill.copied_from_project_id is null or skill.copied_from_project_id = skill.project_id
+              or exists(select 1 from user_performed_skill local_event where local_event.project_id = skill.project_id and local_event.user_id = upa.user_id)
+              or exists(select 1 from project_participation participant where participant.project_id = skill.project_id and participant.user_id = upa.user_id))
         )
         JOIN user_attrs ua ON ua.user_id=upa.user_id
         LEFT JOIN (SELECT ut.user_id, max(ut.value) AS value FROM user_tags ut WHERE ut.key = :usersTableAdditionalUserTagKey group by ut.user_id) ut ON ut.user_id=ua.user_id
@@ -1039,7 +1141,6 @@ HAVING
             ) and
         (:userTagFilter = '' or lower(ut.value) like lower(CONCAT('%', :userTagFilter, '%')))
         and not exists (select 1 from archived_users au where au.user_id = upa.user_id and au.project_id = :projectId)
-        and (:includeImported = true OR exists( select 1 from user_performed_skill upa2 where upa2.project_id = :projectId and upa2.user_id = upa.user_id) )
     GROUP BY upa.user_id
     HAVING sum(skill.point_increment) >= :minimumPoints
        and sum(skill.point_increment) < :maximumPoints
@@ -1057,7 +1158,6 @@ HAVING
                                                                                                       @Param("minimumPoints") int minimumPoints,
                                                                                                       @Param("maximumPoints") int maximumPoints,
                                                                                                       @Param("userTagFilter") String userTagFilter,
-                                                                                                      @Param("includeImported") boolean includeImported,
                                                                                                       Pageable pageable)
 
     @Query(value = FIND_DISTINCT_PROJECT_USERS_BY_SKILLS_WITHOUT_ACHIEVED_SQL, nativeQuery = true)
@@ -1068,7 +1168,6 @@ HAVING
                                                                                                          @Param("minimumPoints") int minimumPoints,
                                                                                                          @Param("maximumPoints") int maximumPoints,
                                                                                                          @Param("userTagFilter") String userTagFilter,
-                                                                                                         @Param("includeImported") boolean includeImported,
                                                                                                          Pageable pageable)
 
     static final String FIND_DISTINCT_GLOBAL_BADGE_USERS_SQL = '''
@@ -1275,7 +1374,10 @@ FROM user_performed_skill upa
               and rel.type in ('RuleSetDefinition', 'GroupSkillToSubject', 'Tag')
               and child.type = 'Skill'
               and child.enabled = 'true'
-    ) skill on ( upa.skill_ref_id = CASE when skill.copied_from_skill_ref is not null then skill.copied_from_skill_ref ELSE skill.id end)
+    ) skill on ( upa.skill_ref_id = CASE when skill.copied_from_skill_ref is not null then skill.copied_from_skill_ref ELSE skill.id end
+        and (skill.copied_from_project_id is null or skill.copied_from_project_id = skill.project_id
+          or exists(select 1 from user_performed_skill local_event where local_event.project_id = skill.project_id and local_event.user_id = upa.user_id)
+          or exists(select 1 from project_participation participant where participant.project_id = skill.project_id and participant.user_id = upa.user_id)))
     LEFT JOIN (
         SELECT uAchievement.user_id, max(uAchievement.level) as level
         FROM user_achievement uAchievement
@@ -1297,7 +1399,6 @@ WHERE
     ) 
     and (:userTagFilter = '' or lower(ut.value) like lower(CONCAT('%', :userTagFilter, '%'))) 
     and not exists (select 1 from archived_users au where au.user_id = upa.user_id and au.project_id = :projectId)
-    and (:includeImported = true OR exists( select 1 from user_performed_skill upa2 where upa2.project_id = :projectId and upa2.user_id = upa.user_id) )
 GROUP BY upa.user_id
 HAVING
     sum(skill.point_increment) >= :minimumPoints
@@ -1310,7 +1411,6 @@ HAVING
                                                                                        @Param("minimumPoints") int minimumPoints,
                                                                                        @Param("maximumPoints") int maximumPoints,
                                                                                        @Param("userTagFilter") String userTagFilter,
-                                                                                       @Param("includeImported") Boolean includeImported,
                                                                                        Pageable pageable)
 
     @Nullable
@@ -1324,7 +1424,8 @@ HAVING
     @Nullable
     @Query(value ='''WITH skills AS (
                 select case when child.copied_from_skill_ref is not null then child.copied_from_skill_ref else child.id end as id,
-                       child.point_increment as point_increment
+                       child.point_increment as point_increment,
+                       child.project_id, child.copied_from_project_id
                 from skill_relationship_definition rel,
                      skill_definition child
                 where rel.parent_ref_id = :parentSkillRefId
@@ -1338,6 +1439,9 @@ HAVING
                  skills
             where up.user_id =:userId
               and up.skill_ref_id = skills.id
+              and (skills.copied_from_project_id is null or skills.copied_from_project_id = skills.project_id
+                or exists(select 1 from user_performed_skill local_event where local_event.project_id = skills.project_id and local_event.user_id = up.user_id)
+                or exists(select 1 from project_participation participant where participant.project_id = skills.project_id and participant.user_id = up.user_id))
               and DATE_TRUNC('DAY', up.performed_on) = :day ''', nativeQuery = true)
     Integer getParentsPointsForAGivenDay(@Param("userId") String userId, @Param("parentSkillRefId") Integer parentSkillRefId, @Param("day") Date day)
 
@@ -1426,7 +1530,10 @@ HAVING
                 update user_points up set points = pointsToUpdate.newPoints
                         from pointsToUpdate
                 where up.user_id = pointsToUpdate.user_id
-                and up.project_id = :projectId and up.skill_id is null;''', nativeQuery=true)
+                and up.project_id = :projectId and up.skill_id is null
+                and (not exists(select 1 from skill_definition imported where imported.project_id = :projectId and imported.copied_from_project_id <> imported.project_id)
+                  or exists(select 1 from user_performed_skill e where e.project_id = :projectId and e.user_id = up.user_id)
+                  or exists(select 1 from project_participation p where p.project_id = :projectId and p.user_id = up.user_id));''', nativeQuery=true)
     void updateUserPointsForProject(@Param("projectId") String projectId)
 
     @Modifying
@@ -1468,7 +1575,10 @@ HAVING
             update user_points up set points = pointsToUpdate.newPoints
             from pointsToUpdate
             where up.user_id = pointsToUpdate.userId
-              and up.project_id = :projectId and up.skill_id = :skillId''', nativeQuery = true)
+              and up.project_id = :projectId and up.skill_id = :skillId
+              and (not exists(select 1 from skill_definition imported where imported.project_id = :projectId and imported.copied_from_project_id <> imported.project_id)
+                or exists(select 1 from user_performed_skill e where e.project_id = :projectId and e.user_id = up.user_id)
+                or exists(select 1 from project_participation p where p.project_id = :projectId and p.user_id = up.user_id))''', nativeQuery = true)
     void updateSubjectUserPoints(@Param("projectId") String projectId, @Param("skillId") String skillId, @Param('enabledSkillsOnly') Boolean enabledSkillsOnly)
 
 

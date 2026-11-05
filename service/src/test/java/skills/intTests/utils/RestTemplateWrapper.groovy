@@ -274,6 +274,10 @@ class RestTemplateWrapper extends RestTemplate {
         return restTemplate.exchange(url, HttpMethod.GET, getAuthEntity(), response)
     }
 
+    ResponseEntity<String> headForEntity(String url) {
+        return restTemplate.exchange(url, HttpMethod.HEAD, getAuthEntity(), String)
+    }
+
     ResponseEntity putForEntity(String url, Object request, Object... uriVariables) {
         return restTemplate.exchange(url, HttpMethod.PUT, getAuthEntity(String.class, request), String.class, uriVariables)
     }

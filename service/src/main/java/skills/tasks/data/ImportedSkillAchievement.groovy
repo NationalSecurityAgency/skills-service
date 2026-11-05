@@ -16,7 +16,9 @@
 package skills.tasks.data
 
 import skills.services.events.SkillDate
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 
+@JsonIgnoreProperties(ignoreUnknown = true)
 class ImportedSkillAchievement {
     String uuid
     String userId

@@ -70,6 +70,7 @@ class CatalogImportAndAchievementsSpecs extends CatalogIntSpec {
         skillsService.finalizeSkillsImportFromCatalog(project3.projectId)
 
         def users = getRandomUsers(5)
+        participateInProject(project3.projectId, users.take(4))
         skillsService.addSkill([projectId: project2.projectId, skillId: p2_skills[0].skillId], users[0])
         skillsService.addSkill([projectId: project2.projectId, skillId: p2_skills[1].skillId], users[0])
         waitForAsyncTasksCompletion.waitForAllScheduleTasks()
@@ -197,6 +198,7 @@ class CatalogImportAndAchievementsSpecs extends CatalogIntSpec {
         skillsService.bulkImportSkillsFromCatalog(project3.projectId, p3subj1.subjectId, p2_skills.collect { [projectId: it.projectId, skillId: it.skillId] })
 
         def users = getRandomUsers(5)
+        participateInProject(project3.projectId, users.take(1))
         skillsService.addSkill([projectId: project2.projectId, skillId: p2_skills[0].skillId], users[0])
         skillsService.addSkill([projectId: project2.projectId, skillId: p2_skills[1].skillId], users[0])
         waitForAsyncTasksCompletion.waitForAllScheduleTasks()
@@ -259,6 +261,7 @@ class CatalogImportAndAchievementsSpecs extends CatalogIntSpec {
         skillsService.importSkillFromCatalog(proj2.p.projectId, proj2.s1.subjectId, proj1.p.projectId, proj1.s1_skills[0].skillId)
 
         String userId = getRandomUsers(1)[0]
+        participateInProject(proj2.p.projectId, [userId])
 
         when:
         List<UserPoints> allPoints1 = userPointsRepo.findAll()
@@ -279,6 +282,7 @@ class CatalogImportAndAchievementsSpecs extends CatalogIntSpec {
         skillsService.finalizeSkillsImportFromCatalog(proj2.p.projectId)
 
         String userId = getRandomUsers(1)[0]
+        participateInProject(proj2.p.projectId, [userId])
         when:
         def addSkillRes = skillsService.addSkill(proj1.s1_skills[0], userId)
         waitForAsyncTasksCompletion.waitForAllScheduleTasks()
@@ -287,6 +291,7 @@ class CatalogImportAndAchievementsSpecs extends CatalogIntSpec {
         then:
         performedSkills.collect({it.projectId}) == [proj1.p.projectId]
         events.collect({it.projectId}) == [proj1.p.projectId]
+        userPointsRepo.findByProjectIdAndUserIdAndSkillId(proj2.p.projectId, userId, proj1.s1_skills[0].skillId).points == 100
     }
 
     def "reporting original skill event achieves subject level"() {
@@ -307,6 +312,7 @@ class CatalogImportAndAchievementsSpecs extends CatalogIntSpec {
 
         def users = getRandomUsers(5)
 
+        participateInProject(proj3.projectId, users.take(1))
         Integer proj3_subj1_ref_id = skillDefRepo.findByProjectIdAndSkillId(proj3.projectId, p3_subj1.subjectId).id
         Integer proj3_subj2_ref_id = skillDefRepo.findByProjectIdAndSkillId(proj3.projectId, p3_subj2.subjectId).id
 
@@ -359,6 +365,7 @@ class CatalogImportAndAchievementsSpecs extends CatalogIntSpec {
         def proj3 = createProjWithCatalogSkills(3)
 
         def users = getRandomUsers(15)
+        participateInProject(proj3.p.projectId, users.take(3))
         List<Date> dates = (1..10).collect { new Date() - it }
         skillsService.addSkill([projectId: proj1.p.projectId, skillId: proj1.s1_skills[0].skillId], users[0], dates[0])
         skillsService.addSkill([projectId: proj1.p.projectId, skillId: proj1.s1_skills[0].skillId], users[0], dates[1])
@@ -433,6 +440,7 @@ class CatalogImportAndAchievementsSpecs extends CatalogIntSpec {
         skillsService.finalizeSkillsImportFromCatalog(project3.projectId)
 
         def users = getRandomUsers(3)
+        participateInProject(project2.projectId, users.take(1))
         skillsService.addSkill([projectId: project1.projectId, skillId: p1_skills[0].skillId], users[0])
         skillsService.addSkill([projectId: project1.projectId, skillId: p1_skills[1].skillId], users[0])
         waitForAsyncTasksCompletion.waitForAllScheduleTasks()
@@ -1387,6 +1395,7 @@ class CatalogImportAndAchievementsSpecs extends CatalogIntSpec {
 
         def randomUsers = getRandomUsers(3)
         def user = randomUsers[0]
+        participateInProject(project2.p.projectId, [user])
 
         // achieve imported child skill
         skillsService.addSkill([projectId: project1.p.projectId, skillId:project1.s1_skills[0].skillId], user, new Date() - 1)
@@ -1529,6 +1538,7 @@ class CatalogImportAndAchievementsSpecs extends CatalogIntSpec {
 
         def randomUsers = getRandomUsers(3)
         def user = randomUsers[0]
+        participateInProject(project2.p.projectId, [user])
 
         skillsService.addSkill([projectId: project1.p.projectId, skillId:project1.s1_skills[0].skillId], user, new Date() - 1)
         def skill1CompletedRes = skillsService.addSkill([projectId: project1.p.projectId, skillId:project1.s1_skills[0].skillId], user)
@@ -1585,6 +1595,7 @@ class CatalogImportAndAchievementsSpecs extends CatalogIntSpec {
 
         def randomUsers = getRandomUsers(3)
         def user = randomUsers[0]
+        participateInProject(project2.p.projectId, [user])
 
         skillsService.addSkill([projectId: project1.p.projectId, skillId:project1.s1_skills[0].skillId], user, new Date() - 1)
         skillsService.addSkill([projectId: project1.p.projectId, skillId:project1.s1_skills[1].skillId], user, new Date() - 1)
@@ -1644,6 +1655,7 @@ class CatalogImportAndAchievementsSpecs extends CatalogIntSpec {
         printLevels(project2.projectId, "")
 
         String user = getRandomUsers(1)[0]
+        participateInProject(project2.projectId, [user])
         skillsService.addSkill(p1_skills[0], user)
         waitForAsyncTasksCompletion.waitForAllScheduleTasks()
 
@@ -1709,6 +1721,7 @@ class CatalogImportAndAchievementsSpecs extends CatalogIntSpec {
                 project1.s1_skills.collect { [projectId: it.projectId, skillId: it.skillId] })
 
         List<String> users = getRandomUsers(3)
+        participateInProject(project2.p.projectId, users.take(2))
         (1..8).each {skillsService.addSkill(project1.s1_skills[0], users[0], new Date() - it) }
         (1..5).each {skillsService.addSkill(project1.s1_skills[1], users[0], new Date() - it) }
         (1..4).each {skillsService.addSkill(project2.s1_skills[1], users[0], new Date() - it) }
@@ -1801,6 +1814,7 @@ class CatalogImportAndAchievementsSpecs extends CatalogIntSpec {
                 project1.s1_skills.collect { [projectId: it.projectId, skillId: it.skillId] })
 
         List<String> users = getRandomUsers(3)
+        participateInProject(project2.p.projectId, users.take(1))
         List<Date> dates = (1..12).collect { new Date() -it }
         (1..8).each {skillsService.addSkill(project1.s1_skills[0], users[0], dates[it]) }
         (1..5).each {skillsService.addSkill(project1.s1_skills[1], users[0], dates[it]) }
@@ -1856,6 +1870,7 @@ class CatalogImportAndAchievementsSpecs extends CatalogIntSpec {
         printLevels(project2.projectId, "")
 
         String user = getRandomUsers(1)[0]
+        participateInProject(project2.projectId, [user])
 //        skillsService.addSkill(p1_skills[0], user, new Date() - 2)
 //        skillsService.addSkill(p1_skills[0], user, new Date() - 1)
         skillsService.addSkill(p1_skills[0], user)
@@ -1938,6 +1953,7 @@ class CatalogImportAndAchievementsSpecs extends CatalogIntSpec {
         ])
 
         String user = getRandomUsers(1)[0]
+        participateInProject(proj1.projectId, [user])
 
         skillsService.addSkill([projectId: proj2.projectId, skillId: p2_skill1.skillId], user, new Date())
         skillsService.addSkill([projectId: proj2.projectId, skillId: p2_skill1.skillId], user, new Date())
@@ -1994,38 +2010,42 @@ class CatalogImportAndAchievementsSpecs extends CatalogIntSpec {
                 [projectId: proj2.projectId, skillId: p2_skill3.skillId],
         ])
 
-        String user = getRandomUsers(1)[0]
+        List<String> users = getRandomUsers(3)
+        String user123 = users[0]
+        String user124 = users[1]
+        String user125 = users[2]
+        participateInProject(proj1.projectId, users)
 
-        skillsService.addSkill([projectId: proj2.projectId, skillId: p2_skill1.skillId], "u123", new Date())
-        skillsService.addSkill([projectId: proj2.projectId, skillId: p2_skill1.skillId], "u123", new Date())
-        skillsService.addSkill([projectId: proj2.projectId, skillId: p2_skill1.skillId], "u123", new DateTime().minusDays(1).toDate())
+        skillsService.addSkill([projectId: proj2.projectId, skillId: p2_skill1.skillId], user123, new Date())
+        skillsService.addSkill([projectId: proj2.projectId, skillId: p2_skill1.skillId], user123, new Date())
+        skillsService.addSkill([projectId: proj2.projectId, skillId: p2_skill1.skillId], user123, new DateTime().minusDays(1).toDate())
 
-        skillsService.addSkill([projectId: proj2.projectId, skillId: p2_skill1.skillId], "u124", new Date())
-        skillsService.addSkill([projectId: proj2.projectId, skillId: p2_skill1.skillId], "u124", new Date())
-        skillsService.addSkill([projectId: proj2.projectId, skillId: p2_skill1.skillId], "u124", new DateTime().minusDays(1).toDate())
+        skillsService.addSkill([projectId: proj2.projectId, skillId: p2_skill1.skillId], user124, new Date())
+        skillsService.addSkill([projectId: proj2.projectId, skillId: p2_skill1.skillId], user124, new Date())
+        skillsService.addSkill([projectId: proj2.projectId, skillId: p2_skill1.skillId], user124, new DateTime().minusDays(1).toDate())
 
-        skillsService.addSkill([projectId: proj2.projectId, skillId: p2_skill1.skillId], "u125", new Date())
-        skillsService.addSkill([projectId: proj1.projectId, skillId: skill2.skillId], "u125", new DateTime().minusDays(1).toDate())
-        skillsService.addSkill([projectId: proj2.projectId, skillId: p2_skill3.skillId], "u125", new DateTime().minusDays(2).toDate())
+        skillsService.addSkill([projectId: proj2.projectId, skillId: p2_skill1.skillId], user125, new Date())
+        skillsService.addSkill([projectId: proj1.projectId, skillId: skill2.skillId], user125, new DateTime().minusDays(1).toDate())
+        skillsService.addSkill([projectId: proj2.projectId, skillId: p2_skill3.skillId], user125, new DateTime().minusDays(2).toDate())
 
         waitForAsyncTasksCompletion.waitForAllScheduleTasks()
         when:
 
-        def u123SkillSummaryBeforeEdit = skillsService.getSkillSummary("u123", proj1.projectId, subj.subjectId)
-        def u123PointHistoryBeforeEdit = skillsService.getPointHistory("u123", proj1.projectId, subj.subjectId)
-        def u124SkillSummaryBeforeEdit = skillsService.getSkillSummary("u124", proj1.projectId, subj.subjectId)
-        def u124PointHistoryBeforeEdit = skillsService.getPointHistory("u124", proj1.projectId, subj.subjectId)
-        def u125SkillSummaryBeforeEdit = skillsService.getSkillSummary("u125", proj1.projectId, subj.subjectId)
-        def u125PointHistoryBeforeEdit = skillsService.getPointHistory("u125", proj1.projectId, subj.subjectId)
+        def u123SkillSummaryBeforeEdit = skillsService.getSkillSummary(user123, proj1.projectId, subj.subjectId)
+        def u123PointHistoryBeforeEdit = skillsService.getPointHistory(user123, proj1.projectId, subj.subjectId)
+        def u124SkillSummaryBeforeEdit = skillsService.getSkillSummary(user124, proj1.projectId, subj.subjectId)
+        def u124PointHistoryBeforeEdit = skillsService.getPointHistory(user124, proj1.projectId, subj.subjectId)
+        def u125SkillSummaryBeforeEdit = skillsService.getSkillSummary(user125, proj1.projectId, subj.subjectId)
+        def u125PointHistoryBeforeEdit = skillsService.getPointHistory(user125, proj1.projectId, subj.subjectId)
 
         skillsService.updateImportedSkill(proj1.projectId, p2_skill1.skillId, 5)
 
-        def u123pointHistoryAfterEdit = skillsService.getPointHistory("u123", proj1.projectId, subj.subjectId)
-        def u123SkillSummaryAfterEdit = skillsService.getSkillSummary("u123", proj1.projectId, subj.subjectId)
-        def u124pointHistoryAfterEdit = skillsService.getPointHistory("u124", proj1.projectId, subj.subjectId)
-        def u124SkillSummaryAfterEdit = skillsService.getSkillSummary("u124", proj1.projectId, subj.subjectId)
-        def u125pointHistoryAfterEdit = skillsService.getPointHistory("u125", proj1.projectId, subj.subjectId)
-        def u125SkillSummaryAfterEdit = skillsService.getSkillSummary("u125", proj1.projectId, subj.subjectId)
+        def u123pointHistoryAfterEdit = skillsService.getPointHistory(user123, proj1.projectId, subj.subjectId)
+        def u123SkillSummaryAfterEdit = skillsService.getSkillSummary(user123, proj1.projectId, subj.subjectId)
+        def u124pointHistoryAfterEdit = skillsService.getPointHistory(user124, proj1.projectId, subj.subjectId)
+        def u124SkillSummaryAfterEdit = skillsService.getSkillSummary(user124, proj1.projectId, subj.subjectId)
+        def u125pointHistoryAfterEdit = skillsService.getPointHistory(user125, proj1.projectId, subj.subjectId)
+        def u125SkillSummaryAfterEdit = skillsService.getSkillSummary(user125, proj1.projectId, subj.subjectId)
 
         then:
         u123SkillSummaryBeforeEdit.points == 30
@@ -2076,6 +2096,7 @@ class CatalogImportAndAchievementsSpecs extends CatalogIntSpec {
 
 
         List<String> users = getRandomUsers(3)
+        participateInProject(proj2.projectId, users.take(2))
         List<Date> dates = (1..12).collect { new Date() - it }.reverse()
         skillsService.addSkill(project1.s1_skills[0], users[0], dates[0])
         Thread.sleep(10)
@@ -2258,6 +2279,7 @@ class CatalogImportAndAchievementsSpecs extends CatalogIntSpec {
         skillsService.createProjectAndSubjectAndSkills(proj2, p2_subj, [p2_skill1])
 
         String user = getRandomUsers(1)[0]
+        participateInProject(proj1.projectId, [user])
 
         skillsService.addSkill([projectId: proj2.projectId, skillId: p2_skill1.skillId], user, new Date())
         skillsService.addSkill([projectId: proj2.projectId, skillId: p2_skill1.skillId], user, new Date())
@@ -2376,4 +2398,3 @@ class CatalogImportAndAchievementsSpecs extends CatalogIntSpec {
         println "-----------"
     }
 }
-

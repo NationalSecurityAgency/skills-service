@@ -200,7 +200,7 @@ interface SkillEventsSupportRepo extends CrudRepository<SkillDef, Long> {
                     s1.id = sr1.child.id and 
                     sr1.type = 'BadgeRequirement' and 
                     s1.projectId = ?1 and 
-                    s1.skillId = ?2)
+                    (?2 is null or s1.skillId = ?2))
             OR EXISTS (SELECT true
                 from GlobalBadgeLevelDef gbld
                 where
@@ -208,7 +208,7 @@ interface SkillEventsSupportRepo extends CrudRepository<SkillDef, Long> {
                     gbld.projectId = ?1)
             )''')
     @Nullable
-    List<SkillDefMin> findGlobalBadgesForProjectIdAndSkillId(String projectId, String skillId)
+    List<SkillDefMin> findGlobalBadgesForProjectIdAndSkillId(String projectId, @Nullable String skillId)
 
     @Modifying
     @Query('''update UserPoints up set up.points = up.points + ?2 where up.id = ?1''')
@@ -307,6 +307,7 @@ interface SkillEventsSupportRepo extends CrudRepository<SkillDef, Long> {
     List<TinyProjectDef> getTinyProjectDefForUserId(String userId)
 
 
+    @Nullable
     @Query('''select max(ups.performedOn)
     from UserPerformedSkill ups
       where
@@ -318,6 +319,12 @@ interface SkillEventsSupportRepo extends CrudRepository<SkillDef, Long> {
                     child.type = 'Skill' and parent.projectId = ?2
             )''')
     Date getUserPerformedSkillLatestDate(String userId, String projectId, Integer parentSkillId, SkillRelDef.RelationshipType type)
+
+    @Nullable
+    @Query('''select max(a.achievedOn) from UserAchievement a, SkillRelDef rel
+        where rel.parent.id = ?3 and rel.child.id = a.skillRefId and rel.type = ?4
+          and a.userId = ?1 and a.projectId = ?2 and a.level is null''')
+    Date getLatestChildAchievementDate(String userId, String projectId, Integer parentSkillId, SkillRelDef.RelationshipType type)
 
     @Query('''select max(ups.performedOn)
     from UserPerformedSkill ups
