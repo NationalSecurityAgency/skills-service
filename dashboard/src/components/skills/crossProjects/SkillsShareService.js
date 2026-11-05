@@ -30,8 +30,8 @@ export default {
     return axios.get(`/admin/projects/${encodeURIComponent(projectId)}/sharedWithMe`, { params, handleError })
       .then((response) => response.data);
   },
-  isSkillShared(projectId, params) {
-    return axios.get(`/admin/projects/${encodeURIComponent(projectId)}/isSkillShared`, { params })
+  isSkillShared(projectId, params, handleError = false) {
+    return axios.get(`/admin/projects/${encodeURIComponent(projectId)}/isSkillShared`, { params, handleError })
         .then((response) => response.data);
   }
 
