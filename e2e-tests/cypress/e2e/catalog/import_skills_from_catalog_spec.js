@@ -778,6 +778,10 @@ describe('Import skills from Catalog Tests', () => {
     });
 
     it('must not be able to import while finalizing', () => {
+        let finalizationState;
+        cy.holdCatalogFinalizationRunningState().then((state) => {
+            finalizationState = state;
+        });
         cy.createProject(2);
         cy.createSubject(2, 1);
         cy.createSkill(2, 1, 1);
@@ -801,6 +805,9 @@ describe('Import skills from Catalog Tests', () => {
         cy.get('[data-cy="closeDialogBtn"]')
             .should('be.enabled');
 
+        cy.then(() => {
+            finalizationState.hold();
+        });
         cy.clickSaveDialogBtn()
         cy.get('[data-cy="importFinalizeAlert"] [data-cy="finalizeBtn"]')
             .should('not.exist');
@@ -811,9 +818,17 @@ describe('Import skills from Catalog Tests', () => {
             .click();
         cy.get('[data-cy="catalogSkillImport-finalizationInProcess"]')
             .contains('Finalization in Progress');
+        cy.then(() => {
+            finalizationState.release();
+        });
+        cy.waitForBackendAsyncTasksToComplete();
     });
 
     it('must not be able to import while finalizing - state session has catalog already loaded', () => {
+        let finalizationState;
+        cy.holdCatalogFinalizationRunningState().then((state) => {
+            finalizationState = state;
+        });
         cy.createProject(2);
         cy.createSubject(2, 1);
         cy.createSkill(2, 1, 1);
@@ -841,6 +856,9 @@ describe('Import skills from Catalog Tests', () => {
         cy.get('[data-cy="numSelectedSkills"]')
             .should('have.text', '1');
 
+        cy.then(() => {
+            finalizationState.hold();
+        });
         cy.finalizeCatalogImportWithoutWaiting(1);
         cy.get('[data-cy="importBtn"]')
             .click();
@@ -850,6 +868,10 @@ describe('Import skills from Catalog Tests', () => {
             .should('have.text', '0');
         cy.get('[data-cy="importBtn"]')
             .should('be.disabled');
+        cy.then(() => {
+            finalizationState.release();
+        });
+        cy.waitForBackendAsyncTasksToComplete();
     });
 
     it('import more than 1 page of skills', () => {
@@ -1250,6 +1272,4 @@ describe('Import skills from Catalog Tests', () => {
             .should('not.exist');
     });
 });
-
-
 
