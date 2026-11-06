@@ -61,19 +61,134 @@ class CrossProjectSkillsManagementSpec extends DefaultIntSpec {
         def proj2SharedWithMeSkills = skillsService.getSharedWithMeSkills(proj2.projectId)
 
         then:
-        proj1SharedSkills.size() == 1
-        proj1SharedSkills.get(0).skillName == "Test Skill 1"
-        proj1SharedSkills.get(0).skillId == "skill1"
-        proj1SharedSkills.get(0).projectName == "Test Project#2"
-        proj1SharedSkills.get(0).projectId == "TestProject2"
-        !proj1SharedWithMeSkills
+        proj1SharedSkills.count == 1
+        proj1SharedSkills.data.get(0).skillName == "Test Skill 1"
+        proj1SharedSkills.data.get(0).skillId == "skill1"
+        proj1SharedSkills.data.get(0).projectName == "Test Project#2"
+        proj1SharedSkills.data.get(0).projectId == "TestProject2"
+        proj1SharedWithMeSkills.count == 0
 
-        !proj2SharedSkills
-        proj2SharedWithMeSkills.size() == 1
-        proj2SharedWithMeSkills.get(0).skillName == "Test Skill 1"
-        proj2SharedWithMeSkills.get(0).skillId == "skill1"
-        proj2SharedWithMeSkills.get(0).projectName == "Test Project#1"
-        proj2SharedWithMeSkills.get(0).projectId == "TestProject1"
+        proj2SharedSkills.count == 0
+        proj2SharedWithMeSkills.count == 1
+        proj2SharedWithMeSkills.data.get(0).skillName == "Test Skill 1"
+        proj2SharedWithMeSkills.data.get(0).skillId == "skill1"
+        proj2SharedWithMeSkills.data.get(0).projectName == "Test Project#1"
+        proj2SharedWithMeSkills.data.get(0).projectId == "TestProject1"
+    }
+
+    def "shared skill lookup explains which project a skill is shared with"() {
+        Map proj1 = SkillsFactory.createProject(1)
+        Map proj2 = SkillsFactory.createProject(2)
+        Map proj3 = SkillsFactory.createProject(3)
+        Map subject = SkillsFactory.createSubject(1, 1)
+        List<Map> skills = SkillsFactory.createSkills(2, 1, 1)
+
+        skillsService.createProject(proj1)
+        skillsService.createProject(proj2)
+        skillsService.createProject(proj3)
+        skillsService.createSubject(subject)
+        skillsService.createSkills(skills)
+
+        expect:
+        !skillsService.isSkillShared(proj1.projectId, skills[0].skillId, proj2.projectId).data
+        !skillsService.isSkillShared(proj1.projectId, skills[0].skillId, proj2.projectId).explanation
+
+        when:
+        skillsService.shareSkill(proj1.projectId, skills[0].skillId, proj2.projectId)
+        Map specificShare = skillsService.isSkillShared(proj1.projectId, skills[0].skillId, proj2.projectId)
+        Map anyShare = skillsService.isSkillShared(proj1.projectId, skills[0].skillId)
+        Map otherProject = skillsService.isSkillShared(proj1.projectId, skills[0].skillId, proj3.projectId)
+
+        then:
+        specificShare.data
+        specificShare.explanation == 'This skill is already shared with project Test Project#2.'
+        anyShare.data
+        anyShare.explanation == 'This skill is already shared with project Test Project#2.'
+        !otherProject.data
+        !otherProject.explanation
+
+        when:
+        skillsService.shareSkill(proj1.projectId, skills[1].skillId, 'ALL_SKILLS_PROJECTS')
+        Map globalShare = skillsService.isSkillShared(proj1.projectId, skills[1].skillId, proj3.projectId)
+        Map anyGlobalShare = skillsService.isSkillShared(proj1.projectId, skills[1].skillId)
+
+        then:
+        globalShare.data
+        globalShare.explanation == 'This skill is already shared with All Projects.'
+        anyGlobalShare.data
+        anyGlobalShare.explanation == 'This skill is already shared with All Projects.'
+    }
+
+    def "a skill can be shared with distinct projects or all projects but not both"() {
+        Map sourceProject = SkillsFactory.createProject(1)
+        Map destination2 = SkillsFactory.createProject(2)
+        Map destination3 = SkillsFactory.createProject(3)
+        Map subject = SkillsFactory.createSubject(1, 1)
+        List<Map> skills = SkillsFactory.createSkills(2, 1, 1)
+        String allProjects = 'ALL_SKILLS_PROJECTS'
+
+        skillsService.createProject(sourceProject)
+        skillsService.createProject(destination2)
+        skillsService.createProject(destination3)
+        skillsService.createSubject(subject)
+        skillsService.createSkills(skills)
+
+        when: 'a skill is shared with a specific project'
+        skillsService.shareSkill(sourceProject.projectId, skills[0].skillId, destination2.projectId)
+
+        then:
+        skillsService.getSharedSkills(sourceProject.projectId).data.collect { it.projectId } == [destination2.projectId]
+
+        when: 'the same share is requested again'
+        skillsService.shareSkill(sourceProject.projectId, skills[0].skillId, destination2.projectId)
+
+        then:
+        SkillsClientException duplicateProjectShare = thrown()
+        duplicateProjectShare.httpStatus == HttpStatus.BAD_REQUEST
+        duplicateProjectShare.message.contains('This skill is already shared with project Test Project#2.')
+
+        when: 'the skill is shared with a different project'
+        skillsService.shareSkill(sourceProject.projectId, skills[0].skillId, destination3.projectId)
+
+        then:
+        skillsService.getSharedSkills(sourceProject.projectId).data.collect { it.projectId }.sort() == [destination2.projectId, destination3.projectId]
+
+        when: 'an all-projects share is requested for a skill already shared with specific projects'
+        skillsService.shareSkill(sourceProject.projectId, skills[0].skillId, allProjects)
+
+        then:
+        SkillsClientException conflictingGlobalShare = thrown()
+        conflictingGlobalShare.httpStatus == HttpStatus.BAD_REQUEST
+        conflictingGlobalShare.message.contains('This skill is already shared with project Test Project#2.')
+
+        when: 'an unshared skill is shared with all projects'
+        skillsService.shareSkill(sourceProject.projectId, skills[1].skillId, allProjects)
+
+        then:
+        skillsService.getSharedSkills(sourceProject.projectId).data.find { it.skillId == skills[1].skillId }.sharedWithAllProjects
+
+        when: 'the all-projects share is requested again'
+        skillsService.shareSkill(sourceProject.projectId, skills[1].skillId, allProjects)
+
+        then:
+        SkillsClientException duplicateGlobalShare = thrown()
+        duplicateGlobalShare.httpStatus == HttpStatus.BAD_REQUEST
+        duplicateGlobalShare.message.contains('This skill is already shared with All Projects.')
+
+        when: 'a specifically targeted share is requested for the globally shared skill'
+        skillsService.shareSkill(sourceProject.projectId, skills[1].skillId, destination2.projectId)
+
+        then:
+        SkillsClientException conflictingProjectShare = thrown()
+        conflictingProjectShare.httpStatus == HttpStatus.BAD_REQUEST
+        conflictingProjectShare.message.contains('This skill is already shared with All Projects.')
+        skillsService.getSharedSkills(sourceProject.projectId).data.collect {
+            [skillId: it.skillId, projectId: it.projectId, sharedWithAllProjects: it.sharedWithAllProjects]
+        }.sort { it.projectId ?: '' } == [
+                [skillId: skills[1].skillId, projectId: null, sharedWithAllProjects: true],
+                [skillId: skills[0].skillId, projectId: destination2.projectId, sharedWithAllProjects: false],
+                [skillId: skills[0].skillId, projectId: destination3.projectId, sharedWithAllProjects: false],
+        ]
     }
 
     def "shared skills must use doc root from project from which they are shared"() {
@@ -135,27 +250,27 @@ class CrossProjectSkillsManagementSpec extends DefaultIntSpec {
         def proj3SharedWithMeSkills = skillsService.getSharedWithMeSkills(proj3.projectId)
 
         then:
-        proj1SharedSkills.size() == 1
-        proj1SharedSkills.get(0).skillName == "Test Skill 1"
-        proj1SharedSkills.get(0).skillId == "skill1"
-        proj1SharedSkills.get(0).projectName == null
-        proj1SharedSkills.get(0).projectId == null
-        proj1SharedSkills.get(0).sharedWithAllProjects
-        !proj1SharedWithMeSkills
+        proj1SharedSkills.count == 1
+        proj1SharedSkills.data.get(0).skillName == "Test Skill 1"
+        proj1SharedSkills.data.get(0).skillId == "skill1"
+        proj1SharedSkills.data.get(0).projectName == null
+        proj1SharedSkills.data.get(0).projectId == null
+        proj1SharedSkills.data.get(0).sharedWithAllProjects
+        proj1SharedWithMeSkills.count == 0
 
-        !proj2SharedSkills
-        proj2SharedWithMeSkills.size() == 1
-        proj2SharedWithMeSkills.get(0).skillName == "Test Skill 1"
-        proj2SharedWithMeSkills.get(0).skillId == "skill1"
-        proj2SharedWithMeSkills.get(0).projectName == "Test Project#1"
-        proj2SharedWithMeSkills.get(0).projectId == "TestProject1"
+        proj2SharedSkills.count == 0
+        proj2SharedWithMeSkills.count == 1
+        proj2SharedWithMeSkills.data.get(0).skillName == "Test Skill 1"
+        proj2SharedWithMeSkills.data.get(0).skillId == "skill1"
+        proj2SharedWithMeSkills.data.get(0).projectName == "Test Project#1"
+        proj2SharedWithMeSkills.data.get(0).projectId == "TestProject1"
 
-        !proj3SharedSkills
-        proj3SharedWithMeSkills.size() == 1
-        proj3SharedWithMeSkills.get(0).skillName == "Test Skill 1"
-        proj3SharedWithMeSkills.get(0).skillId == "skill1"
-        proj3SharedWithMeSkills.get(0).projectName == "Test Project#1"
-        proj3SharedWithMeSkills.get(0).projectId == "TestProject1"
+        proj3SharedSkills.count == 0
+        proj3SharedWithMeSkills.count == 1
+        proj3SharedWithMeSkills.data.get(0).skillName == "Test Skill 1"
+        proj3SharedWithMeSkills.data.get(0).skillId == "skill1"
+        proj3SharedWithMeSkills.data.get(0).projectName == "Test Project#1"
+        proj3SharedWithMeSkills.data.get(0).projectId == "TestProject1"
     }
 
     def "share skill with ALL other projects and then depend on that skill from another project"() {
@@ -196,27 +311,27 @@ class CrossProjectSkillsManagementSpec extends DefaultIntSpec {
 
 
         then:
-        proj1SharedSkills.size() == 1
-        proj1SharedSkills.get(0).skillName == "Test Skill 1"
-        proj1SharedSkills.get(0).skillId == "skill1"
-        proj1SharedSkills.get(0).projectName == null
-        proj1SharedSkills.get(0).projectId == null
-        proj1SharedSkills.get(0).sharedWithAllProjects
-        !proj1SharedWithMeSkills
+        proj1SharedSkills.count == 1
+        proj1SharedSkills.data.get(0).skillName == "Test Skill 1"
+        proj1SharedSkills.data.get(0).skillId == "skill1"
+        proj1SharedSkills.data.get(0).projectName == null
+        proj1SharedSkills.data.get(0).projectId == null
+        proj1SharedSkills.data.get(0).sharedWithAllProjects
+        proj1SharedWithMeSkills.count == 0
 
-        !proj2SharedSkills
-        proj2SharedWithMeSkills.size() == 1
-        proj2SharedWithMeSkills.get(0).skillName == "Test Skill 1"
-        proj2SharedWithMeSkills.get(0).skillId == "skill1"
-        proj2SharedWithMeSkills.get(0).projectName == "Test Project#1"
-        proj2SharedWithMeSkills.get(0).projectId == "TestProject1"
+        proj2SharedSkills.count == 0
+        proj2SharedWithMeSkills.count == 1
+        proj2SharedWithMeSkills.data.get(0).skillName == "Test Skill 1"
+        proj2SharedWithMeSkills.data.get(0).skillId == "skill1"
+        proj2SharedWithMeSkills.data.get(0).projectName == "Test Project#1"
+        proj2SharedWithMeSkills.data.get(0).projectId == "TestProject1"
 
-        !proj3SharedSkills
-        proj3SharedWithMeSkills.size() == 1
-        proj3SharedWithMeSkills.get(0).skillName == "Test Skill 1"
-        proj3SharedWithMeSkills.get(0).skillId == "skill1"
-        proj3SharedWithMeSkills.get(0).projectName == "Test Project#1"
-        proj3SharedWithMeSkills.get(0).projectId == "TestProject1"
+        proj3SharedSkills.count == 0
+        proj3SharedWithMeSkills.count == 1
+        proj3SharedWithMeSkills.data.get(0).skillName == "Test Skill 1"
+        proj3SharedWithMeSkills.data.get(0).skillId == "skill1"
+        proj3SharedWithMeSkills.data.get(0).projectName == "Test Project#1"
+        proj3SharedWithMeSkills.data.get(0).projectId == "TestProject1"
 
         sharedSkillInfo.dependencies.size() == 1
         sharedSkillInfo.dependencies.get(0).dependsOn.skillId == "skill1"
@@ -250,19 +365,19 @@ class CrossProjectSkillsManagementSpec extends DefaultIntSpec {
         def proj2SharedWithMeSkills = skillsServiceAdmin2.getSharedWithMeSkills(proj2.projectId)
 
         then:
-        proj1SharedSkills.size() == 1
-        proj1SharedSkills.get(0).skillName == "Test Skill 1"
-        proj1SharedSkills.get(0).skillId == "skill1"
-        proj1SharedSkills.get(0).projectName == "Test Project#2"
-        proj1SharedSkills.get(0).projectId == "TestProject2"
-        !proj1SharedWithMeSkills
+        proj1SharedSkills.count == 1
+        proj1SharedSkills.data.get(0).skillName == "Test Skill 1"
+        proj1SharedSkills.data.get(0).skillId == "skill1"
+        proj1SharedSkills.data.get(0).projectName == "Test Project#2"
+        proj1SharedSkills.data.get(0).projectId == "TestProject2"
+        proj1SharedWithMeSkills.count == 0
 
-        !proj2SharedSkills
-        proj2SharedWithMeSkills.size() == 1
-        proj2SharedWithMeSkills.get(0).skillName == "Test Skill 1"
-        proj2SharedWithMeSkills.get(0).skillId == "skill1"
-        proj2SharedWithMeSkills.get(0).projectName == "Test Project#1"
-        proj2SharedWithMeSkills.get(0).projectId == "TestProject1"
+        proj2SharedSkills.count == 0
+        proj2SharedWithMeSkills.count == 1
+        proj2SharedWithMeSkills.data.get(0).skillName == "Test Skill 1"
+        proj2SharedWithMeSkills.data.get(0).skillId == "skill1"
+        proj2SharedWithMeSkills.data.get(0).projectName == "Test Project#1"
+        proj2SharedWithMeSkills.data.get(0).projectId == "TestProject1"
     }
 
     def "only admins of a project should see shared skills"() {
@@ -316,18 +431,18 @@ class CrossProjectSkillsManagementSpec extends DefaultIntSpec {
         def proj2SharedWithMeSkills_afterDelete = skillsService.getSharedWithMeSkills(proj2.projectId)
 
         then:
-        proj1SharedSkills.size() == 3
-        proj2SharedWithMeSkills.size() == 3
-        !proj1SharedWithMeSkills
-        !proj2SharedSkills
+        proj1SharedSkills.count == 3
+        proj2SharedWithMeSkills.count == 3
+        proj1SharedWithMeSkills.count == 0
+        proj2SharedSkills.count == 0
 
-        proj1SharedSkills_afterDelete.size() == 2
-        proj1SharedSkills_afterDelete.find { it.skillId == "skill1" }.projectId == "TestProject2"
-        proj1SharedSkills_afterDelete.find { it.skillId == "skill3" }.projectId == "TestProject2"
+        proj1SharedSkills_afterDelete.count == 2
+        proj1SharedSkills_afterDelete.data.find { it.skillId == "skill1" }.projectId == "TestProject2"
+        proj1SharedSkills_afterDelete.data.find { it.skillId == "skill3" }.projectId == "TestProject2"
 
-        proj2SharedWithMeSkills_afterDelete.size() == 2
-        proj2SharedWithMeSkills_afterDelete.find { it.skillId == "skill1" }.projectId == "TestProject1"
-        proj2SharedWithMeSkills_afterDelete.find { it.skillId == "skill3" }.projectId == "TestProject1"
+        proj2SharedWithMeSkills_afterDelete.count == 2
+        proj2SharedWithMeSkills_afterDelete.data.find { it.skillId == "skill1" }.projectId == "TestProject1"
+        proj2SharedWithMeSkills_afterDelete.data.find { it.skillId == "skill3" }.projectId == "TestProject1"
     }
 
     def "remove shared skill with ALL projects"() {
@@ -364,18 +479,18 @@ class CrossProjectSkillsManagementSpec extends DefaultIntSpec {
         def proj2SharedWithMeSkills_afterDelete = skillsService.getSharedWithMeSkills(proj2.projectId)
 
         then:
-        proj1SharedSkills.size() == 3
-        proj2SharedWithMeSkills.size() == 3
-        !proj1SharedWithMeSkills
-        !proj2SharedSkills
+        proj1SharedSkills.count == 3
+        proj2SharedWithMeSkills.count == 3
+        proj1SharedWithMeSkills.count == 0
+        proj2SharedSkills.count == 0
 
-        proj1SharedSkills_afterDelete.size() == 2
-        proj1SharedSkills_afterDelete.find { it.skillId == "skill1" }.projectId == null
-        proj1SharedSkills_afterDelete.find { it.skillId == "skill3" }.projectId == null
+        proj1SharedSkills_afterDelete.count == 2
+        proj1SharedSkills_afterDelete.data.find { it.skillId == "skill1" }.projectId == null
+        proj1SharedSkills_afterDelete.data.find { it.skillId == "skill3" }.projectId == null
 
-        proj2SharedWithMeSkills_afterDelete.size() == 2
-        proj2SharedWithMeSkills_afterDelete.find { it.skillId == "skill1" }.projectId == "TestProject1"
-        proj2SharedWithMeSkills_afterDelete.find { it.skillId == "skill3" }.projectId == "TestProject1"
+        proj2SharedWithMeSkills_afterDelete.count == 2
+        proj2SharedWithMeSkills_afterDelete.data.find { it.skillId == "skill1" }.projectId == "TestProject1"
+        proj2SharedWithMeSkills_afterDelete.data.find { it.skillId == "skill3" }.projectId == "TestProject1"
     }
 
     def "delete cross-project dependency skill"() {
@@ -699,15 +814,15 @@ class CrossProjectSkillsManagementSpec extends DefaultIntSpec {
         def hasDependencyAfterDelete = skillsService.checkIfSkillsHaveDependencies(proj2.projectId, [proj2_skills.get(0).skillId])
 
         then:
-        proj1SharedSkills.size() == 1
-        proj2SharedWithMeSkills.size() == 1
-        !proj1SharedWithMeSkills
-        !proj2SharedSkills
+        proj1SharedSkills.count == 1
+        proj2SharedWithMeSkills.count == 1
+        proj1SharedWithMeSkills.count == 0
+        proj2SharedSkills.count == 0
         hasDependencyBeforeDelete[0].skillId == proj2_skills.get(0).skillId
         hasDependencyBeforeDelete[0].hasDependency == true
 
-        proj1SharedSkills_afterDelete.size() == 0
-        proj2SharedWithMeSkills_afterDelete.size() == 0
+        proj1SharedSkills_afterDelete.count == 0
+        proj2SharedWithMeSkills_afterDelete.count == 0
         hasDependencyAfterDelete[0].skillId == proj2_skills.get(0).skillId
         hasDependencyAfterDelete[0].hasDependency == false
     }
@@ -748,15 +863,15 @@ class CrossProjectSkillsManagementSpec extends DefaultIntSpec {
         def hasDependencyAfterDelete = skillsService.checkIfSkillsHaveDependencies(proj2.projectId, [proj2_skills.get(0).skillId])
 
         then:
-        proj1SharedSkills.size() == 1
-        proj2SharedWithMeSkills.size() == 1
-        !proj1SharedWithMeSkills
-        !proj2SharedSkills
+        proj1SharedSkills.count == 1
+        proj2SharedWithMeSkills.count == 1
+        proj1SharedWithMeSkills.count == 0
+        proj2SharedSkills.count == 0
         hasDependencyBeforeDelete[0].skillId == proj2_skills.get(0).skillId
         hasDependencyBeforeDelete[0].hasDependency == true
 
-        proj1SharedSkills_afterDelete.size() == 0
-        proj2SharedWithMeSkills_afterDelete.size() == 0
+        proj1SharedSkills_afterDelete.count == 0
+        proj2SharedWithMeSkills_afterDelete.count == 0
         hasDependencyAfterDelete[0].skillId == proj2_skills.get(0).skillId
         hasDependencyAfterDelete[0].hasDependency == false
     }
@@ -797,15 +912,15 @@ class CrossProjectSkillsManagementSpec extends DefaultIntSpec {
         def hasDependencyAfterDelete = skillsService.checkIfSkillsHaveDependencies(proj2.projectId, [proj2_skills.get(0).skillId])
 
         then:
-        proj1SharedSkills.size() == 1
-        proj2SharedWithMeSkills.size() == 1
-        !proj1SharedWithMeSkills
-        !proj2SharedSkills
+        proj1SharedSkills.count == 1
+        proj2SharedWithMeSkills.count == 1
+        proj1SharedWithMeSkills.count == 0
+        proj2SharedSkills.count == 0
         hasDependencyBeforeDelete[0].skillId == proj2_skills.get(0).skillId
         hasDependencyBeforeDelete[0].hasDependency == true
 
-        proj1SharedSkills_afterDelete.size() == 0
-        proj2SharedWithMeSkills_afterDelete.size() == 0
+        proj1SharedSkills_afterDelete.count == 0
+        proj2SharedWithMeSkills_afterDelete.count == 0
         hasDependencyAfterDelete[0].skillId == proj2_skills.get(0).skillId
         hasDependencyAfterDelete[0].hasDependency == false
     }
@@ -846,15 +961,15 @@ class CrossProjectSkillsManagementSpec extends DefaultIntSpec {
         def hasDependencyAfterDelete = skillsService.checkIfSkillsHaveDependencies(proj2.projectId, [proj2_skills.get(0).skillId])
 
         then:
-        proj1SharedSkills.size() == 1
-        proj2SharedWithMeSkills.size() == 1
-        !proj1SharedWithMeSkills
-        !proj2SharedSkills
+        proj1SharedSkills.count == 1
+        proj2SharedWithMeSkills.count == 1
+        proj1SharedWithMeSkills.count == 0
+        proj2SharedSkills.count == 0
         hasDependencyBeforeDelete[0].skillId == proj2_skills.get(0).skillId
         hasDependencyBeforeDelete[0].hasDependency == true
 
-        proj1SharedSkills_afterDelete.size() == 0
-        proj2SharedWithMeSkills_afterDelete.size() == 0
+        proj1SharedSkills_afterDelete.count == 0
+        proj2SharedWithMeSkills_afterDelete.count == 0
         hasDependencyAfterDelete[0].skillId == proj2_skills.get(0).skillId
         hasDependencyAfterDelete[0].hasDependency == false
     }
