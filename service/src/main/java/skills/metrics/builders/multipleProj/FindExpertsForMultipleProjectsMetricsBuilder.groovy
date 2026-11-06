@@ -16,11 +16,15 @@
 package skills.metrics.builders.multipleProj
 
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.security.access.AccessDeniedException
 import org.springframework.stereotype.Component
+import skills.auth.UserInfoService
 import skills.controller.exceptions.SkillException
 import skills.metrics.builders.GlobalMetricsBuilder
 import skills.metrics.builders.MetricsPagingParamsHelper
 import skills.metrics.builders.MetricsParams
+import skills.services.admin.InviteOnlyProjectService
+import skills.services.admin.UserCommunityService
 import skills.storage.repos.UserAchievedCustomRepo
 
 @Component
@@ -28,6 +32,15 @@ class FindExpertsForMultipleProjectsMetricsBuilder implements GlobalMetricsBuild
 
     @Autowired
     UserAchievedCustomRepo userAchievedCustomRepo
+
+    @Autowired
+    UserInfoService userInfoService
+
+    @Autowired
+    InviteOnlyProjectService inviteOnlyProjectService
+
+    @Autowired
+    UserCommunityService userCommunityService
 
     @Override
     String getId() {
@@ -44,6 +57,7 @@ class FindExpertsForMultipleProjectsMetricsBuilder implements GlobalMetricsBuild
     @Override
     def build(Map<String, String> props) {
         List<UserAchievedCustomRepo.ProjectAndLevel> params = getParams(props)
+        validateProjectAccess(params)
         MetricsPagingParamsHelper metricsPagingParamsHelper = new MetricsPagingParamsHelper(null, id, props)
         int currentPage = metricsPagingParamsHelper.currentPage
         int pageSize = metricsPagingParamsHelper.pageSize
@@ -53,6 +67,23 @@ class FindExpertsForMultipleProjectsMetricsBuilder implements GlobalMetricsBuild
         List<UserAchievedCustomRepo.UserAndLevel> data = userAchievedCustomRepo.findUsersWithMaxLevelForMultipleProjects(params, currentPage*pageSize, pageSize, !sortDesc)
 
         return new UserAchievementsRes(totalNum: totalNum, data: data)
+    }
+
+    private void validateProjectAccess(List<UserAchievedCustomRepo.ProjectAndLevel> params) {
+        String userId = userInfoService.currentUserId
+        // Authorize every requested project before querying either counts or rows.
+        // Root access bypasses invitation roles, but not community membership.
+        params.each { UserAchievedCustomRepo.ProjectAndLevel param ->
+            if (userCommunityService.isUserCommunityOnlyProject(param.projectId) &&
+                    !userCommunityService.isUserCommunityMember(userId)) {
+                throw new AccessDeniedException('Access is denied')
+            }
+            if (inviteOnlyProjectService.isInviteOnlyProject(param.projectId) &&
+                    !userInfoService.isCurrentUserASuperDuperUser() &&
+                    !inviteOnlyProjectService.canUserAccess(param.projectId, userId, true)) {
+                throw new AccessDeniedException('Access is denied')
+            }
+        }
     }
 
     private List<UserAchievedCustomRepo.ProjectAndLevel> getParams(Map<String, String> props) {

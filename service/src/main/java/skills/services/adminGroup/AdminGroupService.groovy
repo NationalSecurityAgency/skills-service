@@ -108,6 +108,10 @@ class AdminGroupService {
 
         List<AdminGroupDefRepo.AdminGroupDefSummaryRes> fromDb = adminGroupDefRepo.getAdminGroupDefSummariesByUser(userId)
         if (fromDb) {
+            boolean isCommunityMember = userCommunityService.isUserCommunityMember(userInfo.username)
+            if (!isCommunityMember) {
+                fromDb = fromDb.findAll { AdminGroupDefRepo.AdminGroupDefSummaryRes group -> !group.protectedCommunityEnabled }
+            }
             fromDb = fromDb.sort { a, b -> b.created <=> a.created }
             res.addAll(fromDb.collect { convert(it) })
         }

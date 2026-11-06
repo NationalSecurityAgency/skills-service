@@ -16,6 +16,8 @@
 package skills.intTests.community
 
 
+import org.springframework.http.HttpMethod
+import org.springframework.http.HttpStatus
 import skills.intTests.utils.DefaultIntSpec
 import skills.intTests.utils.SkillsClientException
 import skills.intTests.utils.SkillsService
@@ -25,6 +27,62 @@ import skills.storage.model.auth.RoleName
 import static skills.intTests.utils.SkillsFactory.createProject
 
 class ConfigureCommunityForProjectSpecs extends DefaultIntSpec {
+
+    def "community protection cannot be changed through #route settings using #method with value [#value]"() {
+        given:
+        List<String> users = getRandomUsers(2)
+        SkillsService projectAdmin = createService(users[0])
+        SkillsService learner = createService(users[1])
+        SkillsService rootUser = createRootSkillService()
+        rootUser.saveUserTag(projectAdmin.userName, 'dragons', ['DivineDragon'])
+
+        Map project = createProject(1)
+        project.enableProtectedUserCommunity = true
+        projectAdmin.createProject(project)
+        String settingName = Settings.USER_COMMUNITY_ONLY_PROJECT.settingName
+        Map settingRequest = [projectId: project.projectId, setting: settingName, value: value]
+        String endpoint = "/projects/${project.projectId}/settings"
+        if (route == 'single') {
+            endpoint = "${endpoint}/${settingName}"
+        }
+
+        expect:
+        !projectAdmin.isRoot()
+        projectAdmin.getSetting(project.projectId, settingName).value == 'true'
+
+        when:
+        learner.getSkillsSummaryForCurrentUser(project.projectId)
+
+        then:
+        SkillsClientException initialDenial = thrown(SkillsClientException)
+        initialDenial.httpStatus == HttpStatus.FORBIDDEN
+
+        when:
+        if (method == HttpMethod.PUT) {
+            projectAdmin.wsHelper.adminPut(endpoint, route == 'single' ? settingRequest : [settingRequest])
+        } else if (route == 'single') {
+            projectAdmin.changeSetting(project.projectId, settingName, settingRequest)
+        } else {
+            projectAdmin.changeSettings(project.projectId, [settingRequest])
+        }
+
+        then:
+        SkillsClientException rejectedSetting = thrown(SkillsClientException)
+        rejectedSetting.httpStatus == HttpStatus.BAD_REQUEST
+        rejectedSetting.message.contains('errorCode:BadParam')
+        rejectedSetting.message.contains("Not allowed to save [${settingName}] setting using this endpoint")
+        projectAdmin.getSetting(project.projectId, settingName).value == 'true'
+
+        when:
+        learner.getSkillsSummaryForCurrentUser(project.projectId)
+
+        then:
+        SkillsClientException finalDenial = thrown(SkillsClientException)
+        finalDenial.httpStatus == HttpStatus.FORBIDDEN
+
+        where:
+        [route, method, value] << [['single', 'bulk'], [HttpMethod.POST, HttpMethod.PUT], ['false', '', '   ', null, 'true']].combinations()
+    }
 
     def "do not allow to enable community for a project through settings endpoint"() {
         List<String> users = getRandomUsers(2)

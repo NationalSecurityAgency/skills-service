@@ -39,6 +39,85 @@ class UserCommunityGlobalBadgeAuthSpecs extends DefaultIntSpec {
         skillsService.getCurrentUser() // initialize skillsService user_attrs
     }
 
+    def "my badges exclude protected global badges after membership revocation - requirement #requirementType"() {
+        given:
+        SkillsService learner = createService(getRandomUsers(1)[0])
+        learner.getCurrentUser()
+        rootSkillsService.saveUserTag(skillsService.userName, 'dragons', ['DivineDragon'])
+        rootSkillsService.saveUserTag(learner.userName, 'dragons', ['DivineDragon'])
+
+        Map protectedProject = createProject(1)
+        protectedProject.enableProtectedUserCommunity = true
+        Map protectedSkill = createSkill(1, 1)
+        skillsService.createProjectAndSubjectAndSkills(protectedProject, createSubject(1, 1), [protectedSkill])
+        skillsService.enableProdMode(protectedProject)
+        learner.addMyProject(protectedProject.projectId)
+
+        Map ordinaryProject = createProject(2)
+        Map ordinarySkill = createSkill(2, 1)
+        skillsService.createProjectAndSubjectAndSkills(ordinaryProject, createSubject(2, 1), [ordinarySkill])
+        skillsService.enableProdMode(ordinaryProject)
+        learner.addMyProject(ordinaryProject.projectId)
+
+        Map protectedBadge = createBadge(1, 1)
+        protectedBadge.enableProtectedUserCommunity = true
+        protectedBadge.description = 'Protected global badge description'
+        skillsService.createGlobalBadge(protectedBadge)
+        if (requirementType == 'skill') {
+            skillsService.assignSkillToGlobalBadge(projectId: protectedProject.projectId, badgeId: protectedBadge.badgeId, skillId: protectedSkill.skillId)
+        } else {
+            skillsService.assignProjectLevelToGlobalBadge(projectId: protectedProject.projectId, badgeId: protectedBadge.badgeId, level: '1')
+        }
+        protectedBadge.enabled = true
+        skillsService.updateGlobalBadge(protectedBadge)
+
+        Map ordinaryBadge = createBadge(2, 2)
+        skillsService.createGlobalBadge(ordinaryBadge)
+        skillsService.assignSkillToGlobalBadge(projectId: ordinaryProject.projectId, badgeId: ordinaryBadge.badgeId, skillId: ordinarySkill.skillId)
+        ordinaryBadge.enabled = true
+        skillsService.updateGlobalBadge(ordinaryBadge)
+
+        when:
+        List<Map> initialBadges = learner.getMyProgressBadges()
+
+        then:
+        initialBadges*.badgeId == [protectedBadge.badgeId, ordinaryBadge.badgeId]
+        initialBadges[0].badge == protectedBadge.name
+        initialBadges[0].description == protectedBadge.description
+        initialBadges[0].projectLevelsAndSkillsSummaries*.projectId == [protectedProject.projectId]
+        if (requirementType == 'skill') {
+            assert initialBadges[0].skills*.skillId == [protectedSkill.skillId]
+        } else {
+            assert initialBadges[0].projectLevelsAndSkillsSummaries[0].projectLevel.requiredLevel == 1
+        }
+        learner.getBadgeSummary(null, protectedProject.projectId, protectedBadge.badgeId, -1, true).badge == protectedBadge.name
+
+        when: 'remove only membership, leaving the saved projects and session unchanged'
+        userTagRepo.deleteAll(userTagRepo.findAllByUserIdAndKey(learner.userName, 'dragons'))
+
+        then:
+        learner.getMyProgressBadges()*.badgeId == [ordinaryBadge.badgeId]
+        learner.getBadgeSummary(null, ordinaryProject.projectId, ordinaryBadge.badgeId, -1, true).badge == ordinaryBadge.name
+        validateForbidden { learner.getCustomIconCssForGlobalBadge(protectedBadge.badgeId) }
+        validateForbidden { learner.getBadgeSummary(null, protectedProject.projectId, protectedBadge.badgeId, -1, true) }
+        validateForbidden { learner.getBadgeDescriptions(protectedProject.projectId, protectedBadge.badgeId, true) }
+        validateForbidden { learner.getSingleSkillSummaryForCurrentUser(protectedProject.projectId, protectedSkill.skillId) }
+
+        when:
+        rootSkillsService.saveUserTag(learner.userName, 'dragons', ['DivineDragon'])
+        List<Map> restoredBadges = learner.getMyProgressBadges()
+
+        then:
+        restoredBadges*.badgeId == [protectedBadge.badgeId, ordinaryBadge.badgeId]
+        restoredBadges[0].badge == protectedBadge.name
+        restoredBadges[0].description == protectedBadge.description
+        restoredBadges[0].projectLevelsAndSkillsSummaries*.projectId == [protectedProject.projectId]
+        learner.getBadgeSummary(null, protectedProject.projectId, protectedBadge.badgeId, -1, true).badge == protectedBadge.name
+
+        where:
+        requirementType << ['skill', 'project level']
+    }
+
     def "cannot access badge endpoints with UC protection enabled if the user does not belong to the user community"() {
 
         when:
@@ -491,4 +570,3 @@ class UserCommunityGlobalBadgeAuthSpecs extends DefaultIntSpec {
         }
     }
 }
-
