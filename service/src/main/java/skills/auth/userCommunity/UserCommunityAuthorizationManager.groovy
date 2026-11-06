@@ -19,7 +19,6 @@ import groovy.transform.CompileStatic
 import groovy.util.logging.Slf4j
 import jakarta.annotation.PostConstruct
 import jakarta.servlet.http.HttpServletRequest
-import org.apache.commons.lang3.StringUtils
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.Lazy
 import org.springframework.core.annotation.Order
@@ -27,23 +26,19 @@ import org.springframework.security.access.AccessDeniedException
 import org.springframework.security.authorization.AuthenticatedAuthorizationManager
 import org.springframework.security.authorization.AuthorizationDecision
 import org.springframework.security.authorization.AuthorizationManager
+import org.springframework.security.authorization.AuthorizationResult
 import org.springframework.security.core.Authentication
 import org.springframework.security.web.access.intercept.RequestAuthorizationContext
-import org.springframework.security.web.util.UrlUtils
-import org.springframework.security.authorization.AuthorizationResult
+import org.springframework.security.web.servlet.util.matcher.PathPatternRequestMatcher
 import org.springframework.security.web.util.matcher.RequestMatcher
 import org.springframework.stereotype.Component
-import skills.auth.UserAuthService
+import skills.auth.AuthUtils
 import skills.auth.UserInfo
-import skills.auth.requestMatchers.ContainsStrRequestMatcher
-import skills.auth.requestMatchers.StartsWithStrRequestMatcher
 import skills.services.AttachmentService
 import skills.services.admin.UserCommunityService
 import skills.storage.model.Attachment
 
 import java.util.function.Supplier
-import java.util.regex.Matcher
-import java.util.regex.Pattern
 
 @CompileStatic
 @Slf4j
@@ -51,26 +46,32 @@ import java.util.regex.Pattern
 @Order(99)
 class UserCommunityAuthorizationManager implements AuthorizationManager<RequestAuthorizationContext> {
 
-    private static final Pattern PROJECT_ID = ~/(?i)\/.*\/(?:my)?projects\/([^\/]+).*/
-    private static final Pattern QUIZ_ID = ~/(?i)\/.*\/(?:quizzes|quiz-definitions)\/([^\/]+).*/
-    private static final Pattern ATTACHMENT_UUID = ~/(?i)\/api\/download\/(.+)/
-    private static final Pattern ADMIN_GROUP_ID = ~/(?i)\/.*\/admin-group-definitions\/([^\/]+).*/
-    private static final Pattern BADGE_ID = ~/(?i)\/.*\/badge(?:s)?\/([^\/]+).*/
-
-    private RequestMatcher projectsRequestMatcher
-    private RequestMatcher quizzesAdminRequestMatcher
-    private RequestMatcher quizzesApiRequestMatcher
-    private RequestMatcher attachmentsRequestMatcher
-    private RequestMatcher adminGroupRequestMatcher
-    private RequestMatcher badgeRequestMatcher
+    private static final List<RequestMatcher> QUIZ_MATCHERS = [
+            '/api/quizzes/{quizId}/**',
+            '/api/quiz-definitions/{quizId}/**',
+            '/admin/quiz-definitions/{quizId}/**',
+            '/app/quiz-definitions/{quizId}/**',
+    ].collect { String pattern -> (RequestMatcher) PathPatternRequestMatcher.pathPattern(pattern) }
+    private static final List<RequestMatcher> ADMIN_GROUP_MATCHERS = [
+            '/admin/admin-group-definitions/{adminGroupId}/**',
+            '/app/admin-group-definitions/{adminGroupId}/**',
+    ].collect { String pattern -> (RequestMatcher) PathPatternRequestMatcher.pathPattern(pattern) }
+    private static final List<RequestMatcher> BADGE_MATCHERS = [
+            '/admin/badges/{badgeId}/**',
+            '/api/badges/{badgeId}/**',
+            '/app/badges/{badgeId}/**',
+            '/api/projects/{projectId}/badges/{badgeId}/**',
+            '/admin/projects/{projectId}/badges/{badgeId}/**',
+            '/admin/projects/{projectId}/badge/{badgeId}/**',
+            '/admin/admin-group-definitions/{adminGroupId}/badges/{badgeId}/**',
+    ].collect { String pattern -> (RequestMatcher) PathPatternRequestMatcher.pathPattern(pattern) }
+    private static final List<RequestMatcher> ATTACHMENT_MATCHERS = [
+            PathPatternRequestMatcher.pathPattern('/api/download/{uuid}'),
+    ]
 
     @Autowired
     @Lazy
     UserCommunityService userCommunityService
-
-    @Autowired
-    @Lazy
-    UserAuthService userAuthService
 
     @Autowired
     @Lazy
@@ -81,12 +82,6 @@ class UserCommunityAuthorizationManager implements AuthorizationManager<RequestA
     @PostConstruct
     void init() {
         authenticatedAuthorizationManager = AuthenticatedAuthorizationManager.authenticated()
-        projectsRequestMatcher =  new ContainsStrRequestMatcher('projects/')
-        quizzesAdminRequestMatcher = new ContainsStrRequestMatcher('/quiz-definitions/')
-        quizzesApiRequestMatcher = new ContainsStrRequestMatcher('/quizzes/')
-        attachmentsRequestMatcher = new StartsWithStrRequestMatcher('/api/download/')
-        adminGroupRequestMatcher = new ContainsStrRequestMatcher('/admin-group-definitions/')
-        badgeRequestMatcher = new ContainsStrRequestMatcher('/badge')
     }
 
     @Override
@@ -99,14 +94,13 @@ class UserCommunityAuthorizationManager implements AuthorizationManager<RequestA
             return authenticatedDecision
         }
         AuthorizationDecision vote = null // ACCESS_ABSTAIN
-        String projectId = null
-        String quizId = null
-        String adminGroupId = null
-        String badgeId = null
-        if (projectsRequestMatcher.matches(request)) {
-            projectId = extractProjectId(request)
-        } else if (attachmentsRequestMatcher.matches(request)) {
-            AttachmentExtractRes extractRes = extractProjectIdForAttachment(request)
+        String projectId = AuthUtils.getProjectIdForProtection(request)
+        String quizId = AuthUtils.getPathVariable(request, 'quizId', QUIZ_MATCHERS)
+        String adminGroupId = AuthUtils.getPathVariable(request, 'adminGroupId', ADMIN_GROUP_MATCHERS)
+        String badgeId = AuthUtils.getPathVariable(request, 'badgeId', BADGE_MATCHERS)
+        String uuid = AuthUtils.getPathVariable(request, 'uuid', ATTACHMENT_MATCHERS)
+        if (uuid != null) {
+            AttachmentExtractRes extractRes = extractProjectIdForAttachment(uuid)
             if (extractRes?.projectId) {
                 projectId = extractRes.projectId
             }
@@ -116,13 +110,6 @@ class UserCommunityAuthorizationManager implements AuthorizationManager<RequestA
             if (extractRes?.skillId) {
                 badgeId = extractRes.skillId
             }
-        } else if (adminGroupRequestMatcher.matches(request)) {
-            adminGroupId = extractAdminGroupId(request)
-        } else if (quizzesApiRequestMatcher.matches(request) || quizzesAdminRequestMatcher.matches(request)) {
-            quizId = extractQuizId(request)
-        }
-        if (badgeRequestMatcher.matches(request)) {
-            badgeId = extractBadgeId(request)
         }
         if (projectId || adminGroupId || quizId || badgeId) {
             log.debug("evaluating request [{}] for user community protection", request.getRequestURI())
@@ -145,78 +132,14 @@ class UserCommunityAuthorizationManager implements AuthorizationManager<RequestA
         return vote
     }
 
-    private String extractProjectId(HttpServletRequest request) {
-        String res = StringUtils.EMPTY
-        String url = getRequestUrl(request)
-        Matcher pid = PROJECT_ID.matcher(url)
-        if (pid.matches()) {
-            res = pid.group(1)
-            if (res?.equalsIgnoreCase("null") ) {
-                res = StringUtils.EMPTY
-            }
-        }
-        return res
-    }
-
     static class AttachmentExtractRes {
         String projectId
         String quizId
         String skillId
     }
-    private AttachmentExtractRes extractProjectIdForAttachment(HttpServletRequest request) {
-        // Resolve the same path UUID as the download controller. Query parameters
-        // must not become part of the UUID and bypass attachment authorization.
-        String url = request.getServletPath() + (request.getPathInfo() ?: '')
-        Matcher pid = ATTACHMENT_UUID.matcher(url)
-        if (pid.matches()) {
-            String uuid = pid.group(1)
-            Attachment attachment = attachmentService.getAttachment(uuid);
-            return new AttachmentExtractRes(projectId: attachment?.projectId, quizId: attachment?.quizId, skillId: attachment?.skillId)
-        }
-        return null
-    }
-
-    private String extractAdminGroupId(HttpServletRequest request) {
-        String res = StringUtils.EMPTY
-        String url = getRequestUrl(request)
-        Matcher gid = ADMIN_GROUP_ID.matcher(url)
-        if (gid.matches()) {
-            res = gid.group(1)
-            if (res?.equalsIgnoreCase("null") ) {
-                res = StringUtils.EMPTY
-            }
-        }
-        return res
-    }
-
-    private String extractQuizId(HttpServletRequest request) {
-        String res = StringUtils.EMPTY
-        String url = getRequestUrl(request)
-        Matcher gid = QUIZ_ID.matcher(url)
-        if (gid.matches()) {
-            res = gid.group(1)
-            if (res?.equalsIgnoreCase("null") ) {
-                res = StringUtils.EMPTY
-            }
-        }
-        return res
-    }
-
-    private String extractBadgeId(HttpServletRequest request) {
-        String res = StringUtils.EMPTY
-        String url = getRequestUrl(request)
-        Matcher bid = BADGE_ID.matcher(url)
-        if (bid.matches()) {
-            res = bid.group(1)
-            if (res?.equalsIgnoreCase("null") ) {
-                res = StringUtils.EMPTY
-            }
-        }
-        return res
-    }
-
-    private String getRequestUrl(HttpServletRequest request) {
-        return UrlUtils.buildRequestUrl(request);
+    private AttachmentExtractRes extractProjectIdForAttachment(String uuid) {
+        Attachment attachment = attachmentService.getAttachment(uuid)
+        return new AttachmentExtractRes(projectId: attachment?.projectId, quizId: attachment?.quizId, skillId: attachment?.skillId)
     }
 
     private String getUsername(Authentication authentication) {
