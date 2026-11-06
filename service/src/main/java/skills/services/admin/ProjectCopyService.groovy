@@ -24,6 +24,7 @@ import org.apache.commons.lang3.StringUtils
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.data.domain.PageRequest
+import org.springframework.security.access.AccessDeniedException
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import skills.auth.UserInfo
@@ -374,6 +375,12 @@ class ProjectCopyService {
 
     private void validateUserIsAndAdminOfDestProj(String otherProjectId, String projectId) {
         UserInfo userInfo = userInfoService.currentUser
+        // The request's project authorization covers the source. Destination
+        // access must also honor community membership, even if admin roles remain.
+        if (userCommunityService.isUserCommunityOnlyProject(otherProjectId) &&
+                !userCommunityService.isUserCommunityMember(userInfo.username)) {
+            throw new AccessDeniedException('Access is denied')
+        }
         Boolean isAdminForOtherProject = userRoleRepo.isUserProjectAdmin(userInfo.username, otherProjectId)
         if (!isAdminForOtherProject) {
             throw new SkillException("User [${userInfo.username}] is not an admin for destination project [${otherProjectId}]", projectId, null, ErrorCode.BadParam)

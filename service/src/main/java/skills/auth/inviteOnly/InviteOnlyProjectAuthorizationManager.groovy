@@ -108,8 +108,9 @@ class InviteOnlyProjectAuthorizationManager implements AuthorizationManager<Requ
                 // project's current access, without granting proxy identities roles.
                 if (authentication.get().getPrincipal() instanceof UserInfo) {
                     UserInfo userInfo = (UserInfo) authentication.get().getPrincipal()
+                    boolean allowProjectApprover = request.method in ['GET', 'HEAD']
                     if (!userInfo.proxied && projectId != AuthUtils.getProjectIdFromPath(AuthUtils.getRequestPath(request)) &&
-                            inviteOnlyProjectService.canUserAccess(projectId, userInfo.username)) {
+                            inviteOnlyProjectService.canUserAccess(projectId, userInfo.username, allowProjectApprover)) {
                         return new AuthorizationDecision(true)
                     }
                 }

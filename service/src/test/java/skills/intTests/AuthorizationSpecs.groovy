@@ -20,6 +20,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpMethod
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
+import skills.controller.request.model.CopyToAnotherProjectRequestType
 import skills.intTests.utils.AdminGroupDefFactory
 import skills.intTests.utils.DefaultIntSpec
 import skills.intTests.utils.EmailUtils
@@ -35,7 +36,6 @@ import skills.storage.repos.UserTagRepo
 import skills.utils.GroovyToJavaByteUtils
 import skills.utils.WaitFor
 import spock.lang.IgnoreIf
-import spock.lang.IgnoreRest
 import spock.lang.Unroll
 
 import static org.springframework.http.HttpMethod.*
@@ -484,6 +484,54 @@ class AuthorizationSpecs extends DefaultIntSpec {
         withSubject << [false, true]
     }
 
+    def "cross-project summaries allow the loaded invite-only project's approver with subject #withSubject"() {
+        List<String> users = getRandomUsers(2)
+        SkillsService owner = createService(users[0])
+        SkillsService caller = createService(users[1])
+        Map context = SkillsFactory.createProject(1)
+        Map loaded = SkillsFactory.createProject(2)
+        Map subject = SkillsFactory.createSubject(2, 1)
+        Map skill = SkillsFactory.createSkill(2, 1, 1)
+        owner.createProject(context)
+        owner.createProjectAndSubjectAndSkills(loaded, subject, [skill])
+        owner.changeSetting(loaded.projectId, 'invite_only',
+                [projectId: loaded.projectId, setting: 'invite_only', value: 'true'])
+        owner.shareSkill(loaded.projectId, skill.skillId, context.projectId)
+        owner.addProjectAdmin(context.projectId, caller.userName)
+        owner.addUserRole(caller.userName, loaded.projectId, RoleName.ROLE_PROJECT_APPROVER.toString())
+        String subjectPath = withSubject ? "subjects/${subject.subjectId}/" : ''
+        String path = "api/projects/${context.projectId}/projects/${loaded.projectId}/${subjectPath}skills/${skill.skillId}/summary"
+
+        expect:
+        caller.getProject(context.projectId).projectId == context.projectId
+        ResponseEntity<String> direct = caller.wsHelper.rawGet(
+                "api/projects/${loaded.projectId}/skills/${skill.skillId}/summary", [:])
+        direct.statusCode.value() == 200
+        new JsonSlurper().parseText(direct.body).projectId == loaded.projectId
+        new JsonSlurper().parseText(direct.body).skillId == skill.skillId
+
+        when:
+        ResponseEntity<String> response = caller.wsHelper.rawGet(path, [:])
+
+        then:
+        verifyAll {
+            response.statusCode.value() == 200
+            new JsonSlurper().parseText(response.body).projectId == loaded.projectId
+            new JsonSlurper().parseText(response.body).skillId == skill.skillId
+        }
+
+        when:
+        owner.deleteUserRole(caller.userName, loaded.projectId, RoleName.ROLE_PROJECT_APPROVER.toString())
+
+        then:
+        caller.getProject(context.projectId).projectId == context.projectId
+        caller.wsHelper.rawGet(path, [:]).statusCode.value() == 403
+        caller.wsHelper.rawGet("api/projects/${loaded.projectId}/skills/${skill.skillId}/summary", [:]).statusCode.value() == 403
+
+        where:
+        withSubject << [false, true]
+    }
+
     def "cross-project summaries authorize the loaded community project with subject #withSubject"() {
         // Global-badge skills are valid cross-project summary targets without
         // externally sharing a community-protected project's skills.
@@ -526,6 +574,75 @@ class AuthorizationSpecs extends DefaultIntSpec {
         allowed.statusCode.value() == 200
         !new JsonSlurper().parseText(allowed.body).isAllowed
         new JsonSlurper().parseText(allowed.body).validationErrors.any { String error -> error.contains('cannot be copied') }
+    }
+
+    def "cross-project copy #method #suffix rejects revoked destination community access"() {
+        List<String> users = getRandomUsers(2)
+        SkillsService owner = createService(users[0])
+        SkillsService caller = createService(users[1])
+        SkillsService root = createRootSkillService()
+        root.saveUserTag(owner.userName, 'dragons', ['DivineDragon'])
+        root.saveUserTag(caller.userName, 'dragons', ['DivineDragon'])
+
+        Map source = SkillsFactory.createProject(1)
+        Map sourceSubject = SkillsFactory.createSubject(1, 1)
+        Map sourceSkill = SkillsFactory.createSkill(1, 1, 1)
+        Map destination = SkillsFactory.createProject(2) + [enableProtectedUserCommunity: true]
+        owner.createProjectAndSubjectAndSkills(source, sourceSubject, [sourceSkill])
+        owner.createProject(destination)
+        owner.addProjectAdmin(source.projectId, caller.userName)
+        owner.addProjectAdmin(destination.projectId, caller.userName)
+
+        String path = "admin/projects/${source.projectId}/copy/projects/${destination.projectId}"
+        Map body = [copyType: CopyToAnotherProjectRequestType.EntireSubject, fromSubjectId: sourceSubject.subjectId]
+
+        expect:
+        caller.getProject(destination.projectId).projectId == destination.projectId
+        owner.getSubjects(destination.projectId) == []
+        ResponseEntity<String> validation = caller.wsHelper.rawRequest(HttpMethod.POST, "${path}/validateCopy", body)
+        validation.statusCode.value() == 200
+        new JsonSlurper().parseText(validation.body).isAllowed
+
+        when:
+        // Keep both admin roles; revoke only the community membership.
+        userTagRepo.deleteAll(userTagRepo.findAllByUserIdAndKey(caller.userName, 'dragons'))
+
+        then:
+        caller.getProject(source.projectId).projectId == source.projectId
+        caller.wsHelper.rawGet("admin/projects/${destination.projectId}", [:]).statusCode.value() == 403
+
+        when:
+        ResponseEntity<String> response = caller.wsHelper.rawRequest(method, "${path}${suffix}", body)
+        List<Map> destinationSubjects = owner.getSubjects(destination.projectId)
+
+        then:
+        verifyAll {
+            response.statusCode.value() == 403
+            destinationSubjects == []
+        }
+
+        when:
+        root.saveUserTag(caller.userName, 'dragons', ['DivineDragon'])
+        ResponseEntity<String> restored = caller.wsHelper.rawRequest(method, "${path}${suffix}", body)
+
+        then:
+        restored.statusCode.value() == 200
+        if (suffix) {
+            assert new JsonSlurper().parseText(restored.body).isAllowed
+            assert owner.getSubjects(destination.projectId) == []
+        } else {
+            List<Map> copiedSubjects = owner.getSubjects(destination.projectId)
+            assert copiedSubjects.subjectId == [sourceSubject.subjectId]
+            assert copiedSubjects.name == [sourceSubject.name]
+            assert copiedSubjects.numSkills == [1]
+            assert owner.getSkill(sourceSkill + [projectId: destination.projectId]).name == sourceSkill.name
+        }
+
+        where:
+        method          | suffix
+        HttpMethod.POST | '/validateCopy'
+        HttpMethod.POST | ''
+        HttpMethod.PUT  | ''
     }
 
     def "a skill named projects cannot change project authorization"() {
