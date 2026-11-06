@@ -20,10 +20,10 @@ import groovy.transform.CompileStatic
 import groovy.util.logging.Slf4j
 import jakarta.annotation.PostConstruct
 import jakarta.servlet.http.HttpServletRequest
-import org.apache.commons.lang3.StringUtils
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.Lazy
 import org.springframework.core.annotation.Order
+import org.springframework.http.HttpMethod
 import org.springframework.security.authorization.AuthenticatedAuthorizationManager
 import org.springframework.security.authorization.AuthorizationDecision
 import org.springframework.security.authorization.AuthorizationManager
@@ -31,19 +31,17 @@ import org.springframework.security.authorization.AuthorizationResult
 import org.springframework.security.core.Authentication
 import org.springframework.security.core.GrantedAuthority
 import org.springframework.security.web.access.intercept.RequestAuthorizationContext
-import org.springframework.security.web.util.UrlUtils
+import org.springframework.security.web.servlet.util.matcher.PathPatternRequestMatcher
 import org.springframework.security.web.util.matcher.RequestMatcher
 import org.springframework.stereotype.Component
+import skills.auth.AuthUtils
 import skills.auth.UserAuthService
 import skills.auth.UserInfo
 import skills.auth.UserSkillsGrantedAuthority
-import skills.auth.requestMatchers.ContainsStrRequestMatcher
 import skills.services.admin.InviteOnlyProjectService
 import skills.storage.model.auth.RoleName
 
 import java.util.function.Supplier
-import java.util.regex.Matcher
-import java.util.regex.Pattern
 
 /**
  * If a project is defined as inviteOnly, only root users, project admins, or
@@ -57,16 +55,14 @@ import java.util.regex.Pattern
 @Order(99)
 class InviteOnlyProjectAuthorizationManager implements AuthorizationManager<RequestAuthorizationContext> {
 
-    private static final Pattern PROJECT_ID = ~/(?i)\/.*\/(?:my)?projects\/([^\/]+).*/
-
-    private RequestMatcher projectsApiRequestMatcher
-
-    private static final Pattern CONTACT_EXCEPTION = ~/(?i)api\/projects\/[^\/]+\/contact/
-    private static final Pattern NEW_INVITE_EXCEPTION = ~/(?i)api\/projects\/[^\/]+\/newInviteRequest/
-    private static final Pattern JOIN_EXCEPTION = ~/(?i)app\/projects\/[^\/]+\/join\/.*/
-    private static final Pattern VALIDATE_EXCEPTION = ~/(?i)app\/projects\/[^\/]+\/validateInvite\/.*/
-
-    private static final List<Pattern> EXCEPTIONS = [CONTACT_EXCEPTION, JOIN_EXCEPTION, VALIDATE_EXCEPTION, NEW_INVITE_EXCEPTION]
+    private static final List<RequestMatcher> EXCEPTIONS = [
+            PathPatternRequestMatcher.pathPattern(HttpMethod.POST, '/api/projects/{projectId}/contact'),
+            PathPatternRequestMatcher.pathPattern(HttpMethod.POST, '/api/projects/{projectId}/newInviteRequest'),
+            PathPatternRequestMatcher.pathPattern(HttpMethod.POST, '/app/projects/{projectId}/join/{inviteCode}'),
+            PathPatternRequestMatcher.pathPattern(HttpMethod.GET, '/app/projects/{projectId}/validateInvite/{inviteCode}'),
+            // MVC supports HEAD for a GET mapping as well.
+            PathPatternRequestMatcher.pathPattern(HttpMethod.HEAD, '/app/projects/{projectId}/validateInvite/{inviteCode}'),
+    ]
 
     @Autowired
     InviteOnlyProjectService inviteOnlyProjectService
@@ -80,7 +76,6 @@ class InviteOnlyProjectAuthorizationManager implements AuthorizationManager<Requ
     @PostConstruct
     void init() {
         authenticatedAuthorizationManager = AuthenticatedAuthorizationManager.authenticated()
-        projectsApiRequestMatcher = new ContainsStrRequestMatcher('projects/')
     }
 
     @Override
@@ -94,9 +89,9 @@ class InviteOnlyProjectAuthorizationManager implements AuthorizationManager<Requ
             return authenticatedDecision
         }
         AuthorizationDecision vote = null //ACCESS_ABSTAIN
-        if (projectsApiRequestMatcher.matches(request)) {
+        String projectId = AuthUtils.getProjectIdForProtection(request)
+        if (projectId != null) {
             log.debug("evaluating request [{}] for invite-only protection", request.getRequestURI())
-            String projectId = extractProjectId(request)
             Boolean isInviteOnly = inviteOnlyProjectService.isInviteOnlyProject(projectId)
             if (isInviteOnly && !isExceptionUrl(request)) {
                 log.debug("project id [{}] requires invite only access", projectId)
@@ -108,6 +103,17 @@ class InviteOnlyProjectAuthorizationManager implements AuthorizationManager<Requ
                         return new AuthorizationDecision(true) //ACCESS_GRANTED;
                     }
                 }
+                // Authorities are scoped to the primary project for role/proxy
+                // checks. Cross-project summaries must instead check the loaded
+                // project's current access, without granting proxy identities roles.
+                if (authentication.get().getPrincipal() instanceof UserInfo) {
+                    UserInfo userInfo = (UserInfo) authentication.get().getPrincipal()
+                    boolean allowProjectApprover = request.method in ['GET', 'HEAD']
+                    if (!userInfo.proxied && projectId != AuthUtils.getProjectIdFromPath(AuthUtils.getRequestPath(request)) &&
+                            inviteOnlyProjectService.canUserAccess(projectId, userInfo.username, allowProjectApprover)) {
+                        return new AuthorizationDecision(true)
+                    }
+                }
                 log.debug("user [{}] is not permitted to access project [{}]", authentication.get().getPrincipal(), projectId)
                 throw new InviteOnlyAccessDeniedException("Access is denied", projectId)
             }
@@ -116,28 +122,13 @@ class InviteOnlyProjectAuthorizationManager implements AuthorizationManager<Requ
         return vote
     }
 
-    private String extractProjectId(HttpServletRequest request) {
-        String url = getRequestUrl(request)
-        Matcher pid = PROJECT_ID.matcher(url)
-        if (pid.matches()) {
-            return pid.group(1)
-        }
-        return StringUtils.EMPTY
-    }
-
     private boolean isExceptionUrl(HttpServletRequest request) {
-        String url = getRequestUrl(request)
-        log.debug("checking to see if url [{}] matches exception paths [{}]", url, EXCEPTIONS)
-        for (Pattern exception : EXCEPTIONS) {
-            if (exception.matcher(url)) {
+        for (RequestMatcher exception : EXCEPTIONS) {
+            if (exception.matches(request)) {
                 return true
             }
         }
         return false
-    }
-
-    private String getRequestUrl(HttpServletRequest request) {
-        return UrlUtils.buildRequestUrl(request);
     }
 
     private Collection<? extends GrantedAuthority> getAuthorities(Authentication authentication) {
@@ -150,9 +141,10 @@ class InviteOnlyProjectAuthorizationManager implements AuthorizationManager<Requ
     }
 
     private static boolean isPermitted(String projectId, UserSkillsGrantedAuthority grantedAuthority) {
-        if (grantedAuthority.getRole().roleName in [RoleName.ROLE_PRIVATE_PROJECT_USER, RoleName.ROLE_SUPER_DUPER_USER, RoleName.ROLE_PROJECT_ADMIN, RoleName.ROLE_PROJECT_APPROVER]) {
+        if (grantedAuthority.getRole().roleName == RoleName.ROLE_SUPER_DUPER_USER) {
             return true
         }
-        return false
+        return projectId.equalsIgnoreCase(grantedAuthority.role.projectId) &&
+                grantedAuthority.role.roleName in [RoleName.ROLE_PRIVATE_PROJECT_USER, RoleName.ROLE_PROJECT_ADMIN, RoleName.ROLE_PROJECT_APPROVER]
     }
 }

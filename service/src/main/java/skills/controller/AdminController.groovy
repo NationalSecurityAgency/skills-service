@@ -322,7 +322,7 @@ class AdminController {
         return RequestResult.success()
     }
 
-    @RequestMapping(value="/projects/{id}/cancelExpiration")
+    @RequestMapping(value="/projects/{id}/cancelExpiration", method = RequestMethod.POST)
     RequestResult cancelExpiration(@PathVariable("id") String projectId) {
         SkillsValidator.isNotBlank(projectId, "Project Id")
         projAdminService.cancelProjectExpiration(projectId)
@@ -1458,6 +1458,9 @@ class AdminController {
     RequestResult saveProjectSettings(@PathVariable("projectId") String projectId, @RequestBody List<ProjectSettingsRequest> values) {
         SkillsValidator.isNotBlank(projectId, "Project Id")
         SkillsValidator.isNotNull(values, "Settings")
+        values.each { ProjectSettingsRequest value ->
+            SkillsValidator.isTrue(projectId == value?.projectId, "Project Id must equal", projectId)
+        }
 
         projectSettingsValidator.validate(values)
 
@@ -2086,4 +2089,3 @@ class AdminController {
         return batchReportService.addBatchSkillsForBatchUsers(projectId, batchSkillEventRequest);
     }
 }
-

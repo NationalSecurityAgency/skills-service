@@ -309,6 +309,26 @@ class WSHelper {
         return responseEntity
     }
 
+    ResponseEntity<String> rawRequest(HttpMethod method, String endpoint, Object body = null, Map params = [:]) {
+        String url = "${skillsService}/${endpoint}${getUrlFromParams(params)}"
+        switch (method) {
+            case HttpMethod.GET:
+                return restTemplateWrapper.getForEntity(url, String)
+            case HttpMethod.HEAD:
+                return restTemplateWrapper.headForEntity(url)
+            case HttpMethod.POST:
+                return restTemplateWrapper.postForEntity(url, body, String)
+            case HttpMethod.PUT:
+                return restTemplateWrapper.putForEntity(url, body)
+            case HttpMethod.PATCH:
+                return (ResponseEntity<String>) restTemplateWrapper.patchForObject(url, body, String)
+            case HttpMethod.DELETE:
+                return restTemplateWrapper.deleteForEntity(url, body)
+            default:
+                throw new IllegalArgumentException("Unsupported test request method [${method}]")
+        }
+    }
+
     def rawPost(String endpoint, def params, HttpStatus expectedStatus = HttpStatus.OK, boolean throwExceptionOnFailure = true) {
         String url = "${skillsService}/${endpoint}"
         ResponseEntity<String> responseEntity = restTemplateWrapper.postForEntity(url, params, String)
