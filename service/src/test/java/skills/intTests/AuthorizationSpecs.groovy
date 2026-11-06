@@ -532,6 +532,64 @@ class AuthorizationSpecs extends DefaultIntSpec {
         withSubject << [false, true]
     }
 
+    @IgnoreIf({env["SPRING_PROFILES_ACTIVE"] == "pki" })
+    def "cross-project summaries do not grant a proxied approver access with subject #withSubject"() {
+        Map fixture = createProjectEndpointFixture('invite-only')
+        SkillsService owner = fixture.owner
+        SkillsService approver = fixture.caller
+        String loadedProjectId = fixture.project.projectId
+        String skillId = fixture.skills[0].skillId
+        owner.shareSkill(loadedProjectId, skillId, projId)
+        skillsService.addProjectAdmin(projId, approver.userName)
+        owner.addUserRole(approver.userName, loadedProjectId, RoleName.ROLE_PROJECT_APPROVER.toString())
+        String subjectPath = withSubject ? "subjects/${fixture.subject.subjectId}/" : ''
+        String path = "api/projects/${projId}/projects/${loadedProjectId}/${subjectPath}skills/${skillId}/summary"
+        skillsService.setProxyCredentials(projId, skillsService.getClientSecret(projId))
+        String token = skillsService.wsHelper.getTokenForUser(approver.userName)
+
+        expect:
+        ResponseEntity<String> direct = approver.wsHelper.rawGet(path, [:])
+        direct.statusCode.value() == 200
+        new JsonSlurper().parseText(direct.body).skillId == skillId
+
+        when:
+        ResponseEntity<String> contextResponse
+        ResponseEntity<String> crossProjectResponse
+        skillsService.wsHelper.restTemplateWrapper.authenticationToken = "Bearer ${token}"
+        try {
+            // Prove that the proxy token works for its own public project.
+            contextResponse = skillsService.wsHelper.rawGet("api/projects/${projId}/summary", [:])
+            crossProjectResponse = skillsService.wsHelper.rawGet(path, [:])
+        } finally {
+            skillsService.wsHelper.restTemplateWrapper.authenticationToken = null
+        }
+
+        then:
+        contextResponse.statusCode.value() == 200
+        new JsonSlurper().parseText(contextResponse.body).projectName == 'My Project'
+        crossProjectResponse.statusCode.value() == 403
+        !(crossProjectResponse.body ?: '').contains(fixture.project.name)
+
+        when:
+        owner.changeSetting(loadedProjectId, 'invite_only',
+                [projectId: loadedProjectId, setting: 'invite_only', value: 'false'])
+        ResponseEntity<String> publicTargetResponse
+        skillsService.wsHelper.restTemplateWrapper.authenticationToken = "Bearer ${token}"
+        try {
+            publicTargetResponse = skillsService.wsHelper.rawGet(path, [:])
+        } finally {
+            skillsService.wsHelper.restTemplateWrapper.authenticationToken = null
+        }
+
+        then:
+        publicTargetResponse.statusCode.value() == 200
+        new JsonSlurper().parseText(publicTargetResponse.body).projectId == loadedProjectId
+        new JsonSlurper().parseText(publicTargetResponse.body).skillId == skillId
+
+        where:
+        withSubject << [false, true]
+    }
+
     def "cross-project summaries authorize the loaded community project with subject #withSubject"() {
         // Global-badge skills are valid cross-project summary targets without
         // externally sharing a community-protected project's skills.
