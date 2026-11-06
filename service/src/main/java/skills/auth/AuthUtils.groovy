@@ -21,6 +21,10 @@ import groovy.util.logging.Slf4j
 import jakarta.servlet.http.HttpServletRequest
 import jakarta.servlet.http.HttpServletResponse
 import org.springframework.http.HttpMethod
+import org.springframework.security.access.AccessDeniedException
+import org.springframework.security.web.servlet.util.matcher.PathPatternRequestMatcher
+import org.springframework.security.web.util.matcher.OrRequestMatcher
+import org.springframework.security.web.util.matcher.RequestMatcher
 import org.springframework.web.context.request.RequestContextHolder
 import org.springframework.web.context.request.ServletRequestAttributes
 import skills.storage.model.auth.UserRole
@@ -36,6 +40,56 @@ class AuthUtils {
     static final Pattern ADMIN_GROUP_ID_PATTERN = Pattern.compile("^/admin/admin-group-definitions/([^/]+).*\$")
     static final Pattern QUIZ_ID_PATTERN_API = Pattern.compile("^/api/quizzes/([^/]+).*\$")
     static final Pattern GLOBAL_BADGE_ID_PATTERN = Pattern.compile("^/admin/badges/([^/]+).*\$")
+
+    // The two cross-project summary routes load the second project's skill. Other
+    // project routes (including copy and sharing) are scoped to the source project.
+    private static final List<RequestMatcher> PROJECT_PROTECTION_MATCHERS = [
+            '/api/projects/{contextProjectId}/projects/{projectId}/skills/{skillId}/summary',
+            '/api/projects/{contextProjectId}/projects/{projectId}/subjects/{subjectId}/skills/{skillId}/summary',
+            '/api/projects/{projectId}/**',
+            '/api/myprojects/{projectId}/**',
+            '/app/projects/{projectId}/**',
+            '/app/users/projects/{projectId}/**',
+            '/admin/projects/{projectId}/**',
+            '/admin/badges/{badgeId}/projects/{projectId}/skills/{skillId}',
+            '/admin/badges/{badgeId}/projects/{projectId}/level/**',
+            '/admin/admin-group-definitions/{adminGroupId}/projects/{projectId}',
+    ].collect { String pattern -> (RequestMatcher) PathPatternRequestMatcher.pathPattern(pattern) }
+
+    private static final RequestMatcher RESOURCE_CREATION_MATCHER = new OrRequestMatcher([
+            '/app/projects/{id}',
+            '/app/quiz-definitions/{id}',
+            '/app/admin-group-definitions/{id}',
+            '/app/badges/{id}',
+    ].collect { String pattern -> (RequestMatcher) PathPatternRequestMatcher.pathPattern(pattern) })
+
+    static String getProjectIdForProtection(HttpServletRequest request) {
+        return getPathVariable(request, 'projectId', PROJECT_PROTECTION_MATCHERS)
+    }
+
+    static String getPathVariable(HttpServletRequest request, String variable, List<RequestMatcher> matchers) {
+        // Use the same parsed, context-relative path and segment decoding as MVC.
+        // ServletRequestPathUtils (used by these matchers) never includes the query.
+        for (RequestMatcher matcher : matchers) {
+            RequestMatcher.MatchResult result = matcher.matcher(request)
+            if (result.isMatch()) {
+                String id = result.variables.get(variable)
+                // Do not turn a malformed resource ID into an abstention. In
+                // particular, the service validators reject the literal "null".
+                if (!id?.trim() || id.trim().equalsIgnoreCase('null')) {
+                    // These exact creation routes validate the path ID before
+                    // accessing a resource. Retain their structured BadParam
+                    // responses, but never skip protection on resource-access routes.
+                    if (request.method in ['POST', 'PUT'] && RESOURCE_CREATION_MATCHER.matches(request)) {
+                        return null
+                    }
+                    throw new AccessDeniedException('Access is denied')
+                }
+                return id
+            }
+        }
+        return null
+    }
 
     // Example: /admin/projects/{projectId}/approvals/approve
     // Example: /admin/projects/{projectId}/approvals/reject
@@ -95,7 +149,7 @@ class AuthUtils {
                 log.trace("${Thread.currentThread().name} - getRequestPath")
             }
             try {
-                res = servletRequest.getServletPath()
+                res = servletRequest.getServletPath() + (servletRequest.getPathInfo() ?: '')
             } catch (Exception e) {
                 log.error("getRequestPath failed", e)
             }

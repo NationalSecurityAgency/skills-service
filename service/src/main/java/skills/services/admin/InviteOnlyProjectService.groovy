@@ -381,13 +381,16 @@ class InviteOnlyProjectService {
      * Checks if the specified user id has the necessary user role to access the specified invite only project id
      * @param projectId a projectId configured for invite only
      * @param userId a non-null userid
-     * @param idType not required, only used in certain authentication configurations
+     * @param allowProjectApprover include approvers for read-only authorization checks
      * @return
      */
     @Transactional(readOnly = true)
-    boolean canUserAccess(String projectId, String userId) {
+    boolean canUserAccess(String projectId, String userId, boolean allowProjectApprover = false) {
         List<UserRoleRes> roles = accessSettingsStorageService.getUserRolesForProjectIdAndUserId(projectId, userId)
-        return roles?.find {it.roleName == RoleName.ROLE_PRIVATE_PROJECT_USER || it.roleName == RoleName.ROLE_PROJECT_ADMIN}
+        return roles?.any { UserRoleRes role ->
+            role.roleName in [RoleName.ROLE_PRIVATE_PROJECT_USER, RoleName.ROLE_PROJECT_ADMIN] ||
+                    (allowProjectApprover && role.roleName == RoleName.ROLE_PROJECT_APPROVER)
+        } ?: false
     }
 
     @Transactional(readOnly = true)

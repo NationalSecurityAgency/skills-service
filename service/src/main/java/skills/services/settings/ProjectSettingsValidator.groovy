@@ -19,6 +19,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 import skills.controller.exceptions.ErrorCode
 import skills.controller.exceptions.SkillException
+import skills.controller.exceptions.SkillsValidator
 import skills.controller.request.model.ProjectSettingsRequest
 import skills.services.GlobalBadgesService
 import skills.storage.model.Setting
@@ -32,6 +33,10 @@ class ProjectSettingsValidator {
     GlobalBadgesService globalBadgesService
 
     void validate(ProjectSettingsRequest settingsRequest) {
+        SkillsValidator.isTrue(settingsRequest.setting != Settings.USER_COMMUNITY_ONLY_PROJECT.settingName,
+                "Not allowed to save [${Settings.USER_COMMUNITY_ONLY_PROJECT.settingName}] setting using this endpoint",
+                settingsRequest.projectId)
+
         if (settingsRequest.setting == Settings.PRODUCTION_MODE.settingName && settingsRequest.isEnabled()) {
             Setting setting = settingsDataAccessor.getProjectSetting(settingsRequest.projectId, Settings.INVITE_ONLY_PROJECT.settingName)
             if (setting?.isEnabled()) {
@@ -62,7 +67,7 @@ class ProjectSettingsValidator {
 
         ProjectSettingsRequest communitySetting = settings.find { it.setting == Settings.USER_COMMUNITY_ONLY_PROJECT.settingName }
         if (communitySetting) {
-            throw new SkillException("Not allowed to save [${Settings.USER_COMMUNITY_ONLY_PROJECT.settingName}] setting using this endpoint", ErrorCode.BadParam)
+            validate(communitySetting)
         }
     }
 }

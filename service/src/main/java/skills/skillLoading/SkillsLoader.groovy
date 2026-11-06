@@ -287,17 +287,18 @@ class SkillsLoader {
     @Transactional(readOnly = true)
     List<? extends SkillBadgeSummary> getBadgesForUserMyProjects(String userId) {
         List<SkillBadgeSummary> badges = []
+        boolean isCommunityMember = userCommunityService.isUserCommunityMember(userId)
 
         skillDefWithExtraRepo.findAllMyBadgesForUser(userId).withCloseable { Stream<SkillDefWithExtra> rawBadges ->
             rawBadges?.forEach({
                 if (it.projectId) {
-                    if (userCommunityService.isUserCommunityMember(userId) || !userCommunityService.isUserCommunityOnlyProject(it.projectId)) {
+                    if (isCommunityMember || !userCommunityService.isUserCommunityOnlyProject(it.projectId)) {
                         ProjDef projDef = projDefRepo.findByProjectId(it.projectId)
                         badges << loadBadgeSummary(projDef, userId, it, Integer.MAX_VALUE, false, true)
                     }
-                } else {
+                } else if (isCommunityMember || !userCommunityService.isUserCommunityOnlyGlobalBadge(it.id)) {
                     // we have to load badge skills, if no project level is defined then without loading skills,
-                    // the client can't identify the project_ids involved in the global bage
+                    // the client can't identify the project_ids involved in the global badge
                     def badge = loadGlobalBadgeSummary(userId, null, it, Integer.MAX_VALUE, true)
                     if (badge.projectLevelsAndSkillsSummaries) {
                         badges << badge

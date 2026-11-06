@@ -15,6 +15,10 @@
  */
 package skills.intTests
 
+import groovy.json.JsonSlurper
+import org.springframework.http.HttpMethod
+import org.springframework.http.HttpStatus
+import org.springframework.http.ResponseEntity
 import skills.intTests.utils.DefaultIntSpec
 import skills.intTests.utils.SkillsClientException
 import skills.intTests.utils.SkillsFactory
@@ -23,6 +27,116 @@ import skills.intTests.utils.SkillsService
 import static skills.intTests.utils.SkillsFactory.createProject
 
 class ProjectSettingsSpecs extends DefaultIntSpec {
+
+    def "bulk settings reject foreign project entries without changing either project using #method and #batchType batch"() {
+        List<String> users = getRandomUsers(2)
+        SkillsService projectAdmin = createService(users[0])
+        SkillsService otherProjectAdmin = createService(users[1])
+        Map project = createProject(1)
+        Map otherProject = createProject(2)
+        projectAdmin.createProject(project)
+        otherProjectAdmin.createProject(otherProject)
+        projectAdmin.addOrUpdateProjectSetting(project.projectId, 'project.displayName', 'Work Role')
+        projectAdmin.addOrUpdateProjectSetting(project.projectId, 'subject.displayName', 'Competency')
+        otherProjectAdmin.configuredProjectAsInviteOnly(otherProject.projectId)
+        otherProjectAdmin.addOrUpdateProjectSetting(otherProject.projectId, 'project.displayName', 'Other Role')
+
+        Map foreignSetting = [projectId: otherProject.projectId, setting: 'invite_only', value: 'false']
+        List<Map> validSettings = [
+                [projectId: project.projectId, setting: 'project.displayName', value: 'New Role'],
+                [projectId: project.projectId, setting: 'subject.displayName', value: '']
+        ]
+        List<Map> settings = batchType == 'single' ? [foreignSetting] :
+                (batchType == 'foreign-first' ? ([foreignSetting] + validSettings) : (validSettings + [foreignSetting]))
+
+        expect:
+        projectAdmin.wsHelper.rawGet("api/projects/${otherProject.projectId}/summary", [:]).statusCode == HttpStatus.FORBIDDEN
+
+        when:
+        ResponseEntity<String> response = projectAdmin.wsHelper.rawRequest(method,
+                "admin/projects/${project.projectId}/settings", settings)
+
+        then:
+        response.statusCode == HttpStatus.BAD_REQUEST
+        Map error = new JsonSlurper().parseText(response.body) as Map
+        error.errorCode == 'BadParam'
+        error.explanation == 'Project Id must equal'
+        error.projectId == project.projectId
+        projectAdmin.getProjectSettings(project.projectId).find { it.setting == 'project.displayName' }?.value == 'Work Role'
+        projectAdmin.getProjectSettings(project.projectId).find { it.setting == 'subject.displayName' }?.value == 'Competency'
+        otherProjectAdmin.getProjectSettings(otherProject.projectId).find { it.setting == 'invite_only' }?.value == 'true'
+        otherProjectAdmin.getProjectSettings(otherProject.projectId).find { it.setting == 'project.displayName' }?.value == 'Other Role'
+        projectAdmin.wsHelper.rawGet("api/projects/${otherProject.projectId}/summary", [:]).statusCode == HttpStatus.FORBIDDEN
+
+        where:
+        method          | batchType
+        HttpMethod.POST | 'single'
+        HttpMethod.PUT  | 'single'
+        HttpMethod.POST | 'foreign-first'
+        HttpMethod.PUT  | 'foreign-first'
+        HttpMethod.POST | 'foreign-last'
+        HttpMethod.PUT  | 'foreign-last'
+    }
+
+    def "bulk settings reject invalid entries before updates or deletions using #method and #invalidEntry"() {
+        SkillsService projectAdmin = createService(getRandomUsers(1)[0])
+        Map project = createProject(1)
+        projectAdmin.createProject(project)
+        projectAdmin.addOrUpdateProjectSetting(project.projectId, 'project.displayName', 'Work Role')
+        projectAdmin.addOrUpdateProjectSetting(project.projectId, 'subject.displayName', 'Competency')
+        List<Map> settings = [
+                [projectId: project.projectId, setting: 'project.displayName', value: 'New Role'],
+                [projectId: project.projectId, setting: 'subject.displayName', value: ''],
+                invalidEntry
+        ]
+
+        when:
+        ResponseEntity<String> response = projectAdmin.wsHelper.rawRequest(method,
+                "admin/projects/${project.projectId}/settings", settings)
+
+        then:
+        response.statusCode == HttpStatus.BAD_REQUEST
+        Map error = new JsonSlurper().parseText(response.body) as Map
+        error.errorCode == 'BadParam'
+        error.explanation == 'Project Id must equal'
+        error.projectId == project.projectId
+        projectAdmin.getProjectSettings(project.projectId).find { it.setting == 'project.displayName' }?.value == 'Work Role'
+        projectAdmin.getProjectSettings(project.projectId).find { it.setting == 'subject.displayName' }?.value == 'Competency'
+
+        where:
+        method          | invalidEntry
+        HttpMethod.POST | [setting: 'skill.displayName', value: 'Course']
+        HttpMethod.PUT  | [setting: 'skill.displayName', value: 'Course']
+        HttpMethod.POST | [projectId: '', setting: 'skill.displayName', value: 'Course']
+        HttpMethod.PUT  | [projectId: '', setting: 'skill.displayName', value: 'Course']
+        HttpMethod.POST | null
+        HttpMethod.PUT  | null
+        HttpMethod.POST | [projectId: 'TestProject2', setting: 'subject.displayName', value: '']
+        HttpMethod.PUT  | [projectId: 'TestProject2', setting: 'subject.displayName', value: '']
+    }
+
+    def "bulk settings allow same-project updates and deletions using #method"() {
+        SkillsService projectAdmin = createService(getRandomUsers(1)[0])
+        Map project = createProject(1)
+        projectAdmin.createProject(project)
+        projectAdmin.addOrUpdateProjectSetting(project.projectId, 'project.displayName', 'Work Role')
+        projectAdmin.addOrUpdateProjectSetting(project.projectId, 'subject.displayName', 'Competency')
+
+        when:
+        ResponseEntity<String> response = projectAdmin.wsHelper.rawRequest(method,
+                "admin/projects/${project.projectId}/settings", [
+                [projectId: project.projectId, setting: 'project.displayName', value: 'New Role'],
+                [projectId: project.projectId, setting: 'subject.displayName', value: '']
+        ])
+
+        then:
+        response.statusCode == HttpStatus.OK
+        projectAdmin.getProjectSettings(project.projectId).find { it.setting == 'project.displayName' }?.value == 'New Role'
+        !projectAdmin.getProjectSettings(project.projectId).find { it.setting == 'subject.displayName' }
+
+        where:
+        method << [HttpMethod.POST, HttpMethod.PUT]
+    }
 
     def "save custom labels project settings"() {
         def proj = SkillsFactory.createProject()

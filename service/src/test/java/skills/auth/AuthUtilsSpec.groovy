@@ -15,11 +15,62 @@
  */
 package skills.auth
 
+import org.springframework.mock.web.MockHttpServletRequest
+import org.springframework.security.access.AccessDeniedException
 import spock.lang.Specification
 
 import java.nio.charset.StandardCharsets
 
 class AuthUtilsSpec extends Specification {
+
+    def "protection uses the decoded application path with servlet path #servletPath and path info #pathInfo"() {
+        MockHttpServletRequest request = new MockHttpServletRequest('GET', "${contextPath}${requestPath}")
+        request.contextPath = contextPath
+        request.servletPath = servletPath
+        request.pathInfo = pathInfo
+        request.queryString = 'view=/projects/PublicProject/'
+
+        expect:
+        AuthUtils.getProjectIdForProtection(request) == 'RestrictedProject'
+        AuthUtils.getRequestPath(request) == '/api/projects/RestrictedProject/summary'
+
+        where:
+        contextPath | requestPath                                  | servletPath                                      | pathInfo
+        ''          | '/api/projects/RestrictedProject/summary'     | '/api/projects/RestrictedProject/summary'         | null
+        '/tree'     | '/api/projects/RestrictedProject/summary'     | '/api/projects/RestrictedProject/summary'         | null
+        '/tree'     | '/api/projects/RestrictedProject/summary'     | '/api'                                           | '/projects/RestrictedProject/summary'
+        ''          | '/api/projects/%52estrictedProject/summary'   | '/api/projects/RestrictedProject/summary'         | null
+    }
+
+    def "project protection chooses the controller resource rather than a later incidental segment"() {
+        MockHttpServletRequest request = new MockHttpServletRequest('GET', path)
+        request.servletPath = path
+
+        expect:
+        AuthUtils.getProjectIdForProtection(request) == projectId
+
+        where:
+        path                                                                         | projectId
+        '/admin/projects/source/copy/projects/destination'                            | 'source'
+        '/admin/projects/source/skills/skill/shared/projects/destination'              | 'source'
+        '/admin/projects/source/skills/projects/video'                                | 'source'
+        '/api/projects/context/projects/loaded/skills/skill/summary'                   | 'loaded'
+        '/api/projects/context/projects/loaded/subjects/subject/skills/skill/summary'  | 'loaded'
+        '/admin/badges/globalBadge/projects/referenced/level/1'                        | 'referenced'
+        '/admin/admin-group-definitions/group/projects/referenced'                    | 'referenced'
+        '/api/projects/unknown/summary'                                               | 'unknown'
+    }
+
+    def "null-like resource paths fail closed rather than dropping protection"() {
+        MockHttpServletRequest request = new MockHttpServletRequest('GET', '/api/projects/null/summary')
+        request.servletPath = '/api/projects/null/summary'
+
+        when:
+        AuthUtils.getProjectIdForProtection(request)
+
+        then:
+        thrown(AccessDeniedException)
+    }
 
     def "pick first project is if it appears twice in the url"() {
 
@@ -150,4 +201,3 @@ class AuthUtilsSpec extends Specification {
         false   | "/admin/projects//proj1/approvalEmails/unsubscribe"
     }
 }
-

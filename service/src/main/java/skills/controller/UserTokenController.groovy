@@ -174,10 +174,11 @@ class UserTokenController {
 
         @Override
         Map<String, String[]> getParameterMap() {
+            // This internal request must only contain server-selected token parameters.
+            // Forwarding caller parameters would allow replacing the selected identity or grant.
             Map<String, String[]> parameterMap = [:]
             parameterMap.put(OAuth2ParameterNames.GRANT_TYPE, [AuthorizationGrantType.CLIENT_CREDENTIALS.getValue()] as String[])
             parameterMap.put(AuthorizationServerConfig.SKILLS_PROXY_USER, [proxyUser] as String[])
-            parameterMap.putAll(super.getParameterMap())
             return parameterMap
         }
 
@@ -248,7 +249,8 @@ class UserTokenController {
 
         @Override
         String getQueryString() {
-            return request.getQueryString()
+            // The synthesized POST parameters are not parameters from the original GET query.
+            return null
         }
 
         @Override
