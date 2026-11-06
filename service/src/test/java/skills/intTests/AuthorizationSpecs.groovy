@@ -750,7 +750,7 @@ class AuthorizationSpecs extends DefaultIntSpec {
 
     def "encoded project paths enforce #protection access without double encoding"() {
         Map fixture = createProjectEndpointFixture(protection)
-        URI uri = new URI("http://localhost:${localPort}/api/projects/%54estProject1/summary?view=/projects/myProject2/")
+        URI uri = new URI("${fixture.owner.wsHelper.skillsService}/api/projects/%54estProject1/summary?view=/projects/myProject2/")
 
         when:
         ResponseEntity<String> allowed = fixture.owner.wsHelper.restTemplateWrapper.getForEntity(uri, String)
