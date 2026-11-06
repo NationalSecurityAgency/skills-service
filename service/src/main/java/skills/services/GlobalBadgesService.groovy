@@ -339,6 +339,10 @@ class GlobalBadgesService {
         UserInfo userInfo = userInfoService.currentUser
         String userId = userInfo.username?.toLowerCase()
         List<SkillDefWithExtra> badges = skillDefWithExtraRepo.findGlobalBadgesForAdmin(userId)
+        boolean isCommunityMember = userCommunityService.isUserCommunityMember(userInfo.username)
+        if (!isCommunityMember) {
+            badges = badges?.findAll { SkillDefWithExtra badge -> !userCommunityService.isUserCommunityOnlyGlobalBadge(badge.id) }
+        }
         List<GlobalBadgeResult> res = badges.collect { convertToBadge(it, true) }
         return res?.sort({ it.displayOrder })
     }

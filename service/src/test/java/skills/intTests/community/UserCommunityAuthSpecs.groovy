@@ -38,6 +38,91 @@ class UserCommunityAuthSpecs extends DefaultIntSpec {
         skillsService.getCurrentUser() // initialize skillsService user_attrs
     }
 
+    def "global badge collections exclude protected badges after membership revocation - ordinary badge #includeOrdinary"() {
+        given:
+        SkillsService formerMember = createService(getRandomUsers(1)[0])
+        formerMember.getCurrentUser()
+        rootSkillsService.saveUserTag(skillsService.userName, 'dragons', ['DivineDragon'])
+        rootSkillsService.saveUserTag(formerMember.userName, 'dragons', ['DivineDragon'])
+        Map protectedBadge = createBadge(1, 1)
+        protectedBadge.enableProtectedUserCommunity = true
+        skillsService.createGlobalBadge(protectedBadge)
+        skillsService.grantGlobalBadgeAdminRole(protectedBadge.badgeId, formerMember.userName)
+        Map ordinaryBadge = createBadge(1, 2)
+        if (includeOrdinary) {
+            skillsService.createGlobalBadge(ordinaryBadge)
+            skillsService.grantGlobalBadgeAdminRole(ordinaryBadge.badgeId, formerMember.userName)
+        }
+        Map ordinaryGroup = createAdminGroup(1)
+        skillsService.createAdminGroupDef(ordinaryGroup)
+        skillsService.addAdminGroupOwner(ordinaryGroup.adminGroupId, formerMember.userName)
+
+        expect:
+        formerMember.getAllGlobalBadges()*.badgeId == (includeOrdinary ? [protectedBadge.badgeId, ordinaryBadge.badgeId] : [protectedBadge.badgeId])
+        formerMember.getAdminGroupGlobalBadges(ordinaryGroup.adminGroupId).availableGlobalBadges*.badgeId.contains(protectedBadge.badgeId)
+
+        when:
+        userTagRepo.deleteAll(userTagRepo.findAllByUserIdAndKey(formerMember.userName, 'dragons'))
+
+        then:
+        formerMember.getAllGlobalBadges()*.badgeId == (includeOrdinary ? [ordinaryBadge.badgeId] : [])
+        formerMember.getAdminGroupGlobalBadges(ordinaryGroup.adminGroupId).availableGlobalBadges*.badgeId == (includeOrdinary ? [ordinaryBadge.badgeId] : [])
+        validateForbidden { formerMember.getGlobalBadge(protectedBadge.badgeId) }
+        if (includeOrdinary) {
+            assert formerMember.getGlobalBadge(ordinaryBadge.badgeId).name == ordinaryBadge.name
+        }
+
+        when:
+        rootSkillsService.saveUserTag(formerMember.userName, 'dragons', ['DivineDragon'])
+
+        then:
+        formerMember.getAllGlobalBadges()*.badgeId == (includeOrdinary ? [protectedBadge.badgeId, ordinaryBadge.badgeId] : [protectedBadge.badgeId])
+        formerMember.getGlobalBadge(protectedBadge.badgeId).name == protectedBadge.name
+
+        where:
+        includeOrdinary << [true, false]
+    }
+
+    def "admin group collections exclude protected groups after membership revocation - ordinary group #includeOrdinary"() {
+        given:
+        SkillsService formerMember = createService(getRandomUsers(1)[0])
+        formerMember.getCurrentUser()
+        rootSkillsService.saveUserTag(skillsService.userName, 'dragons', ['DivineDragon'])
+        rootSkillsService.saveUserTag(formerMember.userName, 'dragons', ['DivineDragon'])
+        Map protectedGroup = createAdminGroup(1)
+        protectedGroup.enableProtectedUserCommunity = true
+        skillsService.createAdminGroupDef(protectedGroup)
+        skillsService.addAdminGroupOwner(protectedGroup.adminGroupId, formerMember.userName)
+        Map ordinaryGroup = createAdminGroup(2)
+        if (includeOrdinary) {
+            skillsService.createAdminGroupDef(ordinaryGroup)
+            skillsService.addAdminGroupOwner(ordinaryGroup.adminGroupId, formerMember.userName)
+        }
+
+        expect:
+        formerMember.getAdminGroupDefs()*.adminGroupId == (includeOrdinary ? [ordinaryGroup.adminGroupId, protectedGroup.adminGroupId] : [protectedGroup.adminGroupId])
+
+        when:
+        userTagRepo.deleteAll(userTagRepo.findAllByUserIdAndKey(formerMember.userName, 'dragons'))
+
+        then:
+        formerMember.getAdminGroupDefs()*.adminGroupId == (includeOrdinary ? [ordinaryGroup.adminGroupId] : [])
+        validateForbidden { formerMember.getAdminGroupDef(protectedGroup.adminGroupId) }
+        if (includeOrdinary) {
+            assert formerMember.getAdminGroupDef(ordinaryGroup.adminGroupId).name == ordinaryGroup.name
+        }
+
+        when:
+        rootSkillsService.saveUserTag(formerMember.userName, 'dragons', ['DivineDragon'])
+
+        then:
+        formerMember.getAdminGroupDefs()*.adminGroupId == (includeOrdinary ? [ordinaryGroup.adminGroupId, protectedGroup.adminGroupId] : [protectedGroup.adminGroupId])
+        formerMember.getAdminGroupDef(protectedGroup.adminGroupId).name == protectedGroup.name
+
+        where:
+        includeOrdinary << [true, false]
+    }
+
     def "cannot access project endpoints with UC protection enabled if the user does not belong to the user community"() {
 
         when:
