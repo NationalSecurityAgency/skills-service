@@ -114,6 +114,12 @@ defineExpose( {
           :id="`answer_${index}`"
           :name="`answers[${index}].answer`"/>
 
+      <label v-if="!isQuizType && (questionType === QuestionType.SingleChoice || questionType === QuestionType.MultipleChoice)" class="mx-2">
+        <input type="checkbox" v-model="answer.value.allowCustomText" data-cy="allowCustomText"
+               :aria-label="`Allow text response for answer ${index + 1}`" />
+        Allow text response
+      </label>
+
       <ButtonGroup class="ml-1">
         <SkillsButton
           :disabled="noMoreAnswers"
