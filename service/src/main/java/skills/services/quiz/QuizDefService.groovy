@@ -340,6 +340,7 @@ class QuizDefService {
                         questionRefId: savedQuestion.id,
                         answer: fromAnswerDef.answer,
                         isCorrectAnswer: fromAnswerDef.isCorrectAnswer,
+                        allowCustomText: newQuizDef.type == QuizDefParent.QuizType.Survey && fromAnswerDef.allowCustomText,
                         displayOrder: fromAnswerDef.displayOrder,
                         multiPartAnswer: fromAnswerDef.multiPartAnswer,
                 )
@@ -680,6 +681,7 @@ class QuizDefService {
                         questionRefId: savedQuestion.id,
                         answer: InputSanitizer.sanitize(answerDefRequest.answer),
                         isCorrectAnswer: answerDefRequest.isCorrect,
+                        allowCustomText: answerDefRequest.allowCustomText == true,
                         displayOrder: index + 1,
                         multiPartAnswer: null,
                 )
@@ -755,6 +757,7 @@ class QuizDefService {
                 if (answerDef) {
                     answerDef.answer = InputSanitizer.sanitize(answerDefRequest.answer)
                     answerDef.isCorrectAnswer = answerDefRequest.isCorrect
+                    answerDef.allowCustomText = answerDefRequest.allowCustomText == true
                     answerDef.displayOrder = index + 1
                 } else {
                     answerDef = new QuizAnswerDef(
@@ -762,6 +765,7 @@ class QuizDefService {
                             questionRefId: savedQuestion.id,
                             answer: InputSanitizer.sanitize(answerDefRequest.answer),
                             isCorrectAnswer: answerDefRequest.isCorrect,
+                            allowCustomText: answerDefRequest.allowCustomText == true,
                             displayOrder: index + 1,
                     )
                 }
@@ -1080,6 +1084,7 @@ class QuizDefService {
                 id: savedAnswer.id,
                 answer: savedAnswer.answer,
                 isCorrect: Boolean.valueOf(savedAnswer.isCorrectAnswer),
+                allowCustomText: savedAnswer.allowCustomText,
                 displayOrder: savedAnswer.displayOrder,
                 multiPartAnswer: new QuizMultiPartAnswer(term: multiPartAnswer?.term, value: multiPartAnswer?.value)
         )
@@ -1198,6 +1203,9 @@ class QuizDefService {
                             ]
                         } else {
                             answer = InputSanitizer.unsanitizeEscapedHtml(answerDef.answer)
+                            if (answerDef.allowCustomText && foundSelected) {
+                                answer = "${answer}: ${foundSelected.answerText ?: ''}".toString()
+                            }
                         }
                         Boolean needsGrading = foundSelected && foundSelected.answerStatus == UserQuizAnswerAttempt.QuizAnswerStatus.NEEDS_GRADING
                         AiGradingStatusResult aiGradingStatus = createAiGradingStatusResult(foundSelected?.answerStatus, foundSelected?.aiGradingAttemptCount ?: 0)
@@ -1311,6 +1319,12 @@ class QuizDefService {
     }
 
     private void validate(QuizDef quizDef, QuizQuestionDefRequest questionDefRequest) {
+        if (questionDefRequest.answers?.any { it.allowCustomText }) {
+            QuizValidator.isTrue(quizDef.type == QuizDefParent.QuizType.Survey &&
+                    questionDefRequest.questionType in [QuizQuestionType.SingleChoice, QuizQuestionType.MultipleChoice],
+                    'Custom text answers are only supported for choice-based survey questions', quizDef.quizId)
+        }
+
         String quizId = quizDef.getQuizId()
         QuizValidator.isNotBlank(questionDefRequest.question, "question", quizId)
         QuizValidator.isNotNull(questionDefRequest.questionType, "questionType", quizId)

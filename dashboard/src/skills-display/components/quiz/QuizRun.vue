@@ -195,6 +195,10 @@ const schema = object({
                   then: (sch)  => sch
                       .required()
                       .test('atLeastOneSelected', 'At least 1 choice must be selected', (value) => atLeastOneSelected(value))
+                      .test('customTextRequired', 'Enter a response for each selected text option',
+                          (value) => !value?.some((a) => a.selected && a.allowCustomText && !a.answerText?.trim()))
+                      .test('customTextLength', 'Text response is too long',
+                          (value) => !value?.some((a) => a.selected && a.allowCustomText && a.answerText?.length > appConfig.maxTakeQuizInputTextAnswerLength))
                       .label('Answers'),
                 })
                 .when('questionType', {
@@ -353,7 +357,8 @@ const startQuizAttempt = () => {
         copy.questions = quizInfo.value.questions.map((q) => {
           const answerOptions = q.answerOptions.map((a) => ({
             ...a,
-            selected: !!(selectedAnswerIds && selectedAnswerIds.includes(a.id)),
+            selected: !!(selectedAnswerIds && selectedAnswerIds.includes(a.id)) || !!(a.allowCustomText && enteredText?.some((t) => t.answerId === a.id)),
+            answerText: a.allowCustomText ? enteredText?.find((t) => t.answerId === a.id)?.answerText : undefined,
           }));
           if (enteredText && q.questionType === QuestionType.TextInput) {
             const answerId = q.answerOptions[0].id;

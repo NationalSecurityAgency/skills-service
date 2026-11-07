@@ -86,6 +86,9 @@ const ariaLabel = computed(() => {
   }
   return res;
 })
+const textChanged = (event) => {
+  emit('selection-changed', { id: props.a.id, selected: selected.value, answerText: event.target.value });
+}
 const flipSelected = () => {
   if (!props.a.isGraded) {
     selected.value = !selected.value;
@@ -93,6 +96,7 @@ const flipSelected = () => {
     emit('selection-changed', {
       id: props.a.id,
       selected: selected.value,
+      answerText: props.a.answerText,
     });
     const announceMsg = selected.value
         ? `Selected answer number ${props.answerNum} as the correct answer for the question number ${props.qNum}`
@@ -104,7 +108,7 @@ const flipSelected = () => {
 
 <template>
   <div class="answer-row"
-       @keydown.prevent.space="flipSelected"
+       @keydown.space="(event) => { if (event.target === event.currentTarget) { event.preventDefault(); flipSelected(); } }"
        @click="flipSelected"
        :tabindex="a.isGraded ? -1 : 0"
        :class="{ 'bg-gray-100 dark:bg-gray-800 border border-green-400! rounded-border font-semibold sd-theme-tile-background': selected, 'point-cursor hover:border-green-400! border-dashed answer-row-editable skills-theme-quiz-selected-answer-row' : !a.isGraded }"
@@ -127,6 +131,10 @@ const flipSelected = () => {
       </div>
       <div class="flex-1 ml-2">
         <span class="answerText" data-cy="answerText">{{ a.answerOption }}</span>
+        <input v-if="a.allowCustomText" type="text" :value="a.answerText || ''"
+               :disabled="!selected || a.isGraded" :aria-label="a.answerOption"
+               data-cy="customAnswerText" class="ml-2 border rounded px-2"
+               @click.stop @keydown.stop @input="textChanged" />
       </div>
     </div>
   </div>

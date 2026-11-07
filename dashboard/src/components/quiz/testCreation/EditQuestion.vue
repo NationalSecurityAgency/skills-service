@@ -332,6 +332,7 @@ const schema = object({
           object({
             'answer': string().nullable().label('Answer'),
             'isCorrect': boolean().label('Is Correct'),
+            'allowCustomText': boolean().default(false),
             'multiPartAnswer': object({
               term: string().nullable().when([], {
                 is: () => isQuestionTypeMatching.value,

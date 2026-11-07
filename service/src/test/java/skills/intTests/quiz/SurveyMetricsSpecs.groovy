@@ -31,6 +31,82 @@ import java.text.SimpleDateFormat
 
 class SurveyMetricsSpecs extends DefaultIntSpec {
 
+    def "survey choice text is saved updated resumed and included in history"() {
+        def survey = QuizDefFactory.createQuizSurvey(1, 'Description')
+        skillsService.createQuizDef(survey)
+        def question = multiple ? QuizDefFactory.createMultipleChoiceSurveyQuestion(1, 1, 3) :
+                QuizDefFactory.createSingleChoiceSurveyQuestion(1, 1, 3)
+        question.answers[2].answer = 'Other reason'
+        question.answers[2].allowCustomText = true
+        skillsService.createQuizQuestionDefs([question])
+        String user = getRandomUsers(1, true)[0]
+
+        when:
+        def attempt = skillsService.startQuizAttemptForUserId(survey.quizId, user).body
+        def option = attempt.questions[0].answerOptions[2]
+        skillsService.reportQuizAnswerForUserId(survey.quizId, attempt.id, option.id, user,
+                [isSelected: true, answerText: 'First response'])
+        skillsService.reportQuizAnswerForUserId(survey.quizId, attempt.id, option.id, user,
+                [isSelected: true, answerText: 'Revised response'])
+        def resumed = skillsService.startQuizAttemptForUserId(survey.quizId, user).body
+
+        then:
+        option.allowCustomText
+        resumed.enteredText.find { it.answerId == option.id }.answerText == 'Revised response'
+
+        when:
+        skillsService.reportQuizAnswerForUserId(survey.quizId, attempt.id, option.id, user, [isSelected: false])
+        def deselected = skillsService.startQuizAttemptForUserId(survey.quizId, user).body
+
+        then:
+        !deselected.enteredText.find { it.answerId == option.id }
+
+        when:
+        skillsService.reportQuizAnswerForUserId(survey.quizId, attempt.id, option.id, user,
+                [isSelected: true, answerText: 'Final response'])
+        skillsService.completeQuizAttemptForUserId(survey.quizId, attempt.id, user)
+        def result = skillsService.getQuizAttemptResult(survey.quizId, attempt.id)
+
+        then:
+        result.questions[0].answers.find { it.id == option.id }.answer == 'Other reason: Final response'
+
+        where:
+        multiple << [false, true]
+    }
+
+    def "custom survey answers reject invalid text"() {
+        def survey = QuizDefFactory.createQuizSurvey(1, 'Description')
+        skillsService.createQuizDef(survey)
+        def question = QuizDefFactory.createSingleChoiceSurveyQuestion(1, 1, 3)
+        question.answers[2].allowCustomText = true
+        skillsService.createQuizQuestionDefs([question])
+        String user = getRandomUsers(1, true)[0]
+        def attempt = skillsService.startQuizAttemptForUserId(survey.quizId, user).body
+
+        when:
+        skillsService.reportQuizAnswerForUserId(survey.quizId, attempt.id, attempt.questions[0].answerOptions[2].id,
+                user, [isSelected: true, answerText: response])
+
+        then:
+        thrown(skills.intTests.utils.SkillsClientException)
+
+        where:
+        response << [null, '', '   ', 'jabberwocky', 'x' * 2001]
+    }
+
+    def "custom answer configuration is rejected for quizzes"() {
+        def quiz = QuizDefFactory.createQuiz(1, 'Description')
+        skillsService.createQuizDef(quiz)
+        def question = QuizDefFactory.createChoiceQuestion(1, 1, 3, QuizQuestionType.SingleChoice, skills.storage.model.QuizDefParent.QuizType.Quiz)
+        question.answers[2].allowCustomText = true
+
+        when:
+        skillsService.createQuizQuestionDefs([question])
+
+        then:
+        thrown(skills.intTests.utils.SkillsClientException)
+    }
+
     @Value('${skills.config.ui.usersTableAdditionalUserTagKey}')
     String usersTableAdditionalUserTagKey
 
