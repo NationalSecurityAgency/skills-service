@@ -25,6 +25,39 @@ import skills.storage.repos.UserAchievedLevelRepo
 
 class SkillsGroupAchievementSpecs extends DefaultIntSpec {
 
+    def "version-filtered groups require at least two visible children"() {
+        def proj = SkillsFactory.createProject()
+        def subj = SkillsFactory.createSubject()
+        def standalone = SkillsFactory.createSkill(1, 1, 10)
+        standalone.version = 1
+        def group = SkillsFactory.createSkillsGroup(1, 1, 20)
+        def children = SkillsFactory.createSkills(2)
+        children[0].version = 2
+        children[1].version = 3
+        skillsService.createProject(proj)
+        skillsService.createSubject(subj)
+        skillsService.createSkill(standalone)
+        skillsService.createSkill(group)
+        children.each { skillsService.assignSkillToSkillsGroup(group.skillId, it) }
+
+        when:
+        def summary = skillsService.getSkillSummary('user1', proj.projectId, subj.subjectId, selectedVersion)
+        def groups = summary.skills.findAll { it.skillId == group.skillId }
+
+        then:
+        groups.size() == expectedGroups
+        if (expectedGroups) {
+            assert groups[0].children.size() == 2
+            assert groups[0].totalPoints == groups[0].children.collect { it.totalPoints }.sum()
+        }
+
+        where:
+        selectedVersion | expectedGroups
+        1               | 0
+        2               | 0
+        3               | 1
+    }
+
     @Autowired
     UserAchievedLevelRepo achievedRepo
 

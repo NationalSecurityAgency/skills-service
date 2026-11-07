@@ -376,7 +376,9 @@ class SubjectDataLoader {
                 }
             }
 
-            return res
+            return res.findAll {
+                it.skillDef.type != SkillDef.ContainerType.SkillsGroup || it.children.size() >= 2
+            }
         }
         return skillsAndPoints
     }
