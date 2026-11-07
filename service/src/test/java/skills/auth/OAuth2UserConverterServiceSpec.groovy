@@ -212,6 +212,51 @@ class OAuth2UserConverterServiceSpec extends Specification {
         result == expected
     }
 
+    def "Cognito uses the subject rather than the mutable email or username"() {
+        def service = new OAuth2UserConverterService(lookup: new FormSecurityConfiguration().oAuth2UserConverterMap())
+        def attributes = [sub: 'stable-subject', given_name: 'Joe', family_name: 'User',
+                          email: 'joe@example.com', username: 'alias']
+
+        when:
+        UserInfo result = service.convert('cognito', createOAuth2User('alias', attributes))
+
+        then:
+        result == new UserInfo(username: 'stable-subject-cognito', usernameForDisplay: 'joe',
+                email: 'joe@example.com', firstName: 'Joe', lastName: 'User')
+
+        when:
+        attributes.email = 'changed@example.com'
+        attributes.username = 'changed-alias'
+        UserInfo changed = service.convert('cognito', createOAuth2User('changed-alias', attributes))
+
+        then:
+        changed.username == result.username
+        changed.email == 'changed@example.com'
+    }
+
+    def "Cognito rejects missing or blank required claims"() {
+        def service = new OAuth2UserConverterService(lookup: new FormSecurityConfiguration().oAuth2UserConverterMap())
+        def attributes = [sub: 'stable-subject', given_name: 'Joe', family_name: 'User', email: 'joe@example.com']
+        attributes[claim] = value
+
+        when:
+        service.convert('cognito', createOAuth2User('alias', attributes))
+
+        then:
+        thrown(SkillsAuthorizationException)
+
+        where:
+        claim         | value
+        'sub'         | null
+        'sub'         | ' '
+        'given_name'  | null
+        'given_name'  | ' '
+        'family_name' | null
+        'family_name' | ' '
+        'email'       | null
+        'email'       | ' '
+    }
+
     private OAuth2User createOAuth2User(String providerUserId, Map<String, Object> attributes) {
         return new OAuth2User() {
             @Override
