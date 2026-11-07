@@ -18,6 +18,7 @@ package skills.metrics.builders
 
 import groovy.transform.CompileStatic
 import org.apache.commons.lang3.StringUtils
+import skills.controller.exceptions.ErrorCode
 import skills.controller.exceptions.SkillException
 
 import java.text.DateFormat
@@ -25,6 +26,7 @@ import java.text.SimpleDateFormat
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.LocalTime
+import java.time.format.DateTimeParseException
 
 @CompileStatic
 class MetricsParams {
@@ -73,14 +75,14 @@ class MetricsParams {
 
     static Date getFromDayFilter(String projectId, String chartId, Map<String, String> props) {
         String fromStr = getParam(props, P_FROM_DAY_FILTER, chartId, projectId, true)
-        return fromStr ? LocalDate.parse(fromStr).toDate() : new Date(1)
+        return fromStr ? parseDay(P_FROM_DAY_FILTER, fromStr, chartId, projectId).toDate() : new Date(1)
     }
 
     static Date getToDayFilter(String projectId, String chartId, Map<String, String> props) {
         String fromStr = getParam(props, P_TO_DAY_FILTER, chartId, projectId, true)
         Date res
         if (fromStr) {
-            res = LocalDate.parse(fromStr).atTime(LocalTime.MAX).toDate()
+            res = parseDay(P_TO_DAY_FILTER, fromStr, chartId, projectId).atTime(LocalTime.MAX).toDate()
         } else {
             res = LocalDate.now().plusDays(900).toDate()
         }
@@ -103,7 +105,14 @@ class MetricsParams {
 
     static Integer getMinLevel(String projectId, String chartId, Map<String, String> props) {
         String resStr = getParam(props, P_MIN_LEVEL, chartId, projectId, true)
-        return resStr ? Integer.parseInt(resStr) : -1
+        if (!resStr) {
+            return -1
+        }
+        try {
+            return Integer.parseInt(resStr)
+        } catch (NumberFormatException ignored) {
+            throw badParam("Metrics[${chartId}]: ${P_MIN_LEVEL} must be a valid integer. Provided [${resStr}]", projectId)
+        }
     }
 
     static List<String> getAchievementTypes(String projectId, String chartId, Map<String, String> props) {
@@ -125,7 +134,12 @@ class MetricsParams {
 
     static Date getStart(String projectId, String chartId, Map<String, String> props) {
         String tStr = getParam(props, P_START_TIMESTAMP, chartId, projectId)
-        Long timestamp = Long.valueOf(tStr)
+        Long timestamp
+        try {
+            timestamp = Long.valueOf(tStr)
+        } catch (NumberFormatException ignored) {
+            throw badParam("Metrics[${chartId}]: ${P_START_TIMESTAMP} must be a valid timestamp in epoch milliseconds. Provided [${tStr}]", projectId)
+        }
         int numYears = 3
         Date threeYearsAgo = LocalDateTime.now().minusYears(3).toDate()
         Date date = new Date(timestamp)
@@ -133,6 +147,18 @@ class MetricsParams {
             throw new SkillException("Metrics[${chartId}]: ${P_START_TIMESTAMP} param timestamp must be within last ${numYears} years. Provided: [${date}]", projectId)
         }
         return date
+    }
+
+    private static LocalDate parseDay(String paramId, String value, String chartId, String projectId) {
+        try {
+            return LocalDate.parse(value)
+        } catch (DateTimeParseException ignored) {
+            throw badParam("Metrics[${chartId}]: ${paramId} must be a valid date in the yyyy-MM-dd format. Provided [${value}]", projectId)
+        }
+    }
+
+    private static SkillException badParam(String msg, String projectId) {
+        return new SkillException(msg, projectId, SkillException.NA, ErrorCode.BadParam)
     }
 
     static String getParam(Map<String, String> props, String paramId, String chartId, String projectId = null, boolean isOptional = false) {
