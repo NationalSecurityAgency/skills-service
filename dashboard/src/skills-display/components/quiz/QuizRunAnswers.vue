@@ -52,6 +52,7 @@ const selectionChanged = (selectedStatus) => {
     return {
       ...a,
       selected: selectRes,
+      answerText: isThisId ? selectedStatus.answerText : a.answerText,
     };
   });
   value.value = answerOptionsInternal.value
@@ -62,6 +63,7 @@ const selectionChanged = (selectedStatus) => {
     selectedAnswerIds,
     changedAnswerId: selectedStatus.id,
     changedAnswerIdSelected: selectedStatus.selected,
+    answerText: selectedStatus.answerText,
   };
   emit('input', answerOptionsInternal.value);
   emit('selected-answer', currentAnswer);

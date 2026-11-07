@@ -241,6 +241,10 @@ const reportAnswer = (answer) => {
 const performAnswerSave = (answer) => {
 
   if (!isLoading.value) {
+    const option = props.q.answerOptions.find((a) => a.id === answer.changedAnswerId)
+    if (option?.allowCustomText && answer.changedAnswerIdSelected && !answer.answerText?.trim()) {
+      return Promise.resolve()
+    }
     const reportAnswer = () => QuizRunService.reportAnswer(props.quizId, props.quizAttemptId, answer.changedAnswerId, answer.changedAnswerIdSelected, answer.answerText)
     if (QuestionType.isTextInput(props.q.questionType) ) {
       const answerInfo = { answerText: answer.answerText, fieldName: fieldName.value, quizId: props.quizId, quizAttemptId: props.quizAttemptId, answerId: answer.changedAnswerId };
