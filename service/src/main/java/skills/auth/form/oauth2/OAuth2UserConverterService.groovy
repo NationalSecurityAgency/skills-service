@@ -241,6 +241,29 @@ class OAuth2UserConverterService {
         }
     }
 
+    static class CognitoUserConverter implements OAuth2UserConverter {
+        String providerId = 'cognito'
+
+        @Override
+        UserInfo convert(String providerId, OAuth2User oAuth2User) {
+            String subject = oAuth2User.attributes.get('sub')
+            String firstName = oAuth2User.attributes.get('given_name')
+            String lastName = oAuth2User.attributes.get('family_name')
+            String email = oAuth2User.attributes.get('email')
+            if (![subject, firstName, lastName, email].every { StringUtils.isNotBlank(it) }) {
+                throw new SkillsAuthorizationException('Subject, First Name, Last Name, and email must be configured in Cognito')
+            }
+
+            return new UserInfo(
+                    username: "${subject}-${providerId}",
+                    usernameForDisplay: StringUtils.substringBeforeLast(email, '@'),
+                    email: email,
+                    firstName: firstName,
+                    lastName: lastName,
+            )
+        }
+    }
+
     static class AzureConverter implements OAuth2UserConverter {
 
         static final String FIRST_NAME = 'given_name'
