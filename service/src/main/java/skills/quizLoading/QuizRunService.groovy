@@ -340,6 +340,7 @@ class QuizRunService {
                 answerOptions = quizAnswerDefs.collect {
                     new QuizAnswerOptionsInfo(
                             id: it.id,
+                            allowCustomText: it.allowCustomText,
                             answerOption: it.answer ? it.answer : it.multiPartAnswer
                     )
                 }
@@ -614,6 +615,16 @@ class QuizRunService {
 
         QuizAnswerDefRepo.AnswerDefPartialInfo answerDefPartialInfo = getAnswerDefPartialInfo(quizId, answerDefId)
 
+        if (answerDefPartialInfo.allowCustomText && quizReportAnswerReq.isSelected) {
+            QuizValidator.isNotBlank(quizReportAnswerReq.answerText, 'answerText', quizId)
+            propsBasedValidator.quizValidationMaxStrLength(PublicProps.UiProp.maxTakeQuizInputTextAnswerLength,
+                    'Answer', quizReportAnswerReq.answerText, quizId)
+            CustomValidationResult result = validator.validateDescription(new CustomValidator.ValidateDescReq(description: quizReportAnswerReq.answerText, quizId: quizId))
+            if (!result.valid) {
+                throw new SkillQuizException("answerText is invalid: ${result.msg}", quizId, ErrorCode.BadParam)
+            }
+        }
+
         if (answerDefPartialInfo.getQuestionType() == QuizQuestionType.TextInput) {
             if (quizReportAnswerReq.isSelected) {
                 propsBasedValidator.quizValidationMaxStrLength(PublicProps.UiProp.maxTakeQuizInputTextAnswerLength,
@@ -733,9 +744,15 @@ class QuizRunService {
                         quizAnswerDefinitionRefId: answerDefId,
                         userId: userId,
                         status: isCorrectChoice ? UserQuizAnswerAttempt.QuizAnswerStatus.CORRECT : UserQuizAnswerAttempt.QuizAnswerStatus.WRONG,
+                        answer: answerDefPartialInfo.allowCustomText ? quizReportAnswerReq.answerText : null,
                 )
                 quizAttemptAnswerRepo.save(answerAttempt)
             } else {
+                if (answerDefPartialInfo.allowCustomText) {
+                    UserQuizAnswerAttempt existing = quizAttemptAnswerRepo.findByUserQuizAttemptRefIdAndQuizAnswerDefinitionRefId(attemptId, answerDefId)
+                    existing.answer = quizReportAnswerReq.answerText
+                    quizAttemptAnswerRepo.save(existing)
+                }
                 log.warn("Answer was already persisted for user [{}] for answerDefId of [{}]", userId, answerDefId)
             }
 
