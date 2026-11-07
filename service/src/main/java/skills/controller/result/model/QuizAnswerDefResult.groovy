@@ -21,6 +21,7 @@ import skills.utils.InputSanitizer
 class QuizAnswerDefResult {
     Integer id
     String answer
+    Boolean allowCustomText = false
     Boolean isCorrect
     int displayOrder
     QuizMultiPartAnswer multiPartAnswer
