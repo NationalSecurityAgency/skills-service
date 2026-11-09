@@ -18,6 +18,7 @@ package skills.intTests.quiz
 import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
+import org.springframework.test.annotation.DirtiesContext
 import skills.SpringBootApp
 import skills.intTests.utils.SkillsFactory
 import skills.intTests.utils.SkillsService
@@ -32,6 +33,7 @@ import static skills.intTests.utils.SkillsFactory.createSubject
 @Slf4j
 @SpringBootTest(properties = [],
         webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT, classes = SpringBootApp)
+@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
 class QuizSkillAchievementsIT extends QuizSkillAchievementsBaseIntSpec {
 
     @Autowired
@@ -1180,6 +1182,7 @@ class QuizSkillAchievementsIT extends QuizSkillAchievementsBaseIntSpec {
         skillsService.createProjectAndSubjectAndSkills(proj2, proj2_subj, [])
         skillsService.bulkImportSkillsFromCatalog(proj2.projectId, proj2_subj.subjectId, skills.collect { [projectId: proj.projectId, skillId: it.skillId] })
         skillsService.finalizeSkillsImportFromCatalog(proj2.projectId)
+        userServices[0].initializeProjectProgress(proj2.projectId)
 
         // set quiz which would cause all the points and achievements creation
         skills[0].selfReportingType = SkillDef.SelfReportingType.Quiz
@@ -1248,6 +1251,4 @@ class QuizSkillAchievementsIT extends QuizSkillAchievementsBaseIntSpec {
         achievements_proj2.find { !it.skillId }.level == 1
     }
 }
-
-
 

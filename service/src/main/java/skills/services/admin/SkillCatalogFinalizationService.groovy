@@ -236,6 +236,12 @@ class SkillCatalogFinalizationService {
             log.info("Handling Events that were reporting during the finalization runs for [{}] skills between [{}] => [{}]", finalizedSkillIds.size(), start.format(dateFormat), end.format(dateFormat))
             finalizedSkillIds.each { Integer importedSkillRefId ->
                 Integer originalSkillRefId = skillDefRepo.getCopiedFromById(importedSkillRefId)
+                if (originalSkillRefId == null) {
+                    // Reuse, source-skill, or project deletion can commit before this durable replay runs.
+                    // Obsolete references are finished work, not transient failures to retry indefinitely.
+                    log.debug('Skipping catalog finalization replay for deleted import: importedSkillRefId=[{}]', importedSkillRefId)
+                    return
+                }
                 List<UserPerformedSkill> foundEvents = userPerformedSkillRepo.findAllBySkillRefIdWithinTimeRange(originalSkillRefId, start, end)
                 if (foundEvents) {
                     SkillDefMin skill = skillDefRepo.findSkillDefMinById(originalSkillRefId)
