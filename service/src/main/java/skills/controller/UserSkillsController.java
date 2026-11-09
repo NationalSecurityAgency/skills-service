@@ -97,10 +97,11 @@ class UserSkillsController {
     @Autowired
     private ProjectParticipationService projectParticipationService;
 
-    @PostMapping(value = "/projects/{projectId}/progress/initialize", produces = "application/json")
+    @PostMapping(value = "/projects/{projectId}/progress/initialize",
+            consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<ProjectProgressInitializationResult> initializeProgress(
             @PathVariable("projectId") String projectId, HttpServletRequest request,
-            @RequestBody(required = false) Map<String, Object> body) {
+            @RequestBody Map<String, Object> body) {
         SkillsValidator.isTrue(
                 request.getParameter("userId") == null,
                 "userId must not be supplied; initialization uses the authenticated learner.",
@@ -110,7 +111,7 @@ class UserSkillsController {
                 "idType must not be supplied; initialization uses the authenticated learner.",
                 projectId);
         SkillsValidator.isTrue(
-                body == null || body.isEmpty(),
+                body.isEmpty(),
                 "Progress initialization does not accept request body fields.",
                 projectId);
         ProjectProgressInitializationResult result = projectParticipationService.initialize(

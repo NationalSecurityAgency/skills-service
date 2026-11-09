@@ -925,6 +925,12 @@ class SkillsService {
         wsHelper.apiPost("/projects/${projectId}/progress/initialize${query}", body).body
     }
 
+    // Preserve caller-supplied encoding and return error responses for request-validation tests.
+    ResponseEntity<String> initializeProjectProgressRaw(String projectId, Object body, HttpHeaders headers) {
+        wsHelper.rawRequest(HttpMethod.POST, "api/projects/${projectId}/progress/initialize",
+                new HttpEntity<Object>(body, headers))
+    }
+
     // Temporary pre-5.1 root remediation helpers; remove with the endpoints.
     Map cleanupImportedSkillProgress(Object selection = null) {
         wsHelper.rootPost('/cleanupImportedSkillProgress', selection)?.body

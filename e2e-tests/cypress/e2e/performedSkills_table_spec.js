@@ -752,7 +752,7 @@ describe('Performed Skills Table Tests', () => {
         cy.importSkillFromCatalog(1, 1, 2, 2);
         cy.importSkillFromCatalog(1, 1, 2, 3);
         // Source-only events do not qualify a learner for credit in the importing project.
-        cy.request('POST', '/api/projects/proj1/progress/initialize');
+        cy.request('POST', '/api/projects/proj1/progress/initialize', {});
         cy.finalizeCatalogImport(1);
         cy.waitForBackendAsyncTasksToComplete();
 

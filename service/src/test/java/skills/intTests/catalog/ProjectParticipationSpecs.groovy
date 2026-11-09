@@ -19,7 +19,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.jdbc.core.JdbcTemplate
 import org.springframework.http.HttpStatus
 import org.springframework.http.HttpHeaders
-import org.springframework.http.HttpEntity
+import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
 import org.springframework.web.client.HttpStatusCodeException
 import org.springframework.web.client.RestTemplate
@@ -138,10 +138,35 @@ class ProjectParticipationSpecs extends CatalogIntSpec {
         when:
         HttpHeaders headers = new HttpHeaders()
         headers.set('X-XSRF-TOKEN', 'invalid')
-        ResponseEntity<String> csrf = learner.wsHelper.restTemplateWrapper.postForEntity(url, new HttpEntity([:], headers), String)
+        ResponseEntity<String> csrf = learner.initializeProjectProgressRaw(project.projectId, [:], headers)
         then:
         csrf.statusCode == HttpStatus.FORBIDDEN
         !participationRepo.existsByProjectIdAndUserId(project.projectId, learnerId)
+    }
+
+    def "initialization requires a JSON object body: #contentType with #body"() {
+        Map project = createProject(1)
+        skillsService.createProject(project)
+        SkillsService learner = createService(learnerId)
+        HttpHeaders headers = new HttpHeaders()
+        if (contentType != null) {
+            headers.setContentType(contentType)
+        }
+
+        when:
+        ResponseEntity<String> response = learner.initializeProjectProgressRaw(project.projectId, body, headers)
+
+        then:
+        response.statusCode == expectedStatus
+        !participationRepo.existsByProjectIdAndUserId(project.projectId, learnerId)
+
+        where:
+        contentType                           | body     | expectedStatus
+        null                                  | null     | HttpStatus.UNSUPPORTED_MEDIA_TYPE
+        MediaType.APPLICATION_JSON            | null     | HttpStatus.BAD_REQUEST
+        MediaType.APPLICATION_JSON            | 'null'   | HttpStatus.BAD_REQUEST
+        MediaType.TEXT_PLAIN                   | '{}'     | HttpStatus.UNSUPPORTED_MEDIA_TYPE
+        MediaType.APPLICATION_FORM_URLENCODED  | 'key=x'  | HttpStatus.UNSUPPORTED_MEDIA_TYPE
     }
 
     def "local events qualify without participation but source events and imported credit do not"() {

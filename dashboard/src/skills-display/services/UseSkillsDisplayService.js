@@ -48,7 +48,7 @@ export const useSkillsDisplayService = () => {
   }
 
   const initializeUserProgress = () => {
-    return axios.post(`${attributes.serviceUrl}${servicePath}/${encodeURIComponent(attributes.projectId)}/progress/initialize`)
+    return axios.post(`${attributes.serviceUrl}${servicePath}/${encodeURIComponent(attributes.projectId)}/progress/initialize`, {})
       .then((result) => result.data)
   }
 

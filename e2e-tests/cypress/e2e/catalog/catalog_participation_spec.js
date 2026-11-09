@@ -248,7 +248,7 @@ describe('Learner catalog participation', () => {
 
     it('completed status shows no message even when applicable failed finalization makes ready false', () => {
         createCatalog();
-        cy.request('POST', initializeUrl).its('body.backfillStatus').should('eq', 'COMPLETED');
+        cy.request('POST', initializeUrl, {}).its('body.backfillStatus').should('eq', 'COMPLETED');
         // A terminal participant retains its status while applicable finalization affects readiness.
         cy.request('POST', '/admin/projects/proj1/settings/catalog.finalize.state', {
             projectId: 'proj1', setting: 'catalog.finalize.state', value: 'FAILED'
