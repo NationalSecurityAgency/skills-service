@@ -62,6 +62,7 @@ class QuizSkillAchievements_Catalog_RemoveQuizRunSpecs extends QuizSkillAchievem
         skillsService.finalizeSkillsImportFromCatalog(proj2.projectId)
 
         List<SkillsService> userServices = getRandomUsers(3).collect { createService(it) }
+        userServices.each { SkillsService learner -> learner.initializeProjectProgress(proj2.projectId) }
         Integer u1Quiz1AttemptId = passQuiz(userServices[0], quiz1)
 
         Integer u2Quiz1AttemptId = passQuiz(userServices[1], quiz1)
@@ -378,6 +379,7 @@ class QuizSkillAchievements_Catalog_RemoveQuizRunSpecs extends QuizSkillAchievem
         skillsService.finalizeSkillsImportFromCatalog(proj2.projectId)
 
         List<SkillsService> userServices = getRandomUsers(3).collect { createService(it) }
+        userServices.each { SkillsService learner -> learner.initializeProjectProgress(proj2.projectId) }
         Integer u1Quiz1AttemptId = passQuiz(userServices[0], quiz1)
 
         Integer u2Quiz1AttemptId = passQuiz(userServices[1], quiz1)
@@ -602,6 +604,7 @@ class QuizSkillAchievements_Catalog_RemoveQuizRunSpecs extends QuizSkillAchievem
         skillsService.finalizeSkillsImportFromCatalog(proj2.projectId)
 
         List<SkillsService> userServices = getRandomUsers(3).collect { createService(it) }
+        userServices.each { SkillsService learner -> learner.initializeProjectProgress(proj2.projectId) }
         Integer u1Quiz1AttemptId = passQuiz(userServices[0], quiz1)
 
         Integer u2Quiz1AttemptId = passQuiz(userServices[1], quiz1)
@@ -786,6 +789,7 @@ class QuizSkillAchievements_Catalog_RemoveQuizRunSpecs extends QuizSkillAchievem
         skillsService.createBadge(badge2)
 
         List<SkillsService> userServices = getRandomUsers(3).collect { createService(it) }
+        userServices.each { SkillsService learner -> learner.initializeProjectProgress(proj2.projectId) }
         Integer u1Quiz1AttemptId = passQuiz(userServices[0], quiz1)
         Integer u1Quiz2AttemptId = passQuiz(userServices[0], quiz2)
         Integer u1Quiz3AttemptId = passQuiz(userServices[0], quiz3)
@@ -825,6 +829,5 @@ class QuizSkillAchievements_Catalog_RemoveQuizRunSpecs extends QuizSkillAchievem
     }
 
 }
-
 
 

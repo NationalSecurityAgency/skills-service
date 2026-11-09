@@ -1070,7 +1070,8 @@ class DeleteSkillEventSpecs extends DefaultIntSpec {
         skillsService.finalizeSkillsImportFromCatalog(proj.projectId, true)
 
 
-        String userId = "user1"
+        String userId = getRandomUsers(1).first()
+        createService(userId).initializeProjectProgress(proj.projectId)
         Long timestamp = new Date().time
 
         setup:
@@ -1082,6 +1083,7 @@ class DeleteSkillEventSpecs extends DefaultIntSpec {
         assert res.body.completed.find({ it.type == "Skill" }).id == skill2.skillId
         assert res.body.completed.find({ it.type == "Skill" }).name == skill2.name
 
+        waitForAsyncTasksCompletion.waitForAllScheduleTasks()
         def addedSkills = skillsService.getPerformedSkills(userId, proj.projectId)
         assert addedSkills
         assert addedSkills.data.find { it.skillId == skill2.skillId}

@@ -143,6 +143,7 @@ class UserLearningPathGraphSpec extends DefaultIntSpec {
     }
 
     def "user graph maps an imported learning path skill's achievement to its local node and badge entry"() {
+        String userId = getRandomUsers(1).first()
         def sourceProject = SkillsFactory.createProject(1)
         def sourceSubject = SkillsFactory.createSubject(1, 1)
         def sourceSkills = SkillsFactory.createSkills(2, 1, 1, 100)
@@ -163,15 +164,16 @@ class UserLearningPathGraphSpec extends DefaultIntSpec {
         skillsService.createBadge(badge)
         skillsService.addLearningPathPrerequisite(project.projectId, skills[1].skillId, sourceSkills[0].skillId)
         skillsService.addLearningPathPrerequisite(project.projectId, skills[1].skillId, badge.badgeId)
-        skillsService.addSkill([projectId: sourceProject.projectId, skillId: sourceSkills[0].skillId], 'user1', new Date())
-        skillsService.addSkill([projectId: sourceProject.projectId, skillId: sourceSkills[0].skillId], 'user1', new Date())
+        createService(userId).initializeProjectProgress(project.projectId)
+        skillsService.addSkill([projectId: sourceProject.projectId, skillId: sourceSkills[0].skillId], userId, new Date())
+        skillsService.addSkill([projectId: sourceProject.projectId, skillId: sourceSkills[0].skillId], userId, new Date())
         waitForAsyncTasksCompletion.waitForAllScheduleTasks()
         def importedSkillDef = skillDefRepo.findByProjectIdAndSkillId(project.projectId, sourceSkills[0].skillId)
         def originalSkillDef = skillDefRepo.findByProjectIdAndSkillId(sourceProject.projectId, sourceSkills[0].skillId)
-        def achievements = userAchievedLevelRepo.findAll().findAll { it.userId == 'user1' && it.skillId == sourceSkills[0].skillId }
+        def achievements = userAchievedLevelRepo.findAllByUserIdAndProjectIdAndSkillId(userId, project.projectId, sourceSkills[0].skillId)
 
         when:
-        def graph = skillsService.getUserDependencyGraph(project.projectId, 'user1')
+        def graph = skillsService.getUserDependencyGraph(project.projectId, userId)
 
         then:
         importedSkillDef.copiedFrom == originalSkillDef.id

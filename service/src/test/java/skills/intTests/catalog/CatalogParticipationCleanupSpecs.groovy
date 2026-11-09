@@ -30,6 +30,7 @@ import skills.storage.model.ProjectParticipation.BackfillStatus
 import skills.storage.model.SkillDef
 import skills.storage.model.UserPoints
 import skills.storage.model.UserAchievement
+import skills.storage.model.UserAttrs
 import skills.storage.model.Setting
 
 import static skills.intTests.utils.SkillsFactory.*
@@ -703,6 +704,8 @@ class CatalogParticipationCleanupSpecs extends CatalogCleanupIntSpec {
         skillsService.updateSkill(groupRequest)
         skillsService.addSkill(optionalChild, user, new Date() - 3)
         waitForAsyncTasksCompletion.waitForAllScheduleTasks()
+        // Explicitly emulate a stale legacy aggregate; current reuse correctly credits both children.
+        seedPoints(destination.projectId, user, destination.subjects[2], 100)
         Map before = snapshot(destination.projectId, user)
         List<Map> nativeAwards = before.awards.findAll { Map award -> award.skillId in
                 [destination.nativeSkill.skillId, destination.nativeCopy.skillId, optionalChild.skillId, destination.nativeGroup.skillId, destination.nativeBadge.badgeId] }
@@ -1226,7 +1229,11 @@ class CatalogParticipationCleanupSpecs extends CatalogCleanupIntSpec {
 
     def "set-based cleanup removes achievement-only residue for more than one hundred users"() {
         Map setup = fixture(1)
-        List<String> users = getRandomUsers(105)
+        // These persistence-only legacy identities never authenticate, so they do not need PKI certificates.
+        List<String> users = (1..105).collect { int number -> "legacy-cleanup-user-${number}".toString() }
+        userAttrsRepo.saveAll(users.collect { String user ->
+            new UserAttrs(userId: user, userIdForDisplay: user, userTagsLastUpdated: new Date())
+        })
         users.each { String user -> seedResidue(setup.destinations[0], user, false, false) }
         SkillsService root = createRootSkillService()
 

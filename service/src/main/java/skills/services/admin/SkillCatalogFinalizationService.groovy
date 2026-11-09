@@ -117,8 +117,9 @@ class SkillCatalogFinalizationService {
 
     // NOTE: it's critical NOT put @Transactional; each underlying statement should run in its transaction
     // wrapping the whole finalization process in a Transactions causes the method to take hours for a project with lots of users
+    // Synchronous same-project reuse is the exception: its caller owns the atomic definition/credit transaction.
     @Profile
-    FinalizeCatalogSkillsImportResult finalizeCatalogSkillsImport(String projectId) {
+    FinalizeCatalogSkillsImportResult finalizeCatalogSkillsImport(String projectId, boolean withinReuseTransaction = false) {
         long start = System.currentTimeMillis()
         log.info("Finalizing imported skills for [{}]", projectId)
         List<Integer> finalizedSkillIds = []
@@ -159,14 +160,24 @@ class SkillCatalogFinalizationService {
 
                 // 2. for each subject (1) create user points for new users (2) update existing (3) calculate achievements
                 subjects.each { SkillDef subject ->
-                    retryAggregateStage(projectId, subject.skillId) {
-                        batchOperationsTransactionalAccessor.handleCatalogPointsAndAchievementsForSubject(projectId, subject.skillId)
+                    if (withinReuseTransaction) {
+                        // Reuse (including project copy) must see definitions and credit created by its enclosing transaction.
+                        // Keep the asynchronous catalog path's fresh repeatable-read stages and retries unchanged.
+                        batchOperationsTransactionalAccessor.handlePointsAndAchievementsForSubject(subject)
+                    } else {
+                        retryAggregateStage(projectId, subject.skillId) {
+                            batchOperationsTransactionalAccessor.handleCatalogPointsAndAchievementsForSubject(projectId, subject.skillId)
+                        }
                     }
                 }
 
                 // 3. for the project (1) create user points for new users (2) update existing (3) calculate achievements
-                retryAggregateStage(projectId, null) {
-                    batchOperationsTransactionalAccessor.handleCatalogPointsAndAchievementsForProject(projectId)
+                if (withinReuseTransaction) {
+                    batchOperationsTransactionalAccessor.handlePointsAndAchievementsForProject(projectId)
+                } else {
+                    retryAggregateStage(projectId, null) {
+                        batchOperationsTransactionalAccessor.handleCatalogPointsAndAchievementsForProject(projectId)
+                    }
                 }
 
                 log.info("Completed import of points and achievements for [{}] skills for project [{}]", skillRefIds.size(), projectId)

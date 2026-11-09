@@ -65,6 +65,7 @@ class QuizSkillAchievements_Catalog_DisassociatingQuizSpecs extends QuizSkillAch
         skillsService.finalizeSkillsImportFromCatalog(proj2.projectId)
 
         List<SkillsService> userServices = getRandomUsers(3).collect { createService(it) }
+        userServices.each { SkillsService learner -> learner.initializeProjectProgress(proj2.projectId) }
         passQuiz(userServices[0], quiz1)
 
         passQuiz(userServices[1], quiz1)
@@ -389,6 +390,7 @@ class QuizSkillAchievements_Catalog_DisassociatingQuizSpecs extends QuizSkillAch
         skillsService.finalizeSkillsImportFromCatalog(proj2.projectId)
 
         List<SkillsService> userServices = getRandomUsers(3).collect { createService(it) }
+        userServices.each { SkillsService learner -> learner.initializeProjectProgress(proj2.projectId) }
         passQuiz(userServices[0], quiz1)
 
         passQuiz(userServices[1], quiz1)
@@ -661,6 +663,7 @@ class QuizSkillAchievements_Catalog_DisassociatingQuizSpecs extends QuizSkillAch
         skillsService.finalizeSkillsImportFromCatalog(proj2.projectId)
 
         List<SkillsService> userServices = getRandomUsers(3).collect { createService(it) }
+        userServices.each { SkillsService learner -> learner.initializeProjectProgress(proj2.projectId) }
         passQuiz(userServices[0], quiz1)
 
         passQuiz(userServices[1], quiz1)
@@ -929,6 +932,7 @@ class QuizSkillAchievements_Catalog_DisassociatingQuizSpecs extends QuizSkillAch
         skillsService.createBadge(badge2)
 
         List<SkillsService> userServices = getRandomUsers(3).collect { createService(it) }
+        userServices.each { SkillsService learner -> learner.initializeProjectProgress(proj2.projectId) }
         [quiz1, quiz2, quiz3].each { passQuiz(userServices[0], it) }
         [quiz1, quiz2, quiz3].each { passQuiz(userServices[1], it) }
         waitForAsyncTasksCompletion.waitForAllScheduleTasks()
@@ -979,6 +983,5 @@ class QuizSkillAchievements_Catalog_DisassociatingQuizSpecs extends QuizSkillAch
     }
 
 }
-
 
 

@@ -637,6 +637,7 @@ class QuizSkillsAndCatalogSpecs extends DefaultIntSpec {
         skillsService.finalizeSkillsImportFromCatalog(proj2.projectId)
         String userId = getRandomUsers(1).first()
         SkillsService otherUserService = createService(userId)
+        otherUserService.initializeProjectProgress(proj2.projectId)
         when:
         def userOverallProgress_t0 = skillsService.getSkillSummary(otherUserService.userName, proj2.projectId)
         def userOverallProgressProj2_t0 = skillsService.getSkillSummary(otherUserService.userName, proj2.projectId)
@@ -709,6 +710,7 @@ class QuizSkillsAndCatalogSpecs extends DefaultIntSpec {
                 [projectId: proj.projectId, skillId: skills[2].skillId],
         ])
         skillsService.finalizeSkillsImportFromCatalog(proj2.projectId)
+        otherUserService.initializeProjectProgress(proj2.projectId)
 
         when:
         def p1_skillRes_t0 = skillsService.getSingleSkillSummary(otherUserService.userName, proj.projectId, skills[0].skillId)
@@ -751,5 +753,4 @@ class QuizSkillsAndCatalogSpecs extends DefaultIntSpec {
 
 
 }
-
 

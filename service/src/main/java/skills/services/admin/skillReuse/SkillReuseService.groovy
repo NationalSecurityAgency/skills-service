@@ -101,7 +101,7 @@ class SkillReuseService {
         List<CatalogSkill> listOfSkills = skillReuseRequest.skillIds.collect { new CatalogSkill(projectId: projectId, skillId: it) }
         skillCatalogService.importSkillsFromCatalog(projectId, skillReuseRequest.subjectId, listOfSkills, skillReuseRequest.groupId, true)
         // finalize
-        finalizationService.finalizeCatalogSkillsImport(projectId)
+        finalizationService.finalizeCatalogSkillsImport(projectId, true)
 
         handleTrackingUserActions(listOfSkills, skillReuseRequest)
     }

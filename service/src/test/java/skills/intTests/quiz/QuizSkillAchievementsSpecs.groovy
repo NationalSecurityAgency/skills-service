@@ -1176,6 +1176,7 @@ class QuizSkillAchievementsSpecs extends QuizSkillAchievementsBaseIntSpec {
         skillsService.createProjectAndSubjectAndSkills(proj2, proj2_subj, [])
         skillsService.bulkImportSkillsFromCatalog(proj2.projectId, proj2_subj.subjectId, skills.collect { [projectId: proj.projectId, skillId: it.skillId] })
         skillsService.finalizeSkillsImportFromCatalog(proj2.projectId)
+        userServices[0].initializeProjectProgress(proj2.projectId)
 
         // set quiz which would cause all the points and achievements creation
         skills[0].selfReportingType = SkillDef.SelfReportingType.Quiz
@@ -1635,7 +1636,6 @@ class QuizSkillAchievementsSpecs extends QuizSkillAchievementsBaseIntSpec {
     }
 
 }
-
 
 
 
