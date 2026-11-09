@@ -12,15 +12,14 @@
 : See the License for the specific language governing permissions and
 : limitations under the License.
 
-data: {"object":"chat.completion.chunk","choices":[{"index":0,"delta":{"content":"### Question:\nWhich of these performers is a rock band?\n\n### Answers:\n"},"finish_reason":null}]}
+data: {"id":"chat-1","object":"chat.completion.chunk","created":1700608923,"model":"model1","choices":[{"index":0,"delta":{"content":"### Question:\nWhich of these performers is a rock band?\n\n### Answers:\n"},"finish_reason":null}]}
 
-data: {"object":"chat.completion.chunk","choices":[{"index":0,"delta":{"content":"[{\"answer\":\"Led Zeppelin\",\"isCorrect\":true},"},"finish_reason":null}]}
+data: {"id":"chat-1","object":"chat.completion.chunk","created":1700608923,"model":"model1","choices":[{"index":0,"delta":{"content":"[{\"answer\":\"Led Zeppelin\",\"isCorrect\":true},"},"finish_reason":null}]}
 
-data: {"object":"chat.completion.chunk","choices":[{"index":0,"delta":{"content":"{\"answer\":\"Mozart\",\"isCorrect\":false},"},"finish_reason":null}]}
+data: {"id":"chat-1","object":"chat.completion.chunk","created":1700608923,"model":"model1","choices":[{"index":0,"delta":{"content":"{\"answer\":\"Mozart\",\"isCorrect\":false},"},"finish_reason":null}]}
 
-data: {"object":"chat.completion.chunk","choices":[{"index":0,"delta":{"content":"{\"answer\":\"Eminem\",\"isCorrect\":false},"},"finish_reason":null}]}
+data: {"id":"chat-1","object":"chat.completion.chunk","created":1700608923,"model":"model1","choices":[{"index":0,"delta":{"content":"{\"answer\":\"Eminem\",\"isCorrect\":false},"},"finish_reason":null}]}
 
-data: {"object":"chat.completion.chunk","choices":[{"index":0,"delta":{"content":"{\"answer\":\"Bach\",\"isCorrect\":false}]"},"finish_reason":null}]}
+data: {"id":"chat-1","object":"chat.completion.chunk","created":1700608923,"model":"model1","choices":[{"index":0,"delta":{"content":"{\"answer\":\"Bach\",\"isCorrect\":false}]"},"finish_reason":null}]}
 
 data: [DONE]
-
