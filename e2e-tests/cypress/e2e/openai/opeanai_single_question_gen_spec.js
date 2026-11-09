@@ -151,6 +151,51 @@ describe('Generate Single Question Tests', () => {
         validateSavedAnswers(expectedAnswers)
     })
 
+    it('preserves generated answers and correctness in follow-up conversation history', () => {
+        const refinedQuestion = 'Which of these performers is a rock band?'
+        const expectedAnswers = [
+            { text: 'Led Zeppelin', isCorrect: true },
+            { text: 'Mozart', isCorrect: false },
+            { text: 'Eminem', isCorrect: false },
+            { text: 'Bach', isCorrect: false },
+        ]
+        cy.intercept('GET', '/public/config', (req) => {
+            req.reply((res) => {
+                res.body.enableOpenAIIntegration = true
+                res.send(res.body)
+            })
+        })
+        cy.createQuizDef(1)
+        cy.visit('/administrator/quizzes/quiz1')
+        cy.get('[data-cy="btn_Questions"]').click()
+        cy.get('[data-cy="aiButton"]').click()
+        cy.get('[data-cy="genQuestionTypeSelector"]').click()
+        cy.get('[data-cy="selectionItem_SingleChoice"]').click()
+        cy.get('[data-cy="instructionsInput"]').type('AI answer history regression - generate a rock band question{enter}')
+        cy.get('[data-cy="aiMsg-2"] [data-cy="finalSegment"]').should('contain.text', completedMsg)
+        cy.get('[data-cy="aiMsg-2"] [data-cy="generatedSegment"]').should('contain.text', selectSingleRockBandQuestion)
+        expectedAnswers.forEach((answer) => {
+            cy.get('[data-cy="aiMsg-2"] [data-cy="generatedAnswers"]').should('contain.text', answer.text)
+        })
+
+        // This fixture only matches if the assistant history includes the complete original answers.
+        cy.get('[data-cy="instructionsInput"]').should('be.enabled')
+            .type('AI answer history regression - clarify the question but preserve every answer and its correctness{enter}')
+        cy.get('[data-cy="aiMsg-4"] [data-cy="finalSegment"]').should('contain.text', completedMsg)
+        cy.get('[data-cy="aiMsg-4"] [data-cy="generatedSegment"]').should('contain.text', refinedQuestion)
+        expectedAnswers.forEach((answer) => {
+            cy.get('[data-cy="aiMsg-4"] [data-cy="generatedAnswers"]').should('contain.text', answer.text)
+        })
+        cy.get('[data-cy="useGenValueBtn-4"]').should('be.enabled').click()
+        cy.get('[data-cy="questionText"] [data-cy="markdownEditorInput"]').should('contain.text', refinedQuestion)
+        validateAnswers(expectedAnswers)
+        cy.get('[data-cy="answer-4"]').should('not.exist')
+        cy.get('[data-cy="saveDialogBtn"]').should('be.enabled').click()
+        cy.get('[data-cy="markdownEditorInput"]').should('not.exist')
+        cy.get('[data-cy="questionDisplayCard-1"] [data-cy="questionDisplayText"]').should('contain.text', refinedQuestion)
+        validateSavedAnswers(expectedAnswers)
+    })
+
     it('generate a new Multiple Choice question and change answers before saving', () => {
         cy.intercept('GET', '/public/config', (req) => {
             req.reply((res) => {
