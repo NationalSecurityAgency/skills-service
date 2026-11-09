@@ -270,7 +270,35 @@ class CatalogCleanupIntSpec extends CatalogIntSpec {
         [points: userPointsRepo.findByProjectIdAndUserId(projectId, user).sort { it.id }.collect { UserPoints point ->
             [id: point.id, skillId: point.skillId, skillRefId: point.skillRefId, points: point.points,
              created: point.created, updated: point.updated, contributesToSkillsGroup: point.contributesToSkillsGroup]
-        }, awards: userAchievedRepo.findAllByUserAndProjectIds(user, [projectId]).sort { it.id }.collect { UserAchievement award -> awardValues(award) }]
+         }, awards: userAchievedRepo.findAllByUserAndProjectIds(user, [projectId]).sort { it.id }.collect { UserAchievement award -> awardValues(award) }]
+    }
+
+    protected Map projectUserSnapshots(List<Map> destinations, List<String> users) {
+        Map result = [:]
+        destinations.each { Map destination -> users.each { String user -> result["${destination.projectId}/${user}".toString()] = snapshot(destination.projectId, user) } }
+        result
+    }
+
+    protected Map projectMembershipSnapshots(List<Map> destinations, List<String> users) {
+        Map result = [:]
+        destinations.each { Map destination -> users.each { String user -> result["${destination.projectId}/${user}".toString()] = membership(destination.projectId, user) } }
+        result
+    }
+
+    protected void seedDerivedResidue(Map destination, String user) {
+        destination.subjects.each { SkillDef subject ->
+            seedPoints(destination.projectId, user, subject, 100)
+            seedLevels(destination.projectId, user, subject, (1..5).toList())
+        }
+        seedPoints(destination.projectId, user, null, 400)
+        seedLevels(destination.projectId, user, null, (1..5).toList())
+        [destination.nativeGroup, destination.importedGroup].each { SkillDef group ->
+            seedPoints(destination.projectId, user, group, 100)
+            seedAward(destination.projectId, user, group)
+        }
+        [destination.badge, destination.nativeBadge].each { Map badge ->
+            seedAward(destination.projectId, user, skillDefRepo.findByProjectIdAndSkillId(destination.projectId, badge.badgeId))
+        }
     }
 
     protected List<Map> globalSnapshot(String user) {
