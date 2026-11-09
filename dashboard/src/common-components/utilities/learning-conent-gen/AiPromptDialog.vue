@@ -145,7 +145,9 @@ const startGeneration = () => {
       messages.push({role: 'User', content: userChatInstructions})
     } else {
       chatHistory.value.slice(1).forEach((item) => {
-        const content = item.role === ChatRole.USER ? item.userChatInstructions : item.generatedValue
+        const content = item.role === ChatRole.USER
+            ? item.userChatInstructions
+            : (item.assistantChatContent || item.generatedValue)
         messages.push({role: item.role, content})
       })
       if (props.createFollowOnConvoInstructionsFn) {
@@ -217,6 +219,7 @@ const addChatItem = (origMsg, role = ChatRole.ASSISTANT, isGenerating = false, u
     userChatInstructions,
     isGenerating,
     generatedValue: '',
+    assistantChatContent: '',
     generateValueChangedNotes: '',
     generatedInfo: {}, // arbitrary object for clients of this component
     finalMsg: '',
@@ -296,6 +299,8 @@ const genWithStreaming = (messages) => {
       (chunk) => {
         startAnnounceSlowGenStatus()
         const lastChatItem = getLastChatItem()
+        // Preserve the complete response for follow-up requests before filtering display content.
+        lastChatItem.assistantChatContent += chunk
         const chunkRes = props.chunkHandlerFn(chunk, lastChatItem.id)
 
         if (chunkRes.append) {
