@@ -19,7 +19,7 @@ do
           ;;
     esac
 done
-if [ -z "${currentRun}" ] || [ -z "${totalConcurrent}" ]; then
+if ! [[ "${currentRun}" =~ ^[1-9][0-9]*$ && "${totalConcurrent}" =~ ^[1-9][0-9]*$ ]] || (( currentRun > totalConcurrent )); then
     usage
 fi
 echo "Running subset of service tests"
@@ -34,13 +34,17 @@ unset IFS
 cd ../../../
 
 totalNum=${#allTests[@]}
-numPerRun=$((totalNum/totalConcurrent))
-start=$(((currentRun-1)*numPerRun))
-if  [ "$currentRun" -eq "$totalConcurrent" ]; then
-    numPerRun=$totalNum
+# Spread neighboring suites across shards instead of concentrating entire packages
+# (such as the slow catalog suites) in one contiguous shard.
+testsInThisRun=()
+for (( index=currentRun-1; index<totalNum; index+=totalConcurrent )); do
+    testsInThisRun+=("${allTests[index]}")
+done
+echo "There are [$totalNum] total tests. Run [$currentRun]: running [${#testsInThisRun[@]}] tests using round-robin assignment"
+if (( ${#testsInThisRun[@]} == 0 )); then
+    echo "No tests assigned to this shard"
+    exit 0
 fi
-testsInThisRun=${allTests[@]:$start:$numPerRun}
-echo "There are [$totalNum] total tests. Run [$currentRun]: Start Number=[$start], running up to [$numPerRun] tests"
 
 # this variable will be tracked to see if CachingSpec tests is in this run/batch
 # CachingSpec requires dashboard and client-display projects build and deployed
@@ -50,7 +54,7 @@ cachingSpec='no'
 # tests that end with IT must be executed with maven-failsafe-plugin
 integrationTests=()
 serviceTests=()
-for testClass in ${testsInThisRun[@]}
+for testClass in "${testsInThisRun[@]}"
 do
   if [[ $testClass =~ .*IT$ ]]; then
     integrationTests+=($testClass)
@@ -97,14 +101,20 @@ cd ../service
 
 IFS=,;
 serviceTestsExecString="${serviceTests[*]}"
-verifyExecString=""
+testPhase="test"
 if (( ${#integrationTests[@]} != 0 )); then
   integrationTestsString="${integrationTests[*]}"
   integrationTestsExecString="-Dit.test="$integrationTestsString""
-  verifyExecString="verify"
+   # verify already includes test; specifying both repeats earlier build phases.
+   testPhase="verify"
 fi
 unset IFS
 
-commandToRun="mvn ${additionalTestVars} -Dtest="${serviceTestsExecString}" ${integrationTestsExecString} test ${verifyExecString}"
+# An empty -Dtest would select the default suite, not an empty suite.
+serviceTestOptions="-Dtest=${serviceTestsExecString}"
+if (( ${#serviceTests[@]} == 0 )); then
+    serviceTestOptions="-Dtest=NoServiceTestsInThisShard -Dsurefire.failIfNoSpecifiedTests=false"
+fi
+commandToRun="mvn ${additionalTestVars} ${serviceTestOptions} ${integrationTestsExecString} ${testPhase}"
 echo $commandToRun
 exec $commandToRun

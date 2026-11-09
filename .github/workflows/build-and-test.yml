@@ -414,6 +414,13 @@ jobs:
           cp -r service/target/failsafe-reports/. service/target/standard-failsafe-reports/ || true
 
       # --- 2. Run PKI Tests & Isolate Output ---
+      - name: Clear working test reports before PKI
+        if: ${{ always() }}
+        run: |
+          # Standard reports have been staged above. Remove only generated working
+          # reports so a skipped or canceled PKI run cannot upload FORM results.
+          rm -rf service/target/surefire-reports service/target/failsafe-reports
+
       - name: Run skills-service pki tests
         env:
           SPRING_PROFILES_ACTIVE: pki
