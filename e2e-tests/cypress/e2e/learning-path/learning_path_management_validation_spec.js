@@ -31,10 +31,13 @@ describe('Learning Path Management Validation Tests', () => {
     });
 
     Cypress.Commands.add('selectSkill', (selector, skillId, searchString = '', projId='proj1') => {
-        cy.get(selector).blur({force: true})
-        cy.get(selector).click()
+        cy.get(`${selector} input`).should('be.visible').and('be.enabled')
+        // Selecting a From item reloads the To options; do not search an empty, still-loading list.
+        cy.get(`${selector} [data-pc-section="loader"]`).should('not.exist')
+        cy.get(`${selector} input`).blur({force: true})
+        cy.get(`${selector} input`).click()
         if (searchString) {
-            cy.get(selector).type(`${searchString}`)
+            cy.get(`${selector} input`).type(`${searchString}`)
         }
         cy.get(`[data-cy="skillsSelectionItem-${projId}-${skillId}"]`).click()
     })
