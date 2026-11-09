@@ -122,4 +122,28 @@ describe('Custom Label Tests', () => {
         cy.get('[data-cy="takeQuizMsg"]').contains('but your 150 units can be retained by completing the Survey again')
     });
 
+    it('custom plural is used instead of the generated English plural', () => {
+        cy.request('POST', '/admin/projects/proj1/settings', [
+            { value: 'Punkt', setting: 'point.displayName', projectId: 'proj1' },
+            { value: 'Punkte', setting: 'point.displayNamePlural', projectId: 'proj1' },
+        ]);
+        cy.createSkill(1, 1, 1, { pointIncrement: '100', numPerformToCompletion: 2 });
+
+        cy.visit('/test-skills-display/proj1/subjects/subj1/skills/skill1');
+        cy.get('[data-cy="skillProgress-ptsOverProgressBard"]').contains('0 / 200 Punkte');
+        cy.get('[data-cy="overallPointsEarnedCard"] [data-cy="mediaInfoCardSubTitle"]').contains('Overall Punkte Earned');
+        cy.get('[data-cy="pointsPerOccurrenceCard"] [data-cy="mediaInfoCardSubTitle"]').contains('Punkte per Occurrence');
+        cy.contains('Punkts').should('not.exist');
+    });
+
+    it('generated English plural is used when no custom plural is set', () => {
+        cy.request('POST', '/admin/projects/proj1/settings', [
+            { value: 'Punkt', setting: 'point.displayName', projectId: 'proj1' },
+        ]);
+        cy.createSkill(1, 1, 1, { pointIncrement: '100', numPerformToCompletion: 2 });
+
+        cy.visit('/test-skills-display/proj1/subjects/subj1/skills/skill1');
+        cy.get('[data-cy="skillProgress-ptsOverProgressBard"]').contains('0 / 200 Punkts');
+    });
+
 });
