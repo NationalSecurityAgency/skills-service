@@ -31,7 +31,7 @@ export const useTimeUtils = () => {
   }
 
   const isToday = (timestamp) => {
-    return dayjs().utc().isSame(dayjs(timestamp), 'day');
+    return dayjs().isSame(dayjs(timestamp), 'day');
   }
 
   const formatDate = (timestamp, formatter = 'YYYY-MM-DD HH:mm') => {
