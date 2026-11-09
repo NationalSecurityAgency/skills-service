@@ -60,7 +60,7 @@ class ExportWithoutHeaderIT extends ExportBaseIntSpec {
 
         then:
         validateExport(excelExport.file, [
-                ["User ID", "Last Name", "First Name", "Org", "Level", "Current Points", "Percent Complete", "Points First Earned (UTC)", "Points Last Earned (UTC)"],
+                ["User ID", "Last Name", "First Name", "Org", "Level", "Current Points", "Percent Complete", "First Seen (UTC)", "Points Last Earned (UTC)"],
                 [getUserIdForDisplay(user2), getName(user2, false), getName(user2), "", "1.0", "60.0", "0.2", formatDate(today), formatDate(today)],
                 [getUserIdForDisplay(user1), getName(user1, false), getName(user1), "", "2.0", "100.0", "0.3333333333", formatDate(fiveDaysAgo), formatDate(oneDayAgo)],
         ])
