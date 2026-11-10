@@ -339,7 +339,8 @@ select badgeDef.name as name,
       sdParent.projectId=?2 and sdParent.skillId=?3''')
     int countAchievedChildSkills(String userId, @Nullable String projectId, String skillId, Integer version)
 
-    @Query('''select sum(ua.pointsWhenAchieved) 
+    // Imported awards retain source metadata; completed imports contribute destination points.
+    @Query('''select sum(case when sdChild.copiedFrom is not null then sdChild.totalPoints else ua.pointsWhenAchieved end)
     from SkillDef sdParent, SkillRelDef srd, SkillDef sdChild, UserAchievement ua
       where 
       srd.parent.id = sdParent.id and  srd.child.id=sdChild.id and

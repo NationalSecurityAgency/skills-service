@@ -22,6 +22,7 @@ import groovy.util.logging.Slf4j
 import jakarta.annotation.PostConstruct
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
+import org.springframework.context.annotation.Lazy
 import org.springframework.stereotype.Component
 import org.springframework.transaction.annotation.Transactional
 import skills.auth.UserInfoService
@@ -31,6 +32,7 @@ import skills.controller.result.model.RequestResult
 import skills.services.admin.BatchOperationsTransactionalAccessor
 import skills.services.admin.SkillCatalogService
 import skills.services.events.*
+import skills.services.events.pointsAndAchievements.ImportedSkillsAchievementsHandler
 import skills.services.userActions.DashboardAction
 import skills.services.userActions.DashboardItem
 import skills.services.userActions.UserActionInfo
@@ -121,6 +123,7 @@ class SkillEventAdminService {
     @Autowired CatalogParticipantBackfillService catalogBackfillService
     @Autowired LockingService lockingService
     @Autowired AchievedGlobalBadgeHandler achievedGlobalBadgeHandler
+    @Autowired @Lazy ImportedSkillsAchievementsHandler importedSkillsAchievementsHandler
 
     @Value('#{"${skills.bulkUserLookup.minNumOfThreads:1}"}')
     Integer minNumOfThreads
@@ -466,14 +469,18 @@ class SkillEventAdminService {
         performedSkillRepository.delete(performedSkill)
         userEventService.removeEvent(performedSkill.performedOn, performedSkill.userId, performedSkill.skillRefId)
 
-        // Persist reconciliation tasks in the source transaction. Workers see them only
-        // after commit, avoiding acquisition of destination reporting locks while holding
-        // the source lock (reciprocal imports can otherwise deadlock concurrent deletions).
-        // Include disabled copies so a concurrent activation snapshot cannot miss deletion.
+        // Same-project reuse shares the reporting lock and must be consistent at commit.
+        // Queue cross-project copies to avoid inverted reporting locks for reciprocal imports.
+        // Also queue disabled copies so a concurrent activation snapshot cannot miss deletion.
         skillDefRepo.findSkillDefIdsByCopiedFromIncludingDisabled(performedSkill.skillRefId)
                 .each { Integer id ->
-            taskSchedulerService.scheduleImportedSkillAchievement(userId, id,
-                    new SkillDate(date: performedSkill.performedOn, isProvided: true), false, false)
+            SkillDefMin copy = skillDefRepo.findSkillDefMinById(id)
+            SkillDate skillDate = new SkillDate(date: performedSkill.performedOn, isProvided: true)
+            if (copy.projectId == projectId && Boolean.valueOf(copy.enabled)) {
+                importedSkillsAchievementsHandler.handleAchievementsForImportedSkills(userId, copy, skillDate, false, false)
+            } else {
+                taskSchedulerService.scheduleImportedSkillAchievement(userId, id, skillDate, false, false)
+            }
         }
 
         return skillEventResult

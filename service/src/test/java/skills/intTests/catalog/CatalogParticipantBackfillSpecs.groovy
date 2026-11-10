@@ -164,6 +164,7 @@ class CatalogParticipantBackfillSpecs extends CatalogIntSpec {
 
     def "incremental imported group completion preserves historical event metadata after initialization"() {
         Map fixture = catalogFixture()
+        fixture.sourceSkills.each { Map skill -> skillsService.updateImportedSkill('TestProject2', skill.skillId, importedIncrement) }
         SkillsService learner = createService(users[0])
         assert learner.initializeProjectProgress('TestProject2').backfillStatus == 'COMPLETED'
         Map firstSkill = fixture.sourceSkills[0]
@@ -186,9 +187,12 @@ class CatalogParticipantBackfillSpecs extends CatalogIntSpec {
 
         then:
         learner.getSkillsGroupSummary('TestProject2', fixture.group.skillId).skillsAchieved == 2
-        learner.getSkillsSummaryForCurrentUser('TestProject2').points == 400
+        learner.getSkillsSummaryForCurrentUser('TestProject2').points == 4 * importedIncrement
         Instant.parse(group.achievedOn).toEpochMilli() == completionDate.time
-        achievement('TestProject2', users[0], fixture.group.skillId).pointsWhenAchieved == 400
+        achievement('TestProject2', users[0], fixture.group.skillId).pointsWhenAchieved == 4 * importedIncrement
+
+        where:
+        importedIncrement << [100, 250]
     }
 
     def "catalog backfill awards a global badge when imported credit satisfies its project level requirement"() {

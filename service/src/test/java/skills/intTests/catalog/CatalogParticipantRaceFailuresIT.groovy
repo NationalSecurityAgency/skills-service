@@ -30,6 +30,7 @@ import org.springframework.test.context.TestPropertySource
 import skills.intTests.utils.SkillsClientException
 import skills.intTests.utils.SkillsService
 import skills.intTests.utils.QuizDefFactory
+import skills.services.admin.skillReuse.SkillReuseIdUtil
 import skills.storage.model.ProjectParticipation.BackfillStatus
 import skills.storage.model.SkillDef
 import skills.storage.model.UserAchievement
@@ -361,6 +362,60 @@ class CatalogParticipantRaceFailuresIT extends CatalogIntSpec {
         summary.points == 0
         summary.subjects[0].points == 0
         summary.skillsAchieved == 0
+    }
+
+    def "native event deletion immediately reconciles same-project reuse under #placement while imported tasks are held"() {
+        Map fixture = fixture()
+        Map reusedSubject = createSubject(1, 2)
+        Map reusedGroup = createSkillsGroup(1, 2, 30)
+        skillsService.createSubject(reusedSubject)
+        if (placement == 'group') {
+            skillsService.createSkill(reusedGroup)
+        }
+        skillsService.reuseSkills(fixture.source.projectId, [fixture.source.skillId], reusedSubject.subjectId,
+                placement == 'group' ? reusedGroup.skillId : null)
+        String reusedSkillId = SkillReuseIdUtil.addTag(fixture.source.skillId, 0)
+        SkillsService learner = createService(users[0])
+        learner.initializeProjectProgress(fixture.projectId)
+        List<Date> dates = (0..2).collect { int occurrence -> new Date(historicalDate.time + occurrence * 1000) }
+        dates.each { Date date -> skillsService.addSkill(fixture.source, users[0], date) }
+        waitForAsyncTasksCompletion.waitForAllScheduleTasks()
+        assert learner.getSkillsSummaryForCurrentUser(fixture.source.projectId).points == 600
+        assert learner.getSkillsSummaryForCurrentUser(fixture.projectId).points == 300
+        assert learner.getSingleSkillSummaryForCurrentUser(fixture.source.projectId, reusedSkillId).achievedOn
+        if (placement == 'group') {
+            assert learner.getSubjectDescriptions(fixture.source.projectId, reusedSubject.subjectId)
+                    .find { Map description -> description.skillId == reusedGroup.skillId }.achievedOn
+        }
+        queueTasks('imported-skill-achievement')
+
+        when:
+        skillsService.deleteSkillEvent(fixture.source + [userId: users[0], timestamp: dates.last().time])
+        Map summary = learner.getSkillsSummaryForCurrentUser(fixture.source.projectId)
+        Map reusedSkill = learner.getSingleSkillSummaryForCurrentUser(fixture.source.projectId, reusedSkillId)
+
+        then: 'same-project credit and achievements change before any queued worker can run'
+        summary.points == 400
+        summary.subjects.find { Map subject -> subject.subjectId == reusedSubject.subjectId }.points == 200
+        summary.subjects.find { Map subject -> subject.subjectId == 'TestSubject1' }.points == 200
+        summary.skillsAchieved == 0
+        reusedSkill.points == 200
+        !reusedSkill.achievedOn
+        placement != 'group' || !learner.getSubjectDescriptions(fixture.source.projectId, reusedSubject.subjectId)
+                .find { Map description -> description.skillId == reusedGroup.skillId }.achievedOn
+        learner.getSkillsSummaryForCurrentUser(fixture.projectId).points == 300
+        taskCount('imported-skill-achievement') > 0
+
+        when:
+        releaseTasks('imported-skill-achievement')
+        waitForAsyncTasksCompletion.waitForAllScheduleTasks()
+
+        then:
+        learner.getSkillsSummaryForCurrentUser(fixture.projectId).points == 200
+        learner.getSkillsSummaryForCurrentUser(fixture.source.projectId).points == 400
+
+        where:
+        placement << ['subject', 'group']
     }
 
     def "concurrent source deletions with reciprocal imports commit without inverted reporting locks"() {
