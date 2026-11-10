@@ -539,6 +539,9 @@
             <plugin>
                 <artifactId>maven-failsafe-plugin</artifactId>
                 <configuration>
+                    <!-- Dedicated Spring contexts share scheduled_tasks. A cached context's
+                         scheduler must not consume another class's work without its test advice. -->
+                    <reuseForks>false</reuseForks>
                     <includes>
                         <include>**/*IT</include>
                     </includes>

@@ -122,7 +122,7 @@ class CatalogSourceBackedReadsSpecs extends CatalogIntSpec {
         !participationRepo.existsByProjectIdAndUserId(fixture.destination.projectId, fixture.users[5])
 
         when: 'new source activity after simulated cleanup still cannot enroll the user'
-        String lateUser = getRandomUsers(7)[6]
+        String lateUser = fixture.freshUser
         skillsService.addSkill(fixture.imports[0], lateUser)
         waitForAsyncTasksCompletion.waitForAllScheduleTasks()
 
@@ -252,7 +252,7 @@ class CatalogSourceBackedReadsSpecs extends CatalogIntSpec {
         fixture.users[0..4].each { String user ->
             assert !skillsService.addSkill(fixture.imports[0], user, new Date() - 60).body.skillApplied
         }
-        String zeroPointUser = getRandomUsers(7)[6]
+        String zeroPointUser = fixture.freshUser
         Map blocked = createSkill(2, 1, 4, 0, 1, 0, 100)
         skillsService.createSkill(blocked)
         skillsService.addLearningPathPrerequisite(fixture.destination.projectId, blocked.skillId, 'skill3')
@@ -331,7 +331,7 @@ class CatalogSourceBackedReadsSpecs extends CatalogIntSpec {
 
     def "repository-seeded achievement-only credit needs participation and does not create event-list progress"() {
         Map fixture = readsFixture()
-        String user = getRandomUsers(7)[6]
+        String user = fixture.freshUser
         SkillDef source = skillDefRepo.findByProjectIdAndSkillId(fixture.source.projectId, fixture.imports[0].skillId)
         // Deliberately not an ordinary reporting flow: no source performed history or points are created.
         userAchievedRepo.save(new UserAchievement(userId: user, projectId: source.projectId,
@@ -360,7 +360,9 @@ class CatalogSourceBackedReadsSpecs extends CatalogIntSpec {
     }
 
     private Map readsFixture() {
-        List<String> users = getRandomUsers(6)
+        // Reserve the fresh learner in the same call: separate PKI selections can overlap.
+        List<String> fixtureUsers = getRandomUsers(7)
+        List<String> users = fixtureUsers.take(6)
         Map source = createProject(1)
         Map sourceSubject = createSubject(1, 1)
         List<Map> imports = [createSkill(1, 1, 1, 0, 2, 0, 100), createSkill(1, 1, 2, 0, 2, 0, 100)]
@@ -409,7 +411,7 @@ class CatalogSourceBackedReadsSpecs extends CatalogIntSpec {
         }
         assert !participationRepo.existsByProjectIdAndUserId(destination.projectId, users[4])
         assert !userPointsRepo.findByProjectIdAndUserId(destination.projectId, users[5])
-        return [users: users, source: source, destination: destination, other: other, subject: subject, imports: imports, group: group, badge: badge]
+        return [users: users, freshUser: fixtureUsers[6], source: source, destination: destination, other: other, subject: subject, imports: imports, group: group, badge: badge]
     }
 
     private Map usersPage(String path, Map fixture, int page, String query = '') {
