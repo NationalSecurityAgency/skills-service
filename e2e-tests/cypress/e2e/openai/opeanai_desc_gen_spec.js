@@ -108,6 +108,51 @@ describe('Generate Desc Tests', () => {
         cy.get('[data-cy="skillOverviewDescription"]').contains(chessGenValue)
     });
 
+    it('preserves embedded images across successive description refinements', () => {
+        const imageUrl = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+jRZkAAAAASUVORK5CYII='
+        const refinedDescription = 'Refined diagram description'
+        cy.intercept('GET', '/public/config', (req) => {
+            req.reply((res) => {
+                res.body.enableOpenAIIntegration = true
+                res.send(res.body)
+            })
+        })
+        cy.createProject(1)
+        cy.createSubject(1, 1)
+        cy.createSkill(1, 1, 1, { description: `Original diagram description\n\n![diagram](${imageUrl})` })
+        cy.visit('/administrator/projects/proj1/subjects/subj1/skills/skill1')
+        cy.get('[data-cy="editSkillButton_skill1"]').click()
+        cy.get('[data-cy="aiButton"]').click()
+        cy.get('[data-cy="instructionsInput"]').type('AI image history regression - refine the description and preserve the diagram{enter}')
+        cy.get('[data-cy="aiMsg-2"] [data-cy="finalSegment"]').should('contain.text', completedMsg)
+        cy.get('[data-cy="aiMsg-2"] [data-cy="generatedSegment"]').should('contain.text', refinedDescription)
+            .and('not.contain.text', '---IMG-0')
+        cy.get('[data-cy="aiMsg-2"] [data-cy="generatedSegment"] img[alt="diagram"]')
+            .should('be.visible').and('have.attr', 'src', imageUrl)
+
+        cy.get('[data-cy="instructionsInput"]').should('be.enabled')
+            .type('Refine it again and preserve the diagram{enter}')
+        cy.get('[data-cy="aiMsg-4"] [data-cy="finalSegment"]').should('contain.text', completedMsg)
+        cy.get('[data-cy="aiMsg-4"] [data-cy="generatedSegment"]').should('contain.text', refinedDescription)
+            .and('not.contain.text', '---IMG-0')
+        cy.get('[data-cy="aiMsg-4"] [data-cy="generatedSegment"] img[alt="diagram"]')
+            .should('be.visible').and('have.attr', 'src', imageUrl)
+        cy.get('[data-cy="useGenValueBtn-4"]').should('be.enabled').click()
+        cy.get('[data-cy="markdownEditorInput"]').should('contain.text', refinedDescription)
+            .and('not.contain.text', '---IMG-0')
+        cy.get('[data-cy="markdownEditorInput"] img[alt="diagram"]')
+            .should('be.visible').and('have.attr', 'src', imageUrl)
+        cy.get('[data-cy="saveDialogBtn"]').should('be.enabled').click()
+        cy.get('[data-cy="saveDialogBtn"]').should('not.exist')
+        cy.get('[data-cy="skillOverviewDescription"]').should('contain.text', refinedDescription)
+            .and('not.contain.text', '---IMG-0')
+        cy.get('[data-cy="skillOverviewDescription"] img[alt="diagram"]')
+            .should('be.visible').and('have.attr', 'src', imageUrl)
+        cy.reload()
+        cy.get('[data-cy="skillOverviewDescription"] img[alt="diagram"]')
+            .should('be.visible').and('have.attr', 'src', imageUrl)
+    })
+
     it('conversation to generate a new description for a skill', () => {
         cy.intercept('GET', '/public/config', (req) => {
             req.reply((res) => {
@@ -302,5 +347,3 @@ describe('Generate Desc Tests', () => {
     });
 
 });
-
-
