@@ -36,7 +36,7 @@ class WaitForAsyncTasksCompletion {
         long start = System.currentTimeMillis()
         int lastNumRecords
         while ( (lastNumRecords = numRecords.call()) > 0) {
-            Thread.sleep(250)
+            Thread.sleep(50)
             log.trace("Still waiting on [{}] tasks to finish", lastNumRecords)
             if ( System.currentTimeMillis() - start > waitInMs ){
                 throw new IllegalStateException("Scheduled tasks took too long to complete. Waited for [${waitInMs}]ms, still [${lastNumRecords}] tasks left!")
