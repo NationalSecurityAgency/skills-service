@@ -1766,6 +1766,8 @@ class PostAchievementSkillExpirationSpecs extends DefaultIntSpec {
             ])
         }
         expireUserAchievementsTaskExecutor.removeExpiredUserAchievements()
+        // Cross-project imported credit is reconciled asynchronously after expiration commits.
+        waitForAsyncTasksCompletion.waitForAllScheduleTasks()
         settingService.deleteGlobalSetting(ExpireUserAchievementsTaskExecutor.SKILL_EXPIRATION_LAST_RUN_DATE)
     }
 

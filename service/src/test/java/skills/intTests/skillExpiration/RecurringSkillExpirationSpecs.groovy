@@ -1581,5 +1581,7 @@ class RecurringSkillExpirationSpecs extends DefaultIntSpec {
             ])
         }
         expireUserAchievementsTaskExecutor.removeExpiredUserAchievements()
+        // Cross-project imported credit is reconciled asynchronously after expiration commits.
+        waitForAsyncTasksCompletion.waitForAllScheduleTasks()
     }
 }
