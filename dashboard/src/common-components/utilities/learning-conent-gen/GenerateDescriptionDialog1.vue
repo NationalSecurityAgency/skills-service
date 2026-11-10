@@ -118,10 +118,12 @@ const handleGenerationCompleted = (generated) => {
   const generateValueChangedNotes = getValueNotes
 
   if (extractedImageState.extractedImages) {
-    // Follow-up responses can reuse placeholders from the raw conversation history.
-    // Keep all mappings available until this dialog is closed.
-    const { text } = imgHandler.reinsertImages(generatedValue, extractedImageState.extractedImages)
+    const {
+      text,
+      unusedImages
+    } = imgHandler.reinsertImages(generatedValue, extractedImageState.extractedImages)
     generatedValue = text
+    extractedImageState.extractedImages = unusedImages
   }
 
   return {
