@@ -1084,6 +1084,7 @@ class CatalogSkillTests extends CatalogIntSpec {
         assert p3Stats.userTotalPoints == 20
 
         skillsService.deleteSkillEvent([projectId: project1.projectId, skillId: skill.skillId, userId: user, timestamp: skillDate.time])
+        waitForAsyncTasksCompletion.waitForAllScheduleTasks()
 
         def postDeleteP1Stats = skillsService.getUserStats(project1.projectId, user)
         def postDeleteP2Stats = skillsService.getUserStats(project2.projectId, user)
@@ -1143,6 +1144,7 @@ class CatalogSkillTests extends CatalogIntSpec {
         assert p3Stats.userTotalPoints == 20
 
         skillsService.deleteSkillEvent([projectId: project1.projectId, skillId: skill.skillId, userId: user, timestamp: timestamp.time])
+        waitForAsyncTasksCompletion.waitForAllScheduleTasks()
 
         def postDeleteP1Stats = skillsService.getUserStats(project1.projectId, user)
         def postDeleteP2Stats = skillsService.getUserStats(project2.projectId, user)

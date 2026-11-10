@@ -79,9 +79,8 @@ describe('Learner catalog participation', () => {
             }
         };
 
-        it(`${mode}: ordinary first visit shows the pending message and automatically loads imported progress`, () => {
-            createCatalog(true);
-            // Let the production worker run normally: no deferred finalization or response stubs.
+        it(`${mode}: pending first visit automatically loads imported progress after backfill is released`, () => {
+            deferCatalogBackfill();
             cy.intercept('POST', initializeUrl).as('initialize');
             visit();
             cy.wait('@initialize').its('response.body').should('deep.equal', { ready: false, backfillStatus: 'PENDING' });
@@ -91,6 +90,7 @@ describe('Learner catalog participation', () => {
                 .and('contain.text', 'You can keep exploring while we sync your points and achievements.');
             display('[data-cy="subjectTileBtn"]').should('be.visible').and('not.be.disabled');
 
+            releaseCatalogBackfill();
             // Wait through the UI's own status checks: no reload or test-side initialization.
             display('[data-cy="overallPoints"] [data-cy="earnedPoints"]', { timeout: 60000 })
                 .should('have.text', '100');
@@ -99,6 +99,17 @@ describe('Learner catalog participation', () => {
             cy.get('@initialize.all').should((requests) => {
                 expect(requests.some((request) => request.response?.body.backfillStatus === 'COMPLETED')).to.eq(true);
             });
+        });
+
+        it(`${mode}: ordinary first visit loads imported progress even when backfill finishes immediately`, () => {
+            createCatalog(true);
+            // Let the real worker run freely. Its completion may precede the first summary,
+            // so neither an intermediate zero-point render nor a pending message is required.
+            visit();
+            display('[data-cy="overallPoints"] [data-cy="earnedPoints"]', { timeout: 60000 })
+                .should('have.text', '100');
+            display(loadingMessage, { timeout: 60000 }).should('not.exist');
+            display('[data-cy="subjectTile-subj1"] [data-cy="pointsProgress"]').should('have.text', '100 / 400');
         });
 
         // Keep one iframe integration flow; shared status variations and pending interactions run on the dashboard.

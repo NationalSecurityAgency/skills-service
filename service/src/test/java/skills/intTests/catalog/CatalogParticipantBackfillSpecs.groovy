@@ -30,7 +30,6 @@ import skills.storage.model.SkillDef
 import skills.storage.model.UserPoints
 import skills.storage.repos.ProjectParticipationRepo
 import skills.storage.repos.SkillDefRepo
-import spock.lang.IgnoreRest
 import spock.util.concurrent.PollingConditions
 
 import javax.sql.DataSource
@@ -161,6 +160,35 @@ class CatalogParticipantBackfillSpecs extends CatalogIntSpec {
 
         where:
         entry << ['visit', 'award']
+    }
+
+    def "incremental imported group completion preserves historical event metadata after initialization"() {
+        Map fixture = catalogFixture()
+        SkillsService learner = createService(users[0])
+        assert learner.initializeProjectProgress('TestProject2').backfillStatus == 'COMPLETED'
+        Map firstSkill = fixture.sourceSkills[0]
+        Map lastSkill = fixture.sourceSkills[1]
+        skillsService.addSkill(firstSkill, users[0], firstDate)
+        skillsService.addSkill(firstSkill, users[0], new Date(firstDate.time + 1000))
+        skillsService.addSkill(lastSkill, users[0], firstDate)
+        waitForAsyncTasksCompletion.waitForAllScheduleTasks()
+
+        expect:
+        learner.getSkillsGroupSummary('TestProject2', fixture.group.skillId).skillsAchieved == 1
+        !learner.getSubjectDescriptions('TestProject2', 'TestSubject1')
+                .find { Map description -> description.skillId == fixture.group.skillId }.achievedOn
+
+        when:
+        skillsService.addSkill(lastSkill, users[0], completionDate)
+        waitForAsyncTasksCompletion.waitForAllScheduleTasks()
+        Map group = learner.getSubjectDescriptions('TestProject2', 'TestSubject1')
+                .find { Map description -> description.skillId == fixture.group.skillId }
+
+        then:
+        learner.getSkillsGroupSummary('TestProject2', fixture.group.skillId).skillsAchieved == 2
+        learner.getSkillsSummaryForCurrentUser('TestProject2').points == 400
+        Instant.parse(group.achievedOn).toEpochMilli() == completionDate.time
+        achievement('TestProject2', users[0], fixture.group.skillId).pointsWhenAchieved == 400
     }
 
     def "catalog backfill awards a global badge when imported credit satisfies its project level requirement"() {

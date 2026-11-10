@@ -624,6 +624,7 @@ interface SkillDefRepo extends CrudRepository<SkillDef, Integer>, PagingAndSorti
         s.endDate as endDate,
         s.enabled as enabled,
         s.groupId as groupId,
+        s.numSkillsRequired as numSkillsRequired,
         s.copiedFrom as copiedFrom,
         s.copiedFromProjectId as copiedFromProjectId,
         s.readOnly as readOnly

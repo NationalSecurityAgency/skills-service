@@ -94,7 +94,7 @@ class ImportedSkillsAchievementsHandler {
         // Keep the enabled set so a batch activated before our final check is also detected.
         Set<Integer> processedImportIds = skillDefRepo.findAllByProjectIdAndTypeAndEnabledAndCopiedFromIsNotNull(
                 skill.projectId, SkillDef.ContainerType.Skill, 'true').collect { SkillDef imported -> imported.id }.toSet()
-        importedCreditService.reconcile(userId, skill)
+        importedCreditService.reconcile(userId, skill, incomingSkillDate)
         backfillService.validateCreditCompletion(skill.projectId, processedImportIds)
     }
 

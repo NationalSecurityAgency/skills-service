@@ -22,6 +22,7 @@ import org.springframework.transaction.annotation.Transactional
 import skills.services.admin.BatchOperationsTransactionalAccessor
 import skills.services.events.AchievedBadgeHandler
 import skills.services.events.AchievedGlobalBadgeHandler
+import skills.services.events.AchievedSkillsGroupHandler
 import skills.services.events.SkillDate
 import skills.services.events.SkillEventResult
 import skills.storage.model.SkillDef
@@ -48,14 +49,15 @@ class CatalogImportedCreditService {
     @Autowired UserAchievementsAndPointsManagement pointsManagement
     @Autowired @Lazy AchievedBadgeHandler badgeHandler
     @Autowired AchievedGlobalBadgeHandler globalBadgeHandler
+    @Autowired @Lazy AchievedSkillsGroupHandler groupHandler
     @Autowired @Lazy TaskSchedulerService taskSchedulerService
 
     // The caller checks enabled/participation/community/finalization state under the same lock.
     @Transactional
-    void reconcile(String userId, SkillDefMin skill) {
+    void reconcile(String userId, SkillDefMin skill, SkillDate incomingSkillDate) {
         lockingService.lockForSkillReporting(userId, skill.projectId)
         if (reconcileSkillCredit(userId, skill)) {
-            reconcileTotalsAndAchievements(skill.projectId, userId, [skillDefRepo.findById(skill.id).get()])
+            reconcileTotalsAndAchievements(skill.projectId, userId, [skillDefRepo.findById(skill.id).get()], false, incomingSkillDate)
         }
     }
 
@@ -115,11 +117,19 @@ class CatalogImportedCreditService {
     }
 
     @Transactional
-    void reconcileTotalsAndAchievements(String projectId, String userId, List<SkillDef> imports, boolean explicitRepair = false) {
+    void reconcileTotalsAndAchievements(String projectId, String userId, List<SkillDef> imports, boolean explicitRepair = false, SkillDate incomingSkillDate = null) {
         List<SkillDef> groups = explicitRepair ? skillDefRepo.findAllByProjectIdAndType(projectId, SkillDef.ContainerType.SkillsGroup) :
                 imports.findAll { SkillDef skill -> skill.groupId != null }
                 .collect { SkillDef skill -> graphService.getMyGroupParent(skill.id) }.unique { SkillDef group -> group.id }
-        batchAccessor.identifyAndAddGroupAchievementsForSingleUser(userId, groups)
+        if (incomingSkillDate && !explicitRepair) {
+            groups.each { SkillDef group ->
+                groupHandler.checkForSkillsGroup(new SkillEventResult(), userId,
+                        skillDefRepo.findSkillDefMinById(group.id), incomingSkillDate)
+            }
+        } else {
+            // Bulk initialization/repair retains its processing-time metadata policy.
+            batchAccessor.identifyAndAddGroupAchievementsForSingleUser(userId, groups)
+        }
         List<SkillDef> subjects = explicitRepair ? skillDefRepo.findAllByProjectIdAndType(projectId, SkillDef.ContainerType.Subject) :
                 imports.collect { SkillDef skill -> graphService.getMySubjectParent(skill.id) }.unique { SkillDef subject -> subject.id }
         if (explicitRepair) {

@@ -363,6 +363,69 @@ class CatalogParticipantRaceFailuresIT extends CatalogIntSpec {
         summary.skillsAchieved == 0
     }
 
+    def "concurrent source deletions with reciprocal imports commit without inverted reporting locks"() {
+        List<Map> sources = [createSkill(1, 1, 11, 0, 1, 0, 100), createSkill(2, 1, 22, 0, 1, 0, 100)]
+        sources.eachWithIndex { Map source, int index ->
+            skillsService.createProjectAndSubjectAndSkills(createProject(index + 1), createSubject(index + 1, 1), [source])
+            skillsService.exportSkillToCatalog(source.projectId, source.skillId)
+        }
+        sources.eachWithIndex { Map source, int index ->
+            String destination = sources[1 - index].projectId
+            skillsService.bulkImportSkillsFromCatalogAndFinalize(destination, 'TestSubject1', [source])
+        }
+        SkillsService learner = createService(users[0])
+        sources.each { Map source -> learner.initializeProjectProgress(source.projectId) }
+        sources.each { Map source -> skillsService.addSkill(source, users[0], historicalDate) }
+        waitForAsyncTasksCompletion.waitForAllScheduleTasks()
+        sources.each { Map source ->
+            assert learner.getSkillsSummaryForCurrentUser(source.projectId).points == 200
+            assert learner.getSkillsSummaryForCurrentUser(source.projectId).skillsAchieved == 2
+        }
+        queueTasks('imported-skill-achievement')
+        Map<String, Gate> holdingSource = sources.collectEntries { Map source -> [(source.projectId): gate()] }
+        Map<String, AtomicBoolean> pauseOnce = sources.collectEntries { Map source -> [(source.projectId): new AtomicBoolean(true)] }
+        intercept('LockingService.lockForSkillReporting', [users[0]]) { BoundaryInvocation invocation ->
+            Object result = invocation.callRealMethod()
+            String projectId = invocation.getArgument(1)
+            if (pauseOnce[projectId]?.compareAndSet(true, false)) {
+                holdingSource[projectId].pause()
+            }
+            result
+        }
+        SkillsService otherAdmin = createService(skillsService.userName)
+
+        when: 'both HTTP deletion transactions hold their own source lock before either proceeds'
+        Future<Map> first = submit { requestOutcome { skillsService.deleteSkillEvent(sources[0] + [userId: users[0], timestamp: historicalDate.time]) } }
+        Future<Map> second = submit { requestOutcome { otherAdmin.deleteSkillEvent(sources[1] + [userId: users[0], timestamp: historicalDate.time]) } }
+        holdingSource.values().each { Gate boundary -> boundary.awaitArrival() }
+        holdingSource.values().each { Gate boundary -> boundary.open() }
+        Map firstOutcome = first.get(25, TimeUnit.SECONDS)
+        Map secondOutcome = second.get(25, TimeUnit.SECONDS)
+
+        then: 'a database deadlock cannot be hidden by a retry'
+        firstOutcome.success
+        secondOutcome.success
+        firstOutcome.response.body.success
+        secondOutcome.response.body.success
+
+        when:
+        releaseTasks('imported-skill-achievement')
+        waitForAsyncTasksCompletion.waitForAllScheduleTasks()
+
+        then:
+        sources.each { Map source ->
+            Map summary = learner.getSkillsSummaryForCurrentUser(source.projectId)
+            assert summary.points == 0
+            assert summary.subjects[0].points == 0
+            assert summary.skillsAchieved == 0
+            sources.each { Map skill ->
+                Map credit = learner.getSingleSkillSummaryForCurrentUser(source.projectId, skill.skillId)
+                assert credit.points == 0
+                assert !credit.achievedOn
+            }
+        }
+    }
+
     def "a delayed source reset request must retain credit earned after the reset"() {
         Map fixture = fixture(true, 1)
         SkillsService learner = createService(users[0])
@@ -1953,6 +2016,7 @@ class CatalogParticipantRaceFailuresIT extends CatalogIntSpec {
                 execution(* skills.services.CatalogParticipantBackfillService.qualify(..)) ||
                 execution(* skills.services.CatalogImportedCreditService.reconcile(..)) ||
                 execution(* skills.services.LockingService.lockProject(..)) ||
+                execution(* skills.services.LockingService.lockForSkillReporting(..)) ||
                 execution(* skills.services.LockingService.lockCatalogActivation(..)) ||
                 execution(* skills.services.LockingService.lockForSkillsCatalogFinalizationInit(..)) ||
                 execution(* skills.storage.repos.UserPointsRepo.findCatalogCreditDiscrepancies(..)) ||
