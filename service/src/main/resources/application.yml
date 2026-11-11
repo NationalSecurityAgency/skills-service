@@ -206,6 +206,7 @@ skills:
       maxQuizTextAnswerLength: 2000
       maxQuizAnswerHintLength: 2000
       maxTakeQuizInputTextAnswerLength: 50000
+      maxSurveyChoiceTextAnswerLength: 1000
       maxTextInputAiGradingCorrectAnswerLength: 10000
       maxSkillNameLength: 100
       maxSubjectNameLength: 50

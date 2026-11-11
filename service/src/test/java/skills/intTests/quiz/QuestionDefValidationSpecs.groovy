@@ -580,4 +580,38 @@ class QuestionDefValidationSpecs extends DefaultIntSpec {
         skillsClientException.message.contains("[answers.multiPartAnswer.value] must not exceed [2000] chars")
     }
 
+    def "text responses are rejected for quiz questions"() {
+        Map quiz = QuizDefFactory.createQuiz(1)
+        skillsService.createQuizDef(quiz)
+        Map question = QuizDefFactory.createChoiceQuestion(1, 1, 3, QuizQuestionType.SingleChoice)
+        question.answers[2].allowCustomText = true
+
+        when:
+        skillsService.createQuizQuestionDef(question)
+
+        then:
+        SkillsClientException e = thrown(SkillsClientException)
+        e.httpStatus == HttpStatus.BAD_REQUEST
+        e.message.contains('Custom text answers are only supported for choice-based survey questions')
+        e.message.contains("errorCode:BadParam")
+        !skillsService.getQuizQuestionDefs(quiz.quizId).questions
+    }
+
+    def "text responses are rejected when a quiz question is updated"() {
+        Map quiz = QuizDefFactory.createQuiz(1)
+        skillsService.createQuizDef(quiz)
+        def saved = skillsService.createQuizQuestionDef(QuizDefFactory.createChoiceQuestion(1, 1, 3, QuizQuestionType.SingleChoice)).body
+        saved.quizId = quiz.quizId
+        saved.answers[2].allowCustomText = true
+
+        when:
+        skillsService.updateQuizQuestionDef(saved)
+
+        then:
+        SkillsClientException e = thrown(SkillsClientException)
+        e.httpStatus == HttpStatus.BAD_REQUEST
+        e.message.contains('Custom text answers are only supported for choice-based survey questions')
+        e.message.contains("errorCode:BadParam")
+        skillsService.getQuizQuestionDefs(quiz.quizId).questions[0].answers.allowCustomText == [false, false, false]
+    }
 }

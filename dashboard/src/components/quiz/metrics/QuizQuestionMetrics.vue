@@ -335,6 +335,7 @@ const removeExpanderClass = (rowData) => {
       <template #expansion="slotProps">
         <QuizAnswerHistory :answer-def-id="slotProps.data.id"
                            :is-survey="isSurvey"
+                           :allow-custom-text="slotProps.data.allowCustomText"
                            :question-type="q.questionType"
                            :data-cy="`row${slotProps.index}-answerHistory`"
                            :dateRange="dateRange"

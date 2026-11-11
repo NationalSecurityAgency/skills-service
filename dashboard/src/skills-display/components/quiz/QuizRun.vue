@@ -190,6 +190,17 @@ const schema = object({
                       .label('Rating'),
                 }),
             'quizAnswers': array()
+                .of(object({
+                  'answerText': string()
+                      .nullable()
+                      .when(['selected', 'allowCustomText'], {
+                        is: (selected, allowCustomText) => !!selected && !!allowCustomText,
+                        then: (sch) => sch
+                            .trim()
+                            .required('Text response is required')
+                            .max(appConfig.maxSurveyChoiceTextAnswerLength, `Text response must not exceed ${numFormat.pretty(appConfig.maxSurveyChoiceTextAnswerLength)} characters`),
+                      }),
+                }))
                 .when('questionType', {
                   is: (questionType) => questionType === QuestionType.SingleChoice || questionType === QuestionType.MultipleChoice,
                   then: (sch)  => sch
@@ -207,7 +218,7 @@ const schema = object({
           })
       ),
 })
-const { values, meta, handleSubmit, isSubmitting, resetForm, setFieldValue, validate, validateField, errors, errorBag, setErrors } = useForm({
+const { values, meta, handleSubmit, isSubmitting, resetForm, setFieldValue, setFieldError, validate, validateField, errors, errorBag, setErrors } = useForm({
   validationSchema: schema,
 })
 
@@ -351,9 +362,13 @@ const startQuizAttempt = () => {
         quizInfo.value.questions = questions;
         const copy = ({ ...quizInfo.value });
         copy.questions = quizInfo.value.questions.map((q) => {
+          const isChoice = q.questionType === QuestionType.SingleChoice || q.questionType === QuestionType.MultipleChoice
+          // a choice answer with a saved text response is selected, even if the answer no longer allows text
+          const choiceText = (a) => (isChoice ? enteredText?.find((t) => t.answerId === a.id)?.answerText : undefined)
           const answerOptions = q.answerOptions.map((a) => ({
             ...a,
-            selected: !!(selectedAnswerIds && selectedAnswerIds.includes(a.id)),
+            selected: !!(selectedAnswerIds && selectedAnswerIds.includes(a.id)) || choiceText(a) !== undefined,
+            answerText: choiceText(a),
           }));
           if (enteredText && q.questionType === QuestionType.TextInput) {
             const answerId = q.answerOptions[0].id;
@@ -403,18 +418,38 @@ const initializeFormData = (copy) => {
   reportAnswerPromises.value = {}
   resetForm({ values: { questions: formQuestions }, errors: {} });
 }
+const textResponseFieldName = (questionId, answerId) => {
+  const qIndex = quizInfo.value.questions.findIndex((q) => q.id === questionId)
+  const aIndex = qIndex >= 0 ? quizInfo.value.questions[qIndex].answerOptions.findIndex((a) => a.id === answerId) : -1
+  return qIndex >= 0 && aIndex >= 0 ? `questions[${qIndex}].quizAnswers[${aIndex}].answerText` : null
+}
 const updateSelectedAnswers = (questionSelectedAnswer) => {
   isAttemptAlreadyInProgress.value = true;
   if (questionSelectedAnswer.reportAnswerPromise) {
-    const key = QuestionType.isFillInTheBlank(questionSelectedAnswer.questionType) ? `answer:${questionSelectedAnswer.changedAnswerId}` : `question:${questionSelectedAnswer.questionId}`
+    const perAnswer = QuestionType.isFillInTheBlank(questionSelectedAnswer.questionType) || questionSelectedAnswer.isTextEdit
+    const key = perAnswer ? `answer:${questionSelectedAnswer.changedAnswerId}` : `question:${questionSelectedAnswer.questionId}`
+    if (!perAnswer && QuestionType.isSingleChoice(questionSelectedAnswer.questionType)) {
+      // the question's own save now covers text responses of its other answers
+      quizInfo.value.questions.find((q) => q.id === questionSelectedAnswer.questionId)?.answerOptions
+          .forEach((a) => delete reportAnswerPromises.value[`answer:${a.id}`])
+    } else if (!perAnswer) {
+      delete reportAnswerPromises.value[`answer:${questionSelectedAnswer.changedAnswerId}`]
+    }
     const trackedSave = {
       promise: Promise.resolve(questionSelectedAnswer.reportAnswerPromise),
       answer: QuestionType.isFillInTheBlank(questionSelectedAnswer.questionType) ? questionSelectedAnswer : null,
       failed: false,
     }
     reportAnswerPromises.value[key] = trackedSave
-    trackedSave.promise.catch(() => {
+    trackedSave.promise.catch((error) => {
       trackedSave.failed = true
+      if (questionSelectedAnswer.isTextEdit) {
+        const fieldName = textResponseFieldName(questionSelectedAnswer.questionId, questionSelectedAnswer.changedAnswerId)
+        const explanation = error?.response?.data?.explanation
+        if (fieldName && explanation) {
+          setFieldError(fieldName, explanation)
+        }
+      }
     })
   }
 }

@@ -121,6 +121,7 @@ const fieldName = computed(() => {
 
 onMounted(() => {
   answerOptions.value = props.q.answerOptions.map((a) => ({ ...a, selected: a.selected ? a.selected : false }));
+  selectedAnswerIds.value = new Set(answerOptions.value.filter((a) => a.selected).map((a) => a.id))
   if (isRating.value) {
     const selectedAnswer = answerOptions.value.find((a) => a.selected);
     if (selectedAnswer) {
@@ -147,7 +148,17 @@ const textAnswerChanged = (providedAnswerText) => {
   scheduleAnswerSave(currentAnswer, 'answer-text-changed')
 }
 
-const selectionChanged = (currentAnswer) => { 
+const selectedAnswerIds = ref(new Set())
+const selectionChanged = (currentAnswer) => {
+  if (currentAnswer.isTextEdit) {
+    // text responses are debounced; selection changes save right away
+    scheduleAnswerSave(currentAnswer, 'selected-answer')
+    return
+  }
+  selectedAnswerIds.value = new Set(currentAnswer.selectedAnswerIds)
+  // a selection change supersedes pending text saves of the changed answer, and of all answers for single choice
+  const supersededIds = isSingleChoice.value ? props.q.answerOptions.map((a) => a.id) : [currentAnswer.changedAnswerId]
+  supersededIds.forEach((answerId) => cancelScheduledSave(answerId))
   emit('selected-answer', {
     ...currentAnswer,
     reportAnswerPromise: reportAnswer(currentAnswer),
@@ -168,6 +179,16 @@ const fillInTheBlankChangedDebounced = (textInput, answerIndex) => {
     answerText: textInput,
   }
   scheduleAnswerSave(currentAnswer, 'fill-in-the-blank-changed')
+}
+const cancelScheduledSave = (answerId) => {
+  const state = blankSaveStates.get(answerId)
+  if (state?.timer) {
+    clearTimeout(state.timer)
+    state.timer = null
+    // a later save of this answer takes its place
+    state.pending?.resolve(null)
+    state.pending = null
+  }
 }
 const scheduleAnswerSave = (currentAnswer, eventName) => {
   const answerId = currentAnswer.changedAnswerId
@@ -194,7 +215,13 @@ const scheduleAnswerSave = (currentAnswer, eventName) => {
   state.timer = setTimeout(() => {
     state.timer = null
     state.pending = null
-    const save = () => reportAnswer(pending.answer)
+    const save = () => {
+      // never re-select an answer that was deselected in the meantime
+      if (pending.answer.isTextEdit && !selectedAnswerIds.value.has(pending.answer.changedAnswerId)) {
+        return Promise.resolve(null)
+      }
+      return reportAnswer(pending.answer)
+    }
     // A later edit waits for an in-flight save, and can retry after a failure.
     const request = state.inFlight.then(save, save)
     // Keep the save failure available to the parent without an unhandled rejection in this chain.

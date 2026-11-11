@@ -98,6 +98,9 @@ class QuizRunService {
     PublicPropsBasedValidator propsBasedValidator
 
     @Autowired
+    PublicProps publicProps
+
+    @Autowired
     QuizSettingsRepo quizSettingsRepo
 
     @Autowired
@@ -340,6 +343,7 @@ class QuizRunService {
                 answerOptions = quizAnswerDefs.collect {
                     new QuizAnswerOptionsInfo(
                             id: it.id,
+                            allowCustomText: it.allowCustomText,
                             answerOption: it.answer ? it.answer : it.multiPartAnswer
                     )
                 }
@@ -419,8 +423,12 @@ class QuizRunService {
             List<UserQuizAnswerAttemptRepo.AnswerIdAndAnswerText> alreadySelected = quizAttemptAnswerRepo.getSelectedAnswerIdsAndText(inProgressAttempt.id)
 
             List<Integer> selectedAnswerIds = alreadySelected?.findAll({!it.getAnswerText()})?.collect { it.getAnswerId()}
+            // choice answers store sanitized text responses
+            Set<Integer> choiceAnswerIds = questions.findAll { it.questionType in [QuizQuestionType.SingleChoice.toString(), QuizQuestionType.MultipleChoice.toString()] }
+                    .collectMany { it.answerOptions*.id }.toSet()
             List<QuizAttemptStartResult.AnswerIdAndEnteredText> enteredText = alreadySelected?.findAll({it.getAnswerText()})?.collect {
-                new QuizAttemptStartResult.AnswerIdAndEnteredText(answerId: it.getAnswerId(), answerText: it.getAnswerText())
+                String answerText = choiceAnswerIds.contains(it.getAnswerId()) ? InputSanitizer.unsanitizeEscapedHtml(it.getAnswerText()) : it.getAnswerText()
+                new QuizAttemptStartResult.AnswerIdAndEnteredText(answerId: it.getAnswerId(), answerText: answerText)
             }
 
             List<UserQuizQuestionAttempt> attemptQuestion = quizQuestionAttemptRepo.findAllByUserQuizAttemptRefId(inProgressAttempt.id)
@@ -614,6 +622,18 @@ class QuizRunService {
 
         QuizAnswerDefRepo.AnswerDefPartialInfo answerDefPartialInfo = getAnswerDefPartialInfo(quizId, answerDefId)
 
+        // a blank response keeps the selection; completeQuizAttempt requires the text
+        if (answerDefPartialInfo.allowCustomText && quizReportAnswerReq.isSelected && StringUtils.isNotBlank(quizReportAnswerReq.answerText)) {
+            int maxLength = publicProps.getInt(PublicProps.UiProp.maxSurveyChoiceTextAnswerLength)
+            if (quizReportAnswerReq.answerText.length() > maxLength) {
+                throw new SkillQuizException("answerText must not exceed [${maxLength}] chars", quizId, ErrorCode.BadParam)
+            }
+            CustomValidationResult result = validator.validateDescription(new CustomValidator.ValidateDescReq(description: quizReportAnswerReq.answerText, quizId: quizId))
+            if (!result.valid) {
+                throw new SkillQuizException("answerText is invalid: ${result.msg}", quizId, ErrorCode.BadParam)
+            }
+        }
+
         if (answerDefPartialInfo.getQuestionType() == QuizQuestionType.TextInput) {
             if (quizReportAnswerReq.isSelected) {
                 propsBasedValidator.quizValidationMaxStrLength(PublicProps.UiProp.maxTakeQuizInputTextAnswerLength,
@@ -721,6 +741,20 @@ class QuizRunService {
 
     }
 
+    private void validateSelectedCustomTextAnswers(String quizId, Integer quizAttemptId, List<QuizAnswerDef> answerDefs, Set<Integer> selectedAnswerIds) {
+        Set<Integer> customTextIds = answerDefs.findAll { it.allowCustomText && selectedAnswerIds.contains(it.id) }.collect { it.id }.toSet()
+        if (customTextIds) {
+            List<UserQuizAnswerAttempt> answerAttempts = quizAttemptAnswerRepo.findAllByUserQuizAttemptRefIdAndQuizAnswerDefinitionRefIdIn(quizAttemptId, customTextIds)
+            if (answerAttempts.any { StringUtils.isBlank(it.answer) }) {
+                throw new SkillQuizException("Text response is required for each selected answer that allows text", quizId, ErrorCode.BadParam)
+            }
+        }
+    }
+
+    private static String sanitizeCustomText(String answerText) {
+        return StringUtils.isBlank(answerText) ? null : InputSanitizer.sanitize(answerText)
+    }
+
     private void handleReportingAChoiceBasedQuestion(String userId, Integer attemptId, Integer answerDefId, QuizReportAnswerReq quizReportAnswerReq, QuizAnswerDefRepo.AnswerDefPartialInfo answerDefPartialInfo) {
         if (!quizReportAnswerReq.isSelected) {
             quizAttemptAnswerRepo.deleteByUserQuizAttemptRefIdAndQuizAnswerDefinitionRefId(attemptId, answerDefId)
@@ -733,10 +767,17 @@ class QuizRunService {
                         quizAnswerDefinitionRefId: answerDefId,
                         userId: userId,
                         status: isCorrectChoice ? UserQuizAnswerAttempt.QuizAnswerStatus.CORRECT : UserQuizAnswerAttempt.QuizAnswerStatus.WRONG,
+                        answer: answerDefPartialInfo.allowCustomText ? sanitizeCustomText(quizReportAnswerReq.answerText) : null,
                 )
                 quizAttemptAnswerRepo.save(answerAttempt)
             } else {
-                log.warn("Answer was already persisted for user [{}] for answerDefId of [{}]", userId, answerDefId)
+                if (answerDefPartialInfo.allowCustomText) {
+                    UserQuizAnswerAttempt existing = quizAttemptAnswerRepo.findByUserQuizAttemptRefIdAndQuizAnswerDefinitionRefId(attemptId, answerDefId)
+                    existing.answer = sanitizeCustomText(quizReportAnswerReq.answerText)
+                    quizAttemptAnswerRepo.save(existing)
+                } else {
+                    log.warn("Answer was already persisted for user [{}] for answerDefId of [{}]", userId, answerDefId)
+                }
             }
 
             List<QuizAnswerDefRepo.AnswerIdAndCorrectness> questions = quizAnswerRepo.getAnswerIdsAndCorrectnessIndicator(answerDefPartialInfo.getQuestionRefId())
@@ -923,6 +964,7 @@ class QuizRunService {
         Map<Integer, List<QuizAnswerDef>> answerDefByQuestionId = dbAnswersDefs.groupBy {it.questionRefId }
 
         Set<Integer> selectedAnswerIds = quizAttemptAnswerRepo.getSelectedAnswerIds(quizAttemptId).toSet()
+        validateSelectedCustomTextAnswers(quizId, quizAttemptId, dbAnswersDefs, selectedAnswerIds)
         List<UserQuizQuestionAttempt> existingAttempt = quizQuestionAttemptRepo.findAllByUserQuizAttemptRefId(quizAttemptId)
 
         Boolean needsManualGrading = false

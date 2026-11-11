@@ -190,6 +190,9 @@ const toggleQuestionState = () => {
             <div class="flex items-center justify-center ml-2 pb-1">
               <div class="answerText" :data-cy="`answer-${index}_displayText`">{{ a.answer }}</div>
             </div>
+            <div v-if="a.allowCustomText" class="flex items-center justify-center ml-2 pb-1" :data-cy="`answer-${index}_allowsTextResponse`">
+              <Tag severity="secondary" class="text-xs"><i class="fas fa-keyboard mr-1" aria-hidden="true"></i>Text response</Tag>
+            </div>
           </div>
         </div>
         <div v-if="isFillInTheBlankType && !collapsed" class="flex flex-col">
