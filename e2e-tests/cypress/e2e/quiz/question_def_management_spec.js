@@ -305,6 +305,54 @@ describe('Quiz Question CRUD Tests', () => {
         cy.get('[data-cy="answersError"]').should('not.be.visible')
     });
 
+    ['SingleChoice', 'MultipleChoice', 'FillInTheBlank'].forEach((questionType) => {
+        it(`modal validation: ${questionType} answers cannot exceed maxQuizTextAnswerLength`, function () {
+            cy.createQuizDef(1);
+            cy.visit('/administrator/quizzes/quiz1');
+            cy.openDialog('[data-cy="btn_Questions"]', true)
+            cy.get('[data-cy="answerTypeSelector"]').click()
+            cy.get(`[role="option"] [data-cy="selectionItem_${questionType}"]`).click()
+            cy.typeInMarkdownEditor('[data-cy="questionText"]', questionType === 'FillInTheBlank' ? 'First ___ and second ___' : 'Choose an answer')
+            cy.get('[data-cy="answer-0"] [data-cy="answerText"]').type('First answer')
+            if (questionType !== 'FillInTheBlank') {
+                cy.get('[data-cy="answer-0"] [data-cy="selectCorrectAnswer"]').click()
+                if (questionType === 'MultipleChoice') {
+                    cy.get('[data-cy="answer-1"] [data-cy="selectCorrectAnswer"]').click()
+                }
+            }
+
+            cy.request('/public/config').its('body.maxQuizTextAnswerLength').then((configuredMaximum) => {
+                const maxLength = Number(configuredMaximum)
+                const answer = 'a'.repeat(maxLength)
+                const inputSelector = '[data-cy="answer-1"] [data-cy="answerText"]'
+                const errorSelector = '[data-cy="answers[1].answerError"]'
+
+                cy.get(inputSelector).type(answer, { delay: 0 })
+                cy.get(errorSelector).should('not.be.visible')
+                cy.get('[data-cy="saveDialogBtn"]').should('be.enabled')
+
+                cy.get(inputSelector).type('x').should('have.value', `${answer}x`)
+                cy.get(errorSelector).should('be.visible')
+                    .and('contain.text', `Answer must be at most ${maxLength} characters`)
+                cy.get('[data-cy="saveDialogBtn"]').should('be.disabled')
+
+                cy.get(inputSelector).type('{backspace}').should('have.value', answer)
+                cy.get(errorSelector).should('not.be.visible')
+                cy.get('[data-cy="saveDialogBtn"]').should('be.enabled')
+                cy.clickSaveDialogBtn()
+                if (questionType === 'FillInTheBlank') {
+                    cy.get('[data-cy="questionDisplayCard-1"]').should('contain.text', answer)
+                } else {
+                    cy.get('[data-cy="questionDisplayCard-1"] [data-cy="answer-1_displayText"]').should('have.text', answer)
+                }
+
+                cy.reload()
+                cy.get('[data-cy="editQuestionButton_1"]').click()
+                cy.get(inputSelector).should('have.value', answer)
+            });
+        });
+    });
+
     it('modal validation: add remove questions button enable/disable state', function () {
         cy.createQuizDef(1);
         cy.visit('/administrator/quizzes/quiz1');
@@ -1061,6 +1109,47 @@ describe('Quiz Question CRUD Tests', () => {
             cy.clickSaveDialogBtn()
             cy.get('[data-cy="question-1-answer-1"]').should('contain.text', 'Second Term')
                 .and('contain.text', 'Second Answer')
+        });
+    });
+
+    ['term', 'value'].forEach((field) => {
+        it(`modal validation: matching ${field}s cannot exceed maxQuizTextAnswerLength`, function () {
+            cy.createQuizDef(1);
+            cy.visit('/administrator/quizzes/quiz1');
+            cy.openDialog('[data-cy="btn_Questions"]', true)
+            cy.typeInMarkdownEditor('[data-cy="questionText"]', 'Match terms to answers')
+            cy.get('[data-cy="answerTypeSelector"]').click()
+            cy.get('[data-cy="selectionItem_Matching"]').click()
+            cy.get('[data-cy="termText-0"]').type('First term')
+            cy.get('[data-cy="answerText-0"]').type('First answer')
+            cy.get(field === 'term' ? '[data-cy="answerText-1"]' : '[data-cy="termText-1"]').type('Second pair')
+
+            cy.request('/public/config').its('body.maxQuizTextAnswerLength').then((configuredMaximum) => {
+                const maxLength = Number(configuredMaximum)
+                const answer = 'a'.repeat(maxLength)
+                const inputSelector = field === 'term' ? '[data-cy="termText-1"]' : '[data-cy="answerText-1"]'
+                const errorSelector = `[data-cy="answers[1].multiPartAnswer.${field}Error"]`
+
+                cy.get(inputSelector).type(answer, { delay: 0 })
+                cy.get(errorSelector).should('not.be.visible')
+                cy.get('[data-cy="saveDialogBtn"]').should('be.enabled')
+
+                cy.get(inputSelector).type('x').should('have.value', `${answer}x`)
+                cy.get(errorSelector).should('be.visible')
+                    .and('contain.text', `must be at most ${maxLength} characters`)
+                cy.get('[data-cy="saveDialogBtn"]').should('be.disabled')
+
+                cy.get(inputSelector).type('{backspace}').should('have.value', answer)
+                cy.get(errorSelector).should('not.be.visible')
+                cy.get('[data-cy="saveDialogBtn"]').should('be.enabled')
+                cy.clickSaveDialogBtn()
+                cy.get('[data-cy="question-1-answer-1"]').should('contain.text', answer)
+                    .and('contain.text', 'Second pair')
+
+                cy.reload()
+                cy.get('[data-cy="editQuestionButton_1"]').click()
+                cy.get(inputSelector).should('have.value', answer)
+            });
         });
     });
 

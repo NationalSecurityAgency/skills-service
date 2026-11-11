@@ -330,14 +330,14 @@ const schema = object({
   'answers': array()
       .of(
           object({
-            'answer': string().nullable().label('Answer'),
+            'answer': string().nullable().label('Answer').max(appConfig.maxQuizTextAnswerLength),
             'isCorrect': boolean().label('Is Correct'),
             'multiPartAnswer': object({
-              term: string().nullable().when([], {
+              term: string().nullable().max(appConfig.maxQuizTextAnswerLength).when([], {
                 is: () => isQuestionTypeMatching.value,
                 then: (schema) => schema.noHtml(),
               }),
-              value: string().nullable().when([], {
+              value: string().nullable().max(appConfig.maxQuizTextAnswerLength).when([], {
                 is: () => isQuestionTypeMatching.value,
                 then: (schema) => schema.noHtml(),
               }),
