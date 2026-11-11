@@ -14,10 +14,15 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <script setup>
-import { computed, watch, ref } from 'vue'
+import { computed, watch, ref, nextTick } from 'vue'
 import { useSkillsDisplayThemeState } from '@/skills-display/stores/UseSkillsDisplayThemeState.js';
 import { useSkillsAnnouncer } from '@/common-components/utilities/UseSkillsAnnouncer.js'
 import SkillsOverlay from '@/components/utils/SkillsOverlay.vue';
+import SkillsTextInput from '@/components/utils/inputForm/SkillsTextInput.vue';
+
+defineOptions({
+  inheritAttrs: false
+})
 
 const props = defineProps({
   a: Object,
@@ -28,6 +33,8 @@ const props = defineProps({
     type: Boolean,
     default: true,
   },
+  // form field for the text response of an answer that allows text
+  textInputName: String,
 })
 const emit = defineEmits(['input', 'selection-changed'])
 const announcer = useSkillsAnnouncer()
@@ -86,8 +93,9 @@ const ariaLabel = computed(() => {
   }
   return res;
 })
-const textChanged = (event) => {
-  emit('selection-changed', { id: props.a.id, selected: selected.value, answerText: event.target.value });
+const showTextInput = computed(() => props.a.allowCustomText && selected.value && props.textInputName)
+const textChanged = (answerText) => {
+  emit('selection-changed', { id: props.a.id, selected: selected.value, answerText, isTextEdit: true });
 }
 const flipSelected = () => {
   if (!props.a.isGraded) {
@@ -96,8 +104,11 @@ const flipSelected = () => {
     emit('selection-changed', {
       id: props.a.id,
       selected: selected.value,
-      answerText: props.a.answerText,
+      answerText: selected.value ? props.a.answerText : undefined,
     });
+    if (selected.value && props.a.allowCustomText) {
+      nextTick(() => document.getElementById(props.textInputName)?.focus())
+    }
     const announceMsg = selected.value
         ? `Selected answer number ${props.answerNum} as the correct answer for the question number ${props.qNum}`
         : `Removed selection from the answer number ${props.answerNum}`;
@@ -108,7 +119,8 @@ const flipSelected = () => {
 
 <template>
   <div class="answer-row"
-       @keydown.space="(event) => { if (event.target === event.currentTarget) { event.preventDefault(); flipSelected(); } }"
+       v-bind="$attrs"
+       @keydown.prevent.space="flipSelected"
        @click="flipSelected"
        :tabindex="a.isGraded ? -1 : 0"
        :class="{ 'bg-gray-100 dark:bg-gray-800 border border-green-400! rounded-border font-semibold sd-theme-tile-background': selected, 'point-cursor hover:border-green-400! border-dashed answer-row-editable skills-theme-quiz-selected-answer-row' : !a.isGraded }"
@@ -131,13 +143,17 @@ const flipSelected = () => {
       </div>
       <div class="flex-1 ml-2">
         <span class="answerText" data-cy="answerText">{{ a.answerOption }}</span>
-        <input v-if="a.allowCustomText" type="text" :value="a.answerText || ''"
-               :disabled="!selected || a.isGraded" :aria-label="a.answerOption"
-               data-cy="customAnswerText" class="ml-2 border rounded px-2"
-               @click.stop @keydown.stop @input="textChanged" />
       </div>
     </div>
   </div>
+  <SkillsTextInput v-if="showTextInput"
+                   class="ml-10 mr-4 mt-1 mb-1"
+                   :name="textInputName"
+                   :disabled="a.isGraded"
+                   :aria-label="`Text response for answer number ${answerNum} of the question number ${qNum}: ${a.answerOption}`"
+                   placeholder="Please enter your response"
+                   data-cy="customAnswerText"
+                   @input="textChanged" />
 </template>
 
 <style scoped>
