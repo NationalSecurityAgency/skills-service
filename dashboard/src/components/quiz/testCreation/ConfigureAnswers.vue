@@ -20,6 +20,7 @@ import SelectCorrectAnswer from '@/components/quiz/testCreation/SelectCorrectAns
 import { useAppConfig } from '@/common-components/stores/UseAppConfig.js';
 import QuestionType from '@/skills-display/components/quiz/QuestionType.js';
 import {useLog} from "@/components/utils/misc/useLog.js";
+import SkillsCheckboxInput from '@/components/utils/inputForm/SkillsCheckboxInput.vue';
 
 const model = defineModel()
 const props = defineProps({
@@ -37,6 +38,9 @@ const appConfig = useAppConfig()
 const log = useLog()
 const isQuizType = computed(() => {
   return props.quizType === 'Quiz';
+})
+const showTextResponseColumn = computed(() => {
+  return !isQuizType.value && (QuestionType.isSingleChoice(props.questionType) || QuestionType.isMultipleChoice(props.questionType));
 })
 const maxAnswersAllowed = computed(() => {
   return appConfig.maxAnswersPerQuizQuestion;
@@ -93,7 +97,10 @@ defineExpose( {
 
 <template>
   <div v-if="model && model.length > 0" class="mt-2">
-    <div v-for="(answer, index) in fields" :key="answer.key" class="flex flex-wrap items-center gap-0" :data-cy="`answer-${index}`">
+    <div v-if="showTextResponseColumn" class="hidden sm:grid answer-grid items-end" data-cy="textResponseColumnHeader">
+      <div class="col-start-2 text-center text-sm leading-tight">Text Response</div>
+    </div>
+    <div v-for="(answer, index) in fields" :key="answer.key" class="flex flex-wrap items-center gap-0" :class="{ 'sm:grid answer-grid': showTextResponseColumn }" :data-cy="`answer-${index}`">
       <SelectCorrectAnswer
           v-if="isQuizType && !QuestionType.isFillInTheBlank(questionType)"
           :id="`answers[${index}].isCorrect`"
@@ -114,11 +121,12 @@ defineExpose( {
           :id="`answer_${index}`"
           :name="`answers[${index}].answer`"/>
 
-      <label v-if="!isQuizType && (questionType === QuestionType.SingleChoice || questionType === QuestionType.MultipleChoice)" class="mx-2">
-        <input type="checkbox" v-model="answer.value.allowCustomText" data-cy="allowCustomText"
-               :aria-label="`Allow text response for answer ${index + 1}`" />
-        Allow text response
-      </label>
+      <div v-if="showTextResponseColumn" class="flex items-center justify-center gap-1 mx-2 sm:mx-0" data-cy="allowCustomText">
+        <SkillsCheckboxInput :name="`answers[${index}].allowCustomText`"
+                             :binary="true"
+                             :aria-label="`Allow a text response for answer number ${index + 1}`" />
+        <span class="sm:hidden text-sm" aria-hidden="true">Text response</span>
+      </div>
 
       <ButtonGroup class="ml-1">
         <SkillsButton
@@ -143,5 +151,7 @@ defineExpose( {
 </template>
 
 <style scoped>
-
+.answer-grid {
+  grid-template-columns: minmax(0, 1fr) 4.5rem 6rem;
+}
 </style>
