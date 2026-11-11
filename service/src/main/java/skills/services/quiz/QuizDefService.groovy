@@ -950,7 +950,17 @@ class QuizDefService {
 
         Page<UserQuizAnswer> answerAttemptsPage = userQuizAnswerAttemptRepo.findUserAnswers(answerDefId, usersTableAdditionalUserTagKey, startDate, endDate, pageRequest)
         long count = answerAttemptsPage.getTotalElements()
-        List<UserQuizAnswer> answerAttempts = answerAttemptsPage.getContent()
+        List answerAttempts = answerAttemptsPage.getContent()
+        QuizQuestionType questionType = quizQuestionRepo.findById(quizAnswerDef.questionRefId).map({ it.type }).orElse(null)
+        if (questionType in [QuizQuestionType.SingleChoice, QuizQuestionType.MultipleChoice]) {
+            // choice answers store sanitized text responses
+            answerAttempts = answerAttempts.collect { UserQuizAnswer answer ->
+                [updated          : answer.updated, answerTxt: InputSanitizer.unsanitizeEscapedHtml(answer.answerTxt),
+                 status           : answer.status, userId: answer.userId, userIdForDisplay: answer.userIdForDisplay,
+                 userQuizAttemptId: answer.userQuizAttemptId, userTag: answer.userTag,
+                 firstName        : answer.firstName, lastName: answer.lastName]
+            }
+        }
         return new TableResult(totalCount: count, data: answerAttempts, count: count)
     }
 
@@ -1046,6 +1056,7 @@ class QuizDefService {
                                 numAnswered: numAnswered,
                                 numAnsweredCorrect: isSurvey ? numAnswered : (answerCorrectCount?.getCount() ?: 0),
                                 numAnsweredWrong: isSurvey ? 0 : (answerWrongCount?.getCount() ?: 0),
+                                allowCustomText: quizAnswerDefResult.allowCustomText,
                         )
                     }
             )
@@ -1203,8 +1214,9 @@ class QuizDefService {
                             ]
                         } else {
                             answer = InputSanitizer.unsanitizeEscapedHtml(answerDef.answer)
-                            if (answerDef.allowCustomText && foundSelected) {
-                                answer = "${answer}: ${foundSelected.answerText ?: ''}".toString()
+                            // saved text is shown even if the answer no longer allows text
+                            if (foundSelected?.answerText) {
+                                answer = "${answer}: ${InputSanitizer.unsanitizeEscapedHtml(foundSelected.answerText)}".toString()
                             }
                         }
                         Boolean needsGrading = foundSelected && foundSelected.answerStatus == UserQuizAnswerAttempt.QuizAnswerStatus.NEEDS_GRADING
@@ -1319,7 +1331,7 @@ class QuizDefService {
     }
 
     private void validate(QuizDef quizDef, QuizQuestionDefRequest questionDefRequest) {
-        if (questionDefRequest.answers?.any { it.allowCustomText }) {
+        if (questionDefRequest.answers?.any { it?.allowCustomText }) {
             QuizValidator.isTrue(quizDef.type == QuizDefParent.QuizType.Survey &&
                     questionDefRequest.questionType in [QuizQuestionType.SingleChoice, QuizQuestionType.MultipleChoice],
                     'Custom text answers are only supported for choice-based survey questions', quizDef.quizId)
