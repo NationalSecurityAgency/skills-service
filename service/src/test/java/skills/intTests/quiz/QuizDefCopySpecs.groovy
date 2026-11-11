@@ -1135,4 +1135,34 @@ class QuizDefCopySpecs extends DefaultIntSpec {
         skillsService.reportQuizAnswerForUserId(quiz.quizId, quizAttempt.id, quizAttempt.questions[1].answerOptions[pass ? 0 : 1].id, userId)
         skillsService.completeQuizAttemptForUserId(quiz.quizId, quizAttempt.id, userId).body
     }
+
+    def "copying a survey keeps text responses"() {
+        def survey = QuizDefFactory.createQuizSurvey(1)
+        skillsService.createQuizDef(survey)
+        def question = QuizDefFactory.createMultipleChoiceSurveyQuestion(1, 1, 3)
+        question.answers[2].allowCustomText = true
+        skillsService.createQuizQuestionDef(question)
+
+        when:
+        skillsService.copyQuiz(survey.quizId, [quizId: 'newSurveyCopy', name: 'Copy of Survey', description: '', type: survey.type])
+
+        then:
+        skillsService.getQuizQuestionDefs('newSurveyCopy').questions[0].answers.allowCustomText == [false, false, true]
+    }
+
+    def "copying a survey as a quiz clears text responses"() {
+        def survey = QuizDefFactory.createQuizSurvey(1)
+        skillsService.createQuizDef(survey)
+        def question = QuizDefFactory.createMultipleChoiceSurveyQuestion(1, 1, 3)
+        question.answers[2].allowCustomText = true
+        skillsService.createQuizQuestionDef(question)
+
+        when:
+        skillsService.copyQuiz(survey.quizId, [quizId: 'newQuizCopy', name: 'Copy as Quiz', description: '', type: 'Quiz'])
+        def copied = skillsService.getQuizDef('newQuizCopy')
+
+        then:
+        copied.type == 'Quiz'
+        skillsService.getQuizQuestionDefs('newQuizCopy').questions[0].answers.allowCustomText == [false, false, false]
+    }
 }
