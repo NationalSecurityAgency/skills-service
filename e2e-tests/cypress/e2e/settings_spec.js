@@ -438,6 +438,8 @@ describe('Settings Tests', () => {
 
     it('Email Server Settings', () => {
 
+        // Successful email saves have no rendered confirmation; wait before reloading settings.
+        cy.intercept('POST', '/root/saveEmailSettings').as('saveEmailSettings');
         cy.intercept('GET', '/root/getEmailSettings')
             .as('loadEmailSettings');
         cy.intercept('GET', '/app/userInfo')
@@ -514,6 +516,7 @@ describe('Settings Tests', () => {
         // cy.get('[data-cy=emailSettingsTest]').click();
         cy.get('[data-cy=emailSettingsSave]')
             .click();
+        cy.wait('@saveEmailSettings').its('response.statusCode').should('eq', 200);
         //verify that appropriate saved data is loaded when form is loaded again
         cy.get('[data-cy="nav-System"]')
             .click();
@@ -566,8 +569,8 @@ describe('Settings Tests', () => {
 
         cy.get('[data-cy=emailSettingsSave]')
             .click();
-        cy.wait(12 * 1000);
-        cy.get('[data-pc-name="message"]').should('be.visible');
+        cy.contains('[data-cy="emailConnectionSettings"] [data-pc-name="message"]', /timed out/i, { timeout: 20000 })
+            .should('be.visible');
     });
 
     it('System Settings', () => {
@@ -617,6 +620,7 @@ describe('Settings Tests', () => {
     });
 
     it('Updating system settings does not reset email settings', () => {
+        cy.intercept('POST', '/root/saveEmailSettings').as('saveEmailSettings');
         cy.intercept('GET', '/root/getEmailSettings')
             .as('loadEmailSettings');
         cy.intercept('GET', '/app/userInfo')
@@ -630,8 +634,8 @@ describe('Settings Tests', () => {
         cy.wait('@loadUserInfo');
         cy.wait('@loadEmailSettings');
 
-        cy.wait(1000)
         cy.get('[data-cy=host]')
+            .should('be.visible')
             .type('{selectall}localhost');
         cy.get('[data-cy=port]')
             .type('{selectall}1025');
@@ -643,8 +647,11 @@ describe('Settings Tests', () => {
             .type('{selectall}foo@skilltree.madeup');
         cy.get('[data-cy=emailSettingsTest]')
             .click();
+        cy.contains('[data-cy="emailConnectionSettings"] [data-pc-name="message"]', 'Email Connection Successful')
+            .should('be.visible');
         cy.get('[data-cy=emailSettingsSave]')
             .click();
+        cy.wait('@saveEmailSettings').its('response.statusCode').should('eq', 200);
 
         cy.get('[data-cy="nav-System"]')
             .click();
@@ -678,6 +685,7 @@ describe('Settings Tests', () => {
         cy.get('[data-cy=saveSystemSettings]')
             .click();
 
+        cy.contains('[data-pc-name="message"]', 'Saved!').should('be.visible');
         cy.get('[data-cy="nav-System"]')
             .click();
         cy.visit('/settings/email');
@@ -1319,6 +1327,8 @@ describe('Settings Tests', () => {
 
         cy.get('[data-cy=emailTemplateSettingsSave]')
             .click();
+        cy.contains('[data-cy="emailTemplateSettings"] [data-pc-name="message"]', 'Email Template Settings Saved!')
+            .should('be.visible');
         cy.get('[data-cy="nav-Security"]')
             .click();
         cy.get('[data-cy="nav-Email"]')
@@ -1434,6 +1444,7 @@ describe('Settings Tests', () => {
         cy.get('[data-cy="enableDarkMode"]').contains('On');
         cy.get('[data-cy=userPrefsSettingsSave]').should('be.enabled');
         cy.get('[data-cy=userPrefsSettingsSave]').click();
+        cy.get('[data-cy="settingsSavedAlert"]').should('be.visible').and('contain.text', 'Settings Updated');
         cy.get('[data-cy="nav-System"]').click();
 
         cy.get('[data-cy="nav-Preferences"]').click();
@@ -1454,6 +1465,7 @@ describe('Settings Tests', () => {
     });
 
     it('AI Prompt Settings', () => {
+        let defaultPromptSettings;
         cy.intercept('GET', '/public/config', (req) => {
             req.reply((res) => {
                 const conf = res.body;
@@ -1469,7 +1481,9 @@ describe('Settings Tests', () => {
         cy.visit('/administrator/');
         cy.wait('@loadUserInfo');
         cy.wait('@loadConfig')
-        cy.wait('@getAiPromptSettings');
+        cy.wait('@getAiPromptSettings').then(({ response }) => {
+            defaultPromptSettings = response.body;
+        });
 
         cy.get('[data-cy="settings-button"] button').click();
         cy.get('[data-pc-name="menu"] [data-pc-section="item"]').contains('Settings').click();
@@ -1487,57 +1501,55 @@ describe('Settings Tests', () => {
         cy.get('[data-cy^="isDefaultValueTag-"]').each(($defaultTag) => {
           const dataCy = $defaultTag.attr('data-cy');
           const settingName = dataCy.replace('isDefaultValueTag-', '');
+          const defaultTagSelector = `[data-cy="${dataCy}"]`;
           const inputSelector = `[data-cy="aiPromptSetting-${settingName}"] textarea`;
           const resetToDefaultButton = `[data-cy="resetToDefault-${settingName}"]`;
           const errorField = `[data-cy="${settingName}Error"]`;
+          const defaultValue = defaultPromptSettings[settingName].value;
+          const modifiedValue = defaultValue + 'X';
 
           // Verify initial state is 'Default'
-          cy.wrap($defaultTag)
+          cy.get(defaultTagSelector)
             .should('be.visible')
             .and('contain', 'Default');
+          cy.get(inputSelector).should('have.value', defaultValue)
+            .and('have.attr', 'aria-invalid', 'false');
 
-          cy.get('[data-cy="aiPromptSettingsSave"').should('be.disabled')
+          cy.get('[data-cy="aiPromptSettingsSave"]').should('be.disabled')
 
           // Modify the corresponding input field
-          cy.get(inputSelector).then(($input) => {
-            const defaultValue = $input.val();
-            const modifiedValue = defaultValue + 'X'; // Add a character to modify the value
+          cy.get(inputSelector).type('{moveToEnd}X');
+          cy.get(inputSelector).should('have.value', modifiedValue)
+            .and('have.attr', 'aria-invalid', 'false');
+          cy.get(errorField).should('not.be.visible');
+          cy.get('[data-cy="aiPromptSettingsSave"]').should('be.enabled')
 
-            cy.get(inputSelector)
-              .type('{moveToEnd}X')
-              .should('have.value', modifiedValue);
+          // Re-query the tag after updates instead of retaining a DOM snapshot.
+          cy.get(defaultTagSelector)
+            .should('be.visible')
+            .and('contain', 'Modified');
 
-            cy.get(errorField).should('not.be.visible');
+          cy.get(inputSelector).clear()
+          cy.get(inputSelector).should('have.value', '');
+          cy.get(errorField).should('be.visible')
+            .and('contain', 'is a required field');
+          cy.get('[data-cy="aiPromptSettingsSave"]').should('be.disabled')
+          cy.get(inputSelector).type(`{selectall}${tooLong}`, { delay: 0 })
+          cy.get(inputSelector).should('have.value', tooLong);
+          cy.get(errorField).should('be.visible')
+            .and('contain', ' must be at most 5000 characters');
+          cy.get('[data-cy="aiPromptSettingsSave"]').should('be.disabled')
 
-            cy.get('[data-cy="aiPromptSettingsSave"').should('be.enabled')
+          cy.get(resetToDefaultButton).click();
 
-            // Verify the default tag updates to 'Modified'
-            cy.wrap($defaultTag)
-              .should('be.visible')
-              .and('contain', 'Modified');
-
-            cy.get(inputSelector).clear()
-            cy.get(errorField).should('be.visible')
-              .and('contain', 'is a required field');
-            cy.get('[data-cy="aiPromptSettingsSave"').should('be.disabled')
-            cy.get(inputSelector)
-              .type(`{selectall}${tooLong}`, { delay: 0 })
-              cy.get(errorField).should('be.visible')
-                .and('contain', ' must be at most 5000 characters');
-              cy.get('[data-cy="aiPromptSettingsSave"').should('be.disabled')
-
-            cy.get(resetToDefaultButton).click();
-
-            // Verify it goes back to 'Default'
-            cy.wrap($defaultTag)
-              .should('be.visible')
-              .and('contain', 'Default');
-            const resetValue = $input.val();
-            expect(resetValue).to.equal(defaultValue)
-
-            cy.get(errorField).should('not.be.visible');
-            cy.get('[data-cy="aiPromptSettingsSave"').should('be.disabled')
-          });
+          // Assert the value after the queued reset action and its asynchronous response.
+          cy.get(inputSelector).should('have.value', defaultValue)
+            .and('have.attr', 'aria-invalid', 'false');
+          cy.get(defaultTagSelector)
+            .should('be.visible')
+            .and('contain', 'Default');
+          cy.get(errorField).should('not.be.visible');
+          cy.get('[data-cy="aiPromptSettingsSave"]').should('be.disabled')
         });
 
         cy.get('[data-cy="aiPromptSettingsSave"').should('be.disabled')
@@ -1583,7 +1595,10 @@ describe('Settings Tests', () => {
         cy.get('[data-cy="resetToDefault-systemInstructions"]').should('be.disabled')
 
         // modify value
-        cy.get('[data-cy="aiPromptSetting-systemInstructions"] textarea').type('X')
+        cy.get('[data-cy="aiPromptSetting-systemInstructions"] textarea').type('{selectall}X')
+        cy.get('[data-cy="aiPromptSetting-systemInstructions"] textarea')
+          .should('have.value', 'X')
+          .and('have.attr', 'aria-invalid', 'false')
         cy.get('[data-cy="updateSetting-systemInstructions"]').should('be.enabled')
         cy.get('[data-cy="resetToDefault-systemInstructions"]').should('be.enabled')
         cy.get('[data-cy="unsavedChanges-systemInstructions"]').should('be.visible')
@@ -1614,6 +1629,9 @@ describe('Settings Tests', () => {
 
         // update value again
         cy.get('[data-cy="aiPromptSetting-systemInstructions"] textarea').type('{selectall}X')
+        cy.get('[data-cy="aiPromptSetting-systemInstructions"] textarea')
+          .should('have.value', 'X')
+          .and('have.attr', 'aria-invalid', 'false')
         cy.get('[data-cy="updateSetting-systemInstructions"]').should('be.enabled')
         cy.get('[data-cy="resetToDefault-systemInstructions"]').should('be.enabled')
         cy.get('[data-cy="unsavedChanges-systemInstructions"]').should('be.visible')
@@ -1632,6 +1650,9 @@ describe('Settings Tests', () => {
 
         // modify value
         cy.get('[data-cy="aiPromptSetting-newSkillDescriptionInstructions"] textarea').type('{selectall}XYZ')
+        cy.get('[data-cy="aiPromptSetting-newSkillDescriptionInstructions"] textarea')
+          .should('have.value', 'XYZ')
+          .and('have.attr', 'aria-invalid', 'false')
         cy.get('[data-cy="updateSetting-newSkillDescriptionInstructions"]').should('be.enabled')
         cy.get('[data-cy="resetToDefault-newSkillDescriptionInstructions"]').should('be.enabled')
         cy.get('[data-cy="unsavedChanges-newSkillDescriptionInstructions"]').should('be.visible')
@@ -1732,7 +1753,10 @@ describe('Settings Tests', () => {
         cy.get('[data-cy="resetToDefault-systemInstructions"]').should('be.disabled')
 
         // modify value
-        cy.get('[data-cy="aiPromptSetting-systemInstructions"] textarea').type('X')
+        cy.get('[data-cy="aiPromptSetting-systemInstructions"] textarea').type('{selectall}X')
+        cy.get('[data-cy="aiPromptSetting-systemInstructions"] textarea')
+          .should('have.value', 'X')
+          .and('have.attr', 'aria-invalid', 'false')
         cy.get('[data-cy="updateSetting-systemInstructions"]').should('be.enabled')
         cy.get('[data-cy="resetToDefault-systemInstructions"]').should('be.enabled')
         cy.get('[data-cy="unsavedChanges-systemInstructions"]').should('be.visible')
@@ -1763,6 +1787,9 @@ describe('Settings Tests', () => {
 
         // update value again
         cy.get('[data-cy="aiPromptSetting-systemInstructions"] textarea').type('{selectall}X')
+        cy.get('[data-cy="aiPromptSetting-systemInstructions"] textarea')
+          .should('have.value', 'X')
+          .and('have.attr', 'aria-invalid', 'false')
         cy.get('[data-cy="updateSetting-systemInstructions"]').should('be.enabled')
         cy.get('[data-cy="resetToDefault-systemInstructions"]').should('be.enabled')
         cy.get('[data-cy="unsavedChanges-systemInstructions"]').should('be.visible')
@@ -1781,6 +1808,9 @@ describe('Settings Tests', () => {
 
         // modify value
         cy.get('[data-cy="aiPromptSetting-newSkillDescriptionInstructions"] textarea').type('{selectall}XYZ')
+        cy.get('[data-cy="aiPromptSetting-newSkillDescriptionInstructions"] textarea')
+          .should('have.value', 'XYZ')
+          .and('have.attr', 'aria-invalid', 'false')
         cy.get('[data-cy="updateSetting-newSkillDescriptionInstructions"]').should('be.enabled')
         cy.get('[data-cy="resetToDefault-newSkillDescriptionInstructions"]').should('be.enabled')
         cy.get('[data-cy="unsavedChanges-newSkillDescriptionInstructions"]').should('be.visible')
