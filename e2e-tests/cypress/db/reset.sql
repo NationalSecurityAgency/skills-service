@@ -12,6 +12,7 @@
 -- See the License for the specific language governing permissions and
 -- limitations under the License.
 -- creating Inception project is expensive so lets not delete it
+delete from project_participation;
 delete from project_definition where project_id <> 'Inception';
 delete from quiz_definition;
 delete from admin_group_definition;

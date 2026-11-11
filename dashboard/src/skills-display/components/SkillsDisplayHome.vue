@@ -15,20 +15,24 @@ limitations under the License.
 */
 <script setup>
 import { useRoute } from 'vue-router'
-import { toRef } from 'vue'
+import { computed, toRef } from 'vue'
 import { useInitializeUserProgress } from '@/skills-display/UseUserProgressInitialization.js'
+import { useSkillsDisplayInfo } from '@/skills-display/UseSkillsDisplayInfo.js'
 
 const props = defineProps({
   preview: { type: Boolean, default: false }
 })
 
 const route = useRoute()
+const displayInfo = useSkillsDisplayInfo()
 const { isLoading, contextRevision, progressRevision } = useInitializeUserProgress(toRef(props, 'preview'))
+// Error pages do not need initialized progress, unlike the normal display pages.
+const isErrorPage = computed(() => route.name === displayInfo.getContextSpecificRouteName('SkillsDisplayErrorPage'))
 </script>
 
 <template>
   <div class="sd-theme-home" data-cy="skillsDisplayHome">
-    <skills-spinner :is-loading="isLoading" class="mt-20"/>
-    <router-view v-if="!isLoading" :key="`${contextRevision}-${route.name}-${progressRevision}`"/>
+    <skills-spinner :is-loading="isLoading && !isErrorPage" class="mt-20"/>
+    <router-view v-if="!isLoading || isErrorPage" :key="`${contextRevision}-${route.name}-${progressRevision}`"/>
   </div>
 </template>

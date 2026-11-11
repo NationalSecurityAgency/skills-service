@@ -54,6 +54,8 @@ drop table IF EXISTS project_error CASCADE;
 
 drop table IF EXISTS project_access_token CASCADE;
 
+drop table IF EXISTS project_participation CASCADE;
+
 drop table IF EXISTS project_definition CASCADE;
 
 drop table IF EXISTS user_token CASCADE;

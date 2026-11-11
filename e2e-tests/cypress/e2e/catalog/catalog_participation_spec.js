@@ -79,6 +79,18 @@ describe('Learner catalog participation', () => {
             }
         };
 
+        it(`${mode}: initialization failure renders the error page instead of the loading spinner`, () => {
+            cy.intercept('POST', initializeUrl, { statusCode: 500, body: {} });
+            visit();
+
+            display('[data-cy="errorPage"]').should('be.visible');
+            display('[data-cy="errExplanation"]').should('contain.text', 'Oh no, something went wrong!');
+            display('[data-cy="skillsDisplayHome"] [aria-label="Loading"]').should('not.exist');
+            display('[data-cy="overallPoints"]').should('not.exist');
+            display('[data-cy="subjectTileBtn"]').should('not.exist');
+            display(loadingMessage).should('not.exist');
+        });
+
         it(`${mode}: pending first visit automatically loads imported progress after backfill is released`, () => {
             deferCatalogBackfill();
             cy.intercept('POST', initializeUrl).as('initialize');
