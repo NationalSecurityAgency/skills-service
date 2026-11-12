@@ -22,6 +22,7 @@ import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Pageable
 import org.springframework.stereotype.Component
 import skills.controller.result.model.LabelCountItem
+import skills.metrics.UserTagMetricsValidator
 import skills.metrics.builders.MetricsPagingParamsHelper
 import skills.metrics.builders.MetricsParams
 import skills.metrics.builders.ProjectMetricsBuilder
@@ -36,6 +37,9 @@ class NumberUsersPerTagMetricsBuilder implements ProjectMetricsBuilder {
 
     @Autowired
     UserTagRepo userTagRepo
+
+    @Autowired
+    UserTagMetricsValidator userTagMetricsValidator
 
     @Override
     String getId() {
@@ -60,7 +64,8 @@ class NumberUsersPerTagMetricsBuilder implements ProjectMetricsBuilder {
         Boolean sortDesc = metricsPagingParamsHelper.sortDesc
         String sortBy = metricsPagingParamsHelper.getSortBy(true, 'numUsers')
 
-        String tagKey = MetricsParams.getTagKey(projectId, chartId, props)
+        String tagKey = props[MetricsParams.P_TAG_KEY]
+        userTagMetricsValidator.validateProjectMetricsKey(tagKey, projectId)
         String tagFilter = MetricsParams.getTagFilter(projectId, chartId, props)
         String startDate = MetricsParams.getFromDayFilterAsString(projectId, chartId, props)
         String endDate = MetricsParams.getToDayFilterAsString(projectId, chartId, props)

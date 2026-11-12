@@ -35,7 +35,7 @@ describe('Metrics Tests - Skills', () => {
         cy.intercept('GET', '/public/config', (req) => {
             req.reply((res) => {
                 const conf = res.body;
-                conf.projectMetricsTagCharts = '[{"key":"tagA","type":"table","title":"Tag A","tagLabel":"Tag A"}]';
+                conf.projectMetricsTagCharts = '[{"key":"dutyOrganization","type":"table","title":"Tag A","tagLabel":"Tag A"}]';
                 res.send(conf);
             });
         })
@@ -701,7 +701,7 @@ describe('Metrics Tests - Skills', () => {
                             .format('x')
                       });
 
-                    cy.addUserTag(userId, 'tagA', ['ABCDE', 'DEFGH']);
+                    cy.addUserTag(userId, 'dutyOrganization', ['ABCDE', 'DEFGH']);
                 }
             }
 
@@ -717,7 +717,7 @@ describe('Metrics Tests - Skills', () => {
                         .format('x')
                   });
 
-                cy.addUserTag(userId, 'tagA', ['ABCDE', 'DEFGH']);
+                cy.addUserTag(userId, 'dutyOrganization', ['ABCDE', 'DEFGH']);
             }
 
             cy.logout();

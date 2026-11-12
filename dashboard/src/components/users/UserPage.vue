@@ -68,7 +68,7 @@ const loadUserInfo = () => {
   let userTags = Promise.resolve();
 
   if (appConfig.userPageTagsToDisplay) {
-    userTags = UsersService.getUserTags(route.params.userId).then((response) => {
+    userTags = UsersService.getUserTags(route.params.projectId, route.params.userId).then((response) => {
       tags.value = processUserTags(response);
     });
   }

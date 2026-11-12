@@ -35,6 +35,9 @@ interface UserTagRepo extends CrudRepository<UserTag, Integer> {
     @Query("select ut from UserTag ut where ut.userId = ?1 and lower(ut.key) in ?2")
     List<UserTag> findAllByUserIdAndKeyIn(String userId, Set<String> keys)
 
+    @Query("select ut from UserTag ut where ut.userId = ?1 and ut.key in ?2")
+    List<UserTag> findAllByUserIdAndExactKeyIn(String userId, Set<String> keys)
+
     @Modifying
     @Query("delete from UserTag ut where lower(ut.userId) = lower(?1)")
     void deleteByUserId(String userId)

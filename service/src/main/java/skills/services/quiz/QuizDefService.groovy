@@ -37,6 +37,7 @@ import skills.controller.exceptions.SkillException
 import skills.controller.exceptions.SkillQuizException
 import skills.controller.request.model.*
 import skills.controller.result.model.*
+import skills.metrics.UserTagMetricsValidator
 import skills.quizLoading.QuizAssociatedSkillsService
 import skills.quizLoading.QuizSettings
 import skills.services.*
@@ -68,6 +69,9 @@ class QuizDefService {
 
     @Value('${skills.config.ui.usersTableAdditionalUserTagKey:""}')
     String usersTableAdditionalUserTagKey
+
+    @Autowired
+    UserTagMetricsValidator userTagMetricsValidator
 
     @Autowired
     UserInfoService userInfoService
@@ -1384,6 +1388,7 @@ class QuizDefService {
 
     @Transactional(readOnly = true)
     List<LabelCountItem> getUserTagCounts(String quizId, String userTag, Date startDate, Date endDate) {
+        userTagMetricsValidator.validateQuizMetricsKey(userTag, quizId)
         PageRequest pageRequest = PageRequest.of(0, 20, DESC, "tagCount")
         List<UserQuizAttemptRepo.TagValueCount> tagValueCounts = userQuizAttemptRepo.getUserTagCounts(quizId, userTag, startDate, endDate, pageRequest)
         return tagValueCounts?.collect { new LabelCountItem(value: it.tagValue, count: it.tagCount) }

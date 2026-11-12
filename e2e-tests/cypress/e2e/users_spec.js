@@ -1613,10 +1613,10 @@ describe('Users Tests', () => {
 
         const tagRes = `
             [
-                {"id":1,"userId":"skills@evoforge.org","key":"dutyOrganization","value":"tagA"}
+                {"key":"dutyOrganization","value":"tagA"}
             ]
         `
-        cy.intercept('/app/userInfo/userTags/*', {
+        cy.intercept('/admin/projects/proj1/users/*/tags', {
             statusCode: 200,
             body: tagRes,
         }).as('getUserTags')
@@ -1833,5 +1833,4 @@ describe('Users Tests', () => {
         ], 5);
     });
 })
-
 

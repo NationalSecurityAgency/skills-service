@@ -482,11 +482,11 @@ class QuizController {
     @RequestMapping(value = "/{quizId}/userTagCounts", method = [RequestMethod.GET], produces = "application/json")
     @ResponseBody
     List<LabelCountItem> getUserTagCounts(@PathVariable("quizId") String quizId,
-                                          @RequestParam String userTagKey,
+                                          @RequestParam(required = false) String userTagKey,
                                           @RequestParam(required = false) String startDate,
                                           @RequestParam(required = false) String endDate) {
         QuizValidator.isNotBlank(quizId, "Quiz Id")
-        QuizValidator.isNotBlank(userTagKey, "User Tag Key")
+        QuizValidator.isNotBlank(userTagKey, "User Tag Key", quizId)
         List<Date> dates = TimeRangeFormatterUtil.formatTimeRange(startDate, endDate, false)
         return quizDefService.getUserTagCounts(quizId, userTagKey, dates[0], dates[1])
     }
