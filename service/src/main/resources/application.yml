@@ -199,6 +199,10 @@ skills:
       # project approvers, and root users, including admins of self-created projects.
       # Project participation is required but can be established by an admin reporting a skill.
       # Format: key/label|key/label. An empty value disables disclosure of user-page tags.
+      # Tag-metrics drill-downs allow these keys, projectMetricsTagCharts keys, and
+      # usersTableAdditionalUserTagKey. Project and subject/skill tag charts allow only
+      # projectMetricsTagCharts keys; overall tag charts allow only overallMetricsTagCharts keys.
+      # Quiz/survey tag charts allow only usersTableAdditionalUserTagKey.
       userPageTagsToDisplay: ""
       minUsernameLength: 5
       minPasswordLength: 8

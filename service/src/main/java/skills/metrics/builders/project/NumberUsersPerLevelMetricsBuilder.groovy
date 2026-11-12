@@ -18,6 +18,7 @@ package skills.metrics.builders.project
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 import skills.controller.result.model.LabelCountItem
+import skills.metrics.UserTagMetricsValidator
 import skills.metrics.builders.MetricsParams
 import skills.metrics.builders.ProjectMetricsBuilder
 import skills.services.AdminUsersService
@@ -27,6 +28,9 @@ class NumberUsersPerLevelMetricsBuilder implements ProjectMetricsBuilder {
 
     @Autowired
     AdminUsersService adminUsersService
+
+    @Autowired
+    UserTagMetricsValidator userTagMetricsValidator
 
     @Override
     String getId() {
@@ -39,9 +43,12 @@ class NumberUsersPerLevelMetricsBuilder implements ProjectMetricsBuilder {
         if (props.containsKey(MetricsParams.P_SUBJECT_ID)) {
             subjectId = MetricsParams.getSubjectId(projectId, chartId, props);
         }
-        if (props.containsKey(MetricsParams.P_TAG_KEY) && props.containsKey(MetricsParams.P_TAG_FILTER)) {
-            tagKey = MetricsParams.getTagKey(projectId, chartId, props)
-            tagFilter = MetricsParams.getTagFilter(projectId, chartId, props)
+        if (props.containsKey(MetricsParams.P_TAG_KEY)) {
+            userTagMetricsValidator.validateDrillDownKey(props[MetricsParams.P_TAG_KEY], projectId)
+            if (props.containsKey(MetricsParams.P_TAG_FILTER)) {
+                tagKey = MetricsParams.getTagKey(projectId, chartId, props)
+                tagFilter = MetricsParams.getTagFilter(projectId, chartId, props)
+            }
         }
         List<LabelCountItem> dataItems = adminUsersService.getUserCountsPerLevel(projectId, subjectId, tagKey, tagFilter)
         return dataItems

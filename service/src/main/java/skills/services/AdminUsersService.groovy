@@ -27,6 +27,7 @@ import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import skills.controller.exceptions.SkillsValidator
 import skills.controller.result.model.*
+import skills.metrics.UserTagMetricsValidator
 import skills.skillLoading.RankingLoader
 import skills.skillLoading.model.UsersPerLevel
 import skills.storage.model.DayCountItem
@@ -83,6 +84,9 @@ class AdminUsersService {
 
     @Autowired
     UserTagRepo userTagRepo
+
+    @Autowired
+    UserTagMetricsValidator userTagMetricsValidator
 
     @Profile
     List<TimestampCountItem> getUsage(String projectId, String skillId, Date start, Boolean newUsersOnly = false) {
@@ -155,7 +159,8 @@ class AdminUsersService {
     }
 
     TableResultWithTotalPoints loadUsersPageForUserTag(String projectId, String userTagKey, String userTagValue, String query, PageRequest pageRequest) {
-        if (!userTagKey || !userTagValue) {
+        userTagMetricsValidator.validateDrillDownKey(userTagKey, projectId)
+        if (!userTagValue) {
             return TableResultWithTotalPoints.EMPTY
         }
         query = query ? query.trim() : ''

@@ -17,8 +17,23 @@ var moment = require('moment-timezone');
 
 describe('Metrics Using User Tags Tests', () => {
 
-    const userTagsTableSelector = '[data-cy="userTagsTable-manyValues"]';
+    const tableTagKey = 'dutyOrganization';
+    const chartTagKey = 'adminOrganization';
+    const userTagsTableSelector = `[data-cy="userTagsTable-${tableTagKey}"]`;
     const usersTableSelector = '[data-cy=usersTable]'
+
+    const createTags = (numTags, tagKey, projectNum = 1, userPrefix = 'user') => {
+        for (let i = 0; i < numTags; i += 1) {
+            const userId = `${userPrefix}${i}`;
+            cy.reportSkill(projectNum, 1, userId, 'now');
+
+            const tags = [];
+            for (let j = 0; j <= i; j += 1) {
+                tags.push(`tag${j}`);
+            }
+            cy.addUserTag(userId, tagKey, tags);
+        }
+    };
 
     Cypress.Commands.add('prevMonth', () => {
         cy.get('[data-pc-section="panel"] [data-pc-section="calendar"] [data-pc-name="pcprevbutton"]').click()
@@ -47,6 +62,11 @@ describe('Metrics Using User Tags Tests', () => {
         cy.createSubject(1, 1);
         cy.createSkill(1, 1, 1);
 
+        // Isolate the 17-row pagination fixture without configuring another tag key.
+        cy.createProject(2);
+        cy.createSubject(2, 1);
+        cy.createSkill(2, 1, 1);
+
         cy.logout();
         cy.fixture('vars.json')
             .then((vars) => {
@@ -57,22 +77,9 @@ describe('Metrics Using User Tags Tests', () => {
             cy.request('POST', `/root/users/${userId}/tags/${tagKey}`, { tags });
         });
 
-        const createTags = (numTags, tagKey) => {
-            for (let i = 0; i < numTags; i += 1) {
-                const userId = `user${i}`;
-                cy.reportSkill(1, 1, userId, 'now');
-
-                const tags = [];
-                for (let j = 0; j <= i; j += 1) {
-                    tags.push(`tag${j}`);
-                }
-                cy.addUserTag(userId, tagKey, tags);
-            }
-        };
-
-        createTags(21, 'someValues');
-        createTags(25, 'manyValues');
-        createTags(17, 'newTag')
+        createTags(21, chartTagKey);
+        createTags(25, tableTagKey);
+        createTags(17, tableTagKey, 2, 'pagingUser');
 
         cy.logout();
         cy.fixture('vars.json')
@@ -93,7 +100,11 @@ describe('Metrics Using User Tags Tests', () => {
         cy.intercept('GET', '/public/config', (req) => {
             req.reply((res) => {
                 const conf = res.body;
-                conf.projectMetricsTagCharts ='[{"key":"manyValues","type":"table","title":"Many Values","tagLabel":"Best Label"},{"key":"someValues","type":"bar","title":"Some Values"},{"key":"newTag","tagLabel":"New", "type":"table","title":"Some New Tag"}]'
+                // Override presentation, not the backend's configured disclosure keys.
+                conf.projectMetricsTagCharts = JSON.stringify([
+                    { key: tableTagKey, type: 'table', title: 'Many Values', tagLabel: 'Best Label' },
+                    { key: chartTagKey, type: 'bar', title: 'Some Values' },
+                ]);
                 res.send(conf);
             });
         })
@@ -210,9 +221,9 @@ describe('Metrics Using User Tags Tests', () => {
             cy.clickNav('Metrics');
             cy.get('[data-cy="userTagTableCard"] [data-pc-section="header"]')
                 .contains('Many Values');
-            cy.get('[data-cy="userTagTable-manyValues-tagFilter"]')
+            cy.get(`[data-cy="userTagTable-${tableTagKey}-tagFilter"]`)
                 .type('aG2');
-            cy.get('[ data-cy="userTagTable-manyValues-filterBtn"]')
+            cy.get(`[data-cy="userTagTable-${tableTagKey}-filterBtn"]`)
                 .click();
 
             const expected2 = [
@@ -251,7 +262,7 @@ describe('Metrics Using User Tags Tests', () => {
             cy.clickNav('Metrics');
             cy.get('[data-cy="userTagTableCard"] [data-pc-section="header"]')
                 .contains('Many Values');
-            cy.get('[data-cy="userTagTable-manyValues-tagFilter"]')
+            cy.get(`[data-cy="userTagTable-${tableTagKey}-tagFilter"]`)
                 .type('aG2{enter}');
 
             const expected2 = [
@@ -290,17 +301,17 @@ describe('Metrics Using User Tags Tests', () => {
             cy.get('[data-cy="userTagTableCard"] [data-pc-section="header"]').contains('Many Values');
 
             // The DatePicker wrapper can be clicked while its input is still disabled by the initial load.
-            cy.get('[data-cy="manyValues-metricsDateFilter"] input').should('be.enabled').click()
+            cy.get(`[data-cy="${tableTagKey}-metricsDateFilter"] input`).should('be.enabled').click()
             cy.get('[data-pc-section="panel"] [data-pc-section="calendar"]').should('be.visible')
             cy.prevMonth()
             cy.setDay(1)
             cy.setDay(1)
 
-            cy.get('[ data-cy="userTagTable-manyValues-filterBtn"]').click();
+            cy.get(`[data-cy="userTagTable-${tableTagKey}-filterBtn"]`).click();
 
-            cy.get('[data-cy="userTagsTable-manyValues"]').contains('There are no records to show');
+            cy.get(userTagsTableSelector).contains('There are no records to show');
 
-            cy.get('[data-cy="userTagTable-manyValues-clearBtn"]').click();
+            cy.get(`[data-cy="userTagTable-${tableTagKey}-clearBtn"]`).click();
 
             const expected = [];
             for (let i = 0; i < 25; i += 1) {
@@ -326,12 +337,12 @@ describe('Metrics Using User Tags Tests', () => {
 
             cy.get('[data-cy="userTagTableCard"] [data-pc-section="header"]')
                 .contains('Many Values');
-            cy.get('[data-cy="userTagTable-manyValues-tagFilter"]')
+            cy.get(`[data-cy="userTagTable-${tableTagKey}-tagFilter"]`)
                 .type('aG2{enter}');
             cy.get(`${userTagsTableSelector}`)
                 .contains('Total Rows: 6');
 
-            cy.get('[data-cy="userTagTable-manyValues-clearBtn"]')
+            cy.get(`[data-cy="userTagTable-${tableTagKey}-clearBtn"]`)
                 .click();
             cy.get(`${userTagsTableSelector}`)
                 .contains('Total Rows: 25');
@@ -367,11 +378,11 @@ describe('Metrics Using User Tags Tests', () => {
             cy.wait(2000)
 
             cy.intercept('**numUsersPerLevelChartBuilder**').as('numUsersPerLevelChartBuilder')
-            cy.get(`${userTagsTableSelector} [data-cy="userTagTable-manyValues_viewMetricsLink"]`).first().click();
+            cy.get(`${userTagsTableSelector} [data-cy="userTagTable-${tableTagKey}_viewMetricsLink"]`).first().click();
             cy.wait('@numUsersPerLevelChartBuilder')
             cy.matchSnapshotImageForElement('[data-cy="levelsChart"]')
 
-            cy.intercept('/admin/projects/proj1/userTags/manyValues/tag0/users*').as('getUsers');
+            cy.intercept(`/admin/projects/proj1/userTags/${tableTagKey}/tag0/users*`).as('getUsers');
             cy.get(`${usersTableSelector}`).contains('User').click();
             cy.wait('@getUsers')
 
@@ -389,18 +400,28 @@ describe('Metrics Using User Tags Tests', () => {
             cy.wait('@numUsersPerTagBuilder');
             cy.wait('@numUsersPerTagBuilder');
             cy.wait(2000)
-            cy.get('[data-cy="cell_tagValue-tag5"] [data-cy="userTagTable-manyValues_viewMetricsLink"]').click()
+            cy.get(`[data-cy="cell_tagValue-tag5"] [data-cy="userTagTable-${tableTagKey}_viewMetricsLink"]`).click()
             cy.get('[data-cy="usersTable"] [data-cy="skillsBTableTotalRows"]').should('have.text', '20')
             cy.get('[data-cy="users-userTagFilter"]').should('not.exist')
         });
 
         it('ensure user tag metrics table pages appropriately when second page has fewer results', () => {
-            cy.visit('/administrator/projects/proj1/metrics');
+            cy.intercept('GET', '/public/config', (req) => {
+                req.reply((res) => {
+                    const conf = res.body;
+                    conf.projectMetricsTagCharts = JSON.stringify([
+                        { key: tableTagKey, type: 'table', title: 'Some New Tag', tagLabel: 'New' },
+                    ]);
+                    res.send(conf);
+                });
+            }).as('getConfig');
+
+            cy.visit('/administrator/projects/proj2/metrics');
             cy.wait('@getConfig');
 
             cy.get('[data-cy="userTagTableCard"] [data-pc-section="header"]').contains('Some New Tag');
 
-            const newTagsTableSelector = '[data-cy="userTagsTable-newTag"]';
+            const newTagsTableSelector = userTagsTableSelector;
             const expectedPage1 = [
                     [{ colIndex: 0, value: `tag0` }, { colIndex: 1, value: `17` } ],
                     [{ colIndex: 0, value: `tag1` }, { colIndex: 1, value: `16` } ],
@@ -424,11 +445,11 @@ describe('Metrics Using User Tags Tests', () => {
                 [{ colIndex: 0, value: `tag16` }, { colIndex: 1, value: `1` } ],
             ];
 
-            cy.validateTable(newTagsTableSelector, expectedPage1, 10, true, null, false);
+            cy.validateTable(newTagsTableSelector, expectedPage1, 10, true, 17);
 
             cy.get(`${newTagsTableSelector} [data-pc-name="pcpaginator"] [aria-label="Page 2"]`).click();
 
-            cy.validateTable(newTagsTableSelector, expectedPage2, 7, true, null, false);
+            cy.validateTable(newTagsTableSelector, expectedPage2, 7, true, 17);
 
         });
     }

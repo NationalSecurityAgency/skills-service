@@ -285,7 +285,7 @@ describe('Accessibility Tests', () => {
         if (!Cypress.env('oauthMode')) {
             it(`user tags on the metrics page${darkMode}`, () => {
                 cy.setDarkModeIfNeeded(darkMode)
-                const userTagsTableSelector = '[data-cy="userTagsTable-manyValues"]';
+                const userTagsTableSelector = '[data-cy="userTagsTable-dutyOrganization"]';
 
                 cy.createProject(1);
                 cy.createSubject(1, 1);
@@ -314,8 +314,8 @@ describe('Accessibility Tests', () => {
                     }
                 };
 
-                createTags(21, 'someValues');
-                createTags(25, 'manyValues');
+                createTags(21, 'adminOrganization');
+                createTags(25, 'dutyOrganization');
 
                 cy.logout();
                 cy.fixture('vars.json')
@@ -326,7 +326,7 @@ describe('Accessibility Tests', () => {
                 cy.intercept('GET', '/public/config', (req) => {
                     req.reply({
                         body: {
-                            projectMetricsTagCharts: '[{"key":"manyValues","type":"table","title":"Many Values","tagLabel":"Best Label"},{"key":"someValues","type":"bar","title":"Some Values"}]'
+                            projectMetricsTagCharts: '[{"key":"dutyOrganization","type":"table","title":"Many Values","tagLabel":"Best Label"},{"key":"adminOrganization","type":"bar","title":"Some Values"}]'
                         },
                     });
                 })

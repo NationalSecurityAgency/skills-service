@@ -2254,8 +2254,12 @@ class SkillsService {
     }
 
     def getQuizUserTagCounts(String quizId, String userTagKey, String startDate = defaultStart, String endDate = defaultEnd) {
-        String url = "${getQuizDefUrl(quizId)}/userTagCounts?userTagKey=${userTagKey}&startDate=${startDate}&endDate=${endDate}"
-        return wsHelper.adminGet(url.toString())
+        Map<String, String> params = [startDate: startDate, endDate: endDate]
+        if (userTagKey != null) {
+            params.userTagKey = userTagKey
+        }
+        String url = "${getQuizDefUrl(quizId)}/userTagCounts"
+        return wsHelper.adminGet(url, params)
     }
 
     def getQuizUsageOverTime(String quizId, String startDate = defaultStart, String endDate = defaultEnd) {

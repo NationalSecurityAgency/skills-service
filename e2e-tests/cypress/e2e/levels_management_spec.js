@@ -1344,7 +1344,7 @@ describe('Levels Management Tests', () => {
             [{colIndex: 0, value: 4}, {colIndex: 1, value: '670 to 920'}],
             [{colIndex: 0, value: 5}, {colIndex: 1, value: '920 to '}]
         ];
-        cy.validateTable(tableSelector, expected, 5, true, null, false);
+        cy.validateTable(tableSelector, expected, expected.length, true, null, false);
         cy.get('[data-cy="pointBasedLevelManagementWarning"]').should('be.visible')
         cy.get('[data-cy="percentageBasedLevelManagementWarning"]').should('not.exist')
 
@@ -1364,9 +1364,10 @@ describe('Levels Management Tests', () => {
             [{colIndex: 0, value: 3}, {colIndex: 1, value: '450 to 670'}],
             [{colIndex: 0, value: 4}, {colIndex: 1, value: '670 to 920'}],
             [{colIndex: 0, value: 5}, {colIndex: 1, value: '920 to 921'}],
-            [{colIndex: 0, value: 5}, {colIndex: 1, value: '921'}]
+            [{colIndex: 0, value: 6}, {colIndex: 1, value: '921 to '}]
         ];
-        cy.validateTable(tableSelector, expected, 5, true, null, false);
+        // Levels are not paginated; validate all six rows, including the new highest level.
+        cy.validateTable(tableSelector, expected, expected.length, true, null, false);
     });
 
 });
