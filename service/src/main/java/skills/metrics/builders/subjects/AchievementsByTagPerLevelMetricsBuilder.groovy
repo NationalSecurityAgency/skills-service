@@ -18,6 +18,7 @@ package skills.metrics.builders.subjects
 import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
+import skills.metrics.UserTagMetricsValidator
 import skills.metrics.builders.MetricsParams
 import skills.metrics.builders.ProjectMetricsBuilder
 import skills.storage.model.SkillDef
@@ -30,6 +31,9 @@ class AchievementsByTagPerLevelMetricsBuilder implements ProjectMetricsBuilder {
     @Autowired
     UserAchievedLevelRepo userAchievedRepo
 
+    @Autowired
+    UserTagMetricsValidator userTagMetricsValidator
+
     @Override
     String getId() {
         return "achievementsByTagPerLevelMetricsBuilder"
@@ -37,7 +41,9 @@ class AchievementsByTagPerLevelMetricsBuilder implements ProjectMetricsBuilder {
 
     @Override
     def build(String projectId, String chartId, Map<String, String> props) {
-        def userCount = userAchievedRepo.countNumUsersPerSubjectTagAndLevel(projectId, props.subjectId, props.userTagKey);
+        String tagKey = props.userTagKey
+        userTagMetricsValidator.validateProjectMetricsKey(tagKey, projectId)
+        def userCount = userAchievedRepo.countNumUsersPerSubjectTagAndLevel(projectId, props.subjectId, tagKey);
 
         Map users = new HashMap<String, Map>();
         def totalLevels = 0;

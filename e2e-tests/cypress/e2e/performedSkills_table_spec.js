@@ -547,40 +547,40 @@ describe('Performed Skills Table Tests', () => {
         cy.createSkills(12);
         cy.report(12, false);
 
-        cy.intercept('/admin/projects/proj1/performedSkills/user1*',
-            {
-                statusCode: 200,
-                body: {
-                    'data': [{
-                        'skillName': 'Very Great Skill # 12',
-                        'skillId': 'what a crazy long id that comes back it should get truncated sure hope so',
-                        'performedOn': '2020-09-23T11:00:00.000+00:00',
-                        'importedSkill': false
-                    }],
-                    'count': 1,
-                    'totalCount': 1
-                },
-            })
-            .as('getPerformedSkills');
+        const longSkillId = 'what a crazy long id that comes back it should get truncated sure hope so';
+        const displayText = `ID: ${longSkillId}`;
+        const skillCellSelector = `${tableSelector} [data-cy="row0-skillCell"]`;
+
+        cy.intercept('GET', '/admin/projects/proj1/performedSkills/user1*', (req) => {
+            req.reply((res) => {
+                // Preserve subject/group routing metadata required by the View Skill link.
+                const performedSkill = res.body.data[0];
+                res.body.data = [{ ...performedSkill, skillId: longSkillId }];
+                res.body.count = 1;
+                res.body.totalCount = 1;
+                res.send(res.body);
+            });
+        }).as('getPerformedSkills');
         cy.visit('/administrator/projects/proj1/users/user1@skills.org/skillEvents');
         cy.wait('@getPerformedSkills');
 
         cy.validateTable(tableSelector, [
             [{
                 colIndex: 1,
-                value: 'what a crazy long id that comes back it should... >> more'
+                value: displayText.substring(0, 50)
             }],
         ], 5);
 
-        cy.get(`${tableSelector} tr:nth-child(1)`)
-            .contains('more')
-            .click();
+        cy.get(`${skillCellSelector} [data-cy="showMoreText"]`).should('not.contain.text', longSkillId);
+        cy.get(`${skillCellSelector} [data-cy="showMore"]`).should('be.visible');
+        cy.get(`${skillCellSelector} [data-cy="showMoreOrLessBtn"]`).click();
         cy.validateTable(tableSelector, [
             [{
                 colIndex: 1,
-                value: 'what a crazy long id that comes back it should get truncated sure hope so << less'
+                value: displayText
             }],
         ], 5);
+        cy.get(`${skillCellSelector} [data-cy="showLess"]`).should('be.visible');
     });
 
     it('delete skill event', () => {

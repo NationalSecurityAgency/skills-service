@@ -34,7 +34,7 @@ describe('Metrics Tests - Subject', () => {
         cy.intercept('GET', '/public/config', (req) => {
             req.reply((res) => {
                 const conf = res.body;
-                conf.projectMetricsTagCharts = '[{"key":"tagA","type":"table","title":"Tag A","tagLabel":"Tag A"}]';
+                conf.projectMetricsTagCharts = '[{"key":"dutyOrganization","type":"table","title":"Tag A","tagLabel":"Tag A"}]';
                 res.send(conf);
             });
         })
@@ -358,7 +358,7 @@ describe('Metrics Tests - Subject', () => {
                             .format('x')
                       });
 
-                    cy.addUserTag(userId, 'tagA', ['ABCDE', 'A', 'B', 'C']);
+                    cy.addUserTag(userId, 'dutyOrganization', ['ABCDE', 'A', 'B', 'C']);
                 }
             }
 
@@ -374,7 +374,7 @@ describe('Metrics Tests - Subject', () => {
                         .format('x')
                   });
 
-                cy.addUserTag(userId, 'tagA', ['ABCDE']);
+                cy.addUserTag(userId, 'dutyOrganization', ['ABCDE']);
             }
 
             cy.logout();
@@ -389,7 +389,7 @@ describe('Metrics Tests - Subject', () => {
             cy.wait('@skillAchievementsByTagBuilder');
 
             cy.wait(waitForSnap);
-            cy.matchSnapshotImageForElement('[data-cy=numUsersByTag-tagA]', { errorThreshold: 0.07 });
+            cy.matchSnapshotImageForElement('[data-cy=numUsersByTag-dutyOrganization]', { errorThreshold: 0.07 });
         });
     }
 });

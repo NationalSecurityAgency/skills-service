@@ -697,7 +697,8 @@ class RootAccessSpec extends DefaultIntSpec {
         when:
         rootSkillsService.saveUserTag(user.userName, "myKey", ["<script>some</script>"])
 
-        def tags = rootSkillsService.getUserTags(user.userName)
+        // Sanitization is a persistence guarantee; the admin endpoint intentionally only exposes configured keys.
+        def tags = userTagRepo.findAllByUserId(user.userName.toLowerCase())
         then:
         tags.key == ["myKey"]
         tags.value == [""]

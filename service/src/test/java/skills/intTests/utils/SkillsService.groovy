@@ -871,9 +871,9 @@ class SkillsService {
         wsHelper.apiGet(url)
     }
 
-    def getUserTags(String userId) {
-        String url = "/userInfo/userTags/${userId}"
-        wsHelper.appGet(url)
+    def getUserTags(String projectId, String userId) {
+        String url = "/projects/${projectId}/users/${userId}/tags"
+        wsHelper.adminGet(url)
     }
 
     def getCustomIconCssForProject(String projectId){
@@ -2254,8 +2254,12 @@ class SkillsService {
     }
 
     def getQuizUserTagCounts(String quizId, String userTagKey, String startDate = defaultStart, String endDate = defaultEnd) {
-        String url = "${getQuizDefUrl(quizId)}/userTagCounts?userTagKey=${userTagKey}&startDate=${startDate}&endDate=${endDate}"
-        return wsHelper.adminGet(url.toString())
+        Map<String, String> params = [startDate: startDate, endDate: endDate]
+        if (userTagKey != null) {
+            params.userTagKey = userTagKey
+        }
+        String url = "${getQuizDefUrl(quizId)}/userTagCounts"
+        return wsHelper.adminGet(url, params)
     }
 
     def getQuizUsageOverTime(String quizId, String startDate = defaultStart, String endDate = defaultEnd) {

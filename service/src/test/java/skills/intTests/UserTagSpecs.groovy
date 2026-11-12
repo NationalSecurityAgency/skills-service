@@ -15,15 +15,13 @@
  */
 package skills.intTests
 
-import org.springframework.boot.test.context.SpringBootTest
-import skills.SpringBootApp
 import skills.intTests.utils.DefaultIntSpec
 import skills.intTests.utils.SkillsFactory
 import skills.intTests.utils.SkillsService
 
 class UserTagSpecs extends DefaultIntSpec {
 
-    def "get user tags"() {
+    def "no user tags are disclosed when the display allowlist is empty"() {
         String user = getRandomUsers(1, true).first()
         createService(user)
 
@@ -38,14 +36,13 @@ class UserTagSpecs extends DefaultIntSpec {
         def tags = ['ABCDE']
         SkillsService rootUser = createRootSkillService()
         rootUser.saveUserTag(user, 'someTag', tags)
+        skillsService.addSkill(proj1_skills[0], user)
 
         when:
-        def userTags = skillsService.getUserTags(user)
+        List userTags = skillsService.getUserTags(proj1.projectId, user)
 
         then:
-        userTags[0]
-        userTags[0].key == "someTag"
-        userTags[0].value == "ABCDE"
+        userTags == []
     }
 
 }
