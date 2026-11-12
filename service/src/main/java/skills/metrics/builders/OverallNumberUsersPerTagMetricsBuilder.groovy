@@ -21,6 +21,7 @@ import jakarta.annotation.PostConstruct
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 import skills.metrics.GlobalProgressMetricsService
+import skills.metrics.UserTagMetricsValidator
 import skills.storage.repos.GlobalProgressMetricsRepo
 import skills.utils.TimeRangeFormatterUtil
 
@@ -35,6 +36,9 @@ class OverallNumberUsersPerTagMetricsBuilder implements GlobalMetricsBuilder {
 
     @Autowired
     GlobalProgressMetricsService globalProgressMetricsService
+
+    @Autowired
+    UserTagMetricsValidator userTagMetricsValidator
 
     @Override
     String getId() {
@@ -56,7 +60,8 @@ class OverallNumberUsersPerTagMetricsBuilder implements GlobalMetricsBuilder {
         Boolean sortDesc = metricsPagingParamsHelper.sortDesc
         String sortBy = metricsPagingParamsHelper.getSortBy(true, 'numUsers')
 
-        String tagKey = MetricsParams.getTagKey(projectId, chartId, props)
+        String tagKey = props[MetricsParams.P_TAG_KEY]
+        userTagMetricsValidator.validateOverallMetricsKey(tagKey)
         String tagFilter = MetricsParams.getTagFilter(projectId, chartId, props)
         String startDate = MetricsParams.getFromDayFilterAsString(projectId, chartId, props)
         String endDate = MetricsParams.getToDayFilterAsString(projectId, chartId, props)

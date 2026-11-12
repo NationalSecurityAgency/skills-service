@@ -49,11 +49,9 @@ import skills.services.userActions.DashboardAction
 import skills.services.userActions.DashboardItem
 import skills.services.userActions.UserActionInfo
 import skills.services.userActions.UserActionsHistoryService
-import skills.storage.model.UserTag
 import skills.storage.model.auth.RoleName
 import skills.storage.repos.UserAttrsRepo
 import skills.storage.repos.UserRepo
-import skills.storage.repos.UserTagRepo
 
 @RestController
 @RequestMapping("/app")
@@ -84,9 +82,6 @@ class UserInfoController {
 
     @Autowired
     UserAttrsRepo userAttrsRepo
-
-    @Autowired
-    UserTagRepo userTagRepo
 
     @Value('#{securityConfig.authMode}}')
     AuthMode authMode = AuthMode.DEFAULT_AUTH_MODE
@@ -328,11 +323,6 @@ class UserInfoController {
         return pkiUserLookup?.suggestUsers(query, userSuggestOption)?.take(5)?.collect { new UserInfoRes(it) }
     }
 
-    @RequestMapping(value = "/users/{userId}/projectsUserIsAdminFor", method = RequestMethod.GET)
-    List<String> isUserAdmin(@PathVariable("userId") String userId) {
-        return userAuthService.getProjectsUserIsAdminFor(userId)
-    }
-
     @RequestMapping(value="/userAgreement", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     def getUserAgreement() {
@@ -348,9 +338,4 @@ class UserInfoController {
         return currentUser
     }
 
-    @RequestMapping(value="/userInfo/userTags/{userId}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
-    @ResponseBody
-    List<UserTag> getUserTags(@PathVariable("userId") String userId) {
-        return userTagRepo.findAllByUserId(userId)
-    }
 }

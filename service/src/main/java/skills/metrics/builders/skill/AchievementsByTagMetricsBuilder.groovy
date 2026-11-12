@@ -19,6 +19,7 @@ import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.domain.PageRequest
 import org.springframework.stereotype.Component
+import skills.metrics.UserTagMetricsValidator
 import skills.metrics.builders.MetricsParams
 import skills.metrics.builders.ProjectMetricsBuilder
 import skills.storage.model.UserTagCount
@@ -36,6 +37,9 @@ class AchievementsByTagMetricsBuilder implements ProjectMetricsBuilder {
     @Autowired
     UserPerformedSkillRepo userPerformedSkillRepo
 
+    @Autowired
+    UserTagMetricsValidator userTagMetricsValidator
+
     @Override
     String getId() {
         return "skillAchievementsByTagBuilder"
@@ -50,10 +54,12 @@ class AchievementsByTagMetricsBuilder implements ProjectMetricsBuilder {
     @Override
     Object build(String projectId, String chartId, Map<String, String> props) {
         String skillId = MetricsParams.getSkillId(projectId, chartId, props);
+        String tagKey = props.userTagKey
+        userTagMetricsValidator.validateProjectMetricsKey(tagKey, projectId, skillId)
         PageRequest pageRequest = PageRequest.of(0, 20 )
 
-        def skillsPerformed = userPerformedSkillRepo.findAllByProjectIdAndSkillIdAndUserTag(projectId, skillId, props.userTagKey, pageRequest)
-        def skillsAchieved = userAchievedRepo.countNumAchievedByUserTag(projectId, skillId, props.userTagKey)
+        def skillsPerformed = userPerformedSkillRepo.findAllByProjectIdAndSkillIdAndUserTag(projectId, skillId, tagKey, pageRequest)
+        def skillsAchieved = userAchievedRepo.countNumAchievedByUserTag(projectId, skillId, tagKey)
 
         def tagMap = new HashMap<String, UserTagCounts>()
         skillsPerformed.forEach( skill -> {

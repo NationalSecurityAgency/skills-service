@@ -1553,8 +1553,6 @@ Cypress.Commands.add('reportHistoryOfEvents', (projId, user, numDays=10, skipWee
 });
 
 Cypress.Commands.add('validateTable', (tableSelector, expected, pageSize = 5, onlyVisiblePage = false, numRowsParam = null, validateTotalRows = true, sortColumnName = null) => {
-    cy.get(`${tableSelector} [data-pc-section="loadingicon"]`).should('not.exist')
-    cy.get(tableSelector).contains('There are no records to show').should('not.exist')
     const rowSelector = `${tableSelector} tbody tr`
     const numRows =  numRowsParam ? numRowsParam : expected.length;
 
@@ -1562,36 +1560,45 @@ Cypress.Commands.add('validateTable', (tableSelector, expected, pageSize = 5, on
         cy.get(`${tableSelector} th`).contains(sortColumnName).should('exist').click();
     }
 
-    if (validateTotalRows) {
-        cy.get(`${tableSelector} [data-cy=skillsBTableTotalRows]`)
-            .should('have.text', numRows);
-    }
-
-    cy.get(rowSelector).should('have.length', Math.min(pageSize, numRows)).as('cyRows');
-
     const numIterations = onlyVisiblePage ? Math.min(pageSize, numRows) : numRows
-    for (let i = 0; i < numIterations; i += 1) {
-        let rowIndex = i;
-        if (i + 1 >= pageSize) {
-            rowIndex = i - (pageSize * (Math.trunc(i / pageSize)));
-        }
-        if (i > 0 && i % pageSize === 0) {
-            const nextPage = (i / pageSize) + 1;
-            const nextPageSize = (i + pageSize <= numRows) ? pageSize : (numRows % pageSize);
-            cy.log(`Going to the next page #${nextPage}, next page size is [${nextPageSize}]`);
+    expect(expected.length, 'expected rows to validate').to.be.at.least(numIterations);
+    const numPages = Math.max(1, Math.ceil(numIterations / pageSize));
+    for (let pageIndex = 0; pageIndex < numPages; pageIndex += 1) {
+        const offset = pageIndex * pageSize;
+        const visibleRows = Math.min(pageSize, numRows - offset);
+        const expectedPage = expected.slice(offset, Math.min(offset + pageSize, numIterations));
+        if (pageIndex > 0) {
+            const nextPage = pageIndex + 1;
+            cy.log(`Going to the next page #${nextPage}, next page size is [${visibleRows}]`);
             cy.get(`${tableSelector} [data-pc-name="pcpaginator"] [aria-label="Page ${nextPage}"]`).click();
-            cy.get(tableSelector).contains('Loading...').should('not.exist')
-            cy.get(rowSelector).should('have.length', nextPageSize).as('cyRows');
         }
 
-        const alias = `row${i}`
-        cy.get('@cyRows').eq(rowIndex).find('td').as(alias);
-        const toValidate = expected[i];
-        toValidate.forEach((item) => {
-            cy.get(`@${alias}`).eq(item.colIndex).should('contain.text', item.value);
-        })
-    }
+        // Retry the entire page against fresh DOM queries. A completed request does not
+        // guarantee Vue has reordered the rows, and aliased cells can retain the old order.
+        cy.get(tableSelector).should(($table) => {
+            // The mask also covers custom loading slots that have no default loading icon.
+            expect($table.find('[data-pc-section="mask"], [data-pc-section="loadingicon"]'), 'table loading indicators').to.have.length(0);
+            expect($table).not.to.contain.text('There are no records to show');
+            if (validateTotalRows) {
+                expect($table.find('[data-cy="skillsBTableTotalRows"]')).to.have.text(String(numRows));
+            }
+            const $rows = $table.find('tbody tr');
+            expect($rows, `visible rows on page ${pageIndex + 1}`).to.have.length(visibleRows);
+            expectedPage.forEach((cells, rowIndex) => {
+                const $cells = $rows.eq(rowIndex).find('td');
+                cells.forEach((item) => {
+                    expect($cells.eq(item.colIndex), `row ${offset + rowIndex + 1}, column ${item.colIndex + 1}`)
+                        .to.contain.text(item.value);
+                });
+            });
+        });
 
+        // Preserve the existing aliases for callers, but do not use them for assertions.
+        cy.get(rowSelector).as('cyRows');
+        expectedPage.forEach((cells, rowIndex) => {
+            cy.get(rowSelector).eq(rowIndex).find('td').as(`row${offset + rowIndex}`);
+        });
+    }
 });
 
 Cypress.Commands.add('wrapIframe', () => {

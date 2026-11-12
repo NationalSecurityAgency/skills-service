@@ -36,7 +36,7 @@ describe('Metrics Using User Tags Tests', () => {
         cy.intercept('GET', '/public/config', (req) => {
             req.reply({
                 body: {
-                    projectMetricsTagCharts: '[{"key":"manyValues","type":"table","title":"Many Values","tagLabel":"Best Label"},{"key":"someValues","type":"bar","title":"Some Values"}]'
+                    projectMetricsTagCharts: '[{"key":"dutyOrganization","type":"table","title":"Many Values","tagLabel":"Best Label"},{"key":"adminOrganization","type":"bar","title":"Some Values"}]'
                 },
             });
         })
