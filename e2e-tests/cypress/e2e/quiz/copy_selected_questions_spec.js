@@ -15,6 +15,16 @@
  */
 
 describe('Copy selected quiz questions', () => {
+    let releaseCopyRequest;
+
+    afterEach(() => {
+        // Release a held request even if a submission-state assertion fails.
+        if (releaseCopyRequest) {
+            releaseCopyRequest();
+            releaseCopyRequest = undefined;
+        }
+    });
+
     const questionCard = (number) => `[data-cy="questionDisplayCard-${number}"]`;
     const checkbox = (number) => `${questionCard(number)} [data-cy="selectSkillCheckbox"]`;
 
@@ -153,6 +163,78 @@ describe('Copy selected quiz questions', () => {
         cy.get('[data-cy="pageHeaderStat_Questions"] [data-cy="statValue"]').should('have.text', '0');
     });
 
+    ['full', 'insufficient remaining capacity'].forEach((capacity) => {
+        it(`rejects selected-question copying when the destination has ${capacity}`, () => {
+            cy.createQuizDef(1);
+            cy.createQuizDef(2);
+            cy.createQuizQuestionDef(1, 1);
+            cy.createQuizQuestionDef(1, 2);
+            cy.request('/public/config').its('body.maxQuestionsPerQuiz').then((configuredMaximum) => {
+                const maximum = Number(configuredMaximum);
+                const existingCount = capacity === 'full' ? maximum : maximum - 1;
+                for (let number = 1; number <= existingCount; number += 1) {
+                    cy.createQuizQuestionDef(2, number);
+                }
+                cy.visit('/administrator/quizzes/quiz1');
+                cy.get(questionCard(2)).should('be.visible');
+                selectQuestions(1, 2);
+                openCopyDialog();
+                cy.get('[data-cy="quizzes-to-copy"]').click();
+                cy.contains('.p-select-option', 'This is quiz 2').click();
+                cy.get('[data-cy="validationFailedMsg"]')
+                    .should('contain.text', `A Quiz can not have more than ${maximum} questions`)
+                    .and('contain.text', `currently has ${existingCount} questions`)
+                    .and('contain.text', capacity === 'full' ? 'can not accept additional questions' : 'can not accept all the selected questions');
+                cy.get('[data-cy="saveDialogBtn"]').should('be.disabled');
+                cy.get(`${checkbox(1)} input`).should('be.checked');
+                cy.get(`${checkbox(2)} input`).should('be.checked');
+                cy.get('[data-cy="closeDialogBtn"]').should('be.enabled').click();
+
+                cy.visit('/administrator/quizzes/quiz2');
+                cy.get('[data-cy="pageHeaderStat_Questions"] [data-cy="statValue"]').should('have.text', `${existingCount}`);
+                cy.get(questionCard(existingCount)).should('be.visible');
+                cy.get(questionCard(existingCount + 1)).should('not.exist');
+            });
+        });
+    });
+
+    it('prevents cancellation while selected questions are being copied', () => {
+        cy.createQuizDef(1);
+        cy.createQuizDef(2);
+        cy.createQuizQuestionDef(1, 1);
+        cy.visit('/administrator/quizzes/quiz1');
+        cy.get(questionCard(1)).should('be.visible');
+        selectQuestions(1);
+        openCopyDialog();
+        selectDestination('This is quiz 2');
+
+        const copyReady = new Cypress.Promise((resolve) => { releaseCopyRequest = resolve; });
+        cy.intercept('POST', '/admin/quiz-definitions/quiz1/questions/copy/quiz2', (req) => {
+            return copyReady.then(() => req.continue());
+        });
+
+        cy.get('[data-cy="saveDialogBtn"]').click();
+        cy.get('[data-cy="closeDialogBtn"]').should('be.disabled');
+        cy.get('[data-cy="saveDialogBtn"]').should('be.disabled');
+        cy.get('[data-cy="copyQuestionModal"]').find('[aria-label="Close"]').should('not.exist');
+        cy.realPress('Escape');
+        cy.get('[data-cy="copyQuestionModal"]').should('be.visible');
+        cy.get('[data-cy="closeDialogBtn"]').should('be.disabled');
+        cy.get(`${checkbox(1)} input`).should('be.checked');
+        cy.then(() => {
+            releaseCopyRequest();
+            releaseCopyRequest = undefined;
+        });
+
+        cy.contains('Successfully copied 1 question').should('be.visible');
+        cy.get('[data-cy="closeDialogBtn"]').should('be.enabled').click();
+        cy.get('[data-cy="copyQuestionModal"]').should('not.exist');
+        cy.get('#toggleSelectionMode').should('have.focus');
+        cy.visit('/administrator/quizzes/quiz2');
+        cy.get(questionCard(1)).find('[data-cy="questionDisplayText"]').should('contain.text', 'This is a question # 1');
+        cy.get(questionCard(2)).should('not.exist');
+    });
+
     it('keeps the selected questions when copying fails and succeeds on retry', () => {
         cy.createQuizDef(1);
         cy.createQuizDef(2);
@@ -179,28 +261,40 @@ describe('Copy selected quiz questions', () => {
         cy.get('[data-cy="saveDialogBtn"]').should('be.enabled').click();
         cy.contains('Successfully copied 1 question').should('be.visible');
         cy.get('[data-cy="closeDialogBtn"]').click();
+        cy.get('[data-cy="copyQuestionModal"]').should('not.exist');
         cy.get('[data-cy="questionActionsBtn"]').should('be.disabled');
+        cy.get('#toggleSelectionMode').should('be.enabled').and('have.focus');
 
         cy.visit('/administrator/quizzes/quiz2');
         cy.get(questionCard(1)).find('[data-cy="questionDisplayText"]').should('contain.text', 'This is a question # 1');
         cy.get(questionCard(2)).should('not.exist');
     });
 
-    it('deselects questions when cancelling the copy dialog', () => {
-        cy.createQuizDef(1);
-        cy.createQuizDef(2);
-        cy.createQuizQuestionDef(1, 1);
-        cy.visit('/administrator/quizzes/quiz1');
-        cy.get(questionCard(1)).should('be.visible');
-        selectQuestions(1);
-        openCopyDialog();
-        cy.get('[data-cy="closeDialogBtn"]').click();
-        cy.get('[data-cy="quizzes-to-copy"]').should('not.exist');
-        cy.get(`${checkbox(1)} input`).should('not.be.checked');
-        cy.get('[data-cy="questionActionsBtn"]').should('be.disabled');
+    ['Cancel', 'header close', 'Escape'].forEach((closeMethod) => {
+        it(`deselects questions and returns focus to the selection toggle when closing with ${closeMethod}`, () => {
+            cy.createQuizDef(1);
+            cy.createQuizDef(2);
+            cy.createQuizQuestionDef(1, 1);
+            cy.visit('/administrator/quizzes/quiz1');
+            cy.get(questionCard(1)).should('be.visible');
+            selectQuestions(1);
+            openCopyDialog();
+            cy.get('[data-cy="copyQuestionModal"]').should('be.visible');
+            if (closeMethod === 'Escape') {
+                cy.get('[data-cy="closeDialogBtn"]').focus().realPress('Escape');
+            } else if (closeMethod === 'header close') {
+                cy.get('[data-cy="copyQuestionModal"]').find('[aria-label="Close"]').click();
+            } else {
+                cy.get('[data-cy="closeDialogBtn"]').click();
+            }
+            cy.get('[data-cy="copyQuestionModal"]').should('not.exist');
+            cy.get(`${checkbox(1)} input`).should('not.be.checked');
+            cy.get('[data-cy="questionActionsBtn"]').should('be.disabled');
+            cy.get('#toggleSelectionMode').should('be.enabled').and('have.focus');
+        });
     });
 
-    it('supports keyboard selection, action menu navigation, and returning focus after closing', () => {
+    it('supports keyboard selection, action menu navigation, and returning focus to the selection toggle after closing', () => {
         cy.createQuizDef(1);
         cy.createQuizDef(2);
         cy.createQuizQuestionDef(1, 1);
@@ -212,14 +306,22 @@ describe('Copy selected quiz questions', () => {
         cy.get(`${checkbox(1)} input`).focus().should('have.focus').type(' ');
         cy.get(`${checkbox(1)} input`).should('be.checked');
 
+        cy.get('[data-cy="questionActionsBtn"]').should('have.attr', 'aria-haspopup', 'menu')
+            .and('have.attr', 'aria-controls', 'questions-actions-menu')
+            .and('have.attr', 'aria-expanded', 'false');
         cy.get('[data-cy="questionActionsBtn"]').focus().type('{enter}');
         cy.contains('.p-menu-item-link', 'Copy to Another Quiz').should('be.visible');
+        cy.get('[data-cy="questionsActionsMenu"]').should('have.attr', 'id', 'questions-actions-menu');
+        cy.get('[data-cy="questionActionsBtn"]').should('have.attr', 'aria-expanded', 'true');
         cy.contains('.p-menu-item-link', 'Copy to Another Quiz').focus().should('have.focus').realPress('Tab');
         cy.contains('.p-menu-item-link', 'Copy to Another Quiz').should('not.have.focus');
+        cy.get('[data-cy="questionActionsBtn"]').should('have.attr', 'aria-expanded', 'false');
 
         cy.get('[data-cy="questionActionsBtn"]').focus().type('{enter}');
+        cy.get('[data-cy="questionActionsBtn"]').should('have.attr', 'aria-expanded', 'true');
         cy.contains('.p-menu-item-link', 'Copy to Another Quiz').should('be.visible').click();
         cy.get('[data-cy="quizzes-to-copy"]').should('be.visible');
+        cy.get('[data-cy="questionActionsBtn"]').should('have.attr', 'aria-expanded', 'false');
         cy.focused().closest('.p-dialog').should('be.visible');
 
         cy.get('label[for="quizzesToCopy"]').click();
@@ -227,8 +329,38 @@ describe('Copy selected quiz questions', () => {
         cy.get('[data-cy="quizzes-to-copy"]').click();
         cy.contains('.p-select-option', 'This is quiz 2').click();
         cy.get('[data-cy="saveDialogBtn"]').should('be.enabled');
-        cy.get('[data-cy="closeDialogBtn"]').click();
-        cy.get('[data-cy="quizzes-to-copy"]').should('not.exist');
+        cy.get('[data-cy="closeDialogBtn"]').focus().should('have.focus').realPress('Enter');
+        cy.get('[data-cy="copyQuestionModal"]').should('not.exist');
         cy.get('[data-cy="questionActionsBtn"]').should('be.disabled');
+        cy.get('#toggleSelectionMode').should('be.enabled').and('have.focus');
+    });
+
+    ['Escape', 'outside click', 'Actions button'].forEach((dismissMethod) => {
+        it(`updates the Actions button expanded state when dismissing the menu with ${dismissMethod}`, () => {
+            cy.createQuizDef(1);
+            cy.createQuizQuestionDef(1, 1);
+            cy.visit('/administrator/quizzes/quiz1');
+            cy.get(questionCard(1)).should('be.visible');
+            selectQuestions(1);
+            cy.get('[data-cy="questionActionsBtn"]').should('have.attr', 'aria-expanded', 'false').click();
+            cy.get('[data-cy="questionsActionsMenu"]').should('be.visible');
+            cy.get('[data-cy="questionActionsBtn"]').should('have.attr', 'aria-expanded', 'true');
+
+            if (dismissMethod === 'Escape') {
+                cy.contains('.p-menu-item-link', 'Copy to Another Quiz').focus().realPress('Escape');
+            } else if (dismissMethod === 'outside click') {
+                cy.get('[data-cy="selectAllQuestionsBtn"]').click();
+            } else {
+                cy.get('[data-cy="questionActionsBtn"]').click();
+            }
+
+            cy.get('[data-cy="questionsActionsMenu"]').should('not.exist');
+            cy.get('[data-cy="questionActionsBtn"]').should('have.attr', 'aria-expanded', 'false');
+
+            cy.get('#toggleSelectionMode').click();
+            cy.get('[data-cy="questionActionsBtn"]').should('not.exist');
+            cy.get('#toggleSelectionMode').click();
+            cy.get('[data-cy="questionActionsBtn"]').should('have.attr', 'aria-expanded', 'false');
+        });
     });
 });

@@ -319,7 +319,15 @@ class QuizDefService {
         }
         QuizDef originalQuizDef = findQuizDef(originalQuizId)
         QuizDef newQuizDef = findQuizDef(newQuizId)
-        lockingService.lockQuizDef(newQuizDef.quizId)
+
+        // Use stored IDs for subsequent queries, attachment copying, and inserts.
+        originalQuizId = originalQuizDef.quizId
+        newQuizId = newQuizDef.quizId
+
+        List<String> quizIdsToLock = [originalQuizDef.quizId, newQuizDef.quizId].unique().sort()
+        quizIdsToLock.each { String quizId ->
+            lockingService.lockQuizDef(quizId)
+        }
 
         if(questionIdsToCopy?.size() > 0) {
             Integer questions = quizQuestionRepo.countByQuizId(newQuizId)
@@ -604,9 +612,8 @@ class QuizDefService {
     @Transactional()
     QuizQuestionDefResult saveQuestion(String quizId, QuizQuestionDefRequest questionDefRequest, Integer existingQuestionId = null) {
         QuizDef quizDef = findQuizDef(quizId)
-        validate(quizDef, questionDefRequest)
-
         lockingService.lockQuizDef(quizDef.quizId)
+        validate(quizDef, questionDefRequest)
 
         QuizQuestionDef savedQuestion
         List<QuizAnswerDef> savedAnswers
