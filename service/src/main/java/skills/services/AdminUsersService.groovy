@@ -275,7 +275,8 @@ class AdminUsersService {
     @Transactional(readOnly = true)
     List<UserTagResult> getUserTagsForProject(String projectId, String userId) {
         UserPoints userPoints = userPointsRepo.findByProjectIdAndUserIdAndSkillId(projectId, userId, null)
-        SkillsValidator.isTrue(userPoints != null, "User [${userId}] is not an existing user of project [${projectId}]", projectId)
+        SkillsValidator.isTrue(userPoints != null || projectParticipationRepo.existsByProjectIdAndUserId(projectId, userId),
+                "User [${userId}] is not an existing user of project [${projectId}]", projectId)
 
         // This deployment-controlled allowlist is a disclosure policy, not proof of user consent:
         // a project admin can establish participation by reporting a skill for a user.

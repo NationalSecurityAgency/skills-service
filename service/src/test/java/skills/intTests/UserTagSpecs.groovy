@@ -21,9 +21,9 @@ import skills.intTests.utils.SkillsService
 
 class UserTagSpecs extends DefaultIntSpec {
 
-    def "no user tags are disclosed when the display allowlist is empty"() {
+    def "no user tags are disclosed when the display allowlist is empty for #participationType participation"() {
         String user = getRandomUsers(1, true).first()
-        createService(user)
+        SkillsService learner = createService(user)
 
         def proj1 = SkillsFactory.createProject(1)
         def proj1_subj = SkillsFactory.createSubject(1, 1)
@@ -36,13 +36,20 @@ class UserTagSpecs extends DefaultIntSpec {
         def tags = ['ABCDE']
         SkillsService rootUser = createRootSkillService()
         rootUser.saveUserTag(user, 'someTag', tags)
-        skillsService.addSkill(proj1_skills[0], user)
+        if (participationType == 'visit') {
+            learner.initializeProjectProgress(proj1.projectId)
+        } else {
+            skillsService.addSkill(proj1_skills[0], user)
+        }
 
         when:
         List userTags = skillsService.getUserTags(proj1.projectId, user)
 
         then:
         userTags == []
+
+        where:
+        participationType << ['visit', 'skill event']
     }
 
 }
