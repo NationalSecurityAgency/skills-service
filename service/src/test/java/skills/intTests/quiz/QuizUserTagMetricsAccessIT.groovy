@@ -22,9 +22,13 @@ import skills.SpringBootApp
 import skills.intTests.utils.DefaultIntSpec
 import skills.intTests.utils.QuizDefFactory
 import skills.intTests.utils.SkillsClientException
+import skills.intTests.utils.SkillsFactory
 import skills.intTests.utils.SkillsService
+import skills.quizLoading.QuizSettings
 import skills.services.quiz.QuizQuestionType
 import skills.storage.model.QuizDefParent.QuizType
+import skills.storage.model.SkillDef
+import skills.storage.model.auth.RoleName
 
 @SpringBootTest(properties = [
         'skills.config.ui.projectMetricsTagCharts=[{"key":"projectOnly","type":"table"}]',
@@ -104,6 +108,49 @@ class QuizUserTagMetricsAccessIT extends DefaultIntSpec {
 
         where:
         quizType << [QuizType.Quiz, QuizType.Survey]
+    }
+
+    def "#projectRole callers with derived quiz read-only access respect #quizType tag key restrictions"() {
+        Map assessment = createAssessment(quizType)
+        Map project = SkillsFactory.createProject()
+        Map subject = SkillsFactory.createSubject()
+        skillsService.createProject(project)
+        skillsService.createSubject(subject)
+        Map linkedSkill = SkillsFactory.createSkill()
+        linkedSkill.selfReportingType = SkillDef.SelfReportingType.Quiz
+        linkedSkill.quizId = assessment.quizId
+        skillsService.createSkill(linkedSkill)
+
+        List<String> excludedUsers = [skillsService.userName, rootUser.userName] + learners.collect { SkillsService learner -> learner.userName }
+        SkillsService readOnlyCaller = createService(getRandomUsers(1, true, excludedUsers).first())
+        // Grant only a project role; quiz read-only access must come from the skill association.
+        skillsService.addUserRole(readOnlyCaller.userName, project.projectId, projectRole.name())
+
+        when:
+        List<Map> settings = readOnlyCaller.getQuizSettings(assessment.quizId)
+        List<Map> counts = readOnlyCaller.getQuizUserTagCounts(assessment.quizId, 'quizOnly')
+
+        then:
+        settings.find { Map setting -> setting.setting == QuizSettings.QuizUserRole.setting }.value == RoleName.ROLE_QUIZ_READ_ONLY.name()
+        counts == [[value: 'Visible Group', count: 2]]
+
+        when:
+        readOnlyCaller.getQuizUserTagCounts(assessment.quizId, 'hidden')
+
+        then:
+        SkillsClientException exception = thrown(SkillsClientException)
+        exception.httpStatus == HttpStatus.BAD_REQUEST
+        Map error = new JsonSlurper().parseText(exception.resBody)
+        error.errorCode == 'BadParam'
+        error.quizId == assessment.quizId
+        error.explanation == 'Tag key [hidden] is not configured for quiz tag metrics'
+        !exception.resBody.contains('Private Group')
+
+        where:
+        [projectRole, quizType] << [
+                [RoleName.ROLE_PROJECT_ADMIN, RoleName.ROLE_PROJECT_APPROVER],
+                [QuizType.Quiz, QuizType.Survey],
+        ].combinations()
     }
 
     def "missing and blank quiz keys return structured BadParam errors: #tagKey"() {
