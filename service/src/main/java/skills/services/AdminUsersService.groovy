@@ -17,6 +17,7 @@ package skills.services
 
 import callStack.profiler.Profile
 import groovy.util.logging.Slf4j
+import org.apache.commons.lang3.StringUtils
 import org.apache.commons.lang3.tuple.Pair
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
@@ -24,16 +25,19 @@ import org.springframework.data.domain.Page
 import org.springframework.data.domain.PageRequest
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import skills.controller.exceptions.SkillsValidator
 import skills.controller.result.model.*
 import skills.skillLoading.RankingLoader
 import skills.skillLoading.model.UsersPerLevel
 import skills.storage.model.DayCountItem
 import skills.storage.model.MonthlyCountItem
 import skills.storage.model.UserPoints
+import skills.storage.model.UserTag
 import skills.storage.repos.ProjDefRepo
 import skills.storage.repos.SkillDefRepo
 import skills.storage.repos.UserAchievedLevelRepo
 import skills.storage.repos.UserPointsRepo
+import skills.storage.repos.UserTagRepo
 import skills.storage.repos.nativeSql.PostgresQlNativeRepo
 
 import java.time.LocalDateTime
@@ -73,6 +77,12 @@ class AdminUsersService {
 
     @Value('${skills.config.ui.usersTableAdditionalUserTagKey:}')
     String usersTableAdditionalUserTagKey
+
+    @Value('${skills.config.ui.userPageTagsToDisplay:}')
+    String userPageTagsToDisplay
+
+    @Autowired
+    UserTagRepo userTagRepo
 
     @Profile
     List<TimestampCountItem> getUsage(String projectId, String skillId, Date start, Boolean newUsersOnly = false) {
@@ -231,5 +241,30 @@ class AdminUsersService {
             return null
         }
         return accessSettingsStorageService.loadUserInfo(userId)
+    }
+
+    @Transactional(readOnly = true)
+    List<UserTagResult> getUserTagsForProject(String projectId, String userId) {
+        UserPoints userPoints = userPointsRepo.findByProjectIdAndUserIdAndSkillId(projectId, userId, null)
+        SkillsValidator.isTrue(userPoints != null, "User [${userId}] is not an existing user of project [${projectId}]", projectId)
+
+        // This deployment-controlled allowlist is a disclosure policy, not proof of user consent:
+        // a project admin can establish participation by reporting a skill for a user.
+        Set<String> allowedKeys = [] as Set<String>
+        if (StringUtils.isNotBlank(userPageTagsToDisplay)) {
+            userPageTagsToDisplay.split('\\|', -1).each { String section ->
+                String[] parts = section.split('/', -1)
+                // Ignore malformed entries rather than accidentally allowing an unintended key.
+                if (parts.length == 2 && StringUtils.isNotBlank(parts[0]) && StringUtils.isNotBlank(parts[1])) {
+                    allowedKeys.add(parts[0])
+                }
+            }
+        }
+        if (!allowedKeys) {
+            return []
+        }
+        return userTagRepo.findAllByUserIdAndExactKeyIn(userId, allowedKeys).collect { UserTag tag ->
+            new UserTagResult(key: tag.key, value: tag.value)
+        }
     }
 }

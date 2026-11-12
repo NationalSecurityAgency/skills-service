@@ -195,6 +195,11 @@ skills:
       maxHostLength: 50
       maxLastNameLength: 30
       maxNicknameLength: 70
+      # Tags listed in userPageTagsToDisplay are approved for disclosure to project admins,
+      # project approvers, and root users, including admins of self-created projects.
+      # Project participation is required but can be established by an admin reporting a skill.
+      # Format: key/label|key/label. An empty value disables disclosure of user-page tags.
+      userPageTagsToDisplay: ""
       minUsernameLength: 5
       minPasswordLength: 8
       maxPasswordLength: 40
@@ -266,5 +271,4 @@ skills:
     active: default
 db-scheduler:
   threads: 3
-
 

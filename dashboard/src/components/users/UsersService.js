@@ -68,8 +68,8 @@ export default {
       )
       .then((response) => response.data)
   },
-  getUserTags(userId) {
-    return axios.get(`/app/userInfo/userTags/${userId}`).then((response) => response.data)
+  getUserTags(projectId, userId) {
+    return axios.get(`/admin/projects/${encodeURIComponent(projectId)}/users/${encodeURIComponent(userId)}/tags`).then((response) => response.data)
   },
   archiveUsers(projectId, userIds) {
     return axios.post(`/admin/projects/${encodeURIComponent(projectId)}/users/archive`, { userIds})

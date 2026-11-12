@@ -1228,6 +1228,14 @@ class AdminController {
         return adminUsersService.getUserForProject(projectId, userId?.toLowerCase())
     }
 
+    @GetMapping(value = "/projects/{projectId}/users/{userId}/tags", produces = MediaType.APPLICATION_JSON_VALUE)
+    List<UserTagResult> getUserTags(@PathVariable("projectId") String projectId,
+                                  @PathVariable("userId") String userId) {
+        SkillsValidator.isNotBlank(projectId, "Project Id")
+        SkillsValidator.isNotBlank(userId, "User ID", projectId)
+        return adminUsersService.getUserTagsForProject(projectId, userId.toLowerCase())
+    }
+
     @GetMapping(value = "/projects/{projectId}/subjects/{subjectId}/users", produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     TableResultWithTotalPoints getSubjectUsers(@PathVariable("projectId") String projectId,
