@@ -59,7 +59,7 @@ class CommunityAndQuizCopySpecs extends CopyIntSpec {
         pristineDragonsUser.getQuizQuestionDefs(unrestrictedQuiz.quizId).questions.empty
 
         when: 'the destination is also community-protected'
-        def copied = pristineDragonsUser.wsHelper.adminPost("/quiz-definitions/${protectedQuiz.quizId}/questions/copy/${protectedDestination.quizId}".toString(), [sourceQuestion.id])
+        def copied = pristineDragonsUser.copyQuizQuestion(protectedQuiz.quizId, protectedDestination.quizId, [sourceQuestion.id]) //.wsHelper.adminPost("/quiz-definitions/${protectedQuiz.quizId}/questions/copy/${protectedDestination.quizId}".toString(), [sourceQuestion.id])
 
         then:
         copied.body.success

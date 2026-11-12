@@ -29,6 +29,67 @@ class QuizQuestionCopyAuthSpecs extends DefaultIntSpec {
     @Autowired
     QuizQuestionDefRepo quizQuestionDefRepo
 
+    def "non-community #callerRole cannot copy selected questions into a protected destination"() {
+        setup:
+        List<String> users = getRandomUsers(3)
+        SkillsService owner = createService(users[0])
+        SkillsService caller = callerRole == 'root' ? createRootSkillService(users[1]) : createService(users[1])
+        SkillsService root = callerRole == 'root' ? caller : createRootSkillService(users[2])
+        root.saveUserTag(owner.userName, 'dragons', ['DivineDragon'])
+        root.saveUserTag(caller.userName, 'dragons', ['DivineDragon'])
+
+        Map sourceQuiz = QuizDefFactory.createQuiz(1)
+        Map destinationQuiz = QuizDefFactory.createQuiz(2) + [enableProtectedUserCommunity: true]
+        caller.createQuizDef(sourceQuiz)
+        owner.createQuizDef(destinationQuiz)
+        owner.addQuizUserRole(destinationQuiz.quizId, caller.userName, 'ROLE_QUIZ_ADMIN')
+        Map sourceQuestion = QuizDefFactory.createChoiceQuestion(1, 1, 2)
+        sourceQuestion.question = 'Selected public source question'
+        Map createdSourceQuestion = caller.createQuizQuestionDef(sourceQuestion).body
+        Map destinationQuestion = QuizDefFactory.createChoiceQuestion(2, 1, 2)
+        destinationQuestion.question = 'Existing protected destination question'
+        Map createdDestinationQuestion = owner.createQuizQuestionDef(destinationQuestion).body
+
+        expect: 'the caller initially has destination access and copying is allowed'
+        caller.getQuizDefSummary(destinationQuiz.quizId).userCommunity == 'Divine Dragon'
+        caller.validateCopyQuestions(sourceQuiz.quizId, destinationQuiz.quizId, 1).body.isAllowed
+
+        when: 'only community membership is revoked, retaining the admin role'
+        userTagRepo.deleteAll(userTagRepo.findAllByUserIdAndKey(caller.userName, 'dragons'))
+        caller.copyQuestions(sourceQuiz.quizId, destinationQuiz.quizId, [createdSourceQuestion.id])
+
+        then:
+        SkillsClientException denied = thrown()
+        denied.httpStatus == HttpStatus.FORBIDDEN
+        denied.message.contains('errorCode:AccessDenied')
+        owner.getQuizUserRoles(destinationQuiz.quizId).any { Map role ->
+            role.userId == caller.userName && role.roleName == 'ROLE_QUIZ_ADMIN'
+        }
+
+        and: 'the rejected copy did not modify either quiz'
+        List<Map> destinationQuestions = owner.getQuizQuestionDefs(destinationQuiz.quizId).questions
+        destinationQuestions*.id == [createdDestinationQuestion.id]
+        destinationQuestions.first().question == 'Existing protected destination question'
+        destinationQuestions.first().answers*.answer == ['Answer #1', 'Answer #2']
+        destinationQuestions.first().answers*.isCorrect == [true, false]
+        caller.getQuizQuestionDefs(sourceQuiz.quizId).questions*.id == [createdSourceQuestion.id]
+
+        when: 'membership is restored without changing either admin role'
+        root.saveUserTag(caller.userName, 'dragons', ['DivineDragon'])
+        def response = caller.copyQuestions(sourceQuiz.quizId, destinationQuiz.quizId, [createdSourceQuestion.id])
+        List<Map> restoredDestinationQuestions = caller.getQuizQuestionDefs(destinationQuiz.quizId).questions
+
+        then:
+        response.body.success
+        restoredDestinationQuestions*.question == ['Existing protected destination question', 'Selected public source question']
+        restoredDestinationQuestions*.displayOrder == [0, 1]
+        restoredDestinationQuestions.last().answers*.answer == ['Answer #1', 'Answer #2']
+        restoredDestinationQuestions.last().answers*.isCorrect == [true, false]
+
+        where:
+        callerRole << ['admin', 'root']
+    }
+
     def "validating a copy requires destination quiz admin access"() {
         SkillsService sourceAdmin = createService(getRandomUsers(1)[0])
         def sourceQuiz = QuizDefFactory.createQuiz(1)

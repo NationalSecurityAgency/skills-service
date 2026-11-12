@@ -123,6 +123,7 @@ function toggleSelectionMode(value) {
   if(value) {
     collapseAllQuestions()
   } else {
+    questionsActionsMenuVisible.value = false
     clearSelectedQuestions()
     expandAllQuestions()
   }
@@ -310,6 +311,12 @@ function clearSelectedQuestions() {
   })
 }
 
+function onCopyModalClosed() {
+  clearSelectedQuestions()
+  // Clearing the selection disables Actions, so return to an enabled control.
+  focusState.setElementId('toggleSelectionMode')
+}
+
 function selectAllQuestions() {
   const ids = questions.value.map(question => question.id)
   ids.forEach(id => {
@@ -318,6 +325,7 @@ function selectAllQuestions() {
 }
 
 const questionsActionsMenu = ref(false)
+const questionsActionsMenuVisible = ref(false)
 const toggleActionsMenu = (event) => {
   questionsActionsMenu.value.toggle(event)
 }
@@ -375,7 +383,9 @@ const actionsMenu = ref([
             v-if="!quizConfig.isReadOnlyQuiz && selectionModeEnabled"
             @click="toggleActionsMenu"
             aria-label="Question actions button"
-            aria-haspopup="true"
+            aria-haspopup="menu"
+            aria-controls="questions-actions-menu"
+            :aria-expanded="questionsActionsMenuVisible"
             :disabled="Object.keys(selectedQuestions).length === 0"
             :track-for-focus="true"
             data-cy="questionActionsBtn">
@@ -389,6 +399,8 @@ const actionsMenu = ref([
               id="questions-actions-menu"
               data-cy="questionsActionsMenu"
               :model="actionsMenu"
+              @show="questionsActionsMenuVisible = true"
+              @hide="questionsActionsMenuVisible = false"
               aria-label="Menu to perform actions on selected questions"
               :popup="true">
           <template #item="{ item, props }">
@@ -513,7 +525,7 @@ const actionsMenu = ref([
         :questions-to-save="selectedQuestions"
         v-if="copyQuestionInfo.showDialog"
         v-model="copyQuestionInfo.showDialog"
-        @copy-modal-closed="clearSelectedQuestions"
+        @copy-modal-closed="onCopyModalClosed"
         :enable-return-focus="true" />
 
   </div>

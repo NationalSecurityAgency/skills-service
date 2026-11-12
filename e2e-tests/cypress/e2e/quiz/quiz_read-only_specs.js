@@ -82,6 +82,22 @@ describe('Quiz Read Only Role Tests', () => {
         cy.login(userName, password);
     });
 
+    it('read-only users cannot select or copy quiz questions', () => {
+        cy.visit('/administrator/quizzes/quiz1/');
+        cy.get('[data-cy="pageHeader"] [data-cy="userRole"]').should('have.text', 'Read Only');
+        cy.get('[data-cy="questionDisplayCard-3"]').should('be.visible');
+        cy.get('[data-cy="toggleSelectionMode"]').should('not.exist');
+        cy.get('[data-cy="selectSkillCheckbox"]').should('not.exist');
+        cy.get('[data-cy="selectAllQuestionsBtn"]').should('not.exist');
+        cy.get('[data-cy="deselectAllQuestionsBtn"]').should('not.exist');
+        cy.get('[data-cy="questionActionsBtn"]').should('not.exist');
+        cy.get('[data-cy="questionsActionsMenu"]').should('not.exist');
+        [1, 2, 3].forEach((number) => {
+            cy.get(`[data-cy="copyQuestionButton_${number}"]`).should('not.exist');
+        });
+        cy.get('[data-cy="copyQuestionModal"]').should('not.exist');
+    });
+
     it('quiz page - read only has no mutation controls', function () {
         Cypress.Commands.add("runCheck", (assertChainPrepend) => {
             const chainerPrepend = assertChainPrepend ? assertChainPrepend : '';
