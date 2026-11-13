@@ -62,6 +62,7 @@ if (!['skill.name', 'sharedProject.name'].includes(sortInfo.value?.sortBy)) {
 const doesShareAlreadyExist = ref(false);
 const validatingSkill = ref(false)
 const validationFailed = ref(false)
+const lastLoadedState = ref(null)
 let shareLookupId = 0
 
 const shareButtonEnabled = computed(() => {
@@ -117,10 +118,29 @@ const loadSharedSkills = () => {
       }
       sharedSkills.value = data.data;
       totalRecords.value = data.totalCount;
-    }).catch(() => {
-      if (requestId === sharedSkillsRequestId) {
-        sharedSkillsLoadFailed.value = true
+
+      lastLoadedState.value = {
+        page: params.page,
+        pageSize: params.limit,
+        sortBy: params.orderBy,
+        sortOrder: params.ascending ? 1 : -1,
       }
+    }).catch(() => {
+        if (requestId !== sharedSkillsRequestId) {
+          return
+        }
+
+        const previous = lastLoadedState.value
+        if (previous) {
+          currentPage.value = previous.page
+          pageSize.value = previous.pageSize
+          sortInfo.value = {
+            sortBy: previous.sortBy,
+            sortOrder: previous.sortOrder,
+          }
+        }
+
+        sharedSkillsLoadFailed.value = true
     }).finally(() => {
       if (requestId === sharedSkillsRequestId) {
         loading.value.sharedSkillsInit = false

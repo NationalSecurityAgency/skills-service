@@ -316,7 +316,7 @@ const updateSearch = (value) => {
         </div>
       </div>
       <div class="flex flex-1 gap-2 mt-2">
-        <Checkbox id="includeShared" v-model="includeSharedSkills" binary data-cy="includeShared" aria-label="Include skills shared from other projects" @change="loadSharedSkills"/>
+        <Checkbox input-id="includeShared" v-model="includeSharedSkills" binary data-cy="includeShared" aria-label="Include skills shared from other projects" @change="loadSharedSkills"/>
         <label for="includeShared">Include skills shared from other projects</label>
       </div>
       <Message v-if="includeSharedSkills && sharedSkillsLoadFailed" severity="error" :closable="false" data-cy="sharedSkillsSearchError">

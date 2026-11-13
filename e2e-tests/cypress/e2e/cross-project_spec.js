@@ -994,17 +994,94 @@ describe('Shared skills pagination and request recovery', () => {
 
         it(`recovers after the latest ${project === 1 ? 'outgoing' : 'incoming'} table request fails`, () => {
             const endpoint = project === 1 ? 'shared' : 'sharedWithMe';
-            visit(project);
+            let failNextPage = true;
+            visit(project, {
+                [outgoingSortKey]: { sortOrder: -1, sortBy: 'skill.name' },
+                [incomingSortKey]: { sortOrder: -1, sortBy: 'skill.name' },
+            });
             expectFirstSkill(card, 'Shared Skill 6');
             cy.intercept('GET', `/admin/projects/proj${project}/${endpoint}?*`, (request) => {
-                if (request.query.page === '2') {
+                if (failNextPage && request.query.page === '2') {
+                    failNextPage = false;
                     request.reply({ statusCode: 500, body: { explanation: 'Latest request failed' } });
                 }
             });
             cy.get(`${card} [aria-label="Page 2"]`).click();
             cy.get(card).should('contain', 'Could not load shared skills. Please try again.');
-            cy.get(`${card} [aria-label="Page 1"]`).click();
             expectFirstSkill(card, 'Shared Skill 6');
+            cy.get(`${card} [aria-label="Page 1"]`).should('have.attr', 'aria-current', 'page');
+            cy.get(`${card} [aria-label="Rows per page"]`).should('have.text', '5');
+            cy.get(`${card} th`).contains('Shared Skill').closest('th')
+                .should('have.attr', 'aria-sort', 'descending');
+
+            cy.get(`${card} [aria-label="Page 2"]`).click();
+            expectFirstSkill(card, 'Shared Skill 1', 1);
+            cy.get(`${card} [aria-label="Page 2"]`).should('have.attr', 'aria-current', 'page');
+            cy.get(card).should('not.contain', 'Could not load shared skills');
+        });
+
+        it(`restores the latest successful page and sort after a failed ${project === 1 ? 'outgoing' : 'incoming'} sort`, () => {
+            const endpoint = project === 1 ? 'shared' : 'sharedWithMe';
+            let failNextSort = true;
+            visit(project, {
+                [outgoingSortKey]: { sortOrder: -1, sortBy: 'skill.name' },
+                [incomingSortKey]: { sortOrder: -1, sortBy: 'skill.name' },
+            });
+            expectFirstSkill(card, 'Shared Skill 6');
+            cy.get(`${card} [aria-label="Page 2"]`).click();
+            expectFirstSkill(card, 'Shared Skill 1', 1);
+            cy.intercept('GET', `/admin/projects/proj${project}/${endpoint}?*`, (request) => {
+                if (failNextSort && request.query.ascending === 'true') {
+                    failNextSort = false;
+                    request.reply({ statusCode: 500, body: { explanation: 'Sort request failed' } });
+                }
+            });
+
+            cy.get(`${card} th`).contains('Shared Skill').click();
+            cy.get(card).should('contain', 'Could not load shared skills. Please try again.');
+            expectFirstSkill(card, 'Shared Skill 1', 1);
+            cy.get(`${card} [aria-label="Page 2"]`).should('have.attr', 'aria-current', 'page');
+            cy.get(`${card} [aria-label="Rows per page"]`).should('have.text', '5');
+            cy.get(`${card} th`).contains('Shared Skill').closest('th')
+                .should('have.attr', 'aria-sort', 'descending');
+
+            cy.get(`${card} th`).contains('Shared Skill').click();
+            expectFirstSkill(card, 'Shared Skill 1');
+            cy.get(`${card} [aria-label="Page 1"]`).should('have.attr', 'aria-current', 'page');
+            cy.get(`${card} th`).contains('Shared Skill').closest('th')
+                .should('have.attr', 'aria-sort', 'ascending');
+            cy.get(card).should('not.contain', 'Could not load shared skills');
+        });
+
+        it(`restores the latest successful page and size after a failed ${project === 1 ? 'outgoing' : 'incoming'} page-size change`, () => {
+            const endpoint = project === 1 ? 'shared' : 'sharedWithMe';
+            let failNextSizeChange = true;
+            visit(project, {
+                [outgoingSortKey]: { sortOrder: -1, sortBy: 'skill.name' },
+                [incomingSortKey]: { sortOrder: -1, sortBy: 'skill.name' },
+            });
+            expectFirstSkill(card, 'Shared Skill 6');
+            cy.get(`${card} [aria-label="Page 2"]`).click();
+            expectFirstSkill(card, 'Shared Skill 1', 1);
+            cy.intercept('GET', `/admin/projects/proj${project}/${endpoint}?*`, (request) => {
+                if (failNextSizeChange && request.query.limit === '10') {
+                    failNextSizeChange = false;
+                    request.reply({ statusCode: 500, body: { explanation: 'Page-size request failed' } });
+                }
+            });
+
+            changePageSize(card, 10);
+            cy.get(card).should('contain', 'Could not load shared skills. Please try again.');
+            expectFirstSkill(card, 'Shared Skill 1', 1);
+            cy.get(`${card} [aria-label="Rows per page"]`).should('have.text', '5');
+            cy.get(`${card} [aria-label="Page 2"]`).should('have.attr', 'aria-current', 'page');
+            cy.get(`${card} th`).contains('Shared Skill').closest('th')
+                .should('have.attr', 'aria-sort', 'descending');
+
+            changePageSize(card, 10);
+            expectFirstSkill(card, 'Shared Skill 6', 6);
+            cy.get(`${card} [aria-label="Rows per page"]`).should('have.text', '10');
+            cy.get(`${card} [aria-label="Page 1"]`).should('have.attr', 'aria-current', 'page');
             cy.get(card).should('not.contain', 'Could not load shared skills');
         });
     });
