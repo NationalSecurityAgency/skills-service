@@ -781,6 +781,34 @@ class AdminAttributionIT extends DefaultIntSpec {
         !messages()[0].contains('\t')
     }
 
+    def 'encoded resource IDs cannot inject Unicode controls or separators into attribution logs'() {
+        given:
+        SkillsService requester = createRootSkillService(users[0].userName, 'password')
+        String requesterId = requester.userName.toLowerCase(Locale.ROOT)
+        String path = "/admin/${route}/bad${character}forged"
+
+        when:
+        // The authenticated transport percent-encodes the Unicode path segment. A malformed
+        // claim rejects attribution after the interceptor records the decoded resource ID.
+        ResponseEntity<Map> response = attributedRequest(requester, path, HttpMethod.GET, null, 'first,second')
+
+        then:
+        response.statusCode == HttpStatus.BAD_REQUEST
+        response.body.errorCode == 'BadParam'
+        messages() == ["Admin attribution request userId=[${requesterId}] requestingSystemUserId=[${requesterId}] " +
+                'claimedActingUserId=[first,second] method=[GET] ' +
+                "path=[/admin/${route}/bad${encodedCharacter}forged] resource=[${resourceType}:bad_forged] " +
+                'attributionStatus=[rejected] httpStatus=[400]']
+        !(messages()[0] =~ /[\p{Cc}\p{Cf}\p{Zl}\p{Zp}]/)
+
+        where:
+        [route, resourceType, character, encodedCharacter] << [
+                [['projects', 'project'], ['quiz-definitions', 'quiz']],
+                [['\u0085', '%C2%85'], ['\u009f', '%C2%9F'], ['\u2028', '%E2%80%A8'],
+                 ['\u2029', '%E2%80%A9'], ['\u202e', '%E2%80%AE'], ['\u200b', '%E2%80%8B']]
+        ].combinations().collect { List combination -> combination.flatten() }
+    }
+
     def 'header-bearing requests rejected by CORS are also logged'() {
         given:
         Map project = createProject()

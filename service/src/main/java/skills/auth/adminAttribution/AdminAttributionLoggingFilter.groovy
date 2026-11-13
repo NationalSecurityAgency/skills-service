@@ -62,7 +62,8 @@ class AdminAttributionLoggingFilter extends OncePerRequestFilter {
     }
 
     private static String safe(Object value) {
-        String text = value?.toString()?.replaceAll(/[\p{Cntrl}\[\]]/, '_') ?: '-'
+        // Unicode controls, formatting controls, and separators must not split or disguise audit entries.
+        String text = value?.toString()?.replaceAll(/[\p{Cc}\p{Cf}\p{Zl}\p{Zp}\[\]]/, '_') ?: '-'
         return text.take(512)
     }
 }
