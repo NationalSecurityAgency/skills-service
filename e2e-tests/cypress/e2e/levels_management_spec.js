@@ -109,6 +109,7 @@ describe('Levels Management Tests', () => {
         cy.visit('/administrator/projects/proj1/levels');
 
         const tableSelector = '[data-cy=levelsTable]';
+        const percentInput = '[data-p="modal"] [data-cy="percent"] [data-pc-name="pcinputtext"]';
         let expected = [
             [{colIndex: 0, value: 1}, {colIndex: 1, value: '10'}, {colIndex: 2, value: '100 to 250'}],
             [{colIndex: 0, value: 2}, {colIndex: 1, value: '25'}, {colIndex: 2, value: '250 to 450'}],
@@ -119,26 +120,39 @@ describe('Levels Management Tests', () => {
         cy.validateTable(tableSelector, expected, 5, true, null, false);
         cy.get('[data-cy="percentageBasedLevelManagementWarning"]').should('be.visible')
 
-        cy.get('[data-cy="levelsTable"] [data-p-index="4"] [data-cy="editLevelButton"]').click()
-        cy.get('[data-cy="percent"] [data-pc-name="pcinputtext"]').should('have.value', '92')
+        // Wait for the dialog's initial focus before interacting with its number input.
+        cy.openDialog('[data-cy="levelsTable"] [data-p-index="4"] [data-cy="editLevelButton"]', true)
+        cy.get(percentInput).should('have.value', '92')
+        cy.get('[data-cy="saveDialogBtn"]').should('be.enabled')
         cy.get('[data-cy="percentError"]').should('not.exist')
         cy.get('[data-cy="closeDialogBtn"]').click()
+        cy.get('[data-p="modal"]').should('not.exist')
 
-        cy.get('[data-cy="levelsTable"] [data-p-index="2"] [data-cy="editLevelButton"]').click()
-        cy.get('[data-cy="percent"] [data-pc-name="pcinputtext"]').should('have.value', '45')
+        cy.openDialog('[data-cy="levelsTable"] [data-p-index="2"] [data-cy="editLevelButton"]', true)
+        cy.get(percentInput).should('have.value', '45')
+        cy.get('[data-cy="saveDialogBtn"]').should('be.enabled')
         cy.get('[data-cy="percentError"]').should('not.exist')
-        cy.get('[data-p="modal"] [data-cy="percent"]').should('be.visible')
-        cy.get('[data-p="modal"] [data-cy="percent"]').clear()
+        cy.get(percentInput).clear()
+        cy.get(percentInput).should('have.value', '')
         cy.get('[data-cy="percentError"]').contains('Percent is a required field')
-        cy.get('[data-p="modal"] [data-cy="percent"]').type('25')
+        cy.get('[data-cy="saveDialogBtn"]').should('be.disabled')
+        cy.get(percentInput).type('25')
+        cy.get(percentInput).should('have.value', '25')
         cy.get('[data-cy="percentError"]').contains('Percent must not overlap with other levels')
-        cy.get('[data-p="modal"] [data-cy="percent"]').type('{backspace}6')
+        cy.get('[data-cy="saveDialogBtn"]').should('be.disabled')
+        cy.get(percentInput).type('{backspace}6')
+        cy.get(percentInput).should('have.value', '26')
+        cy.get('[data-cy="saveDialogBtn"]').should('be.enabled')
         cy.get('[data-cy="percentError"]').should('not.exist')
 
-        cy.get('[data-p="modal"] [data-cy="percent"]').type('{backspace}{backspace}67')
+        cy.get(percentInput).type('{backspace}{backspace}67')
+        cy.get(percentInput).should('have.value', '67')
         cy.get('[data-cy="percentError"]').contains('Percent must not overlap with other levels')
+        cy.get('[data-cy="saveDialogBtn"]').should('be.disabled')
 
-        cy.get('[data-p="modal"] [data-cy="percent"]').type('{backspace}6')
+        cy.get(percentInput).type('{backspace}6')
+        cy.get(percentInput).should('have.value', '66')
+        cy.get('[data-cy="saveDialogBtn"]').should('be.enabled')
         cy.get('[data-cy="percentError"]').should('not.exist')
 
         cy.get('[data-cy="saveDialogBtn"]').click()
@@ -152,21 +166,31 @@ describe('Levels Management Tests', () => {
         cy.validateTable(tableSelector, expected, 5, true, null, false);
 
 
-        cy.get('[data-cy="levelsTable"] [data-p-index="3"] [data-cy="editLevelButton"]').click()
-        cy.get('[data-cy="percent"] [data-pc-name="pcinputtext"]').should('have.value', '67')
+        cy.openDialog('[data-cy="levelsTable"] [data-p-index="3"] [data-cy="editLevelButton"]', true)
+        cy.get(percentInput).should('have.value', '67')
+        cy.get('[data-cy="saveDialogBtn"]').should('be.enabled')
         cy.get('[data-cy="percentError"]').should('not.exist')
-        cy.get('[data-p="modal"] [data-cy="percent"]').should('be.visible')
-        cy.get('[data-p="modal"] [data-cy="percent"]').clear()
+        cy.get(percentInput).clear()
+        cy.get(percentInput).should('have.value', '')
         cy.get('[data-cy="percentError"]').contains('Percent is a required field')
-        cy.get('[data-p="modal"] [data-cy="percent"]').type('66')
+        cy.get('[data-cy="saveDialogBtn"]').should('be.disabled')
+        cy.get(percentInput).type('66')
+        cy.get(percentInput).should('have.value', '66')
         cy.get('[data-cy="percentError"]').contains('Percent must not overlap with other levels')
-        cy.get('[data-p="modal"] [data-cy="percent"]').type('{backspace}7')
+        cy.get('[data-cy="saveDialogBtn"]').should('be.disabled')
+        cy.get(percentInput).type('{backspace}7')
+        cy.get(percentInput).should('have.value', '67')
+        cy.get('[data-cy="saveDialogBtn"]').should('be.enabled')
         cy.get('[data-cy="percentError"]').should('not.exist')
 
-        cy.get('[data-p="modal"] [data-cy="percent"]').type('{backspace}{backspace}92')
+        cy.get(percentInput).type('{backspace}{backspace}92')
+        cy.get(percentInput).should('have.value', '92')
         cy.get('[data-cy="percentError"]').contains('Percent must not overlap with other levels')
+        cy.get('[data-cy="saveDialogBtn"]').should('be.disabled')
 
-        cy.get('[data-p="modal"] [data-cy="percent"]').type('{backspace}{backspace}68')
+        cy.get(percentInput).type('{backspace}{backspace}68')
+        cy.get(percentInput).should('have.value', '68')
+        cy.get('[data-cy="saveDialogBtn"]').should('be.enabled')
         cy.get('[data-cy="percentError"]').should('not.exist')
 
         cy.get('[data-cy="saveDialogBtn"]').click()
@@ -233,8 +257,10 @@ describe('Levels Management Tests', () => {
 
         cy.clickNav('Levels');
         cy.openDialog('[data-cy="addLevel"]', true)
-        cy.get('[data-cy="pointsInput"]')
+        cy.get('[data-p="modal"] [data-cy="pointsInput"] [data-pc-name="pcinputtext"]')
             .type('20000');
+        cy.get('[data-p="modal"] [data-cy="pointsInput"] [data-pc-name="pcinputtext"]')
+            .should('have.value', '20,000');
         cy.clickSaveDialogBtn()
 
         cy.get('[data-cy="addLevel"]')
@@ -396,8 +422,10 @@ describe('Levels Management Tests', () => {
         cy.visit('/administrator/projects/proj1/subjects/subj1');
         cy.clickNav('Levels');
         cy.openDialog('[data-cy="addLevel"]', true)
-        cy.get('[data-cy="pointsInput"]')
+        cy.get('[data-p="modal"] [data-cy="pointsInput"] [data-pc-name="pcinputtext"]')
             .type('20000');
+        cy.get('[data-p="modal"] [data-cy="pointsInput"] [data-pc-name="pcinputtext"]')
+            .should('have.value', '20,000');
         cy.clickSaveDialogBtn()
 
         cy.get('[data-cy="addLevel"]')
@@ -882,20 +910,23 @@ describe('Levels Management Tests', () => {
 
         cy.contains('Levels')
             .click();
-        cy.get('[data-cy=editLevelButton]')
-            .first()
-            .click();
-        cy.get('[data-cy=percent] [data-pc-name="pcinputtext"]').clear()
-        cy.get('[data-cy=percent] [data-pc-name="pcinputtext"]')
-            .type('1000');
+        const percentInput = '[data-p="modal"] [data-cy="percent"] [data-pc-name="pcinputtext"]';
+        cy.openDialog('[data-cy="levelsTable"] [data-p-index="0"] [data-cy="editLevelButton"]', true)
+        cy.get(percentInput).should('have.value', '10')
+        cy.get('[data-cy="saveDialogBtn"]').should('be.enabled')
+        cy.get(percentInput).clear()
+        cy.get(percentInput).should('have.value', '')
+        cy.get(percentInput).type('1000')
+        cy.get(percentInput).should('have.value', '1,000')
         cy.get('[data-cy=percentError]')
             .contains('Percent must be less than or equal to 100');
         cy.get('[data-cy=saveDialogBtn]')
             .should('be.disabled');
 
-        cy.get('[data-cy=percent] [data-pc-name="pcinputtext"]').clear()
-        cy.get('[data-cy=percent] [data-pc-name="pcinputtext"]')
-            .type('50');
+        cy.get(percentInput).clear()
+        cy.get(percentInput).should('have.value', '')
+        cy.get(percentInput).type('50')
+        cy.get(percentInput).should('have.value', '50')
         cy.get('[data-cy=percentError]')
             .contains('Percent must not overlap with other levels');
         cy.get('[data-cy=saveDialogBtn]')
@@ -1184,6 +1215,8 @@ describe('Levels Management Tests', () => {
         cy.visit('/administrator/projects/proj1/levels');
 
         const tableSelector = '[data-cy=levelsTable]';
+        const pointsFromInput = '[data-p="modal"] [data-cy="pointsFrom"] [data-pc-name="pcinputtext"]';
+        const pointsToInput = '[data-p="modal"] [data-cy="pointsTo"] [data-pc-name="pcinputtext"]';
         let expected = [
             [{colIndex: 0, value: 1}, {colIndex: 1, value: '100 to 250'}],
             [{colIndex: 0, value: 2}, {colIndex: 1, value: '250 to 450'}],
@@ -1195,85 +1228,103 @@ describe('Levels Management Tests', () => {
         cy.get('[data-cy="pointBasedLevelManagementWarning"]').should('be.visible')
         cy.get('[data-cy="percentageBasedLevelManagementWarning"]').should('not.exist')
 
-        cy.get('[data-cy="levelsTable"] [data-p-index="4"] [data-cy="editLevelButton"]').click()
-        cy.get('[data-cy="pointsFrom"] [data-pc-name="pcinputtext"]').should('have.value', '920')
+        cy.openDialog('[data-cy="levelsTable"] [data-p-index="4"] [data-cy="editLevelButton"]', true)
+        cy.get(pointsFromInput).should('have.value', '920')
         cy.get('[data-p="modal"] [data-cy="pointsTo"]').should('not.exist')
         cy.get('[data-p="modal"] [data-cy="noPointsToFieldMsg"]').should('exist')
-        cy.get('[data-cy="pointsFromError"]').should('not.exist')
         cy.get('[data-cy="saveDialogBtn"]').should('be.enabled')
+        cy.get('[data-cy="pointsFromError"]').should('not.exist')
 
-        cy.get('[data-p="modal"] [data-cy="pointsFrom"]').clear()
-        cy.get('[data-p="modal"] [data-cy="pointsFrom"]').type('919')
-        cy.get('[data-cy="pointsFrom"] [data-pc-name="pcinputtext"]').should('have.value', '919')
+        cy.get(pointsFromInput).clear()
+        cy.get(pointsFromInput).should('have.value', '')
+        cy.get(pointsFromInput).type('919')
+        cy.get(pointsFromInput).should('have.value', '919')
         cy.get('[data-cy="pointsFromError"]').contains('Points From must not overlap with other levels')
         cy.get('[data-cy="saveDialogBtn"]').should('be.disabled')
 
         cy.get('[data-cy="closeDialogBtn"]').click()
+        cy.get('[data-p="modal"]').should('not.exist')
 
-        cy.get('[data-cy="levelsTable"] [data-p-index="2"] [data-cy="editLevelButton"]').click()
-        cy.get('[data-cy="pointsFrom"] [data-pc-name="pcinputtext"]').should('have.value', '450')
-        cy.get('[data-cy="pointsTo"] [data-pc-name="pcinputtext"]').should('have.value', '670')
+        cy.openDialog('[data-cy="levelsTable"] [data-p-index="2"] [data-cy="editLevelButton"]', true)
+        cy.get(pointsFromInput).should('have.value', '450')
+        cy.get(pointsToInput).should('have.value', '670')
         cy.get('[data-p="modal"] [data-cy="noPointsToFieldMsg"]').should('not.exist')
+        cy.get('[data-cy="saveDialogBtn"]').should('be.enabled')
         cy.get('[data-cy="pointsFromError"]').should('not.exist')
         cy.get('[data-cy="pointsToError"]').should('not.exist')
-        cy.get('[data-cy="saveDialogBtn"]').should('be.enabled')
 
-        cy.get('[data-p="modal"] [data-cy="pointsFrom"]').clear()
-        cy.get('[data-p="modal"] [data-cy="pointsFrom"]').type('449')
-        cy.get('[data-cy="pointsFrom"] [data-pc-name="pcinputtext"]').should('have.value', '449')
-        cy.get('[data-cy="pointsTo"] [data-pc-name="pcinputtext"]').should('have.value', '670')
+        cy.get(pointsFromInput).clear()
+        cy.get(pointsFromInput).should('have.value', '')
+        cy.get(pointsFromInput).type('449')
+        cy.get(pointsFromInput).should('have.value', '449')
+        cy.get(pointsToInput).should('have.value', '670')
         cy.get('[data-p="modal"] [data-cy="noPointsToFieldMsg"]').should('not.exist')
         cy.get('[data-cy="pointsFromError"]').contains('Points From must not overlap with other levels')
         cy.get('[data-cy="pointsToError"]').should('not.exist')
         cy.get('[data-cy="saveDialogBtn"]').should('be.disabled')
 
-        cy.get('[data-p="modal"] [data-cy="pointsFrom"]').type('{backspace}{backspace}51')
-        cy.get('[data-cy="pointsFrom"] [data-pc-name="pcinputtext"]').should('have.value', '451')
-        cy.get('[data-cy="pointsTo"] [data-pc-name="pcinputtext"]').should('have.value', '670')
+        cy.get(pointsFromInput).type('{backspace}{backspace}51')
+        cy.get(pointsFromInput).should('have.value', '451')
+        cy.get(pointsToInput).should('have.value', '670')
         cy.get('[data-p="modal"] [data-cy="noPointsToFieldMsg"]').should('not.exist')
+        cy.get('[data-cy="saveDialogBtn"]').should('be.enabled')
         cy.get('[data-cy="pointsFromError"]').should('not.exist')
         cy.get('[data-cy="pointsToError"]').should('not.exist')
-        cy.get('[data-cy="saveDialogBtn"]').should('be.enabled')
 
-        cy.get('[data-p="modal"] [data-cy="pointsTo"]').clear()
-        cy.get('[data-p="modal"] [data-cy="pointsTo"]').type('671')
-        cy.get('[data-cy="pointsFrom"] [data-pc-name="pcinputtext"]').should('have.value', '451')
-        cy.get('[data-cy="pointsTo"] [data-pc-name="pcinputtext"]').should('have.value', '671')
+        cy.get(pointsToInput).clear()
+        cy.get(pointsToInput).should('have.value', '')
+        cy.get(pointsToInput).type('671')
+        cy.get(pointsFromInput).should('have.value', '451')
+        cy.get(pointsToInput).should('have.value', '671')
         cy.get('[data-p="modal"] [data-cy="noPointsToFieldMsg"]').should('not.exist')
         cy.get('[data-cy="pointsFromError"]').should('not.exist')
         cy.get('[data-cy="pointsToError"]').contains('Points To must not overlap with other levels')
         cy.get('[data-cy="saveDialogBtn"]').should('be.disabled')
 
-        cy.get('[data-cy="pointsTo"] [data-pc-name="pcinputtext"]').clear()
-        cy.get('[data-cy="pointsTo"] [data-pc-name="pcinputtext"]').type('670')
-        cy.get('[data-cy="pointsFrom"] [data-pc-name="pcinputtext"]').should('have.value', '451')
-        cy.get('[data-cy="pointsTo"] [data-pc-name="pcinputtext"]').should('have.value', '670')
+        cy.get(pointsToInput).clear()
+        cy.get(pointsToInput).should('have.value', '')
+        cy.get(pointsToInput).type('670')
+        cy.get(pointsFromInput).should('have.value', '451')
+        cy.get(pointsToInput).should('have.value', '670')
         cy.get('[data-p="modal"] [data-cy="noPointsToFieldMsg"]').should('not.exist')
+        cy.get('[data-cy="saveDialogBtn"]').should('be.enabled')
         cy.get('[data-cy="pointsToError"]').should('not.exist')
 
-        cy.get('[data-cy="pointsFrom"] [data-pc-name="pcinputtext"]').clear()
-        cy.get('[data-cy="pointsFrom"] [data-pc-name="pcinputtext"]').type('670')
-        cy.get('[data-cy="pointsFrom"] [data-pc-name="pcinputtext"]').should('have.value', '670')
-        cy.get('[data-cy="pointsTo"] [data-pc-name="pcinputtext"]').should('have.value', '670')
+        cy.get(pointsFromInput).clear()
+        cy.get(pointsFromInput).should('have.value', '')
+        cy.get(pointsFromInput).type('670')
+        cy.get(pointsFromInput).should('have.value', '670')
+        cy.get(pointsToInput).should('have.value', '670')
         cy.get('[data-cy="pointsFromError"]').contains('Points From must be less than Points To');
-        cy.get('[data-cy="pointsFrom"] [data-pc-name="pcinputtext"]').clear()
-        cy.get('[data-cy="pointsFrom"] [data-pc-name="pcinputtext"]').type('451')
+        cy.get('[data-cy="saveDialogBtn"]').should('be.disabled')
+        cy.get(pointsFromInput).clear()
+        cy.get(pointsFromInput).should('have.value', '')
+        cy.get(pointsFromInput).type('451')
+        cy.get(pointsFromInput).should('have.value', '451')
+        cy.get('[data-cy="saveDialogBtn"]').should('be.enabled')
+        cy.get('[data-cy="pointsFromError"]').should('not.exist')
 
-        cy.get('[data-cy="pointsTo"] [data-pc-name="pcinputtext"]').clear()
-        cy.get('[data-cy="pointsTo"] [data-pc-name="pcinputtext"]').type('451')
-        cy.get('[data-cy="pointsFrom"] [data-pc-name="pcinputtext"]').should('have.value', '451')
-        cy.get('[data-cy="pointsTo"] [data-pc-name="pcinputtext"]').should('have.value', '451')
+        cy.get(pointsToInput).clear()
+        cy.get(pointsToInput).should('have.value', '')
+        cy.get(pointsToInput).type('451')
+        cy.get(pointsFromInput).should('have.value', '451')
+        cy.get(pointsToInput).should('have.value', '451')
         cy.get('[data-cy="pointsToError"]').contains('Points To must be greater than Points From');
-        cy.get('[data-cy="pointsTo"] [data-pc-name="pcinputtext"]').clear()
-        cy.get('[data-cy="pointsTo"] [data-pc-name="pcinputtext"]').type('670')
+        cy.get('[data-cy="saveDialogBtn"]').should('be.disabled')
+        cy.get(pointsToInput).clear()
+        cy.get(pointsToInput).should('have.value', '')
+        cy.get(pointsToInput).type('670')
+        cy.get(pointsToInput).should('have.value', '670')
+        cy.get('[data-cy="saveDialogBtn"]').should('be.enabled')
+        cy.get('[data-cy="pointsToError"]').should('not.exist')
 
-        cy.get('[data-p="modal"] [data-cy="pointsTo"]').type('{backspace}{backspace}50')
-        cy.get('[data-cy="pointsFrom"] [data-pc-name="pcinputtext"]').should('have.value', '451')
-        cy.get('[data-cy="pointsTo"] [data-pc-name="pcinputtext"]').should('have.value', '650')
+        cy.get(pointsToInput).type('{backspace}{backspace}50')
+        cy.get(pointsFromInput).should('have.value', '451')
+        cy.get(pointsToInput).should('have.value', '650')
         cy.get('[data-p="modal"] [data-cy="noPointsToFieldMsg"]').should('not.exist')
+        cy.get('[data-cy="saveDialogBtn"]').should('be.enabled')
         cy.get('[data-cy="pointsFromError"]').should('not.exist')
         cy.get('[data-cy="pointsToError"]').should('not.exist')
-        cy.get('[data-cy="saveDialogBtn"]').should('be.enabled')
 
         cy.get('[data-cy="saveDialogBtn"]').click()
 
@@ -1294,6 +1345,7 @@ describe('Levels Management Tests', () => {
         cy.visit('/administrator/projects/proj1/levels');
 
         const tableSelector = '[data-cy=levelsTable]';
+        const pointsFromInput = '[data-p="modal"] [data-cy="pointsFrom"] [data-pc-name="pcinputtext"]';
         let expected = [
             [{colIndex: 0, value: 1}, {colIndex: 1, value: '100 to 250'}],
             [{colIndex: 0, value: 2}, {colIndex: 1, value: '250 to 450'}],
@@ -1305,19 +1357,21 @@ describe('Levels Management Tests', () => {
         cy.get('[data-cy="pointBasedLevelManagementWarning"]').should('be.visible')
         cy.get('[data-cy="percentageBasedLevelManagementWarning"]').should('not.exist')
 
-        cy.get('[data-cy="levelsTable"] [data-p-index="4"] [data-cy="editLevelButton"]').click()
-        cy.get('[data-cy="pointsFrom"] [data-pc-name="pcinputtext"]').should('have.value', '920')
+        cy.openDialog('[data-cy="levelsTable"] [data-p-index="4"] [data-cy="editLevelButton"]', true)
+        cy.get(pointsFromInput).should('have.value', '920')
         cy.get('[data-p="modal"] [data-cy="pointsTo"]').should('not.exist')
         cy.get('[data-p="modal"] [data-cy="noPointsToFieldMsg"]').should('exist')
-        cy.get('[data-cy="pointsFromError"]').should('not.exist')
         cy.get('[data-cy="saveDialogBtn"]').should('be.enabled')
+        cy.get('[data-cy="pointsFromError"]').should('not.exist')
 
-        cy.get('[data-p="modal"] [data-cy="pointsFrom"]').clear()
-        cy.get('[data-p="modal"] [data-cy="pointsFrom"]').type('1000')
-        cy.get('[data-cy="pointsFrom"] [data-pc-name="pcinputtext"]').should('have.value', '1,000')
+        cy.get(pointsFromInput).clear()
+        cy.get(pointsFromInput).should('have.value', '')
+        cy.get('[data-cy="saveDialogBtn"]').should('be.disabled')
+        cy.get(pointsFromInput).type('1000')
+        cy.get(pointsFromInput).should('have.value', '1,000')
+        cy.get('[data-cy="saveDialogBtn"]').should('be.enabled')
         cy.get('[data-cy="pointsFromError"]').should('not.exist')
         cy.get('[data-cy="pointsToError"]').should('not.exist')
-        cy.get('[data-cy="saveDialogBtn"]').should('be.enabled')
         cy.get('[data-cy="saveDialogBtn"]').click()
 
         expected = [
@@ -1337,6 +1391,7 @@ describe('Levels Management Tests', () => {
         cy.visit('/administrator/projects/proj1/levels');
 
         const tableSelector = '[data-cy=levelsTable]';
+        const pointsInput = '[data-p="modal"] [data-cy="pointsInput"] [data-pc-name="pcinputtext"]';
         let expected = [
             [{colIndex: 0, value: 1}, {colIndex: 1, value: '100 to 250'}],
             [{colIndex: 0, value: 2}, {colIndex: 1, value: '250 to 450'}],
@@ -1348,14 +1403,17 @@ describe('Levels Management Tests', () => {
         cy.get('[data-cy="pointBasedLevelManagementWarning"]').should('be.visible')
         cy.get('[data-cy="percentageBasedLevelManagementWarning"]').should('not.exist')
 
-        cy.get('[data-cy="addLevel"]').click()
-        cy.get('[data-p="modal"] [data-cy="pointsInput"]').clear()
-        cy.get('[data-p="modal"] [data-cy="pointsInput"]').type('920')
+        cy.openDialog('[data-cy="addLevel"]', true)
+        cy.get(pointsInput).clear()
+        cy.get(pointsInput).should('have.value', '')
+        cy.get(pointsInput).type('920')
+        cy.get(pointsInput).should('have.value', '920')
         cy.get('[data-p="modal"] [data-cy="pointsError"]').contains('Points must not overlap with other levels')
         cy.get('[data-cy="saveDialogBtn"]').should('be.disabled')
-        cy.get('[data-p="modal"] [data-cy="pointsInput"]').type('{backspace}1')
-        cy.get('[data-p="modal"] [data-cy="pointsError"]').should('not.exist')
+        cy.get(pointsInput).type('{backspace}1')
+        cy.get(pointsInput).should('have.value', '921')
         cy.get('[data-cy="saveDialogBtn"]').should('be.enabled')
+        cy.get('[data-p="modal"] [data-cy="pointsError"]').should('not.exist')
         cy.get('[data-cy="saveDialogBtn"]').click()
 
         expected = [
