@@ -52,6 +52,11 @@ const loadSharedSkills = () => {
         if (requestId !== sharedSkillsRequestId) {
           return;
         }
+        const lastPage = Math.max(1, Math.ceil(data.totalCount / pageSize.value));
+        if (currentPage.value > lastPage) {
+          currentPage.value = lastPage;
+          return loadSharedSkills();
+        }
         sharedSkills.value = data.data;
         totalRecords.value = data.totalCount;
       }).catch(() => {
@@ -94,12 +99,12 @@ onMounted(() => {
       <Message v-if="sharedSkillsLoadFailed" severity="error">
         Could not load shared skills. Please try again.
       </Message>
-      <div v-if="sharedSkills && sharedSkills.length > 0">
+      <div v-if="sharedSkills?.length > 0 || totalRecords > 0">
         <shared-skills-table :shared-skills="sharedSkills" :disable-delete="true" :page-size="pageSize" :possible-page-sizes="possiblePageSizes"
-                             :total-records="totalRecords" :sort-field="sortInfo.sortBy" :sort-order="sortInfo.sortOrder"
+                             :total-records="totalRecords" :current-page="currentPage" :sort-field="sortInfo.sortBy" :sort-order="sortInfo.sortOrder"
                              @page-changed="pageChanged" @sort-changed="sortChanged"></shared-skills-table>
       </div>
-      <div v-else-if="!sharedSkillsLoadFailed">
+      <div v-else-if="!loading && !sharedSkillsLoadFailed && totalRecords === 0">
         <no-content2 title="No Skills Available Yet..." icon="far fa-handshake"
                      class="p-8"
                      message="Coordinate with other projects to share skills with this project."></no-content2>

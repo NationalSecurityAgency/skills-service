@@ -76,6 +76,7 @@ import java.nio.charset.StandardCharsets
 
 import static org.springframework.data.domain.Sort.Direction.ASC
 import static org.springframework.data.domain.Sort.Direction.DESC
+import org.springframework.data.domain.Sort
 
 @RestController
 @RequestMapping("/admin")
@@ -1411,6 +1412,7 @@ class AdminController {
                 projectId
         )
         PageRequest pageRequest = TablePageUtil.createPagingRequestWithValidation(limit, page, orderBy, ascending)
+        pageRequest = pageRequest.withSort(pageRequest.sort.and(Sort.by(Sort.Direction.ASC, 'share.id')))
         return shareSkillsService.getSharedSkillsWithOtherProjects(projectId, pageRequest, filter)
     }
 
@@ -1428,6 +1430,7 @@ class AdminController {
                 projectId
         )
         PageRequest pageRequest = TablePageUtil.createPagingRequestWithValidation(limit, page, orderBy, ascending)
+        pageRequest = pageRequest.withSort(pageRequest.sort.and(Sort.by(Sort.Direction.ASC, 'share.id')))
         return shareSkillsService.getSharedSkillsFromOtherProjects(projectId, pageRequest, filter)
     }
 

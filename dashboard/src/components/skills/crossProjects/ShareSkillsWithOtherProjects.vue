@@ -110,6 +110,11 @@ const loadSharedSkills = () => {
       if (requestId !== sharedSkillsRequestId) {
         return
       }
+      const lastPage = Math.max(1, Math.ceil(data.totalCount / pageSize.value))
+      if (currentPage.value > lastPage) {
+        currentPage.value = lastPage
+        return loadSharedSkills()
+      }
       sharedSkills.value = data.data;
       totalRecords.value = data.totalCount;
     }).catch(() => {
@@ -296,12 +301,12 @@ const sortChanged = (sortingInfo) => {
           Could not load shared skills. Please try again.
         </Message>
 
-        <div v-if="sharedSkills && sharedSkills.length > 0" class="my-6">
+        <div v-if="sharedSkills?.length > 0 || totalRecords > 0" class="my-6">
           <shared-skills-table :shared-skills="sharedSkills" v-on:skill-removed="deleteSharedSkill" :page-size="pageSize" @sort-changed="sortChanged"
-                               :possible-page-sizes="possiblePageSizes" :total-records="totalRecords" :sort-field="sortInfo.sortBy" :sort-order="sortInfo.sortOrder"
+                               :possible-page-sizes="possiblePageSizes" :total-records="totalRecords" :current-page="currentPage" :sort-field="sortInfo.sortBy" :sort-order="sortInfo.sortOrder"
                                @page-changed="pageChanged"></shared-skills-table>
         </div>
-        <div v-else-if="!sharedSkillsLoadFailed">
+        <div v-else-if="!loading.sharedSkillsInit && !loading.sharedSkills && !sharedSkillsLoadFailed && totalRecords === 0">
           <no-content2 title="Not Selected Yet..." icon="fas fa-share-alt" class="p-8"
                        message="To make your project's skills eligible please select a skill and then the project that you want to share this skill with." />
         </div>

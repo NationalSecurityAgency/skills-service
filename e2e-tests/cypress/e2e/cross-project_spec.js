@@ -884,6 +884,34 @@ describe('Shared skills pagination and request recovery', () => {
         { project: 1, card: outgoingCard },
         { project: 2, card: incomingCard },
     ].forEach(({ project, card }) => {
+        it(`recovers the ${project === 1 ? 'outgoing' : 'incoming'} table when another session removes the last page`, () => {
+            visit(project);
+            expectFirstSkill(card, 'Shared Skill 6');
+            // Change the dataset without refreshing the current session's paginator.
+            cy.request('DELETE', '/admin/projects/proj1/skills/skill1/shared/projects/proj2');
+            cy.get(`${card} [aria-label="Page 2"]`).click();
+            expectFirstSkill(card, 'Shared Skill 6');
+            cy.get(`${card} ${table}`).should('be.visible').and('not.contain', 'Shared Skill 1');
+            cy.get(`${card} [aria-label="Page 1"]`).should('have.attr', 'aria-current', 'page');
+            cy.get(`${card} [aria-label="Page 2"]`).should('not.exist');
+            cy.get(`${card} [data-cy="skillsBTableTotalRows"]`).should('have.text', '5');
+            cy.get(card).should('not.contain', 'No Skills Available Yet...')
+                .and('not.contain', 'Not Selected Yet...');
+        });
+
+        it(`shows the empty state when all ${project === 1 ? 'outgoing' : 'incoming'} shares disappear before paging`, () => {
+            visit(project);
+            expectFirstSkill(card, 'Shared Skill 6');
+            for (let skill = 1; skill <= 6; skill += 1) {
+                cy.request('DELETE', `/admin/projects/proj1/skills/skill${skill}/shared/projects/proj2`);
+            }
+            cy.get(`${card} [aria-label="Page 2"]`).click();
+            cy.get(card).should('contain', project === 1 ? 'Not Selected Yet...' : 'No Skills Available Yet...');
+            cy.get(`${card} ${table}`).should('not.exist');
+            cy.get(`${card} [aria-label="Page 1"]`).should('not.exist');
+            cy.get(card).should('not.contain', 'Could not load shared skills');
+        });
+
         it(`resets the ${project === 1 ? 'outgoing' : 'incoming'} table to page one when sorting`, () => {
             visit(project);
             expectFirstSkill(card, 'Shared Skill 6');

@@ -161,6 +161,50 @@ class SharedSkillsPaginationSpec extends DefaultIntSpec {
         true     | 'skill.skillId' | [['skill1', 'TestProject1'], ['skill1', 'TestProject3'], ['skill2', 'TestProject1'], ['skill3', 'TestProject1']]
     }
 
+    def "paging breaks sort ties by ascending share ID - incoming=#incoming orderBy=#orderBy ascending=#ascending"() {
+        setup:
+        createShares()
+        Map globallyShared = SkillsFactory.createSkill(3, 1, 1)
+        globallyShared.name = 'Alpha'
+        skillsService.updateSkill(globallyShared)
+
+        // Recreating this share puts the oldest skill last in share-ID order.
+        skillsService.deleteShared('TestProject1', 'skill1', 'TestProject2')
+        skillsService.shareSkill('TestProject1', 'skill1', 'TestProject2')
+
+        List<List<String>> sharesByCreationOrder = incoming
+                ? [['skill2', 'TestProject1'], ['skill3', 'TestProject1'], ['skill1', 'TestProject3'], ['skill1', 'TestProject1']]
+                : [['skill2', 'TestProject2'], ['skill3', 'TestProject2'], ['skill1', 'TestProject3'], ['skill1', 'TestProject2']]
+        List<List<String>> expected = expectedOrder.collect { int index -> sharesByCreationOrder[index] }
+
+        when:
+        List<Map> pages = (1..4).collect { int page -> loadShares(incoming, 1, page, orderBy, ascending) }
+        Map beyondLast = loadShares(incoming, 1, 5, orderBy, ascending)
+        Map allShares = loadShares(incoming, 200, 1, orderBy, ascending)
+
+        then:
+        pages.every { Map result -> result.totalCount == 4 && result.data.size() == 1 }
+        pages.collect { Map result -> [result.data[0].skillId, result.data[0].projectId] } == expected
+        allShares.data.collect { Map row -> [row.skillId, row.projectId] } == expected
+        beyondLast.totalCount == 4
+        beyondLast.data == []
+
+        where:
+        incoming | orderBy              | ascending | expectedOrder
+        false    | 'skill.name'         | true      | [2, 3, 1, 0]
+        false    | 'skill.name'         | false     | [0, 1, 2, 3]
+        false    | 'skill.skillId'      | true      | [2, 3, 0, 1]
+        false    | 'skill.skillId'      | false     | [1, 0, 2, 3]
+        false    | 'sharedProject.name' | true      | [2, 0, 1, 3]
+        false    | 'sharedProject.name' | false     | [0, 1, 3, 2]
+        true     | 'skill.name'         | true      | [2, 3, 1, 0]
+        true     | 'skill.name'         | false     | [0, 1, 2, 3]
+        true     | 'skill.skillId'      | true      | [2, 3, 0, 1]
+        true     | 'skill.skillId'      | false     | [1, 0, 2, 3]
+        true     | 'projectName'        | true      | [2, 0, 1, 3]
+        true     | 'projectName'        | false     | [0, 1, 3, 2]
+    }
+
     def "unrelated admins and ordinary users cannot read sharing endpoints - role=#role endpoint=#endpoint"() {
         setup:
         createShares()

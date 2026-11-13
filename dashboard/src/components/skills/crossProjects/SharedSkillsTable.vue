@@ -18,13 +18,15 @@ import { computed, onMounted, ref } from 'vue'
 import Column from 'primevue/column'
 import { useResponsiveBreakpoints } from '@/components/utils/misc/UseResponsiveBreakpoints.js'
 import SkillsDataTable from "@/components/utils/table/SkillsDataTable.vue";
+import {useNumberFormat} from "@/common-components/filter/UseNumberFormat.js";
 
-const props = defineProps(['sharedSkills', 'disableDelete', 'pageSize', 'possiblePageSizes', 'totalRecords', 'sortField', 'sortOrder'])
+const props = defineProps(['sharedSkills', 'disableDelete', 'pageSize', 'possiblePageSizes', 'totalRecords', 'currentPage', 'sortField', 'sortOrder'])
 const emit = defineEmits(['skill-removed', 'page-changed', 'sort-changed'])
 const responsive = useResponsiveBreakpoints()
 const isFlex = computed(() => responsive.lg.value)
-const firstRow = ref(0)
+const firstRow = computed(() => (props.currentPage - 1) * props.pageSize)
 
+const numberFormat = useNumberFormat()
 const loaded = ref(false)
 
 onMounted(() => {
@@ -32,7 +34,6 @@ onMounted(() => {
 })
 
 const onDeleteEvent = (skill) => {
-  firstRow.value = 0
   emit('skill-removed', skill)
 }
 
@@ -51,7 +52,6 @@ const getProjectId = (row) => {
 }
 
 const sortTable = (sortingInfo) => {
-  firstRow.value = 0
   emit('sort-changed', sortingInfo)
 }
 
@@ -61,10 +61,10 @@ const pageChanged = (pagingInfo) => {
 </script>
 
 <template>
-  <div id="shared-skills-table" v-if="sharedSkills && sharedSkills.length" data-cy="sharedSkillsTableDiv">
+  <div id="shared-skills-table" v-if="sharedSkills?.length > 0 || totalRecords > 0" data-cy="sharedSkillsTableDiv">
     <SkillsDataTable
       v-if="loaded" :value="sharedSkills" :sortField="sortField" :sortOrder="sortOrder" @sort="sortTable" paginator
-      :totalRecords="totalRecords" :rows="pageSize" :rowsPerPageOptions="possiblePageSizes" lazy @page="pageChanged" v-model:first="firstRow"
+      :totalRecords="totalRecords" :rows="pageSize" :rowsPerPageOptions="possiblePageSizes" lazy @page="pageChanged" :first="firstRow"
       data-cy="sharedSkillsTable" :tableStoredStateId="disableDelete ? 'sharedWithMeSkillsTable' : 'sharedSkillsTable'"
       aria-label="Skills Shared with Other Projects">
       <Column field="skill.name" header="Shared Skill" sortable :class="{'flex': isFlex }">
@@ -93,6 +93,9 @@ const pageChanged = (pagingInfo) => {
                   data-cy="sharedSkillsTable-removeBtn"><i class="fa fa-trash" /></Button>
         </template>
       </Column>
+      <template #paginatorstart>
+        <span>Total Rows:</span> <span class="font-semibold" data-cy=skillsBTableTotalRows>{{ numberFormat.pretty(totalRecords) }}</span>
+      </template>
     </SkillsDataTable>
   </div>
 </template>

@@ -212,13 +212,23 @@ function validate(value, ctx) {
 }
 
 const filterProjectSkills = () => {
-  if(allSkills.value[0]) {
-    const filtered = savedMainSkills.value.filter((it) => {
-      return it.name?.toLowerCase().includes(filterValue.value.toLowerCase())
-    })
-    allSkills.value[0].items = filtered;
+  if (!savedMainSkills.value) {
+    return;
   }
-}
+
+  const search = filterValue.value.toLowerCase();
+  const filtered = savedMainSkills.value.filter((skill) =>
+      skill.name?.toLowerCase().includes(search)
+  );
+
+  const otherGroups = allSkills.value.filter(
+      (group) => group?.label !== 'This Project'
+  );
+
+  allSkills.value = filtered.length > 0
+      ? [{ label: 'This Project', items: filtered }, ...otherGroups]
+      : otherGroups;
+};
 
 const updateSearch = (value) => {
   if(filterValue.value !== value) {
