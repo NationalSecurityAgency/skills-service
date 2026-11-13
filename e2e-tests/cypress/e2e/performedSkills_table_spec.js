@@ -735,6 +735,7 @@ describe('Performed Skills Table Tests', () => {
     });
 
     it('can not delete batch of skill events with dependencies', () => {
+        const userId = Cypress.env('proxyUser');
         cy.createProject(2);
         cy.createSubject(2, 1);
         cy.createSkill(2, 1, 1, { description: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.' });
@@ -744,15 +745,18 @@ describe('Performed Skills Table Tests', () => {
         cy.exportSkillToCatalog(2, 1, 2);
         cy.exportSkillToCatalog(2, 1, 3);
 
-        cy.reportSkill(2, 1, 'user6Good@skills.org', '2020-09-12 11:00');
-        cy.reportSkill(2, 2, 'user6Good@skills.org', '2020-09-12 11:05');
-        cy.reportSkill(2, 3, 'user6Good@skills.org', '2020-09-12 11:10');
+        cy.reportSkill(2, 1, userId, '2020-09-12 11:00');
+        cy.reportSkill(2, 2, userId, '2020-09-12 11:05');
+        cy.reportSkill(2, 3, userId, '2020-09-12 11:10');
         cy.importSkillFromCatalog(1, 1, 2, 1);
         cy.importSkillFromCatalog(1, 1, 2, 2);
         cy.importSkillFromCatalog(1, 1, 2, 3);
+        // Source-only events do not qualify a learner for credit in the importing project.
+        cy.request('POST', '/api/projects/proj1/progress/initialize', {});
         cy.finalizeCatalogImport(1);
+        cy.waitForBackendAsyncTasksToComplete();
 
-        cy.visit('/administrator/projects/proj1/users/user6Good@skills.org/skillEvents');
+        cy.visit(`/administrator/projects/proj1/users/${userId}/skillEvents`);
 
         cy.validateTable(tableSelector, [
             [{
@@ -832,4 +836,3 @@ describe('Performed Skills Table Tests', () => {
         cy.get('[data-cy=breadcrumbItemLabel]').should('contain.text', 'Group:');
     });
 });
-

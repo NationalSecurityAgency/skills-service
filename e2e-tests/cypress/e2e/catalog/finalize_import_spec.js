@@ -55,8 +55,6 @@ describe('Finalize Imported Skills Tests', () => {
         cy.clickSaveDialogBtn()
         cy.get('[data-cy="importFinalizeAlert"] [data-cy="finalizeBtn"]')
             .should('not.exist');
-        cy.get('[data-cy="importFinalizeAlert"]')
-            .contains('Finalizing 2 imported skills');
         cy.waitForBackendAsyncTasksToComplete();
         cy.get('[data-cy="importFinalizeAlert"]')
             .contains('Successfully finalized 2 imported skills!');
@@ -74,6 +72,11 @@ describe('Finalize Imported Skills Tests', () => {
     });
 
     it('finalize imported skills - refresh after initiating finalize', () => {
+        let finalizationState;
+        cy.holdCatalogFinalizationRunningState().then((state) => {
+            finalizationState = state;
+        });
+
         cy.createProject(2);
         cy.createSubject(2, 1);
         cy.createSkill(2, 1, 1);
@@ -101,6 +104,9 @@ describe('Finalize Imported Skills Tests', () => {
         cy.get('[data-cy="closeDialogBtn"]')
             .should('be.enabled');
 
+        cy.then(() => {
+            finalizationState.hold();
+        });
         cy.clickSaveDialogBtn()
         cy.get('[data-cy="importFinalizeAlert"] [data-cy="finalizeBtn"]')
             .should('not.exist');
@@ -108,12 +114,18 @@ describe('Finalize Imported Skills Tests', () => {
             .contains('Finalizing 2 imported skills');
 
         // refresh
+        cy.then(() => {
+            finalizationState.showRunningInfo(2);
+        });
         cy.visit('/administrator/projects/proj1');
         cy.get('[data-cy="importFinalizeAlert"]')
             .contains('Finalizing 2 imported skills');
         cy.get('[data-cy="importFinalizeAlert"] [data-cy="finalizeBtn"]')
             .should('not.exist');
 
+        cy.then(() => {
+            finalizationState.release();
+        });
         cy.waitForBackendAsyncTasksToComplete();
         cy.get('[data-cy="importFinalizeAlert"]')
             .contains('Successfully finalized 2 imported skills!');
@@ -131,6 +143,10 @@ describe('Finalize Imported Skills Tests', () => {
     });
 
     it('finalize imported skills - drill down after initiating finalize', () => {
+        let finalizationState;
+        cy.holdCatalogFinalizationRunningState().then((state) => {
+            finalizationState = state;
+        });
         cy.createProject(2);
         cy.createSubject(2, 1);
         cy.createSkill(2, 1, 1);
@@ -158,13 +174,19 @@ describe('Finalize Imported Skills Tests', () => {
         cy.get('[data-cy="closeDialogBtn"]')
             .should('be.enabled');
 
+        cy.then(() => {
+            finalizationState.hold();
+        });
         cy.clickSaveDialogBtn()
         cy.get('[data-cy="importFinalizeAlert"] [data-cy="finalizeBtn"]')
             .should('not.exist');
         cy.get('[data-cy="importFinalizeAlert"]')
             .contains('Finalizing 2 imported skills');
 
-        // drill down and make sure alert is gone
+        // Drill down while the UI still sees finalization running.
+        cy.then(() => {
+            finalizationState.showRunningInfo(2);
+        });
         cy.get('[data-cy="manageBtn_subj1"]')
             .click();
         cy.contains('Very Great Skill 2');
@@ -173,6 +195,9 @@ describe('Finalize Imported Skills Tests', () => {
         cy.get('[data-cy="importFinalizeAlert"]')
             .contains('Finalizing 2 imported skills');
 
+        cy.then(() => {
+            finalizationState.release();
+        });
         cy.waitForBackendAsyncTasksToComplete();
         cy.get('[data-cy="importFinalizeAlert"]')
             .contains('Successfully finalized 2 imported skills!');
@@ -216,8 +241,6 @@ describe('Finalize Imported Skills Tests', () => {
         cy.clickSaveDialogBtn()
         cy.get('[data-cy="importFinalizeAlert"] [data-cy="finalizeBtn"]')
             .should('not.exist');
-        cy.get('[data-cy="importFinalizeAlert"]')
-            .contains('Finalizing 2 imported skills');
         cy.waitForBackendAsyncTasksToComplete();
         cy.get('[data-cy="importFinalizeAlert"]')
             .contains('Successfully finalized 2 imported skills!');
@@ -229,6 +252,10 @@ describe('Finalize Imported Skills Tests', () => {
     });
 
     it('finalize imported skills on subject page - refresh after finalization', () => {
+        let finalizationState;
+        cy.holdCatalogFinalizationRunningState().then((state) => {
+            finalizationState = state;
+        });
         cy.createProject(2);
         cy.createSubject(2, 1);
         cy.createSkill(2, 1, 1);
@@ -256,6 +283,9 @@ describe('Finalize Imported Skills Tests', () => {
         cy.get('[data-cy="closeDialogBtn"]')
             .should('be.enabled');
 
+        cy.then(() => {
+            finalizationState.hold();
+        });
         cy.clickSaveDialogBtn()
         cy.get('[data-cy="importFinalizeAlert"]')
             .contains('Finalizing 2 imported skills');
@@ -263,12 +293,18 @@ describe('Finalize Imported Skills Tests', () => {
             .should('not.exist');
 
         // refresh
+        cy.then(() => {
+            finalizationState.showRunningInfo(2);
+        });
         cy.visit('/administrator/projects/proj1/subjects/subj1');
         cy.get('[data-cy="importFinalizeAlert"] [data-cy="finalizeBtn"]')
             .should('not.exist');
         cy.get('[data-cy="importFinalizeAlert"]')
             .contains('Finalizing 2 imported skills');
 
+        cy.then(() => {
+            finalizationState.release();
+        });
         cy.waitForBackendAsyncTasksToComplete();
         cy.get('[data-cy="importFinalizeAlert"]')
             .contains('Successfully finalized 2 imported skills!');
@@ -280,6 +316,10 @@ describe('Finalize Imported Skills Tests', () => {
     });
 
     it('finalize imported skills on subject page - navigate to project after finalization', () => {
+        let finalizationState;
+        cy.holdCatalogFinalizationRunningState().then((state) => {
+            finalizationState = state;
+        });
         cy.createProject(2);
         cy.createSubject(2, 1);
         cy.createSkill(2, 1, 1);
@@ -307,6 +347,9 @@ describe('Finalize Imported Skills Tests', () => {
         cy.get('[data-cy="closeDialogBtn"]')
             .should('be.enabled');
 
+        cy.then(() => {
+            finalizationState.hold();
+        });
         cy.clickSaveDialogBtn()
         cy.get('[data-cy="importFinalizeAlert"] [data-cy="finalizeBtn"]')
             .should('not.exist');
@@ -314,6 +357,9 @@ describe('Finalize Imported Skills Tests', () => {
             .contains('Finalizing 2 imported skills');
 
         // user breadcrumb to navigate up to a project
+        cy.then(() => {
+            finalizationState.showRunningInfo(2);
+        });
         cy.get('[data-cy="breadcrumb-proj1"]')
             .click();
         cy.get('[data-cy="importFinalizeAlert"] [data-cy="finalizeBtn"]')
@@ -321,6 +367,9 @@ describe('Finalize Imported Skills Tests', () => {
         cy.get('[data-cy="importFinalizeAlert"]')
             .contains('Finalizing 2 imported skills');
 
+        cy.then(() => {
+            finalizationState.release();
+        });
         cy.waitForBackendAsyncTasksToComplete();
         cy.get('[data-cy="importFinalizeAlert"]')
             .contains('Successfully finalized 2 imported skills!');
@@ -405,8 +454,6 @@ describe('Finalize Imported Skills Tests', () => {
         cy.clickSaveDialogBtn()
         cy.get('[data-cy="importFinalizeAlert"] [data-cy="finalizeBtn"]')
             .should('not.exist');
-        cy.get('[data-cy="importFinalizeAlert"]')
-            .contains('Finalizing 2 imported skills');
         cy.waitForBackendAsyncTasksToComplete();
         cy.get('[data-cy="importFinalizeAlert"]')
             .contains('Successfully finalized 2 imported skills!');
@@ -457,8 +504,6 @@ describe('Finalize Imported Skills Tests', () => {
         cy.clickSaveDialogBtn()
         cy.get('[data-cy="importFinalizeAlert"] [data-cy="finalizeBtn"]')
             .should('not.exist');
-        cy.get('[data-cy="importFinalizeAlert"]')
-            .contains('Finalizing 2 imported skills');
         cy.waitForBackendAsyncTasksToComplete();
         cy.get('[data-cy="importFinalizeAlert"]')
             .contains('Successfully finalized 2 imported skills!');
@@ -475,6 +520,10 @@ describe('Finalize Imported Skills Tests', () => {
     });
 
     it('cannot import while finalizing', () => {
+        let finalizationState;
+        cy.holdCatalogFinalizationRunningState().then((state) => {
+            finalizationState = state;
+        });
         cy.createProject(2);
         cy.createSubject(2, 1);
         cy.createSkill(2, 1, 1);
@@ -499,6 +548,9 @@ describe('Finalize Imported Skills Tests', () => {
         cy.visit('/administrator/projects/proj1/subjects/subj1');
         cy.get('[data-cy="importFinalizeAlert"] [data-cy="finalizeBtn"]')
             .click();
+        cy.then(() => {
+            finalizationState.hold();
+        });
         cy.clickSaveDialogBtn()
         cy.get('[data-cy="importFinalizeAlert"] [data-cy="finalizeBtn"]')
             .should('not.exist');
@@ -511,6 +563,9 @@ describe('Finalize Imported Skills Tests', () => {
             .contains('Finalization in Progress');
         cy.get('[data-cy="importBtn"]')
             .should('be.disabled');
+        cy.then(() => {
+            finalizationState.release();
+        });
         cy.waitForBackendAsyncTasksToComplete();
     });
 
@@ -554,8 +609,6 @@ describe('Finalize Imported Skills Tests', () => {
         cy.clickSaveDialogBtn()
         cy.get('[data-cy="importFinalizeAlert"] [data-cy="finalizeBtn"]')
             .should('not.exist');
-        cy.get('[data-cy="importFinalizeAlert"]')
-            .contains('Finalizing 2 imported skills');
         cy.waitForBackendAsyncTasksToComplete();
         cy.get('[data-cy="importFinalizeAlert"]')
             .contains('Successfully finalized 2 imported skills!');
@@ -601,9 +654,6 @@ describe('Finalize Imported Skills Tests', () => {
         cy.clickSaveDialogBtn()
         cy.get('[data-cy="importFinalizeAlert"] [data-cy="finalizeBtn"]')
             .should('not.exist');
-        cy.get('[data-cy="importFinalizeAlert"]')
-            .contains('Finalizing 1 imported skill');
-
         cy.waitForBackendAsyncTasksToComplete();
         cy.get('[data-cy="importFinalizeAlert"]')
             .contains('Successfully finalized 1 imported skill!');
@@ -907,5 +957,3 @@ describe('Finalize Imported Skills Tests', () => {
 
     });
 });
-
-

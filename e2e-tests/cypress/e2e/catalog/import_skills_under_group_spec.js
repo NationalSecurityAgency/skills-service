@@ -61,9 +61,6 @@ describe('Import Skills under a Group Tests', () => {
         cy.clickSaveDialogBtn()
         cy.get('[data-cy="importFinalizeAlert"] [data-cy="finalizeBtn"]')
             .should('not.exist');
-        cy.get('[data-cy="importFinalizeAlert"]')
-            .contains('Finalizing 1 imported skill');
-
         cy.waitForBackendAsyncTasksToComplete();
         cy.get('[data-cy="importFinalizeAlert"]')
             .contains('Successfully finalized 1 imported skill!');
@@ -297,5 +294,4 @@ describe('Import Skills under a Group Tests', () => {
             .should('not.exist');
     });
 });
-
 

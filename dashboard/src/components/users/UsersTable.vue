@@ -35,7 +35,6 @@ import { useNumberFormat } from '@/common-components/filter/UseNumberFormat.js'
 import { useProjConfig } from '@/stores/UseProjConfig.js'
 import TableNoRes from '@/components/utils/table/TableNoRes.vue'
 import { useStorage } from '@vueuse/core'
-import CatalogService from '@/components/skills/catalog/CatalogService.js'
 import { useSkillsState } from '@/stores/UseSkillsState.js'
 
 const route = useRoute()
@@ -66,8 +65,6 @@ const pageSize = useStorage('usersTable-pageSize', 10)
 const possiblePageSizes = [5, 10, 15, 20, 50]
 const sortInfo = ref({ sortOrder: -1, sortBy: 'lastUpdated' })
 const selectedRows = ref([])
-const excludeImported = route.params.projectId ? useStorage(`usersTable-excludeImported-${route.params.projectId}`, false) : ref(false)
-const showExcludeImportedUsersToggle = ref(false)
 
 const maximumProgress = computed(() => {
   return totalPoints.value + totalLevels.value;
@@ -82,11 +79,6 @@ const tagKey = computed(() => {
 });
 
 onMounted(() => {
-  if (eligibleForExcludeImportedUsersToggle.value) {
-    CatalogService.getImportedStatsForProject(route.params.projectId).then((stats) => {
-      showExcludeImportedUsersToggle.value = stats.numberOfSkillsImported > 0
-    })
-  }
   loadData()
 })
 
@@ -164,8 +156,8 @@ const getUrl = () => {
 const isProjectLevel = computed(() => {
   return !(route.params.skillId || route.params.badgeId || route.params.subjectId || (route.params.tagKey && route.params.tagFilter)) && !isSkillsTagPage.value
 })
-const isProjectPage = computed(() => route.params.projectId)
-const eligibleForExcludeImportedUsersToggle = computed(() => isProjectPage.value)
+
+const isProjectUsersPage = computed(() => route.name === 'ProjectUsers')
 
 const isUserTagsMetricsPage = computed(() => {
   return route.params.tagKey && route.params.tagFilter
@@ -200,7 +192,6 @@ const loadData = () => {
     minimumPoints: filters.value.progress[0],
     maximumPoints: filters.value.progress[1],
     userTagFilter: filters.value.userTagFilter,
-    includeImported: !excludeImported.value,
   }).then((res) => {
     data.value = res.data
     totalRows.value = res.count
@@ -225,7 +216,7 @@ const getOrderBy = (orderBy) => {
 
 const calcPercent = (userPoints) => {
   if (!totalPoints.value) {
-    return 'N/A'
+    return isProjectUsersPage.value ? 0 : 'N/A'
   }
   return Math.trunc((userPoints / totalPoints.value) * 100)
 }
@@ -368,13 +359,8 @@ const tableStoredStateId = computed(() => {
             <SkillsSpinner :is-loading="true"></SkillsSpinner>
           </div>
         </template>
-        <template v-if="isProjectPage && (showExcludeImportedUsersToggle || isProjectLevel) || isGlobalBadgePage" #header>
-          <div class="flex gap-2 flex-wrap py-1">
-            <div class="flex-1">
-              <div v-if="showExcludeImportedUsersToggle && !isSkillsTagPage" class="flex gap-1 items-center">
-                <ToggleSwitch inputId="excludeImported" v-model="excludeImported" @change="loadData" data-cy="excludeImportedToggle"/><label for="excludeImported">Exclude Users that only earned points in imported skills</label>
-              </div>
-            </div>
+        <template v-if="isProjectLevel || isGlobalBadgePage" #header>
+          <div class="flex gap-2 flex-wrap justify-end py-1">
             <div>
               <SkillsButton
                   v-if="!projConfig.isReadOnlyProj && isProjectLevel"
@@ -525,7 +511,7 @@ const tableStoredStateId = computed(() => {
             </div>
           </template>
         </Column>
-        <Column v-if="!isGlobalBadgePage" field="firstUpdated" header="Points First Earned" :sortable="true" :class="{'flex': responsive.md.value }">
+        <Column v-if="!isGlobalBadgePage" field="firstUpdated" :header="isProjectUsersPage ? 'First Seen' : 'Points First Earned'" :sortable="true" :class="{'flex': responsive.md.value }">
           <template #header>
             <i class="far fa-clock mr-1" :class="colors.getTextClass(3)" aria-hidden="true"></i>
           </template>
@@ -538,7 +524,8 @@ const tableStoredStateId = computed(() => {
             <i class="far fa-clock mr-1" :class="colors.getTextClass(3)" aria-hidden="true"></i>
           </template>
           <template #body="slotProps">
-            <date-cell :value="slotProps.data.lastUpdated" />
+            <span v-if="isProjectUsersPage && !slotProps.data.lastUpdated">N/A</span>
+            <date-cell v-else :value="slotProps.data.lastUpdated" />
           </template>
         </Column>
 

@@ -24,6 +24,54 @@ import static skills.intTests.utils.SkillsFactory.*
 
 class SkillReuseManagementSpec extends CatalogIntSpec {
 
+    def "queued finalization replay completes after deleting the #deletion"() {
+        Map project = createProject(1)
+        Map sourceSubject = createSubject(1, 1)
+        Map destinationSubject = createSubject(1, 2)
+        List<Map> skills = createSkills(2, 1, 1, 100)
+        skillsService.createProjectAndSubjectAndSkills(project, sourceSubject, skills)
+        skillsService.createSubject(destinationSubject)
+        String userId = getRandomUsers(1).first()
+        SkillsService learner = createService(userId)
+        skills.each { Map skill -> skillsService.addSkill(skill, userId) }
+        waitForAsyncTasksCompletion.waitForAllScheduleTasks()
+        List<String> reusedIds = skills.collect { Map skill -> SkillReuseIdUtil.addTag(skill.skillId, 0) }
+
+        when:
+        // Hold replay at its durable queue boundary so deletion cannot race with task execution.
+        installTrigger('reuse_test_queue_replay', 'scheduled_tasks',
+                "if NEW.task_name = 'catalog-finalize-replay' then NEW.execution_time := now() + interval '1 hour'; end if; return NEW;")
+        try {
+            skillsService.reuseSkills(project.projectId, skills*.skillId, destinationSubject.subjectId)
+            assert skillsService.getSkillsForSubject(project.projectId, destinationSubject.subjectId)*.skillId == reusedIds
+            assert jdbcTemplate.queryForObject("select count(*) from scheduled_tasks where task_name = 'catalog-finalize-replay'", Integer) == 1
+            if (deletion == 'project') {
+                skillsService.deleteProject(project.projectId)
+            } else {
+                skillsService.deleteSkill([projectId: project.projectId,
+                        subjectId: deletion == 'source skill' ? sourceSubject.subjectId : destinationSubject.subjectId,
+                        skillId: deletion == 'source skill' ? skills[0].skillId : reusedIds[0]])
+            }
+        } finally {
+            removeTrigger('reuse_test_queue_replay', 'scheduled_tasks')
+            jdbcTemplate.update("update scheduled_tasks set execution_time = now() where task_name = 'catalog-finalize-replay'")
+        }
+        waitForAsyncTasksCompletion.waitForAllScheduleTasks()
+
+        then:
+        if (deletion == 'project') {
+            assert !skillsService.getProjects().find { Map item -> item.projectId == project.projectId }
+        } else {
+            assert skillsService.getSkillsForSubject(project.projectId, destinationSubject.subjectId)*.skillId == [reusedIds[1]]
+            assert learner.getSingleSkillSummaryForCurrentUser(project.projectId, reusedIds[1]).points == 100
+            assert learner.getSingleSkillSummaryForCurrentUser(project.projectId, skills[1].skillId).points == 100
+            assert learner.getSkillsSummaryForCurrentUser(project.projectId).points == (deletion == 'source skill' ? 200 : 300)
+        }
+
+        where:
+        deletion << ['reused skill', 'source skill', 'project']
+    }
+
     def "reuse skill in another subject"() {
         def p1 = createProject(1)
         def p1subj1 = createSubject(1, 1)

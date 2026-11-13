@@ -34,6 +34,7 @@ import skills.controller.request.model.SkillRequest
 import skills.controller.result.model.*
 import skills.services.CustomValidationResult
 import skills.services.CustomValidator
+import skills.services.LockingService
 import skills.services.RuleSetDefGraphService
 import skills.services.admin.skillReuse.SkillReuseIdUtil
 import skills.services.attributes.SkillAttributeService

@@ -56,12 +56,14 @@ import skills.services.userActions.UserActionsHistoryService
 import skills.skillLoading.model.SlidesSummary
 import skills.storage.model.*
 import skills.storage.repos.*
+import skills.storage.repos.QuizToSkillDefRepo.ProjectIdAndSkillId
 import skills.tasks.TaskSchedulerService
 import skills.tasks.data.TextInputAiGradingRequest
 import skills.utils.InputSanitizer
 
 import java.time.LocalDateTime
 import java.time.ZoneOffset
+import java.util.Locale
 
 @Service
 @Slf4j
@@ -1099,8 +1101,14 @@ class QuizRunService {
     List<SkillEventResult> reportAnyAssociatedSkills(UserQuizAttempt userQuizAttempt, Integer quizDefId) {
         List<SkillEventResult> res = []
         if (userQuizAttempt.status == UserQuizAttempt.QuizAttemptStatus.PASSED) {
-            List<QuizToSkillDefRepo.ProjectIdAndSkillId> skills = quizToSkillDefRepo.getSkillsForQuiz(quizDefId)
+            List<ProjectIdAndSkillId> skills = quizToSkillDefRepo.getSkillsForQuiz(quizDefId)
             if (skills) {
+                // Shared quiz completions retain reporting locks across projects until commit.
+                // Acquire them in canonical project order, independent of repository enumeration.
+                skills = skills.sort(false) { ProjectIdAndSkillId left, ProjectIdAndSkillId right ->
+                    (left.projectId.toLowerCase(Locale.ROOT) <=> right.projectId.toLowerCase(Locale.ROOT)) ?:
+                            (left.skillRefId <=> right.skillRefId)
+                }
                 skills.each {
                     if (Boolean.valueOf(it.enabled)) {
                         SkillEventResult skillEventResult = reportSkill(it.projectId, it.skillId, userQuizAttempt.userId, userQuizAttempt.completed)

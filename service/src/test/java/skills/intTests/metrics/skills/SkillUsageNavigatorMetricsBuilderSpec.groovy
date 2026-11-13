@@ -551,6 +551,7 @@ class SkillUsageNavigatorMetricsBuilderSpec extends DefaultIntSpec {
             skillsService.importSkillFromCatalog(proj.projectId, subj.subjectId, proj2.projectId, it.skillId)
         }
         skillsService.finalizeSkillsImportFromCatalog(proj.projectId, true)
+        users.each { String user -> createService(user).initializeProjectProgress(proj.projectId) }
 
 
         List<Date> days
@@ -673,6 +674,7 @@ class SkillUsageNavigatorMetricsBuilderSpec extends DefaultIntSpec {
 
         List<Date> dates = (5..1).collect { new Date() - it }
         List<String> users = getRandomUsers(5)
+        users.each { String user -> createService(user).initializeProjectProgress(p2.projectId) }
         skillsService.addSkill(p1Skills[0], users[0], dates[4])
 
         skillsService.addSkill(p1Skills[0], users[1], dates[0])
@@ -729,6 +731,7 @@ class SkillUsageNavigatorMetricsBuilderSpec extends DefaultIntSpec {
 
         List<Date> dates = (5..1).collect { new Date() - it }
         List<String> users = getRandomUsers(5)
+        users.each { String user -> createService(user).initializeProjectProgress(p2.projectId) }
         skillsService.addSkill(p1Skills[0], users[0], dates[4])
 
         skillsService.addSkill(p1Skills[0], users[1], dates[0])

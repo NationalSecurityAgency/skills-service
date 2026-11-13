@@ -25,7 +25,8 @@ import skills.utils.LoggerHelper
 import spock.lang.IgnoreIf
 import spock.lang.Specification
 
-@SpringBootTest(properties = ['skills.prof.endpoints.slowMethod2=2000', 'skills.h2.port=9093'],
+@SpringBootTest(properties = ['skills.prof.endpoints.slowMethod2=2000', 'skills.h2.port=9093',
+        'logging.level.skills.profile.CallStackProfAspect=INFO'],
         webEnvironment=SpringBootTest.WebEnvironment.RANDOM_PORT, classes = SpringBootApp)
 class EnableCallStackProfIT extends Specification {
 
@@ -60,4 +61,3 @@ class EnableCallStackProfIT extends Specification {
     }
 
 }
-

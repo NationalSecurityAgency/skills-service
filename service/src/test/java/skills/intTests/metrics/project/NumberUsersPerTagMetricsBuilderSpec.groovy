@@ -396,6 +396,7 @@ class NumberUsersPerTagMetricsBuilderSpec extends DefaultIntSpec {
         def proj2_subj = SkillsFactory.createSubject(2, 1)
         skillsService.createProject(proj2)
         skillsService.createSubject(proj2_subj)
+        users.each { String user -> createService(user).initializeProjectProgress(proj2.projectId) }
 
         skills.each {skillsService.exportSkillToCatalog(it.projectId, it.skillId)}
         skillsService.bulkImportSkillsFromCatalogAndFinalize(proj2.projectId, proj2_subj.subjectId, skills.collect { [projectId: it.projectId, skillId: it.skillId] })

@@ -916,6 +916,35 @@ class SkillsService {
         wsHelper.apiGet(url)
     }
 
+    ResponseEntity<String> headSkillsSummaryForCurrentUser(String projectId) {
+        return wsHelper.apiHead("/projects/${projectId}/summary")
+    }
+
+    Map initializeProjectProgress(String projectId, Map params = [:], Map body = [:]) {
+        String query = params ? '?' + params.collect { String key, Object value -> "${key}=${value}" }.join('&') : ''
+        wsHelper.apiPost("/projects/${projectId}/progress/initialize${query}", body).body
+    }
+
+    // Preserve caller-supplied encoding and return error responses for request-validation tests.
+    ResponseEntity<String> initializeProjectProgressRaw(String projectId, Object body, HttpHeaders headers) {
+        wsHelper.rawRequest(HttpMethod.POST, "api/projects/${projectId}/progress/initialize",
+                new HttpEntity<Object>(body, headers))
+    }
+
+    // Temporary pre-5.1 root remediation helpers; remove with the endpoints.
+    Map cleanupImportedSkillProgress(Object selection = null) {
+        wsHelper.rootPost('/cleanupImportedSkillProgress', selection)?.body
+    }
+
+    Map fixImportedSkillProgress(String projectId, String userId) {
+        wsHelper.rootPost("/projects/${projectId}/users/${userId}/fixImportedSkillProgress", [:])?.body
+    }
+
+    Map initializeProjectProgressAsProxy(String projectId, String userId) {
+        String token = wsHelper.getTokenForUser(userId)
+        return wsHelper.proxyApiPost(token, "/projects/${projectId}/progress/initialize", [:]).body
+    }
+
     def getSkillsSummaryForUser(String projId, String userId, int version = -1) {
         String url = "/projects/${projId}/summary?userId=${userId}"
         if (version >= 0) {
@@ -1234,12 +1263,12 @@ class SkillsService {
         return wsHelper.apiGet(url.toString())
     }
 
-    def getProjectUsers(String projectId, int limit = 10, int page = 1, String orderBy = 'userId', boolean ascending = true, String query = "", int minimumPoints = 0, int maximumPoints = 100, String userTagFilter = "", boolean includeImported = true) {
-        return wsHelper.adminGet("${getProjectUrl(projectId)}/users?limit=${limit}&ascending=${ascending ? 1 : 0}&page=${page}&byColumn=0&orderBy=${orderBy}&query=${query}&minimumPoints=${minimumPoints}&maximumPoints=${maximumPoints}${userTagFilter ? '&userTagFilter='+userTagFilter : ''}&includeImported=${includeImported}".toString())
+    def getProjectUsers(String projectId, int limit = 10, int page = 1, String orderBy = 'userId', boolean ascending = true, String query = "", int minimumPoints = 0, int maximumPoints = 100, String userTagFilter = "") {
+        return wsHelper.adminGet("${getProjectUrl(projectId)}/users?limit=${limit}&ascending=${ascending ? 1 : 0}&page=${page}&byColumn=0&orderBy=${orderBy}&query=${query}&minimumPoints=${minimumPoints}&maximumPoints=${maximumPoints}${userTagFilter ? '&userTagFilter='+userTagFilter : ''}".toString())
     }
 
-    def getUserProgressExcelExport(String projectId, String orderBy = 'totalPoints', boolean ascending = true, String query = "", int minimumPoints = 0, int maximumPoints = 100, String userTagFilter = "", boolean includeImported = true) {
-        return downloadAttachment("/admin${getProjectUrl(projectId)}/users/export/excel?&ascending=${ascending ? 1 : 0}&orderBy=${orderBy}&query=${query}&minimumPoints=${minimumPoints}&maximumPoints=${maximumPoints}${userTagFilter ? '&userTagFilter='+userTagFilter : ''}&includeImported=${includeImported}".toString())
+    def getUserProgressExcelExport(String projectId, String orderBy = 'totalPoints', boolean ascending = true, String query = "", int minimumPoints = 0, int maximumPoints = 100, String userTagFilter = "") {
+        return downloadAttachment("/admin${getProjectUrl(projectId)}/users/export/excel?&ascending=${ascending ? 1 : 0}&orderBy=${orderBy}&query=${query}&minimumPoints=${minimumPoints}&maximumPoints=${maximumPoints}${userTagFilter ? '&userTagFilter='+userTagFilter : ''}".toString())
     }
 
     def getGlobalUserProgressExcelExport(String orderBy = 'userIdForDisplay', boolean ascending = true, String query = "", String userTagFilter = "") {
@@ -1264,8 +1293,8 @@ class SkillsService {
         return downloadAttachment("/admin${getSubjectUrl(projectId, subjectId)}/skills/export/excel".toString())
     }
 
-    def getSubjectUsers(String projectId, String subjectId, int limit = 10, int page = 1, String orderBy = 'userId', boolean ascending = true, String query = '', int minimumPoints = 0, int maximumPoints = 100, String userTagFilter = '', boolean includeImported = true) {
-        return wsHelper.adminGet("${getSubjectUrl(projectId, subjectId)}/users?limit=${limit}&ascending=${ascending ? 1 : 0}&page=${page}&byColumn=0&orderBy=${orderBy}&query=${query}&minimumPoints=${minimumPoints}&maximumPoints=${maximumPoints}${userTagFilter ? '&userTagFilter='+userTagFilter : ''}&includeImported=${includeImported}".toString())
+    def getSubjectUsers(String projectId, String subjectId, int limit = 10, int page = 1, String orderBy = 'userId', boolean ascending = true, String query = '', int minimumPoints = 0, int maximumPoints = 100, String userTagFilter = '') {
+        return wsHelper.adminGet("${getSubjectUrl(projectId, subjectId)}/users?limit=${limit}&ascending=${ascending ? 1 : 0}&page=${page}&byColumn=0&orderBy=${orderBy}&query=${query}&minimumPoints=${minimumPoints}&maximumPoints=${maximumPoints}${userTagFilter ? '&userTagFilter='+userTagFilter : ''}".toString())
     }
 
     def getGlobalBadgeUserProgressExcelExport(String badgeId, String orderBy = 'totalProgress', boolean ascending = true, String query = "", String userTagFilter = "") {
@@ -1285,22 +1314,22 @@ class SkillsService {
         return wsHelper.adminGet("/projects/${projectId}/lastSkillEvent".toString())
     }
 
-    def getSkillUsers(String projectId, String skillId, int limit = 10, int page = 1, String orderBy = 'userId', boolean ascending = true, String query = '', int minimumPoints = 0, int maximumPoints = 100, String userTagFilter = "", boolean includeImported = true) {
-        return wsHelper.adminGet("${getSkillUrl(projectId, null, skillId)}/users?limit=${limit}&ascending=${ascending ? 1 : 0}&page=${page}&byColumn=0&orderBy=${orderBy}&query=${query}&minimumPoints=${minimumPoints}&maximumPoints=${maximumPoints}${userTagFilter ? '&userTagFilter='+userTagFilter : ''}&includeImported=${includeImported}".toString())
+    def getSkillUsers(String projectId, String skillId, int limit = 10, int page = 1, String orderBy = 'userId', boolean ascending = true, String query = '', int minimumPoints = 0, int maximumPoints = 100, String userTagFilter = "") {
+        return wsHelper.adminGet("${getSkillUrl(projectId, null, skillId)}/users?limit=${limit}&ascending=${ascending ? 1 : 0}&page=${page}&byColumn=0&orderBy=${orderBy}&query=${query}&minimumPoints=${minimumPoints}&maximumPoints=${maximumPoints}${userTagFilter ? '&userTagFilter='+userTagFilter : ''}".toString())
     }
 
-    def getSkillGroupUsers(String projectId, String groupId, int limit = 10, int page = 1, String orderBy = 'userId', boolean ascending = true, String query = '', int minimumPoints = 0, int maximumPoints = 100, String userTagFilter = '', boolean includeImported = true) {
+    def getSkillGroupUsers(String projectId, String groupId, int limit = 10, int page = 1, String orderBy = 'userId', boolean ascending = true, String query = '', int minimumPoints = 0, int maximumPoints = 100, String userTagFilter = '') {
         String url = "/projects/${projectId}/groups/${groupId}/users".toString()
-        return wsHelper.adminGet("${url}?limit=${limit}&ascending=${ascending ? 1 : 0}&page=${page}&byColumn=0&orderBy=${orderBy}&query=${query}&minimumPoints=${minimumPoints}&maximumPoints=${maximumPoints}&userTagFilter=${userTagFilter}&includeImported=${includeImported}".toString())
+        return wsHelper.adminGet("${url}?limit=${limit}&ascending=${ascending ? 1 : 0}&page=${page}&byColumn=0&orderBy=${orderBy}&query=${query}&minimumPoints=${minimumPoints}&maximumPoints=${maximumPoints}&userTagFilter=${userTagFilter}".toString())
     }
 
-    def getSkillTagUsers(String projectId, String tagId, int limit = 10, int page = 1, String orderBy = 'userId', boolean ascending = true, String query = '', int minimumPoints = 0, int maximumPoints = 100, String userTagFilter = '', boolean includeImported = true) {
+    def getSkillTagUsers(String projectId, String tagId, int limit = 10, int page = 1, String orderBy = 'userId', boolean ascending = true, String query = '', int minimumPoints = 0, int maximumPoints = 100, String userTagFilter = '') {
         String url = "/projects/${projectId}/skills/tags/${tagId}/users".toString()
-        return wsHelper.adminGet("${url}?limit=${limit}&ascending=${ascending ? 1 : 0}&page=${page}&byColumn=0&orderBy=${orderBy}&query=${query}&minimumPoints=${minimumPoints}&maximumPoints=${maximumPoints}&userTagFilter=${userTagFilter}&includeImported=${includeImported}".toString())
+        return wsHelper.adminGet("${url}?limit=${limit}&ascending=${ascending ? 1 : 0}&page=${page}&byColumn=0&orderBy=${orderBy}&query=${query}&minimumPoints=${minimumPoints}&maximumPoints=${maximumPoints}&userTagFilter=${userTagFilter}".toString())
     }
 
-    def getBadgeUsers(String projectId, String badgeId, int limit = 10, int page = 1, String orderBy = 'userId', boolean ascending = true, String query = '', int minimumPoints = 0, int maximumPoints = 100, String userTagFilter = '', boolean includeImported = true) {
-        return wsHelper.adminGet("${getBadgeUrl(projectId, badgeId)}/users?limit=${limit}&ascending=${ascending ? 1 : 0}&page=${page}&byColumn=0&orderBy=${orderBy}&query=${query}&minimumPoints=${minimumPoints}&maximumPoints=${maximumPoints}${userTagFilter ? '&userTagFilter='+userTagFilter : ''}&includeImported=${includeImported}".toString())
+    def getBadgeUsers(String projectId, String badgeId, int limit = 10, int page = 1, String orderBy = 'userId', boolean ascending = true, String query = '', int minimumPoints = 0, int maximumPoints = 100, String userTagFilter = '') {
+        return wsHelper.adminGet("${getBadgeUrl(projectId, badgeId)}/users?limit=${limit}&ascending=${ascending ? 1 : 0}&page=${page}&byColumn=0&orderBy=${orderBy}&query=${query}&minimumPoints=${minimumPoints}&maximumPoints=${maximumPoints}${userTagFilter ? '&userTagFilter='+userTagFilter : ''}".toString())
     }
 
     def getGlobalBadgeUsers(String badgeId, int limit = 10, int page = 1, String orderBy = 'userId', boolean ascending = true, String query = '', String userTagFilter = '') {

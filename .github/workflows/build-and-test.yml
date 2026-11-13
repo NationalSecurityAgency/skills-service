@@ -65,7 +65,7 @@ jobs:
 
       - name: Build skills-service
         env:
-          MAVEN_OPTS: -Xmx2048m
+          MAVEN_OPTS: -Xmx2048m -Dlogback.configurationFile=${{ github.workspace }}/.github/logback-ci.xml
         run: |
           mvn --batch-mode install -DskipTests
 
@@ -96,7 +96,7 @@ jobs:
           POSTGRES_DB: skills
         # Set health checks to wait until postgres has started
         options: >-
-          --health-cmd pg_isready
+          --health-cmd "pg_isready -U postgres -d skills"
           --health-interval 10s
           --health-timeout 5s
           --health-retries 5
@@ -104,6 +104,13 @@ jobs:
           - 5432:5432
 
     steps:
+      - name: Suppress PostgreSQL error statement logging
+        run: |
+          docker exec -i "${{ job.services.postgres.id }}" psql -U postgres -d skills -v ON_ERROR_STOP=1 <<'SQL'
+          ALTER SYSTEM SET log_min_error_statement = 'PANIC';
+          SELECT pg_reload_conf();
+          SQL
+
       - name: print default vars  [${{ github.event_name }}]
         run: |
           echo "${{ github.event_name }}"
@@ -256,7 +263,7 @@ jobs:
           POSTGRES_DB: skills
         # Set health checks to wait until postgres has started
         options: >-
-          --health-cmd pg_isready
+          --health-cmd "pg_isready -U postgres -d skills"
           --health-interval 10s
           --health-timeout 5s
           --health-retries 5
@@ -265,6 +272,13 @@ jobs:
           - 5432:5432
 
     steps:
+      - name: Suppress PostgreSQL error statement logging
+        run: |
+          docker exec -i "${{ job.services.postgres.id }}" psql -U postgres -d skills -v ON_ERROR_STOP=1 <<'SQL'
+          ALTER SYSTEM SET log_min_error_statement = 'PANIC';
+          SELECT pg_reload_conf();
+          SQL
+
       - name: Install libs
         run: |
           sudo apt-get install -y postgresql-client
@@ -347,7 +361,7 @@ jobs:
           POSTGRES_DB: skills
         # Set health checks to wait until postgres has started
         options: >-
-          --health-cmd pg_isready
+          --health-cmd "pg_isready -U postgres -d skills"
           --health-interval 10s
           --health-timeout 5s
           --health-retries 5
@@ -355,6 +369,13 @@ jobs:
           # Maps tcp port 5432 on service container to the host
           - 5432:5432
     steps:
+      - name: Suppress PostgreSQL error statement logging
+        run: |
+          docker exec -i "${{ job.services.postgres.id }}" psql -U postgres -d skills -v ON_ERROR_STOP=1 <<'SQL'
+          ALTER SYSTEM SET log_min_error_statement = 'PANIC';
+          SELECT pg_reload_conf();
+          SQL
+
       - uses: actions/checkout@v6
       - uses: actions/setup-node@v6
         with:
@@ -380,31 +401,40 @@ jobs:
       # --- 1. Run Standard Tests & Isolate Output ---
       - name: Run skills-service tests
         env:
-          MAVEN_OPTS: -Xmx3G -XX:+UnlockDiagnosticVMOptions
+          MAVEN_OPTS: -Xmx3G -XX:+UnlockDiagnosticVMOptions -Dlogback.configurationFile=${{ github.workspace }}/.github/logback-ci.xml
         run: |
           cd service
-          ../.github/scripts/runSubsetOfServiceTests.sh -t 15 -c ${{ matrix.container }} -d "-Dspring.datasource.url=jdbc:postgresql://localhost:5432/skills -Dspring.datasource.username=postgres -Dspring.datasource.password=skillsPassword"
+          ../.github/scripts/runSubsetOfServiceTests.sh -t 15 -c ${{ matrix.container }} -d "-Dspring.datasource.url=jdbc:postgresql://localhost:5432/skills -Dspring.datasource.username=postgres -Dspring.datasource.password=skillsPassword -Dmaven.test.redirectTestOutputToFile=true -Dlogging.level.callStack.profiler=WARN -Dlogging.level.skills.profile=WARN"
 
       - name: Stage Standard Reports
         if: ${{ always() }}
         run: |
-          mkdir -p service/target/standard-reports
+          mkdir -p service/target/standard-reports service/target/standard-failsafe-reports
           cp -r service/target/surefire-reports/. service/target/standard-reports/ || true
+          cp -r service/target/failsafe-reports/. service/target/standard-failsafe-reports/ || true
 
       # --- 2. Run PKI Tests & Isolate Output ---
+      - name: Clear working test reports before PKI
+        if: ${{ always() }}
+        run: |
+          # Standard reports have been staged above. Remove only generated working
+          # reports so a skipped or canceled PKI run cannot upload FORM results.
+          rm -rf service/target/surefire-reports service/target/failsafe-reports
+
       - name: Run skills-service pki tests
         env:
           SPRING_PROFILES_ACTIVE: pki
-          MAVEN_OPTS: -Xmx3G -XX:+UnlockDiagnosticVMOptions
+          MAVEN_OPTS: -Xmx3G -XX:+UnlockDiagnosticVMOptions -Dlogback.configurationFile=${{ github.workspace }}/.github/logback-ci.xml
         run: |
           cd service
-          ../.github/scripts/runSubsetOfServiceTests.sh -t 15 -c ${{ matrix.container }} -d "-Dspring.datasource.url=jdbc:postgresql://localhost:5432/skills -Dspring.datasource.username=postgres -Dspring.datasource.password=skillsPassword -Dspring.cloud.aws.s3.enabled=false"
+          ../.github/scripts/runSubsetOfServiceTests.sh -t 15 -c ${{ matrix.container }} -d "-Dspring.datasource.url=jdbc:postgresql://localhost:5432/skills -Dspring.datasource.username=postgres -Dspring.datasource.password=skillsPassword -Dspring.cloud.aws.s3.enabled=false -Dmaven.test.redirectTestOutputToFile=true -Dlogging.level.callStack.profiler=WARN -Dlogging.level.skills.profile=WARN"
 
       - name: Stage PKI Reports
         if: ${{ always() }}
         run: |
-          mkdir -p service/target/pki-reports
+          mkdir -p service/target/pki-reports service/target/pki-failsafe-reports
           cp -r service/target/surefire-reports/. service/target/pki-reports/ || true
+          cp -r service/target/failsafe-reports/. service/target/pki-failsafe-reports/ || true
 
       # --- 3. Upload Isolated Artifact Bundles ---
       - name: Upload Standard Surefire Artifacts
@@ -420,6 +450,20 @@ jobs:
         with:
           name: surefire-pki-${{ matrix.container }}
           path: ./service/target/pki-reports
+
+      - name: Upload Standard Failsafe Artifacts
+        if: ${{ always() }}
+        uses: actions/upload-artifact@v7
+        with:
+          name: failsafe-standard-${{ matrix.container }}
+          path: ./service/target/standard-failsafe-reports
+
+      - name: Upload PKI Failsafe Artifacts
+        if: ${{ always() }}
+        uses: actions/upload-artifact@v7
+        with:
+          name: failsafe-pki-${{ matrix.container }}
+          path: ./service/target/pki-failsafe-reports
 
   combine-surefire-reports:
     runs-on: ubuntu-latest

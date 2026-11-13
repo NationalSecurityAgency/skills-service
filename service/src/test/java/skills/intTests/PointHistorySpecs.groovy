@@ -379,6 +379,7 @@ class PointHistorySpecs extends DefaultIntSpec {
     }
 
     def "history considers group skills"() {
+        String userId = getRandomUsers(1).first()
         def proj = SkillsFactory.createProject()
         def subject = SkillsFactory.createSubject()
         def skillsGroup = SkillsFactory.createSkillsGroup(1, 1, 20)
@@ -407,7 +408,7 @@ class PointHistorySpecs extends DefaultIntSpec {
         skillsService.createProjectAndSubjectAndSkills(proj2, subject2, [skillsGroup2])
         skillsService.bulkImportSkillsIntoGroupFromCatalogAndFinalize(proj2.projectId, subject2.subjectId, skillsGroup2.skillId,
                 [[projectId: proj.projectId, skillId: skills[0].skillId], [projectId: proj.projectId, skillId: skills[1].skillId]])
-
+        createService(userId).initializeProjectProgress(proj2.projectId)
 
         when:
         skillsService.addSkill([projectId: SkillsFactory.defaultProjId, skillId: skills.get(0).skillId], userId, today)

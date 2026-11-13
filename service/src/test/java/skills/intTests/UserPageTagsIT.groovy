@@ -89,14 +89,42 @@ class UserPageTagsIT extends DefaultIntSpec {
         exception.httpStatus == HttpStatus.FORBIDDEN
     }
 
-    def "a user with participation only in another project cannot have their tags retrieved"() {
+    def "a Progress and Ranking visit without skill events allows exact allowlisted tags for #readerRole"() {
+        SkillsService approver = createService(getRandomUsers(1).first())
+        skillsService.addUserRole(approver.userName, project.projectId, RoleName.ROLE_PROJECT_APPROVER.name())
+        SkillsService reader = [admin: skillsService, root: rootUser, approver: approver][readerRole]
+
+        when:
+        Map initialization = learner.initializeProjectProgress(project.projectId)
+        learner.getSkillsSummaryForCurrentUser(project.projectId)
+        List<Map> tags = reader.getUserTags(project.projectId, learner.userName.toUpperCase())
+
+        then:
+        initialization.ready
+        tags.sort { Map tag -> "${tag.key}:${tag.value}" } == [
+                [key: 'department', value: 'Department A'],
+                [key: 'organization', value: 'Org A'],
+                [key: 'organization', value: 'Org B'],
+        ]
+        // Ensure the visit-only fixture exercises participation rather than the points fallback.
+        userPointsRepo.findByProjectIdAndUserIdAndSkillId(project.projectId, learner.userName.toLowerCase(), null) == null
+
+        where:
+        readerRole << ['admin', 'root', 'approver']
+    }
+
+    def "a user with #participationType participation only in another project cannot have their tags retrieved"() {
         Map otherProject = SkillsFactory.createProject(2)
         skillsService.createProject(otherProject)
         skillsService.createSubject(SkillsFactory.createSubject(2, 1))
         List<Map> otherSkills = SkillsFactory.createSkills(3, 2, 1, 40)
         skillsService.createSkills(otherSkills)
         Map otherSkill = otherSkills.first()
-        skillsService.addSkill(otherSkill, learner.userName)
+        if (participationType == 'visit') {
+            learner.initializeProjectProgress(otherProject.projectId)
+        } else {
+            skillsService.addSkill(otherSkill, learner.userName)
+        }
 
         when:
         skillsService.getUserTags(project.projectId, learner.userName)
@@ -106,6 +134,9 @@ class UserPageTagsIT extends DefaultIntSpec {
         exception.httpStatus == HttpStatus.BAD_REQUEST
         exception.resBody.contains('"errorCode":"BadParam"')
         exception.resBody.contains("User [${learner.userName.toLowerCase()}] is not an existing user of project [${project.projectId}]")
+
+        where:
+        participationType << ['visit', 'skill event']
     }
 
     def "approver-only user can retrieve exact allowlisted tags for a learner in their project"() {
@@ -139,8 +170,12 @@ class UserPageTagsIT extends DefaultIntSpec {
         exception.httpStatus == HttpStatus.FORBIDDEN
     }
 
-    def "ordinary learner cannot retrieve even their own allowlisted tags"() {
-        skillsService.addSkill(skill, learner.userName)
+    def "ordinary learner cannot retrieve even their own allowlisted tags with #participationType participation"() {
+        if (participationType == 'visit') {
+            learner.initializeProjectProgress(project.projectId)
+        } else {
+            skillsService.addSkill(skill, learner.userName)
+        }
 
         when:
         learner.getUserTags(project.projectId, learner.userName)
@@ -148,6 +183,9 @@ class UserPageTagsIT extends DefaultIntSpec {
         then:
         SkillsClientException exception = thrown(SkillsClientException)
         exception.httpStatus == HttpStatus.FORBIDDEN
+
+        where:
+        participationType << ['visit', 'skill event']
     }
 
 }

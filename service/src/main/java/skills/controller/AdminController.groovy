@@ -1141,14 +1141,13 @@ class AdminController {
                                 @RequestParam Boolean ascending,
                                 @RequestParam int minimumPoints,
                                 @RequestParam(required = false, defaultValue = "100") int maximumPoints,
-                                @RequestParam(required = false, defaultValue = "true") boolean includeImported,
                                 @RequestParam(required = false, defaultValue = "") String userTagFilter) {
         SkillsValidator.isNotBlank(projectId, "Project Id")
         SkillsValidator.isTrue(minimumPoints >=0, "Minimum Points is less than 0", projectId)
         SkillsValidator.isTrue(maximumPoints <=100, "Maximum Points is greater than 100", projectId)
 
         PageRequest pageRequest = TablePageUtil.createPagingRequestWithLowerBoundValidation(projectId, limit, page, orderBy, ascending)
-        return adminUsersService.loadUsersPageForProject(projectId, query, pageRequest, minimumPoints, maximumPoints, userTagFilter, includeImported)
+        return adminUsersService.loadUsersPageForProject(projectId, query, pageRequest, minimumPoints, maximumPoints, userTagFilter)
     }
 
     @GetMapping(value = "/projects/{projectId}/users/count")
@@ -1166,7 +1165,6 @@ class AdminController {
                                     @RequestParam Boolean ascending,
                                     @RequestParam int minimumPoints,
                                     @RequestParam(required = false, defaultValue = "100") int maximumPoints,
-                                    @RequestParam(required = false, defaultValue = "true") boolean includeImported,
                                     @RequestParam(required = false, defaultValue = "") String userTagFilter) {
         SkillsValidator.isNotBlank(projectId, "Project Id")
         SkillsValidator.isTrue(minimumPoints >=0, "Minimum Points is less than 0", projectId)
@@ -1180,7 +1178,6 @@ class AdminController {
         mav.addObject(UserProgressExportResult.MINIMUM_POINTS, minimumPoints)
         mav.addObject(UserProgressExportResult.MAXIMUM_POINTS, maximumPoints)
         mav.addObject(UserProgressExportResult.PAGE_REQUEST, pageRequest)
-        mav.addObject(UserProgressExportResult.INCLUDE_IMPORTED, includeImported)
         return mav;
     }
 
@@ -1247,7 +1244,6 @@ class AdminController {
                                 @RequestParam Boolean ascending,
                                 @RequestParam int minimumPoints,
                                 @RequestParam(required = false, defaultValue = "100") int maximumPoints,
-                                @RequestParam(required = false, defaultValue = "true") boolean includeImported,
                                 @RequestParam(required = false, defaultValue = "") String userTagFilter) {
         SkillsValidator.isNotBlank(projectId, "Project Id")
         SkillsValidator.isNotBlank(subjectId, "Subject Id", projectId)
@@ -1255,7 +1251,7 @@ class AdminController {
         SkillsValidator.isTrue(maximumPoints <=100, "Maximum Points is greater than 100", projectId)
 
         PageRequest pageRequest = PageRequest.of(page - 1, limit, ascending ? ASC : DESC, orderBy)
-        return adminUsersService.loadUsersPageForSubject(projectId, subjectId, query, pageRequest, minimumPoints, maximumPoints, userTagFilter, includeImported)
+        return adminUsersService.loadUsersPageForSubject(projectId, subjectId, query, pageRequest, minimumPoints, maximumPoints, userTagFilter)
     }
 
     @GetMapping(value = "/projects/{projectId}/skills/{skillId}/users", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -1269,7 +1265,6 @@ class AdminController {
                               @RequestParam Boolean ascending,
                               @RequestParam int minimumPoints,
                               @RequestParam(required = false, defaultValue = "") String userTagFilter,
-                              @RequestParam(required = false, defaultValue = "true") boolean includeImported,
                               @RequestParam(required = false, defaultValue = "100") int maximumPoints) {
         SkillsValidator.isNotBlank(projectId, "Project Id")
         SkillsValidator.isNotBlank(skillId, "Skill Id", projectId)
@@ -1277,7 +1272,7 @@ class AdminController {
         SkillsValidator.isTrue(maximumPoints <=100, "Maximum Points is greater than 100", projectId)
 
         PageRequest pageRequest = PageRequest.of(page - 1, limit, ascending ? ASC : DESC, orderBy)
-        return adminUsersService.loadUsersPageForSkills(projectId, Collections.singletonList(skillId), query, pageRequest, minimumPoints, maximumPoints, userTagFilter, includeImported)
+        return adminUsersService.loadUsersPageForSkills(projectId, Collections.singletonList(skillId), query, pageRequest, minimumPoints, maximumPoints, userTagFilter)
     }
 
     @GetMapping(value = "/projects/{projectId}/badges/{badgeId}/users", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -1291,7 +1286,6 @@ class AdminController {
                               @RequestParam Boolean ascending,
                               @RequestParam int minimumPoints,
                               @RequestParam(required = false, defaultValue = "") String userTagFilter,
-                              @RequestParam(required = false, defaultValue = "true") boolean includeImported,
                               @RequestParam(required = false, defaultValue = "100") int maximumPoints) {
         SkillsValidator.isNotBlank(projectId, "Project Id")
         SkillsValidator.isNotBlank(badgeId, "Badge Id", projectId)
@@ -1304,7 +1298,7 @@ class AdminController {
         if (!skillIds) {
             return new TableResult()
         }
-        return adminUsersService.loadUsersPageForSkills(projectId, skillIds, query, pageRequest, minimumPoints, maximumPoints, userTagFilter, includeImported)
+        return adminUsersService.loadUsersPageForSkills(projectId, skillIds, query, pageRequest, minimumPoints, maximumPoints, userTagFilter)
     }
 
     @GetMapping(value = "/projects/{projectId}/groups/{groupId}/users", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -1318,7 +1312,6 @@ class AdminController {
                                    @RequestParam Boolean ascending,
                                    @RequestParam int minimumPoints,
                                    @RequestParam String userTagFilter,
-                                   @RequestParam(required = false, defaultValue = "true") boolean includeImported,
                                    @RequestParam(required = false, defaultValue = "100") int maximumPoints) {
         SkillsValidator.isNotBlank(projectId, "Project Id")
         SkillsValidator.isNotBlank(groupId, "Skills Group Id", projectId)
@@ -1331,7 +1324,7 @@ class AdminController {
         if (!skillIds) {
             return new TableResult()
         }
-        return adminUsersService.loadUsersPageForSkills(projectId, skillIds, query, pageRequest, minimumPoints, maximumPoints, userTagFilter, includeImported, true)
+        return adminUsersService.loadUsersPageForSkills(projectId, skillIds, query, pageRequest, minimumPoints, maximumPoints, userTagFilter, true)
     }
 
     @GetMapping(value = "/projects/{projectId}/userTags/{userTagKey}/{userTagValue}/users", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -1941,7 +1934,6 @@ class AdminController {
                                    @RequestParam Boolean ascending,
                                    @RequestParam int minimumPoints,
                                    @RequestParam String userTagFilter,
-                                   @RequestParam(required = false, defaultValue = "true") boolean includeImported,
                                    @RequestParam(required = false, defaultValue = "100") int maximumPoints) {
         SkillsValidator.isNotBlank(projectId, "Project Id")
         SkillsValidator.isNotBlank(tagId, "Tag Id", tagId)
@@ -1949,7 +1941,7 @@ class AdminController {
         SkillsValidator.isTrue(maximumPoints <=100, "Maximum Points is greater than 100", projectId)
 
         PageRequest pageRequest = PageRequest.of(page - 1, limit, ascending ? ASC : DESC, orderBy)
-        return adminUsersService.loadUsersPageForSkillTag(projectId, tagId, query, pageRequest, minimumPoints, maximumPoints, userTagFilter, includeImported)
+        return adminUsersService.loadUsersPageForSkillTag(projectId, tagId, query, pageRequest, minimumPoints, maximumPoints, userTagFilter)
     }
 
 

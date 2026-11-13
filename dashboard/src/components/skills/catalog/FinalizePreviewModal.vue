@@ -103,16 +103,14 @@ const close = () => {
         skill{{ pluralSupport.plural(finalizeInfo.numSkillsToFinalize) }} to finalize.
         Please note that the finalization process may take <i>several moments</i>.
       </p>
-      <div>
+      <div class="mt-2">
         The finalization process includes:
-        <ul>
+        <ul class="list-disc pl-6 space-y-2 mt-1">
           <li>Imported skills will <b>now</b> contribute to the overall project and subject points.</li>
-          <li>Skill points are migrated to this project for <b>all of the users</b> who made progress in the imported
-            skills <i>(in the original project)</i>.
+          <li>Credit for imported skills is added for users who have already earned points in this project or visited
+            this training. New users receive that credit when they first earn points or visit this training.
           </li>
-          <li>Project and subject <b>level</b> achievements are calculated for the users that have points for the
-            imported skills.
-          </li>
+          <li>Subject and project levels are recalculated to include this credit.</li>
         </ul>
       </div>
       <Message

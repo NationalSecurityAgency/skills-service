@@ -22,7 +22,7 @@ import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import skills.controller.exceptions.SkillException
 import skills.controller.request.model.ProjectSettingsRequest
-import skills.controller.result.model.SettingsResult
+import skills.services.LockingService
 import skills.services.RuleSetDefGraphService
 import skills.services.attributes.SkillAttributeService
 import skills.services.events.SkillDate
@@ -37,6 +37,8 @@ import skills.storage.repos.*
 import skills.storage.repos.nativeSql.PostgresQlNativeRepo
 import skills.tasks.TaskSchedulerService
 import skills.tasks.config.TaskConfig
+
+import java.sql.SQLException
 
 @Service
 @Slf4j
@@ -76,12 +78,18 @@ class SkillCatalogFinalizationService {
     SettingsService settingsService
 
     @Autowired
+    SettingRepo settingRepo
+
+    @Autowired
     BatchOperationsTransactionalAccessor batchOperationsTransactionalAccessor
 
     @Autowired
     SkillAttributeService skillAttributeService
 
+    @Autowired LockingService lockingService
+
     final static String PROJ_FINALIZE_STATE_PROP = "catalog.finalize.state"
+    private static final int AGGREGATE_MAX_ATTEMPTS = 3
     static enum FinalizeState {
         NOT_RUNNING, RUNNING, COMPLETED, FAILED
     }
@@ -89,6 +97,10 @@ class SkillCatalogFinalizationService {
     @Transactional
     @Profile
     void requestFinalizationOfImportedSkills(String projectId) {
+        // Match skill saves: project before init, since updating state also locks the project.
+        lockingService.lockProject(projectId)
+        // Atomically order RUNNING/task creation with competing starts and learner qualification.
+        lockingService.lockForSkillsCatalogFinalizationInit(projectId)
         if (getCurrentState(projectId) == FinalizeState.RUNNING) {
             throw new SkillException("Catalog import finalize is already running for [${projectId}]", projectId)
         }
@@ -105,14 +117,16 @@ class SkillCatalogFinalizationService {
 
     // NOTE: it's critical NOT put @Transactional; each underlying statement should run in its transaction
     // wrapping the whole finalization process in a Transactions causes the method to take hours for a project with lots of users
+    // Synchronous same-project reuse is the exception: its caller owns the atomic definition/credit transaction.
     @Profile
-    FinalizeCatalogSkillsImportResult finalizeCatalogSkillsImport(String projectId) {
+    FinalizeCatalogSkillsImportResult finalizeCatalogSkillsImport(String projectId, boolean withinReuseTransaction = false) {
         long start = System.currentTimeMillis()
         log.info("Finalizing imported skills for [{}]", projectId)
         List<Integer> finalizedSkillIds = []
+        List<SkillDef> disabledImportedSkills = []
         try {
             projDefAccessor.getProjDef(projectId) // validate
-            List<SkillDef> disabledImportedSkills = skillDefRepo.findAllByProjectIdAndTypeAndEnabledAndCopiedFromIsNotNull(projectId, SkillDef.ContainerType.Skill, Boolean.FALSE.toString())
+            disabledImportedSkills = skillDefRepo.findAllByProjectIdAndTypeAndEnabledAndCopiedFromIsNotNull(projectId, SkillDef.ContainerType.Skill, Boolean.FALSE.toString())
 
             if (disabledImportedSkills) {
                 // update groups points
@@ -141,25 +155,39 @@ class SkillCatalogFinalizationService {
                 batchOperationsTransactionalAccessor.copySkillAchievementsToTheImportedProjects(projectId, skillRefIds)
 
                 log.info("Identifying group achievements for [{}] groups in project [{}]", groups.size(), projectId)
-                batchOperationsTransactionalAccessor.identifyAndAddGroupAchievements(groups)
+                batchOperationsTransactionalAccessor.identifyAndAddGroupAchievements(groups, disabledImportedSkills)
                 log.info("Completed import of group achievements for [{}] groups in [{}] project", groups.size(), projectId)
 
                 // 2. for each subject (1) create user points for new users (2) update existing (3) calculate achievements
                 subjects.each { SkillDef subject ->
-                    batchOperationsTransactionalAccessor.handlePointsAndAchievementsForSubject(subject)
+                    if (withinReuseTransaction) {
+                        // Reuse (including project copy) must see definitions and credit created by its enclosing transaction.
+                        // Keep the asynchronous catalog path's fresh repeatable-read stages and retries unchanged.
+                        batchOperationsTransactionalAccessor.handlePointsAndAchievementsForSubject(subject)
+                    } else {
+                        retryAggregateStage(projectId, subject.skillId) {
+                            batchOperationsTransactionalAccessor.handleCatalogPointsAndAchievementsForSubject(projectId, subject.skillId)
+                        }
+                    }
                 }
 
                 // 3. for the project (1) create user points for new users (2) update existing (3) calculate achievements
-                batchOperationsTransactionalAccessor.handlePointsAndAchievementsForProject(projectId)
+                if (withinReuseTransaction) {
+                    batchOperationsTransactionalAccessor.handlePointsAndAchievementsForProject(projectId)
+                } else {
+                    retryAggregateStage(projectId, null) {
+                        batchOperationsTransactionalAccessor.handleCatalogPointsAndAchievementsForProject(projectId)
+                    }
+                }
 
                 log.info("Completed import of points and achievements for [{}] skills for project [{}]", skillRefIds.size(), projectId)
                 finalizedSkillIds = disabledImportedSkills.collect {it.id }
-                batchOperationsTransactionalAccessor.enableSkills(disabledImportedSkills)
+                batchOperationsTransactionalAccessor.awardCatalogBadges(projectId)
             } else {
                 log.warn("Finalize was called for [{}] projectId but there were no disabled skills", projectId)
             }
 
-            updateState(projectId, FinalizeState.COMPLETED)
+            batchOperationsTransactionalAccessor.completeCatalogFinalization(projectId, disabledImportedSkills, start)
         } catch (Throwable t) {
             updateState(projectId, FinalizeState.FAILED)
             throw new TaskConfig.DoNotRetryAsyncTaskException("Failed to finalize [${projectId}] project", t)
@@ -168,6 +196,34 @@ class SkillCatalogFinalizationService {
         long end = System.currentTimeMillis()
         log.info("Completed finalizing imported skills for [{}]", projectId)
         return new FinalizeCatalogSkillsImportResult(start: start, end:end, skillRefIds: finalizedSkillIds)
+    }
+
+    // Retry outside the stage transaction so each proxied attempt reads a fresh snapshot after rollback.
+    private void retryAggregateStage(String projectId, String subjectId, Closure<Void> stage) {
+        for (int attempt = 1; attempt <= AGGREGATE_MAX_ATTEMPTS; attempt++) {
+            try {
+                stage.call()
+                return
+            } catch (Exception failure) {
+                if (attempt == AGGREGATE_MAX_ATTEMPTS || !isSerializationFailure(failure)) {
+                    throw failure
+                }
+                log.warn('Retrying catalog aggregate stage after serialization conflict: projectId=[{}], subjectId=[{}], nextAttempt=[{}/{}]',
+                        projectId, subjectId, attempt + 1, AGGREGATE_MAX_ATTEMPTS)
+            }
+        }
+    }
+
+    private static boolean isSerializationFailure(Throwable failure) {
+        // Hibernate/Spring wrap PostgreSQL's 40001 snapshot conflict; retry only that failure.
+        Throwable cause = failure
+        while (cause != null) {
+            if (cause instanceof SQLException && cause.getSQLState() == '40001') {
+                return true
+            }
+            cause = cause.cause
+        }
+        return false
     }
 
     @Transactional
@@ -180,6 +236,12 @@ class SkillCatalogFinalizationService {
             log.info("Handling Events that were reporting during the finalization runs for [{}] skills between [{}] => [{}]", finalizedSkillIds.size(), start.format(dateFormat), end.format(dateFormat))
             finalizedSkillIds.each { Integer importedSkillRefId ->
                 Integer originalSkillRefId = skillDefRepo.getCopiedFromById(importedSkillRefId)
+                if (originalSkillRefId == null) {
+                    // Reuse, source-skill, or project deletion can commit before this durable replay runs.
+                    // Obsolete references are finished work, not transient failures to retry indefinitely.
+                    log.debug('Skipping catalog finalization replay for deleted import: importedSkillRefId=[{}]', importedSkillRefId)
+                    return
+                }
                 List<UserPerformedSkill> foundEvents = userPerformedSkillRepo.findAllBySkillRefIdWithinTimeRange(originalSkillRefId, start, end)
                 if (foundEvents) {
                     SkillDefMin skill = skillDefRepo.findSkillDefMinById(originalSkillRefId)
@@ -222,8 +284,10 @@ class SkillCatalogFinalizationService {
     }
 
     FinalizeState getCurrentState(String projectId) {
-        SettingsResult res = settingsService.getProjectSetting(projectId, PROJ_FINALIZE_STATE_PROP)
-        return res?.value ? FinalizeState.valueOf(res?.value) : FinalizeState.NOT_RUNNING
+        // Read a scalar so repeated state checks bypass cached Setting entities,
+        // including when another transaction completes finalization while a caller waits.
+        String state = settingRepo.findProjectSettingValue(projectId, PROJ_FINALIZE_STATE_PROP)
+        return state ? FinalizeState.valueOf(state) : FinalizeState.NOT_RUNNING
     }
 
     private void updateState(String projectId, FinalizeState state) {

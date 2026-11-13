@@ -362,6 +362,8 @@ class PostAchievementSkillExpirationSpecs extends DefaultIntSpec {
         skillsService.bulkImportSkillsFromCatalog(proj4.projectId, proj4_subj2.subjectId, subj2_skills.collect { [projectId: proj.projectId, skillId: it.skillId] })
         skillsService.finalizeSkillsImportFromCatalog(proj4.projectId)
 
+        users.each { String userId -> createService(userId).initializeProjectProgress(proj4.projectId) }
+
         Date eightDaysAgo = new Date()-8
         skillsService.addSkill([projectId: proj.projectId, skillId: skills[0].skillId], users[0], eightDaysAgo)
         skillsService.addSkill([projectId: proj.projectId, skillId: skills[1].skillId], users[0], eightDaysAgo)
@@ -567,6 +569,8 @@ class PostAchievementSkillExpirationSpecs extends DefaultIntSpec {
         skillsService.bulkImportSkillsFromCatalog(proj4.projectId, proj4_subj.subjectId, skills.collect { [projectId: proj.projectId, skillId: it.skillId] })
         skillsService.bulkImportSkillsFromCatalog(proj4.projectId, proj4_subj2.subjectId, subj2_skills.collect { [projectId: proj.projectId, skillId: it.skillId] })
         skillsService.finalizeSkillsImportFromCatalog(proj4.projectId)
+
+        users.each { String userId -> createService(userId).initializeProjectProgress(proj4.projectId) }
 
         Date eightDaysAgo = new Date()-8
         skillsService.addSkill([projectId: proj.projectId, skillId: skills[0].skillId], users[0], eightDaysAgo)
@@ -802,6 +806,8 @@ class PostAchievementSkillExpirationSpecs extends DefaultIntSpec {
         skillsService.bulkImportSkillsFromCatalog(proj4.projectId, proj4_subj.subjectId, skills[2..4].collect { [projectId: proj.projectId, skillId: it.skillId] })
         skillsService.bulkImportSkillsFromCatalog(proj4.projectId, proj4_subj2.subjectId, subj2_skills.collect { [projectId: proj.projectId, skillId: it.skillId] })
         skillsService.finalizeSkillsImportFromCatalog(proj4.projectId)
+
+        users.each { String userId -> createService(userId).initializeProjectProgress(proj4.projectId) }
 
         Date eightDaysAgo = new Date()-8
         skillsService.addSkill([projectId: proj.projectId, skillId: skills[0].skillId], users[0], eightDaysAgo)
@@ -1120,6 +1126,8 @@ class PostAchievementSkillExpirationSpecs extends DefaultIntSpec {
         skillsService.bulkImportSkillsFromCatalog(proj4.projectId, proj4_subj.subjectId, skills.collect { [projectId: proj.projectId, skillId: it.skillId] })
         skillsService.bulkImportSkillsFromCatalog(proj4.projectId, proj4_subj2.subjectId, subj2_skills.collect { [projectId: proj.projectId, skillId: it.skillId] })
         skillsService.finalizeSkillsImportFromCatalog(proj4.projectId)
+
+        users.each { String userId -> createService(userId).initializeProjectProgress(proj4.projectId) }
 
         def proj4_badge = SkillsFactory.createBadge(4, 1)
         skillsService.createBadge(proj4_badge)
@@ -1758,6 +1766,8 @@ class PostAchievementSkillExpirationSpecs extends DefaultIntSpec {
             ])
         }
         expireUserAchievementsTaskExecutor.removeExpiredUserAchievements()
+        // Cross-project imported credit is reconciled asynchronously after expiration commits.
+        waitForAsyncTasksCompletion.waitForAllScheduleTasks()
         settingService.deleteGlobalSetting(ExpireUserAchievementsTaskExecutor.SKILL_EXPIRATION_LAST_RUN_DATE)
     }
 

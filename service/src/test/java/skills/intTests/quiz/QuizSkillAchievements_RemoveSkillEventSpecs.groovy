@@ -202,6 +202,10 @@ class QuizSkillAchievements_RemoveSkillEventSpecs extends QuizSkillAchievementsB
         skillsService.bulkImportSkillsFromCatalogAndFinalize(proj4.projectId, proj4_subj.subjectId, skills.collect { [projectId: proj.projectId, skillId: it.skillId] })
 
         List<SkillsService> userServices = getRandomUsers(1).collect { createService(it) }
+        userServices.each { SkillsService learner ->
+            learner.initializeProjectProgress(proj3.projectId)
+            learner.initializeProjectProgress(proj4.projectId)
+        }
         Integer u1Quiz1AttemptIdFailed = failQuiz(userServices[0], quiz1)
         Integer u1Quiz1AttemptId = passQuiz(userServices[0], quiz1)
         Integer u1Quiz2AttemptIdFailed = failQuiz(userServices[0], quiz2)
@@ -440,6 +444,10 @@ class QuizSkillAchievements_RemoveSkillEventSpecs extends QuizSkillAchievementsB
         skillsService.bulkImportSkillsFromCatalogAndFinalize(proj4.projectId, proj4_subj.subjectId, skills.collect { [projectId: proj.projectId, skillId: it.skillId] })
 
         List<SkillsService> userServices = getRandomUsers(1).collect { createService(it) }
+        userServices.each { SkillsService learner ->
+            learner.initializeProjectProgress(proj3.projectId)
+            learner.initializeProjectProgress(proj4.projectId)
+        }
         Integer u1Quiz1AttemptIdFailed = failQuiz(userServices[0], quiz1)
         Integer u1Quiz1AttemptId = passQuiz(userServices[0], quiz1)
         Integer u1Quiz2AttemptIdFailed = failQuiz(userServices[0], quiz2)
@@ -533,6 +541,11 @@ class QuizSkillAchievements_RemoveSkillEventSpecs extends QuizSkillAchievementsB
         def proj4_subj = createSubject(4, 1)
         skillsService.createProjectAndSubjectAndSkills(proj4, proj4_subj, [])
         skillsService.bulkImportSkillsFromCatalogAndFinalize(proj4.projectId, proj4_subj.subjectId, skills.collect { [projectId: proj.projectId, skillId: it.skillId] })
+        userServices.each { SkillsService learner ->
+            learner.initializeProjectProgress(proj3.projectId)
+            learner.initializeProjectProgress(proj4.projectId)
+        }
+        waitForAsyncTasksCompletion.waitForAllScheduleTasks()
 
         Integer u1Quiz1AttemptIdFailed = failQuiz(userServices[0], quiz1)
         Integer u1Quiz1AttemptId = passQuiz(userServices[0], quiz1)
@@ -948,7 +961,11 @@ class QuizSkillAchievements_RemoveSkillEventSpecs extends QuizSkillAchievementsB
         proj4_badge.enabled = true
         skillsService.createBadge(proj4_badge)
 
-
+        userServices.each { SkillsService learner ->
+            learner.initializeProjectProgress(proj3.projectId)
+            learner.initializeProjectProgress(proj4.projectId)
+        }
+        waitForAsyncTasksCompletion.waitForAllScheduleTasks()
         Integer u1Quiz1AttemptIdFailed = failQuiz(userServices[0], quiz1)
         Integer u1Quiz1AttemptId = passQuiz(userServices[0], quiz1)
         Integer u1Quiz2AttemptIdFailed = failQuiz(userServices[0], quiz2)

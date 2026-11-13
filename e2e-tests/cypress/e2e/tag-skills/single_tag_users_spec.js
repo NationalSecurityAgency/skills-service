@@ -222,7 +222,7 @@ describe('Users Page for a Single Skill Tag Tests', () => {
         cy.validateTable(tableSelector, reversedExpected, 10);
     })
 
-    it('do not show excludeImported switch', () => {
+    it('lists only users with tagged-skill progress when the project imports other skills', () => {
         cy.createProject(2);
         cy.createSubject(2, 1);
         cy.createSkill(2, 1, 10)
@@ -236,7 +236,6 @@ describe('Users Page for a Single Skill Tag Tests', () => {
         cy.validateTable(tableSelector, [
             [{colIndex: 0, value: 'user1'}],
         ], 10);
-        cy.get('[data-cy="excludeImportedToggle"]').should('not.exist')
     })
 
 })

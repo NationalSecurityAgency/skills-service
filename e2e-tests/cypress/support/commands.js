@@ -886,6 +886,36 @@ Cypress.Commands.add('finalizeCatalogImportWithoutWaiting', (projNum = 1) => {
     cy.request('POST', url);
 });
 
+Cypress.Commands.add('holdCatalogFinalizationRunningState', (projNum = 1) => {
+    // Control only the browser's view of finalization; real backend work continues normally.
+    const projectId = `proj${projNum}`;
+    let holdRunningState = false;
+    let pendingSkills = null;
+
+    cy.intercept('GET', `/admin/projects/${projectId}/settings/catalog.finalize.state`, (req) => {
+        if (holdRunningState) {
+            req.reply({ projectId, setting: 'catalog.finalize.state', value: 'RUNNING' });
+        } else {
+            req.continue();
+        }
+    });
+    cy.intercept('GET', `/admin/projects/${projectId}/catalog/finalize/info`, (req) => {
+        req.continue((res) => {
+            if (holdRunningState && pendingSkills !== null) {
+                res.body = { ...res.body, numSkillsToFinalize: pendingSkills, isRunning: true };
+            }
+        });
+    });
+
+    return cy.wrap({
+        // Activate immediately before starting finalization, after any initial catalog interactions.
+        hold: () => { holdRunningState = true; },
+        // Enable before navigating so the next page sees a running batch even if it has already completed.
+        showRunningInfo: (numSkills) => { pendingSkills = numSkills; },
+        release: () => { holdRunningState = false; },
+    }, { log: false });
+});
+
 Cypress.Commands.add("finalizeCatalogImport", (projNum = 1) => {
     cy.finalizeCatalogImportWithoutWaiting(projNum);
     cy.waitUntil(() => cy.request(`/admin/projects/proj${projNum}/settings/catalog.finalize.state`).then((response) => response.body.value === "COMPLETED"), {
@@ -1348,9 +1378,7 @@ Cypress.Commands.add('waitForBackendAsyncTasksToComplete', () => {
         interval: 500 // performs the check every 500 ms, default to 200
     };
 
-    // first call to npm fails, looks like this may be the bug: https://github.com/cypress-io/cypress/issues/6081
-    cy.exec('npm version', {failOnNonZeroExit: false})
-    cy.waitUntil(() => cy.exec('npm run backend:countScheduledTasks').then((result) => result.stdout.match(/.*------\s+(\d+)\s+\(/)[1] === '0'), waitConf);
+    cy.waitUntil(() => cy.task('countScheduledTasks').then((count) => count === 0), waitConf);
 });
 
 Cypress.Commands.add('execSql', (sql, isUpdate = false) => {

@@ -21,7 +21,7 @@ import static skills.intTests.utils.SkillsFactory.*
 
 class UserPointsImportedSkillsSpecs extends DefaultIntSpec {
 
-    def 'do not return users for disabled imported skills'() {
+    def 'disabled imports contribute no progress while project Users retains explicit participants'() {
         List<String> randos = getRandomUsers(2)
 
         def project = createProject(10)
@@ -38,6 +38,7 @@ class UserPointsImportedSkillsSpecs extends DefaultIntSpec {
 
         skillsService.exportSkillToCatalog(skill1.projectId, skill1.skillId)
         skillsService.importSkillFromCatalog(project2.projectId, project2_subject.subjectId, skill1.projectId, skill1.skillId)
+        createService(randos[0]).initializeProjectProgress(project2.projectId)
 
         when:
         def results_t0 = skillsService.getProjectUsers(project2.projectId)
@@ -49,9 +50,12 @@ class UserPointsImportedSkillsSpecs extends DefaultIntSpec {
         def results_skill_t1 = skillsService.getSkillUsers(project2.projectId, skill1.skillId)
 
         then:
-        results_t0.count == 1
-        results_t0.totalCount == 1
-        results_t0.data.size() == 1
+        results_t0.count == 2
+        results_t0.totalCount == 2
+        results_t0.totalPoints == 1000
+        results_t0.data.size() == 2
+        results_t0.data.find { it.userId == randos[0].toLowerCase() }.totalPoints == 0
+        results_t0.data.find { it.userId == randos[0].toLowerCase() }.lastUpdated == null
         results_t0.data.find { it.userId == randos[1].toLowerCase() }.totalPoints == 100
         results_subject_t0.count == 1
         results_subject_t0.totalPoints == 1000
@@ -64,6 +68,7 @@ class UserPointsImportedSkillsSpecs extends DefaultIntSpec {
 
         results_t1.count == 2
         results_t1.totalCount == 2
+        results_t1.totalPoints == 2000
         results_t1.data.size() == 2
         results_t1.data.find { it.userId == randos[1].toLowerCase() }.totalPoints == 100
         results_t1.data.find { it.userId == randos[0].toLowerCase() }.totalPoints == 100
@@ -78,9 +83,10 @@ class UserPointsImportedSkillsSpecs extends DefaultIntSpec {
         results_skill_t1.totalCount == 1
         results_skill_t1.data.size() == 1
         results_skill_t1.data.find { it.userId == randos[0].toLowerCase() }.totalPoints == 100
+
     }
 
-    def 'ability to exclude users that only earned points in imported skills - project and subject'() {
+    def 'imported-only participants are included - project and subject'() {
         List<String> users = getRandomUsers(5)
 
         def p1 = createProject(10)
@@ -99,6 +105,9 @@ class UserPointsImportedSkillsSpecs extends DefaultIntSpec {
         skillsService.importSkillFromCatalog(p2.projectId, p2_subj1.subjectId, p1_skills[0].projectId, p1_skills[1].skillId)
         skillsService.finalizeSkillsImportFromCatalog(p2.projectId)
 
+        // Visit-only participants remain visible alongside users with local awards.
+        users[0..1].each { String user -> createService(user).initializeProjectProgress(p2.projectId) }
+
         skillsService.addSkill(p1_skills[0], users[0])
         skillsService.addSkill(p1_skills[1], users[0])
         skillsService.addSkill(p1_skills[0], users[1])
@@ -109,52 +118,47 @@ class UserPointsImportedSkillsSpecs extends DefaultIntSpec {
         skillsService.addSkill(p2_skills[2], users[3])
 
         when:
-        def p2UsersIncludedImported = skillsService.getProjectUsers(p2.projectId, 10, 1, "userId", true, "", 0, 100, "", true)
-        def p1UsersExcludedImported = skillsService.getProjectUsers(p2.projectId, 10, 1, "userId", true, "", 0, 100, "", false)
-        def p1UsersExcludedImportedWithMaxPoints = skillsService.getProjectUsers(p2.projectId, 10, 1, "userId", true, "", 0, 49, "", false)
-        def p1UsersExcludedImportedWithMinPoints = skillsService.getProjectUsers(p2.projectId, 10, 1, "userId", true, "", 17, 100, "", false)
+        Map projectUsers = skillsService.getProjectUsers(p2.projectId)
+        Map projectUsersWithMaxPoints = skillsService.getProjectUsers(p2.projectId, 10, 1, "userId", true, "", 0, 49)
+        Map projectUsersWithMinPoints = skillsService.getProjectUsers(p2.projectId, 10, 1, "userId", true, "", 17, 100)
 
-        def p2SubjUsersIncludedImported = skillsService.getSubjectUsers(p2.projectId,  p2_subj1.subjectId, 10, 1, "userId", true, "", 0, 100, "", true)
-        def p2SubjUsersExcludedImported = skillsService.getSubjectUsers(p2.projectId,  p2_subj1.subjectId, 10, 1, "userId", true, "", 0, 100, "", false)
-        def p2SubjUsersExcludedImportedWithMaxPoints = skillsService.getSubjectUsers(p2.projectId,  p2_subj1.subjectId, 10, 1, "userId", true, "", 0, 49, "", false)
-        def p2SubjUsersExcludedImportedWithMinPoints = skillsService.getSubjectUsers(p2.projectId,  p2_subj1.subjectId, 10, 1, "userId", true, "", 17, 100, "", false)
+        Map subjectUsers = skillsService.getSubjectUsers(p2.projectId, p2_subj1.subjectId)
+        Map subjectUsersWithMaxPoints = skillsService.getSubjectUsers(p2.projectId, p2_subj1.subjectId, 10, 1, "userId", true, "", 0, 49)
+        Map subjectUsersWithMinPoints = skillsService.getSubjectUsers(p2.projectId, p2_subj1.subjectId, 10, 1, "userId", true, "", 17, 100)
 
         then:
-        p2UsersIncludedImported.data.userId.sort() == users[0..3].sort()
-        p2UsersIncludedImported.data.find { users[0].equalsIgnoreCase(it.userId) }.totalPoints == 200
-        p2UsersIncludedImported.data.find { users[1].equalsIgnoreCase(it.userId) }.totalPoints == 100
-        p2UsersIncludedImported.data.find { users[2].equalsIgnoreCase(it.userId) }.totalPoints == 300
-        p2UsersIncludedImported.data.find { users[3].equalsIgnoreCase(it.userId) }.totalPoints == 100
+        projectUsers.count == 4
+        projectUsers.totalCount == 4
+        projectUsers.totalPoints == 600
+        projectUsers.data.collectEntries { [it.userId, it.totalPoints] } == [
+                (users[0]): 200, (users[1]): 100, (users[2]): 300, (users[3]): 100,
+        ]
+        projectUsersWithMaxPoints.count == 3
+        projectUsersWithMaxPoints.totalCount == 3
+        projectUsersWithMaxPoints.data.collectEntries { [it.userId, it.totalPoints] } == [
+                (users[0]): 200, (users[1]): 100, (users[3]): 100,
+        ]
+        projectUsersWithMinPoints.count == 2
+        projectUsersWithMinPoints.totalCount == 2
+        projectUsersWithMinPoints.data.collectEntries { [it.userId, it.totalPoints] } == [(users[0]): 200, (users[2]): 300]
 
-        p1UsersExcludedImported.data.userId.sort() == users[2..3].sort()
-        p1UsersExcludedImported.data.find { users[2].equalsIgnoreCase(it.userId) }.totalPoints == 300
-        p1UsersExcludedImported.data.find { users[3].equalsIgnoreCase(it.userId) }.totalPoints == 100
-
-        p1UsersExcludedImportedWithMaxPoints.data.userId.sort() == users[3..3].sort()
-        p1UsersExcludedImportedWithMaxPoints.data.find { users[3].equalsIgnoreCase(it.userId) }.totalPoints == 100
-
-        p1UsersExcludedImportedWithMinPoints.data.userId.sort() == users[2..2].sort()
-        p1UsersExcludedImportedWithMinPoints.data.find { users[2].equalsIgnoreCase(it.userId) }.totalPoints == 300
-
-        // subject
-        p2SubjUsersIncludedImported.data.userId.sort() == users[0..3].sort()
-        p2SubjUsersIncludedImported.data.find { users[0].equalsIgnoreCase(it.userId) }.totalPoints == 200
-        p2SubjUsersIncludedImported.data.find { users[1].equalsIgnoreCase(it.userId) }.totalPoints == 100
-        p2SubjUsersIncludedImported.data.find { users[2].equalsIgnoreCase(it.userId) }.totalPoints == 300
-        p2SubjUsersIncludedImported.data.find { users[3].equalsIgnoreCase(it.userId) }.totalPoints == 100
-
-        p2SubjUsersExcludedImported.data.userId.sort() == users[2..3].sort()
-        p2SubjUsersExcludedImported.data.find { users[2].equalsIgnoreCase(it.userId) }.totalPoints == 300
-        p2SubjUsersExcludedImported.data.find { users[3].equalsIgnoreCase(it.userId) }.totalPoints == 100
-
-        p2SubjUsersExcludedImportedWithMaxPoints.data.userId.sort() == users[3..3].sort()
-        p2SubjUsersExcludedImportedWithMaxPoints.data.find { users[3].equalsIgnoreCase(it.userId) }.totalPoints == 100
-
-        p2SubjUsersExcludedImportedWithMinPoints.data.userId.sort() == users[2..2].sort()
-        p2SubjUsersExcludedImportedWithMinPoints.data.find { users[2].equalsIgnoreCase(it.userId) }.totalPoints == 300
+        subjectUsers.count == 4
+        subjectUsers.totalCount == 4
+        subjectUsers.totalPoints == 600
+        subjectUsers.data.collectEntries { [it.userId, it.totalPoints] } == [
+                (users[0]): 200, (users[1]): 100, (users[2]): 300, (users[3]): 100,
+        ]
+        subjectUsersWithMaxPoints.count == 3
+        subjectUsersWithMaxPoints.totalCount == 3
+        subjectUsersWithMaxPoints.data.collectEntries { [it.userId, it.totalPoints] } == [
+                (users[0]): 200, (users[1]): 100, (users[3]): 100,
+        ]
+        subjectUsersWithMinPoints.count == 2
+        subjectUsersWithMinPoints.totalCount == 2
+        subjectUsersWithMinPoints.data.collectEntries { [it.userId, it.totalPoints] } == [(users[0]): 200, (users[2]): 300]
     }
 
-    def 'ability to exclude users that only earned points in imported skills - subject'() {
+    def 'imported-only participants are included - subject'() {
         List<String> users = getRandomUsers(5)
 
         def p1 = createProject(10)
@@ -177,6 +181,8 @@ class UserPointsImportedSkillsSpecs extends DefaultIntSpec {
         skillsService.importSkillFromCatalog(p2.projectId, p2_subj1.subjectId, p1_skills[0].projectId, p1_skills[2].skillId)
         skillsService.finalizeSkillsImportFromCatalog(p2.projectId)
 
+        createService(users[1]).initializeProjectProgress(p2.projectId)
+
         assert skillsService.addSkill(p1_skills[0], users[0]).body.skillApplied
         assert skillsService.addSkill(p1_skills[1], users[0]).body.skillApplied
         assert skillsService.addSkill(p1_skills[0], users[1]).body.skillApplied
@@ -190,29 +196,24 @@ class UserPointsImportedSkillsSpecs extends DefaultIntSpec {
         assert skillsService.addSkill(p2_skills[3], users[3]).body.skillApplied
 
         when:
-        def p2SubjUsersIncludedImported = skillsService.getSubjectUsers(p2.projectId,  p2_subj1.subjectId, 10, 1, "userId", true, "", 0, 100, "", true)
-        def p2SubjUsersExcludedImported = skillsService.getSubjectUsers(p2.projectId,  p2_subj1.subjectId, 10, 1, "userId", true, "", 0, 100, "", false)
-        def p2SubjUsersExcludedImportedWithMaxPoints = skillsService.getSubjectUsers(p2.projectId,  p2_subj1.subjectId, 10, 1, "userId", true, "", 0, 99, "", false)
-        def p2SubjUsersExcludedImportedWithMinPoints = skillsService.getSubjectUsers(p2.projectId,  p2_subj1.subjectId, 10, 1, "userId", true, "", 67, 100, "", false)
+        Map subjectUsers = skillsService.getSubjectUsers(p2.projectId, p2_subj1.subjectId)
+        Map subjectUsersWithMaxPoints = skillsService.getSubjectUsers(p2.projectId, p2_subj1.subjectId, 10, 1, "userId", true, "", 0, 99)
+        Map subjectUsersWithMinPoints = skillsService.getSubjectUsers(p2.projectId, p2_subj1.subjectId, 10, 1, "userId", true, "", 67, 100)
 
         then:
-        p2SubjUsersIncludedImported.data.userId.sort() == users[0..2].sort()
-        p2SubjUsersIncludedImported.data.find { users[0].equalsIgnoreCase(it.userId) }.totalPoints == 200
-        p2SubjUsersIncludedImported.data.find { users[1].equalsIgnoreCase(it.userId) }.totalPoints == 100
-        p2SubjUsersIncludedImported.data.find { users[2].equalsIgnoreCase(it.userId) }.totalPoints == 300
-
-        p2SubjUsersExcludedImported.data.userId.sort() == [users[0], users[2]].sort()
-        p2SubjUsersExcludedImported.data.find { users[0].equalsIgnoreCase(it.userId) }.totalPoints == 200
-        p2SubjUsersExcludedImported.data.find { users[2].equalsIgnoreCase(it.userId) }.totalPoints == 300
-
-        p2SubjUsersExcludedImportedWithMaxPoints.data.userId.sort() == users[0..0].sort()
-        p2SubjUsersExcludedImportedWithMaxPoints.data.find { users[0].equalsIgnoreCase(it.userId) }.totalPoints == 200
-
-        p2SubjUsersExcludedImportedWithMinPoints.data.userId.sort() == users[2..2].sort()
-        p2SubjUsersExcludedImportedWithMinPoints.data.find { users[2].equalsIgnoreCase(it.userId) }.totalPoints == 300
+        subjectUsers.count == 3
+        subjectUsers.totalCount == 3
+        subjectUsers.totalPoints == 300
+        subjectUsers.data.collectEntries { [it.userId, it.totalPoints] } == [(users[0]): 200, (users[1]): 100, (users[2]): 300]
+        subjectUsersWithMaxPoints.count == 2
+        subjectUsersWithMaxPoints.totalCount == 2
+        subjectUsersWithMaxPoints.data.collectEntries { [it.userId, it.totalPoints] } == [(users[0]): 200, (users[1]): 100]
+        subjectUsersWithMinPoints.count == 1
+        subjectUsersWithMinPoints.totalCount == 1
+        subjectUsersWithMinPoints.data.collectEntries { [it.userId, it.totalPoints] } == [(users[2]): 300]
     }
 
-    def 'ability to exclude users that only earned points in imported skills - single skill'() {
+    def 'imported-only participants are included - single skill'() {
         List<String> users = getRandomUsers(5)
 
         def p1 = createProject(10)
@@ -231,6 +232,8 @@ class UserPointsImportedSkillsSpecs extends DefaultIntSpec {
         skillsService.importSkillFromCatalog(p2.projectId, p2_subj1.subjectId, p1_skills[0].projectId, p1_skills[1].skillId)
         skillsService.finalizeSkillsImportFromCatalog(p2.projectId)
 
+        createService(users[1]).initializeProjectProgress(p2.projectId)
+
         skillsService.addSkill(p1_skills[0], users[0], new Date() - 2)
         skillsService.addSkill(p1_skills[0], users[0], new Date() - 1)
         skillsService.addSkill(p1_skills[0], users[0], new Date())
@@ -247,29 +250,24 @@ class UserPointsImportedSkillsSpecs extends DefaultIntSpec {
         skillsService.addSkill(p2_skills[2], users[3])
 
         when:
-        def p2SkillUsersIncludedImported = skillsService.getSkillUsers(p2.projectId, p1_skills[0].skillId, 10, 1, "userId", true, "", 0, 100, "", true)
-        def p2SkillUsersExcludedImported = skillsService.getSkillUsers(p2.projectId,  p1_skills[0].skillId, 10, 1, "userId", true, "", 0, 100, "", false)
-        def p2SkillUsersExcludedImportedWithMaxPoints = skillsService.getSkillUsers(p2.projectId,  p1_skills[0].skillId, 10, 1, "userId", true, "", 0, 49, "", false)
-        def p2SkillUsersExcludedImportedWithMinPoints = skillsService.getSkillUsers(p2.projectId,  p1_skills[0].skillId, 10, 1, "userId", true, "", 21, 100, "", false)
+        Map skillUsers = skillsService.getSkillUsers(p2.projectId, p1_skills[0].skillId)
+        Map skillUsersWithMaxPoints = skillsService.getSkillUsers(p2.projectId, p1_skills[0].skillId, 10, 1, "userId", true, "", 0, 49)
+        Map skillUsersWithMinPoints = skillsService.getSkillUsers(p2.projectId, p1_skills[0].skillId, 10, 1, "userId", true, "", 21, 100)
 
         then:
-        p2SkillUsersIncludedImported.data.userId.sort() == users[0..2].sort()
-        p2SkillUsersIncludedImported.data.find { users[0].equalsIgnoreCase(it.userId) }.totalPoints == 300
-        p2SkillUsersIncludedImported.data.find { users[1].equalsIgnoreCase(it.userId) }.totalPoints == 200
-        p2SkillUsersIncludedImported.data.find { users[2].equalsIgnoreCase(it.userId) }.totalPoints == 100
-
-        p2SkillUsersExcludedImported.data.userId.sort() == [users[0], users[2]].sort()
-        p2SkillUsersExcludedImported.data.find { users[0].equalsIgnoreCase(it.userId) }.totalPoints == 300
-        p2SkillUsersExcludedImported.data.find { users[2].equalsIgnoreCase(it.userId) }.totalPoints == 100
-
-        p2SkillUsersExcludedImportedWithMaxPoints.data.userId.sort() == users[2..2].sort()
-        p2SkillUsersExcludedImportedWithMaxPoints.data.find { users[2].equalsIgnoreCase(it.userId) }.totalPoints == 100
-
-        p2SkillUsersExcludedImportedWithMinPoints.data.userId.sort() == users[0..0].sort()
-        p2SkillUsersExcludedImportedWithMinPoints.data.find { users[0].equalsIgnoreCase(it.userId) }.totalPoints == 300
+        skillUsers.count == 3
+        skillUsers.totalCount == 3
+        skillUsers.totalPoints == 500
+        skillUsers.data.collectEntries { [it.userId, it.totalPoints] } == [(users[0]): 300, (users[1]): 200, (users[2]): 100]
+        skillUsersWithMaxPoints.count == 2
+        skillUsersWithMaxPoints.totalCount == 2
+        skillUsersWithMaxPoints.data.collectEntries { [it.userId, it.totalPoints] } == [(users[1]): 200, (users[2]): 100]
+        skillUsersWithMinPoints.count == 2
+        skillUsersWithMinPoints.totalCount == 2
+        skillUsersWithMinPoints.data.collectEntries { [it.userId, it.totalPoints] } == [(users[0]): 300, (users[1]): 200]
     }
 
-    def 'ability to exclude users that only earned points in imported skills - badge'() {
+    def 'imported-only participants are included - badge'() {
         List<String> users = getRandomUsers(5)
 
         def p1 = createProject(10)
@@ -291,6 +289,8 @@ class UserPointsImportedSkillsSpecs extends DefaultIntSpec {
         skillsService.importSkillFromCatalog(p2.projectId, p2_subj1.subjectId, p1_skills[0].projectId, p1_skills[1].skillId)
         skillsService.importSkillFromCatalog(p2.projectId, p2_subj1.subjectId, p1_skills[0].projectId, p1_skills[2].skillId)
         skillsService.finalizeSkillsImportFromCatalog(p2.projectId)
+
+        createService(users[1]).initializeProjectProgress(p2.projectId)
 
         String badge1Id = 'badge1'
         skillsService.addBadge([projectId: p2.projectId, badgeId: badge1Id, name: 'Badge 1'])
@@ -311,25 +311,120 @@ class UserPointsImportedSkillsSpecs extends DefaultIntSpec {
         assert skillsService.addSkill(p2_skills[6], users[3]).body.skillApplied // not part of the badge
 
         when:
-        def badgeUsersIncludedImported = skillsService.getBadgeUsers(p2.projectId,  badge1Id, 10, 1, "userId", true, "", 0, 100, "", true)
-        def badgeUsersExcludedImported = skillsService.getBadgeUsers(p2.projectId,  badge1Id, 10, 1, "userId", true, "", 0, 100, "", false)
-        def badgeUsersExcludedImportedWithMaxPoints = skillsService.getBadgeUsers(p2.projectId,  badge1Id, 10, 1, "userId", true, "", 0, 65, "", false)
-        def badgeUsersExcludedImportedWithMinPoints = skillsService.getBadgeUsers(p2.projectId,  badge1Id, 10, 1, "userId", true, "", 51, 100, "", false)
+        Map badgeUsers = skillsService.getBadgeUsers(p2.projectId, badge1Id)
+        Map badgeUsersWithMaxPoints = skillsService.getBadgeUsers(p2.projectId, badge1Id, 10, 1, "userId", true, "", 0, 65)
+        Map badgeUsersWithMinPoints = skillsService.getBadgeUsers(p2.projectId, badge1Id, 10, 1, "userId", true, "", 51, 100)
 
         then:
-        badgeUsersIncludedImported.data.userId.sort() == users[0..2].sort()
-        badgeUsersIncludedImported.data.find { users[0].equalsIgnoreCase(it.userId) }.totalPoints == 300
-        badgeUsersIncludedImported.data.find { users[1].equalsIgnoreCase(it.userId) }.totalPoints == 100
-        badgeUsersIncludedImported.data.find { users[2].equalsIgnoreCase(it.userId) }.totalPoints == 400
+        badgeUsers.count == 3
+        badgeUsers.totalCount == 3
+        badgeUsers.totalPoints == 600
+        badgeUsers.data.collectEntries { [it.userId, it.totalPoints] } == [(users[0]): 300, (users[1]): 100, (users[2]): 400]
+        badgeUsersWithMaxPoints.count == 2
+        badgeUsersWithMaxPoints.totalCount == 2
+        badgeUsersWithMaxPoints.data.collectEntries { [it.userId, it.totalPoints] } == [(users[0]): 300, (users[1]): 100]
+        badgeUsersWithMinPoints.count == 1
+        badgeUsersWithMinPoints.totalCount == 1
+        badgeUsersWithMinPoints.data.collectEntries { [it.userId, it.totalPoints] } == [(users[2]): 400]
+    }
 
-        badgeUsersExcludedImported.data.userId.sort() == [users[0], users[2]].sort()
-        badgeUsersExcludedImported.data.find { users[0].equalsIgnoreCase(it.userId) }.totalPoints == 300
-        badgeUsersExcludedImported.data.find { users[2].equalsIgnoreCase(it.userId) }.totalPoints == 400
+    def 'user lists preserve paging, user filters and percentage bounds with imported-only participants'() {
+        List<String> users = getRandomUsers(5)
+        Map sourceProject = createProject(10)
+        Map sourceSubject = createSubject(10, 1)
+        Map sourceSkill = createSkill(10, 1, 10, 0, 2, 0, 100)
+        skillsService.createProjectAndSubjectAndSkills(sourceProject, sourceSubject, [sourceSkill])
+        Map project = createProject(11)
+        Map subject = createSubject(11, 1)
+        Map group = createSkillsGroup(11, 1, 50)
+        Map nativeSkill = createSkill(11, 1, 20, 0, 1, 0, 100)
+        skillsService.createProjectAndSubjectAndSkills(project, subject, [group])
+        skillsService.assignSkillToSkillsGroup(group.skillId, nativeSkill)
+        skillsService.exportSkillToCatalog(sourceProject.projectId, sourceSkill.skillId)
+        skillsService.bulkImportSkillsIntoGroupFromCatalog(project.projectId, subject.subjectId, group.skillId, [sourceSkill])
+        skillsService.finalizeSkillsImportFromCatalog(project.projectId)
+        Map badge = createBadge(11, 1)
+        skillsService.addBadge(badge)
+        [sourceSkill, nativeSkill].each { Map skill ->
+            skillsService.assignSkillToBadge([projectId: project.projectId, badgeId: badge.badgeId, skillId: skill.skillId])
+        }
+        String tagId = 'filtered'
+        skillsService.addTagToSkills(project.projectId, [sourceSkill.skillId, nativeSkill.skillId], 'Filtered', tagId)
 
-        badgeUsersExcludedImportedWithMaxPoints.data.userId.sort() == users[0..0].sort()
-        badgeUsersExcludedImportedWithMaxPoints.data.find { users[0].equalsIgnoreCase(it.userId) }.totalPoints == 300
+        // These participants have no destination events, only an authorized visit and imported credit.
+        [users[0], users[1], users[4]].each { String user -> createService(user).initializeProjectProgress(project.projectId) }
+        skillsService.addSkill(sourceSkill, users[0], new Date() - 1)
+        [users[1], users[3]].each { String user ->
+            skillsService.addSkill(sourceSkill, user, new Date() - 1)
+            skillsService.addSkill(sourceSkill, user)
+        }
+        skillsService.addSkill(sourceSkill, users[4])
+        skillsService.addSkill(nativeSkill, users[2])
+        skillsService.addSkill(nativeSkill, users[3])
+        waitForAsyncTasksCompletion.waitForAllScheduleTasks()
+        skillsService.archiveUsers([users[4]], project.projectId)
+        createRootSkillService().saveUserTag(users[0], 'dutyOrganization', ['filter-team'])
 
-        badgeUsersExcludedImportedWithMinPoints.data.userId.sort() == users[2..2].sort()
-        badgeUsersExcludedImportedWithMinPoints.data.find { users[2].equalsIgnoreCase(it.userId) }.totalPoints == 400
+        Map<String, Closure> lists = [
+                project: { List args -> skillsService.getProjectUsers(project.projectId, *args) },
+                subject: { List args -> skillsService.getSubjectUsers(project.projectId, subject.subjectId, *args) },
+                skill: { List args -> skillsService.getSkillUsers(project.projectId, sourceSkill.skillId, *args) },
+                group: { List args -> skillsService.getSkillGroupUsers(project.projectId, group.skillId, *args) },
+                badge: { List args -> skillsService.getBadgeUsers(project.projectId, badge.badgeId, *args) },
+                tag: { List args -> skillsService.getSkillTagUsers(project.projectId, tagId, *args) },
+        ]
+
+        expect:
+        lists.each { String view, Closure load ->
+            int availablePoints = view == 'skill' ? 200 : 300
+            Map<String, Integer> expected = view == 'skill' ? [
+                    (users[0]): 100, (users[1]): 200, (users[3]): 200,
+            ] : [(users[0]): 100, (users[1]): 200, (users[2]): 100, (users[3]): 300]
+            List<String> sortedUsers = expected.keySet().sort()
+            Map all = load([10, 1, 'userId', true, '', 0, 100, ''])
+            assert all.count == expected.size()
+            assert all.totalCount == expected.size()
+            assert all.totalPoints == availablePoints
+            assert all.data.collectEntries { [it.userId, it.totalPoints] } == expected
+            if (view == 'group') {
+                assert all.data.collectEntries { [it.userId, it.skillsAchieved] } == [
+                        (users[0]): 0, (users[1]): 1, (users[2]): 1, (users[3]): 2,
+                ]
+            }
+            // A full first page forces Spring Data's count query, including the group's explicit count SQL.
+            [1, 2].each { int page ->
+                Map paged = load([1, page, 'userId', true, '', 0, 100, ''])
+                assert paged.count == expected.size()
+                assert paged.totalCount == expected.size()
+                assert paged.data.size() == 1
+                assert paged.data.userId == [sortedUsers[page - 1]]
+                assert paged.data[0].totalPoints == expected[sortedUsers[page - 1]]
+            }
+            Map descending = load([1, 1, 'userId', false, '', 0, 100, ''])
+            assert descending.count == expected.size()
+            assert descending.totalCount == expected.size()
+            assert descending.data.collectEntries { [it.userId, it.totalPoints] } == [(sortedUsers.last()): expected[sortedUsers.last()]]
+            Map queried = load([10, 1, 'userId', true, users[0], 0, 100, ''])
+            assert queried.count == 1
+            assert queried.totalCount == 1
+            assert queried.data.collectEntries { [it.userId, it.totalPoints] } == [(users[0]): 100]
+            Map tagged = load([10, 1, 'userId', true, '', 0, 100, 'FILTER-TEAM'])
+            assert tagged.count == 1
+            assert tagged.totalCount == 1
+            assert tagged.data.collectEntries { [it.userId, it.totalPoints] } == [(users[0]): 100]
+            // Upper bounds are exclusive below 100%; full completion remains included at 100%.
+            Map belowHalf = load([10, 1, 'userId', true, '', 0, 50, ''])
+            Map<String, Integer> expectedBelowHalf = view == 'skill' ? [:] : [(users[0]): 100, (users[2]): 100]
+            assert belowHalf.count == expectedBelowHalf.size()
+            assert belowHalf.totalCount == expectedBelowHalf.size()
+            assert belowHalf.data.collectEntries { [it.userId, it.totalPoints] } == expectedBelowHalf
+            Map aboveTwoThirds = load([10, 1, 'userId', true, '', 67, 100, ''])
+            Map<String, Integer> expectedAbove = view == 'skill' ? [(users[1]): 200, (users[3]): 200] : [(users[3]): 300]
+            assert aboveTwoThirds.count == expectedAbove.size()
+            assert aboveTwoThirds.totalCount == expectedAbove.size()
+            assert aboveTwoThirds.totalPoints == availablePoints
+            assert aboveTwoThirds.data.collectEntries { [it.userId, it.totalPoints] } == expectedAbove
+        }
+
     }
 }

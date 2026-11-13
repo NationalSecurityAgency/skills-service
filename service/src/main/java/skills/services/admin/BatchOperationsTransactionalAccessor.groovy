@@ -17,29 +17,71 @@ package skills.services.admin
 
 import callStack.profiler.Profile
 import groovy.util.logging.Slf4j
-import jakarta.transaction.Transactional
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.context.annotation.Lazy
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Isolation
+import org.springframework.transaction.annotation.Propagation
+import org.springframework.transaction.annotation.Transactional
+import skills.controller.request.model.ProjectSettingsRequest
+import skills.controller.result.model.LevelDefinitionRes
 import skills.controller.result.model.SettingsResult
 import skills.services.BadgeUtils
+import skills.services.LevelDefinitionStorageService
+import skills.services.LockingService
 import skills.services.RuleSetDefGraphService
 import skills.services.RuleSetDefinitionScoreUpdater
+import skills.services.events.SkillDate
+import skills.services.events.AchievedGlobalBadgeHandler
 import skills.services.UserAchievementsAndPointsManagement
 import skills.services.settings.Settings
 import skills.services.settings.SettingsService
+import skills.services.admin.SkillCatalogFinalizationService.FinalizeState
 import skills.storage.model.SkillDef
 import skills.storage.model.SkillRelDef
 import skills.storage.repos.SkillDefRepo
+import skills.storage.repos.CatalogParticipationCleanupRepo
 import skills.storage.repos.SkillRelDefRepo
 import skills.storage.repos.UserAchievedLevelRepo
 import skills.storage.repos.UserEventsRepo
 import skills.storage.repos.UserPerformedSkillRepo
 import skills.storage.repos.UserPointsRepo
+import skills.storage.repos.UserPointsRepo.ImportedCreditDiscrepancy
 import skills.storage.repos.nativeSql.PostgresQlNativeRepo
+import skills.tasks.TaskSchedulerService
+
+import java.util.stream.Stream
 
 @Service
 @Slf4j
 class BatchOperationsTransactionalAccessor {
+
+    @Autowired CatalogParticipationCleanupRepo catalogCleanupRepo
+    @Autowired @Lazy SkillCatalogFinalizationService catalogFinalizationService
+
+    /** Temporary pre-5.1 remediation. No reporting/init gate; later admission may overlap. */
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    Map cleanupCatalogParticipation(String projectId) {
+        Map result = [projectId: projectId, status: 'SKIPPED', deletedRecords: 0L,
+                      deletedPointRows: 0, deletedAchievementRows: 0]
+        if (catalogFinalizationService.getCurrentState(projectId) in [FinalizeState.RUNNING, FinalizeState.FAILED]) {
+            return result + [reason: 'Catalog finalization is RUNNING or FAILED; retry after recovery']
+        }
+        if (!skillDefRepo.existsEnabledCatalogImport(projectId)) {
+            return result + [reason: 'No enabled cross-project catalog imports']
+        }
+        result.deletedPointRows = catalogCleanupRepo.deletePoints(projectId)
+        log.info('Legacy catalog cleanup UNCOMMITTED points delete: project=[{}], deletedPointRows=[{}]', projectId, result.deletedPointRows)
+        result.deletedAchievementRows = catalogCleanupRepo.deleteAchievements(projectId)
+        result.deletedRecords = (long) result.deletedPointRows + result.deletedAchievementRows
+        log.info('Legacy catalog cleanup UNCOMMITTED achievements delete: project=[{}], counts=[{}]', projectId, result)
+        result.status = result.deletedRecords > 0 ? 'CLEANED' : 'SKIPPED'
+        if (result.status == 'SKIPPED') { result.reason = 'No removable destination credit' }
+        result
+    }
+
+    @Autowired
+    LockingService lockingService
 
     @Autowired
     SkillDefRepo skillDefRepo
@@ -80,6 +122,59 @@ class BatchOperationsTransactionalAccessor {
     @Autowired
     UserCommunityService userCommunityService
 
+    @Autowired TaskSchedulerService taskSchedulerService
+    @Autowired BadgeAdminService badgeAdminService
+    @Autowired LevelDefinitionStorageService levelDefinitionStorageService
+    @Autowired AchievedGlobalBadgeHandler achievedGlobalBadgeHandler
+
+    @Transactional
+    void addMissingCatalogLevels(String projectId, String subjectId = null, String userId = null) {
+        if (skillDefRepo.existsCatalogImport(projectId)) {
+            Integer refId = subjectId ? skillDefRepo.findByProjectIdAndSkillId(projectId, subjectId).id : null
+            levelDefinitionStorageService.getLevels(projectId, subjectId).each { LevelDefinitionRes level ->
+                if (level.pointsFrom != null) {
+                    userAchievedLevelRepo.addMissingCatalogLevel(projectId, subjectId, refId, userId, level.level, level.pointsFrom)
+                }
+            }
+        }
+    }
+
+    @Transactional
+    void completeCatalogFinalization(String projectId, List<SkillDef> imports, long startOfFinalization) {
+        // State publication also locks the project; acquire it before activation to match admission ordering.
+        lockingService.lockProject(projectId)
+        // Fence the completion snapshot and durable handoff even when there are no imports to enable.
+        lockingService.lockCatalogActivation(projectId)
+        enableSkills(imports)
+        settingsService.saveSetting(new ProjectSettingsRequest(projectId: projectId,
+                setting: SkillCatalogFinalizationService.PROJ_FINALIZE_STATE_PROP,
+                value: FinalizeState.COMPLETED.toString()))
+        if (imports) {
+            // Persist the original replay window with activation so acknowledgment failures cannot lose it.
+            taskSchedulerService.scheduleCatalogFinalizationReplay(projectId,
+                    imports.collect { SkillDef skill -> skill.id }, startOfFinalization, System.currentTimeMillis())
+        }
+        taskSchedulerService.scheduleCatalogParticipantBackfill(projectId)
+        // Commit activation and its catch-up tasks together. Repeated finalization is safe:
+        // tasks reconcile current state, including changes missed during an earlier failed run.
+        userPointsRepo.findCatalogCreditDiscrepancies(projectId, userCommunityService.userCommunityUserTagKey ?: '',
+                userCommunityService.userCommunityUserTagValue ?: '').withCloseable { Stream<ImportedCreditDiscrepancy> discrepancies ->
+            discrepancies.forEach { ImportedCreditDiscrepancy discrepancy ->
+                taskSchedulerService.scheduleImportedSkillAchievement(discrepancy.userId, discrepancy.skillRefId,
+                        new SkillDate(date: new Date(), isProvided: false), false, false)
+            }
+        }
+    }
+
+    @Transactional
+    void awardCatalogBadges(String projectId) {
+        skillDefRepo.findAllByProjectIdAndType(projectId, SkillDef.ContainerType.Badge).each { SkillDef badge ->
+            if (Boolean.valueOf(badge.enabled)) {
+                badgeAdminService.awardBadgeToUsersMeetingRequirements(badge, true)
+            }
+        }
+    }
+
     @Transactional
     @Profile
     void enableSkills(List<SkillDef> disabledImportedSkills) {
@@ -87,6 +182,20 @@ class BatchOperationsTransactionalAccessor {
             it.enabled = Boolean.TRUE.toString()
         }
         skillDefRepo.saveAll(disabledImportedSkills)
+    }
+
+    // Reject a stale bulk sum if a local award commits while its aggregate UPDATE waits for the row.
+    // Failed attempts roll back totals and awards together; retries get a fresh transaction and snapshot.
+    @Transactional(isolation = Isolation.REPEATABLE_READ, propagation = Propagation.REQUIRES_NEW)
+    void handleCatalogPointsAndAchievementsForSubject(String projectId, String subjectId) {
+        SkillDef subject = skillDefRepo.findByProjectIdAndSkillId(projectId, subjectId)
+        handlePointsAndAchievementsForSubject(subject)
+    }
+
+    // Project totals need the same protection against awards committing during bulk replacement.
+    @Transactional(isolation = Isolation.REPEATABLE_READ, propagation = Propagation.REQUIRES_NEW)
+    void handleCatalogPointsAndAchievementsForProject(String projectId) {
+        handlePointsAndAchievementsForProject(projectId)
     }
 
     /**
@@ -107,6 +216,7 @@ class BatchOperationsTransactionalAccessor {
 
 
         identifyAndAddSubjectLevelAchievements(subject.projectId, subjectId)
+        addMissingCatalogLevels(projectId, subjectId)
     }
 
     /**
@@ -124,6 +234,7 @@ class BatchOperationsTransactionalAccessor {
         createProjectUserPointsForTheNewUsers(projectId)
         updateUserPointsForProject(projectId)
         identifyAndAddProjectLevelAchievements(projectId, pointsBased)
+        addMissingCatalogLevels(projectId)
     }
 
     @Transactional
@@ -156,25 +267,25 @@ class BatchOperationsTransactionalAccessor {
     @Transactional
     @Profile
     void copySingleUserSkillUserPointsToTheImportedProjects(String userId, String toProjectId, List<Integer> fromSkillRefIds) {
-        log.info("Copying [{}] skills UserPoints to the imported project [{}] for user=[{}]", fromSkillRefIds.size(), toProjectId, userId)
+        log.debug("Copying [{}] skills UserPoints to the imported project [{}] for user=[{}]", fromSkillRefIds.size(), toProjectId, userId)
         userPointsRepo.copySingleUserSkillUserPointsToTheImportedProjects(userId, toProjectId, fromSkillRefIds)
-        log.info("Done copying [{}] skills UserPoints to the imported project [{}] for user=[{}]", fromSkillRefIds.size(), toProjectId, userId)
+        log.debug("Done copying [{}] skills UserPoints to the imported project [{}] for user=[{}]", fromSkillRefIds.size(), toProjectId, userId)
     }
 
     @Transactional
     @Profile
     void copySkillAchievementsToTheImportedProjects(String projectId, List<Integer> fromSkillRefIds) {
         log.info("Copying [{}] skills achievements to the imported project [{}]", fromSkillRefIds.size(), projectId)
-        userAchievedLevelRepo.copySkillAchievementsToTheImportedProjects(fromSkillRefIds, userCommunityService.userCommunityUserTagKey ?: '', userCommunityService.userCommunityUserTagValue ?: '')
+        userAchievedLevelRepo.copySkillAchievementsToTheImportedProjects(projectId, fromSkillRefIds, userCommunityService.userCommunityUserTagKey ?: '', userCommunityService.userCommunityUserTagValue ?: '')
         log.info("Done copying [{}] skills achievements to the imported project [{}]", fromSkillRefIds.size(), projectId)
     }
 
     @Transactional
     @Profile
     void copyForSingleUserSkillAchievementsToTheImportedProjects(String userId, String projectId, List<Integer> fromSkillRefIds) {
-        log.info("Copying [{}] skills achievements to the imported project [{}] for user=[{}]", fromSkillRefIds.size(), projectId, userId)
-        userAchievedLevelRepo.copyForSingleUserSkillAchievementsToTheImportedProjects(userId, fromSkillRefIds)
-        log.info("Done copying [{}] skills achievements to the imported project [{}] for user=[{}]", fromSkillRefIds.size(), projectId, userId)
+        log.debug("Copying [{}] skills achievements to the imported project [{}] for user=[{}]", fromSkillRefIds.size(), projectId, userId)
+        userAchievedLevelRepo.copyForSingleUserSkillAchievementsToTheImportedProjects(userId, projectId, fromSkillRefIds)
+        log.debug("Done copying [{}] skills achievements to the imported project [{}] for user=[{}]", fromSkillRefIds.size(), projectId, userId)
     }
 
     @Transactional
@@ -191,9 +302,9 @@ class BatchOperationsTransactionalAccessor {
     @Transactional
     @Profile
     Integer createSubjectUserPointsForSingleNewUser(String userId, String toProjectId, String toSubjectId) {
-        log.info("Creating UserPoints for the new users for [{}-{}] subject", toProjectId, toSubjectId)
+        log.debug("Creating subject UserPoints: projectId=[{}], subjectId=[{}], userId=[{}]", toProjectId, toSubjectId, userId)
         int numRows = userPointsRepo.createSubjectUserPointsForSingleNewUser(userId, toProjectId, toSubjectId)
-        log.info("Created [{}] UserPoints for the new users for [{}-{}] subject", numRows, toProjectId, toSubjectId)
+        log.debug("Created [{}] subject UserPoints: projectId=[{}], subjectId=[{}], userId=[{}]", numRows, toProjectId, toSubjectId, userId)
 
         return numRows
     }
@@ -274,9 +385,15 @@ class BatchOperationsTransactionalAccessor {
 
     @Transactional
     @Profile
-    void identifyAndAddGroupAchievements(List<SkillDef> groups) {
+    void identifyAndAddGroupAchievements(List<SkillDef> groups, List<SkillDef> skillsBeingFinalized = []) {
         groups.each { SkillDef skillsGroupSkillDef ->
             int numSkillsRequired = skillsGroupAdminService.getActualNumSkillsRequred(skillsGroupSkillDef.numSkillsRequired, skillsGroupSkillDef.id)
+            if (skillsGroupSkillDef.numSkillsRequired == -1) {
+                // Finalization evaluates achievements before enabling the imported children.
+                numSkillsRequired += skillsBeingFinalized.count { SkillDef skill ->
+                    skill.projectId == skillsGroupSkillDef.projectId && skill.groupId == skillsGroupSkillDef.skillId && skill.enabled == 'false'
+                }
+            }
             log.info("Identifying group achievements groupRefId=[{}], groupId=[{}.{}], numSkillsRequired=[{}]",
                     skillsGroupSkillDef.id, skillsGroupSkillDef.projectId, skillsGroupSkillDef.skillId, numSkillsRequired)
             userAchievedLevelRepo.identifyAndAddGroupAchievements(
@@ -285,6 +402,8 @@ class BatchOperationsTransactionalAccessor {
                     skillsGroupSkillDef.id,
                     numSkillsRequired,
                     Boolean.FALSE.toString(),
+                    userCommunityService.userCommunityUserTagKey ?: '',
+                    userCommunityService.userCommunityUserTagValue ?: '',
             )
             log.info("Finished identifying group achievements groupRefId=[{}], groupId=[{}.{}], numSkillsRequired=[{}]",
                     skillsGroupSkillDef.id, skillsGroupSkillDef.projectId, skillsGroupSkillDef.skillId, numSkillsRequired)
@@ -296,7 +415,7 @@ class BatchOperationsTransactionalAccessor {
     void identifyAndAddGroupAchievementsForSingleUser(String userId, List<SkillDef> groups) {
         groups.each { SkillDef skillsGroupSkillDef ->
             int numSkillsRequired = skillsGroupAdminService.getActualNumSkillsRequred(skillsGroupSkillDef.numSkillsRequired, skillsGroupSkillDef.id)
-            log.info("Identifying group achievements userId=[{}], groupRefId=[{}], groupId=[{}.{}], numSkillsRequired=[{}]",
+            log.debug("Identifying group achievements userId=[{}], groupRefId=[{}], groupId=[{}.{}], numSkillsRequired=[{}]",
                     userId, skillsGroupSkillDef.id, skillsGroupSkillDef.projectId, skillsGroupSkillDef.skillId, numSkillsRequired)
             userAchievedLevelRepo.identifyAndAddGroupAchievementsForSingleUser(
                     userId,
@@ -306,7 +425,7 @@ class BatchOperationsTransactionalAccessor {
                     numSkillsRequired,
                     Boolean.FALSE.toString(),
             )
-            log.info("Finished identifying group achievements userId=[{}], groupRefId=[{}], groupId=[{}.{}], numSkillsRequired=[{}]",
+            log.debug("Finished identifying group achievements userId=[{}], groupRefId=[{}], groupId=[{}.{}], numSkillsRequired=[{}]",
                     userId, skillsGroupSkillDef.id, skillsGroupSkillDef.projectId, skillsGroupSkillDef.skillId, numSkillsRequired)
         }
     }
@@ -323,10 +442,10 @@ class BatchOperationsTransactionalAccessor {
     @Transactional
     @Profile
     void identifyAndAddSubjectLevelAchievementsForSingleUser(String userId, String projectId, String subjectId) {
-        log.info("Identifying subject level achievements for [{}-{}] subject for user=[{}]", projectId, subjectId, userId, )
+        log.debug("Identifying subject level achievements for [{}-{}] subject for user=[{}]", projectId, subjectId, userId)
         SkillDef subject = skillDefRepo.findByProjectIdAndSkillId(projectId, subjectId)
         userAchievementsAndPointsManagement.identifyAndAddSubjectLevelAchievementsForSingleUser(userId, subject)
-        log.info("Completed import for subject. projectIdTo=[{}], subjectIdTo=[{}] for user=[{}]", projectId, subjectId, userId)
+        log.debug("Completed import for subject. projectIdTo=[{}], subjectIdTo=[{}] for user=[{}]", projectId, subjectId, userId)
     }
 
     @Transactional
@@ -340,9 +459,9 @@ class BatchOperationsTransactionalAccessor {
     @Transactional
     @Profile
     void createProjectUserPointsForSingleNewUser(String userId, String toProjectId) {
-        log.info("Creating UserPoints for the new users for [{}] project for user [{}]", toProjectId, userId)
+        log.debug("Creating UserPoints for the new users for [{}] project for user [{}]", toProjectId, userId)
         userPointsRepo.createProjectUserPointsForSingleNewUser(userId, toProjectId)
-        log.info("Competed creating UserPoints for the new users for [{}] project for user [{}]", toProjectId, userId)
+        log.debug("Completed creating UserPoints for the new users for [{}] project for user [{}]", toProjectId, userId)
     }
 
     @Transactional
@@ -364,14 +483,15 @@ class BatchOperationsTransactionalAccessor {
     @Transactional
     @Profile
     void identifyAndAddProjectLevelAchievements(String userId, String projectId){
-        log.info("Identifying and adding project level achievements for [{}] project, userId=[{}]", projectId, userId)
+        log.debug("Identifying and adding project level achievements for [{}] project, userId=[{}]", projectId, userId)
         userAchievementsAndPointsManagement.identifyAndAddProjectLevelAchievementsForSingleUser(userId, projectId)
-        log.info("Completed identifying and adding project level achievements for [{}] project, userId=[{}]", projectId, userId)
+        log.debug("Completed identifying and adding project level achievements for [{}] project, userId=[{}]", projectId, userId)
     }
 
     @Transactional
     @Profile
     void batchRemovePerformedSkillsForUserAndSpecificSkills(String userId, String projectId, List<Integer> skillRefIds) {
+        lockingService.lockForSkillReporting(userId, projectId)
         userPerformedSkillRepo.deleteAllByUserIdAndSkillRefIdIn(userId, skillRefIds)
         userEventsRepo.deleteAllByUserIdAndSkillRefIdIn(userId, skillRefIds)
         userPointsRepo.deleteAllByUserIdAndSkillRefIdIn(userId, skillRefIds)
@@ -380,22 +500,27 @@ class BatchOperationsTransactionalAccessor {
         removeGroupAchievementsForSkillsForASpecificUser(skillRefIds, userId)
         updateSubjectPointsAndRemoveAchievementsForSkillsAndSpecificUser(skillRefIds, userId, projectId)
         removeBadgeAchievementsForSkillsAndSpecificUser(skillRefIds, userId)
-        removeGlobalBadgeAchievementsForSkillsAndSpecificUser(skillRefIds, userId)
 
         userPointsRepo.updateUserPointsForProjectAndUser(projectId, userId)
         userPointsRepo.removeOrphanedProjectPointsForUser(projectId, userId)
         userAchievementsAndPointsManagement.removeProjectLevelAchievementsIfUserDoesNotQualify(userId, projectId)
-    }
-
-    @Profile
-    private void removeGlobalBadgeAchievementsForSkillsAndSpecificUser(List<Integer> skillRefIds, String userId) {
-        List<Integer> badgesSkillIsUsedIn = skillRelDefRepo.getGlobalBadgeIdsForSkills(skillRefIds)
-        if (badgesSkillIsUsedIn) {
-            // do a delete
-            badgesSkillIsUsedIn.forEach { it ->
-                userAchievedLevelRepo.deleteAllBySkillRefIdAndUserId(it, userId)
+        achievedGlobalBadgeHandler.reconcileGlobalBadgesForProject(userId, projectId)
+        // Quiz-linked source cleanup can run after an import's own cleanup task.
+        // Notify copies again after the actual source rows have been removed, including
+        // disabled copies whose activation snapshot may precede this transaction's commit.
+        skillRefIds.each { Integer skillRefId ->
+            skillDefRepo.findSkillDefIdsByCopiedFromIncludingDisabled(skillRefId).each { Integer importedId ->
+                taskSchedulerService.scheduleImportedSkillAchievement(userId, importedId,
+                        new SkillDate(date: new Date(), isProvided: false), false, false)
             }
         }
+    }
+
+    @Transactional
+    void removeCatalogSkillAchievements(String userId, String projectId, List<Integer> skillRefIds) {
+        userAchievedLevelRepo.deleteAllBySkillRefIdInAndUserId(skillRefIds, userId)
+        removeGroupAchievementsForSkillsForASpecificUser(skillRefIds, userId)
+        removeBadgeAchievementsForSkillsAndSpecificUser(skillRefIds, userId)
     }
 
     @Profile

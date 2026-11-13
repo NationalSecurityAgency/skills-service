@@ -22,6 +22,7 @@ import groovy.util.logging.Slf4j
 import jakarta.annotation.PostConstruct
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
+import org.springframework.context.annotation.Lazy
 import org.springframework.stereotype.Component
 import org.springframework.transaction.annotation.Transactional
 import skills.auth.UserInfoService
@@ -31,6 +32,7 @@ import skills.controller.result.model.RequestResult
 import skills.services.admin.BatchOperationsTransactionalAccessor
 import skills.services.admin.SkillCatalogService
 import skills.services.events.*
+import skills.services.events.pointsAndAchievements.ImportedSkillsAchievementsHandler
 import skills.services.userActions.DashboardAction
 import skills.services.userActions.DashboardItem
 import skills.services.userActions.UserActionInfo
@@ -38,6 +40,7 @@ import skills.services.userActions.UserActionsHistoryService
 import skills.storage.accessors.ProjDefAccessor
 import skills.storage.model.*
 import skills.storage.repos.*
+import skills.storage.repos.SkillDefRepo.ProjectIdAndSkill
 import skills.tasks.TaskSchedulerService
 import skills.utils.MatomoReporter
 import skills.utils.MetricsLogger
@@ -106,9 +109,6 @@ class SkillEventAdminService {
     UserQuizAttemptRepo userQuizAttemptRepo
 
     @Autowired
-    GlobalBadgesService globalBadgesService
-
-    @Autowired
     TaskSchedulerService taskSchedulerService
 
     @Autowired
@@ -119,6 +119,11 @@ class SkillEventAdminService {
 
     @Autowired
     BatchOperationsTransactionalAccessor batchOperationsTransactionalAccessor
+
+    @Autowired CatalogParticipantBackfillService catalogBackfillService
+    @Autowired LockingService lockingService
+    @Autowired AchievedGlobalBadgeHandler achievedGlobalBadgeHandler
+    @Autowired @Lazy ImportedSkillsAchievementsHandler importedSkillsAchievementsHandler
 
     @Value('#{"${skills.bulkUserLookup.minNumOfThreads:1}"}')
     Integer minNumOfThreads
@@ -208,16 +213,17 @@ class SkillEventAdminService {
     @Profile
     @Transactional
     RequestResult bulkDeleteSkillEventsForUser(String projectId, String userId) {
+        lockingService.lockForSkillReporting(userId, projectId)
+        boolean hadLocalEvents = performedSkillRepository.existsLocalEventByProjectIdAndUserId(projectId, userId)
         performedSkillRepository.deleteAllByUserIdAndProjectId(userId, projectId)
         userEventService.removeAllEvents(projectId, userId)
         achievedLevelRepo.deleteAllByProjectIdAndUserId(projectId, userId)
-        List<Integer> globalBadges = achievedLevelRepo.getAchievedGlobalBadgeForUserIntersectingProjectId(userId, projectId)
-        achievedLevelRepo.deleteAllById(globalBadges)
         userPointsRepo.deleteAllByProjectIdAndUserId(projectId, userId)
         skillApprovalRepo.deleteAllByProjectIdAndUserId(projectId, userId)
         userQuizAttemptRepo.deleteAllAttemptsForQuizzesAssociatedToProjectAndByUserId(projectId, userId)
 
-        handleImportedSkills(projectId, userId)
+        catalogBackfillService.reset(projectId, userId, hadLocalEvents)
+        achievedGlobalBadgeHandler.reconcileGlobalBadgesForProject(userId, projectId)
 
         propagateUpdatesToQuizSkillsAndImportedSkills(projectId, userId)
 
@@ -234,38 +240,6 @@ class SkillEventAdminService {
         ))
 
         return RequestResult.success()
-    }
-
-    @Profile
-    private void handleImportedSkills(String projectId, String userId) {
-        List<SkillDef> enabledImportedSkills = skillDefRepo.findAllByProjectIdAndTypeAndEnabledAndCopiedFromIsNotNull(projectId, SkillDef.ContainerType.Skill, Boolean.TRUE.toString())
-        if (enabledImportedSkills) {
-            List<Integer> skillRefIds = enabledImportedSkills.collect { it.copiedFrom }
-
-            // 1. copy skill points and achievements
-            batchOperationsTransactionalAccessor.copySingleUserSkillUserPointsToTheImportedProjects(userId, projectId, skillRefIds)
-            batchOperationsTransactionalAccessor.copyForSingleUserSkillAchievementsToTheImportedProjects(userId, projectId, skillRefIds)
-
-            List<SkillDef> groups = enabledImportedSkills
-                    .findAll({ it.groupId != null })
-                    .collect { ruleSetDefGraphService.getParentSkill(it) }
-                    .unique(false) { SkillDef a, SkillDef b -> a.skillId <=> b.skillId }
-            log.info("Identifying group achievements for [{}] groups in project [{}] for user [{}]", groups.size(), projectId, userId)
-            batchOperationsTransactionalAccessor.identifyAndAddGroupAchievementsForSingleUser(userId, groups)
-            log.info("Completed import of group achievements for [{}] groups in [{}] project for user [{}]", groups.size(), projectId, userId)
-
-            // 2. for each subject (1) create user points for new users (2) update existing (3) calculate achievements
-            List<SkillDef> subjects = enabledImportedSkills.collect { ruleSetDefGraphService.getMySubjectParent(it.id) }
-                    .unique(false) { SkillDef a, SkillDef b -> a.skillId <=> b.skillId }
-            subjects.each { SkillDef subject ->
-                batchOperationsTransactionalAccessor.createSubjectUserPointsForSingleNewUser(userId, subject.projectId, subject.skillId)
-                batchOperationsTransactionalAccessor.identifyAndAddSubjectLevelAchievementsForSingleUser(userId, subject.projectId, subject.skillId)
-            }
-
-            // 3. for the project (1) create user points for new users (2) update existing (3) calculate achievements
-            batchOperationsTransactionalAccessor.createProjectUserPointsForSingleNewUser(userId, projectId)
-            batchOperationsTransactionalAccessor.identifyAndAddProjectLevelAchievements(userId, projectId)
-        }
     }
 
     @Profile
@@ -301,8 +275,9 @@ class SkillEventAdminService {
             }
         }
 
-        // collect catalog imported skills
-        List<SkillDefRepo.ProjectIdAndSkill> imported = skillDefRepo.getAllImportedByOriginalProject(projectId)
+        // Same-project reuse is handled by the reset transaction; only propagate deletion to other projects.
+        List<ProjectIdAndSkill> imported = skillDefRepo.getAllImportedByOriginalProject(projectId)
+                .findAll { ProjectIdAndSkill copy -> !copy.projectId.equalsIgnoreCase(projectId) }
         if (imported) {
             Map<String, List<SkillDefRepo.ProjectIdAndSkill>> importedByProjectId = imported.groupBy { it.projectId }
             importedByProjectId.each {
@@ -483,32 +458,30 @@ class SkillEventAdminService {
         String projectId = performedSkill.projectId;
         String skillId = performedSkill.skillId
         String userId = performedSkill.userId
+        lockingService.lockForSkillReporting(userId, projectId)
 
         SkillDefMin skillDefinitionMin = getSkillDef(projectId, skillId)
         Long numExistingSkills = performedSkillRepository.countByUserIdAndProjectIdAndSkillId(userId, projectId, skillId) ?: 0
         // account for null
 
-        // handle catalog
-        List<SkillDefWithExtra> related = skillDefRepo.findSkillDefMinCopiedFrom(performedSkill.skillRefId)
-        if (related) {
-            log.info("Propagating event deletion to the catalog skills - [{}] copies imported", related?.size())
-            related?.each {
-                updateUserPointsAndAchievementsWhenPerformedSkillRemoved(userId, it, numExistingSkills)
-            }
-            log.info("Completed propagating event deletion to the catalog skills - [{}] copies imported", related?.size())
-        }
-
-        List<Integer> badgesSkillIsUsedIn = globalBadgesService.globalBadgesSkillIsUsedIn(projectId, skillId)
-        if (badgesSkillIsUsedIn) {
-            // do a delete
-            badgesSkillIsUsedIn.forEach{ it ->
-                achievedLevelRepo.deleteAllBySkillRefIdAndUserId(it, userId)
-            }
-        }
-
         SkillEventResult skillEventResult = updateUserPointsAndAchievementsWhenPerformedSkillRemoved(userId, skillDefinitionMin, numExistingSkills)
+        achievedGlobalBadgeHandler.reconcileGlobalBadgesForProject(userId, projectId)
         performedSkillRepository.delete(performedSkill)
         userEventService.removeEvent(performedSkill.performedOn, performedSkill.userId, performedSkill.skillRefId)
+
+        // Same-project reuse shares the reporting lock and must be consistent at commit.
+        // Queue cross-project copies to avoid inverted reporting locks for reciprocal imports.
+        // Also queue disabled copies so a concurrent activation snapshot cannot miss deletion.
+        skillDefRepo.findSkillDefIdsByCopiedFromIncludingDisabled(performedSkill.skillRefId)
+                .each { Integer id ->
+            SkillDefMin copy = skillDefRepo.findSkillDefMinById(id)
+            SkillDate skillDate = new SkillDate(date: performedSkill.performedOn, isProvided: true)
+            if (copy.projectId == projectId && Boolean.valueOf(copy.enabled)) {
+                importedSkillsAchievementsHandler.handleAchievementsForImportedSkills(userId, copy, skillDate, false, false)
+            } else {
+                taskSchedulerService.scheduleImportedSkillAchievement(userId, id, skillDate, false, false)
+            }
+        }
 
         return skillEventResult
     }
