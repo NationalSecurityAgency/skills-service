@@ -18,22 +18,38 @@ package skills.intTests.userActions
 import ch.qos.logback.classic.Logger
 import ch.qos.logback.classic.spi.ILoggingEvent
 import ch.qos.logback.core.read.ListAppender
+import org.apache.hc.client5.http.impl.classic.HttpClients
+import org.apache.hc.client5.http.impl.io.PoolingHttpClientConnectionManager
+import org.apache.hc.client5.http.socket.PlainConnectionSocketFactory
+import org.apache.hc.client5.http.ssl.NoopHostnameVerifier
+import org.apache.hc.client5.http.ssl.SSLConnectionSocketFactory
+import org.apache.hc.core5.http.config.RegistryBuilder
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.core.io.ClassPathResource
+import org.springframework.http.HttpEntity
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpMethod
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
+import org.springframework.http.client.HttpComponentsClientHttpRequestFactory
 import org.springframework.test.annotation.DirtiesContext
 import org.springframework.test.context.TestPropertySource
+import org.springframework.web.client.RestTemplate
 import skills.auth.adminAttribution.AdminAttributionLoggingFilter
 import skills.auth.adminAttribution.AdminAttributionProperties
 import skills.intTests.utils.DefaultIntSpec
 import skills.intTests.utils.QuizDefFactory
+import skills.intTests.utils.RestTemplateWrapper
 import skills.intTests.utils.SkillsService
 import skills.services.userActions.DashboardAction
 import skills.storage.model.auth.RoleName
+import spock.lang.IgnoreIf
 
+import javax.net.ssl.KeyManager
+import javax.net.ssl.SSLContext
+import javax.net.ssl.TrustManagerFactory
+import java.security.KeyStore
 import java.util.concurrent.BlockingQueue
 import java.util.concurrent.LinkedBlockingQueue
 import java.util.concurrent.TimeUnit
@@ -57,6 +73,7 @@ class AdminAttributionIT extends DefaultIntSpec {
     Logger attributionLogger
     ListAppender<ILoggingEvent> appender
     BlockingQueue<ILoggingEvent> loggedRequests
+    HttpComponentsClientHttpRequestFactory anonymousRequestFactory
 
     def setup() {
         users = getRandomUsers(3).collect { String userId -> createService(userId) }
@@ -80,6 +97,7 @@ class AdminAttributionIT extends DefaultIntSpec {
         attributionLogger.detachAppender(appender)
         appender.stop()
         attributionProperties.allowedRequesters = [] as Set
+        anonymousRequestFactory?.destroy()
     }
 
     def 'project edits record the acting user and authenticated requester without leaking to the next request'() {
@@ -482,6 +500,100 @@ class AdminAttributionIT extends DefaultIntSpec {
         messages()[0].contains('httpStatus=[403]')
     }
 
+    def 'the attribution header cannot authenticate an anonymous admin request'() {
+        given:
+        Map project = createProject()
+        users[0].createProject(project)
+        long historyCount = users[0].getUserActionsForProject(project.projectId).count
+        RestTemplateWrapper anonymous = anonymousClient()
+        String url = "${users[0].wsHelper.skillsService}/admin/projects/${project.projectId}"
+        Map changes = project + [name: 'Must not change']
+        HttpStatus expectedStatus = isPkiMode ? HttpStatus.FORBIDDEN : HttpStatus.UNAUTHORIZED
+
+        expect:
+        // Obtain a valid anonymous CSRF cookie so the request reaches authentication checks.
+        anonymous.postForEntity(url, changes, Map).statusCode == expectedStatus
+        messages().empty
+
+        when:
+        HttpHeaders headers = new HttpHeaders()
+        headers.set(HEADER, users[0].userName)
+        ResponseEntity<Map> response = anonymous.postForEntity(url, new HttpEntity<>(changes, headers), Map)
+        awaitAdminLog()
+
+        then:
+        response.statusCode == expectedStatus
+        users[0].getProject(project.projectId).name == project.name
+        users[0].getUserActionsForProject(project.projectId).count == historyCount
+        messages().size() == 1
+        messages()[0].contains('userId=[-] requestingSystemUserId=[-]')
+        messages()[0].contains("claimedActingUserId=[${users[0].userName}]")
+        messages()[0].contains("attributionStatus=[rejected] httpStatus=[${expectedStatus.value()}]")
+    }
+
+    @IgnoreIf({ env['SPRING_PROFILES_ACTIVE'] == 'pki' })
+    def 'a real proxied token cannot provide attribution even for an allowlisted administrator or root'() {
+        given:
+        SkillsService requester = rootRequester ? createRootSkillService(users[0].userName, 'password') : users[0]
+        Map project = createProject()
+        requester.createProject(project)
+        requester.addProjectAdmin(project.projectId, users[1].userName)
+        long historyCount = requester.getUserActionsForProject(project.projectId).count
+        ResponseEntity<Map> tokenResponse = requester.requestWithHeaders("/api/projects/${project.projectId}/token",
+                HttpMethod.GET, null, new HttpHeaders())
+        assert tokenResponse.statusCode == HttpStatus.OK
+        String token = tokenResponse.body.access_token as String
+        assert token
+        HttpHeaders tokenHeaders = new HttpHeaders()
+        tokenHeaders.setBearerAuth(token)
+
+        expect:
+        // Prove that this is a valid token, not an invalid credential rejected before our filter.
+        requester.requestWithHeaders("/api/projects/${project.projectId}/summary", HttpMethod.GET, null, tokenHeaders)
+                .statusCode == HttpStatus.OK
+        messages().empty
+
+        when:
+        tokenHeaders.set(HEADER, users[1].userName)
+        ResponseEntity<Map> rejected = requester.requestWithHeaders("/admin/projects/${project.projectId}",
+                HttpMethod.POST, project + [name: 'Must not change'], tokenHeaders)
+        awaitAdminLog()
+
+        then:
+        rejected.statusCode == HttpStatus.FORBIDDEN
+        requester.getProject(project.projectId).name == project.name
+        requester.getUserActionsForProject(project.projectId).count == historyCount
+        messages().size() == 1
+        messages()[0].contains("requestingSystemUserId=[${requester.userName.toLowerCase(Locale.ROOT)}]")
+        messages()[0].contains("claimedActingUserId=[${users[1].userName}]")
+        messages()[0].contains('attributionStatus=[rejected] httpStatus=[403]')
+
+        where:
+        rootRequester << [false, true]
+    }
+
+    def 'an unscoped attribution claim cannot forge log fields or additional log entries'() {
+        given:
+        Map badge = [badgeId: 'globalBadge', name: 'Original badge']
+        users[0].createGlobalBadge(badge)
+        String maliciousClaim = 'fake-user] httpStatus=[401] requestingSystemUserId=[forged] method=[DELETE'
+        String requesterId = users[0].userName.toLowerCase(Locale.ROOT)
+
+        when:
+        ResponseEntity<Map> response = attributedRequest(users[0], "/admin/badges/${badge.badgeId}",
+                HttpMethod.POST, badge + [name: 'Safely logged edit'], maliciousClaim)
+
+        then:
+        response.statusCode == HttpStatus.OK
+        users[0].getGlobalBadge(badge.badgeId).name == 'Safely logged edit'
+        // Bracket-delimited spoofed fields are confined to the sanitized claim, not trusted log fields.
+        messages() == ["Admin attribution request userId=[${requesterId}] requestingSystemUserId=[${requesterId}] " +
+                'claimedActingUserId=[fake-user_ httpStatus=_401_ requestingSystemUserId=_forged_ method=_DELETE] ' +
+                "method=[POST] path=[/admin/badges/${badge.badgeId}] resource=[-] attributionStatus=[ignored_unscoped] httpStatus=[200]"]
+        !messages()[0].contains('\r')
+        !messages()[0].contains('\n')
+    }
+
     def 'header-bearing requests rejected by CORS are also logged'() {
         given:
         Map project = createProject()
@@ -570,6 +682,30 @@ class AdminAttributionIT extends DefaultIntSpec {
         edit.userId == users[1].userName.toLowerCase(Locale.ROOT)
         !users[1].getProjectUserActionAttributes(project.projectId, edit.id as Long).containsKey('requestingSystemUserId')
         messages().empty
+    }
+
+    private RestTemplateWrapper anonymousClient() {
+        if (!isPkiMode) {
+            // Unlike SkillsService's constructor, this transport does not create an account or log in.
+            return new RestTemplateWrapper()
+        }
+        KeyStore trust = KeyStore.getInstance('JKS')
+        new ClassPathResource('/certs/truststore.jks').inputStream.withCloseable { InputStream stream ->
+            trust.load(stream, 'skillspass'.toCharArray())
+        }
+        TrustManagerFactory trustManagers = TrustManagerFactory.getInstance(TrustManagerFactory.defaultAlgorithm)
+        trustManagers.init(trust)
+        SSLContext sslContext = SSLContext.getInstance('TLS')
+        // Explicitly omit client keys, including the test harness's global javax.net.ssl key store.
+        sslContext.init(new KeyManager[0], trustManagers.trustManagers, null)
+        SSLConnectionSocketFactory sockets = new SSLConnectionSocketFactory(sslContext, ['TLSv1.2'] as String[],
+                null, NoopHostnameVerifier.INSTANCE)
+        PoolingHttpClientConnectionManager connections = new PoolingHttpClientConnectionManager(RegistryBuilder.create()
+                .register('http', PlainConnectionSocketFactory.getSocketFactory())
+                .register('https', sockets).build())
+        anonymousRequestFactory = new HttpComponentsClientHttpRequestFactory(HttpClients.custom()
+                .setConnectionManager(connections).disableCookieManagement().build())
+        return new RestTemplateWrapper(new RestTemplate(anonymousRequestFactory), true)
     }
 
     private ResponseEntity<Map> attributedRequest(SkillsService requester, String path, HttpMethod method, Object body, String actor) {
