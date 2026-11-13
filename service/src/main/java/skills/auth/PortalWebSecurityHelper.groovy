@@ -33,6 +33,7 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity
 import org.springframework.security.config.ObjectPostProcessor
 import org.springframework.security.core.Authentication
 import org.springframework.security.core.context.SecurityContextHolder
+import org.springframework.security.web.access.intercept.AuthorizationFilter
 import org.springframework.security.web.access.intercept.RequestAuthorizationContext
 import org.springframework.security.web.authentication.session.SessionAuthenticationStrategy
 import org.springframework.security.web.authentication.www.BasicAuthenticationFilter
@@ -42,7 +43,11 @@ import org.springframework.security.web.util.matcher.OrRequestMatcher
 import org.springframework.security.web.util.matcher.RequestMatcher
 import org.springframework.stereotype.Component
 import org.springframework.util.StringUtils
+import org.springframework.web.filter.CorsFilter
 import org.springframework.web.filter.OncePerRequestFilter
+import skills.auth.adminAttribution.AdminAttributionLoggingFilter
+import skills.auth.adminAttribution.AdminAttributionProperties
+import skills.auth.adminAttribution.AdminAttributionRequesterFilter
 import skills.auth.inviteOnly.InviteOnlyProjectAuthorizationManager
 import skills.auth.openai.OpenAIAuthorizationManager
 import skills.auth.userCommunity.UserCommunityAuthorizationManager
@@ -87,7 +92,16 @@ class PortalWebSecurityHelper {
     @Autowired
     ObjectMapper objectMapper
 
+    @Autowired
+    AdminAttributionProperties adminAttributionProperties
+
+    @Autowired
+    UserInfoService userInfoService
+
     HttpSecurity configureHttpSecurity(HttpSecurity http) {
+        // Wrap CORS, authentication, authorization, and MVC to log header-bearing rejections as well.
+        http.addFilterBefore(new AdminAttributionLoggingFilter(adminAttributionProperties), CorsFilter.class)
+        http.addFilterBefore(new AdminAttributionRequesterFilter(adminAttributionProperties, userInfoService), AuthorizationFilter.class)
         if (disableCsrfProtection) {
             http.csrf((csrf) -> csrf.disable())
         } else {

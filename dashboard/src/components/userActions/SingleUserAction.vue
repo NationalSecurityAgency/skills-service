@@ -79,7 +79,7 @@ const loadData = () => {
         let loadedObj = res;
         if (!excludeLookupFromActions.includes(props.action) && propsToShow) {
           loadedObj = Object.fromEntries(Object.entries(res)
-              .filter(([key]) => propsToShow.includes(key)));
+              .filter(([key]) => propsToShow.includes(key) || key === 'requestingSystemUserId'));
         }
         attributes.value = Object.entries(loadedObj).map((entry) => {
           let label = entry[0];
