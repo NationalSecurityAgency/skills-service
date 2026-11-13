@@ -21,6 +21,9 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.Configuration
 import org.springframework.security.access.AccessDeniedException
 import org.springframework.security.authorization.AuthorizationResult
+import org.springframework.security.web.servlet.util.matcher.PathPatternRequestMatcher
+import org.springframework.security.web.util.matcher.OrRequestMatcher
+import org.springframework.security.web.util.matcher.RequestMatcher
 import org.springframework.web.servlet.HandlerInterceptor
 import org.springframework.web.servlet.HandlerMapping
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry
@@ -37,6 +40,17 @@ class AdminAttributionInterceptor implements HandlerInterceptor, WebMvcConfigure
     static final String RESOURCE_ATTRIBUTE = 'adminAttributionResource'
     static final String REQUESTER_ATTRIBUTE = 'adminAttributionRequester'
     static final int MAX_USER_ID_LENGTH = 255
+
+    private final RequestMatcher scopedRoutes = new OrRequestMatcher([
+            '/admin/projects/{projectId}/**',
+            '/admin/quiz-definitions/{quizId}/**',
+    ].collect { String pattern -> (RequestMatcher) PathPatternRequestMatcher.pathPattern(pattern) })
+
+    private final RequestMatcher copyRoutes = new OrRequestMatcher([
+            '/admin/projects/{projectId}/copy',
+            '/admin/projects/{projectId}/copy/projects/{otherProjectId}/**',
+            '/admin/quiz-definitions/{quizId}/copy',
+    ].collect { String pattern -> (RequestMatcher) PathPatternRequestMatcher.pathPattern(pattern) })
 
     @Autowired
     AdminAttributionProperties properties
@@ -63,6 +77,13 @@ class AdminAttributionInterceptor implements HandlerInterceptor, WebMvcConfigure
 
         // The security-chain filter already enforced the allowlist, including unscoped routes.
         UserInfo requester = userInfoService.currentUser
+
+        // Copies write history for a destination that has not been validated here. Group and
+        // global-badge routes are also unscoped, even when they contain a project/quiz ID.
+        // Keep the requester for the entire operation and log the claim as ignored_unscoped.
+        if (!scopedRoutes.matches(request) || copyRoutes.matches(request)) {
+            return true
+        }
 
         Map<String, String> variables = request.getAttribute(HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE) as Map<String, String>
         String projectId = variables?.get('projectId') ?: AuthUtils.getProjectIdForProtection(request)

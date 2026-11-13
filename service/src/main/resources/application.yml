@@ -140,8 +140,12 @@ skills:
       maxConcurrentRequestsGlobal: 200
   authorization:
     adminAttribution:
-      # Audit-only attribution on /admin routes; both identities must be resource admins (or root).
+      # Audit-only attribution on /admin/projects and /admin/quiz-definitions routes;
+      # both identities must be resource admins (or root).
       # Acting users must also satisfy account eligibility and protected-community restrictions.
+      # Copy routes (including cross-project copy validation), admin-group routes, and global-badge
+      # routes ignore attribution and log ignored_unscoped, even with embedded project/quiz IDs.
+      # Their history retains the requester; all header-bearing /admin requests still require the allowlist.
       enabled: false
       # The header value is the canonical application user ID, including in PKI mode.
       # Credential/session/CSRF header names (for example Authorization or Cookie) are prohibited.

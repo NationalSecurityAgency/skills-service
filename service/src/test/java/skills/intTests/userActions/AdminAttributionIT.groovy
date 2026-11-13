@@ -286,6 +286,85 @@ class AdminAttributionIT extends DefaultIntSpec {
         users[0].getUserActionsForQuiz(quiz.quizId).count == 1
     }
 
+    def 'copies retain the requester in destination history and log ignored attribution'() {
+        given:
+        SkillsService actor = rootActor ? createRootSkillService(users[1].userName, 'password') : users[1]
+        boolean quizCopy = copyType == 'quiz'
+        Map source = quizCopy ? QuizDefFactory.createQuiz() : createProject()
+        Map destination = quizCopy ? QuizDefFactory.createQuiz(2) : createProject(2)
+        String sourceId = quizCopy ? source.quizId : source.projectId
+        String destinationId = quizCopy ? destination.quizId : destination.projectId
+        String path = "/admin/${quizCopy ? 'quiz-definitions' : 'projects'}/${sourceId}/copy"
+        Map body = destination
+        if (quizCopy) {
+            users[0].createQuizDef(source)
+            users[0].addQuizUserRole(sourceId, actor.userName, RoleName.ROLE_QUIZ_ADMIN.name())
+        } else {
+            users[0].createProject(source)
+            users[0].addProjectAdmin(sourceId, actor.userName)
+            users[0].createSubject(createSubject())
+            users[0].createSkill(createSkill())
+            if (copyType == 'cross-project') {
+                users[0].createProject(destination)
+                users[0].createSubject(createSubject(2))
+                path += "/projects/${destinationId}"
+                body = [copyType: 'SelectSkills', skillIds: ['skill1'], toSubjectId: createSubject(2).subjectId]
+                // A non-root actor administers only the source; root covers the case where
+                // destination permissions cannot explain the attribution/history mismatch.
+            }
+        }
+        List<Long> existingIds = copyType == 'cross-project' ?
+                users[0].getUserActionsForProject(destinationId, 100).data.collect { Map row -> row.id as Long } : []
+
+        when:
+        ResponseEntity<Map> response = attributedRequest(users[0], path, method, body, actor.userName)
+        Map history = quizCopy ? users[0].getUserActionsForQuiz(destinationId, 100) : users[0].getUserActionsForProject(destinationId, 100)
+        List<Map> copiedActions = history.data.findAll { Map row -> !existingIds.contains(row.id as Long) }
+
+        then:
+        response.statusCode == HttpStatus.OK
+        (quizCopy ? users[0].getQuizDef(destinationId) : users[0].getProject(destinationId)).name == destination.name
+        !copiedActions.empty
+        copiedActions.every { Map row -> row.userId == users[0].userName.toLowerCase(Locale.ROOT) }
+        copiedActions.every { Map row ->
+            Map attributes = quizCopy ? users[0].getQuizUserActionAttributes(destinationId, row.id as Long) :
+                    users[0].getProjectUserActionAttributes(destinationId, row.id as Long)
+            !attributes.containsKey('requestingSystemUserId')
+        }
+        copyType != 'cross-project' || users[0].getSkill(createSkill(2)).name == createSkill().name
+        messages().size() == 1
+        messages()[0].contains("userId=[${users[0].userName.toLowerCase(Locale.ROOT)}]")
+        messages()[0].contains("claimedActingUserId=[${actor.userName}]")
+        messages()[0].contains('resource=[-] attributionStatus=[ignored_unscoped] httpStatus=[200]')
+
+        where:
+        [copyType, rootActor, method] << [['quiz', 'project', 'cross-project'], [false, true], [HttpMethod.POST, HttpMethod.PUT]].combinations()
+    }
+
+    def 'subject bean attributes survive attributed history serialization'() {
+        given:
+        Map project = createProject()
+        Map subject = createSubject() + [description: 'Preserved subject description', helpUrl: 'https://example.org/subject']
+        users[0].createProject(project)
+        users[0].addProjectAdmin(project.projectId, users[1].userName)
+
+        when:
+        ResponseEntity<Map> response = attributedRequest(users[0], "/admin/projects/${project.projectId}/subjects/${subject.subjectId}",
+                HttpMethod.POST, subject, users[1].userName)
+        Map action = users[1].getUserActionsForProject(project.projectId).data.find { Map row -> row.item == 'Subject' }
+        Map attributes = users[1].getProjectUserActionAttributes(project.projectId, action.id as Long)
+
+        then:
+        response.statusCode == HttpStatus.OK
+        users[1].getSubject(subject).name == subject.name
+        action.userId == users[1].userName.toLowerCase(Locale.ROOT)
+        attributes.name == subject.name
+        attributes.skillId == subject.subjectId
+        attributes.description == subject.description
+        attributes.helpUrl == subject.helpUrl
+        attributes.requestingSystemUserId == users[0].userName.toLowerCase(Locale.ROOT)
+    }
+
     def 'a project approver cannot qualify as either attribution identity'() {
         given:
         Map project = createProject()
@@ -485,6 +564,94 @@ class AdminAttributionIT extends DefaultIntSpec {
         messages()[1].contains("userId=[${users[0].userName.toLowerCase(Locale.ROOT)}]")
         messages()[1].contains('claimedActingUserId=[unknown-attribution-user]')
         messages()[1].contains('attributionStatus=[ignored_unscoped] httpStatus=[200]')
+    }
+
+    def 'nested global-badge project routes stay unscoped in history and request logs'() {
+        given:
+        SkillsService root = createRootSkillService(users[2].userName, 'password')
+        Map project = createProject()
+        Map badge = [badgeId: 'globalBadge', name: 'Original badge']
+        users[0].createProject(project)
+        users[0].createSubject(createSubject())
+        users[0].createSkill(createSkill())
+        users[0].createGlobalBadge(badge)
+        users[0].grantGlobalBadgeAdminRole(badge.badgeId, users[1].userName)
+        users[0].addProjectAdmin(project.projectId, users[1].userName)
+        String path = "/admin/badges/${badge.badgeId}/projects/${project.projectId}/${level ? 'level/1' : 'skills/skill1'}"
+
+        when:
+        ResponseEntity<Map> denied = attributedRequest(users[1], path, HttpMethod.POST, null, users[0].userName)
+        ResponseEntity<Map> accepted = attributedRequest(users[0], path, HttpMethod.POST, null, 'unknown-attribution-user')
+        Map action = root.getUserActionsForEverything(100).data.find { Map row -> row.action == (level ? 'AssignLevel' : 'AssignSkill') }
+        Map attributes = root.getUserActionAttributes(action.id as Long)
+
+        then:
+        denied.statusCode == HttpStatus.FORBIDDEN
+        accepted.statusCode == HttpStatus.OK
+        action.userId == users[0].userName.toLowerCase(Locale.ROOT)
+        !action.projectId
+        attributes.projectId == project.projectId
+        attributes.badgeId == badge.badgeId
+        !attributes.containsKey('requestingSystemUserId')
+        messages().size() == 2
+        messages()[0].contains('attributionStatus=[rejected] httpStatus=[403]')
+        messages()[1].contains("userId=[${users[0].userName.toLowerCase(Locale.ROOT)}]")
+        messages()[1].contains('claimedActingUserId=[unknown-attribution-user]')
+        messages()[1].contains('resource=[-] attributionStatus=[ignored_unscoped] httpStatus=[200]')
+
+        where:
+        level << [false, true]
+    }
+
+    def 'nested admin-group project and quiz routes ignore attribution for the whole operation'() {
+        given:
+        SkillsService root = createRootSkillService(users[2].userName, 'password')
+        Map group = [adminGroupId: 'testGroup', name: 'Test Admin Group']
+        Map resource = quizResource ? QuizDefFactory.createQuiz() : createProject()
+        String id = quizResource ? resource.quizId : resource.projectId
+        users[0].createAdminGroupDef(group)
+        users[0].addAdminGroupOwner(group.adminGroupId, users[1].userName)
+        if (quizResource) {
+            users[0].createQuizDef(resource)
+            users[0].addQuizUserRole(id, users[1].userName, RoleName.ROLE_QUIZ_ADMIN.name())
+        } else {
+            users[0].createProject(resource)
+            users[0].addProjectAdmin(id, users[1].userName)
+        }
+        String path = "/admin/admin-group-definitions/${group.adminGroupId}/${quizResource ? 'quizzes' : 'projects'}/${id}"
+
+        when:
+        ResponseEntity<Map> denied = attributedRequest(users[1], path, HttpMethod.PUT, null, users[0].userName)
+        ResponseEntity<Map> added = attributedRequest(users[0], path, HttpMethod.PUT, null, 'unknown-attribution-user')
+
+        then:
+        denied.statusCode == HttpStatus.FORBIDDEN
+        added.statusCode == HttpStatus.OK
+        (quizResource ? users[0].getAdminGroupQuizzesAndSurveys(group.adminGroupId).assignedQuizzes*.quizId :
+                users[0].getAdminGroupProjects(group.adminGroupId).assignedProjects*.projectId) == [id]
+
+        when:
+        ResponseEntity<Map> removed = attributedRequest(users[0], path, HttpMethod.DELETE, null, 'unknown-attribution-user')
+        Map action = root.getUserActionsForEverything(100).data.find { Map row -> row.item == 'AdminGroup' && row.action == 'Delete' }
+
+        then:
+        removed.statusCode == HttpStatus.OK
+        (quizResource ? users[0].getAdminGroupQuizzesAndSurveys(group.adminGroupId).assignedQuizzes :
+                users[0].getAdminGroupProjects(group.adminGroupId).assignedProjects).empty
+        action.userId == users[0].userName.toLowerCase(Locale.ROOT)
+        !action.projectId
+        !action.quizId
+        root.getUserActionAttributes(action.id as Long) == [adminGroupName: group.name, adminGroupId: group.adminGroupId]
+        messages().size() == 3
+        messages()[0].contains('attributionStatus=[rejected] httpStatus=[403]')
+        messages().drop(1).every { String message ->
+            message.contains("userId=[${users[0].userName.toLowerCase(Locale.ROOT)}]") &&
+                    message.contains('claimedActingUserId=[unknown-attribution-user]') &&
+                    message.contains('resource=[-] attributionStatus=[ignored_unscoped] httpStatus=[200]')
+        }
+
+        where:
+        quizResource << [false, true]
     }
 
     def 'even an unmatched admin route rejects a non-allowlisted requester'() {
