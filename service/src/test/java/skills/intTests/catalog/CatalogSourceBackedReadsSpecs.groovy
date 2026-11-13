@@ -177,10 +177,10 @@ class CatalogSourceBackedReadsSpecs extends CatalogIntSpec {
     def "tag metrics filter both user counts and distinct-tag pagination before grouping"() {
         Map fixture = readsFixture()
         fixture.users.eachWithIndex { String user, int index ->
-            userTagRepo.save(new UserTag(userId: user, key: 'readTags', value: "tag${index}"))
-            userTagRepo.save(new UserTag(userId: user, key: 'readTags', value: 'shared'))
+            userTagRepo.save(new UserTag(userId: user, key: 'someCoolKey', value: "tag${index}"))
+            userTagRepo.save(new UserTag(userId: user, key: 'someCoolKey', value: 'shared'))
         }
-        Map props = [tagKey: 'readTags', currentPage: 1, pageSize: 2, sortBy: 'tag', sortDesc: false]
+        Map props = [tagKey: 'someCoolKey', currentPage: 1, pageSize: 2, sortBy: 'tag', sortDesc: false]
 
         when:
         List<Map> pages = (1..3).collect { int page ->
