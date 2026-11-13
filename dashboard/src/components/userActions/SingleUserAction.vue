@@ -96,8 +96,10 @@ const loadData = () => {
           if (customValues) {
             value = customValues[value] || value
           }
-          const replacement = valuesMap.get(value);
-          value = replacement || value;
+          if (entry[0] !== 'requestingSystemUserId') {
+            const replacement = valuesMap.get(value);
+            value = replacement || value;
+          }
           return {
             label: label,
             value,
