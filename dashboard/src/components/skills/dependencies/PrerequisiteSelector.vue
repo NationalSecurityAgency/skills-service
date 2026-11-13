@@ -37,6 +37,7 @@ const { errors, defineField } = useForm({
 });
 const [toSkillId, toSkillIdAttrs] = defineField('toSkillId');
 
+const includeSharedSkills = ref(false);
 const allSkills = ref([]);
 const allPotentialSkills = ref([]);
 const selectedToSkills = ref([]);
@@ -45,6 +46,10 @@ const toProjectId = ref(null);
 const loadingPotentialSkills = ref(false);
 const loadingAllSkills = ref(false);
 const projectId = route.params.projectId;
+const filterValue = ref('');
+const savedMainSkills = ref(null)
+const sharedSkillsLoadFailed = ref(false);
+let sharedSkillsRequestId = 0;
 
 const fromSelector = ref();
 const toSelector = ref();
@@ -63,28 +68,68 @@ const isLoading = computed(() => {
   return loadingPotentialSkills.value || loadingAllSkills.value;
 });
 
+const fromSkillOptions = computed(() => {
+  const groups = allSkills.value.filter((group) => group.items?.length > 0);
+  if (includeSharedSkills.value) {
+    return groups;
+  }
+  return groups
+      .filter((group) => group.label === 'This Project')
+      .flatMap((group) => group.items);
+});
+
 const loadAllSkills = () => {
   loadingAllSkills.value = true;
-  const getProjectSkillsAndBadges = SkillsService.getProjectSkillsAndBadgesWithImportedSkills(projectId);
-  const getSharedSkills = SkillsShareService.getSharedWithmeSkills(projectId);
-
-  Promise.all([getProjectSkillsAndBadges, getSharedSkills]).then((results) => {
-    const mainSkills = results[0];
-    const sharedSkills = results[1];
-    if (sharedSkills && sharedSkills.length > 0) {
-      sharedSkills.forEach((skill) => {
-        const newSkill = {
-          name: skill.skillName,
-          type: 'Shared Skill',
-          ...skill,
-        };
-        mainSkills.push(newSkill);
-      });
-    }
-    allSkills.value = mainSkills;
+  SkillsService.getProjectSkillsAndBadgesWithImportedSkills(projectId).then((mainSkills) => {
+    savedMainSkills.value = mainSkills;
+    allSkills.value = [{ label: "This Project", items: mainSkills }];
+    filterProjectSkills();
+    loadSharedSkills();
     loadingAllSkills.value = false;
   });
 };
+
+const loadSharedSkills = async () => {
+  const requestId = ++sharedSkillsRequestId;
+  const filter = filterValue.value;
+  sharedSkillsLoadFailed.value = false;
+  allSkills.value = allSkills.value.filter((group) => group?.label !== 'Shared Skills');
+
+  if (!includeSharedSkills.value || !savedMainSkills.value) {
+    return;
+  }
+
+  const params = {
+    limit: 200,
+    ascending: false,
+    page: 1,
+    orderBy: 'skill.skillId',
+    filter,
+  };
+
+  try {
+    // Handle errors locally so obsolete requests cannot navigate away.
+    const result = await SkillsShareService.getSharedWithmeSkills(projectId, params, false);
+    if (requestId !== sharedSkillsRequestId || !includeSharedSkills.value) {
+      return;
+    }
+
+    const processedSkills = result.data.map((skill) => ({
+      name: skill.skillName,
+      type: 'Shared Skill',
+      ...skill,
+    }));
+
+    if (processedSkills.length > 0) {
+      allSkills.value.push({ label: "Shared Skills", items: processedSkills });
+    }
+  } catch {
+    if (requestId !== sharedSkillsRequestId || !includeSharedSkills.value) {
+      return;
+    }
+    sharedSkillsLoadFailed.value = true;
+  }
+}
 
 const updatePotentialSkills = () => {
   loadingPotentialSkills.value = true;
@@ -185,6 +230,33 @@ function validate(value, ctx) {
     return ctx.createError({ message: reason });
   });
 }
+
+const filterProjectSkills = () => {
+  if (!savedMainSkills.value) {
+    return;
+  }
+
+  const search = filterValue.value.toLowerCase();
+  const filtered = savedMainSkills.value.filter((skill) =>
+      skill.name?.toLowerCase().includes(search)
+  );
+
+  const otherGroups = allSkills.value.filter(
+      (group) => group?.label !== 'This Project'
+  );
+
+  allSkills.value = filtered.length > 0
+      ? [{ label: 'This Project', items: filtered }, ...otherGroups]
+      : otherGroups;
+};
+
+const updateSearch = (value) => {
+  if(filterValue.value !== value) {
+    filterValue.value = value;
+    filterProjectSkills()
+    loadSharedSkills()
+  }
+}
 </script>
 
 <template>
@@ -196,7 +268,7 @@ function validate(value, ctx) {
       <div class="flex gap-2 flex-wrap flex-col lg:flex-row lg:items-end">
         <div class="flex-1 field">
           <label for="learningItemFromInput">From:</label>
-          <skills-selector :options="allSkills"
+          <skills-selector :options="fromSkillOptions"
                            :is-loading="isLoading"
                            :selected="selectedFromSkills"
                            ref="fromSelector"
@@ -205,10 +277,15 @@ function validate(value, ctx) {
                            inputId="learningItemFromInput"
                            placeholder="From Skill or Badge"
                            placeholder-icon="fas fa-search"
+                           @search-change="updateSearch"
+                           :internal-search="false"
                            aria-label="Select a skill or a badge for the Learning Path's from step"
                            v-on:added="onFromSelected"
                            :disabled="disabled"
                            :appendTo="appendTo"
+                           :after-list-slot-text="includeSharedSkills ? 'Enter text to search for shared skills' : null"
+                           :option-group-label="includeSharedSkills ? 'label' : null"
+                           :option-group-children="includeSharedSkills ? 'items' : null"
                            :showType=true />
         </div>
         <div class="flex-1 field">
@@ -238,6 +315,13 @@ function validate(value, ctx) {
           </SkillsButton>
         </div>
       </div>
+      <div class="flex flex-1 gap-2 mt-2">
+        <Checkbox input-id="includeShared" v-model="includeSharedSkills" binary data-cy="includeShared" aria-label="Include skills shared from other projects" @change="loadSharedSkills"/>
+        <label for="includeShared">Include skills shared from other projects</label>
+      </div>
+      <Message v-if="includeSharedSkills && sharedSkillsLoadFailed" severity="error" :closable="false" data-cy="sharedSkillsSearchError">
+        Could not load shared skills. Change the search to try again.
+      </Message>
       <div>
         <input v-model="toSkillId" v-bind="toSkillIdAttrs" class="hidden" aria-hidden="true" aria-label="Used to validate learning path route"/>
         <Message v-if="errors.toSkillId" severity="error" data-cy="learningPathError" :closable="false"><span v-html="InputSanitizer.sanitize(errors.toSkillId)" /></Message>

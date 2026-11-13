@@ -957,7 +957,7 @@ class AuthorizationSpecs extends DefaultIntSpec {
                 "/groups/${groupId}/skills", "/groups/${groupId}/subject", '/skills', '/skillsAndBadges',
                 "/skills/${skillId}", '/badges', "/badges/${badgeId}", "/badge/${badgeId}/skills",
                 '/navigableItems', '/levels', "/subjects/${subjectId}/levels", '/users/count',
-                '/settings', '/clientSecret', '/latestVersion', '/dependency/graph', '/shared', '/sharedWithMe',
+                '/settings', '/clientSecret', '/latestVersion', '/dependency/graph',
                 '/catalog/finalize/info', '/pendingFinalization/pointTotals',
                 '/skills/imported/stats', '/skills/exported/stats', '/skills/tags', '/skills/tags/access',
                 '/lastSkillEvent', '/validateEnablingCommunity', '/adminGroups',
@@ -973,6 +973,8 @@ class AuthorizationSpecs extends DefaultIntSpec {
             requests.add(endpoint(GET, "${admin}/${path}", paging))
         }
         requests.addAll([
+                endpoint(GET, "${admin}/shared", [limit: 10, page: 1, orderBy: 'skill.name', ascending: true]),
+                endpoint(GET, "${admin}/sharedWithMe", [limit: 10, page: 1, orderBy: 'skill.name', ascending: true]),
                 endpoint(GET, "${admin}/performedSkills/${fixture.owner.userName}",
                         [limit: 10, page: 1, query: '', orderBy: 'performedOn', ascending: true]),
                 endpoint(GET, "${admin}/skills/exported", [limit: 10, page: 1, orderBy: 'skillId', ascending: true]),
