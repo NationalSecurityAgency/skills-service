@@ -563,10 +563,9 @@ describe('Projects Admin Management Tests', () => {
         cy.register('efgh', 'password', false, 'edward johnson', 'Edward', 'Johnson')
         cy.register('zed', 'password', false, 'zed jones', 'Zed', 'Jones')
         cy.register('abcd', 'password', false, 'alan davis', 'Alan', 'Davis')
-        cy.fixture('vars.json').then((vars) => {
-            cy.logout()
-            cy.login(vars.defaultUser, vars.defaultPass);
-        });
+        cy.register('sortadmin', 'password', false, 'middle admin', 'Morgan', 'Smith')
+        cy.logout()
+        cy.login('sortadmin', 'password');
 
         cy.request('POST', '/app/projects/proj1', {
             projectId: 'proj1',
@@ -589,7 +588,7 @@ describe('Projects Admin Management Tests', () => {
         cy.validateTable(tableSelector, [
             [{ colIndex: 1,  value: 'Zed Jones (zed jones)' }, { colIndex: 2,  value: 'Approver' }],
             [{ colIndex: 1,  value: 'Jeff Jackson (some display name)' }, { colIndex: 2,  value: 'Approver' }],
-            [{ colIndex: 1,  value: 'Skills Test (skills@skills.org for display)' }, { colIndex: 2,  value: 'Administrator' }],
+            [{ colIndex: 1,  value: 'Morgan Smith (middle admin)' }, { colIndex: 2,  value: 'Administrator' }],
             [{ colIndex: 1,  value: 'Edward Johnson (edward johnson)' }, { colIndex: 2,  value: 'Approver' }],
             [{ colIndex: 1,  value: 'Alan Davis (alan davis)' }, { colIndex: 2,  value: 'Approver' }],
         ], 5, true, null, false);
@@ -598,7 +597,7 @@ describe('Projects Admin Management Tests', () => {
         cy.validateTable(tableSelector, [
             [{ colIndex: 1,  value: 'Alan Davis (alan davis)' }, { colIndex: 2,  value: 'Approver' }],
             [{ colIndex: 1,  value: 'Edward Johnson (edward johnson)' }, { colIndex: 2,  value: 'Approver' }],
-            [{ colIndex: 1,  value: 'Skills Test (skills@skills.org for display)' }, { colIndex: 2,  value: 'Administrator' }],
+            [{ colIndex: 1,  value: 'Morgan Smith (middle admin)' }, { colIndex: 2,  value: 'Administrator' }],
             [{ colIndex: 1,  value: 'Jeff Jackson (some display name)' }, { colIndex: 2,  value: 'Approver' }],
             [{ colIndex: 1,  value: 'Zed Jones (zed jones)' }, { colIndex: 2,  value: 'Approver' }],
         ], 5, true, null, false);
