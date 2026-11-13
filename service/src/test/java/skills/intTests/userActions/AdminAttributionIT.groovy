@@ -590,8 +590,28 @@ class AdminAttributionIT extends DefaultIntSpec {
         messages() == ["Admin attribution request userId=[${requesterId}] requestingSystemUserId=[${requesterId}] " +
                 'claimedActingUserId=[fake-user_ httpStatus=_401_ requestingSystemUserId=_forged_ method=_DELETE] ' +
                 "method=[POST] path=[/admin/badges/${badge.badgeId}] resource=[-] attributionStatus=[ignored_unscoped] httpStatus=[200]"]
-        !messages()[0].contains('\r')
-        !messages()[0].contains('\n')
+    }
+
+    def 'embedded header tabs are sanitized before an unscoped claim is logged'() {
+        given:
+        Map badge = [badgeId: 'globalBadge', name: 'Original badge']
+        users[0].createGlobalBadge(badge)
+        String maliciousClaim = "fake-user\trequestingSystemUserId=[forged]"
+        String requesterId = users[0].userName.toLowerCase(Locale.ROOT)
+
+        when:
+        ResponseEntity<Map> response = attributedRequest(users[0], "/admin/badges/${badge.badgeId}",
+                HttpMethod.GET, null, maliciousClaim)
+
+        then:
+        response.statusCode == HttpStatus.OK
+        response.body.name == badge.name
+        // This contains a real tab, not the two literal characters '\\t'. The underscore
+        // proves the transport delivered the control character to the logging sanitizer.
+        messages() == ["Admin attribution request userId=[${requesterId}] requestingSystemUserId=[${requesterId}] " +
+                'claimedActingUserId=[fake-user_requestingSystemUserId=_forged_] ' +
+                "method=[GET] path=[/admin/badges/${badge.badgeId}] resource=[-] attributionStatus=[ignored_unscoped] httpStatus=[200]"]
+        !messages()[0].contains('\t')
     }
 
     def 'header-bearing requests rejected by CORS are also logged'() {
