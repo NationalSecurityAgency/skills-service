@@ -146,6 +146,8 @@ skills:
       # Copy routes (including cross-project copy validation), admin-group routes, and global-badge
       # routes ignore attribution and log ignored_unscoped, even with embedded project/quiz IDs.
       # Their history retains the requester; all header-bearing /admin requests still require the allowlist.
+      # Every header-bearing /admin request is logged at INFO, including authentication/CORS/CSRF rejections.
+      # Before enabling, consider ingress rate limits and bounded log retention while preserving legitimate audit records.
       enabled: false
       # The header value is the canonical application user ID, including in PKI mode.
       # Credential/session/CSRF header names (for example Authorization or Cookie) are prohibited.
