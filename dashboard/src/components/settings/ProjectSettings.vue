@@ -51,6 +51,12 @@ const schema = yup.object({
   skillDisplayName: yup.string().max(appConfig.maxCustomLabelLength).noHtml().label('Skill Display Text'),
   levelDisplayName: yup.string().max(appConfig.maxCustomLabelLength).noHtml().label('Level Display Text'),
   pointDisplayName: yup.string().max(appConfig.maxCustomLabelLength).noHtml().label('Point Display Text'),
+  projectDisplayNamePlural: yup.string().max(appConfig.maxCustomLabelLength).noHtml().label('Project Plural Display Text'),
+  subjectDisplayNamePlural: yup.string().max(appConfig.maxCustomLabelLength).noHtml().label('Subject Plural Display Text'),
+  groupDisplayNamePlural: yup.string().max(appConfig.maxCustomLabelLength).noHtml().label('Group Plural Display Text'),
+  skillDisplayNamePlural: yup.string().max(appConfig.maxCustomLabelLength).noHtml().label('Skill Plural Display Text'),
+  levelDisplayNamePlural: yup.string().max(appConfig.maxCustomLabelLength).noHtml().label('Level Plural Display Text'),
+  pointDisplayNamePlural: yup.string().max(appConfig.maxCustomLabelLength).noHtml().label('Point Plural Display Text'),
 });
 
 const { values, defineField, errors, meta, handleSubmit, setFieldValue, resetForm } = useForm({
@@ -62,6 +68,12 @@ const { values, defineField, errors, meta, handleSubmit, setFieldValue, resetFor
     subjectDisplayName: 'Subject',
     projectDisplayName: 'Project',
     pointDisplayName: 'Point',
+    projectDisplayNamePlural: '',
+    subjectDisplayNamePlural: '',
+    groupDisplayNamePlural: '',
+    skillDisplayNamePlural: '',
+    levelDisplayNamePlural: '',
+    pointDisplayNamePlural: '',
   }
 });
 
@@ -208,6 +220,48 @@ let settings = ref({
     dirty: false,
     projectId: route.params.projectId,
   },
+  projectDisplayNamePlural: {
+    value: '',
+    setting: 'project.displayNamePlural',
+    lastLoadedValue: '',
+    dirty: false,
+    projectId: route.params.projectId,
+  },
+  subjectDisplayNamePlural: {
+    value: '',
+    setting: 'subject.displayNamePlural',
+    lastLoadedValue: '',
+    dirty: false,
+    projectId: route.params.projectId,
+  },
+  groupDisplayNamePlural: {
+    value: '',
+    setting: 'group.displayNamePlural',
+    lastLoadedValue: '',
+    dirty: false,
+    projectId: route.params.projectId,
+  },
+  skillDisplayNamePlural: {
+    value: '',
+    setting: 'skill.displayNamePlural',
+    lastLoadedValue: '',
+    dirty: false,
+    projectId: route.params.projectId,
+  },
+  levelDisplayNamePlural: {
+    value: '',
+    setting: 'level.displayNamePlural',
+    lastLoadedValue: '',
+    dirty: false,
+    projectId: route.params.projectId,
+  },
+  pointDisplayNamePlural: {
+    value: '',
+    setting: 'point.displayNamePlural',
+    lastLoadedValue: '',
+    dirty: false,
+    projectId: route.params.projectId,
+  },
   hideProjectDescription: {
     value: false,
     setting: 'show_project_description_everywhere',
@@ -237,7 +291,13 @@ const shouldShowCustomLabelsConfig = computed(() => {
       || settings.value.groupDisplayName.value !== 'Group' || settings.value.groupDisplayName.dirty
       || settings.value.skillDisplayName.value !== 'Skill' || settings.value.skillDisplayName.dirty
       || settings.value.levelDisplayName.value !== 'Level' || settings.value.levelDisplayName.dirty
-      || settings.value.pointDisplayName.value !== 'Point' || settings.value.pointDisplayName.dirty;
+      || settings.value.pointDisplayName.value !== 'Point' || settings.value.pointDisplayName.dirty
+      || !!settings.value.projectDisplayNamePlural.value || settings.value.projectDisplayNamePlural.dirty
+      || !!settings.value.subjectDisplayNamePlural.value || settings.value.subjectDisplayNamePlural.dirty
+      || !!settings.value.groupDisplayNamePlural.value || settings.value.groupDisplayNamePlural.dirty
+      || !!settings.value.skillDisplayNamePlural.value || settings.value.skillDisplayNamePlural.dirty
+      || !!settings.value.levelDisplayNamePlural.value || settings.value.levelDisplayNamePlural.dirty
+      || !!settings.value.pointDisplayNamePlural.value || settings.value.pointDisplayNamePlural.dirty;
 });
 
 const showCustomLabelsConfigLabel = computed(() => {
@@ -505,6 +565,18 @@ const toggleCustomLabelConfig = () => {
     settings.value.levelDisplayName.dirty = true
     settings.value.pointDisplayName.value = 'Point'
     settings.value.pointDisplayName.dirty = true
+    settings.value.projectDisplayNamePlural.value = ''
+    settings.value.projectDisplayNamePlural.dirty = true
+    settings.value.subjectDisplayNamePlural.value = ''
+    settings.value.subjectDisplayNamePlural.dirty = true
+    settings.value.groupDisplayNamePlural.value = ''
+    settings.value.groupDisplayNamePlural.dirty = true
+    settings.value.skillDisplayNamePlural.value = ''
+    settings.value.skillDisplayNamePlural.dirty = true
+    settings.value.levelDisplayNamePlural.value = ''
+    settings.value.levelDisplayNamePlural.dirty = true
+    settings.value.pointDisplayNamePlural.value = ''
+    settings.value.pointDisplayNamePlural.dirty = true
   }
 }
 </script>
@@ -638,26 +710,50 @@ const toggleCustomLabelConfig = () => {
                                           label="Project Display Text"
                                           @input="updateSettingsField"
                                           help-message='The word "Project" may be overloaded to some organizations.  You can change the value displayed to users in Skills Display here.'/>
+                  <SkillsSettingTextInput name="projectDisplayNamePlural"
+                                          label="Project Plural Display Text"
+                                          @input="updateSettingsField"
+                                          help-message='Optional plural form of the Project Display Text. When empty, an English plural is generated automatically.'/>
                   <SkillsSettingTextInput name="subjectDisplayName"
                                           label="Subject Display Text"
                                           @input="updateSettingsField"
                                           help-message='The word "Subject" may be overloaded to some organizations.  You can change the value displayed to users in Skills Display here.'/>
+                  <SkillsSettingTextInput name="subjectDisplayNamePlural"
+                                          label="Subject Plural Display Text"
+                                          @input="updateSettingsField"
+                                          help-message='Optional plural form of the Subject Display Text. When empty, an English plural is generated automatically.'/>
                   <SkillsSettingTextInput name="groupDisplayName"
                                           label="Group Display Text"
                                           @input="updateSettingsField"
                                           help-message='The word "Group" may be overloaded to some organizations.  You can change the value displayed to users in Skills Display here.'/>
+                  <SkillsSettingTextInput name="groupDisplayNamePlural"
+                                          label="Group Plural Display Text"
+                                          @input="updateSettingsField"
+                                          help-message='Optional plural form of the Group Display Text. When empty, an English plural is generated automatically.'/>
                   <SkillsSettingTextInput name="skillDisplayName"
                                           label="Skill Display Text"
                                           @input="updateSettingsField"
                                           help-message='The word "Skill" may be overloaded to some organizations.  You can change the value displayed to users in Skills Display here.'/>
+                  <SkillsSettingTextInput name="skillDisplayNamePlural"
+                                          label="Skill Plural Display Text"
+                                          @input="updateSettingsField"
+                                          help-message='Optional plural form of the Skill Display Text. When empty, an English plural is generated automatically.'/>
                   <SkillsSettingTextInput name="levelDisplayName"
                                           label="Level Display Text"
                                           @input="updateSettingsField"
                                           help-message='The word "Level" may be overloaded to some organizations.  You can change the value displayed to users in Skills Display here.'/>
+                  <SkillsSettingTextInput name="levelDisplayNamePlural"
+                                          label="Level Plural Display Text"
+                                          @input="updateSettingsField"
+                                          help-message='Optional plural form of the Level Display Text. When empty, an English plural is generated automatically.'/>
                   <SkillsSettingTextInput name="pointDisplayName"
                                           label="Point Display Text"
                                           @input="updateSettingsField"
                                           help-message='The word "Point" may be overloaded to some organizations.  You can change the value displayed to users in Skills Display here.'/>
+                  <SkillsSettingTextInput name="pointDisplayNamePlural"
+                                          label="Point Plural Display Text"
+                                          @input="updateSettingsField"
+                                          help-message='Optional plural form of the Point Display Text. When empty, an English plural is generated automatically.'/>
                 </template>
               </Card>
             </div>
