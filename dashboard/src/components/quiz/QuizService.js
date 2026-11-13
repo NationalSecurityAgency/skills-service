@@ -16,8 +16,8 @@
 import axios from 'axios'
 
 export default {
-  getQuizDefs() {
-    return axios.get('/app/quiz-definitions').then((response) => response.data)
+  getQuizDefs(handleError = true) {
+    return axios.get('/app/quiz-definitions', { handleError }).then((response) => response.data)
   },
   updateQuizDef(quizDef) {
     const quizId = quizDef.originalQuizId ? quizDef.originalQuizId : quizDef.quizId
@@ -64,6 +64,12 @@ export default {
     return axios
       .post(`/admin/quiz-definitions/${quizId}/create-question`, newQuestionDef)
       .then((response) => response.data)
+  },
+  validateQuizCopy(fromQuizId, toQuizId, numberOfQuestions) {
+    return axios.post(`/admin/quiz-definitions/${fromQuizId}/questions/validateCopy`, { destinationQuizId: toQuizId, numberOfQuestions }, { handleError: false }).then((response) => response.data)
+  },
+  copyToAnotherQuiz(fromQuizId, toQuizId, questionIds) {
+    return axios.post(`/admin/quiz-definitions/${fromQuizId}/questions/copy/${toQuizId}`, questionIds, { handleError: false }).then((response) => response.data)
   },
   updateQuizQuestionDef(quizId, existingQuestionDef) {
     return axios
