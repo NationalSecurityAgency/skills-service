@@ -786,26 +786,35 @@ class AdminAttributionIT extends DefaultIntSpec {
         SkillsService requester = createRootSkillService(users[0].userName, 'password')
         String requesterId = requester.userName.toLowerCase(Locale.ROOT)
         String path = "/admin/${route}/bad${character}forged"
+        HttpHeaders headers = new HttpHeaders()
+        headers.set(HEADER, 'first,second')
 
         when:
         // The authenticated transport percent-encodes the Unicode path segment. A malformed
-        // claim rejects attribution after the interceptor records the decoded resource ID.
-        ResponseEntity<Map> response = attributedRequest(requester, path, HttpMethod.GET, null, 'first,second')
+        // claim rejects attribution after the interceptor records the decoded resource ID,
+        // unless the firewall rejects the path before the attribution filters run.
+        ResponseEntity<Map> response = requester.requestWithHeaders(path, HttpMethod.GET, null, headers)
 
         then:
         response.statusCode == HttpStatus.BAD_REQUEST
-        response.body.errorCode == 'BadParam'
-        messages() == ["Admin attribution request userId=[${requesterId}] requestingSystemUserId=[${requesterId}] " +
-                'claimedActingUserId=[first,second] method=[GET] ' +
-                "path=[/admin/${route}/bad${encodedCharacter}forged] resource=[${resourceType}:bad_forged] " +
-                'attributionStatus=[rejected] httpStatus=[400]']
-        !(messages()[0] =~ /[\p{Cc}\p{Cf}\p{Zl}\p{Zp}]/)
+        if (firewallRejected) {
+            // StrictHttpFirewall blocks line/paragraph separators before the logging filter.
+            assert messages().empty
+        } else {
+            assert response.body.errorCode == 'BadParam'
+            awaitAdminLog()
+            assert messages() == ["Admin attribution request userId=[${requesterId}] requestingSystemUserId=[${requesterId}] " +
+                    'claimedActingUserId=[first,second] method=[GET] ' +
+                    "path=[/admin/${route}/bad${encodedCharacter}forged] resource=[${resourceType}:bad_forged] " +
+                    'attributionStatus=[rejected] httpStatus=[400]']
+            assert !(messages()[0] =~ /[\p{Cc}\p{Cf}\p{Zl}\p{Zp}]/)
+        }
 
         where:
-        [route, resourceType, character, encodedCharacter] << [
+        [route, resourceType, character, encodedCharacter, firewallRejected] << [
                 [['projects', 'project'], ['quiz-definitions', 'quiz']],
-                [['\u0085', '%C2%85'], ['\u009f', '%C2%9F'], ['\u2028', '%E2%80%A8'],
-                 ['\u2029', '%E2%80%A9'], ['\u202e', '%E2%80%AE'], ['\u200b', '%E2%80%8B']]
+                [['\u0085', '%C2%85', false], ['\u009f', '%C2%9F', false], ['\u2028', '%E2%80%A8', true],
+                 ['\u2029', '%E2%80%A9', true], ['\u202e', '%E2%80%AE', false], ['\u200b', '%E2%80%8B', false]]
         ].combinations().collect { List combination -> combination.flatten() }
     }
 
