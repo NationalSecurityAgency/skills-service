@@ -45,6 +45,36 @@ describe('Dashboard User Actions Tests', () => {
         cy.get('[data-p-index="0"] [data-pc-section="rowtogglebutton"]').click()
         cy.get('[data-cy="row0-expandedDetails"').contains('Skill Id:')
         cy.get('[data-cy="row0-expandedDetails"').contains('skill1')
+        cy.get('[data-cy="row0-expandedDetails"]').should('not.contain.text', 'Requesting System User Id:')
+    });
+
+    it('preserves literal requester identity in filtered project and quiz action details', () => {
+        cy.createProject(1)
+        cy.createQuizDef(1)
+
+        const scenarios = [
+            { page: '/administrator/projects/proj1/activityHistory', attributes: '/admin/projects/proj1/dashboardActions/*/attributes', item: 'Project' },
+            { page: '/administrator/quizzes/quiz1/activityHistory', attributes: '/admin/quiz-definitions/quiz1/dashboardActions/*/attributes', item: 'Quiz' },
+        ];
+        scenarios.forEach(({ page, attributes, item }) => {
+            cy.intercept('GET', attributes, (req) => {
+                req.reply((res) => {
+                    res.body.requestingSystemUserId = 'invite_only';
+                    res.body.internalOnlyAttribute = 'should be filtered out';
+                });
+            });
+
+            cy.visit(page)
+            cy.get('[data-cy="row0-item"]').should('contain.text', item)
+            cy.get('[data-p-index="0"] [data-pc-section="rowtogglebutton"]').click()
+            cy.get('[data-cy="row0-expandedDetails"]').within(() => {
+                cy.contains('Requesting System User Id:').should('be.visible')
+                    .parent().should('contain.text', 'invite_only');
+                cy.contains('Name:').should('be.visible');
+                cy.root().should('not.contain.text', 'Is Private Invite Only Project')
+                    .and('not.contain.text', 'should be filtered out');
+            });
+        });
     });
 
     it('filter project user activity', () => {
