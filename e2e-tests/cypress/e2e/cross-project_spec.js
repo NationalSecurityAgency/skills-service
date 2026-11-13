@@ -793,6 +793,25 @@ describe('Shared skills pagination and request recovery', () => {
             .first().should('contain', name);
     };
 
+    const pagingNames = (first, last) => Array.from({ length: Math.abs(last - first) + 1 }, (_, index) =>
+        `Paging Skill ${String(first + index * (last >= first ? 1 : -1)).padStart(2, '0')}`);
+
+    const createTwelveShares = () => {
+        for (let skill = 1; skill <= 12; skill += 1) {
+            cy.createSkill(1, 1, skill, { name: `Paging Skill ${String(skill).padStart(2, '0')}` });
+            if (skill > 6) {
+                cy.request('PUT', `/admin/projects/proj1/skills/skill${skill}/shared/projects/proj2`);
+            }
+        }
+    };
+
+    const expectSkills = (card, expected, page) => {
+        cy.get(`${card} ${rows} td:first-child`).should(($skills) => {
+            expect([...$skills].map((skill) => skill.textContent.trim())).to.deep.equal(expected);
+        });
+        cy.get(`${card} [aria-label="Page ${page}"]`).should('have.attr', 'aria-current', 'page');
+    };
+
     const selectShare = (skill = 1, project = 3) => {
         cy.get(`${outgoingCard} [data-cy="skillsSelector"] input`).type(`{selectall}Shared Skill ${skill}`);
         // Wait for the debounced search instead of selecting from the initial suggestions.
@@ -1024,6 +1043,95 @@ describe('Shared skills pagination and request recovery', () => {
         expectFirstSkill(outgoingCard, 'Shared Skill 6');
         cy.get(`${outgoingCard} ${table}`).should('not.contain', 'Shared Skill 1');
         cy.get(`${outgoingCard} [aria-label="Page 2"]`).should('not.exist');
+    });
+
+    [
+        { project: 1, card: outgoingCard },
+        { project: 2, card: incomingCard },
+    ].forEach(({ project, card }) => {
+        it(`keeps all ${project === 1 ? 'outgoing' : 'incoming'} rows and the active page aligned after later-page sorting`, () => {
+            createTwelveShares();
+            visit(project, {
+                [outgoingSortKey]: { sortOrder: -1, sortBy: 'skill.name' },
+                [incomingSortKey]: { sortOrder: -1, sortBy: 'skill.name' },
+            });
+            expectSkills(card, pagingNames(12, 8), 1);
+            cy.get(`${card} [aria-label="Page 3"]`).click();
+            expectSkills(card, pagingNames(2, 1), 3);
+            cy.get(`${card} th`).contains('Shared Skill').click();
+            expectSkills(card, pagingNames(1, 5), 1);
+            cy.get(`${card} [aria-label="Page 2"]`).click();
+            expectSkills(card, pagingNames(6, 10), 2);
+            cy.get(`${card} th`).contains('Shared Skill').click();
+            expectSkills(card, pagingNames(12, 8), 1);
+            cy.get(`${card} [aria-label="Page 2"]`).click();
+            expectSkills(card, pagingNames(7, 3), 2);
+        });
+
+        it(`recovers a removed ${project === 1 ? 'outgoing' : 'incoming'} final page while multiple pages remain`, () => {
+            createTwelveShares();
+            visit(project, {
+                [outgoingSortKey]: { sortOrder: -1, sortBy: 'skill.name' },
+                [incomingSortKey]: { sortOrder: -1, sortBy: 'skill.name' },
+            });
+            expectSkills(card, pagingNames(12, 8), 1);
+            // Simulate another session changing the dataset without refreshing this paginator.
+            cy.request('DELETE', '/admin/projects/proj1/skills/skill1/shared/projects/proj2');
+            cy.request('DELETE', '/admin/projects/proj1/skills/skill2/shared/projects/proj2');
+            cy.get(`${card} [aria-label="Page 3"]`).click();
+            expectSkills(card, pagingNames(7, 3), 2);
+            cy.get(`${card} [data-cy="skillsBTableTotalRows"]`).should('have.text', '10');
+            cy.get(`${card} [aria-label="Page 3"]`).should('not.exist');
+            cy.get(`${card} [aria-label="Page 1"]`).click();
+            expectSkills(card, pagingNames(12, 8), 1);
+        });
+    });
+
+    it('aligns outgoing rows and the active page after deleting on a later page with multiple pages remaining', () => {
+        createTwelveShares();
+        visit(1, { [outgoingSortKey]: { sortOrder: -1, sortBy: 'skill.name' } });
+        expectSkills(outgoingCard, pagingNames(12, 8), 1);
+        cy.get(`${outgoingCard} [aria-label="Page 3"]`).click();
+        expectSkills(outgoingCard, pagingNames(2, 1), 3);
+        cy.get(`${outgoingCard} ${rows}`).contains('Paging Skill 01').closest('tr')
+            .find('[data-cy="sharedSkillsTable-removeBtn"]').click();
+        expectSkills(outgoingCard, pagingNames(12, 8), 1);
+        cy.get(`${outgoingCard} [data-cy="skillsBTableTotalRows"]`).should('have.text', '11');
+        cy.get(`${outgoingCard} [aria-label="Page 3"]`).click();
+        expectSkills(outgoingCard, ['Paging Skill 02'], 3);
+        cy.get(`${outgoingCard} [data-cy="sharedSkillsTable-removeBtn"]`).click();
+        expectSkills(outgoingCard, pagingNames(12, 8), 1);
+        cy.get(`${outgoingCard} [aria-label="Page 3"]`).should('not.exist');
+        cy.get(`${outgoingCard} [aria-label="Page 2"]`).click();
+        expectSkills(outgoingCard, pagingNames(7, 3), 2);
+    });
+
+    it('retains the incoming total across pages and page sizes with count left and controls right below the rows', () => {
+        createTwelveShares();
+        visit(2, { [incomingSortKey]: { sortOrder: -1, sortBy: 'skill.name' } });
+        const count = `${incomingCard} [data-cy="skillsBTableTotalRows"]`;
+        expectSkills(incomingCard, pagingNames(12, 8), 1);
+        cy.get(count).should('be.visible').and('have.text', '12');
+        cy.get(`${incomingCard} [aria-label="Page 3"]`).click();
+        expectSkills(incomingCard, pagingNames(2, 1), 3);
+        cy.get(count).should('have.text', '12');
+        changePageSize(incomingCard, 10);
+        expectSkills(incomingCard, pagingNames(2, 1), 2);
+        cy.get(count).should('have.text', '12');
+        cy.get(`${incomingCard} [aria-label="Page 1"]`).click();
+        expectSkills(incomingCard, pagingNames(12, 3), 1);
+        cy.get(count).should('have.text', '12');
+        cy.get(`${incomingCard} ${table}`).should(($table) => {
+            const countRect = $table[0].querySelector('[data-pc-section="contentstart"]').getBoundingClientRect();
+            const controlsRect = $table[0].querySelector('[aria-label="Pagination Controls for table with id of sharedWithMeSkillsTable"] [data-pc-section="content"]').getBoundingClientRect();
+            const tableRect = $table[0].getBoundingClientRect();
+            const bodyRect = $table[0].querySelector('tbody').getBoundingClientRect();
+            expect(countRect.top).to.be.at.least(bodyRect.bottom);
+            expect(controlsRect.top).to.be.at.least(bodyRect.bottom);
+            expect(countRect.right).to.be.lessThan(controlsRect.left);
+            expect(countRect.left - tableRect.left).to.be.lessThan(32);
+            expect(tableRect.right - controlsRect.right).to.be.lessThan(32);
+        });
     });
 
     it('blocks a duplicate share that is not on the visible page', () => {
@@ -1272,6 +1380,98 @@ describe('Shared skills pagination and request recovery', () => {
         cy.get(outgoingCard).should('not.contain', 'already shared');
     });
 
+    it('groups prerequisite options only when shared skills are included and hides empty groups', () => {
+        const groups = '[data-pc-section="optiongroup"]';
+        cy.createBadge(2, 1, { name: 'Local destination badge' });
+        cy.assignSkillToBadge(2, 1, 1);
+        cy.enableBadge(2, 1, { name: 'Local destination badge' });
+        visit(2);
+        cy.get(fromInput).click();
+        cy.get(option(2, 1)).should('be.visible');
+        cy.get('[data-cy="skillsSelectionItem-proj2-badge1"]').should('be.visible');
+        cy.get(groups).should('not.exist');
+        cy.get('[data-cy^="skillsSelectionItem-proj1-"]').should('not.exist');
+
+        cy.get('[data-cy="includeShared"]').click();
+        cy.get(fromInput).click();
+        cy.get(option(1, 6)).scrollIntoView().should('be.visible');
+        cy.get(groups).should('have.length', 2);
+        cy.get(groups).eq(0).should('have.text', 'This Project');
+        cy.get(groups).eq(1).should('have.text', 'Shared Skills');
+
+        cy.get(fromInput).type('Local');
+        cy.get('[data-cy^="skillsSelectionItem-proj1-"]').should('not.exist');
+        cy.get(option(2, 1)).should('be.visible');
+        cy.get('[data-cy="skillsSelectionItem-proj2-badge1"]').should('be.visible');
+        cy.get(groups).should('have.length', 1).and('have.text', 'This Project');
+
+        cy.get(fromInput).type('{selectall}skill2');
+        cy.get(option(1, 2)).should('be.visible');
+        cy.get(option(2, 1)).should('not.exist');
+        cy.get(groups).should('have.length', 1).and('have.text', 'Shared Skills');
+
+        cy.get('[data-cy="includeShared"]').click();
+        cy.get(fromInput).type('{selectall}Local');
+        cy.get(option(2, 1)).should('be.visible');
+        cy.get('[data-cy="skillsSelectionItem-proj2-badge1"]').should('be.visible');
+        cy.get(groups).should('not.exist');
+        cy.get('[data-cy^="skillsSelectionItem-proj1-"]').should('not.exist');
+    });
+
+    [false, true].forEach((includeShared) => {
+        it(`clears search loading for empty and repeated queries and restores options after no matches (shared=${includeShared})`, () => {
+            visit(2);
+            if (includeShared) {
+                cy.get('[data-cy="includeShared"]').click();
+            }
+            cy.get(fromInput).click();
+            cy.get(option(2, 1)).should('be.visible');
+            if (includeShared) {
+                cy.get(option(1, 6)).should('exist');
+            }
+            const spinner = '[data-cy="learningPathFromSkillSelector"] [data-pc-section="loader"]';
+            cy.get(spinner).should('not.exist');
+            // Advance the real autocomplete debounce deterministically, including
+            // same-query completions that do not issue another HTTP request.
+            cy.clock(Date.now(), ['setTimeout', 'clearTimeout']);
+            cy.get(fromInput).type('Local');
+            cy.tick(500);
+            cy.get(option(2, 1)).should('be.visible');
+            cy.get(spinner).should('not.exist');
+            cy.get(fromInput).type('{selectall}Local');
+            cy.tick(500);
+            cy.get(option(2, 1)).should('be.visible');
+            cy.get(spinner).should('not.exist');
+            cy.get(fromInput).type('{selectall}no matching prerequisite');
+            cy.tick(500);
+            cy.get('[data-pc-section="emptymessage"]').should('be.visible')
+                .and('contain', 'No results found. Consider changing the search query');
+            cy.get('[data-cy^="skillsSelectionItem-"]').should('not.exist');
+            cy.get(spinner).should('not.exist');
+            cy.get(fromInput).clear();
+            // Flush the autocomplete's deferred close before reopening the popup.
+            cy.tick(0);
+            // Clearing closes the popup; reopen it through the selector's dropdown.
+            cy.get('[data-cy="learningPathFromSkillSelector"] button[aria-label="click to select a skill"]').click();
+            cy.tick(500);
+            cy.get(option(2, 1)).should('be.visible');
+            if (includeShared) {
+                cy.get(option(1, 6)).should('exist');
+                cy.get('[data-pc-section="optiongroup"]').should('have.length', 2);
+            } else {
+                cy.get('[data-pc-section="optiongroup"]').should('not.exist');
+            }
+            cy.get(spinner).should('not.exist');
+            cy.get(fromInput).blur().focus();
+            cy.tick(500);
+            cy.get(option(2, 1)).should('be.visible');
+            cy.get(spinner).should('not.exist');
+            cy.clock().invoke('restore');
+            cy.get(option(2, 1)).click();
+            cy.get('[data-cy="learningPathToSkillSelector"] input').should('be.enabled');
+        });
+    });
+
     it('ignores an older shared search after a newer search completes', () => {
         let releaseSearch;
         cy.intercept('GET', '/admin/projects/proj2/sharedWithMe?*', (request) => {
@@ -1295,6 +1495,83 @@ describe('Shared skills pagination and request recovery', () => {
         cy.wait('@oldSearch');
         cy.get(option(1, 2)).should('be.visible');
         cy.get(option(1, 1)).should('not.exist');
+    });
+
+    it('ignores an older shared search failure after a newer search succeeds', () => {
+        let releaseSearch;
+        cy.intercept('GET', '/admin/projects/proj2/sharedWithMe?*', (request) => {
+            if (request.query.filter === 'skill1') {
+                request.alias = 'oldFailedSearch';
+                return new Cypress.Promise((resolve) => {
+                    releaseSearch = () => {
+                        request.reply({ statusCode: 500, body: { explanation: 'Older search failed' } });
+                        resolve();
+                    };
+                });
+            }
+        });
+        visit(2);
+        cy.get('[data-cy="includeShared"]').click();
+        cy.get(fromInput).type('skill1');
+        cy.wrap({ ready: () => Boolean(releaseSearch) }).invoke('ready').should('eq', true);
+        cy.get(fromInput).type('{selectall}skill2');
+        cy.get(option(1, 2)).should('be.visible');
+        cy.then(() => releaseSearch());
+        cy.wait('@oldFailedSearch');
+        cy.location('pathname').should('eq', '/administrator/projects/proj2/learning-path');
+        cy.get(option(1, 2)).should('be.visible');
+        cy.get(option(1, 1)).should('not.exist');
+        cy.get('[data-cy="sharedSkillsSearchError"]').should('not.exist');
+        cy.get(option(1, 2)).click();
+        cy.get('[data-cy="learningPathToSkillSelector"] input').should('be.enabled');
+    });
+
+    it('ignores a shared search failure after shared skills are toggled off', () => {
+        let releaseSearch;
+        cy.intercept('GET', '/admin/projects/proj2/sharedWithMe?*', (request) => {
+            if (request.query.filter === 'skill1') {
+                request.alias = 'disabledFailedSearch';
+                return new Cypress.Promise((resolve) => {
+                    releaseSearch = () => {
+                        request.reply({ statusCode: 500, body: { explanation: 'Disabled search failed' } });
+                        resolve();
+                    };
+                });
+            }
+        });
+        visit(2);
+        cy.get('[data-cy="includeShared"]').click();
+        cy.get(fromInput).type('skill1');
+        cy.wrap({ ready: () => Boolean(releaseSearch) }).invoke('ready').should('eq', true);
+        cy.get('[data-cy="includeShared"]').click();
+        cy.then(() => releaseSearch());
+        cy.wait('@disabledFailedSearch');
+        cy.location('pathname').should('eq', '/administrator/projects/proj2/learning-path');
+        cy.get('[data-cy="includeShared"] input').should('not.be.checked');
+        cy.get('[data-cy="sharedSkillsSearchError"]').should('not.exist');
+        cy.get(fromInput).type('{selectall}Local');
+        cy.get(option(2, 1)).should('be.visible');
+        cy.get(option(1, 1)).should('not.exist');
+        cy.get(option(2, 1)).click();
+        cy.get('[data-cy="learningPathToSkillSelector"] input').should('be.enabled');
+    });
+
+    it('shows the current shared search failure inline and recovers on a new search', () => {
+        cy.intercept('GET', '/admin/projects/proj2/sharedWithMe?*', (request) => {
+            if (request.query.filter === 'Local') {
+                request.reply({ statusCode: 500, body: { explanation: 'Current search failed' } });
+            }
+        });
+        visit(2);
+        cy.get('[data-cy="includeShared"]').click();
+        cy.get(fromInput).type('Local');
+        cy.get('[data-cy="sharedSkillsSearchError"]').should('be.visible')
+            .and('contain', 'Could not load shared skills. Change the search to try again.');
+        cy.location('pathname').should('eq', '/administrator/projects/proj2/learning-path');
+        cy.get(option(2, 1)).should('be.visible');
+        cy.get(fromInput).type('{selectall}skill2');
+        cy.get(option(1, 2)).should('be.visible');
+        cy.get('[data-cy="sharedSkillsSearchError"]').should('not.exist');
     });
 
     it('does not reintroduce shared options when sharing is toggled off during a search', () => {

@@ -97,6 +97,7 @@ class SharedSkillsPaginationSpec extends DefaultIntSpec {
         true     | 'SKILL1'          | 2             | ['Alpha']  | ['Delta']
         true     | 'aLpH'            | 1             | ['Alpha']  | []
         true     | 'no such skill'   | 0             | []         | []
+        false    | 'no such skill'   | 0             | []         | []
         true     | "' OR 1=1 --"     | 0             | []         | []
         false    | "' OR 1=1 --"     | 0             | []         | []
     }
@@ -161,7 +162,7 @@ class SharedSkillsPaginationSpec extends DefaultIntSpec {
         true     | 'skill.skillId' | [['skill1', 'TestProject1'], ['skill1', 'TestProject3'], ['skill2', 'TestProject1'], ['skill3', 'TestProject1']]
     }
 
-    def "paging breaks sort ties by ascending share ID - incoming=#incoming orderBy=#orderBy ascending=#ascending"() {
+    def "paging breaks sort ties by ascending share ID - incoming=#incoming orderBy=#orderBy ascending=#ascending pageSize=#pageSize"() {
         setup:
         createShares()
         Map globallyShared = SkillsFactory.createSkill(3, 1, 1)
@@ -178,13 +179,15 @@ class SharedSkillsPaginationSpec extends DefaultIntSpec {
         List<List<String>> expected = expectedOrder.collect { int index -> sharesByCreationOrder[index] }
 
         when:
-        List<Map> pages = (1..4).collect { int page -> loadShares(incoming, 1, page, orderBy, ascending) }
-        Map beyondLast = loadShares(incoming, 1, 5, orderBy, ascending)
+        int pageCount = (int) Math.ceil(4 / (double) pageSize)
+        List<Map> pages = (1..pageCount).collect { int page -> loadShares(incoming, pageSize, page, orderBy, ascending) }
+        Map beyondLast = loadShares(incoming, pageSize, pageCount + 1, orderBy, ascending)
         Map allShares = loadShares(incoming, 200, 1, orderBy, ascending)
 
         then:
-        pages.every { Map result -> result.totalCount == 4 && result.data.size() == 1 }
-        pages.collect { Map result -> [result.data[0].skillId, result.data[0].projectId] } == expected
+        pages.every { Map result -> result.totalCount == 4 }
+        pages*.data*.size() == (pageSize == 1 ? [1, 1, 1, 1] : [3, 1])
+        pages.collectMany { Map result -> result.data.collect { Map row -> [row.skillId, row.projectId] } } == expected
         allShares.data.collect { Map row -> [row.skillId, row.projectId] } == expected
         beyondLast.totalCount == 4
         beyondLast.data == []
@@ -203,6 +206,35 @@ class SharedSkillsPaginationSpec extends DefaultIntSpec {
         true     | 'skill.skillId'      | false     | [1, 0, 2, 3]
         true     | 'projectName'        | true      | [2, 0, 1, 3]
         true     | 'projectName'        | false     | [0, 1, 3, 2]
+
+        combined:
+        pageSize << [1, 3]
+    }
+
+    def "outgoing global shares retain exact identities across partial pages - ascending=#ascending"() {
+        setup:
+        createShares()
+        skillsService.deleteShared('TestProject1', 'skill3', 'TestProject2')
+        skillsService.shareSkill('TestProject1', 'skill3', 'ALL_SKILLS_PROJECTS')
+
+        when:
+        Map first = loadShares(false, 3, 1, 'sharedProject.name', ascending)
+        Map last = loadShares(false, 3, 2, 'sharedProject.name', ascending)
+        Map filtered = loadShares(false, 3, 1, 'sharedProject.name', ascending, 'SKILL3')
+
+        then:
+        first.totalCount == 4
+        last.totalCount == 4
+        first.data.size() == 3
+        last.data.size() == 1
+        (first.data + last.data).collect { Map row -> [row.skillId, row.projectId, row.sharedWithAllProjects] } == expected
+        filtered.totalCount == 1
+        filtered.data.collect { Map row -> [row.skillId, row.projectId, row.sharedWithAllProjects] } == [['skill3', null, true]]
+
+        where:
+        ascending | expected
+        true      | [['skill1', 'TestProject3', false], ['skill1', 'TestProject2', false], ['skill2', 'TestProject2', false], ['skill3', null, true]]
+        false     | [['skill3', null, true], ['skill1', 'TestProject2', false], ['skill2', 'TestProject2', false], ['skill1', 'TestProject3', false]]
     }
 
     def "unrelated admins and ordinary users cannot read sharing endpoints - role=#role endpoint=#endpoint"() {

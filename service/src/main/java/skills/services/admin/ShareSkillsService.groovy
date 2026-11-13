@@ -22,6 +22,7 @@ import org.springframework.data.domain.Page
 import org.springframework.data.domain.PageRequest
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import skills.controller.exceptions.ErrorCode
 import skills.controller.exceptions.SkillException
 import skills.controller.exceptions.SkillsValidator
 import skills.controller.result.model.SharedSkillResult
@@ -32,6 +33,7 @@ import skills.storage.model.SkillDef
 import skills.storage.model.SkillShareDef
 import skills.storage.accessors.ProjDefAccessor
 import skills.storage.accessors.SkillDefAccessor
+import skills.storage.repos.SkillDefRepo
 import skills.storage.repos.SkillShareDefRepo
 
 @Service
@@ -48,6 +50,9 @@ class ShareSkillsService {
 
     @Autowired
     SkillDefAccessor skillDefAccessor
+
+    @Autowired
+    SkillDefRepo skillDefRepo
 
     @Autowired
     SkillsDepsService skillsDepsService
@@ -114,7 +119,17 @@ class ShareSkillsService {
             throw new SkillException("Can not share skill to itself. Requested project [$sharedToProjectId] is itself!", projectId, skillId)
         }
         SkillDef skill = skillDefAccessor.getSkillDef(projectId, skillId)
+        // Hold the source skill lock through the conflict check and transaction commit.
+        skill = skillDefRepo.findByIdForUpdate(skill.id)
+        if (!skill) {
+            throw new SkillException("Failed to find skillId [$skillId] for [$projectId]", projectId, skillId)
+        }
         SkillsValidator.isTrue(!skill.readOnly, "Skills imported from the catalog may not be shared as cross project dependencies", projectId, skillId)
+
+        String explanation = getExistingShareExplanation(projectId, skillId, sharedToProjectId)
+        if (explanation != null) {
+            throw new SkillException("Skill can not be shared with [${sharedToProjectId}]: [${explanation}]", projectId, skillId, ErrorCode.AccessDenied)
+        }
 
         ProjDef sharedToProject = null
         if (sharedToProjectId != ALL_SKILLS_PROJECTS) {

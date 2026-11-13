@@ -16,7 +16,9 @@
 package skills.storage.repos
 
 
+import jakarta.persistence.LockModeType
 import org.springframework.data.domain.Pageable
+import org.springframework.data.jpa.repository.Lock
 import org.springframework.data.jpa.repository.Modifying
 import org.springframework.data.jpa.repository.Query
 import org.springframework.data.repository.CrudRepository
@@ -51,6 +53,11 @@ interface SkillDefRepo extends CrudRepository<SkillDef, Integer>, PagingAndSorti
                       and s.setting = 'user_community' and s.value = 'true')
             or exists(select 1 from user_tags t where t.user_id = ?2 and t.key = ?3 and t.value = ?4)))''', nativeQuery = true)
     boolean existsSourceCreditForEnabledCatalogImports(String projectId, String userId, String communityKey, String communityValue)
+
+    @Nullable
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @Query('select skill from SkillDef skill where skill.id = ?1')
+    SkillDef findByIdForUpdate(Integer id)
 
     /**
      * Need to create a custom query with limited fields as having many fields is slow,
