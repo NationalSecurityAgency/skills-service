@@ -21,12 +21,15 @@ import org.springframework.dao.DataIntegrityViolationException
 import skills.intTests.utils.DefaultIntSpec
 import skills.intTests.utils.EmailUtils
 import skills.settings.EmailSettingsService
+import skills.storage.model.Notification
 import skills.storage.model.Setting
 import skills.storage.repos.NotificationsRepo
 import skills.storage.repos.UserAttrsRepo
 import skills.utils.LoggerHelper
 import skills.utils.WaitFor
 import ch.qos.logback.classic.spi.ILoggingEvent
+
+import java.util.stream.Stream
 
 @Slf4j
 class EmailNotifierSpecs extends DefaultIntSpec {
@@ -196,19 +199,22 @@ class EmailNotifierSpecs extends DefaultIntSpec {
         greenMail.stop()
 
         when:
-        emailNotifier.sendNotification(new Notifier.NotificationRequest(
-                userIds: [skillsService.userName],
-                type: "ForTestNotificationBuilder",
-                keyValParams: [simpleParam: 'param value']
-        ))
+        // Commit both notifications together so the scheduler cannot split the initial dispatch.
+        runInTransaction {
+            emailNotifier.sendNotification(new Notifier.NotificationRequest(
+                    userIds: [skillsService.userName],
+                    type: "ForTestNotificationBuilder",
+                    keyValParams: [simpleParam: 'param value']
+            ))
 
-        emailNotifier.sendNotification(new Notifier.NotificationRequest(
-                userIds: [skillsService.userName],
-                type: "ForTestNotificationBuilder",
-                keyValParams: [simpleParam: 'param value']
-        ))
+            emailNotifier.sendNotification(new Notifier.NotificationRequest(
+                    userIds: [skillsService.userName],
+                    type: "ForTestNotificationBuilder",
+                    keyValParams: [simpleParam: 'param value']
+            ))
+        }
 
-        WaitFor.wait { loggerHelper.hasLogMsgStartsWith("Dispatched ") }
+        assert WaitFor.wait { loggerHelper.hasLogMsgStartsWith("Dispatched ") }
 
         List<ILoggingEvent> logsList = loggerHelper.logEvents;
 
@@ -229,7 +235,6 @@ class EmailNotifierSpecs extends DefaultIntSpec {
     def "failed emails must be retried when the email server is back functioning"() {
         setup:
         assert notificationsRepo.count() == 0
-        LoggerHelper loggerHelper = new LoggerHelper(EmailNotifier.class)
         log.info("########## stopping greenMail")
         greenMail.stop()
 
@@ -247,29 +252,25 @@ class EmailNotifierSpecs extends DefaultIntSpec {
                 keyValParams: [simpleParam: 'param value']
         ))
 
-        WaitFor.wait { loggerHelper.hasLogMsgStartsWith("Dispatched ") }
-        assert loggerHelper.logEvents.find { it.message.startsWith("Dispatched [0] notification(s) with [2] error(s)") }
+        // Wait for both failures to commit, regardless of how the scheduler batches them.
+        assert WaitFor.wait {
+            runInTransaction {
+                notificationsRepo.streamFailedNotifications().withCloseable { Stream<Notification> notifications ->
+                    notifications.count() == 2
+                }
+            }
+        }
 
         log.info("########## starting greenMail")
         greenMail.start()
 
         assert WaitFor.wait { greenMail.getReceivedMessages().length > 1 }
-        assert WaitFor.wait {
-            // there is a race condition - can either handle both failures in one run OR handle with in 2 consecutive runs
-            loggerHelper.logEvents.find { it.message.startsWith("Retry: Dispatched [2] notification(s) with [0] error(s)") } || (
-                    loggerHelper.logEvents.find { it.message.startsWith("Retry: Dispatched [1] notification(s) with [1] error(s)") } &&
-                    loggerHelper.logEvents.find { it.message.startsWith("Retry: Dispatched [1] notification(s) with [0] error(s)") }
-            )
-        }
+        // Receiving the emails does not guarantee the retry transaction has committed.
+        assert WaitFor.wait { notificationsRepo.count() == 0 }
 
         then:
         greenMail.getReceivedMessages().length == 2
         EmailUtils.getEmails(greenMail).collect { it.subj } == ["Test Subject", "Test Subject"]
-
-        notificationsRepo.count() == 0
-
-        cleanup:
-        loggerHelper.stop()
     }
 
     def "remove notification if server never returns"() {
@@ -291,9 +292,9 @@ class EmailNotifierSpecs extends DefaultIntSpec {
                 keyValParams: [simpleParam: 'param value']
         ))
 
-        WaitFor.wait(120) { loggerHelper.logEvents.findAll { it.message.startsWith("Removed notification because it failed and exceeded max retention of [30] seconds") }.size() == 2 }
+        assert WaitFor.wait(120) { loggerHelper.logEvents.findAll { it.message.startsWith("Removed notification because it failed and exceeded max retention of [30] seconds") }.size() == 2 }
 
-        WaitFor.wait(10) { notificationsRepo.count() == 0 }
+        assert WaitFor.wait(10) { notificationsRepo.count() == 0 }
 
         then:
         notificationsRepo.count() == 0
