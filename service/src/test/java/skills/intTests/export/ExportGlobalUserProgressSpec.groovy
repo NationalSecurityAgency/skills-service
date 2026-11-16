@@ -18,6 +18,7 @@ package skills.intTests.export
 import skills.intTests.utils.QuizDefFactory
 import skills.intTests.utils.SkillsService
 
+import static skills.intTests.utils.SkillsFactory.*
 import static skills.metrics.GlobalProgressMetricsService.getUSER_PREF_GLOBAL_METRICS_EXCLUSION
 
 class ExportGlobalUserProgressSpec extends ExportBaseIntSpec {
