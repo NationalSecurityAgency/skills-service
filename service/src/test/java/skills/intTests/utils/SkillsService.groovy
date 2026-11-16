@@ -79,6 +79,12 @@ class SkillsService {
         return wsHelper.restTemplateWrapper.exchange(endpoint, method, request, responseType)
     }
 
+    // Use the shared authenticated transport, including its PKI credentials and CSRF/cookie interceptor.
+    <T> ResponseEntity<T> requestWithHeaders(String path, HttpMethod method, Object body, HttpHeaders headers, Class<T> responseType = Map) {
+        HttpEntity<?> request = wsHelper.restTemplateWrapper.getAuthEntity(responseType, body, headers)
+        return wsHelper.oAuthRestTemplate.exchange("${wsHelper.skillsService}${path}".toString(), method, request, responseType)
+    }
+
     String getSessionCookie() {
         String sessionCookie = wsHelper.restTemplateWrapper.authResponse?.headers?.get(HttpHeaders.SET_COOKIE)
                 ?.find { String cookie -> cookie.startsWith('JSESSIONID=') }

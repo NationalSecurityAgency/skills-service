@@ -29,12 +29,15 @@ import tools.jackson.databind.ser.std.SimpleFilterProvider;
 import java.text.SimpleDateFormat
 import groovy.util.logging.Slf4j
 import jakarta.annotation.PostConstruct
+import jakarta.servlet.http.HttpServletRequest
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.PageRequest
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import skills.auth.AuthUtils
 import skills.auth.UserInfoService
+import skills.auth.adminAttribution.AdminAttribution
 import skills.controller.exceptions.ErrorCode
 import skills.controller.exceptions.QuizValidator
 import skills.controller.exceptions.SkillException
@@ -84,37 +87,40 @@ class UserActionsHistoryService {
         if (userActionInfo.projectId == InceptionProjectService.inceptionProjectId) {
             return
         }
-        String actionAttributesAsStr = userActionInfo.actionAttributes ? mapper.writeValueAsString(userActionInfo.actionAttributes) : null
-        UserActionsHistory userActionsHistory = new UserActionsHistory(
-                action: userActionInfo.action,
-                item: userActionInfo.item,
-                itemId: userActionInfo.itemId,
-                itemRefId: userActionInfo.itemRefId,
-                userId: userInfoService.currentUserId,
-                projectId: userActionInfo.projectId,
-                quizId: userActionInfo.quizId,
-                actionAttributes: actionAttributesAsStr,
-        )
-        userActionsHistoryRepo.save(userActionsHistory)
+        userActionsHistoryRepo.save(buildHistory(userActionInfo))
     }
 
     @Transactional
     void saveUserActions(List<UserActionInfo> userActionInfos) {
         List<UserActionsHistory> userActionsHistoryList = userActionInfos.findAll {
             it.projectId != InceptionProjectService.inceptionProjectId }.collect { UserActionInfo userActionInfo ->
-                String actionAttributesAsStr = userActionInfo.actionAttributes ? mapper.writeValueAsString(userActionInfo.actionAttributes) : null
-                return new UserActionsHistory(
-                        action: userActionInfo.action,
-                        item: userActionInfo.item,
-                        itemId: userActionInfo.itemId,
-                        itemRefId: userActionInfo.itemRefId,
-                        userId: userInfoService.currentUserId,
-                        projectId: userActionInfo.projectId,
-                        quizId: userActionInfo.quizId,
-                        actionAttributes: actionAttributesAsStr,
-                )
+                return buildHistory(userActionInfo)
         }
         userActionsHistoryRepo.saveAll(userActionsHistoryList)
+    }
+
+    private UserActionsHistory buildHistory(UserActionInfo info) {
+        String attributesJson = info.actionAttributes ? mapper.writeValueAsString(info.actionAttributes) : null
+        AdminAttribution attribution = AuthUtils.servletRequest?.getAttribute(AdminAttribution.REQUEST_ATTRIBUTE) as AdminAttribution
+        boolean attributed = attribution && (
+                (attribution.projectId && info.projectId?.equalsIgnoreCase(attribution.projectId)) ||
+                (attribution.quizId && info.quizId?.equalsIgnoreCase(attribution.quizId)))
+        if (attributed) {
+            // Serialize first to copy maps/beans and retain the existing sensitive-field filtering.
+            // This field is server-owned and must never be taken from action attributes supplied by a caller.
+            Map attributes = attributesJson ? mapper.readValue(attributesJson, Map) : [:]
+            attributes.requestingSystemUserId = attribution.requestingSystemUserId
+            attributesJson = mapper.writeValueAsString(attributes)
+        }
+        return new UserActionsHistory(
+                action: info.action,
+                item: info.item,
+                itemId: info.itemId,
+                itemRefId: info.itemRefId,
+                userId: attributed ? attribution.actingUserId : userInfoService.currentUserId,
+                projectId: info.projectId,
+                quizId: info.quizId,
+                actionAttributes: attributesJson)
     }
 
     @Transactional
@@ -211,9 +217,27 @@ class UserActionsHistoryService {
     }
 
     int handleProjectIdChange(String prevProjId, String newProjId) {
-        return userActionsHistoryRepo.updateProjectId(prevProjId, newProjId)
+        int updated = userActionsHistoryRepo.updateProjectId(prevProjId, newProjId)
+        updateAttributionResourceId(prevProjId, newProjId, false)
+        return updated
     }
     int handleQuizIdChange(String prevQuizId, String newQuizId) {
-        return userActionsHistoryRepo.updateQuizId(prevQuizId, newQuizId)
+        int updated = userActionsHistoryRepo.updateQuizId(prevQuizId, newQuizId)
+        updateAttributionResourceId(prevQuizId, newQuizId, true)
+        return updated
+    }
+
+    private static void updateAttributionResourceId(String previousId, String newId, boolean quiz) {
+        HttpServletRequest request = AuthUtils.servletRequest
+        AdminAttribution attribution = request?.getAttribute(AdminAttribution.REQUEST_ATTRIBUTE) as AdminAttribution
+        String validatedId = quiz ? attribution?.quizId : attribution?.projectId
+        if (validatedId?.equalsIgnoreCase(previousId)) {
+            // Preserve attribution for all subsequent history writes for this same renamed resource.
+            request.setAttribute(AdminAttribution.REQUEST_ATTRIBUTE, new AdminAttribution(
+                    actingUserId: attribution.actingUserId,
+                    requestingSystemUserId: attribution.requestingSystemUserId,
+                    projectId: quiz ? attribution.projectId : newId,
+                    quizId: quiz ? newId : attribution.quizId))
+        }
     }
 }

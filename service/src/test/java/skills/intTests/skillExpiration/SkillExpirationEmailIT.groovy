@@ -961,7 +961,8 @@ class SkillExpirationEmailIT extends InviteOnlyBaseSpec {
 
         // verify imported skill notifications were not sent
         !emails.find { it.html.contains(skill3_imported.name) }
-        notificationsRepo.count() == 0
+        // Email delivery can complete before the dispatch transaction commits its deletions.
+        assert WaitFor.wait { notificationsRepo.count() == 0 }
     }
 
     def "do send skill expired emails for invite only project for permitted user"() {

@@ -93,7 +93,6 @@ class UserCommunityAuthorizationManager implements AuthorizationManager<RequestA
             log.debug("unauthenticated access attempt to protected resource", request.getRequestURI())
             return authenticatedDecision
         }
-        AuthorizationDecision vote = null // ACCESS_ABSTAIN
         String projectId = AuthUtils.getProjectIdForProtection(request)
         String quizId = AuthUtils.getPathVariable(request, 'quizId', QUIZ_MATCHERS)
         String adminGroupId = AuthUtils.getPathVariable(request, 'adminGroupId', ADMIN_GROUP_MATCHERS)
@@ -111,25 +110,30 @@ class UserCommunityAuthorizationManager implements AuthorizationManager<RequestA
                 badgeId = extractRes.skillId
             }
         }
+        return authorizeUserForResources(getUsername(authentication.get()), projectId, quizId, adminGroupId, badgeId)
+    }
+
+    // Community policy only: callers must separately validate authentication, account status, and roles.
+    // Explicit resource IDs also support attribution on routes whose target is resolved by MVC.
+    AuthorizationDecision authorizeUserForResources(String username, String projectId, String quizId,
+                                                    String adminGroupId = null, String badgeId = null) {
         if (projectId || adminGroupId || quizId || badgeId) {
-            log.debug("evaluating request [{}] for user community protection", request.getRequestURI())
             Boolean isUserCommunityOnlyProject = projectId && userCommunityService.isUserCommunityOnlyProject(projectId)
             Boolean isUserCommunityOnlyAdminGroup = adminGroupId && userCommunityService.isUserCommunityOnlyAdminGroup(adminGroupId)
             Boolean isUserCommunityOnlyQuiz = quizId && userCommunityService.isUserCommunityOnlyQuiz(quizId)
             Boolean isUserCommunityOnlyBadge = badgeId && userCommunityService.isUserCommunityOnlyGlobalBadge(badgeId)
             if (isUserCommunityOnlyProject || isUserCommunityOnlyAdminGroup || isUserCommunityOnlyQuiz || isUserCommunityOnlyBadge) {
                 log.debug("project id [{}], admin group [{}], quiz [{}], or badge [{}] requires user community only access", projectId, adminGroupId, quizId, badgeId)
-                Boolean belongsToUserCommunity = userCommunityService.isUserCommunityMember(getUsername(authentication.get()))
+                Boolean belongsToUserCommunity = userCommunityService.isUserCommunityMember(username)
                 if (belongsToUserCommunity) {
                     return new AuthorizationDecision(true) // ACCESS_GRANTED;
                 } else {
-                    log.debug("user [{}] is not permitted to access project [{}], admin group [{}], quiz [{}], or badge [{}]", authentication.get().getPrincipal(), projectId, adminGroupId, quizId, badgeId)
+                    log.debug("user [{}] is not permitted to access project [{}], admin group [{}], quiz [{}], or badge [{}]", username, projectId, adminGroupId, quizId, badgeId)
                     throw new AccessDeniedException("Access is denied")
                 }
             }
-            return vote
         }
-        return vote
+        return null // ACCESS_ABSTAIN
     }
 
     static class AttachmentExtractRes {

@@ -139,6 +139,21 @@ skills:
       requestsPerMinuteGlobal: 6000
       maxConcurrentRequestsGlobal: 200
   authorization:
+    adminAttribution:
+      # Audit-only attribution on /admin/projects and /admin/quiz-definitions routes;
+      # both identities must be resource admins (or root).
+      # Acting users must also satisfy account eligibility and protected-community restrictions.
+      # Copy routes (including cross-project copy validation), admin-group routes, and global-badge
+      # routes ignore attribution and log ignored_unscoped, even with embedded project/quiz IDs.
+      # Their history retains the requester; all header-bearing /admin requests still require the allowlist.
+      # Every header-bearing /admin request is logged at INFO, including authentication/CORS/CSRF rejections.
+      # Before enabling, consider ingress rate limits and bounded log retention while preserving legitimate audit records.
+      enabled: false
+      # The header value is the canonical application user ID, including in PKI mode.
+      # Credential/session/CSRF header names (for example Authorization or Cookie) are prohibited.
+      headerName: X-SkillTree-Acting-User
+      # Exact authenticated requester IDs. Root requesters must also be allowlisted.
+      allowedRequesters: []
     # Enable to fully prevent User Enumeration by ensuring unverified email addresses cannot trigger
     # account-dependent behavior that reveals whether an address is registered. Otherwise, an attacker can
     # use a two-request oracle, comparing requests for known and tested addresses to infer account existence.
@@ -275,4 +290,3 @@ skills:
     active: default
 db-scheduler:
   threads: 3
-

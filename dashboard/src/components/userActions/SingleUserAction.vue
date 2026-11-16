@@ -79,7 +79,7 @@ const loadData = () => {
         let loadedObj = res;
         if (!excludeLookupFromActions.includes(props.action) && propsToShow) {
           loadedObj = Object.fromEntries(Object.entries(res)
-              .filter(([key]) => propsToShow.includes(key)));
+              .filter(([key]) => propsToShow.includes(key) || key === 'requestingSystemUserId'));
         }
         attributes.value = Object.entries(loadedObj).map((entry) => {
           let label = entry[0];
@@ -96,8 +96,10 @@ const loadData = () => {
           if (customValues) {
             value = customValues[value] || value
           }
-          const replacement = valuesMap.get(value);
-          value = replacement || value;
+          if (entry[0] !== 'requestingSystemUserId') {
+            const replacement = valuesMap.get(value);
+            value = replacement || value;
+          }
           return {
             label: label,
             value,
