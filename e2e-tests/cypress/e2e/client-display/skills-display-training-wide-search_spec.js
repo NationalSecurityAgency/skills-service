@@ -16,6 +16,24 @@
 
 describe('Skills Display Training Wide Search Tests', () => {
 
+    it('renders and filters skill names containing ampersands in training-wide search', () => {
+        cy.createProject(1)
+        cy.createSubject(1, 1, { name: 'Subject One & Two' })
+        cy.createSkill(1, 1, 1, { name: 'One & Two' })
+
+        cy.visit('/progress-and-rankings/projects/proj1');
+        cy.get('[data-cy="skillsDisplaySearchBtn"]').click()
+        cy.get('[data-cy="trainingSearchDialog"]').should('be.visible')
+        cy.get('[data-cy="searchRes-skill1"] [data-cy="highlightedValue"]').should('have.text', 'One & Two')
+        cy.get('[data-cy="searchRes-skill1"] [data-cy="subjectName"]').should('contain.text', 'Subject One & Two')
+
+        cy.get('input.p-listbox-filter').type('One & Two')
+        cy.get('[data-cy="searchRes-skill1"] [data-cy="highlightedValue"]').should('have.text', 'One & Two')
+        cy.get('[data-cy="searchRes-skill1"] mark').should('have.text', 'One & Two')
+        cy.get('[data-cy="searchRes-skill1"]').click()
+        cy.get('[data-cy="skillProgressTitle"]').should('contain.text', 'One & Two')
+    })
+
     it('navigate to skills, subjects, tags and badges using training-wide search dialog', () => {
         cy.intercept('GET', '/api/projects/proj1/navigableItems')
               .as('loadNavigableItems')

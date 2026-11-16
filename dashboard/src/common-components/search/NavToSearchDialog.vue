@@ -26,6 +26,7 @@ import SkillReuseIdUtil from "@/components/utils/SkillReuseIdUtil.js";
 import SkillType from "@/common-components/utilities/SkillType.js";
 import {usePluralize} from "@/components/utils/misc/UsePluralize.js";
 import {useNumberFormat} from "@/common-components/filter/UseNumberFormat.js";
+import { decodeHtmlEntities } from '@/components/utils/HtmlEntityDecoder.js'
 
 const emit = defineEmits(['hidden']);
 const props = defineProps({
@@ -68,7 +69,12 @@ const loadSkillsSubjectsAndBadges = (event) => {
   isSearching.value = true
   return props.loadProjPagesInfoFn()
       .then((results) => {
-        searchRes.value = results
+        searchRes.value = results?.map((result) => ({
+          ...result,
+          skillName: decodeHtmlEntities(result.skillName),
+          subjectName: decodeHtmlEntities(result.subjectName),
+          skillsGroupName: decodeHtmlEntities(result.skillsGroupName),
+        }))
         if (results && results.length > 0) {
           announcer.polite(`Showing ${results.length} items.  Type to search for a ${attributes.subjectDisplayNamePlural}, ${attributes.skillDisplayNamePlural} or Badges. Use arrow keys to select and enter or click to navigate to the ${attributes.subjectDisplayName}, ${attributes.skillDisplayName} or Badge.`)
         } else {
