@@ -554,9 +554,9 @@ class CatalogSkillDependenciesAndBadgesSpecs extends CatalogIntSpec {
         def sharedSkills = skillsService.getSharedWithMeSkills(project2.projectId)
 
         then:
-        sharedSkills.size() == 1
-        sharedSkills[0].skillName == skill.name
-        sharedSkills[0].projectId == project1.projectId
+        sharedSkills.totalCount == 1
+        sharedSkills.data[0].skillName == skill.name
+        sharedSkills.data[0].projectId == project1.projectId
     }
 
 
@@ -597,9 +597,9 @@ class CatalogSkillDependenciesAndBadgesSpecs extends CatalogIntSpec {
         def sharedSkills = skillsService.getSharedWithMeSkills(project2.projectId)
 
         then:
-        sharedSkills.size() == 1
-        sharedSkills[0].skillName == skill.name
-        sharedSkills[0].projectId == project1.projectId
+        sharedSkills.totalCount == 1
+        sharedSkills.data[0].skillName == skill.name
+        sharedSkills.data[0].projectId == project1.projectId
     }
 
 }
