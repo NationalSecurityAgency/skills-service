@@ -270,6 +270,46 @@ describe('Copy selected quiz questions', () => {
         cy.get(questionCard(2)).should('not.exist');
     });
 
+    it('retrying after a committed copy with an ambiguous response currently duplicates questions', () => {
+        cy.createQuizDef(1);
+        cy.createQuizDef(2);
+        cy.createQuizQuestionDef(1, 1);
+        cy.visit('/administrator/quizzes/quiz1');
+        cy.get(questionCard(1)).should('be.visible');
+        selectQuestions(1);
+        openCopyDialog();
+        selectDestination('This is quiz 2');
+
+        let attempts = 0;
+        cy.intercept('POST', '/admin/quiz-definitions/quiz1/questions/copy/quiz2', (req) => {
+            attempts += 1;
+            if (attempts === 1) {
+                // The backend commits before its successful response is hidden from the UI.
+                // Copy is not idempotent: retrying this ambiguous outcome creates another copy.
+                req.continue((res) => {
+                    expect(res.statusCode).to.equal(200);
+                    expect(res.body.success).to.equal(true);
+                    res.send({ statusCode: 503, body: { explanation: 'Copy outcome could not be confirmed' } });
+                });
+            } else {
+                req.continue();
+            }
+        });
+
+        cy.get('[data-cy="saveDialogBtn"]').click();
+        cy.get('[data-cy="copyQuestionsFailedMsg"]').should('contain.text', 'Copy outcome could not be confirmed');
+        cy.get(`${checkbox(1)} input`).should('be.checked');
+        cy.get('[data-cy="saveDialogBtn"]').should('be.enabled').click();
+        cy.contains('Successfully copied 1 question').should('be.visible');
+        cy.get('[data-cy="closeDialogBtn"]').click();
+
+        cy.visit('/administrator/quizzes/quiz2');
+        cy.get('[data-cy="pageHeaderStat_Questions"] [data-cy="statValue"]').should('have.text', '2');
+        cy.get(questionCard(1)).find('[data-cy="questionDisplayText"]').should('contain.text', 'This is a question # 1');
+        cy.get(questionCard(2)).find('[data-cy="questionDisplayText"]').should('contain.text', 'This is a question # 1');
+        cy.get(questionCard(3)).should('not.exist');
+    });
+
     ['Cancel', 'header close', 'Escape'].forEach((closeMethod) => {
         it(`deselects questions and returns focus to the selection toggle when closing with ${closeMethod}`, () => {
             cy.createQuizDef(1);

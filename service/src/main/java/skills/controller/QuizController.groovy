@@ -615,13 +615,18 @@ class QuizController {
     CopyValidationRes validateCopyItemsToAnotherProject(
             @PathVariable("quizId") String quizId,
             @RequestBody CopyBatchQuestionsRequest copyRequest) {
+        QuizValidator.isNotBlank(copyRequest.destinationQuizId, "destinationQuizId", quizId)
+        QuizValidator.isNotNull(copyRequest.numberOfQuestions, "numberOfQuestions", quizId)
+        QuizValidator.isTrue(copyRequest.numberOfQuestions > 0, "numberOfQuestions must be greater than 0", quizId)
+
+        String destinationQuizId = quizDefService.findQuizDef(copyRequest.destinationQuizId).quizId
         UserInfo currentUser = userInfoService.currentUser
-        if (!userAuthService.isUserQuizAdmin(currentUser, copyRequest.destinationQuizId)) {
-            throw new AccessDeniedException("User [${currentUser.username}] is not an admin for quiz [${copyRequest.destinationQuizId}]")
+        if (!userAuthService.isUserQuizAdmin(currentUser, destinationQuizId)) {
+            throw new AccessDeniedException("User [${currentUser.username}] is not an admin for quiz [${destinationQuizId}]")
         }
-        if (userCommunityService.isUserCommunityOnlyQuiz(copyRequest.destinationQuizId) && !userCommunityService.isUserCommunityMember(currentUser.username)) {
-            throw new AccessDeniedException("User [${currentUser.username}] can not copy questions to [${copyRequest.destinationQuizId}]")
+        if (userCommunityService.isUserCommunityOnlyQuiz(destinationQuizId) && !userCommunityService.isUserCommunityMember(currentUser.username)) {
+            throw new AccessDeniedException("User [${currentUser.username}] can not copy questions to [${destinationQuizId}]")
         }
-        return quizDefService.validateCopyQuestionsToAnotherQuiz(quizId, copyRequest.destinationQuizId, copyRequest.numberOfQuestions)
+        return quizDefService.validateCopyQuestionsToAnotherQuiz(quizId, destinationQuizId, copyRequest.numberOfQuestions)
     }
 }

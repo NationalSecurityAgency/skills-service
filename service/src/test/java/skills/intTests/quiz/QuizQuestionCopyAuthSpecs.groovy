@@ -21,8 +21,15 @@ import skills.intTests.utils.DefaultIntSpec
 import skills.intTests.utils.QuizDefFactory
 import skills.intTests.utils.SkillsClientException
 import skills.intTests.utils.SkillsService
+import skills.quizLoading.QuizSettings
 import skills.services.quiz.QuizQuestionType
+import skills.storage.model.SkillDef
+import skills.storage.model.auth.RoleName
 import skills.storage.repos.QuizQuestionDefRepo
+
+import static skills.intTests.utils.SkillsFactory.createProject
+import static skills.intTests.utils.SkillsFactory.createSkill
+import static skills.intTests.utils.SkillsFactory.createSubject
 
 class QuizQuestionCopyAuthSpecs extends DefaultIntSpec {
 
@@ -88,6 +95,55 @@ class QuizQuestionCopyAuthSpecs extends DefaultIntSpec {
 
         where:
         callerRole << ['admin', 'root']
+    }
+
+    def "#endpoint requires source admin access when destination admin has #sourceAccess source access"() {
+        List<String> users = getRandomUsers(2)
+        SkillsService sourceOwner = createService(users[0])
+        SkillsService caller = createService(users[1])
+        Map sourceQuiz = QuizDefFactory.createQuiz(1)
+        Map destinationQuiz = QuizDefFactory.createQuiz(2)
+        sourceOwner.createQuizDef(sourceQuiz)
+        caller.createQuizDef(destinationQuiz)
+        Map sourceQuestion = sourceOwner.createQuizQuestionDef(QuizDefFactory.createChoiceQuestion(1, 1, 2)).body
+        caller.createQuizQuestionDef(QuizDefFactory.createChoiceQuestion(2, 1, 2))
+        Map sourceBefore = sourceOwner.getQuizQuestionDefs(sourceQuiz.quizId)
+        Map destinationBefore = caller.getQuizQuestionDefs(destinationQuiz.quizId)
+        if (sourceAccess == 'read-only') {
+            Map project = createProject(1)
+            Map subject = createSubject(1, 1)
+            sourceOwner.createProjectAndSubjectAndSkills(project, subject, [])
+            Map skill = createSkill(1, 1, 1)
+            skill.selfReportingType = SkillDef.SelfReportingType.Quiz
+            skill.quizId = sourceQuiz.quizId
+            sourceOwner.createSkill(skill)
+            sourceOwner.addProjectAdmin(project.projectId, caller.userName)
+            assert caller.getQuizQuestionDefs(sourceQuiz.quizId) == sourceBefore
+            assert caller.getQuizSettings(sourceQuiz.quizId).find { Map setting ->
+                setting.setting == QuizSettings.QuizUserRole.setting
+            }.value == RoleName.ROLE_QUIZ_READ_ONLY.toString()
+        }
+
+        when:
+        if (endpoint == 'preflight') {
+            caller.validateCopyQuestions(sourceQuiz.quizId, destinationQuiz.quizId, 1)
+        } else {
+            caller.copyQuestions(sourceQuiz.quizId, destinationQuiz.quizId, [sourceQuestion.id])
+        }
+
+        then:
+        SkillsClientException denied = thrown()
+        denied.httpStatus == HttpStatus.FORBIDDEN
+        denied.message.contains('errorCode:quiz_permission')
+        caller.getQuizQuestionDefs(destinationQuiz.quizId) == destinationBefore
+        sourceOwner.getQuizQuestionDefs(sourceQuiz.quizId) == sourceBefore
+
+        where:
+        endpoint    | sourceAccess
+        'preflight' | 'none'
+        'copy'      | 'none'
+        'preflight' | 'read-only'
+        'copy'      | 'read-only'
     }
 
     def "validating a copy requires destination quiz admin access"() {

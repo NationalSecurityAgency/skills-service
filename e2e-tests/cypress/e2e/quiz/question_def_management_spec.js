@@ -19,6 +19,14 @@ import utcPlugin from 'dayjs/plugin/utc';
 dayjs.extend(utcPlugin);
 
 describe('Quiz Question CRUD Tests', () => {
+    let releaseValidationResponse;
+
+    afterEach(() => {
+        if (releaseValidationResponse) {
+            releaseValidationResponse();
+            releaseValidationResponse = undefined;
+        }
+    });
 
     beforeEach(() => {
         Cypress.Commands.add('validateDisplayAnswer', (qNum, aNum, selected, isSingleChoice) => {
@@ -1670,32 +1678,66 @@ describe('Quiz Question CRUD Tests', () => {
         cy.get('[data-cy="quizzes-to-copy"]').should('not.exist');
     });
 
-    it('validates only the currently selected quiz before copying selected questions', function () {
-        cy.createQuizDef(1);
-        cy.createQuizDef(2);
-        cy.createQuizDef(3);
-        cy.createQuizQuestionDef(1, 1);
-        cy.visit('/administrator/quizzes/quiz1');
-        cy.get('[data-cy="questionDisplayCard-1"]').should('be.visible');
-        cy.get('[data-cy="toggleSelectionMode"]').click();
-        cy.get('[data-cy="questionDisplayCard-1"] [data-cy="selectSkillCheckbox"]').click();
-        cy.get('[data-cy="questionActionsBtn"]').click();
-        cy.contains('.p-menu-item-link', 'Copy to Another Quiz').click();
-        cy.get('[data-cy="quizzes-to-copy"]').should('be.visible');
+    [true, false].forEach((oldApproval) => {
+        it(`ignores an old ${oldApproval ? 'approval' : 'denial'} after validating the current destination`, function () {
+            cy.createQuizDef(1);
+            cy.createQuizDef(2);
+            cy.createQuizDef(3);
+            cy.createQuizQuestionDef(1, 1);
+            cy.visit('/administrator/quizzes/quiz1');
+            cy.get('[data-cy="questionDisplayCard-1"]').should('be.visible');
+            cy.get('[data-cy="toggleSelectionMode"]').click();
+            cy.get('[data-cy="questionDisplayCard-1"] [data-cy="selectSkillCheckbox"]').click();
+            cy.get('[data-cy="questionActionsBtn"]').click();
+            cy.contains('.p-menu-item-link', 'Copy to Another Quiz').click();
+            cy.get('[data-cy="quizzes-to-copy"]').should('be.visible');
 
-        cy.intercept('POST', '/admin/quiz-definitions/quiz1/questions/validateCopy', {
-            isAllowed: false,
-            validationErrors: ['Cannot copy to this quiz']
+            let oldRequestStarted = false;
+            const oldResponseReady = new Cypress.Promise((resolve) => { releaseValidationResponse = resolve; });
+            cy.intercept('POST', '/admin/quiz-definitions/quiz1/questions/validateCopy', (req) => {
+                if (req.body.destinationQuizId === 'quiz2') {
+                    req.alias = 'oldDestinationValidation';
+                    oldRequestStarted = true;
+                    return oldResponseReady.then(() => req.reply({
+                        isAllowed: oldApproval,
+                        validationErrors: oldApproval ? [] : ['Old destination is rejected']
+                    }));
+                }
+                req.alias = 'currentDestinationValidation';
+                req.reply({
+                    isAllowed: !oldApproval,
+                    validationErrors: oldApproval ? ['Current destination is rejected'] : []
+                });
+            });
+
+            cy.get('[data-cy="quizzes-to-copy"]').click();
+            cy.contains('.p-select-option', 'This is quiz 2').click();
+            cy.get('[data-cy="saveDialogBtn"]').should('be.disabled');
+            cy.wrap(null).should(() => { expect(oldRequestStarted).to.equal(true); });
+            cy.get('[data-cy="quizzes-to-copy"]').click();
+            cy.contains('.p-select-option', 'This is quiz 3').click();
+            cy.wait('@currentDestinationValidation');
+            cy.get('[data-cy="saveDialogBtn"]').should(oldApproval ? 'be.disabled' : 'be.enabled');
+            if (oldApproval) {
+                cy.get('[data-cy="validationFailedMsg"]').should('contain.text', 'Current destination is rejected');
+            } else {
+                cy.get('[data-cy="validationFailedMsg"]').should('not.exist');
+            }
+
+            cy.then(() => {
+                releaseValidationResponse();
+                releaseValidationResponse = undefined;
+            });
+            cy.wait('@oldDestinationValidation');
+            cy.get('[data-cy="quizzes-to-copy"]').should('contain.text', 'This is quiz 3');
+            cy.get('[data-cy="saveDialogBtn"]').should(oldApproval ? 'be.disabled' : 'be.enabled');
+            if (oldApproval) {
+                cy.get('[data-cy="validationFailedMsg"]').should('contain.text', 'Current destination is rejected');
+            } else {
+                cy.get('[data-cy="validationFailedMsg"]').should('not.exist');
+            }
+            cy.get('[data-cy="closeDialogBtn"]').click();
         });
-
-        cy.get('[data-cy="quizzes-to-copy"]').click();
-        cy.contains('.p-select-option', 'This is quiz 2').click();
-        cy.get('[data-cy="saveDialogBtn"]').should('be.disabled');
-        cy.get('[data-cy="quizzes-to-copy"]').click();
-        cy.contains('.p-select-option', 'This is quiz 3').click();
-        cy.get('[data-cy="validationFailedMsg"]').should('contain.text', 'Cannot copy to this quiz');
-        cy.get('[data-cy="saveDialogBtn"]').should('be.disabled');
-        cy.get('[data-cy="validationFailedMsg"]').should('contain.text', 'Cannot copy to this quiz');
     });
 
 });

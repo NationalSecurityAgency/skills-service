@@ -40,6 +40,169 @@ class QuizQuestionCopySpecs extends DefaultIntSpec  {
     @Autowired
     AttachmentRepo attachmentRepo
 
+    def "copy preflight rejects #sourceType to #destinationType"() {
+        SkillsService admin = createService(getRandomUsers(1)[0])
+        Map sourceQuiz = sourceType == QuizType.Quiz ? QuizDefFactory.createQuiz(1) : QuizDefFactory.createQuizSurvey(1)
+        Map destinationQuiz = destinationType == QuizType.Quiz ? QuizDefFactory.createQuiz(2) : QuizDefFactory.createQuizSurvey(2)
+        admin.createQuizDef(sourceQuiz)
+        admin.createQuizDef(destinationQuiz)
+
+        when:
+        Map validation = admin.validateCopyQuestions(sourceQuiz.quizId, destinationQuiz.quizId, 1).body
+
+        then:
+        !validation.isAllowed
+        validation.validationErrors == ["Can not copy questions between quizzes and surveys - [${sourceQuiz.quizId}], [${destinationQuiz.quizId}]"]
+        admin.getQuizQuestionDefs(destinationQuiz.quizId).questions.empty
+
+        where:
+        sourceType      | destinationType
+        QuizType.Quiz   | QuizType.Survey
+        QuizType.Survey | QuizType.Quiz
+    }
+
+    def "copy preflight rejects #countLabel question count"() {
+        SkillsService admin = createService(getRandomUsers(1)[0])
+        Map sourceQuiz = QuizDefFactory.createQuiz(1)
+        Map destinationQuiz = QuizDefFactory.createQuiz(2)
+        admin.createQuizDef(sourceQuiz)
+        admin.createQuizDef(destinationQuiz)
+        Map request = [destinationQuizId: destinationQuiz.quizId] + countRequest
+
+        when:
+        admin.wsHelper.adminPost("/quiz-definitions/${sourceQuiz.quizId}/questions/validateCopy".toString(), request)
+
+        then:
+        SkillsClientException error = thrown()
+        error.httpStatus == HttpStatus.BAD_REQUEST
+        error.message.contains('errorCode:BadParam')
+        error.message.contains(expectedMessage)
+        admin.getQuizQuestionDefs(destinationQuiz.quizId).questions.empty
+
+        where:
+        countLabel | countRequest              | expectedMessage
+        'omitted'  | [:]                       | 'numberOfQuestions was not provided.'
+        'null'     | [numberOfQuestions: null] | 'numberOfQuestions was not provided.'
+        'zero'     | [numberOfQuestions: 0]    | 'numberOfQuestions must be greater than 0'
+        'negative' | [numberOfQuestions: -1]   | 'numberOfQuestions must be greater than 0'
+    }
+
+    def "copy preflight requires a nonblank destination #destinationId"() {
+        SkillsService admin = createService(getRandomUsers(1)[0])
+        Map sourceQuiz = QuizDefFactory.createQuiz(1)
+        admin.createQuizDef(sourceQuiz)
+
+        when:
+        admin.validateCopyQuestions(sourceQuiz.quizId, destinationId, 1)
+
+        then:
+        SkillsClientException error = thrown()
+        error.httpStatus == HttpStatus.BAD_REQUEST
+        error.message.contains('errorCode:BadParam')
+        error.message.contains('destinationQuizId was not provided.')
+
+        where:
+        destinationId << [null, '', '   ']
+    }
+
+    def "root copy preflight reports a missing #missingQuiz quiz"() {
+        SkillsService root = createRootSkillService(getRandomUsers(1)[0])
+        Map sourceQuiz = QuizDefFactory.createQuiz(1)
+        Map destinationQuiz = QuizDefFactory.createQuiz(2)
+        root.createQuizDef(sourceQuiz)
+        root.createQuizDef(destinationQuiz)
+        String sourceId = missingQuiz == 'source' ? 'MissingSourceQuiz' : sourceQuiz.quizId
+        String destinationId = missingQuiz == 'destination' ? 'MissingDestinationQuiz' : destinationQuiz.quizId
+        String missingId = missingQuiz == 'source' ? sourceId : destinationId
+
+        when:
+        root.validateCopyQuestions(sourceId, destinationId, 1)
+
+        then:
+        SkillsClientException error = thrown()
+        error.httpStatus == HttpStatus.BAD_REQUEST
+        error.message.contains('errorCode:BadParam')
+        error.message.contains('Failed to find quiz id.')
+        error.message.contains("quizId:${missingId}")
+        root.getQuizQuestionDefs(destinationQuiz.quizId).questions.empty
+
+        where:
+        missingQuiz << ['source', 'destination']
+    }
+
+    def "ordinary admin copy preflight accepts case-variant quiz IDs"() {
+        SkillsService admin = createService(getRandomUsers(1)[0])
+        Map sourceQuiz = QuizDefFactory.createQuiz(1)
+        Map destinationQuiz = QuizDefFactory.createQuiz(2)
+        admin.createQuizDef(sourceQuiz)
+        admin.createQuizDef(destinationQuiz)
+
+        when:
+        Map validation = admin.validateCopyQuestions(sourceQuiz.quizId.toLowerCase(), destinationQuiz.quizId.toUpperCase(), 1).body
+
+        then:
+        validation.isAllowed
+        validation.validationErrors.empty
+    }
+
+    def "copy preflight capacity validation handles #capacityCase counts"() {
+        SkillsService admin = createService(getRandomUsers(1)[0])
+        Map sourceQuiz = QuizDefFactory.createQuiz(1)
+        Map destinationQuiz = QuizDefFactory.createQuiz(2)
+        admin.createQuizDef(sourceQuiz)
+        admin.createQuizDef(destinationQuiz)
+        admin.createQuizQuestionDef(QuizDefFactory.createChoiceQuestion(2, 1, 2))
+        Map destinationBefore = admin.getQuizQuestionDefs(destinationQuiz.quizId)
+        Integer maxQuestions = publicProps.getInt(PublicProps.UiProp.maxQuestionsPerQuiz)
+        Integer incomingCount = capacityCase == 'at limit' ? maxQuestions - 1 :
+                (capacityCase == 'over limit' ? maxQuestions : Integer.MAX_VALUE)
+
+        when:
+        Map validation = admin.validateCopyQuestions(sourceQuiz.quizId, destinationQuiz.quizId, incomingCount).body
+
+        then:
+        validation.isAllowed == allowed
+        if (allowed) {
+            assert validation.validationErrors.empty
+        } else {
+            assert validation.validationErrors.size() == 1
+            assert validation.validationErrors[0].contains("can not have more than ${maxQuestions} questions")
+            assert validation.validationErrors[0].contains('currently has 1 questions')
+        }
+        admin.getQuizQuestionDefs(destinationQuiz.quizId) == destinationBefore
+
+        where:
+        capacityCase | allowed
+        'at limit'   | true
+        'over limit' | false
+        'overflow'   | false
+    }
+
+    def "whole-quiz copy derives the count for a source with #questionCount questions"() {
+        SkillsService admin = createService(getRandomUsers(1)[0])
+        Map sourceQuiz = QuizDefFactory.createQuiz(1)
+        Map destinationQuiz = QuizDefFactory.createQuiz(2)
+        admin.createQuizDef(sourceQuiz)
+        if (questionCount > 0) {
+            admin.createQuizQuestionDefs(QuizDefFactory.createChoiceQuestions(1, questionCount, 2))
+        }
+
+        when:
+        admin.copyQuiz(sourceQuiz.quizId, destinationQuiz)
+        List<Map> copiedQuestions = admin.getQuizQuestionDefs(destinationQuiz.quizId).questions
+
+        then:
+        admin.getQuizDefSummary(destinationQuiz.quizId).numQuestions == questionCount
+        copiedQuestions.size() == questionCount
+        copiedQuestions*.question == (0..<questionCount).collect { int index -> "This is questions #${index + 1}".toString() }
+        copiedQuestions.every { Map question ->
+            question.answers*.answer == ['Answer #1', 'Answer #2'] && question.answers*.isCorrect == [true, false]
+        }
+
+        where:
+        questionCount << [0, 2]
+    }
+
     def "direct selected-question copy rejects #sourceType to #destinationType"() {
         setup:
         SkillsService admin = createService(getRandomUsers(1)[0])
@@ -301,6 +464,41 @@ class QuizQuestionCopySpecs extends DefaultIntSpec  {
             assert !copiedQuestion.answers*.id.intersect(source.answers*.id)
         }
         skillsService.getQuizQuestionDefs(sourceQuiz.quizId).questions*.id == sourceQuestions*.id
+    }
+
+    def "missing uploaded video rejects copying and rolls back previously copied questions"() {
+        SkillsService admin = createService(getRandomUsers(1)[0])
+        Map sourceQuiz = QuizDefFactory.createQuiz(1)
+        Map destinationQuiz = QuizDefFactory.createQuiz(2)
+        admin.createQuizDef(sourceQuiz)
+        admin.createQuizDef(destinationQuiz)
+        Map validQuestion = admin.createQuizQuestionDef(QuizDefFactory.createChoiceQuestion(1, 1, 2)).body
+        Map brokenQuestion = admin.createQuizQuestionDef(QuizDefFactory.createChoiceQuestion(1, 2, 2)).body
+        Resource video = new ClassPathResource('/testVideos/create-quiz.mp4')
+        admin.saveSkillVideoAttributes(sourceQuiz.quizId, brokenQuestion.id.toString(),
+                [file: video, transcript: 'Source transcript'], true)
+        Map sourceVideo = admin.getSkillVideoAttributes(sourceQuiz.quizId, brokenQuestion.id.toString(), true)
+        String missingUuid = sourceVideo.videoUrl.tokenize('/').last()
+        // Preserve the source attributes while simulating an already-missing file.
+        attachmentRepo.delete(attachmentRepo.findByUuid(missingUuid))
+        Map existingQuestion = QuizDefFactory.createChoiceQuestion(2, 1, 2)
+        existingQuestion.question = 'Existing destination question'
+        admin.createQuizQuestionDef(existingQuestion)
+        Map destinationBefore = admin.getQuizQuestionDefs(destinationQuiz.quizId)
+
+        when:
+        admin.copyQuestions(sourceQuiz.quizId, destinationQuiz.quizId, [validQuestion.id, brokenQuestion.id])
+
+        then:
+        SkillsClientException error = thrown()
+        error.httpStatus == HttpStatus.BAD_REQUEST
+        error.message.contains('errorCode:BadParam')
+        error.message.contains("video attachment [${missingUuid}] does not exist")
+        error.message.contains("questionId:${brokenQuestion.id}")
+        error.message.contains("quizId:${destinationQuiz.quizId}")
+        admin.getQuizQuestionDefs(destinationQuiz.quizId) == destinationBefore
+        admin.getQuizQuestionDefs(sourceQuiz.quizId).questions*.id == [validQuestion.id, brokenQuestion.id]
+        admin.getSkillVideoAttributes(sourceQuiz.quizId, brokenQuestion.id.toString(), true) == sourceVideo
     }
 
     def "selected-question copy preserves attachments #videoHosting video and AI settings"() {

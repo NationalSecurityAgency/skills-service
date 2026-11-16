@@ -17,6 +17,8 @@ package skills.intTests.quiz
 
 import org.mockito.invocation.InvocationOnMock
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.core.io.ClassPathResource
+import org.springframework.core.io.Resource
 import org.springframework.http.HttpStatus
 import org.springframework.jdbc.core.JdbcTemplate
 import org.springframework.test.context.bean.override.mockito.MockitoSpyBean
@@ -27,6 +29,7 @@ import skills.intTests.utils.SkillsClientException
 import skills.intTests.utils.SkillsService
 import skills.services.quiz.QuizQuestionType
 import skills.storage.model.QuizQuestionDef
+import skills.storage.repos.AttachmentRepo
 import skills.storage.repos.QuizQuestionDefRepo
 import spock.util.concurrent.PollingConditions
 
@@ -51,6 +54,111 @@ class QuizQuestionCopyConcurrencyIT extends DefaultIntSpec {
 
     @Autowired
     PublicProps publicProps
+
+    @Autowired
+    AttachmentRepo attachmentRepo
+
+    def "copy preserves uploaded video during a concurrent source video #mutation"() {
+        setup:
+        List<String> users = getRandomUsers(2)
+        SkillsService copier = createService(users[0])
+        SkillsService editor = createService(users[1])
+        Map sourceQuiz = QuizDefFactory.createQuiz(1)
+        Map destinationQuiz = QuizDefFactory.createQuiz(2)
+        copier.createQuizDef(sourceQuiz)
+        copier.createQuizDef(destinationQuiz)
+        copier.addQuizUserRole(sourceQuiz.quizId, users[1], 'ROLE_QUIZ_ADMIN')
+        Map createdQuestion = copier.createQuizQuestionDef(QuizDefFactory.createChoiceQuestion(1, 1, 2)).body
+        Resource video = new ClassPathResource('/testVideos/create-quiz.mp4')
+        copier.saveSkillVideoAttributes(sourceQuiz.quizId, createdQuestion.id.toString(), [
+                file: video, transcript: 'Original transcript', captions: 'Original captions', allowDownloads: true,
+        ], true)
+        Map originalVideo = copier.getSkillVideoAttributes(sourceQuiz.quizId, createdQuestion.id.toString(), true)
+        String originalUuid = originalVideo.videoUrl.tokenize('/').last()
+        byte[] expectedVideo = video.inputStream.withCloseable { InputStream stream -> stream.bytes }
+
+        CountDownLatch copyPaused = new CountDownLatch(1)
+        CountDownLatch resumeCopy = new CountDownLatch(1)
+        AtomicInteger copyPid = new AtomicInteger()
+        // Pause after reading the source attributes, before fetching its video file.
+        doAnswer({ InvocationOnMock invocation ->
+            List<QuizQuestionDef> questions = quizQuestionDefRepo.findAllByQuizIdIgnoreCase(sourceQuiz.quizId)
+                    .findAll { QuizQuestionDef questionDef -> questionDef.id == createdQuestion.id }
+            copyPid.set(jdbcTemplate.queryForObject('select pg_backend_pid()', Integer))
+            copyPaused.countDown()
+            assert resumeCopy.await(60, TimeUnit.SECONDS): 'Copy was not released by the test'
+            return questions
+        }).when(quizQuestionDefRepo).findAllByQuizIdAndIds(sourceQuiz.quizId, [createdQuestion.id])
+
+        ExecutorService executor = Executors.newFixedThreadPool(2)
+        Future<Object> copyRequest
+        Future<Object> mutationRequest
+
+        when:
+        copyRequest = executor.submit({ ->
+            copier.copyQuestions(sourceQuiz.quizId, destinationQuiz.quizId, [createdQuestion.id])
+        } as Callable<Object>)
+        assert copyPaused.await(10, TimeUnit.SECONDS): 'Copy did not reach the pause point'
+        mutationRequest = executor.submit({ ->
+            if (mutation == 'delete') {
+                return editor.deleteSkillVideoAttributes(sourceQuiz.quizId, createdQuestion.id.toString(), true)
+            }
+            return editor.saveSkillVideoAttributes(sourceQuiz.quizId, createdQuestion.id.toString(), [
+                    file: video, transcript: 'Replacement transcript', captions: 'Replacement captions', allowDownloads: true,
+            ], true)
+        } as Callable<Object>)
+
+        new PollingConditions(timeout: 10).eventually {
+            Boolean blockedByCopy = jdbcTemplate.queryForObject('''
+                select exists (
+                    select 1 from pg_locks where ? = any(pg_blocking_pids(pid))
+                )
+            ''', Boolean, copyPid.get())
+            assert blockedByCopy || mutationRequest.isDone()
+        }
+
+        then: 'video mutation waits before deleting the original attachment'
+        !mutationRequest.isDone()
+
+        when:
+        resumeCopy.countDown()
+        copyRequest.get(30, TimeUnit.SECONDS)
+        mutationRequest.get(30, TimeUnit.SECONDS)
+        List<Map> destinationQuestions = copier.getQuizQuestionDefs(destinationQuiz.quizId).questions
+
+        then: 'the copied video remains independently downloadable after the source mutation'
+        destinationQuestions.size() == 1
+        Map copiedVideo = copier.getSkillVideoAttributes(destinationQuiz.quizId, destinationQuestions.first().id.toString(), true)
+        copiedVideo.isInternallyHosted
+        copiedVideo.videoUrl != originalVideo.videoUrl
+        copiedVideo.transcript == 'Original transcript'
+        copiedVideo.captions == 'Original captions'
+        copiedVideo.allowDownloads
+        copier.downloadAttachment(copiedVideo.videoUrl).file.bytes == expectedVideo
+
+        and: 'the mutation removed the original file and updated only the source'
+        !attachmentRepo.findByUuid(originalUuid)
+        if (mutation == 'delete') {
+            assert !editor.getQuizQuestionDef(sourceQuiz.quizId, createdQuestion.id).attributes?.videoConf
+        } else {
+            Map replacementVideo = editor.getSkillVideoAttributes(sourceQuiz.quizId, createdQuestion.id.toString(), true)
+            assert replacementVideo.videoUrl != originalVideo.videoUrl
+            assert replacementVideo.videoUrl != copiedVideo.videoUrl
+            assert replacementVideo.transcript == 'Replacement transcript'
+            assert replacementVideo.captions == 'Replacement captions'
+            assert editor.downloadAttachment(replacementVideo.videoUrl).file.bytes == expectedVideo
+        }
+
+        cleanup:
+        resumeCopy?.countDown()
+        executor?.shutdown()
+        if (executor) {
+            assert executor.awaitTermination(70, TimeUnit.SECONDS): 'Concurrent requests did not finish during cleanup'
+        }
+
+        where:
+        mutation << ['delete', 'replace']
+    }
 
     def "copy preserves original question and answers during a concurrent source #mutation"() {
         setup:
