@@ -251,10 +251,14 @@ const filterProjectSkills = () => {
 };
 
 const updateSearch = (value) => {
-  if(filterValue.value !== value) {
-    filterValue.value = value;
-    filterProjectSkills()
-    loadSharedSkills()
+  const queryChanged = filterValue.value !== value;
+  filterValue.value = value;
+
+  // Refresh suggestions on every completion so PrimeVue clears its searching state.
+  filterProjectSkills();
+
+  if (queryChanged) {
+    loadSharedSkills();
   }
 }
 </script>
