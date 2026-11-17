@@ -99,6 +99,43 @@ class ProjectUserRemovalExpirationSpecs extends DefaultIntSpec {
         operation << ['removal', 'Delete All']
     }
 
+    def "#operation is a no-op for expired-only history without participation or active progress"() {
+        Map skill = createSkill(1, 1, 1, 0, 1, 0, 100)
+        skillsService.createProjectAndSubjectAndSkills(createProject(1), createSubject(1, 1), [skill])
+        String userId = getRandomUsers(1)[0]
+        SkillsService learner = createService(userId)
+        assert skillsService.addSkill(skill, userId, new Date() - 10).body.skillApplied
+        expire([skill])
+        String lastExpirationDate = learner.getSingleSkillSummaryForCurrentUser('TestProject1', skill.skillId).lastExpirationDate
+        Long actionsBefore = skillsService.getUserActionsForProject('TestProject1').totalCount
+
+        expect:
+        skillsService.getProjectUsers('TestProject1').count == 0
+        skillsService.getPerformedSkills(userId, 'TestProject1').totalCount == 0
+        learner.getSkillsSummaryForCurrentUser('TestProject1').points == 0
+        !userPointsRepo.existsByProjectIdAndUserId('TestProject1', userId)
+        skillsService.getExpiredSkills('TestProject1', '', '').data*.skillId == [skill.skillId]
+        lastExpirationDate != null
+
+        when:
+        if (removeFromProject) {
+            skillsService.removeUserFromProject('TestProject1', userId)
+        } else {
+            skillsService.deleteAllSkillEvents([projectId: 'TestProject1', userId: userId])
+        }
+
+        then:
+        skillsService.getExpiredSkills('TestProject1', '', '').data*.skillId == [skill.skillId]
+        learner.getSingleSkillSummaryForCurrentUser('TestProject1', skill.skillId).lastExpirationDate == lastExpirationDate
+        skillsService.getProjectUsers('TestProject1').count == 0
+        skillsService.getUserActionsForProject('TestProject1').totalCount == actionsBefore
+
+        where:
+        operation     | removeFromProject
+        'Remove User' | true
+        'Delete All'  | false
+    }
+
     def "Delete All clears active progress and expired history and summary state"() {
         List<Map> skills = (1..2).collect { int id -> createSkill(1, 1, id, 0, 1, 0, 100) }
         skillsService.createProjectAndSubjectAndSkills(createProject(1), createSubject(1, 1), skills)

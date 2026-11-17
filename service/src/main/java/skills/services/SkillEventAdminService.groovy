@@ -224,6 +224,9 @@ class SkillEventAdminService {
     RequestResult bulkDeleteSkillEventsForUser(String projectId, String userId) {
         lockingService.lockForSkillReporting(userId, projectId)
         boolean hadLocalEvents = performedSkillRepository.existsLocalEventByProjectIdAndUserId(projectId, userId)
+        if (!hasProjectUserData(projectId, userId, hadLocalEvents)) {
+            return RequestResult.success()
+        }
         deleteUserProgress(projectId, userId)
 
         catalogBackfillService.reset(projectId, userId, hadLocalEvents)
@@ -249,6 +252,10 @@ class SkillEventAdminService {
         SkillsValidator.isTrue(state != FinalizeState.FAILED,
                 'This user cannot be removed because Skills Catalog finalization failed. Please resolve finalization before trying again.', canonicalProjectId)
 
+        boolean hadLocalEvents = performedSkillRepository.existsLocalEventByProjectIdAndUserId(canonicalProjectId, canonicalUserId)
+        if (!hasProjectUserData(canonicalProjectId, canonicalUserId, hadLocalEvents)) {
+            return RequestResult.success()
+        }
         deleteUserProgress(canonicalProjectId, canonicalUserId)
         projectParticipationRepo.deleteByProjectIdAndUserId(canonicalProjectId, canonicalUserId)
         ArchivedUser archivedUser = archivedUsersRepo.findByProjectIdAndUserId(canonicalProjectId, canonicalUserId)
@@ -260,6 +267,15 @@ class SkillEventAdminService {
         propagateUpdatesToQuizSkillsAndImportedSkills(canonicalProjectId, canonicalUserId)
         recordUserProgressDeletion(canonicalProjectId, canonicalUserId, true)
         return RequestResult.success()
+    }
+
+    private boolean hasProjectUserData(String projectId, String userId, boolean hadLocalEvents) {
+        // Called under the reporting lock. A quiz association alone must not authorize
+        // deleting an absent user's passed attempts and credit in other projects.
+        // Check stored project-local data, not catalog source events from another project.
+        return hadLocalEvents ||
+                projectParticipationRepo.existsByProjectIdAndUserId(projectId, userId) ||
+                userPointsRepo.existsByProjectIdAndUserId(projectId, userId)
     }
 
     private void deleteUserProgress(String projectId, String userId) {

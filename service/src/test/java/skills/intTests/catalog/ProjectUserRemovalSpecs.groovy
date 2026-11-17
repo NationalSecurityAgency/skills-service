@@ -234,6 +234,39 @@ class ProjectUserRemovalSpecs extends CatalogBackfillSpecBase {
         reuse << [false, true]
     }
 
+    def "#operation is a no-op for approval-only records without participation or earned progress"() {
+        Map skill = createSkill(1, 1, 1, 0, 1, 0, 100) + [selfReportingType: SelfReportingType.Approval]
+        skillsService.createProjectAndSubjectAndSkills(createProject(1), createSubject(1, 1), [skill])
+        SkillsService learner = createService(users[0])
+        learner.addSkill(skill)
+        Long actionsBefore = skillsService.getUserActionsForProject('TestProject1').totalCount
+
+        expect:
+        !participationRepo.existsByProjectIdAndUserId('TestProject1', users[0])
+        !userPointsRepo.existsByProjectIdAndUserId('TestProject1', users[0])
+        skillsService.getProjectUsers('TestProject1').count == 0
+        skillsService.getPerformedSkills(users[0], 'TestProject1').totalCount == 0
+        skillsService.getApprovals('TestProject1', 10, 1, 'requestedOn', false).count == 1
+
+        when:
+        if (removeFromProject) {
+            skillsService.removeUserFromProject('TestProject1', users[0])
+        } else {
+            skillsService.deleteAllSkillEvents([projectId: 'TestProject1', userId: users[0]])
+        }
+
+        then:
+        skillsService.getApprovals('TestProject1', 10, 1, 'requestedOn', false).count == 1
+        learner.getSkillsSummaryForCurrentUser('TestProject1').points == 0
+        skillsService.getProjectUsers('TestProject1').count == 0
+        skillsService.getUserActionsForProject('TestProject1').totalCount == actionsBefore
+
+        where:
+        operation     | removeFromProject
+        'Remove User' | true
+        'Delete All'  | false
+    }
+
     def "removal clears pending approved and rejected self-report records"() {
         List<Map> skills = (1..3).collect { int id -> createSkill(1, 1, id, 0, 1, 0, 100) + [selfReportingType: SelfReportingType.Approval] }
         skillsService.createProjectAndSubjectAndSkills(createProject(1), createSubject(1, 1), skills)
