@@ -15,8 +15,10 @@
  */
 package skills.intTests.quiz
 
+import skills.intTests.utils.QuizDefFactory
 import skills.intTests.utils.SkillsService
 import skills.storage.model.SkillDef.SelfReportingType
+import skills.storage.model.auth.RoleName
 
 import static skills.intTests.utils.SkillsFactory.*
 
@@ -51,5 +53,57 @@ class ProjectUserRemovalQuizSpecs extends QuizSkillAchievementsBaseIntSpec {
         skillsService.getPerformedSkills(learner.userName, 'TestProject2').data*.skillId == [unrelated.skillId]
         skillsService.getQuizRuns(quiz.quizId).data*.attemptId == [failedAttempt]
         skillsService.getProjectUsers('TestProject1').count == 0
+    }
+
+    def "project quiz association authorizes rolling removal without administering the shared quiz or other project"() {
+        List<String> users = getRandomUsers(4)
+        SkillsService projectAdmin = createService(users[0])
+        SkillsService otherProjectAdmin = createService(users[1])
+        SkillsService quizAdmin = createService(users[2])
+        SkillsService learner = createService(users[3])
+        Map sharedQuiz = QuizDefFactory.createQuiz(1)
+        Map unrelatedQuiz = QuizDefFactory.createQuiz(2)
+        quizAdmin.createQuizDef(sharedQuiz)
+        quizAdmin.createQuizQuestionDefs(QuizDefFactory.createChoiceQuestions(1, 1, 2))
+        quizAdmin.createQuizDef(unrelatedQuiz)
+        quizAdmin.createQuizQuestionDefs(QuizDefFactory.createChoiceQuestions(2, 1, 2))
+        Map sourceSkill = createSkill(1, 1, 1, 0, 1, 0, 100) + [selfReportingType: SelfReportingType.Quiz, quizId: sharedQuiz.quizId]
+        Map sharedSkill = createSkill(2, 1, 2, 0, 1, 0, 100) + [selfReportingType: SelfReportingType.Quiz, quizId: sharedQuiz.quizId]
+        Map unrelatedSkill = createSkill(2, 1, 3, 0, 1, 0, 100)
+        Map unrelatedQuizSkill = createSkill(2, 1, 4, 0, 1, 0, 100) + [selfReportingType: SelfReportingType.Quiz, quizId: unrelatedQuiz.quizId]
+        projectAdmin.createProjectAndSubjectAndSkills(createProject(1), createSubject(1, 1), [sourceSkill])
+        otherProjectAdmin.createProjectAndSubjectAndSkills(createProject(2), createSubject(2, 1), [sharedSkill, unrelatedSkill, unrelatedQuizSkill])
+        Integer sharedAttempt = passQuiz(learner, sharedQuiz)
+        Integer unrelatedAttempt = passQuiz(learner, unrelatedQuiz)
+        otherProjectAdmin.addSkill(unrelatedSkill, learner.userName)
+        waitForAsyncTasksCompletion.waitForAllScheduleTasks()
+
+        expect:
+        !projectAdmin.isRoot()
+        projectAdmin.getUserRolesForProjectAndUser('TestProject1', projectAdmin.userName)*.roleName == [RoleName.ROLE_PROJECT_ADMIN.toString()]
+        otherProjectAdmin.getUserRolesForProjectAndUser('TestProject2', projectAdmin.userName).isEmpty()
+        quizAdmin.getQuizUserRoles(sharedQuiz.quizId)*.userId == [quizAdmin.userName]
+        quizAdmin.getQuizRuns(sharedQuiz.quizId).data*.attemptId == [sharedAttempt]
+        quizAdmin.getQuizRuns(unrelatedQuiz.quizId).data*.attemptId == [unrelatedAttempt]
+        learner.getSkillsSummaryForCurrentUser('TestProject1').points == 100
+        learner.getSkillsSummaryForCurrentUser('TestProject1').skillsAchieved == 1
+        learner.getSkillsSummaryForCurrentUser('TestProject2').points == 300
+        learner.getSkillsSummaryForCurrentUser('TestProject2').skillsAchieved == 3
+
+        when:
+        Map result = projectAdmin.removeUserFromProject('TestProject1', learner.userName)
+        waitForAsyncTasksCompletion.waitForAllScheduleTasks()
+
+        then:
+        result.success
+        learner.getSkillsSummaryForCurrentUser('TestProject1').points == 0
+        learner.getSkillsSummaryForCurrentUser('TestProject1').skillsAchieved == 0
+        projectAdmin.getProjectUsers('TestProject1').count == 0
+        learner.getSkillsSummaryForCurrentUser('TestProject2').points == 200
+        learner.getSkillsSummaryForCurrentUser('TestProject2').skillsAchieved == 2
+        otherProjectAdmin.getPerformedSkills(learner.userName, 'TestProject2').data*.skillId.sort() == [unrelatedSkill.skillId, unrelatedQuizSkill.skillId].sort()
+        otherProjectAdmin.getProjectUsers('TestProject2').data*.userId == [learner.userName]
+        quizAdmin.getQuizRuns(sharedQuiz.quizId).totalCount == 0
+        quizAdmin.getQuizRuns(unrelatedQuiz.quizId).data*.attemptId == [unrelatedAttempt]
     }
 }
