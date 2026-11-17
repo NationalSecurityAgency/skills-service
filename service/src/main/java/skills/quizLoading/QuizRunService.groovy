@@ -1103,8 +1103,10 @@ class QuizRunService {
         if (userQuizAttempt.status == UserQuizAttempt.QuizAttemptStatus.PASSED) {
             List<ProjectIdAndSkillId> skills = quizToSkillDefRepo.getSkillsForQuiz(quizDefId)
             if (skills) {
-                // Shared quiz completions retain reporting locks across projects until commit.
-                // Acquire them in canonical project order, independent of repository enumeration.
+                // Shared quiz awards retain reporting/catalog qualification locks through commit.
+                // Report in canonical project order to reduce inverted-lock risk, independent of
+                // repository enumeration. Imports/reuse synchronize from these native sources.
+                // Ordering does not add locks to maximum-points reports or fence in-flight cleanup.
                 skills = skills.sort(false) { ProjectIdAndSkillId left, ProjectIdAndSkillId right ->
                     (left.projectId.toLowerCase(Locale.ROOT) <=> right.projectId.toLowerCase(Locale.ROOT)) ?:
                             (left.skillRefId <=> right.skillRefId)

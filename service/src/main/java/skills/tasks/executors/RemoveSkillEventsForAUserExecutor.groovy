@@ -58,7 +58,13 @@ class RemoveSkillEventsForAUserExecutor implements VoidExecutionHandler<RemoveSk
         List<SkillDefMin> skills = data.skillRefIds.collect { Integer id -> skillDefRepo.findSkillDefMinById(id) }.findAll { it != null }
         List<Integer> localIds = skills.findAll { SkillDefMin skill -> !skill.copiedFrom }.collect { SkillDefMin skill -> skill.id }
         if (localIds) {
-            // Recheck under the reporting lock: a retake may have passed since this cleanup was queued.
+            // Preserve retakes committed before this check, not completions still in flight.
+            // Operational constraint: Remove User and Delete All are maintenance for inactive
+            // learners; keep quiz taking/grading inactive until their queued cleanup completes.
+            // A maximum-points quiz report can return without taking the reporting lock, so
+            // an overlapping completion may commit a new pass after this check while cleanup
+            // removes its shared-project credit/achievements. This rare race is accepted rather
+            // than adding reporting locks to every passed-quiz completion; inactivity is not enforced here.
             Set<Integer> passedQuizSkillIds = userQuizAttemptRepo.findSkillRefIdsByUserIdAndStatus(
                     localIds, data.userId, QuizAttemptStatus.PASSED).toSet()
             localIds = localIds.findAll { Integer id -> !passedQuizSkillIds.contains(id) }
