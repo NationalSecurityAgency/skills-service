@@ -227,6 +227,7 @@ class QuizController {
     RequestResult copyQuestionDefToAnotherProject(@PathVariable("quizId") String quizId,
                                                           @PathVariable("toQuizId") String toQuizId,
                                                           @RequestBody List<Integer> ids) {
+        toQuizId = quizDefService.findQuizDef(toQuizId).quizId
         UserInfo currentUser = userInfoService.currentUser
         if (!userAuthService.isUserQuizAdmin(currentUser, toQuizId)) {
             throw new AccessDeniedException("User [${currentUser.username}] is not an admin for quiz [${toQuizId}]")

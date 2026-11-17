@@ -130,19 +130,47 @@ class QuizQuestionCopySpecs extends DefaultIntSpec  {
         missingQuiz << ['source', 'destination']
     }
 
-    def "ordinary admin copy preflight accepts case-variant quiz IDs"() {
+    def "ordinary admin validates and copies selected questions using #destinationCase destination quiz IDs"() {
         SkillsService admin = createService(getRandomUsers(1)[0])
         Map sourceQuiz = QuizDefFactory.createQuiz(1)
         Map destinationQuiz = QuizDefFactory.createQuiz(2)
         admin.createQuizDef(sourceQuiz)
         admin.createQuizDef(destinationQuiz)
+        Map selectedQuestion = QuizDefFactory.createChoiceQuestion(1, 1, 2)
+        selectedQuestion.question = 'Selected source question'
+        Map createdSourceQuestion = admin.createQuizQuestionDef(selectedQuestion).body
+        Map unselectedSourceQuestion = admin.createQuizQuestionDef(QuizDefFactory.createChoiceQuestion(1, 2, 2)).body
+        String sourceId = sourceQuiz.quizId.toLowerCase(Locale.ROOT)
+        String destinationId = destinationCase == 'lower' ? destinationQuiz.quizId.toLowerCase(Locale.ROOT) :
+                destinationQuiz.quizId.toUpperCase(Locale.ROOT)
 
         when:
-        Map validation = admin.validateCopyQuestions(sourceQuiz.quizId.toLowerCase(), destinationQuiz.quizId.toUpperCase(), 1).body
+        Map validation = admin.validateCopyQuestions(sourceId, destinationId, 1).body
 
         then:
         validation.isAllowed
         validation.validationErrors.empty
+
+        when: 'the same ordinary admin copies to the destination accepted by preflight'
+        Map response = admin.copyQuestions(sourceId, destinationId, [createdSourceQuestion.id]).body
+        List<Map> destinationQuestions = admin.getQuizQuestionDefs(destinationQuiz.quizId).questions
+
+        then:
+        response.success
+        destinationQuestions.size() == 1
+        Map copiedQuestion = destinationQuestions.first()
+        copiedQuestion.id != createdSourceQuestion.id
+        copiedQuestion.question == 'Selected source question'
+        copiedQuestion.answerHint == 'This is a hint for question #1'
+        copiedQuestion.questionType == 'SingleChoice'
+        copiedQuestion.displayOrder == 0
+        copiedQuestion.answers*.answer == ['Answer #1', 'Answer #2']
+        copiedQuestion.answers*.isCorrect == [true, false]
+        copiedQuestion.answers*.displayOrder == [1, 2]
+        admin.getQuizQuestionDefs(sourceQuiz.quizId).questions*.id == [createdSourceQuestion.id, unselectedSourceQuestion.id]
+
+        where:
+        destinationCase << ['lower', 'upper']
     }
 
     def "copy preflight capacity validation handles #capacityCase counts"() {
