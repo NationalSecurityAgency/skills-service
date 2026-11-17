@@ -19,6 +19,12 @@ import { createWriteStream } from 'node:fs';
 // Run from the dashboard with: node scripts/generateSlidesLinksFixture.mjs
 const doc = new PDFDocument({ size: [600, 400], margin: 40 });
 doc.pipe(createWriteStream(new URL('../../e2e-tests/cypress/fixtures/slides-link-actions.pdf', import.meta.url)));
+const optionalLayer = doc.ref({ Type: 'OCG', Name: new String('Review layer') });
+optionalLayer.end();
+doc._root.data.OCProperties = {
+    OCGs: [optionalLayer],
+    D: { Order: [optionalLayer], ON: [optionalLayer], BaseState: 'ON' },
+};
 for (let page = 1; page <= 3; page += 1) {
     if (page > 1) doc.addPage();
     doc.fontSize(20).text(`Link actions slide ${page}`, 40, 40);
@@ -39,8 +45,15 @@ for (let page = 1; page <= 3; page += 1) {
     });
     doc.annotate(300, 235, 180, 24, {
         Subtype: 'Link',
-        A: { S: 'JavaScript', JS: 'globalThis.pdfScriptExecuted = true; app.alert("unsafe")' },
+        // PDFKit serializes primitive strings as PDF names in raw dictionaries.
+        // Boxed strings produce the PDF string payload required by these actions.
+        A: { S: 'JavaScript', JS: new String('globalThis.pdfScriptExecuted = true; app.alert("unsafe")') },
     });
-    doc.annotate(300, 275, 180, 24, { Subtype: 'Link', A: { S: 'Launch', F: '/etc/passwd' } });
+    doc.annotate(300, 275, 180, 24, { Subtype: 'Link', A: { S: 'Launch', F: new String('file:///etc/passwd') } });
+    doc.text('Unsupported layer toggle', 300, 315);
+    doc.annotate(300, 310, 180, 24, {
+        Subtype: 'Link',
+        A: { S: 'SetOCGState', State: ['Toggle', optionalLayer], PreserveRB: true },
+    });
 }
 doc.end();

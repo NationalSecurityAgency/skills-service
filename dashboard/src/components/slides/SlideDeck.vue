@@ -255,7 +255,12 @@ const renderPage = (pageNum, requestedWidth = null, announce = true) => {
           page,
           viewport: viewport.clone({ dontFlip: true }),
           linkService,
-          annotations: annotations.filter((annotation) => annotation.annotationType === pdfjsLib.AnnotationType.LINK),
+          // Only expose actions supported by this single-page viewer. In particular,
+          // SetOCGState needs optional-content rendering that our adapter does not provide.
+          annotations: annotations.filter((annotation) =>
+              annotation.annotationType === pdfjsLib.AnnotationType.LINK &&
+              (annotation.url || annotation.dest ||
+                  ['NextPage', 'PrevPage', 'FirstPage', 'LastPage'].includes(annotation.action))),
           renderForms: false,
           enableScripting: false,
         })

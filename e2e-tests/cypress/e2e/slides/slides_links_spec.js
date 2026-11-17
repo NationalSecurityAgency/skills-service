@@ -154,9 +154,20 @@ describe('Slide hyperlinks', () => {
             .and('have.attr', 'href', `${Cypress.config('baseUrl')}/static/link-tests/slides/docs/intro.html`)
             .and('have.attr', 'target', '_blank')
             .and('have.attr', 'rel', 'noopener noreferrer');
-        // Four supported named actions and two safe external links only.
+        // Four supported named actions and two safe external links only. Valid
+        // JavaScript, file Launch and unsupported layer-toggle actions add no anchors.
         cy.get(links).should('have.length', 6);
         cy.get(`${links}[href^="javascript:"], ${links}[href^="data:"], ${links}[href^="file:"]`).should('not.exist');
         cy.window().its('pdfScriptExecuted').should('not.exist');
+    });
+
+    it('does not expose unsupported optional-content layer actions as clickable links', () => {
+        loadActionSlides();
+        cy.get('#text-layer').should('contain.text', 'Unsupported layer toggle');
+        cy.get(links).should('have.length', 6);
+        cy.get('[data-cy="slidesAnnotationLayer"] [data-internal-link] a').should('have.length', 4);
+        cy.get(internalLink).eq(0).click();
+        cy.get('[data-cy="currentSlideMsg"]').should('have.text', 'Slide 2 of 3');
+        cy.get(links).should('have.length', 6);
     });
 });
