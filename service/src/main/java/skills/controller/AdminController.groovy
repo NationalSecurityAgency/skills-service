@@ -950,6 +950,15 @@ class AdminController {
         skillsAdminService.deleteSkill(projectId, skillId)
     }
 
+    @RequestMapping(value = "/projects/{projectId}/users/{userId}", method = RequestMethod.DELETE, produces = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseBody
+    RequestResult removeUserFromProject(@PathVariable("projectId") String projectId,
+                                        @PathVariable("userId") String userId) {
+        SkillsValidator.isNotBlank(projectId, "Project Id")
+        SkillsValidator.isNotBlank(userId, "User Id", projectId)
+        return skillEventService.removeUserFromProject(projectId, userId.toLowerCase(Locale.ROOT))
+    }
+
     @RequestMapping(value = "/projects/{projectId}/users/{userId}/events", method = RequestMethod.DELETE, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     RequestResult deleteAllSkillEventsForUser(@PathVariable("projectId") String projectId,
