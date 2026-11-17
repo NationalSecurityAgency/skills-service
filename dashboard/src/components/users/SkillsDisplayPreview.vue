@@ -136,10 +136,20 @@ const isLoading = computed(() => checkingAccess.value || skillsDisplayAttributes
                      remove-button-label="Yes, Remove User!"
                      focus-on-close-id="removeProjectUserBtn"
                      @do-remove="removeUser">
-    <div class="flex flex-col gap-4">
-      <p>This action cannot be undone and <b>permanently deletes</b> this user's progress in this project, including points and achievements.</p>
-      <p>Passed quiz attempts associated with this project are also removed. Progress in other projects that share those quizzes may be affected.</p>
-      <p>The user's account, roles, and project access are not removed.</p>
+    <div class="flex flex-col gap-4 leading-relaxed">
+      <p>This action cannot be undone and <strong>permanently deletes</strong> this user's progress in this project, including points and achievements.</p>
+      <div>
+        <p class="font-semibold mb-2">Additional effects, if applicable:</p>
+        <ul class="list-disc pl-5 space-y-3">
+          <li data-cy="removeProjectUserQuizWarning">
+            <strong>Quizzes:</strong> If this project has skills associated with quizzes, this user's passed attempts for those quizzes will also be removed. Their progress in other projects that use the same quizzes may be affected.
+          </li>
+          <li data-cy="removeProjectUserCatalogWarning">
+            <strong>Skills Catalog:</strong> If this project exports skills to the Skills Catalog, removing this user's progress may also remove their points and achievements in other projects that import those skills.
+          </li>
+        </ul>
+      </div>
+      <p data-cy="removeProjectUserAccountWarning"><strong>Not removed:</strong> The user's account, roles, and project access.</p>
     </div>
   </RemovalValidation>
 </div>

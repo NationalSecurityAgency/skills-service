@@ -50,6 +50,18 @@ describe('Remove a project user', () => {
         cy.openDialog(removeButton);
         cy.get('[data-cy="removalSafetyCheckMsg"]').should('contain.text', 'cannot be undone')
             .and('contain.text', 'This action cannot be undone and permanently deletes');
+        cy.get('[data-cy="removeProjectUserQuizWarning"]').should('be.visible')
+            .and('contain.text', 'Quizzes:')
+            .and('contain.text', 'If this project has skills associated with quizzes')
+            .and('contain.text', "this user's passed attempts for those quizzes will also be removed")
+            .and('contain.text', 'Their progress in other projects that use the same quizzes may be affected');
+        cy.get('[data-cy="removeProjectUserCatalogWarning"]').should('be.visible')
+            .and('contain.text', 'Skills Catalog:')
+            .and('contain.text', 'If this project exports skills to the Skills Catalog')
+            .and('contain.text', "may also remove their points and achievements in other projects that import those skills");
+        cy.get('[data-cy="removeProjectUserAccountWarning"]').should('be.visible')
+            .and('contain.text', 'Not removed:')
+            .and('contain.text', "The user's account, roles, and project access");
         cy.get('[data-cy="saveDialogBtn"]').should('be.disabled');
         cy.get('[data-cy="currentValidationText"]').type('delete me');
         cy.get('[data-cy="saveDialogBtn"]').should('be.disabled');
