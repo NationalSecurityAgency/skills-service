@@ -201,7 +201,7 @@ class OpenAIService {
     }
 
     private List<Message> createChatMessages(AiChatRequest request) {
-        List<Message> messages = request.messages.size() == 1 ? [new SystemMessage(systemMsg)] : []
+        List<Message> messages = [new SystemMessage(systemMsg)]
         messages.addAll(request.messages.collect { msg ->
             if (msg.role == AiChatRequest.Role.User) {
                 return new UserMessage(msg.content)

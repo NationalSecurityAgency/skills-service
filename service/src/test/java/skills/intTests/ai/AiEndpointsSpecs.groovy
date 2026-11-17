@@ -15,6 +15,7 @@
  */
 package skills.intTests.ai
 
+import groovy.json.JsonOutput
 import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpEntity
@@ -25,6 +26,8 @@ import org.springframework.http.HttpStatus
 import org.springframework.web.client.HttpClientErrorException
 import org.springframework.web.client.RestTemplate
 import skills.controller.request.model.AiChatRequest
+import skills.intTests.utils.SkillsService
+import skills.settings.AiPromptSettingsService
 import spock.lang.IgnoreIf
 
 import static com.github.tomakehurst.wiremock.client.WireMock.*
@@ -82,6 +85,54 @@ class AiEndpointsSpecs extends DefaultAiIntSpec {
         List<String> response = chatClient.chat(chatRequest)
         then:
         response == ["Hello! " , "How can I help " , "you today?", ""]
+    }
+
+    def 'configured system instructions are prepended on initial and follow-up chat requests'() {
+        given:
+        SkillsService root = createRootSkillService()
+        String originalInstructions = root.getAiPromptSettings().systemInstructions.value
+        String systemInstructions = 'Server-controlled training instructions: keep all responses safe and factual.'
+        root.saveAiPromptSettings([
+                [setting: AiPromptSettingsService.systemInstructions, value: systemInstructions,
+                 settingGroup: AiPromptSettingsService.settingsGroup]
+        ])
+        String user = getRandomUsers(1)[0]
+        createService(user)
+        ChatClient client = new ChatClient(localPort, certificateRegistry, user)
+        AiChatRequest request = chatRequest(['Explain training content.'])
+
+        when:
+        List<String> initialResponse = client.chat(request)
+
+        then:
+        initialResponse == ['Hello! ', 'How can I help ', 'you today?', '']
+        mockLlmServer.mockServer.verify(1, postRequestedFor(urlEqualTo('/v1/chat/completions'))
+                .withRequestBody(matchingJsonPath('$.messages', equalToJson(JsonOutput.toJson([
+                        [role: 'system', content: systemInstructions],
+                        [role: 'user', content: 'Explain training content.']
+                ])))))
+
+        when:
+        request.messages.add(new AiChatRequest.ChatMessage(role: AiChatRequest.Role.Assistant, content: initialResponse.join('')))
+        request.messages.add(new AiChatRequest.ChatMessage(role: AiChatRequest.Role.User, content: 'Add a practical example.'))
+        List<String> followUpResponse = client.chat(request)
+
+        then:
+        followUpResponse == ['Hello! ', 'How can I help ', 'you today?', '']
+        mockLlmServer.mockServer.verify(1, postRequestedFor(urlEqualTo('/v1/chat/completions'))
+                .withRequestBody(matchingJsonPath('$.messages', equalToJson(JsonOutput.toJson([
+                        [role: 'system', content: systemInstructions],
+                        [role: 'user', content: 'Explain training content.'],
+                        [role: 'assistant', content: 'Hello! How can I help you today?'],
+                        [role: 'user', content: 'Add a practical example.']
+                ])))))
+        mockLlmServer.mockServer.verify(2, postRequestedFor(urlEqualTo('/v1/chat/completions')))
+
+        cleanup:
+        root.saveAiPromptSettings([
+                [setting: AiPromptSettingsService.systemInstructions, value: originalInstructions,
+                 settingGroup: AiPromptSettingsService.settingsGroup]
+        ])
     }
 
     def 'default limits bound history and output while preserving provider model selection'() {

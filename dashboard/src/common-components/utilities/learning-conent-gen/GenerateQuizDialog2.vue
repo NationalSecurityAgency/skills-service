@@ -220,17 +220,9 @@ const handleGeneratedChunk = (chunk, historyId) => {
 }
 const safeJsonParse = (jsonString) => {
   try {
-    // First try to parse as is
     return JSON.parse(jsonString);
-  } catch (e) {
-    try {
-      // If that fails, try to evaluate the string as JavaScript
-      const evaluated = (0, eval)(`(${jsonString})`);
-      // Convert back to string and parse to ensure it's valid JSON
-      return JSON.parse(JSON.stringify(evaluated));
-    } catch (innerError) {
-      throw new Error(`error parsing question: ${jsonString}`, { cause: innerError})
-    }
+  } catch (error) {
+    throw new Error('Generated question is not valid JSON', { cause: error });
   }
 }
 
