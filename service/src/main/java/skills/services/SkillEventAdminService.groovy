@@ -67,6 +67,9 @@ class SkillEventAdminService {
     UserAchievedLevelRepo achievedLevelRepo
 
     @Autowired
+    ExpiredUserAchievementRepo expiredUserAchievementRepo
+
+    @Autowired
     RuleSetDefGraphService ruleSetDefGraphService
 
     @Autowired
@@ -263,6 +266,7 @@ class SkillEventAdminService {
         performedSkillRepository.deleteAllByUserIdAndProjectId(userId, projectId)
         userEventService.removeAllEvents(projectId, userId)
         achievedLevelRepo.deleteAllByProjectIdAndUserId(projectId, userId)
+        expiredUserAchievementRepo.deleteAllByProjectIdAndUserId(projectId, userId)
         userPointsRepo.deleteAllByProjectIdAndUserId(projectId, userId)
         skillApprovalRepo.deleteAllByProjectIdAndUserId(projectId, userId)
         userQuizAttemptRepo.deleteAllAttemptsForQuizzesAssociatedToProjectAndByUserId(projectId, userId)
