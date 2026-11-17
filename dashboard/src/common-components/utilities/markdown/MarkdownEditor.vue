@@ -205,22 +205,27 @@ const insertTable = (dimensions) => {
 
 const handlePasteAsText = (event) => {
   if (props.disabled) {
+    log.debug('MarkdownEditor is disabled, ignoring paste event')
     return
   }
 
   // the actual context of the editor is within <p> tags and NOT an <input> tag
   const isPasteIntoToolbarDialog =  event.target instanceof HTMLInputElement
   if (isPasteIntoToolbarDialog) {
+    log.debug('Paste event occurred in toolbar dialog, ignoring')
     return
   }
 
   const clipboardItems = [...(event.clipboardData?.items || [])]
+  log.debug(`Paste event contains ${clipboardItems.length} items with types: ${clipboardItems.map((item) => item.type).join(', ')}`)
   const hasImage = clipboardItems.some((item) => item.type.startsWith('image/'))
   if (hasImage) {
+    log.debug('Paste event contains image, ignoring')
     return
   }
 
   const plainText = event.clipboardData?.getData('text/plain') || ''
+  log.debug(`Paste event contains plain text: ${plainText}`)
   event.preventDefault()
   event.stopPropagation()
 
