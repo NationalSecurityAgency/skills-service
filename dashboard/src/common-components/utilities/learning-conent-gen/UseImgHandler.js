@@ -83,8 +83,9 @@ export const useImgHandler = () => {
         // Process in reverse order to handle multiple occurrences correctly
         for (let i = processedImages.length - 1; i >= 0; i--) {
             const image = processedImages[i];
-            const placeholder = escapeRegExp(image.placeholder);
-            const placeholderRegex = new RegExp(placeholder, 'g'); // Removed 'i' flag for case-sensitive matching
+            // AI responses may Markdown-escape any of the placeholder's hyphens.
+            const placeholder = escapeRegExp(image.placeholder).replace(/-/g, '\\\\?-');
+            const placeholderRegex = new RegExp(`${placeholder}(?!\\d)`, 'g');
             const newText = restoredText.replace(placeholderRegex, image.markdown);
 
             if (newText === restoredText) {

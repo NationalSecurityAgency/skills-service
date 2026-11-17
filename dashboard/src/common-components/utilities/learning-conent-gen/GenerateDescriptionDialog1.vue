@@ -118,12 +118,9 @@ const handleGenerationCompleted = (generated) => {
   const generateValueChangedNotes = getValueNotes
 
   if (extractedImageState.extractedImages) {
-    const {
-      text,
-      unusedImages
-    } = imgHandler.reinsertImages(generatedValue, extractedImageState.extractedImages)
+    // Raw conversation history keeps placeholders, so retain mappings for every response.
+    const { text } = imgHandler.reinsertImages(generatedValue, extractedImageState.extractedImages)
     generatedValue = text
-    extractedImageState.extractedImages = unusedImages
   }
 
   return {
