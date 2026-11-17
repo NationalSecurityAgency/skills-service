@@ -89,6 +89,14 @@ const props = defineProps({
     type: Boolean,
     default: true,
   },
+  optionGroupLabel: {
+    type: String,
+    required: false
+  },
+  optionGroupChildren: {
+    type: String,
+    required: false
+  }
 });
 
 const selectedInternal = ref([]);
@@ -137,7 +145,7 @@ const searchChanged = (event) => {
   if (props.internalSearch) {
     if(currentSearch.value) {
       optionsInternal.value = props.options.filter((item) => {
-        return item.name.toLowerCase().includes(currentSearch.value.toLowerCase());
+        return item.name?.toLowerCase().includes(currentSearch.value?.toLowerCase());
       })
     }
     else {
@@ -264,6 +272,8 @@ const subTypesToShow = (item) => {
           optionLabel="name"
           :completeOnFocus="true"
           :appendTo="appendTo"
+          :optionGroupLabel="optionGroupLabel ? optionGroupLabel : null"
+          :optionGroupChildren="optionGroupChildren ? optionGroupChildren : null"
           :delay="500">
 
         <template #option="slotProps">

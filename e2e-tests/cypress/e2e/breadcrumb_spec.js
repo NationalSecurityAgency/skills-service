@@ -342,10 +342,10 @@ describe('Breadcrumb Navigation Tests', () => {
     });
 
     it('Cross Project', () => {
-        cy.intercept('GET', '/admin/projects/proj1/shared')
-            .as('loadSharedSkills');
+        cy.intercept('GET', '/admin/projects/proj1/skills?excludeImportedSkills=true')
+            .as('loadSkills');
         cy.visit('/administrator/projects/proj1/learning-path');
-        cy.wait('@loadSharedSkills');
+        cy.wait('@loadSkills');
         cy.get('[data-cy=breadcrumb-proj1]')
             .click();
         cy.wait('@loadProject');
