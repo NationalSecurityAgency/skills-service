@@ -74,6 +74,8 @@ linkService.setViewer({
   pagesRotation: 0,
   isInPresentationMode: false,
   scrollPageIntoView: ({ pageNumber }) => renderPage(pageNumber),
+  nextPage: () => nextPage(),
+  previousPage: () => prevPage(),
   pageLabelToPageNumber: () => null,
 })
 
@@ -140,7 +142,8 @@ const handleKeyDown = (e) => {
 };
 
 const loadPdf = () => {
-  const loadingTask = pdfjsLib.getDocument(props.pdfUrl);
+  const documentUrl = new URL(props.pdfUrl, window.location.href).href;
+  const loadingTask = pdfjsLib.getDocument({ url: documentUrl, docBaseUrl: documentUrl });
   return loadingTask.promise.then((pdf) => {
     pdfDoc.value = pdf;
     linkService.setDocument(pdf);
@@ -357,7 +360,7 @@ const downloadPdf = () => {
           </div>
           <div ref="containerRef" :id="`${slidesId}Container`"
                class="border-r-1 border-l-1 relative hover-resize-container"
-               :class="{'presentation-mode bg-surface-700': isFullscreen}"
+               :class="{'presentation-mode bg-surface-700 w-screen h-screen': isFullscreen}"
                :style="slidesContainerStyle">
             <canvas id="pdfCanvasId" class="z-0 absolute top-0 left-0"></canvas>
             <div id="text-layer" tabindex="-1" class="textLayer absolute top-0 left-0 w-full h-full z-40"
