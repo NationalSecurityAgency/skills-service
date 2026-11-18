@@ -27,13 +27,43 @@ import skills.storage.model.UserAttrs
 import skills.storage.model.UserQuizAttempt
 import skills.utils.WaitFor
 
+import java.util.concurrent.CountDownLatch
+import java.util.concurrent.TimeUnit
+
 import static com.github.tomakehurst.wiremock.client.WireMock.*
 
 @Slf4j
 class TextInputAiGraderSpecs extends DefaultAiIntSpec {
 
+    private CountDownLatch releaseAiResponse
+
     def setup() {
         startEmailServer()
+    }
+
+    def cleanup() {
+        if (releaseAiResponse != null) {
+            releaseAiGradingResponse()
+            mockLlmServer.gradingResponseTransformer.beforeResponse = null
+            waitForAsyncTasksCompletion.waitForAllScheduleTasks()
+        }
+    }
+
+    private CountDownLatch holdAiGradingResponse() {
+        CountDownLatch aiGradingStarted = new CountDownLatch(1)
+        CountDownLatch responseRelease = new CountDownLatch(1)
+        releaseAiResponse = responseRelease
+        // Preserve the ungraded state until the test captures it or saves a manual grade.
+        mockLlmServer.gradingResponseTransformer.beforeResponse = {
+            aiGradingStarted.countDown()
+            assert responseRelease.await(60, TimeUnit.SECONDS): 'AI grading response was not released'
+            return null
+        }
+        return aiGradingStarted
+    }
+
+    private void releaseAiGradingResponse() {
+        releaseAiResponse.countDown()
     }
 
     def "AI grading isolates student data and validates confidence #confidence"() {
@@ -97,6 +127,7 @@ class TextInputAiGraderSpecs extends DefaultAiIntSpec {
     }
 
     def "AI grade text input and PASS - single question quiz"() {
+        holdAiGradingResponse()
         def quiz = QuizDefFactory.createQuiz(1, "Fancy Description")
         skillsService.createQuizDef(quiz)
         def questions = QuizDefFactory.createTextInputQuestion(1, 1)
@@ -112,6 +143,7 @@ class TextInputAiGraderSpecs extends DefaultAiIntSpec {
         when:
         def quizAttemptResBefore = skillsService.getQuizAttemptResult(quiz.quizId, quizAttempt.id)
 
+        releaseAiGradingResponse()
         waitForAsyncTasksCompletion.waitForAllScheduleTasks()
         def quizAttemptRes = skillsService.getQuizAttemptResult(quiz.quizId, quizAttempt.id)
         then:
@@ -135,6 +167,7 @@ class TextInputAiGraderSpecs extends DefaultAiIntSpec {
     }
 
     def "AI grade text input and PASS - multiple questions"() {
+        holdAiGradingResponse()
         def quiz = QuizDefFactory.createQuiz(1, "Fancy Description")
         skillsService.createQuizDef(quiz)
         skillsService.createQuizQuestionDefs([
@@ -153,6 +186,7 @@ class TextInputAiGraderSpecs extends DefaultAiIntSpec {
         when:
         def quizAttemptResBefore = skillsService.getQuizAttemptResult(quiz.quizId, quizAttempt.id)
 
+        releaseAiGradingResponse()
         waitForAsyncTasksCompletion.waitForAllScheduleTasks()
         def quizAttemptRes = skillsService.getQuizAttemptResult(quiz.quizId, quizAttempt.id)
         then:
@@ -180,6 +214,7 @@ class TextInputAiGraderSpecs extends DefaultAiIntSpec {
     }
 
     def "AI grade text input and PASS with partial requirement"() {
+        holdAiGradingResponse()
         def quiz = QuizDefFactory.createQuiz(1, "Fancy Description")
         skillsService.createQuizDef(quiz)
         skillsService.createQuizQuestionDefs([
@@ -204,6 +239,7 @@ class TextInputAiGraderSpecs extends DefaultAiIntSpec {
         when:
         def quizAttemptResBefore = skillsService.getQuizAttemptResult(quiz.quizId, quizAttempt.id)
 
+        releaseAiGradingResponse()
         waitForAsyncTasksCompletion.waitForAllScheduleTasks()
         def quizAttemptRes = skillsService.getQuizAttemptResult(quiz.quizId, quizAttempt.id)
         then:
@@ -238,6 +274,7 @@ class TextInputAiGraderSpecs extends DefaultAiIntSpec {
     }
 
     def "AI grade text input and PASS with partial requirement - multiple ai graded questions"() {
+        holdAiGradingResponse()
         def quiz = QuizDefFactory.createQuiz(1, "Fancy Description")
         skillsService.createQuizDef(quiz)
         skillsService.createQuizQuestionDefs([
@@ -262,6 +299,7 @@ class TextInputAiGraderSpecs extends DefaultAiIntSpec {
         when:
         def quizAttemptResBefore = skillsService.getQuizAttemptResult(quiz.quizId, quizAttempt.id)
 
+        releaseAiGradingResponse()
         waitForAsyncTasksCompletion.waitForAllScheduleTasks()
         def quizAttemptRes = skillsService.getQuizAttemptResult(quiz.quizId, quizAttempt.id)
         then:
@@ -296,6 +334,7 @@ class TextInputAiGraderSpecs extends DefaultAiIntSpec {
     }
 
     def "AI grade text input and FAIL - single question quiz"() {
+        holdAiGradingResponse()
         def quiz = QuizDefFactory.createQuiz(1, "Fancy Description")
         skillsService.createQuizDef(quiz)
         def questions = QuizDefFactory.createTextInputQuestion(1, 1)
@@ -311,6 +350,7 @@ class TextInputAiGraderSpecs extends DefaultAiIntSpec {
         when:
         def quizAttemptResBefore = skillsService.getQuizAttemptResult(quiz.quizId, quizAttempt.id)
 
+        releaseAiGradingResponse()
         waitForAsyncTasksCompletion.waitForAllScheduleTasks()
         def quizAttemptRes = skillsService.getQuizAttemptResult(quiz.quizId, quizAttempt.id)
         then:
@@ -334,6 +374,7 @@ class TextInputAiGraderSpecs extends DefaultAiIntSpec {
     }
 
     def "AI grade text input and FAIL - multiple questions"() {
+        holdAiGradingResponse()
         def quiz = QuizDefFactory.createQuiz(1, "Fancy Description")
         skillsService.createQuizDef(quiz)
         skillsService.createQuizQuestionDefs([
@@ -352,6 +393,7 @@ class TextInputAiGraderSpecs extends DefaultAiIntSpec {
         when:
         def quizAttemptResBefore = skillsService.getQuizAttemptResult(quiz.quizId, quizAttempt.id)
 
+        releaseAiGradingResponse()
         waitForAsyncTasksCompletion.waitForAllScheduleTasks()
         def quizAttemptRes = skillsService.getQuizAttemptResult(quiz.quizId, quizAttempt.id)
         then:
@@ -379,6 +421,7 @@ class TextInputAiGraderSpecs extends DefaultAiIntSpec {
     }
 
     def "AI grade text input and FAIL with partial requirement"() {
+        holdAiGradingResponse()
         def quiz = QuizDefFactory.createQuiz(1, "Fancy Description")
         skillsService.createQuizDef(quiz)
         skillsService.createQuizQuestionDefs([
@@ -403,6 +446,7 @@ class TextInputAiGraderSpecs extends DefaultAiIntSpec {
         when:
         def quizAttemptResBefore = skillsService.getQuizAttemptResult(quiz.quizId, quizAttempt.id)
 
+        releaseAiGradingResponse()
         waitForAsyncTasksCompletion.waitForAllScheduleTasks()
         def quizAttemptRes = skillsService.getQuizAttemptResult(quiz.quizId, quizAttempt.id)
         then:
@@ -437,6 +481,7 @@ class TextInputAiGraderSpecs extends DefaultAiIntSpec {
     }
     
     def "AI grade text input and FAIL because confidence is too low"() {
+        holdAiGradingResponse()
         def quiz = QuizDefFactory.createQuiz(1, "Fancy Description")
         skillsService.createQuizDef(quiz)
         def questions = QuizDefFactory.createTextInputQuestion(1, 1)
@@ -452,6 +497,7 @@ class TextInputAiGraderSpecs extends DefaultAiIntSpec {
         when:
         def quizAttemptResBefore = skillsService.getQuizAttemptResult(quiz.quizId, quizAttempt.id)
 
+        releaseAiGradingResponse()
         waitForAsyncTasksCompletion.waitForAllScheduleTasks()
         def quizAttemptRes = skillsService.getQuizAttemptResult(quiz.quizId, quizAttempt.id)
         then:
@@ -639,6 +685,8 @@ class TextInputAiGraderSpecs extends DefaultAiIntSpec {
     }
 
     def "Attempt to AI grade text input but was already graded manually"() {
+        CountDownLatch aiGradingStarted = holdAiGradingResponse()
+
         def quiz = QuizDefFactory.createQuiz(1, "Fancy Description")
         skillsService.createQuizDef(quiz)
         def questions = QuizDefFactory.createTextInputQuestion(1, 1)
@@ -652,8 +700,10 @@ class TextInputAiGraderSpecs extends DefaultAiIntSpec {
         assert gradedQuizAttempt.needsGrading == true
 
         when:
+        assert aiGradingStarted.await(30, TimeUnit.SECONDS): 'AI grading did not start'
         def quizAttemptResBefore = skillsService.getQuizAttemptResult(quiz.quizId, quizAttempt.id)
         skillsService.gradeAnswer(skillsService.userName, quiz.quizId, quizAttempt.id, quizAttempt.questions[0].answerOptions[0].id, true, "Good answer")
+        releaseAiGradingResponse()
 
         waitForAsyncTasksCompletion.waitForAllScheduleTasks()
         def quizAttemptRes = skillsService.getQuizAttemptResult(quiz.quizId, quizAttempt.id)
@@ -679,6 +729,7 @@ class TextInputAiGraderSpecs extends DefaultAiIntSpec {
     }
 
     def "Attempt to manually grade text input but was already AI graded"() {
+        holdAiGradingResponse()
         def quiz = QuizDefFactory.createQuiz(1, "Fancy Description")
         skillsService.createQuizDef(quiz)
         def questions = QuizDefFactory.createTextInputQuestion(1, 1)
@@ -694,6 +745,7 @@ class TextInputAiGraderSpecs extends DefaultAiIntSpec {
         when:
         def quizAttemptResBefore = skillsService.getQuizAttemptResult(quiz.quizId, quizAttempt.id)
 
+        releaseAiGradingResponse()
         waitForAsyncTasksCompletion.waitForAllScheduleTasks()
         def quizAttemptRes = skillsService.getQuizAttemptResult(quiz.quizId, quizAttempt.id)
 
@@ -724,6 +776,7 @@ class TextInputAiGraderSpecs extends DefaultAiIntSpec {
     }
 
     def "AI graded text input does not run custom validator"() {
+        holdAiGradingResponse()
         def quiz = QuizDefFactory.createQuiz(1, "Fancy Description")
         skillsService.createQuizDef(quiz)
         def questions = QuizDefFactory.createTextInputQuestion(1, 1)
@@ -739,6 +792,7 @@ class TextInputAiGraderSpecs extends DefaultAiIntSpec {
         when:
         def quizAttemptResBefore = skillsService.getQuizAttemptResult(quiz.quizId, quizAttempt.id)
 
+        releaseAiGradingResponse()
         waitForAsyncTasksCompletion.waitForAllScheduleTasks()
         def quizAttemptRes = skillsService.getQuizAttemptResult(quiz.quizId, quizAttempt.id)
         then:

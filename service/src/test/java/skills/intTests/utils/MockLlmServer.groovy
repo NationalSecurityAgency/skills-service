@@ -16,13 +16,21 @@
 package skills.intTests.utils
 
 import com.github.tomakehurst.wiremock.WireMockServer
+import com.github.tomakehurst.wiremock.common.InputStreamSource
 import com.github.tomakehurst.wiremock.extension.ResponseTransformerV2
 import com.github.tomakehurst.wiremock.http.Response
 import com.github.tomakehurst.wiremock.stubbing.ServeEvent
+import com.github.tomakehurst.wiremock.stubbing.StubMapping
 import groovy.json.JsonOutput
 import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Component
+
+import java.nio.charset.StandardCharsets
+import java.util.concurrent.BlockingQueue
+import java.util.concurrent.CountDownLatch
+import java.util.concurrent.LinkedBlockingQueue
+import java.util.concurrent.TimeUnit
 
 import static com.github.tomakehurst.wiremock.client.WireMock.*
 import static com.github.tomakehurst.wiremock.core.WireMockConfiguration.wireMockConfig
@@ -51,10 +59,14 @@ class MockLlmServer {
     Integer mockLlmServerPort
 
     WireMockServer mockServer
+    DynamicGradingResponseTransformer gradingResponseTransformer
+    ControlledStreamResponseTransformer controlledStreamResponseTransformer
 
     void start() {
         try {
             boolean isPkiMode = SystemSSLConfiguration.isPki()
+            gradingResponseTransformer = new DynamicGradingResponseTransformer()
+            controlledStreamResponseTransformer = new ControlledStreamResponseTransformer()
             
             if (isPkiMode) {
                 mockServer = new WireMockServer(wireMockConfig()
@@ -68,12 +80,12 @@ class MockLlmServer {
                         .trustStoreType("JKS")
                         .httpDisabled(true)
                         .needClientAuth(true)
-                        .extensions(new DynamicGradingResponseTransformer()))
+                        .extensions(gradingResponseTransformer, controlledStreamResponseTransformer))
                 log.info("WireMock server configured for 2-way SSL (HTTPS) on port {}", mockLlmServerPort)
             } else {
                 mockServer = new WireMockServer(wireMockConfig()
                         .port(mockLlmServerPort)
-                        .extensions(new DynamicGradingResponseTransformer()))
+                        .extensions(gradingResponseTransformer, controlledStreamResponseTransformer))
                 log.info("WireMock server configured for HTTP on port {}", mockLlmServerPort)
             }
             
@@ -208,9 +220,99 @@ class MockLlmServer {
         mockServer.stop();
     }
 
-    static class DynamicGradingResponseTransformer implements ResponseTransformerV2 {
+    ControlledStream stubControlledStream() {
+        ControlledStream stream = new ControlledStream()
+        controlledStreamResponseTransformer.stream = stream
+        stream.stub = mockServer.stubFor(post(urlPathEqualTo('/v1/chat/completions'))
+                .withRequestBody(containing('controlled stream'))
+                .atPriority(1)
+                .willReturn(ok().withHeader(CONTENT_TYPE, 'text/event-stream')
+                        .withTransformers('controlled-stream-response-transformer')))
+        return stream
+    }
+
+    static class ControlledStream {
+        private static final String DONE = 'data: [DONE]\n\n'
+        private final BlockingQueue<String> chunks = new LinkedBlockingQueue<>()
+        final CountDownLatch started = new CountDownLatch(1)
+        final CountDownLatch finished = new CountDownLatch(1)
+        StubMapping stub
+
+        void sendChunk() {
+            chunks.add(createStreamMsg('partial ') + '\n\n')
+        }
+
+        void complete() {
+            chunks.add(DONE)
+        }
+
+        long writeTo(OutputStream output) {
+            started.countDown()
+            long bytesWritten = 0
+            String chunk = createStreamMsg('partial ') + '\n\n'
+            try {
+                while (true) {
+                    byte[] bytes = chunk.getBytes(StandardCharsets.UTF_8)
+                    output.write(bytes)
+                    output.flush()
+                    bytesWritten += bytes.length
+                    if (chunk == DONE) {
+                        return bytesWritten
+                    }
+                    chunk = chunks.poll(30, TimeUnit.SECONDS)
+                    if (chunk == null) {
+                        throw new IOException('Controlled AI stream was not released')
+                    }
+                }
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt()
+                throw new IOException('Controlled AI stream was interrupted', e)
+            } finally {
+                finished.countDown()
+            }
+        }
+    }
+
+    static class ControlledStreamBody extends ByteArrayInputStream {
+        private final ControlledStream stream
+
+        ControlledStreamBody(ControlledStream stream) {
+            // WireMock reads the body for its request journal before sending it.
+            // Only transferTo (the servlet write path) waits for test-controlled chunks.
+            super((createStreamMsg('partial ') + '\n\ndata: [DONE]\n\n').getBytes(StandardCharsets.UTF_8))
+            this.stream = stream
+        }
+
+        @Override
+        long transferTo(OutputStream output) throws IOException {
+            return stream.writeTo(output)
+        }
+    }
+
+    static class ControlledStreamResponseTransformer implements ResponseTransformerV2 {
+        volatile ControlledStream stream
+
         @Override
         Response transform(Response response, ServeEvent serveEvent) {
+            ControlledStream currentStream = stream
+            InputStreamSource bodySource = { -> new ControlledStreamBody(currentStream) } as InputStreamSource
+            return Response.Builder.like(response).body(bodySource).build()
+        }
+
+        @Override
+        String getName() { 'controlled-stream-response-transformer' }
+
+        @Override
+        boolean applyGlobally() { false }
+    }
+
+    static class DynamicGradingResponseTransformer implements ResponseTransformerV2 {
+        // Optional synchronization hook for observing intermediate grading state.
+        volatile Closure<Void> beforeResponse
+
+        @Override
+        Response transform(Response response, ServeEvent serveEvent) {
+            beforeResponse?.call()
             String requestBody = serveEvent.request.getBodyAsString()
             Boolean shouldPass = requestBody.contains('this answer should pass')
             Integer confidenceLevel = shouldPass ? 90 : 10
