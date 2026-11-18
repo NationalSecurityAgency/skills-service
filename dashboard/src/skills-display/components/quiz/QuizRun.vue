@@ -195,9 +195,9 @@ const schema = object({
                       .nullable()
                       .when(['selected', 'allowCustomText'], {
                         is: (selected, allowCustomText) => !!selected && !!allowCustomText,
+                        // spaces count toward the length, as on the server; blank text is still missing
                         then: (sch) => sch
-                            .trim()
-                            .required('Text response is required')
+                            .test('textResponseRequired', 'Text response is required', (value) => !!value && value.trim().length > 0)
                             .max(appConfig.maxSurveyChoiceTextAnswerLength, `Text response must not exceed ${numFormat.pretty(appConfig.maxSurveyChoiceTextAnswerLength)} characters`),
                       }),
                 }))
@@ -468,8 +468,16 @@ const completeTestRun = () => {
   isAttemptAlreadyInProgress.value = true;
   submitTestRun()
 }
+const hasTextResponses = () => !!quizInfo.value?.questions?.some((q) => q.answerOptions?.some((a) => a.allowCustomText))
 const handleSaveError = (error) => {
-  saveError.value = error?.response?.data?.explanation || 'Unable to save your quiz. Please review your answers and try again.'
+  const explanation = error?.response?.data?.explanation
+  const isRejectedInput = error?.response?.status === 400 && explanation
+  if (!isRejectedInput && hasTextResponses()) {
+    // a connection or server problem: entered text stays on the page so it can be copied before refreshing
+    saveError.value = 'We couldn\'t save your response. Copy your text responses before refreshing the page. After refreshing, re-enter any missing text before completing the survey.'
+  } else {
+    saveError.value = explanation || 'Unable to save your quiz. Please review your answers and try again.'
+  }
   announcer.polite(saveError.value)
 }
 const waitForAnswerSaves = () => {

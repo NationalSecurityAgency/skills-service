@@ -149,16 +149,25 @@ const textAnswerChanged = (providedAnswerText) => {
 }
 
 const selectedAnswerIds = ref(new Set())
+// Each text response has a version that changes with every edit or selection change of its answer.
+// A text save is sent only if its version is still current when it is about to be sent.
+const answerVersions = new Map()
+const bumpVersion = (answerId) => answerVersions.set(answerId, (answerVersions.get(answerId) || 0) + 1)
+const isCurrentVersion = (answerId, version) => answerVersions.get(answerId) === version
 const selectionChanged = (currentAnswer) => {
   if (currentAnswer.isTextEdit) {
     // text responses are debounced; selection changes save right away
+    bumpVersion(currentAnswer.changedAnswerId)
     scheduleAnswerSave(currentAnswer, 'selected-answer')
     return
   }
   selectedAnswerIds.value = new Set(currentAnswer.selectedAnswerIds)
   // a selection change supersedes pending text saves of the changed answer, and of all answers for single choice
   const supersededIds = isSingleChoice.value ? props.q.answerOptions.map((a) => a.id) : [currentAnswer.changedAnswerId]
-  supersededIds.forEach((answerId) => cancelScheduledSave(answerId))
+  supersededIds.forEach((answerId) => {
+    bumpVersion(answerId)
+    cancelScheduledSave(answerId)
+  })
   emit('selected-answer', {
     ...currentAnswer,
     reportAnswerPromise: reportAnswer(currentAnswer),
@@ -212,12 +221,15 @@ const scheduleAnswerSave = (currentAnswer, eventName) => {
 
   const pending = state.pending
   pending.answer = currentAnswer
+  pending.version = answerVersions.get(answerId)
+  // a text save is outdated once its answer was edited, deselected or reselected after it was scheduled
+  const isOutdated = () => pending.answer.isTextEdit && !isCurrentVersion(answerId, pending.version)
   state.timer = setTimeout(() => {
     state.timer = null
     state.pending = null
     const save = () => {
-      // never re-select an answer that was deselected in the meantime
-      if (pending.answer.isTextEdit && !selectedAnswerIds.value.has(pending.answer.changedAnswerId)) {
+      // never send an outdated text response, and never re-select an answer that was deselected in the meantime
+      if (isOutdated() || (pending.answer.isTextEdit && !selectedAnswerIds.value.has(answerId))) {
         return Promise.resolve(null)
       }
       return reportAnswer(pending.answer)
@@ -226,7 +238,8 @@ const scheduleAnswerSave = (currentAnswer, eventName) => {
     const request = state.inFlight.then(save, save)
     // Keep the save failure available to the parent without an unhandled rejection in this chain.
     state.inFlight = request.catch(() => {})
-    request.then(pending.resolve, pending.reject)
+    // errors of outdated saves are ignored; a newer save or selection takes their place
+    request.then(pending.resolve, (error) => (isOutdated() ? pending.resolve(null) : pending.reject(error)))
   }, appConfig.formFieldDebounceInMs)
 
   emit(eventName, {
