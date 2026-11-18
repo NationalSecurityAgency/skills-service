@@ -91,12 +91,12 @@ const metrics = computed(() => {
            :class="hasBadges ? 'lg:grid-cols-[minmax(14rem,1fr)_repeat(4,minmax(0,0.75fr))]' : 'lg:grid-cols-[minmax(14rem,1fr)_repeat(3,minmax(0,1fr))]'">
         <div class="border-b border-surface p-4 lg:row-span-3 lg:grid lg:grid-rows-subgrid lg:border-r lg:border-b-0">
           <div class="flex flex-col gap-2 lg:self-start">
-            <div class="flex flex-wrap items-center justify-between gap-2">
-              <h3 class="flex items-center gap-2 text-xl font-medium sd-theme-primary-color">
+            <div class="flex flex-col items-start gap-2">
+              <h3 class="flex items-center gap-2 text-xl font-medium sd-theme-primary-color" data-cy="compactOverallTitle">
                 <i class="fas fa-chart-line text-orange-700 dark:text-orange-300" aria-hidden="true" />Overall Progress
               </h3>
               <Tag v-if="userProgress.todaysPoints > 0" severity="success" icon="fas fa-arrow-trend-up"
-                   :value="`+${numFormat.pretty(userProgress.todaysPoints)} today`" />
+                   :value="`+${numFormat.pretty(userProgress.todaysPoints)} today`" data-cy="compactTodayPoints" />
             </div>
             <div class="flex items-baseline gap-1 font-semibold text-surface-900 dark:text-surface-0 sd-theme-primary-color" data-cy="compactOverallPercent">
               <span class="text-3xl leading-9">{{ overallPercent }}</span><span class="text-xl">%</span>
