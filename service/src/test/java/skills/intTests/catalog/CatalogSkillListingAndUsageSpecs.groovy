@@ -15,6 +15,8 @@
  */
 package skills.intTests.catalog
 
+import java.time.Instant
+
 import static skills.intTests.utils.SkillsFactory.*
 
 class CatalogSkillListingAndUsageSpecs extends CatalogIntSpec {
@@ -708,7 +710,7 @@ class CatalogSkillListingAndUsageSpecs extends CatalogIntSpec {
         def user = getRandomUsers(1)[0]
 
         when:
-        Date date = new Date()
+        Date date = Date.from(Instant.parse(earnedOn))
         participateInProject(project2.projectId, [user])
         skillsService.addSkill([projectId: project1.projectId, skillId: skill.skillId], user, date)
         waitForAsyncTasksCompletion.waitForAllScheduleTasks()
@@ -716,7 +718,10 @@ class CatalogSkillListingAndUsageSpecs extends CatalogIntSpec {
 
         then:
         subjectUsers.data[0].userId == user
-        subjectUsers.data[0].lastUpdated == date.toInstant().toString()
+        Instant.parse(subjectUsers.data[0].lastUpdated) == date.toInstant()
+
+        where:
+        earnedOn << ['2026-11-17T18:17:06Z', '2026-11-17T18:17:06.123Z']
     }
 
 

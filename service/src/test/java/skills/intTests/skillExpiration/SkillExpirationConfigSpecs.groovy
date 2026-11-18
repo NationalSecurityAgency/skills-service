@@ -24,6 +24,7 @@ import skills.services.attributes.ExpirationAttrs
 import skills.storage.model.SkillAttributesDef
 import skills.storage.repos.SkillAttributesDefRepo
 
+import java.time.Instant
 import java.time.LocalDateTime
 
 import static skills.intTests.utils.SkillsFactory.*
@@ -109,7 +110,7 @@ class SkillExpirationConfigSpecs extends DefaultIntSpec {
         attributes.expirationType == ExpirationAttrs.YEARLY
         attributes.every == 1
         attributes.monthlyDay == expirationDate.dayOfMonth.toString()
-        attributes.nextExpirationDate == expirationDate.toDate().toInstant().toString()
+        Instant.parse(attributes.nextExpirationDate) == expirationDate.toDate().toInstant()
     }
 
     def "delete expiration attributes" () {
@@ -142,7 +143,7 @@ class SkillExpirationConfigSpecs extends DefaultIntSpec {
         t1_attributes.expirationType == ExpirationAttrs.YEARLY
         t1_attributes.every == 1
         t1_attributes.monthlyDay == expirationDate.dayOfMonth.toString()
-        t1_attributes.nextExpirationDate == expirationDate.toDate().toInstant().toString()
+        Instant.parse(t1_attributes.nextExpirationDate) == expirationDate.toDate().toInstant()
         t1_skillAttributes
 
         t2_attributes.expirationType == ExpirationAttrs.NEVER
