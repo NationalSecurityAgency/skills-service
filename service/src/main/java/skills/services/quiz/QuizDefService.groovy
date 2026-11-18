@@ -696,12 +696,15 @@ class QuizDefService {
         boolean isTextInputQuestion = questionDefRequest.questionType == QuizQuestionType.TextInput
         boolean isRating = questionDefRequest.questionType == QuizQuestionType.Rating
         boolean isMatchingQuestion = questionDefRequest.questionType == QuizQuestionType.Matching
+        boolean isChoiceQuestion = questionDefRequest.questionType in [QuizQuestionType.SingleChoice, QuizQuestionType.MultipleChoice]
         List<QuizAnswerDef> savedAnswers
         List<QuizAnswerDef> existingAnswerDefs = quizAnswerRepo.findAllByQuestionRefId(savedQuestion.id).sort { it.displayOrder }
         if (isTextInputQuestion) {
             QuizAnswerDef qToUpdate = existingAnswerDefs[0]
             qToUpdate.answer = null
             qToUpdate.isCorrectAnswer = false
+            // text responses are only for choice questions; the reused answer may have allowed one
+            qToUpdate.allowCustomText = false
             savedAnswers = [quizAnswerRepo.saveAndFlush(qToUpdate)]
             if (existingAnswerDefs.size() > 1) {
                 List<Integer> idsToRemove = existingAnswerDefs.subList(1, existingAnswerDefs.size()).collect { it.id }
@@ -738,6 +741,7 @@ class QuizDefService {
                 if (answerDef) {
                     answerDef.multiPartAnswer = JsonOutput.toJson(multiPartAnswer)
                     answerDef.displayOrder = index + 1
+                    answerDef.allowCustomText = false
                     return answerDef
                 } else {
                     return new QuizAnswerDef(
@@ -757,7 +761,7 @@ class QuizDefService {
                 if (answerDef) {
                     answerDef.answer = InputSanitizer.sanitize(answerDefRequest.answer)
                     answerDef.isCorrectAnswer = answerDefRequest.isCorrect
-                    answerDef.allowCustomText = answerDefRequest.allowCustomText == true
+                    answerDef.allowCustomText = isChoiceQuestion && answerDefRequest.allowCustomText == true
                     answerDef.displayOrder = index + 1
                 } else {
                     answerDef = new QuizAnswerDef(
@@ -765,7 +769,7 @@ class QuizDefService {
                             questionRefId: savedQuestion.id,
                             answer: InputSanitizer.sanitize(answerDefRequest.answer),
                             isCorrectAnswer: answerDefRequest.isCorrect,
-                            allowCustomText: answerDefRequest.allowCustomText == true,
+                            allowCustomText: isChoiceQuestion && answerDefRequest.allowCustomText == true,
                             displayOrder: index + 1,
                     )
                 }
