@@ -25,7 +25,7 @@ defineProps({
 </script>
 
 <template>
-  <Card data-cy="projectDescription" :pt="{ content: { class: 'my-0 py-0'}}">
+  <Card data-cy="projectDescription" :pt="{ content: { class: 'my-0 py-0'}, body: { class: '!my-1 !py-0'}}">
     <template #content>
       <markdown-text v-if="description" :text="description" />
     </template>

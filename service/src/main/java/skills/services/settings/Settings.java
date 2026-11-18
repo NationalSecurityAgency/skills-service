@@ -30,6 +30,7 @@ public enum Settings {
     GROUP_INFO_ON_SKILL_PAGE("group-info-on-skill-page"),
     SHOW_PROJECT_DESCRIPTION_EVERYWHERE("show_project_description_everywhere"),
     DISABLE_SKILLS_DISPLAY_ACHIEVEMENTS_CELEBRATIONS("skills-display-achievement-celebration-disabled"),
+    SKILLS_DISPLAY_COMPACT_VIEW_DEFAULT("skills-display-compact-view-default"),
     USER_PROJECT_ROLE("user_project_role"),
     USER_COMMUNITY_ONLY_PROJECT("user_community"),
     PROJECT_COMMUNITY_VALUE("project_community_value"),

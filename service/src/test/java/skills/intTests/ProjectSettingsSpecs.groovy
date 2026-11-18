@@ -23,10 +23,63 @@ import skills.intTests.utils.DefaultIntSpec
 import skills.intTests.utils.SkillsClientException
 import skills.intTests.utils.SkillsFactory
 import skills.intTests.utils.SkillsService
+import skills.services.settings.Settings
 
 import static skills.intTests.utils.SkillsFactory.createProject
 
 class ProjectSettingsSpecs extends DefaultIntSpec {
+
+    def "compact view defaults to expanded when no project setting is saved"() {
+        SkillsService learner = createService(getRandomUsers(1)[0])
+        Map project = createProject(1)
+        skillsService.createProject(project)
+
+        expect:
+        learner.getPublicClientDisplayConfigs().compactViewDefault == false
+        learner.getPublicClientDisplayConfigs(project.projectId).compactViewDefault == false
+        !skillsService.getProjectSettings(project.projectId).find { it.setting == Settings.SKILLS_DISPLAY_COMPACT_VIEW_DEFAULT.settingName }
+    }
+
+    def "compact view project default is saved and exposed to trainees without affecting other projects"() {
+        SkillsService learner = createService(getRandomUsers(1)[0])
+        Map project = createProject(1)
+        Map otherProject = createProject(2)
+        skillsService.createProject(project)
+        skillsService.createProject(otherProject)
+        String settingName = Settings.SKILLS_DISPLAY_COMPACT_VIEW_DEFAULT.settingName
+
+        when:
+        skillsService.addOrUpdateProjectSetting(project.projectId, settingName, 'true')
+
+        then:
+        skillsService.getProjectSettings(project.projectId).find { it.setting == settingName }?.value == 'true'
+        learner.getPublicClientDisplayConfigs(project.projectId).compactViewDefault == true
+        learner.getPublicClientDisplayConfigs(otherProject.projectId).compactViewDefault == false
+        learner.getPublicClientDisplayConfigs().compactViewDefault == false
+
+        when:
+        skillsService.addOrUpdateProjectSetting(project.projectId, settingName, 'false')
+
+        then:
+        skillsService.getProjectSettings(project.projectId).find { it.setting == settingName }?.value == 'false'
+        learner.getPublicClientDisplayConfigs(project.projectId).compactViewDefault == false
+        learner.getPublicClientDisplayConfigs(otherProject.projectId).compactViewDefault == false
+    }
+
+    def "removing compact view project default restores expanded view"() {
+        SkillsService learner = createService(getRandomUsers(1)[0])
+        Map project = createProject(1)
+        skillsService.createProject(project)
+        String settingName = Settings.SKILLS_DISPLAY_COMPACT_VIEW_DEFAULT.settingName
+        skillsService.addOrUpdateProjectSetting(project.projectId, settingName, 'true')
+
+        when:
+        skillsService.addOrUpdateProjectSetting(project.projectId, settingName, '')
+
+        then:
+        !skillsService.getProjectSettings(project.projectId).find { it.setting == settingName }
+        learner.getPublicClientDisplayConfigs(project.projectId).compactViewDefault == false
+    }
 
     def "bulk settings reject foreign project entries without changing either project using #method and #batchType batch"() {
         List<String> users = getRandomUsers(2)

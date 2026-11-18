@@ -166,6 +166,13 @@ let settings = ref({
     dirty: false,
     projectId: route.params.projectId,
   },
+  compactViewDefault: {
+    value: false,
+    setting: 'skills-display-compact-view-default',
+    lastLoadedValue: false,
+    dirty: false,
+    projectId: route.params.projectId,
+  },
   projectDisplayName: {
     value: 'Project',
     setting: 'project.displayName',
@@ -256,6 +263,8 @@ const disableAchievementCelebrationLabel = computed(() => {
   return formatToggleLabel(settings.value.disableAchievementsCelebration.value);
 });
 
+const compactViewDefaultLabel = computed(() => formatToggleLabel(settings.value.compactViewDefault.value));
+
 const projectDeletionProtectionLabel = computed(() => {
   return formatToggleLabel(settings.value.projectDeletionProtection.value);
 });
@@ -332,6 +341,10 @@ const groupInfoOnSkillPageChanged = ((value) => {
 
 const disableAchievementsCelebrationChanged = ((value) => {
   settings.value.disableAchievementsCelebration.dirty = `${value}` !== `${settings.value.disableAchievementsCelebration.lastLoadedValue}`;
+})
+
+const compactViewDefaultChanged = ((value) => {
+  settings.value.compactViewDefault.dirty = `${value}` !== `${settings.value.compactViewDefault.lastLoadedValue}`;
 })
 
 const inviteOnlyProjectChanged = ((value) => {
@@ -680,6 +693,23 @@ const toggleCustomLabelConfig = () => {
                          aria-labelledby="groupInfoOnSkillPageLabel"
                          data-cy="groupInfoOnSkillPageSwitch" />
             <span class="ml-1">{{ groupInfoOnSkillPageLabel }}</span>
+          </settings-item>
+
+          <settings-item label="Default to Compact User Progress" input-id="compactViewDefaultSwitchInput">
+            <div class="flex flex-col gap-2">
+              <div class="flex items-center gap-2">
+                <ToggleSwitch v-model="settings.compactViewDefault.value"
+                              inputId="compactViewDefaultSwitchInput"
+                              @update:modelValue="compactViewDefaultChanged"
+                              aria-labelledby="labelForcompactViewDefaultSwitchInput"
+                              aria-describedby="compactViewDefaultHelp"
+                              data-cy="compactViewDefaultSwitch" />
+                <span>{{ compactViewDefaultLabel }}</span>
+              </div>
+              <div id="compactViewDefaultHelp" class="text-sm text-muted-color">
+                Start user-facing project and subject progress overview pages in compact view. Users can expand or collapse the view, and their browser preference takes precedence over this project default.
+              </div>
+            </div>
           </settings-item>
 
           <settings-item label="Hide Achievement Celebration" input-id="disableAchievementsCelebrationSwitchInput">

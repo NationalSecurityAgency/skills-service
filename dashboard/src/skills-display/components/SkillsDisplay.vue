@@ -14,18 +14,15 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <script setup>
-import { computed, onMounted } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import { useSkillsDisplayThemeState } from '@/skills-display/stores/UseSkillsDisplayThemeState.js'
 import SkillsTitle from '@/skills-display/components/utilities/SkillsTitle.vue'
-import UserOverallProgress from '@/skills-display/components/home/UserOverallProgress.vue'
 import { useUserProgressSummaryState } from '@/skills-display/stores/UseUserProgressSummaryState.js'
 import { useLog } from '@/components/utils/misc/useLog.js'
-import MyRank from '@/skills-display/components/rank/MyRank.vue'
-import PointProgressChart from '@/skills-display/components/progress/points/PointProgressChart.vue'
+import ProgressAndRankingOverview from '@/skills-display/components/ProgressAndRankingOverview.vue'
 import SubjectTiles from '@/skills-display/components/subjects/SubjectTiles.vue'
 import ProjectDescription from '@/skills-display/components/home/ProjectDescription.vue'
 import { useSkillsDisplayAttributesState } from '@/skills-display/stores/UseSkillsDisplayAttributesState.js'
-import MyBadges from '@/skills-display/components/badges/MyBadges.vue'
 import TranscriptCard from '@/skills-display/components/userTranscript/TranscriptCard.vue'
 import TagList from "@/skills-display/components/skill/tags/TagList.vue";
 import { useUserProgressInitialization } from '@/skills-display/UseUserProgressInitialization.js'
@@ -35,6 +32,7 @@ const userProgress = useUserProgressSummaryState()
 const attributes = useSkillsDisplayAttributesState()
 const log = useLog()
 const { isProgressPending } = useUserProgressInitialization()
+const compactView = ref(false)
 
 onMounted(() => {
   if (log.isDebugEnabled()) {
@@ -50,9 +48,6 @@ const showDescription = computed(() =>
   && description.value
   && attributes.displayProjectDescription
 )
-const hasBadges = computed(() => {
-  return userProgress.userProgressSummary && userProgress.userProgressSummary.badges && userProgress.userProgressSummary.badges.enabled;
-})
 
 </script>
 
@@ -81,23 +76,11 @@ const hasBadges = computed(() => {
         </template>
       </Card>
       <project-description v-if="showDescription" :description="description" class="mt-4"/>
-      <user-overall-progress class="mt-4"/>
-
-      <div class="mt-4 flex flex-col lg:flex-row gap-4 items-stretch">
-        <div class="">
-          <my-rank />
-        </div>
-        <div class="flex-1 min-w-0">
-          <point-progress-chart class="w-full" />
-        </div>
-        <div v-if="hasBadges" class="">
-          <my-badges :badges="userProgress.userProgressSummary.badges"></my-badges>
-        </div>
-      </div>
+      <progress-and-ranking-overview class="mt-4" :badges="userProgress.userProgressSummary.badges" @update:compact="compactView = $event" />
 
       <tag-list class="mt-4" data-cy="skillTagsCard" />
 
-      <subject-tiles class="mt-4"/>
+      <subject-tiles class="mt-4" :compact="compactView"/>
 
       <transcript-card
         v-if="userProgress.userProgressSummary && userProgress.userProgressSummary.totalSkills > 0"

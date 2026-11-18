@@ -162,6 +162,7 @@ class PublicConfigController {
         res["groupDescriptionsOn"] = false
         res["groupInfoOnSkillPage"] = false
         res["displayProjectDescription"] = true
+        res["compactViewDefault"] = false
         if (Boolean.valueOf(uiConfigProperties.dbUpgradeInProgress)) {
             res["dbUpgradeInProgress"] = uiConfigProperties.dbUpgradeInProgress
         }
@@ -177,7 +178,8 @@ class PublicConfigController {
                     Settings.SHOW_PROJECT_DESCRIPTION_EVERYWHERE.settingName,
                     Settings.GROUP_INFO_ON_SKILL_PAGE.settingName,
                     Settings.SHOW_PROJECT_DESCRIPTION_EVERYWHERE.settingName,
-                    Settings.DISABLE_SKILLS_DISPLAY_ACHIEVEMENTS_CELEBRATIONS.settingName
+                    Settings.DISABLE_SKILLS_DISPLAY_ACHIEVEMENTS_CELEBRATIONS.settingName,
+                    Settings.SKILLS_DISPLAY_COMPACT_VIEW_DEFAULT.settingName
             ])?.collectEntries {
                 [it.setting, it.value]
             }
@@ -223,6 +225,7 @@ class PublicConfigController {
 
             Boolean disableAchievementsCelebrations = Boolean.valueOf(projectSettings?[Settings.DISABLE_SKILLS_DISPLAY_ACHIEVEMENTS_CELEBRATIONS.settingName])
             res["disableAchievementsCelebrations"] = disableAchievementsCelebrations
+            res["compactViewDefault"] = Boolean.valueOf(projectSettings?[Settings.SKILLS_DISPLAY_COMPACT_VIEW_DEFAULT.settingName])
 
             String name = projAdminService.lookupProjectName(projectId)
             res["projectName"] = name

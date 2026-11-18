@@ -107,6 +107,7 @@ export const useSkillsDisplayAttributesState = defineStore('skillsDisplayAttribu
   const groupDescriptionsOn = computed(() => config.value.groupDescriptionsOn)
   const groupInfoOnSkillPage = computed(() => config.value.groupInfoOnSkillPage)
   const disableAchievementsCelebrations = computed(() => config.value.disableAchievementsCelebrations)
+  const compactViewDefault = computed(() => config.value.compactViewDefault === true)
 
   const afterPropsAreSet = () => {
     return new Promise((resolve) => {
@@ -156,6 +157,7 @@ export const useSkillsDisplayAttributesState = defineStore('skillsDisplayAttribu
     version,
     projectName,
     projectUserCommunityDescriptor,
-    disableAchievementsCelebrations
+    disableAchievementsCelebrations,
+    compactViewDefault
   }
 })
