@@ -19,6 +19,7 @@ describe('Survey Text Responses Tests', () => {
     const textInput = (aIndex) => `[data-cy="question_1"] [data-cy="customAnswerText"][id="questions[0].quizAnswers[${aIndex}].answerText"]`
     const textError = (aIndex) => `[data-cy="questions[0].quizAnswers[${aIndex}].answerTextError"]`
     const answerRow = (aNum) => `[data-cy="question_1"] [data-cy="answer_${aNum}"]`
+    const recoveryMessage = 'We couldn\'t save your response. Copy your text responses before refreshing the page. After refreshing, re-enter any missing text before completing the survey.'
 
     const createTextResponseSurvey = (questionType) => {
         cy.createSurveyDef(1);
@@ -36,6 +37,42 @@ describe('Survey Text Responses Tests', () => {
     const startSurvey = () => {
         cy.visit('/progress-and-rankings/quizzes/quiz1')
         cy.get('[data-cy="startQuizAttempt"]').click()
+    }
+
+    // Names each answer save so tests can wait for a specific one: selection changes are selectSave or
+    // deselectSave, text saves use the alias given for their text, or textSave.
+    // Returns the list of text responses sent, to check that a text was never sent.
+    const interceptSaves = (textAliases = {}, handlers = {}) => {
+        const sentTexts = []
+        cy.intercept('POST', '/api/quizzes/quiz1/attempt/*/answers/*', (req) => {
+            const { isSelected, answerText } = req.body
+            if (typeof answerText === 'string') {
+                sentTexts.push(answerText)
+                req.alias = textAliases[answerText] || 'textSave'
+            } else {
+                req.alias = isSelected ? 'selectSave' : 'deselectSave'
+            }
+            handlers[answerText]?.(req)
+        })
+        return sentTexts
+    }
+    const checkNeverSent = (sentTexts, text) => {
+        cy.wrap(sentTexts).should('not.include', text)
+    }
+
+    // the learner's own attempt history and the admin's view of the same attempt
+    const checkHistory = (expectedAnswers) => {
+        const checkAnswers = () => {
+            Object.entries(expectedAnswers).forEach(([aIndex, text]) => {
+                cy.get(`[data-cy="questionDisplayCard-1"] [data-cy="answer-${aIndex}_displayText"]`).should('have.text', text)
+            })
+        }
+        cy.visit('/progress-and-rankings/my-quiz-attempts');
+        cy.get('[data-cy="viewQuizAttempt"]').first().click()
+        checkAnswers()
+        cy.visit('/administrator/quizzes/quiz1/runs');
+        cy.get('[data-cy="row0-viewRun"]').click()
+        checkAnswers()
     }
 
     const questionTypes = ['SingleChoice', 'MultipleChoice']
@@ -82,7 +119,7 @@ describe('Survey Text Responses Tests', () => {
             cy.get('[data-cy="questionDisplayCard-1"] [data-cy="answer-2_allowsTextResponse"]').should('not.exist')
         });
 
-        it(`text input focus, spaces, required and length validation [${questionType}]`, () => {
+        it(`text input focus, required and length validation [${questionType}]`, () => {
             createTextResponseSurvey(questionType)
             startSurvey()
 
@@ -105,20 +142,44 @@ describe('Survey Text Responses Tests', () => {
             cy.get(textInput(3)).should('have.focus')
         });
 
-        it(`server validation errors are shown on the text input [${questionType}]`, () => {
-            cy.intercept('POST', '/api/quizzes/quiz1/attempt/*/answers/*').as('reportAnswer')
+        it(`spaces at either end count toward the length limit [${questionType}]`, () => {
+            interceptSaves({ [` ${'x'.repeat(999)}`]: 'atLimitSave' })
             createTextResponseSurvey(questionType)
             startSurvey()
 
             cy.get(answerRow(3)).click()
-            cy.wait('@reportAnswer')
+            cy.wait('@selectSave')
+            // exactly at the limit w/ a leading space: accepted by the browser and the server
+            cy.get(textInput(2)).type(` ${'x'.repeat(999)}`, { delay: 0 })
+            cy.wait('@atLimitSave').its('response.statusCode').should('eq', 200)
+            cy.get(textError(2)).should('not.contain', 'must not exceed')
+
+            // one character over because of a trailing space: rejected in the browser, as on the server
+            cy.get(textInput(2)).type(' ')
+            cy.get(textError(2)).contains('Text response must not exceed 1,000 characters')
+            cy.get(textInput(2)).type('{backspace}')
+            cy.get(textError(2)).should('not.contain', 'must not exceed')
+
+            // one character over because of a leading space
+            cy.get(textInput(2)).clear()
+            cy.get(textInput(2)).type(` ${'x'.repeat(1000)}`, { delay: 0 })
+            cy.get(textError(2)).contains('Text response must not exceed 1,000 characters')
+        });
+
+        it(`server validation errors are shown on the text input [${questionType}]`, () => {
+            interceptSaves()
+            createTextResponseSurvey(questionType)
+            startSurvey()
+
+            cy.get(answerRow(3)).click()
+            cy.wait('@selectSave')
             cy.get(textInput(2)).type('jabberwocky')
-            cy.wait('@reportAnswer').its('response.statusCode').should('eq', 400)
+            cy.wait('@textSave').its('response.statusCode').should('eq', 400)
             cy.get(textError(2)).contains('answerText is invalid: paragraphs may not contain jabberwocky')
         });
 
         it(`switch options, clear, resume and complete [${questionType}]`, () => {
-            cy.intercept('POST', '/api/quizzes/quiz1/attempt/*/answers/*').as('reportAnswer')
+            interceptSaves({ '': 'clearedSave' })
             createTextResponseSurvey(questionType)
             startSurvey()
 
@@ -137,7 +198,7 @@ describe('Survey Text Responses Tests', () => {
 
             // a cleared response stays selected and blocks completion
             cy.get(textInput(3)).clear()
-            cy.wait(1500)
+            cy.wait('@clearedSave')
             cy.reload()
             cy.get(`${answerRow(4)} [data-cy="selected_true"]`)
             cy.get(textInput(3)).should('have.value', '')
@@ -155,39 +216,142 @@ describe('Survey Text Responses Tests', () => {
             cy.clickCompleteQuizBtn()
             cy.get('[data-cy="surveyCompletion"]').contains('Thank you for taking the time to complete the survey')
 
-            cy.request('/admin/quiz-definitions/quiz1/runs?query=&limit=10&ascending=false&page=1&orderBy=started').then((res) => {
-                cy.request(`/admin/quiz-definitions/quiz1/runs/${res.body.data[0].attemptId}`).then((run) => {
-                    const answers = run.body.questions[0].answers.map((a) => a.answer)
-                    expect(answers).to.deep.equal(isSingle ?
-                        ['First', 'Second', 'Other reason', 'Another reason: Final text'] :
-                        ['First', 'Second', 'Other reason: First text', 'Another reason: Final text'])
-                })
-            })
+            checkHistory(isSingle ?
+                { 0: 'First', 1: 'Second', 2: 'Other reason', 3: 'Another reason: Final text' } :
+                { 0: 'First', 1: 'Second', 2: 'Other reason: First text', 3: 'Another reason: Final text' })
         });
 
         it(`deselecting right after typing does not restore the option [${questionType}]`, () => {
-            cy.intercept('POST', '/api/quizzes/quiz1/attempt/*/answers/*').as('reportAnswer')
+            const sentTexts = interceptSaves()
             createTextResponseSurvey(questionType)
             startSurvey()
 
             cy.get(answerRow(3)).click()
+            cy.wait('@selectSave')
             cy.get(textInput(2)).type('typed then removed')
             cy.get(answerRow(3)).click()
             cy.get(textInput(2)).should('not.exist')
-            cy.wait(2000)
+            cy.wait('@deselectSave')
             cy.reload()
             cy.get(`${answerRow(3)} [data-cy="selected_false"]`)
             cy.get(textInput(2)).should('not.exist')
             if (isSingle) {
                 // a newer single choice selection is not overridden by a pending text save
                 cy.get(answerRow(3)).click()
+                cy.wait('@selectSave')
                 cy.get(textInput(2)).type('pending text')
                 cy.get(answerRow(2)).click()
-                cy.wait(2000)
+                cy.wait('@selectSave')
                 cy.reload()
                 cy.get(`${answerRow(2)} [data-cy="selected_true"]`)
                 cy.get(`${answerRow(3)} [data-cy="selected_false"]`)
+                checkNeverSent(sentTexts, 'pending text')
             }
+            checkNeverSent(sentTexts, 'typed then removed')
+        });
+
+        it(`an older text save does not restore a cleared response [${questionType}]`, () => {
+            // the first text save is slow; a second edit finishes its typing delay while it is still in flight
+            let slowSaveSent = false
+            const sentTexts = interceptSaves({ 'slow text': 'slowSave' }, {
+                'slow text': (req) => {
+                    slowSaveSent = true
+                    req.continue((res) => {
+                        res.setDelay(2000)
+                    })
+                },
+            })
+            createTextResponseSurvey(questionType)
+            startSurvey()
+
+            cy.get(answerRow(3)).click()
+            cy.wait('@selectSave')
+            cy.clock(Date.now(), ['setTimeout', 'clearTimeout'])
+            cy.get(textInput(2)).type('slow text')
+            cy.tick(1000)
+            cy.wrap(null).should(() => expect(slowSaveSent).to.equal(true))
+            cy.get(textInput(2)).type(' and more')
+            cy.tick(1000)
+            // while both edits wait, the respondent clears the text by switching away and back
+            if (isSingle) {
+                cy.get(answerRow(1)).click()
+            } else {
+                cy.get(answerRow(3)).click()
+            }
+            cy.get(answerRow(3)).click()
+            cy.get(textInput(2)).should('have.value', '')
+            cy.clock().then((clock) => clock.restore())
+            cy.wait('@slowSave')
+            if (isSingle) {
+                cy.wait(['@selectSave', '@selectSave'])
+            } else {
+                cy.wait(['@deselectSave', '@selectSave'])
+            }
+
+            // the text stays cleared after resuming, and a blank response blocks completion
+            cy.reload()
+            cy.get(`${answerRow(3)} [data-cy="selected_true"]`)
+            cy.get(textInput(2)).should('have.value', '')
+            cy.get('[data-cy="completeQuizBtn"]').click()
+            cy.get(textError(2)).contains('Text response is required')
+            cy.get('[data-cy="surveyCompletion"]').should('not.exist')
+            checkNeverSent(sentTexts, 'slow text and more')
+
+            // fresh text entered right before completion is the one saved
+            cy.get(textInput(2)).type('fresh text')
+            cy.clickCompleteQuizBtn()
+            cy.get('[data-cy="surveyCompletion"]')
+            checkNeverSent(sentTexts, 'slow text and more')
+            checkHistory({ 0: 'First', 2: 'Other reason: fresh text' })
+        });
+
+        it(`a failed save explains how to recover and keeps the text [${questionType}]`, () => {
+            interceptSaves({ 'unsaved text': 'failedSave' }, {
+                'unsaved text': (req) => req.reply({ forceNetworkError: true }),
+            })
+            createTextResponseSurvey(questionType)
+            startSurvey()
+
+            cy.get(answerRow(3)).click()
+            cy.wait('@selectSave')
+            cy.get(textInput(2)).type('unsaved text')
+            cy.get('[data-cy="completeQuizBtn"]').click()
+            cy.get('[data-cy="quizSaveError"]').should('have.text', recoveryMessage)
+            cy.get(textInput(2)).should('have.value', 'unsaved text')
+            cy.get('[data-cy="surveyCompletion"]').should('not.exist')
+
+            // invalid text keeps its specific error
+            cy.get(textInput(2)).clear()
+            cy.get(textInput(2)).type('jabberwocky text')
+            cy.get('[data-cy="completeQuizBtn"]').click()
+            cy.get('[data-cy="quizSaveError"]').contains('answerText is invalid: paragraphs may not contain jabberwocky')
+            cy.get('[data-cy="quizSaveError"]').should('not.contain', 'Copy your text responses')
+            cy.get('[data-cy="surveyCompletion"]').should('not.exist')
+        });
+
+        it(`a saved response is kept when the setting is turned off mid-attempt [${questionType}]`, () => {
+            interceptSaves({ 'kept text': 'keptSave' })
+            createTextResponseSurvey(questionType)
+            startSurvey()
+
+            cy.get(answerRow(3)).click()
+            cy.get(textInput(2)).type('kept text')
+            cy.wait('@keptSave').its('response.statusCode').should('eq', 200)
+
+            // the admin turns off the text response on that answer
+            cy.request('/admin/quiz-definitions/quiz1/questions').then((res) => {
+                const question = res.body.questions[0]
+                question.answers[2].allowCustomText = false
+                question.quizId = 'quiz1'
+                cy.request('POST', `/admin/quiz-definitions/quiz1/questions/${question.id}`, question)
+            })
+
+            cy.reload()
+            cy.get(`${answerRow(3)} [data-cy="selected_true"]`)
+            cy.get(textInput(2)).should('not.exist')
+            cy.clickCompleteQuizBtn()
+            cy.get('[data-cy="surveyCompletion"]')
+            checkHistory({ 2: 'Other reason: kept text' })
         });
 
         it(`saved responses show in attempt history and the results table [${questionType}]`, () => {
@@ -202,12 +366,9 @@ describe('Survey Text Responses Tests', () => {
             cy.clickCompleteQuizBtn()
             cy.get('[data-cy="surveyCompletion"]')
 
-            cy.visit('/progress-and-rankings/my-quiz-attempts');
-            cy.get('[data-cy="viewQuizAttempt"]').first().click()
-            cy.get('[data-cy="questionDisplayCard-1"] [data-cy="answer-3_displayText"]').should('have.text', 'Another reason: A response with markup & more')
-            if (!isSingle) {
-                cy.get('[data-cy="questionDisplayCard-1"] [data-cy="answer-2_displayText"]').should('have.text', 'Other reason: Other response')
-            }
+            checkHistory(isSingle ?
+                { 3: 'Another reason: A response with markup & more' } :
+                { 2: 'Other reason: Other response', 3: 'Another reason: A response with markup & more' })
 
             cy.visit('/administrator/quizzes/quiz1/results');
             cy.get('[data-cy="metrics-q1"] [data-p-index="3"] [data-pc-section="rowtogglebutton"]').click()
