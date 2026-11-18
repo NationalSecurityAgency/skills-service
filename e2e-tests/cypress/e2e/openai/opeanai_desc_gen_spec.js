@@ -120,6 +120,45 @@ describe('Generate Desc Tests', () => {
         })
     })
 
+    it('preserves embedded images across successive description refinements, saving and reloading', () => {
+        openImageDescription().then((imageUrls) => {
+            cy.get('[data-cy="instructionsInput"]').type('AI description image regression - improve the description and keep both diagrams{enter}')
+            cy.get('[data-cy="aiMsg-2"] [data-cy="finalSegment"]').should('contain.text', completedMsg)
+            assertDescriptionImages('[data-cy="aiMsg-2"] [data-cy="generatedSegment"]', [0, 1, 0, 1, 0, 1].map((index) => imageUrls[index]))
+
+            cy.get('[data-cy="instructionsInput"]').should('be.enabled')
+                .type('AI description image regression - simplify while keeping both diagrams{enter}')
+            cy.get('[data-cy="aiMsg-4"] [data-cy="finalSegment"]').should('contain.text', completedMsg)
+            cy.get('[data-cy="aiMsg-4"] [data-cy="generatedSegment"]').should('contain.text', 'Study both diagrams step by step.')
+            assertDescriptionImages('[data-cy="aiMsg-4"] [data-cy="generatedSegment"]', imageUrls)
+
+            // The third fixture requires the second draft with raw placeholders in assistant history.
+            cy.get('[data-cy="instructionsInput"]').should('be.enabled')
+                .type('AI description image regression - reorder the diagrams in the simplified draft{enter}')
+            const finalText = 'Compare the second diagram with the first diagram.'
+            cy.get('[data-cy="aiMsg-6"] [data-cy="finalSegment"]').should('contain.text', completedMsg)
+            cy.get('[data-cy="aiMsg-6"] [data-cy="generatedSegment"]').should('contain.text', finalText)
+            const reorderedImages = [imageUrls[1], imageUrls[0]]
+            assertDescriptionImages('[data-cy="aiMsg-6"] [data-cy="generatedSegment"]', reorderedImages)
+            cy.intercept('POST', '/api/validation/description', (req) => {
+                if (req.body.value?.includes(finalText)) {
+                    req.alias = 'refinedDescriptionValidation'
+                }
+            })
+            cy.get('[data-cy="useGenValueBtn-6"]').should('be.enabled').click()
+            cy.get(imageDescriptionEditor).should('contain.text', finalText)
+            assertDescriptionImages(imageDescriptionEditor, reorderedImages)
+            cy.wait('@refinedDescriptionValidation')
+            cy.get('[data-cy="saveDialogBtn"]').should('be.enabled').click()
+            cy.get('[data-cy="saveDialogBtn"]').should('not.exist')
+            cy.get('[data-cy="skillOverviewDescription"]').should('contain.text', finalText)
+            assertDescriptionImages('[data-cy="skillOverviewDescription"]', reorderedImages)
+            cy.reload()
+            cy.get('[data-cy="skillOverviewDescription"]').should('contain.text', finalText)
+            assertDescriptionImages('[data-cy="skillOverviewDescription"]', reorderedImages)
+        })
+    })
+
     it('does not replace an unmapped image placeholder with a different image', () => {
         openImageDescription().then((imageUrls) => {
             cy.get('[data-cy="instructionsInput"]').type('AI description image regression - return an unmapped image reference{enter}')
