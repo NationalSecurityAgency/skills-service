@@ -92,9 +92,9 @@ const metrics = computed(() => {
         <div class="border-b border-surface p-4 lg:row-span-3 lg:grid lg:grid-rows-subgrid lg:border-r lg:border-b-0">
           <div class="flex flex-col gap-2 lg:self-start">
             <div class="flex flex-col items-start gap-2">
-              <h3 class="flex items-center gap-2 text-xl font-medium sd-theme-primary-color" data-cy="compactOverallTitle">
+              <h2 class="flex items-center gap-2 text-xl font-medium sd-theme-primary-color" data-cy="compactOverallTitle">
                 <i class="fas fa-chart-line text-orange-700 dark:text-orange-300" aria-hidden="true" />Overall Progress
-              </h3>
+              </h2>
               <Tag v-if="userProgress.todaysPoints > 0" severity="success" icon="fas fa-arrow-trend-up"
                    :value="`+${numFormat.pretty(userProgress.todaysPoints)} today`" data-cy="compactTodayPoints" />
             </div>
@@ -119,10 +119,10 @@ const metrics = computed(() => {
           <div v-for="metric in metrics" :key="metric.id" class="flex min-w-0 flex-col gap-2 p-4 lg:row-span-3 lg:grid lg:grid-rows-subgrid" :aria-busy="metric.loading || undefined"
                :data-cy="`compactMetric-${metric.id}`">
             <div class="flex flex-col gap-2 lg:row-start-1 lg:self-start">
-              <h3 class="flex items-start gap-2 text-xl leading-7 font-medium sd-theme-primary-color"
+              <h2 class="flex items-start gap-2 text-xl leading-7 font-medium sd-theme-primary-color"
                   :class="{ 'pr-6': metric.id === (hasBadges ? 'badges' : 'rank') }">
                 <i :class="[metric.icon, metric.iconColor]" class="mt-1 shrink-0 text-xl" aria-hidden="true" />{{ metric.label }}
-              </h3>
+              </h2>
               <div class="flex flex-col gap-1">
                 <div v-if="metric.loading" class="h-9 w-16 animate-pulse rounded bg-surface-200 dark:bg-surface-700 motion-reduce:animate-none" aria-hidden="true" />
                 <div v-else class="flex flex-wrap items-baseline gap-x-1.5 text-surface-900 dark:text-surface-0 sd-theme-primary-color"
