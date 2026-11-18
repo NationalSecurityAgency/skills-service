@@ -4,10 +4,10 @@
   "request": {
     "method": "POST", "urlPath": "/v1/chat/completions",
     "bodyPatterns": [
-      { "matchesJsonPath": { "expression": "$.messages.length()", "equalTo": "3" } },
-      { "matchesJsonPath": { "expression": "$.messages[2].content", "contains": "AI format history regression - update FillInTheBlank answers" } },
+      { "matchesJsonPath": { "expression": "$.messages.length()", "equalTo": "4" } },
+      { "matchesJsonPath": { "expression": "$.messages[3].content", "contains": "AI format history regression - update FillInTheBlank answers" } },
       { "contains": "Generate a FillInTheBlank Question Type" },
-      { "matchesJsonPath": { "expression": "$.messages[1].content", "equalTo": "### Question:\nThe rock bands behind Hey Jude and Bohemian Rhapsody are ___ and ___.\n\n### Answers:\n[\n  {\"answer\":\"The Beatles\",\"isCorrect\":true},\n  {\"answer\":\"Queen\",\"isCorrect\":true}\n]" } }
+      { "matchesJsonPath": { "expression": "$.messages[2].content", "equalTo": "### Question:\nThe rock bands behind Hey Jude and Bohemian Rhapsody are ___ and ___.\n\n### Answers:\n[\n  {\"answer\":\"The Beatles\",\"isCorrect\":true},\n  {\"answer\":\"Queen\",\"isCorrect\":true}\n]" } }
     ]
   },
   "response": { "status": 200, "headers": { "Content-Type": "text/event-stream" }, "bodyFileName": "response-body-history-fillintheblank.txt", "chunkedDribbleDelay": { "numberOfChunks": 10, "totalDuration": 1000 } }

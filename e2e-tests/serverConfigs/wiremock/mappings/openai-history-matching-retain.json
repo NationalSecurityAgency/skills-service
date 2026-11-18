@@ -4,10 +4,10 @@
   "request": {
     "method": "POST", "urlPath": "/v1/chat/completions",
     "bodyPatterns": [
-      { "matchesJsonPath": { "expression": "$.messages[4].content", "contains": "AI format history regression - retain updated Matching answers" } },
+      { "matchesJsonPath": { "expression": "$.messages[5].content", "contains": "AI format history regression - retain updated Matching answers" } },
       { "contains": "Generate a Matching Question Type" },
-      { "matchesJsonPath": { "expression": "$.messages[3].role", "equalTo": "assistant" } },
-      { "matchesJsonPath": { "expression": "$.messages[3].content", "equalTo": "### Question:\nMatch the bands with their updated hit songs.\n\n### Answers:\n[{\"answer\":\"\",\"isCorrect\":true,\"multiPartAnswer\":{\"term\":\"Queen\",\"value\":\"We Will Rock You\"}},{\"answer\":\"\",\"isCorrect\":true,\"multiPartAnswer\":{\"term\":\"The Beatles\",\"value\":\"Yesterday\"}}]" } }
+      { "matchesJsonPath": { "expression": "$.messages[4].role", "equalTo": "assistant" } },
+      { "matchesJsonPath": { "expression": "$.messages[4].content", "equalTo": "### Question:\nMatch the bands with their updated hit songs.\n\n### Answers:\n[{\"answer\":\"\",\"isCorrect\":true,\"multiPartAnswer\":{\"term\":\"Queen\",\"value\":\"We Will Rock You\"}},{\"answer\":\"\",\"isCorrect\":true,\"multiPartAnswer\":{\"term\":\"The Beatles\",\"value\":\"Yesterday\"}}]" } }
     ]
   },
   "response": { "status": 200, "headers": { "Content-Type": "text/event-stream" }, "bodyFileName": "response-body-history-matching.txt", "chunkedDribbleDelay": { "numberOfChunks": 10, "totalDuration": 1000 } }

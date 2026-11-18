@@ -136,7 +136,7 @@ describe('AI question conversation history and recovery', () => {
             // WireMock requires the initial assistant's answers, not just the displayed question.
             generate(`AI format history regression - update ${type} answers`, 4)
             assertUpdatedPreview(type, 4)
-            // This fixture requires the second assistant response at messages[3], including its new answers.
+            // WireMock sees the prepended system message, so the second assistant response is at messages[4].
             generate(`AI format history regression - retain updated ${type} answers`, 6)
             assertUpdatedPreview(type, 6)
             applySaveAndReload(type, 6)

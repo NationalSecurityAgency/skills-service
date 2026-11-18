@@ -4,10 +4,10 @@
   "request": {
     "method": "POST", "urlPath": "/v1/chat/completions",
     "bodyPatterns": [
-      { "matchesJsonPath": { "expression": "$.messages[4].content", "contains": "AI format history regression - retain updated MultipleChoice answers" } },
+      { "matchesJsonPath": { "expression": "$.messages[5].content", "contains": "AI format history regression - retain updated MultipleChoice answers" } },
       { "contains": "Generate a MultipleChoice Question Type" },
-      { "matchesJsonPath": { "expression": "$.messages[3].role", "equalTo": "assistant" } },
-      { "matchesJsonPath": { "expression": "$.messages[3].content", "equalTo": "### Question:\nSelect the bands that recorded these updated hits.\n\n### Answers:\n[{\"answer\":\"Queen\",\"isCorrect\":true},{\"answer\":\"The Beatles\",\"isCorrect\":true},{\"answer\":\"Mozart\",\"isCorrect\":false}]" } }
+      { "matchesJsonPath": { "expression": "$.messages[4].role", "equalTo": "assistant" } },
+      { "matchesJsonPath": { "expression": "$.messages[4].content", "equalTo": "### Question:\nSelect the bands that recorded these updated hits.\n\n### Answers:\n[{\"answer\":\"Queen\",\"isCorrect\":true},{\"answer\":\"The Beatles\",\"isCorrect\":true},{\"answer\":\"Mozart\",\"isCorrect\":false}]" } }
     ]
   },
   "response": { "status": 200, "headers": { "Content-Type": "text/event-stream" }, "bodyFileName": "response-body-history-multiplechoice.txt", "chunkedDribbleDelay": { "numberOfChunks": 10, "totalDuration": 1000 } }

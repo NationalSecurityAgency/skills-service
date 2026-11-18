@@ -4,10 +4,10 @@
   "request": {
     "method": "POST", "urlPath": "/v1/chat/completions",
     "bodyPatterns": [
-      { "matchesJsonPath": { "expression": "$.messages.length()", "equalTo": "3" } },
-      { "matchesJsonPath": { "expression": "$.messages[2].content", "contains": "AI format history regression - convert SingleChoice to Matching" } },
-      { "matchesJsonPath": { "expression": "$.messages[2].content", "contains": "The Question Type has changed from `SingleChoice` to `Matching`" } },
-      { "matchesJsonPath": { "expression": "$.messages[1].content", "contains": "{\"answer\": \"Bach\", \"isCorrect\": false}" } }
+      { "matchesJsonPath": { "expression": "$.messages.length()", "equalTo": "4" } },
+      { "matchesJsonPath": { "expression": "$.messages[3].content", "contains": "AI format history regression - convert SingleChoice to Matching" } },
+      { "matchesJsonPath": { "expression": "$.messages[3].content", "contains": "The Question Type has changed from `SingleChoice` to `Matching`" } },
+      { "matchesJsonPath": { "expression": "$.messages[2].content", "contains": "{\"answer\": \"Bach\", \"isCorrect\": false}" } }
     ]
   },
   "response": { "status": 200, "headers": { "Content-Type": "text/event-stream" }, "bodyFileName": "response-body-history-matching.txt", "chunkedDribbleDelay": { "numberOfChunks": 10, "totalDuration": 1000 } }
