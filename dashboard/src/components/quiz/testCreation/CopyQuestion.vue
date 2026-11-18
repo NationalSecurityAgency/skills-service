@@ -70,7 +70,7 @@ const copyQuestions = async () => {
     await QuizService.copyToAnotherQuiz(props.questionDef.quizId, selectedQuiz.value, questionsToSave)
     copied.value = true;
   } catch (error) {
-    copyError.value = error.response?.data?.explanation || 'Unable to copy questions. Please try again.'
+    copyError.value = error.response?.data?.explanation || 'We couldn’t confirm whether the questions were copied.'
   } finally {
     copyInProgress.value = false;
   }
@@ -136,7 +136,7 @@ const currentQuizName = computed(() => {
         ok-button-severity="danger"
         ok-button-icon="fas fa-copy"
         ok-button-label="Copy"
-        :ok-button-disabled="!canCopy"
+        :ok-button-disabled="!canCopy || copyError.length > 0"
         v-model="model"
         :show-ok-button="showOkButton"
         :cancel-button-label="!showOkButton ? 'Close' : 'Cancel'"
@@ -147,7 +147,6 @@ const currentQuizName = computed(() => {
         :loading="loadingComponent"
         @on-ok="copyQuestions"
         @on-cancel="close">
-
     <div class="flex flex-col gap-1 mb-4" v-if="!copyInProgress && !copied">
       <Message severity="info" :closable="false">
         This will copy {{ numberOfQuestions }} {{pluralize.plural("question", numberOfQuestions)}} to the selected {{ props.questionDef.quizType }}.
@@ -177,7 +176,8 @@ const currentQuizName = computed(() => {
         </ul>
       </Message>
       <Message v-if="copyError" :closable="false" severity="error" data-cy="copyQuestionsFailedMsg">
-        {{ copyError }}
+        <div>{{ copyError }}</div>
+        <div>Refresh the page and check the destination {{ props.questionDef.quizType.toLowerCase() }} before attempting another copy.</div>
       </Message>
     </div>
     <skills-spinner :is-loading="copyInProgress" class="mt-6 mb-4"/>

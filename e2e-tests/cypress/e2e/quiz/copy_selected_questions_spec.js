@@ -235,42 +235,41 @@ describe('Copy selected quiz questions', () => {
         cy.get(questionCard(2)).should('not.exist');
     });
 
-    it('keeps the selected questions when copying fails and succeeds on retry', () => {
-        cy.createQuizDef(1);
-        cy.createQuizDef(2);
-        cy.createQuizQuestionDef(1, 1);
-        cy.visit('/administrator/quizzes/quiz1');
-        cy.get(questionCard(1)).should('be.visible');
-        selectQuestions(1);
-        openCopyDialog();
-        selectDestination('This is quiz 2');
+    ['with an explanation', 'without an explanation'].forEach((errorResponse) => {
+        it(`keeps the selected questions and disables copying after an error ${errorResponse}`, () => {
+            cy.createQuizDef(1);
+            cy.createQuizDef(2);
+            cy.createQuizQuestionDef(1, 1);
+            cy.visit('/administrator/quizzes/quiz1');
+            cy.get(questionCard(1)).should('be.visible');
+            selectQuestions(1);
+            openCopyDialog();
+            selectDestination('This is quiz 2');
 
-        let attempts = 0;
-        cy.intercept('POST', '/admin/quiz-definitions/quiz1/questions/copy/quiz2', (req) => {
-            attempts += 1;
-            if (attempts === 1) {
-                req.reply({ statusCode: 503, body: { explanation: 'Copy temporarily unavailable' } });
-            } else {
-                req.continue();
-            }
+            cy.intercept('POST', '/admin/quiz-definitions/quiz1/questions/copy/quiz2', {
+                statusCode: 503,
+                body: errorResponse === 'with an explanation' ? { explanation: 'Copy temporarily unavailable' } : {},
+            });
+
+            cy.get('[data-cy="saveDialogBtn"]').click();
+            cy.get('[data-cy="copyQuestionsFailedMsg"]')
+                .should('contain.text', errorResponse === 'with an explanation' ? 'Copy temporarily unavailable' : 'We couldn’t confirm whether the questions were copied.')
+                .and('contain.text', 'Refresh the page and check the destination quiz before attempting another copy.');
+            cy.contains('This will copy 1 question').should('be.visible');
+            cy.get(`${checkbox(1)} input`).should('be.checked');
+            cy.get('[data-cy="saveDialogBtn"]').should('be.disabled');
+            cy.get('[data-cy="closeDialogBtn"]').should('be.enabled').click();
+            cy.get('[data-cy="copyQuestionModal"]').should('not.exist');
+            cy.get('[data-cy="questionActionsBtn"]').should('be.disabled');
+            cy.get('#toggleSelectionMode').should('be.enabled').and('have.focus');
+
+            cy.visit('/administrator/quizzes/quiz2');
+            cy.get('[data-cy="noQuestionsYet"]').should('be.visible');
+            cy.get('[data-cy="pageHeaderStat_Questions"] [data-cy="statValue"]').should('have.text', '0');
         });
-
-        cy.get('[data-cy="saveDialogBtn"]').click();
-        cy.get('[data-cy="copyQuestionsFailedMsg"]').should('contain.text', 'Copy temporarily unavailable');
-        cy.contains('This will copy 1 question').should('be.visible');
-        cy.get('[data-cy="saveDialogBtn"]').should('be.enabled').click();
-        cy.contains('Successfully copied 1 question').should('be.visible');
-        cy.get('[data-cy="closeDialogBtn"]').click();
-        cy.get('[data-cy="copyQuestionModal"]').should('not.exist');
-        cy.get('[data-cy="questionActionsBtn"]').should('be.disabled');
-        cy.get('#toggleSelectionMode').should('be.enabled').and('have.focus');
-
-        cy.visit('/administrator/quizzes/quiz2');
-        cy.get(questionCard(1)).find('[data-cy="questionDisplayText"]').should('contain.text', 'This is a question # 1');
-        cy.get(questionCard(2)).should('not.exist');
     });
 
-    it('retrying after a committed copy with an ambiguous response currently duplicates questions', () => {
+    it('disables copying after a committed copy with an ambiguous response to prevent duplicate questions', () => {
         cy.createQuizDef(1);
         cy.createQuizDef(2);
         cy.createQuizQuestionDef(1, 1);
@@ -280,34 +279,27 @@ describe('Copy selected quiz questions', () => {
         openCopyDialog();
         selectDestination('This is quiz 2');
 
-        let attempts = 0;
         cy.intercept('POST', '/admin/quiz-definitions/quiz1/questions/copy/quiz2', (req) => {
-            attempts += 1;
-            if (attempts === 1) {
-                // The backend commits before its successful response is hidden from the UI.
-                // Copy is not idempotent: retrying this ambiguous outcome creates another copy.
-                req.continue((res) => {
-                    expect(res.statusCode).to.equal(200);
-                    expect(res.body.success).to.equal(true);
-                    res.send({ statusCode: 503, body: { explanation: 'Copy outcome could not be confirmed' } });
-                });
-            } else {
-                req.continue();
-            }
+            // The backend commits before its successful response is hidden from the UI.
+            req.continue((res) => {
+                expect(res.statusCode).to.equal(200);
+                expect(res.body.success).to.equal(true);
+                res.send({ statusCode: 503, body: { explanation: 'Copy outcome could not be confirmed' } });
+            });
         });
 
         cy.get('[data-cy="saveDialogBtn"]').click();
-        cy.get('[data-cy="copyQuestionsFailedMsg"]').should('contain.text', 'Copy outcome could not be confirmed');
+        cy.get('[data-cy="copyQuestionsFailedMsg"]')
+            .should('contain.text', 'Copy outcome could not be confirmed')
+            .and('contain.text', 'Refresh the page and check the destination quiz before attempting another copy.');
         cy.get(`${checkbox(1)} input`).should('be.checked');
-        cy.get('[data-cy="saveDialogBtn"]').should('be.enabled').click();
-        cy.contains('Successfully copied 1 question').should('be.visible');
-        cy.get('[data-cy="closeDialogBtn"]').click();
+        cy.get('[data-cy="saveDialogBtn"]').should('be.disabled');
+        cy.get('[data-cy="closeDialogBtn"]').should('be.enabled').click();
 
         cy.visit('/administrator/quizzes/quiz2');
-        cy.get('[data-cy="pageHeaderStat_Questions"] [data-cy="statValue"]').should('have.text', '2');
+        cy.get('[data-cy="pageHeaderStat_Questions"] [data-cy="statValue"]').should('have.text', '1');
         cy.get(questionCard(1)).find('[data-cy="questionDisplayText"]').should('contain.text', 'This is a question # 1');
-        cy.get(questionCard(2)).find('[data-cy="questionDisplayText"]').should('contain.text', 'This is a question # 1');
-        cy.get(questionCard(3)).should('not.exist');
+        cy.get(questionCard(2)).should('not.exist');
     });
 
     ['Cancel', 'header close', 'Escape'].forEach((closeMethod) => {

@@ -374,7 +374,7 @@ const actionsMenu = ref([
             v-if="!quizConfig.isReadOnlyQuiz"
             v-on:update:modelValue="toggleSelectionMode"
             v-model="selectionModeEnabled" />
-        <label for="toggleSelectionMode">Select Questions</label>
+        <label for="toggleSelectionMode" v-if="!quizConfig.isReadOnlyQuiz">Select Questions</label>
 
         <SkillsButton
             id="questionActionsBtn"
