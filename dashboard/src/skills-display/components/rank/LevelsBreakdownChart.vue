@@ -25,6 +25,7 @@ import Chart from "primevue/chart";
 import ChartDataLabels from 'chartjs-plugin-datalabels';
 import MetricsOverlay from "@/components/metrics/utils/MetricsOverlay.vue";
 import {useChartSupportColors} from "@/components/metrics/common/UseChartSupportColors.js";
+import {useChartSnapshotMode} from '@/skills-display/components/test/UseChartSnapshotMode.js'
 import ChartDownloadControls from "@/components/metrics/common/ChartDownloadControls.vue";
 
 const props = defineProps({
@@ -36,6 +37,16 @@ const attributes = useSkillsDisplayAttributesState()
 const themeState = useSkillsDisplayThemeState()
 const themeHelper = useThemesHelper()
 const animationEnded = ref(false)
+const chartSnapshotMode = useChartSnapshotMode()
+const snapshotDrawn = ref(false)
+const resetSnapshotReadiness = () => { snapshotDrawn.value = false }
+const snapshotPlugin = {
+  id: 'levelBreakdownSnapshotReadiness',
+  beforeInit: resetSnapshotReadiness,
+  beforeUpdate: resetSnapshotReadiness,
+  beforeDestroy: resetSnapshotReadiness,
+  afterDraw: () => { snapshotDrawn.value = true },
+}
 const numFormat = useNumberFormat()
 const chartSupportColors = useChartSupportColors()
 
@@ -65,6 +76,7 @@ const loadData = () => {
 }
 
 const computeChartData = () => {
+  snapshotDrawn.value = false
   chartData.value = {
     labels: usersPerLevel.value.map((item) => `${attributes.levelDisplayName} ${item.level}`),
     datasets: [{
@@ -140,7 +152,7 @@ const setChartOptions = () => {
         }
       }
     },
-    animation: {
+    animation: chartSnapshotMode.value ? false : {
       onComplete: function() {
         animationEnded.value = true;
       }
@@ -165,7 +177,7 @@ const levelBreakdownChartRef = ref(null)
                type="bar"
                :data="chartData"
                :options="chartJsOptions"
-               :plugins="[ChartDataLabels]"
+               :plugins="chartSnapshotMode ? [ChartDataLabels, snapshotPlugin] : [ChartDataLabels]"
                class="h-[18rem]" />
         <template #no-data>
           <InlineMessage>No one achieved
@@ -173,7 +185,8 @@ const levelBreakdownChartRef = ref(null)
             yet... You could be the <i><strong>first one</strong></i>!</InlineMessage>
         </template>
       </metrics-overlay>
-      <span v-if="animationEnded" data-cy="levelBreakdownChart-animationEnded"></span>
+      <span v-if="chartSnapshotMode ? (!usersPerLevelLoading && snapshotDrawn) : animationEnded" data-cy="levelBreakdownChart-animationEnded"></span>
+      <span v-if="chartSnapshotMode && !usersPerLevelLoading && snapshotDrawn" data-cy="levelBreakdownChart-rendered"></span>
     </template>
   </Card>
 </template>

@@ -21,8 +21,10 @@ import SkillsDisplayHome from '@/skills-display/components/SkillsDisplayHome.vue
 import { useSkillsDisplayThemeState } from '@/skills-display/stores/UseSkillsDisplayThemeState.js'
 import { useLog } from '@/components/utils/misc/useLog.js'
 import { useTestThemeUtils } from '@/skills-display/components/test/UseTestThemeUtils.js'
+import { provideChartSnapshotMode } from '@/skills-display/components/test/UseChartSnapshotMode.js'
 
 const route = useRoute()
+provideChartSnapshotMode(route.query.disableChartAnimations === 'true')
 const projectId = route.params.projectId
 const skillsDisplayAttributes = useSkillsDisplayAttributesState()
 const themeState = useSkillsDisplayThemeState()

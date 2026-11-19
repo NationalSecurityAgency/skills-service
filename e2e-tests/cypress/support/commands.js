@@ -164,25 +164,38 @@ Cypress.Commands.add("doMatchSnapshotImage", (options) => {
         return cy.get(options.selector || 'body').should('be.visible').then(async ($element) => {
             const element = $element[0];
             const document = element.ownerDocument;
-            const window = document.defaultView;
             if (options.blackout) {
                 Cypress.$(document.body).find(options.blackout).css('visibility', 'hidden');
             }
 
-            await document.fonts.ready;
-            const images = [...element.querySelectorAll('img')];
-            if (element.matches('img')) {
-                images.push(element);
-            }
-            await Promise.all(images.filter(image =>
-                (image.currentSrc || image.getAttribute('src') || image.getAttribute('srcset')) &&
-                image.getClientRects().length > 0 && window.getComputedStyle(image).visibility !== 'hidden'
-            ).map(image => image.decode()));
+            const waitForElementResources = async (root) => {
+                const doc = root.ownerDocument;
+                const win = doc.defaultView;
+                await doc.fonts.ready;
+                const images = [...root.querySelectorAll('img')];
+                if (root.matches('img')) images.push(root);
+                await Promise.all(images.filter(image =>
+                    (image.currentSrc || image.getAttribute('src') || image.getAttribute('srcset')) &&
+                    image.getClientRects().length > 0 && win.getComputedStyle(image).visibility !== 'hidden'
+                ).map(image => image.decode()));
 
-            // Allow layout and paint to commit after resources load and blackout styles change.
-            await new Cypress.Promise(resolve => {
-                window.requestAnimationFrame(() => window.requestAnimationFrame(() => resolve()));
-            });
+                // An iframe screenshot includes its child document, not just the host's resources.
+                const frames = [...root.querySelectorAll('iframe')];
+                if (root.matches('iframe')) frames.push(root);
+                await Promise.all(frames.filter(frame =>
+                    frame.getClientRects().length > 0 && win.getComputedStyle(frame).visibility !== 'hidden'
+                ).map(frame => {
+                    const body = frame.contentDocument?.body;
+                    if (!body) throw new Error('Snapshot resource readiness requires a loaded, accessible iframe document');
+                    return waitForElementResources(body);
+                }));
+
+                // Allow layout and paint to commit after resources load and blackout styles change.
+                await new Cypress.Promise(resolve => {
+                    win.requestAnimationFrame(() => win.requestAnimationFrame(() => resolve()));
+                });
+            };
+            await waitForElementResources(element);
         }).then(() => {
             if (options.selector) {
                 return cy.get(options.selector).compareSnapshot(options.name, visualRegressionOptions);

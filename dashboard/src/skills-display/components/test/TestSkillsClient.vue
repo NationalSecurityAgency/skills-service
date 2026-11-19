@@ -49,6 +49,9 @@ if (isSummaryOnly) {
   options.isSummaryOnly = true
   log.info(`TestSkillsClient.vue: isSummaryOnly=true`)
 }
+if (route.query.disableChartAnimations === 'true') {
+  options.disableChartAnimations = true
+}
 if (skillsVersionParam) {
   skillsVersion = skillsVersionParam
   log.info(`TestSkillsClient.vue: Using version [${skillsVersion}]`)

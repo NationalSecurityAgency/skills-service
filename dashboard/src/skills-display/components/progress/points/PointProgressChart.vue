@@ -27,6 +27,7 @@ import {useChartSupportColors} from "@/components/metrics/common/UseChartSupport
 import ChartDownloadControls from "@/components/metrics/common/ChartDownloadControls.vue";
 import {useAppConfig} from "@/common-components/stores/UseAppConfig.js";
 import {useSkillsDisplayInfo} from '@/skills-display/UseSkillsDisplayInfo.js'
+import {useChartSnapshotMode} from '@/skills-display/components/test/UseChartSnapshotMode.js'
 
 const appConfig = useAppConfig()
 const pointHistoryState = useSkillsDisplayPointHistoryState()
@@ -36,10 +37,11 @@ const attributes = useSkillsDisplayAttributesState()
 const skillsDisplayInfo = useSkillsDisplayInfo()
 const chartSupportColors = useChartSupportColors()
 const colors = chartSupportColors.getColors()
+const chartSnapshotMode = useChartSnapshotMode()
 
-// Only the local test harness can opt into static charts, before Chart.js creates an instance.
-const disableAnimation = computed(() => skillsDisplayInfo.isLocalTestPath() &&
-    route.query.disablePointHistoryChartAnimation === 'true')
+// Only test harnesses can opt into static charts, before Chart.js creates an instance.
+const disableAnimation = computed(() => chartSnapshotMode.value || (skillsDisplayInfo.isLocalTestPath() &&
+    route.query.disablePointHistoryChartAnimation === 'true'))
 const loading = ref(true)
 const animationEnded = ref(false)
 const chartLoaded = ref(false)
