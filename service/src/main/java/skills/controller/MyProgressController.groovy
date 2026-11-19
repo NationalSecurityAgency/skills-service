@@ -30,6 +30,7 @@ import skills.controller.exceptions.SkillException
 import skills.controller.exceptions.SkillsValidator
 import skills.controller.request.model.AddMyProjectRequest
 import skills.controller.result.model.AvailableProjectResult
+import skills.controller.result.model.ProjectCatalogSearchResult
 import skills.controller.result.model.ProjectNameResult
 import skills.controller.result.model.RequestResult
 import skills.metrics.MetricsService
@@ -92,6 +93,17 @@ class MyProgressController {
 
         String currentUserIdLower = userInfoService.getCurrentUserId().toLowerCase()
         return skillsLoader.getAvailableForMyProjects(currentUserIdLower);
+    }
+
+    @RequestMapping(value = "/availableForMyProjects/search", method = RequestMethod.GET, produces = "application/json")
+    @ResponseBody
+    @CompileStatic
+    @Profile
+    List<ProjectCatalogSearchResult> searchAvailableForMyProjects(@RequestParam(name = "query", required = false, defaultValue = "") String query) {
+        validateRankingAndProgressViewsEnabled()
+
+        String currentUserIdLower = userInfoService.getCurrentUserId().toLowerCase()
+        return skillsLoader.searchAvailableForMyProjects(currentUserIdLower, query)
     }
 
     @PostMapping('/myprojects/{projectId}')
