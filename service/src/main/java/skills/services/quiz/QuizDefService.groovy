@@ -128,6 +128,9 @@ class QuizDefService {
     PublicPropsBasedValidator propsBasedValidator
 
     @Autowired
+    PublicProps publicProps
+
+    @Autowired
     UserAttrsRepo userAttrsRepo
 
     @Autowired
@@ -313,17 +316,58 @@ class QuizDefService {
         return [quizAttributesAsStr: quizAttributesAsStr, attachment: slidesAttachment]
     }
 
-    void copyQuestions(String originalQuizId, String newQuizId) {
+    @Transactional
+    void copyQuestions(String originalQuizId, String newQuizId, List<Integer> questionIdsToCopy = null) {
+        if (questionIdsToCopy != null) {
+            QuizValidator.isTrue(!questionIdsToCopy.isEmpty(), "At least one question id must be provided", originalQuizId)
+        }
         QuizDef originalQuizDef = findQuizDef(originalQuizId)
-        List<QuizQuestionDef> originalQuestions = quizQuestionRepo.findAllByQuizIdIgnoreCase(originalQuizId)
+        QuizDef newQuizDef = findQuizDef(newQuizId)
+
+        // Use stored IDs for subsequent queries, attachment copying, and inserts.
+        originalQuizId = originalQuizDef.quizId
+        newQuizId = newQuizDef.quizId
+
+        List<String> quizIdsToLock = [originalQuizDef.quizId, newQuizDef.quizId].unique().sort()
+        quizIdsToLock.each { String quizId ->
+            lockingService.lockQuizDef(quizId)
+        }
+
+        if(questionIdsToCopy?.size() > 0) {
+            Integer questions = quizQuestionRepo.countByQuizId(newQuizId)
+            Integer totalQuestions = questions + questionIdsToCopy.size()
+            Integer maxQuestions = publicProps.getInt(PublicProps.UiProp.maxQuestionsPerQuiz)
+
+            if(totalQuestions > maxQuestions) {
+                throw new SkillQuizException("Questions would exceed the maximum number of questions [${maxQuestions}] in [${newQuizId}]", ErrorCode.BadParam)
+            }
+        }
+
+        if(originalQuizDef.type !== newQuizDef.type) {
+            throw new SkillQuizException("Can not copy questions between quizzes and surveys - [${originalQuizId}], [${newQuizId}]", ErrorCode.BadParam)
+        }
+        CopyValidationRes copyValidation = validateCopyQuestionsToAnotherQuiz(originalQuizDef.quizId, newQuizDef.quizId, questionIdsToCopy?.size())
+        if (!copyValidation.isAllowed) {
+            throw new SkillQuizException(copyValidation.validationErrors.join(' '), newQuizDef.quizId, ErrorCode.AccessDenied)
+        }
+
+        List<QuizQuestionDef> originalQuestions
+        if(questionIdsToCopy != null) {
+            originalQuestions = quizQuestionRepo.findAllByQuizIdAndIds(originalQuizId, questionIdsToCopy)
+            Set<Integer> foundQuestionIds = originalQuestions.collect { it.id }.toSet()
+            List<Integer> missingQuestionIds = questionIdsToCopy.findAll { !foundQuestionIds.contains(it) }
+            QuizValidator.isTrue(missingQuestionIds.isEmpty(), "Question ids ${missingQuestionIds} do not belong to quiz [${originalQuizDef.quizId}]", originalQuizDef.quizId)
+        } else {
+            originalQuestions = quizQuestionRepo.findAllByQuizIdIgnoreCase(originalQuizId)
+        }
 
         // validate questions
-        validateQuestions(originalQuestions, originalQuizDef.quizId)
+        validateQuestions(originalQuestions, newQuizDef.quizId)
 
-        QuizDef newQuizDef = findQuizDef(newQuizId)
-        lockingService.lockQuizDef(newQuizDef.quizId)
+        Integer nextDisplayOrder = quizQuestionRepo.getMaxQuestionDisplayOrderByQuizId(newQuizDef.quizId)
+        nextDisplayOrder = nextDisplayOrder != null ? nextDisplayOrder + 1 : 0
 
-        originalQuestions.each { QuizQuestionDef fromQuestionDef ->
+        originalQuestions.sort { it.displayOrder }.each { QuizQuestionDef fromQuestionDef ->
             QuestionAttrs questionAttrs = copyQuestionAttrs(fromQuestionDef, newQuizDef)
 
             String updatedQuestion = attachmentService.copyAttachmentsForIncomingDescription(fromQuestionDef.question, null, null, newQuizId)
@@ -332,7 +376,7 @@ class QuizDefService {
                     question: updatedQuestion,
                     answerHint: fromQuestionDef.answerHint,
                     type: fromQuestionDef.type,
-                    displayOrder: fromQuestionDef.displayOrder,
+                    displayOrder: nextDisplayOrder++,
                     attributes: questionAttrs ? mapper.writeValueAsString(questionAttrs) : null
             ))
 
@@ -360,36 +404,42 @@ class QuizDefService {
             SkillVideoAttrs videoAttrs = questionAttrs?.videoConf
             String transcript = videoAttrs?.transcript
             if (StringUtils.isNotBlank(transcript)) {
-                CustomValidationResult validationResult = customValidator.validateDescription(new CustomValidator.ValidateDescReq(description: transcript, quizId: fromQuestionDef.quizId))
+                CustomValidationResult validationResult = customValidator.validateDescription(new CustomValidator.ValidateDescReq(description: transcript, quizId: newQuizDef.quizId))
                 if (!validationResult.valid) {
                     String msg = "Video transcript validation failed for questionId=[${fromQuestionDef.id}], fullMessage=[${validationResult.msg}]"
-                    throw new SkillQuizException(msg, null, fromQuestionDef.quizId, fromQuestionDef.id, ErrorCode.ParagraphValidationFailed)
+                    throw new SkillQuizException(msg, null, newQuizDef.quizId, fromQuestionDef.id, ErrorCode.ParagraphValidationFailed)
                 }
             }
 
             String internallyHostedAttachmentUuid = videoAttrs?.internallyHostedAttachmentUuid
             if (internallyHostedAttachmentUuid) {
                 Attachment attachment = attachmentService.getAttachment(internallyHostedAttachmentUuid)
-                if (attachment) {
-                    Attachment newAttachment = attachmentService.copyAttachmentWithNewUuid(attachment, null, newQuizDef.quizId)
-                    videoAttrs.videoUrl = "/api/download/${newAttachment.uuid}".toString()
-                    videoAttrs.internallyHostedAttachmentUuid = newAttachment.uuid
-                    questionAttrs.videoConf = videoAttrs
+                if (!attachment) {
+                    String msg = "Cannot copy question [${fromQuestionDef.id}] from quiz " +
+                            "[${fromQuestionDef.quizId}]: video attachment " +
+                            "[${internallyHostedAttachmentUuid}] does not exist"
+                    throw new SkillQuizException(msg, null, newQuizDef.quizId,
+                            fromQuestionDef.id, ErrorCode.BadParam)
                 }
+
+                Attachment newAttachment = attachmentService.copyAttachmentWithNewUuid(attachment, null, newQuizDef.quizId)
+                videoAttrs.videoUrl = "/api/download/${newAttachment.uuid}".toString()
+                videoAttrs.internallyHostedAttachmentUuid = newAttachment.uuid
+                questionAttrs.videoConf = videoAttrs
             }
         }
         return questionAttrs
     }
 
-    private validateQuestions(List<QuizQuestionDef> questionDefList, String originalQuizId) {
+    private validateQuestions(List<QuizQuestionDef> questionDefList, String destinationQuizId) {
         questionDefList.forEach { QuizQuestionDef question ->
-            CustomValidationResult validationResult = customValidator.validateDescription(new CustomValidator.ValidateDescReq(description: question.question, quizId: originalQuizId))
+            CustomValidationResult validationResult = customValidator.validateDescription(new CustomValidator.ValidateDescReq(description: question.question, quizId: destinationQuizId))
             if (validationResult.valid && StringUtils.isNotBlank(question.answerHint)) {
-                validationResult = customValidator.validateDescription(new CustomValidator.ValidateDescReq(description: question.answerHint, quizId: originalQuizId))
+                validationResult = customValidator.validateDescription(new CustomValidator.ValidateDescReq(description: question.answerHint, quizId: destinationQuizId))
             }
             if (!validationResult.valid) {
                 String msg = "Validation failed for questionId=[${question.id}], fullMessage=[${validationResult.msg}]"
-                throw new SkillQuizException(msg, null, originalQuizId, question.id, ErrorCode.ParagraphValidationFailed)
+                throw new SkillQuizException(msg, null, destinationQuizId, question.id, ErrorCode.ParagraphValidationFailed)
             }
         }
     }
@@ -572,9 +622,8 @@ class QuizDefService {
     @Transactional()
     QuizQuestionDefResult saveQuestion(String quizId, QuizQuestionDefRequest questionDefRequest, Integer existingQuestionId = null) {
         QuizDef quizDef = findQuizDef(quizId)
-        validate(quizDef, questionDefRequest)
-
         lockingService.lockQuizDef(quizDef.quizId)
+        validate(quizDef, questionDefRequest)
 
         QuizQuestionDef savedQuestion
         List<QuizAnswerDef> savedAnswers
@@ -1312,6 +1361,52 @@ class QuizDefService {
             throw new SkillQuizException("Failed to find quiz id.", quizId, ErrorCode.BadParam)
         }
         return updatedDef
+    }
+
+    @Transactional
+    CopyValidationRes validateCopyQuestionsToAnotherQuiz(String fromQuiz, String toQuiz, Integer numberOfQuestions) {
+        QuizDef sourceQuiz = findQuizDef(fromQuiz)
+        QuizDef destinationQuiz = findQuizDef(toQuiz)
+        fromQuiz = sourceQuiz.quizId
+        toQuiz = destinationQuiz.quizId
+
+        if (numberOfQuestions != null) {
+            QuizValidator.isTrue(numberOfQuestions > 0, "numberOfQuestions must be greater than 0", fromQuiz)
+        }
+
+        if (sourceQuiz.type !== destinationQuiz.type) {
+            String errorMessage = "Can not copy questions between quizzes and surveys - [${fromQuiz}], [${toQuiz}]"
+            return new CopyValidationRes(isAllowed: false, validationErrors: [errorMessage])
+        }
+
+        if(userCommunityService.isUserCommunityOnlyQuiz(fromQuiz) && !userCommunityService.isUserCommunityOnlyQuiz(toQuiz)) {
+            String fromCommunity = userCommunityService.getQuizUserCommunity(fromQuiz)
+            String toCommunity = userCommunityService.getQuizUserCommunity(toQuiz)
+
+            String errorMessage = "Can not copy questions from ${fromCommunity} quizzes to ${toCommunity} quizzes."
+            return new CopyValidationRes(isAllowed: false, validationErrors: [errorMessage])
+        }
+
+        // Internal whole-quiz copies omit the count; validate their actual size.
+        Integer questionsToCopy = numberOfQuestions != null ? numberOfQuestions : quizQuestionRepo.countByQuizId(fromQuiz)
+        Integer questions = quizQuestionRepo.countByQuizId(toQuiz)
+        long totalQuestions = questions.longValue() + questionsToCopy.longValue()
+        Integer maxQuestions = publicProps.getInt(PublicProps.UiProp.maxQuestionsPerQuiz)
+
+        if (totalQuestions > maxQuestions) {
+            String quizName = destinationQuiz.name
+            String quizType = destinationQuiz.type.toString()
+            String errorMessage = "A ${quizType} can not have more than ${maxQuestions} questions. ${quizName} currently has ${questions} questions"
+            if (questions == maxQuestions) {
+                errorMessage += " and can not accept additional questions."
+            } else {
+                errorMessage += " and can not accept all the selected questions. Please select fewer questions to copy."
+            }
+            return new CopyValidationRes(isAllowed: false, validationErrors: [errorMessage])
+        }
+
+        CopyValidationRes res = new CopyValidationRes(isAllowed: true, validationErrors: [])
+        return res;
     }
 
     private void validate(QuizDef quizDef, QuizQuestionDefRequest questionDefRequest) {

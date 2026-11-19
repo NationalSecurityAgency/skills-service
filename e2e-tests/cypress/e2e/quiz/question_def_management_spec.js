@@ -19,6 +19,14 @@ import utcPlugin from 'dayjs/plugin/utc';
 dayjs.extend(utcPlugin);
 
 describe('Quiz Question CRUD Tests', () => {
+    let releaseValidationResponse;
+
+    afterEach(() => {
+        if (releaseValidationResponse) {
+            releaseValidationResponse();
+            releaseValidationResponse = undefined;
+        }
+    });
 
     beforeEach(() => {
         Cypress.Commands.add('validateDisplayAnswer', (qNum, aNum, selected, isSingleChoice) => {
@@ -1597,4 +1605,139 @@ describe('Quiz Question CRUD Tests', () => {
             expect(storage).to.be.null;
         })
     });
+
+    it('keeps individual and bulk question selections in sync', function () {
+        cy.createQuizDef(1);
+        cy.createQuizQuestionDef(1, 1);
+        cy.createQuizQuestionDef(1, 2);
+        cy.visit('/administrator/quizzes/quiz1');
+
+        cy.get('[data-cy="questionDisplayCard-2"]').should('be.visible');
+        cy.get('[data-cy="toggleSelectionMode"]').click();
+        cy.get('[data-cy="questionActionsBtn"]').should('be.disabled');
+
+        cy.get('[data-cy="questionDisplayCard-1"] [data-cy="selectSkillCheckbox"]').click();
+        cy.get('[data-cy="questionDisplayCard-1"] [data-cy="selectSkillCheckbox"] input').should('be.checked');
+        cy.get('[data-cy="questionActionsBtn"]').should('be.enabled');
+
+        cy.get('[data-cy="selectAllQuestionsBtn"]').click();
+        cy.get('[data-cy="questionDisplayCard-1"] [data-cy="selectSkillCheckbox"] input').should('be.checked');
+        cy.get('[data-cy="questionDisplayCard-2"] [data-cy="selectSkillCheckbox"] input').should('be.checked');
+
+        cy.get('[data-cy="questionDisplayCard-1"] [data-cy="selectSkillCheckbox"]').click();
+        cy.get('[data-cy="questionDisplayCard-1"] [data-cy="selectSkillCheckbox"] input').should('not.be.checked');
+        cy.get('[data-cy="questionActionsBtn"]').should('be.enabled');
+
+        cy.get('[data-cy="deselectAllQuestionsBtn"]').click();
+        cy.get('[data-cy="questionDisplayCard-1"] [data-cy="selectSkillCheckbox"] input').should('not.be.checked');
+        cy.get('[data-cy="questionDisplayCard-2"] [data-cy="selectSkillCheckbox"] input').should('not.be.checked');
+        cy.get('[data-cy="questionActionsBtn"]').should('be.disabled');
+
+        cy.get('[data-cy="questionDisplayCard-1"] [data-cy="selectSkillCheckbox"]').click();
+        cy.get('[data-cy="questionActionsBtn"]').should('be.enabled');
+        cy.get('[data-cy="toggleSelectionMode"]').click();
+        cy.get('[data-cy="questionActionsBtn"]').should('not.exist');
+        cy.get('[data-cy="toggleSelectionMode"]').click();
+        cy.get('[data-cy="questionDisplayCard-1"] [data-cy="selectSkillCheckbox"] input').should('not.be.checked');
+        cy.get('[data-cy="questionDisplayCard-2"] [data-cy="selectSkillCheckbox"] input').should('not.be.checked');
+        cy.get('[data-cy="questionActionsBtn"]').should('be.disabled');
+    });
+
+    it('recovers when bulk-copy destinations fail to load', function () {
+        cy.createQuizDef(1);
+        cy.createQuizDef(2);
+        cy.createQuizQuestionDef(1, 1);
+        cy.visit('/administrator/quizzes/quiz1');
+        cy.get('[data-cy="questionDisplayCard-1"]').should('be.visible');
+
+        let destinationRequests = 0;
+        cy.intercept('GET', '/app/quiz-definitions', (req) => {
+            destinationRequests += 1;
+            if (destinationRequests === 1) {
+                req.reply({ statusCode: 503, body: { explanation: 'Destinations temporarily unavailable' } });
+            } else {
+                req.continue();
+            }
+        });
+
+        cy.get('[data-cy="toggleSelectionMode"]').click();
+        cy.get('[data-cy="questionDisplayCard-1"] [data-cy="selectSkillCheckbox"]').click();
+        cy.get('[data-cy="questionActionsBtn"]').click();
+        cy.contains('.p-menu-item-link', 'Copy to Another Quiz').click();
+
+        cy.get('[data-cy="quizDestinationsLoadError"]').should('contain.text', 'Destinations temporarily unavailable');
+        cy.get('[data-cy="saveDialogBtn"]').should('be.disabled');
+        cy.get('[data-cy="quizzes-to-copy"]').should('not.exist');
+        cy.get('[data-cy="retryQuizDestinationsBtn"]').click();
+        cy.get('[data-cy="quizDestinationsLoadError"]').should('not.exist');
+        cy.get('[data-cy="quizzes-to-copy"]').should('be.visible');
+        cy.get('[data-cy="quizzes-to-copy"]').click();
+        cy.contains('.p-select-option', 'This is quiz 2').click();
+        cy.get('[data-cy="saveDialogBtn"]').should('be.enabled');
+        cy.get('[data-cy="closeDialogBtn"]').click();
+        cy.get('[data-cy="quizzes-to-copy"]').should('not.exist');
+    });
+
+    [true, false].forEach((oldApproval) => {
+        it(`ignores an old ${oldApproval ? 'approval' : 'denial'} after validating the current destination`, function () {
+            cy.createQuizDef(1);
+            cy.createQuizDef(2);
+            cy.createQuizDef(3);
+            cy.createQuizQuestionDef(1, 1);
+            cy.visit('/administrator/quizzes/quiz1');
+            cy.get('[data-cy="questionDisplayCard-1"]').should('be.visible');
+            cy.get('[data-cy="toggleSelectionMode"]').click();
+            cy.get('[data-cy="questionDisplayCard-1"] [data-cy="selectSkillCheckbox"]').click();
+            cy.get('[data-cy="questionActionsBtn"]').click();
+            cy.contains('.p-menu-item-link', 'Copy to Another Quiz').click();
+            cy.get('[data-cy="quizzes-to-copy"]').should('be.visible');
+
+            let oldRequestStarted = false;
+            const oldResponseReady = new Cypress.Promise((resolve) => { releaseValidationResponse = resolve; });
+            cy.intercept('POST', '/admin/quiz-definitions/quiz1/questions/validateCopy', (req) => {
+                if (req.body.destinationQuizId === 'quiz2') {
+                    req.alias = 'oldDestinationValidation';
+                    oldRequestStarted = true;
+                    return oldResponseReady.then(() => req.reply({
+                        isAllowed: oldApproval,
+                        validationErrors: oldApproval ? [] : ['Old destination is rejected']
+                    }));
+                }
+                req.alias = 'currentDestinationValidation';
+                req.reply({
+                    isAllowed: !oldApproval,
+                    validationErrors: oldApproval ? ['Current destination is rejected'] : []
+                });
+            });
+
+            cy.get('[data-cy="quizzes-to-copy"]').click();
+            cy.contains('.p-select-option', 'This is quiz 2').click();
+            cy.get('[data-cy="saveDialogBtn"]').should('be.disabled');
+            cy.wrap(null).should(() => { expect(oldRequestStarted).to.equal(true); });
+            cy.get('[data-cy="quizzes-to-copy"]').click();
+            cy.contains('.p-select-option', 'This is quiz 3').click();
+            cy.wait('@currentDestinationValidation');
+            cy.get('[data-cy="saveDialogBtn"]').should(oldApproval ? 'be.disabled' : 'be.enabled');
+            if (oldApproval) {
+                cy.get('[data-cy="validationFailedMsg"]').should('contain.text', 'Current destination is rejected');
+            } else {
+                cy.get('[data-cy="validationFailedMsg"]').should('not.exist');
+            }
+
+            cy.then(() => {
+                releaseValidationResponse();
+                releaseValidationResponse = undefined;
+            });
+            cy.wait('@oldDestinationValidation');
+            cy.get('[data-cy="quizzes-to-copy"]').should('contain.text', 'This is quiz 3');
+            cy.get('[data-cy="saveDialogBtn"]').should(oldApproval ? 'be.disabled' : 'be.enabled');
+            if (oldApproval) {
+                cy.get('[data-cy="validationFailedMsg"]').should('contain.text', 'Current destination is rejected');
+            } else {
+                cy.get('[data-cy="validationFailedMsg"]').should('not.exist');
+            }
+            cy.get('[data-cy="closeDialogBtn"]').click();
+        });
+    });
+
 });

@@ -28,6 +28,7 @@ import skills.auth.UserInfoService
 import skills.controller.exceptions.AttachmentValidator
 import skills.controller.exceptions.SkillException
 import skills.controller.exceptions.SkillsValidator
+import skills.services.LockingService
 import skills.services.attributes.SkillAttributeService
 import skills.services.attributes.SkillVideoAttrs
 import skills.services.quiz.QuizDefService
@@ -60,6 +61,9 @@ class QuizVideoService {
     QuizDefService quizDefService
 
     @Autowired
+    LockingService lockingService
+
+    @Autowired
     QuizValidatorService quizValidatorService
 
     @Autowired
@@ -79,7 +83,10 @@ class QuizVideoService {
     @Transactional
     SkillVideoAttrs saveVideo(String quizId, Integer questionId, Boolean isAlreadyHosted,
                               MultipartFile file, String videoUrl, String captions, String transcript,
-                              Double width, Double height, Boolean allowDownloads) {
+                               Double width, Double height, Boolean allowDownloads) {
+        quizId = quizDefService.findQuizDef(quizId).quizId
+        lockingService.lockQuizDef(quizId)
+
         quizValidatorService.validateQuestion(quizId, questionId)
         SkillVideoAttrs existingVideoAttributes = quizDefService.getVideoAttributesForQuestion(quizId, questionId)
         final boolean isEdit = existingVideoAttributes?.videoUrl
@@ -120,6 +127,9 @@ class QuizVideoService {
 
     @Transactional
     boolean deleteVideoAttrs(String quizId, Integer questionId) {
+        quizId = quizDefService.findQuizDef(quizId).quizId
+        lockingService.lockQuizDef(quizId)
+
         SkillVideoAttrs existingVideoAttributes = quizDefService.getVideoAttributesForQuestion(quizId, questionId)
 
         if (existingVideoAttributes?.internallyHostedAttachmentUuid) {

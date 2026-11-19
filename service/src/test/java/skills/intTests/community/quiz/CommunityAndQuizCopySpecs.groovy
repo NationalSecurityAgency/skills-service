@@ -26,6 +26,7 @@ import skills.intTests.utils.SkillsService
 import skills.quizLoading.QuizSettings
 import skills.storage.model.Attachment
 import skills.storage.model.QuizSetting
+import skills.storage.repos.QuizQuestionDefRepo
 
 import java.nio.file.Files
 
@@ -33,6 +34,109 @@ class CommunityAndQuizCopySpecs extends CopyIntSpec {
 
     @Autowired
     JdbcTemplate jdbcTemplate
+
+    @Autowired
+    QuizQuestionDefRepo quizQuestionRepo
+
+    def "copying selected questions cannot downgrade their user community"() {
+        SkillsService pristineDragonsUser = createService(getRandomUsers(1)[0])
+        SkillsService rootUser = createRootSkillService()
+        rootUser.saveUserTag(pristineDragonsUser.userName, 'dragons', ['DivineDragon'])
+
+        def protectedQuiz = QuizDefFactory.createQuiz(1)
+        protectedQuiz.enableProtectedUserCommunity = true
+        pristineDragonsUser.createQuizDef(protectedQuiz)
+        def unrestrictedQuiz = QuizDefFactory.createQuiz(2)
+        pristineDragonsUser.createQuizDef(unrestrictedQuiz)
+        def protectedDestination = QuizDefFactory.createQuiz(3)
+        protectedDestination.enableProtectedUserCommunity = true
+        pristineDragonsUser.createQuizDef(protectedDestination)
+        def sourceQuestion = pristineDragonsUser.createQuizQuestionDef(QuizDefFactory.createChoiceQuestion(1, 1, 2)).body
+
+        when: 'a direct copy request targets an unrestricted quiz'
+        pristineDragonsUser.copyQuizQuestion(protectedQuiz.quizId, unrestrictedQuiz.quizId, [sourceQuestion.id])
+
+        then:
+        SkillsClientException denied = thrown()
+        denied.message.contains('errorCode:AccessDenied')
+        denied.message.contains('Can not copy questions')
+        pristineDragonsUser.getQuizQuestionDefs(unrestrictedQuiz.quizId).questions.empty
+
+        when: 'the destination is also community-protected'
+        def copied = pristineDragonsUser.copyQuizQuestion(protectedQuiz.quizId, protectedDestination.quizId, [sourceQuestion.id]) //.wsHelper.adminPost("/quiz-definitions/${protectedQuiz.quizId}/questions/copy/${protectedDestination.quizId}".toString(), [sourceQuestion.id])
+
+        then:
+        copied.body.success
+        pristineDragonsUser.getQuizQuestionDefs(protectedDestination.quizId).questions.size() == 1
+    }
+
+    def "copying #copyType validates #field against the destination community rules"() {
+        SkillsService communityAdmin = createService(getRandomUsers(1)[0])
+        SkillsService rootUser = createRootSkillService()
+        rootUser.saveUserTag(communityAdmin.userName, 'dragons', ['DivineDragon'])
+
+        Map sourceQuiz = QuizDefFactory.createQuiz(1)
+        communityAdmin.createQuizDef(sourceQuiz)
+        Map validQuestion = communityAdmin.createQuizQuestionDef(QuizDefFactory.createChoiceQuestion(1, 1, 2)).body
+        Map questionRequest = QuizDefFactory.createChoiceQuestion(1, 2, 2)
+        String invalidContent = 'divinedragon is not allowed in the protected destination'
+        if (field != 'transcript') {
+            questionRequest[field] = invalidContent
+        }
+        Map invalidQuestion = communityAdmin.createQuizQuestionDef(questionRequest).body
+        if (field == 'transcript') {
+            communityAdmin.saveSkillVideoAttributes(sourceQuiz.quizId, invalidQuestion.id.toString(), [
+                    videoUrl: 'https://example.org/video.mp4', transcript: invalidContent,
+            ], true)
+        }
+
+        Map destinationQuiz = QuizDefFactory.createQuiz(2)
+        destinationQuiz.enableProtectedUserCommunity = true
+        Map existingQuestion
+        if (copyType == 'selected questions') {
+            communityAdmin.createQuizDef(destinationQuiz)
+            existingQuestion = communityAdmin.createQuizQuestionDef(QuizDefFactory.createChoiceQuestion(2, 1, 2)).body
+        }
+
+        when:
+        if (copyType == 'selected questions') {
+            communityAdmin.copyQuizQuestion(sourceQuiz.quizId, destinationQuiz.quizId, [validQuestion.id, invalidQuestion.id])
+        } else {
+            communityAdmin.copyQuiz(sourceQuiz.quizId, destinationQuiz)
+        }
+
+        then:
+        SkillsClientException exception = thrown()
+        exception.message.contains('errorCode:ParagraphValidationFailed')
+        exception.message.contains('May not contain divinedragon word')
+        exception.message.contains("questionId:${invalidQuestion.id}")
+        exception.message.contains("quizId:${destinationQuiz.quizId}")
+        if (copyType == 'selected questions') {
+            List destinationQuestions = communityAdmin.getQuizQuestionDefs(destinationQuiz.quizId).questions
+            assert destinationQuestions.size() == 1
+            assert destinationQuestions[0].id == existingQuestion.id
+            assert destinationQuestions[0].question == 'This is questions #1'
+        } else {
+            assert !quizDefRepo.findByQuizIdIgnoreCase(destinationQuiz.quizId)
+            assert quizQuestionRepo.countByQuizId(destinationQuiz.quizId) == 0
+        }
+        List sourceQuestions = communityAdmin.getQuizQuestionDefs(sourceQuiz.quizId).questions
+        sourceQuestions.size() == 2
+        if (field == 'transcript') {
+            assert communityAdmin.getVideoTranscript(sourceQuiz.quizId, invalidQuestion.id.toString(), true) == invalidContent
+        } else {
+            assert sourceQuestions.find { it.id == invalidQuestion.id }[field] == invalidContent
+        }
+
+        where:
+        copyType             | field
+        'selected questions' | 'question'
+        'selected questions' | 'answerHint'
+        'selected questions' | 'transcript'
+        'whole quiz'         | 'question'
+        'whole quiz'         | 'answerHint'
+        'whole quiz'         | 'transcript'
+    }
 
     def "non-UC user cannot copy non-uc quiz to uc"() {
         def q1 = QuizDefFactory.createQuiz(1)

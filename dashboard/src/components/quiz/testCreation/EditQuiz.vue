@@ -205,7 +205,7 @@ const saveQuiz = (values) => {
       if (isParagraphValidationFailed) {
         const explanation = err.response.data.explanation
         const isVideoTranscript = explanation.includes('Video transcript validation failed')
-        const quizId = err.response.data.quizId
+        const quizId = props.quiz.quizId
         const questionId = err.response.data.questionId
         return QuizService.getQuizQuestionDef(quizId, questionId).then((questionDef) => {
           return {
