@@ -22,7 +22,7 @@ import {
   createCompactMetricsProject,
   createCompactViewProject,
   projectPath,
-} from '../../support/compact-view';
+} from '../../../support/compact-view';
 
 describe('Compact view progress metrics', () => {
   beforeEach(() => {

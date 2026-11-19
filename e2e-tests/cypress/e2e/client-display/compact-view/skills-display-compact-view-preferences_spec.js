@@ -21,7 +21,7 @@ import {
   projectPath,
   setProjectDefault,
   viewButton,
-} from '../../support/compact-view';
+} from '../../../support/compact-view';
 
 describe('Compact view browser preferences', () => {
   beforeEach(() => {

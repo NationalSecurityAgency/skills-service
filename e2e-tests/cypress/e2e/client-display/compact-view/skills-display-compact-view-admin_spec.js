@@ -20,7 +20,7 @@ import {
   projectPath,
   setProjectDefault,
   viewButton,
-} from '../../support/compact-view';
+} from '../../../support/compact-view';
 
 const defaultSwitch = '[data-cy="compactViewDefaultSwitch"] [data-pc-section="input"]';
 const previewPath = (user = Cypress.env('proxyUser')) => `/administrator/projects/proj1/users/${encodeURIComponent(user)}`;

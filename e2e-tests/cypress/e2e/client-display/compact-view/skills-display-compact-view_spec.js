@@ -23,7 +23,7 @@ import {
   createCompactViewProject,
   projectPath,
   viewButton,
-} from '../../support/compact-view';
+} from '../../../support/compact-view';
 
 describe('Compact user progress display', () => {
   beforeEach(() => {
