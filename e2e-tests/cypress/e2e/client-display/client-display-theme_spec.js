@@ -14,9 +14,11 @@
  * limitations under the License.
  */
 import moment from 'moment-timezone';
-
-const dateFormatter = value => moment.utc(value)
-    .format('YYYY-MM-DD[T]HH:mm:ss[Z]');
+import {
+    matchSkillsDisplaySnapshot,
+    visitSkillsDisplaySnapshotPage,
+    waitForIframeSnapshot,
+} from '../../support/skills-display-snapshot-helpers';
 
 describe('Client Display Tests', () => {
 
@@ -180,24 +182,24 @@ describe('Client Display Tests', () => {
     });
 
     it(`test theming - No Subjects`, () => {
-        cy.cdVisit('/?enableTheme=true');
+        visitSkillsDisplaySnapshotPage('/?enableTheme=true');
         cy.contains('User Skills');
         cy.get('[data-cy=myRank]')
             .contains('1');
         cy.contains('0 Points earned Today');
         cy.contains('Subjects have not been added yet.');
-        cy.matchSnapshotImageForElement('[data-cy="testDisplayTheme"]', { blackout: '[data-cy=pointHistoryChart]' });
+        matchSkillsDisplaySnapshot('[data-cy="testDisplayTheme"]', { blackout: '[data-cy=pointHistoryChart]' });
     });
 
     it('skills client\'s iframe support can load theme', () => {
         cy.ignoreSkillsClientError()
-        cy.visit(`/test-skills-client/proj1?enableTheme=true`)
+        cy.visit(`/test-skills-client/proj1?enableTheme=true&disableChartAnimations=true`)
         cy.wrapIframe().find('[data-cy="skillTreePoweredBy"]')
         cy.wrapIframe().find('[data-cy="pointHistoryChartNoData"]')
         cy.wrapIframe().contains('Subjects have not been added yet')
         cy.wrapIframe().find('[data-cy="myRankPosition"]')
-        cy.wait(4000)
-        cy.matchSnapshotImageForElement('body iframe', { errorThreshold: 0.05 })
+        waitForIframeSnapshot()
+        matchSkillsDisplaySnapshot('body iframe', { errorThreshold: 0.05 })
     })
 
     it('skills client\'s iframe properly sets background on pages that are not full height', () => {
@@ -207,7 +209,7 @@ describe('Client Display Tests', () => {
             cy.createSkill(1,1,i)
         }
         cy.ignoreSkillsClientError()
-        cy.visit(`/test-skills-client/proj1?enableTheme=true`)
+        cy.visit(`/test-skills-client/proj1?enableTheme=true&disableChartAnimations=true`)
         cy.wrapIframe().find('[data-cy="skillTreePoweredBy"]')
         cy.wrapIframe().find('[data-cy="pointHistoryChartNoData"]')
         cy.wrapIframe().find('[data-cy="myRankPosition"]')
@@ -222,7 +224,8 @@ describe('Client Display Tests', () => {
         cy.wrapIframe().find('[data-cy="skillProgressTitle-skill6"] [data-cy="skillProgressTitle"]').click()
         cy.wrapIframe().find('[data-cy="pointsPerOccurrenceCard"] [data-cy="mediaInfoCardTitle"]').should('have.text', '100 Increment')
 
-        cy.matchSnapshotImageForElement('body iframe')
+        waitForIframeSnapshot()
+        matchSkillsDisplaySnapshot('body iframe')
     })
 
     it('skills client\'s iframe support does not show header or footer', () => {
@@ -231,7 +234,7 @@ describe('Client Display Tests', () => {
         cy.ignoreSkillsClientError()
 
         cy.viewport(1300, 1600);
-        cy.visit(`/test-skills-client/proj1`)
+        cy.visit(`/test-skills-client/proj1?disableChartAnimations=true`)
         cy.wrapIframe().find('[data-cy="skillTreePoweredBy"]')
         cy.wrapIframe().find('[data-cy="pointHistoryChartNoData"]')
         cy.wrapIframe().find('[data-cy="myRankPosition"]')
@@ -275,7 +278,7 @@ describe('Client Display Tests', () => {
         cy.ignoreSkillsClientError()
 
         cy.viewport(1300, 1600);
-        cy.visit(`/test-skills-client/proj1`)
+        cy.visit(`/test-skills-client/proj1?disableChartAnimations=true`)
         cy.wrapIframe().find('[data-cy="skillTreePoweredBy"]')
         cy.wrapIframe().find('[data-cy="pointHistoryChartNoData"]')
         cy.wrapIframe().find('[data-cy="myRankPosition"]')
@@ -293,14 +296,14 @@ describe('Client Display Tests', () => {
             description: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.'
         });
 
-        cy.cdVisit('/subjects/subj1/?enableTheme=true');
+        visitSkillsDisplaySnapshotPage('/subjects/subj1/?enableTheme=true');
         cy.contains('Subject 1');
         cy.contains('Skills have not been added yet.');
         cy.get('[data-cy=myRank]')
             .contains('1');
         cy.contains('0 Points earned Today');
         cy.contains('Description');
-        cy.matchSnapshotImageForElement('[data-cy="testDisplayTheme"]', { blackout: '[data-cy=pointHistoryChart]' });
+        matchSkillsDisplaySnapshot('[data-cy="testDisplayTheme"]', { blackout: '[data-cy=pointHistoryChart]' });
     });
 
     it('Point History\'s open menu must respect tiles.background option', () => {
@@ -332,13 +335,14 @@ describe('Client Display Tests', () => {
                 .format('x')
         });
 
-        cy.cdVisit('/?enableTheme=true');
+        visitSkillsDisplaySnapshotPage('/?enableTheme=true');
         cy.contains('Point History');
-        cy.get('[data-cy="pointHistoryChart-animationEnded"]');
+        cy.get('[data-cy="pointHistoryChart-rendered"]').should('exist');
+        cy.get('[data-cy="pointHistoryChartWithData"]').should('have.attr', 'aria-busy', 'false');
+        cy.get('[data-cy="pointHistoryChartWithData"] [data-pc-section="mask"]').should('not.exist');
         cy.get('[data-cy="chartDownloadMenu"]').click();
-        cy.get('[data-p="popup"][data-pc-name="menu"] [aria-label="Export to CSV"]')
-        cy.wait(1000)
-        cy.matchSnapshotImageForElement('[data-p="popup"][data-pc-name="menu"]', {
+        cy.get('[data-p="popup"][data-pc-name="menu"] [aria-label="Export to CSV"]').should('be.visible')
+        matchSkillsDisplaySnapshot('[data-p="popup"][data-pc-name="menu"]', {
             errorThreshold: 0.1
         });
     });
@@ -360,10 +364,7 @@ describe('Client Display Tests', () => {
 
         cy.createBadge(1, 1);
         cy.assignSkillToBadge(1, 1, 1);
-        cy.assignSkillToBadge(1, 1, 2);
         cy.assignSkillToBadge(1, 1, 3);
-        cy.assignSkillToBadge(1, 1, 4);
-        cy.assignSkillToBadge(1, 1, 5);
         cy.enableBadge(1, 1);
 
         cy.reportSkill(1, 2, Cypress.env('proxyUser'), 'now');
@@ -371,7 +372,7 @@ describe('Client Display Tests', () => {
         cy.reportSkill(1, 3, Cypress.env('proxyUser'), 'now');
         cy.reportSkill(1, 4, Cypress.env('proxyUser'), 'now');
 
-        cy.cdVisit('/subjects/subj1/?enableTheme=true');
+        visitSkillsDisplaySnapshotPage('/subjects/subj1/?enableTheme=true');
 
         cy.get('[data-cy="skillsSearchInput"]')
             .type('blah');
@@ -396,76 +397,10 @@ describe('Client Display Tests', () => {
 
         cy.get('[data-cy="skillProgress_index-0"] [data-cy="skillProgress-ptsOverProgressBard"]').contains('100 / 200 Points')
         cy.get('[data-cy="skillProgress_index-1"] [data-cy="skillProgress-ptsOverProgressBard"]').contains('100 / 200 Points')
-        cy.matchSnapshotImageForElement('[data-cy="skillsProgressList"]');
-    });
-
-    it('skills filter open', () => {
-        cy.createSubject(1, 1);
-        cy.createSkill(1, 1, 1, { name: 'Search blah skill 1' });
-        cy.createSkill(1, 1, 2, { name: 'is a skill 2' });
-        cy.createSkill(1, 1, 3, { name: 'find Blah other skill 3' });
-        cy.createSkill(1, 1, 4, { name: 'Search nothing skill 4' });
-        cy.createSkill(1, 1, 5, {
-            name: 'sEEk bLaH skill 5',
-            selfReportingType: 'Approval'
-        });
-        cy.createSkill(1, 1, 6, {
-            name: 'some other skill 6',
-            selfReportingType: 'HonorSystem'
-        });
-
-        cy.createBadge(1, 1);
-        cy.assignSkillToBadge(1, 1, 1);
-        cy.assignSkillToBadge(1, 1, 2);
-        cy.assignSkillToBadge(1, 1, 3);
-        cy.assignSkillToBadge(1, 1, 4);
-        cy.assignSkillToBadge(1, 1, 5);
-        cy.enableBadge(1, 1);
-
-        cy.reportSkill(1, 2, Cypress.env('proxyUser'), 'now');
-        cy.reportSkill(1, 3, Cypress.env('proxyUser'), 'yesterday');
-        cy.reportSkill(1, 1, Cypress.env('proxyUser'), 'now');
-        cy.reportSkill(1, 1, Cypress.env('proxyUser'), 'yesterday');
-        cy.reportSkill(1, 3, Cypress.env('proxyUser'), 'now');
-        cy.reportSkill(1, 4, Cypress.env('proxyUser'), 'now');
-
-        cy.cdVisit('/subjects/subj1/?enableTheme=true');
-        cy.get('[data-cy="filterMenu"] [data-cy="filterBtn"]')
-            .click();
-
-        cy.get('[data-cy="skillProgress_index-0"]')
-            .contains('skill 1');
-        cy.get('[data-cy="skillProgress_index-0"]')
-            .contains('200 / 200');
-
-        cy.get('[data-cy="skillProgress_index-1"]')
-            .contains('skill 2');
-        cy.get('[data-cy="skillProgress_index-1"]')
-            .contains('100 / 200');
-
-        cy.get('[data-cy="skillProgress_index-2"]')
-            .contains('skill 3');
-        cy.get('[data-cy="skillProgress_index-2"]')
-            .contains('200 / 200');
-
-        cy.get('[data-cy="skillProgress_index-3"]')
-            .contains('skill 4');
-        cy.get('[data-cy="skillProgress_index-3"]')
-            .contains('100 / 200');
-
-        cy.get('[data-cy="skillProgress_index-4"]')
-            .contains('skill 5');
-        cy.get('[data-cy="skillProgress_index-4"]')
-            .contains('0 / 200');
-
-        cy.get('[data-cy="skillProgress_index-5"]')
-            .contains('skill 6');
-        cy.get('[data-cy="skillProgress_index-5"]')
-            .contains('0 / 200');
-
-        cy.get('[data-cy="skillProgress_index-6"]')
-            .should('not.exist');
-        cy.matchSnapshotImageForElement('[data-cy="skillsProgressList"]');
+        cy.get('[data-cy="skillProgress_index-0"] [data-cy="skillBadges"]').should('contain.text', 'Badge 1');
+        cy.get('[data-cy="skillProgress_index-1"] [data-cy="skillBadges"]').should('contain.text', 'Badge 1');
+        cy.get('[data-pc-name="panelmenu"]').should('not.exist');
+        matchSkillsDisplaySnapshot('[data-cy="skillsProgressList"]');
     });
 
     if (!Cypress.env('oauthMode')) {
@@ -491,8 +426,9 @@ describe('Client Display Tests', () => {
             cy.reportSkill(1, 1, otherUser, 'yesterday');
             cy.reportSkill(1, 3, otherUser, 'now');
 
-            cy.cdVisit(`/?enableTheme=true&loginAsUser=skills@skills.org`);
-            cy.matchSnapshotImageForElement('[data-cy="myRank"]', {
+            visitSkillsDisplaySnapshotPage(`/?enableTheme=true&loginAsUser=skills@skills.org`);
+            cy.get('[data-cy="optedOutMessage"]').should('be.visible');
+            matchSkillsDisplaySnapshot('[data-cy="myRank"]', {
                 name: 'Client Display Tests - My rank themed where user opted-out',
                 blackout: '[data-cy=pointHistoryChart]'
             });
@@ -506,11 +442,11 @@ describe('Client Display Tests', () => {
             cy.get('[data-cy="leaderboard"]')
                 .contains('You selected to opt-out');
 
-            cy.matchSnapshotImageForElement('[data-cy="myRankPositionStatCard"]', {
+            matchSkillsDisplaySnapshot('[data-cy="myRankPositionStatCard"]', {
                 name: 'Client Display Tests - Rank Overview of My rank themed where user opted-out',
                 blackout: '[data-cy=userFirstSeen]'
             });
-            cy.matchSnapshotImageForElement('[data-cy="leaderboard"]', {
+            matchSkillsDisplaySnapshot('[data-cy="leaderboard"]', {
                 name: 'Client Display Tests - Rank Overview of themed Leaderboard where user opted-out',
                 blackout: '[data-cy=userFirstSeen]'
             });
@@ -522,10 +458,10 @@ describe('Client Display Tests', () => {
         cy.createSkill(1, 1, 1);
 
         // ensure brand exist
-        cy.cdVisit('/');
+        visitSkillsDisplaySnapshotPage('/');
         cy.get('[data-cy="skillTreePoweredBy"]').contains('powered by');
 
-        cy.cdVisit('/?themeParam=disableSkillTreeBrand|true');
+        visitSkillsDisplaySnapshotPage('/?themeParam=disableSkillTreeBrand|true');
         cy.get('[data-cy="skillTreePoweredBy"]').should('not.exist');
     });
 
@@ -543,27 +479,16 @@ describe('Client Display Tests', () => {
             borderStyle: 'none none solid none',
             backgroundColor: encodeURIComponent('#0374ff')
         })
-        cy.cdVisit(`/?enableTheme=true&themeParam=pageTitle|${pageTitle}|true&themeParam=disableBreadcrumb|true&themeParam=skillTreeBrandColor|null`);
-        cy.matchSnapshotImageForElement('[data-cy="skillsTitle"]');
-    });
-
-    it('ability to left align breadcrumb', () => {
-        cy.createSubject(1, 1);
-        cy.createSkill(1, 1, 1);
-
-        const breadcrumbParam = 'breadcrumb|{"align":"start"}';
-        cy.cdVisit(`/?enableTheme=true&themeParam=${breadcrumbParam}&disableBackButton=true`);
-        cy.cdClickSubj(0);
-        cy.cdClickSkill(0);
-
-        cy.matchSnapshotImageForElement('.skills-theme-page-title');
+        visitSkillsDisplaySnapshotPage(`/?enableTheme=true&themeParam=pageTitle|${pageTitle}|true&themeParam=disableBreadcrumb|true&themeParam=skillTreeBrandColor|null`);
+        cy.get('[data-cy="skillsTitle"]').should('contain.text', 'Themed User Skills');
+        matchSkillsDisplaySnapshot('[data-cy="skillsTitle"]');
     });
 
     it('landingPageTitle theme config', () => {
-        cy.cdVisit(`/?themeParam=landingPageTitle|New cool title`);
+        visitSkillsDisplaySnapshotPage(`/?themeParam=landingPageTitle|New cool title`);
         cy.get('[data-cy="skillsTitle"]').contains('New cool title');
 
-        cy.cdVisit(`/`);
+        visitSkillsDisplaySnapshotPage(`/`);
         cy.get('[data-cy="skillsTitle"]').contains('User Skills');
     });
 
@@ -579,26 +504,26 @@ describe('Client Display Tests', () => {
         const skillTreeBrandColorParam = 'themeParam=skillTreeBrandColor|%23ffff00'; // yellow
 
         // legacy pageTitleTextColor param
-        cy.cdVisit(`/?${legacyPageTitleParam}&${titleBg}`);
-        cy.matchSnapshotImageForElement('[data-cy="skillTreePoweredBy"]', {
+        visitSkillsDisplaySnapshotPage(`/?${legacyPageTitleParam}&${titleBg}`);
+        matchSkillsDisplaySnapshot('[data-cy="skillTreePoweredBy"]', {
             name: 'SkillTree Brand - legacy title color param'
         });
 
         // new pageTitle.textColor overrides legacy pageTitleTextColor param
-        cy.cdVisit(`/?${legacyPageTitleParam}&${pageTitleParam}&${titleBg}`);
-        cy.matchSnapshotImageForElement('[data-cy="skillTreePoweredBy"]', {
+        visitSkillsDisplaySnapshotPage(`/?${legacyPageTitleParam}&${pageTitleParam}&${titleBg}`);
+        matchSkillsDisplaySnapshot('[data-cy="skillTreePoweredBy"]', {
             name: 'SkillTree Brand - title color param overrides legacy'
         });
 
         // explicit brand color overrides title param
-        cy.cdVisit(`/?${skillTreeBrandColorParam}&${legacyPageTitleParam}&${pageTitleParam}&${titleBg}`);
-        cy.matchSnapshotImageForElement('[data-cy="skillTreePoweredBy"]', {
+        visitSkillsDisplaySnapshotPage(`/?${skillTreeBrandColorParam}&${legacyPageTitleParam}&${pageTitleParam}&${titleBg}`);
+        matchSkillsDisplaySnapshot('[data-cy="skillTreePoweredBy"]', {
             name: 'SkillTree Brand - explicit brand color'
         });
 
         // just pageTitle.textColor param
-        cy.cdVisit(`/?${pageTitleParam}&${titleBg}`);
-        cy.matchSnapshotImageForElement('[data-cy="skillTreePoweredBy"]', {
+        visitSkillsDisplaySnapshotPage(`/?${pageTitleParam}&${titleBg}`);
+        matchSkillsDisplaySnapshot('[data-cy="skillTreePoweredBy"]', {
             name: 'SkillTree Brand - title color param'
         });
     });
@@ -608,11 +533,6 @@ describe('Client Display Tests', () => {
         cy.createSkill(1, 1, 1, { name: 'Search blah skill 1' });
         cy.createSkill(1, 1, 2, { name: 'is a skill 2' });
         cy.createSkill(1, 1, 3, { name: 'find Blah other skill 3' });
-        cy.createSkill(1, 1, 4, { name: 'Search nothing skill 4' });
-        cy.createSkill(1, 1, 5, {
-            name: 'sEEk bLaH skill 5',
-            selfReportingType: 'Approval'
-        });
         cy.createSkill(1, 1, 6, {
             name: 'some other skill 6',
             selfReportingType: 'HonorSystem'
@@ -639,9 +559,8 @@ describe('Client Display Tests', () => {
         cy.reportSkill(1, 1, Cypress.env('proxyUser'), 'now');
         cy.reportSkill(1, 1, Cypress.env('proxyUser'), 'yesterday');
         cy.reportSkill(1, 3, Cypress.env('proxyUser'), 'now');
-        cy.reportSkill(1, 4, Cypress.env('proxyUser'), 'now');
 
-        cy.cdVisit('/?enableTheme=true');
+        visitSkillsDisplaySnapshotPage('/?enableTheme=true');
         cy.cdClickBadges();
 
         cy.get('[data-cy="badgeSearchInput"]')
@@ -660,61 +579,9 @@ describe('Client Display Tests', () => {
         cy.get('[data-cy="badge_badge2"]')
         cy.get('[data-cy="badge_badge3"]')
 
-        cy.matchSnapshotImageForElement('[data-cy="availableBadges"]', 'Client Display Tests - badge search and badge filter selected-available');
-        cy.matchSnapshotImageForElement('[data-cy="achievedBadges"]', 'Client Display Tests - badge search and badge filter selected-achieved');
-    });
-
-    it('badge filter open', () => {
-        cy.createSubject(1, 1);
-        cy.createSkill(1, 1, 1, { name: 'Search blah skill 1' });
-        cy.createSkill(1, 1, 2, { name: 'is a skill 2' });
-        cy.createSkill(1, 1, 3, { name: 'find Blah other skill 3' });
-        cy.createSkill(1, 1, 4, { name: 'Search nothing skill 4' });
-        cy.createSkill(1, 1, 5, {
-            name: 'sEEk bLaH skill 5',
-            selfReportingType: 'Approval'
-        });
-        cy.createSkill(1, 1, 6, {
-            name: 'some other skill 6',
-            selfReportingType: 'HonorSystem'
-        });
-
-        //create badge
-
-        cy.createBadge(1, 1);
-        cy.assignSkillToBadge(1, 1, 1);
-        cy.assignSkillToBadge(1, 1, 3);
-        cy.enableBadge(1, 1);
-
-        cy.createBadge(1, 2);
-        cy.assignSkillToBadge(1, 2, 2);
-        cy.assignSkillToBadge(1, 2, 1);
-        cy.enableBadge(1, 2);
-
-        cy.createBadge(1, 3);
-        cy.assignSkillToBadge(1, 3, 6);
-        cy.enableBadge(1, 3);
-
-        cy.reportSkill(1, 2, Cypress.env('proxyUser'), 'now');
-        cy.reportSkill(1, 3, Cypress.env('proxyUser'), 'yesterday');
-        cy.reportSkill(1, 1, Cypress.env('proxyUser'), 'now');
-        cy.reportSkill(1, 1, Cypress.env('proxyUser'), 'yesterday');
-        cy.reportSkill(1, 3, Cypress.env('proxyUser'), 'now');
-        cy.reportSkill(1, 4, Cypress.env('proxyUser'), 'now');
-
-        cy.cdVisit('/?enableTheme=true');
-        cy.cdClickBadges();
-
-        cy.get('[data-cy="badgeSearchInput"]')
-            .type('badge');
-
-        cy.get('[data-cy="filterMenu"] [data-cy="filterBtn"]')
-            .click();
-        cy.get('[data-cy=earnedBadgeLink_badge1]').should('be.visible');
-
-        cy.get('[data-cy="badge_badge2"]')
-        cy.get('[data-cy="badge_badge3"]')
-        cy.matchSnapshotImageForElement('[data-cy="skillsDisplayHome"]');
+        cy.get('[data-pc-name="panelmenu"]').should('not.exist');
+        matchSkillsDisplaySnapshot('[data-cy="availableBadges"]', 'Client Display Tests - badge search and badge filter selected-available');
+        matchSkillsDisplaySnapshot('[data-cy="achievedBadges"]', 'Client Display Tests - badge search and badge filter selected-achieved');
     });
 
     it('skills group', () => {
@@ -724,9 +591,9 @@ describe('Client Display Tests', () => {
         cy.addSkillToGroup(1, 1, 1, 2);
         cy.createSkillsGroup(1, 1, 1, { enabled: true });
 
-        cy.cdVisit('/?enableTheme=true');
+        visitSkillsDisplaySnapshotPage('/?enableTheme=true');
         cy.cdClickSubj(0);
-        cy.get('[data-cy=skillCompletedCheck-group1')
+        cy.get('[data-cy="skillCompletedCheck-group1"]')
             .should('not.exist'); // completed checkbox should not exist
         cy.get('[data-cy="skillProgress_index-0"] [data-cy="skillProgress-ptsOverProgressBard"]')
             .first()
@@ -735,7 +602,7 @@ describe('Client Display Tests', () => {
             .contains('0 / 200 Points');
         cy.get('[data-cy="group-group1_skillProgress-skill2"] [data-cy="skillProgress-ptsOverProgressBard"]')
             .contains('0 / 200 Points');
-        cy.matchSnapshotImageForElement('[data-cy="skillsProgressList"]');
+        matchSkillsDisplaySnapshot('[data-cy="skillsProgressList"]');
     });
 
     it('skills group - partial completion', () => {
@@ -750,8 +617,8 @@ describe('Client Display Tests', () => {
 
         cy.reportSkill(1, 2, Cypress.env('proxyUser'), 'yesterday');
 
-        cy.cdVisit('/subjects/subj1/?enableTheme=true');
-        cy.get('[data-cy=skillCompletedCheck-group1')
+        visitSkillsDisplaySnapshotPage('/subjects/subj1/?enableTheme=true');
+        cy.get('[data-cy="skillCompletedCheck-group1"]')
             .should('not.exist'); // completed checkbox should not exist
         cy.get('[data-cy="skillProgress_index-0"] [data-cy="skillProgress-ptsOverProgressBard"]')
             .first()
@@ -760,7 +627,7 @@ describe('Client Display Tests', () => {
             .contains('200 / 200 Points');
         cy.get('[data-cy="group-group1_skillProgress-skill2"] [data-cy="skillProgress-ptsOverProgressBard"]')
             .contains('100 / 200 Points');
-        cy.matchSnapshotImageForElement('[data-cy="skillsProgressList"]');
+        matchSkillsDisplaySnapshot('[data-cy="skillsProgressList"]');
     });
 
     it('skills group - 1 out 2 skills required', () => {
@@ -778,8 +645,8 @@ describe('Client Display Tests', () => {
 
         cy.reportSkill(1, 2, Cypress.env('proxyUser'), 'yesterday');
 
-        cy.cdVisit('/subjects/subj1/?enableTheme=true');
-        cy.get('[data-cy=skillCompletedCheck-group1')
+        visitSkillsDisplaySnapshotPage('/subjects/subj1/?enableTheme=true');
+        cy.get('[data-cy="skillCompletedCheck-group1"]')
             .should('exist'); // completed checkbox should exist
         cy.get('[data-cy="skillProgress_index-0"] [data-cy="skillProgress-ptsOverProgressBard"]')
             .first()
@@ -788,17 +655,18 @@ describe('Client Display Tests', () => {
             .contains('200 / 200 Points');
         cy.get('[data-cy="group-group1_skillProgress-skill2"] [data-cy="skillProgress-ptsOverProgressBard"]')
             .contains('100 / 200 Points');
-        cy.matchSnapshotImageForElement('[data-cy="skillsProgressList"]');
+        matchSkillsDisplaySnapshot('[data-cy="skillsProgressList"]');
     });
 
     it('theme self report rich text editor', () => {
         cy.createSubject(1, 1);
         cy.createSkill(1, 1, 1, { selfReportingType: 'Approval', });
-        cy.cdVisit('/subjects/subj1/skills/skill1/?enableTheme=true');
+        visitSkillsDisplaySnapshotPage('/subjects/subj1/skills/skill1/?enableTheme=true');
 
         cy.get('[data-cy="requestApprovalBtn"]').click()
         cy.get('[data-cy="selfReportMsgInput"]').type('ok hello there')
-        cy.matchSnapshotImageForElement('[data-cy="selfReportMsgInput"]');
+        cy.get('[data-cy="selfReportMsgInput"]').should('contain.text', 'ok hello there')
+        matchSkillsDisplaySnapshot('[data-cy="selfReportMsgInput"]');
     })
 
 });

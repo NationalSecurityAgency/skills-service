@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <script setup>
-import { computed, nextTick, onBeforeUnmount, ref, onMounted, watch } from 'vue'
+import { computed, nextTick, onBeforeUnmount, ref, onMounted, useTemplateRef, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import { Network } from 'vis-network'
 import { useSkillsDisplayAttributesState } from '@/skills-display/stores/UseSkillsDisplayAttributesState.js'
@@ -26,6 +26,7 @@ import UserPrerequisitesProgress from '@/skills-display/components/skill/prerequ
 import PrerequisitesTable from '@/skills-display/components/skill/prerequisites/PrerequisitesTable.vue'
 import { useNavToSkillUtil } from '@/skills-display/components/skill/prerequisites/UseNavToSkillUtil.js'
 import { useThemesHelper } from '@/components/header/UseThemesHelper.js'
+import { useChartSnapshotMode } from '@/skills-display/components/test/UseChartSnapshotMode.js'
 
 const props = defineProps({
   dependencies: Array
@@ -37,6 +38,8 @@ const skillsDisplayService = useSkillsDisplayService()
 const themeState = useSkillsDisplayThemeState()
 const themeHelper = useThemesHelper()
 const navHelper = useNavToSkillUtil()
+const chartSnapshotMode = useChartSnapshotMode()
+const prerequisitesGraph = useTemplateRef('prerequisitesGraph')
 
 const loadingData = ref(true)
 const thisSkill = ref({})
@@ -157,6 +160,7 @@ const clearNetwork = () => {
   graphRenderReady.value = false
   network.value?.destroy()
   network.value = null
+  if (prerequisitesGraph.value) delete prerequisitesGraph.value.getNodePosition
 }
 const isSmallScreen = () => {
   const width = window.innerWidth
@@ -168,7 +172,7 @@ const createGraph = async () => {
   const generation = graphGeneration
   await nextTick()
 
-  const container = document.getElementById('dependent-skills-network')
+  const container = prerequisitesGraph.value
   if (generation !== graphGeneration || !container?.isConnected) return
 
   // Canvas icons do not trigger font loading like DOM text does. Load them before layout and drawing.
@@ -178,7 +182,7 @@ const createGraph = async () => {
 
   const graphNetwork = new Network(container, buildData(), displayOptions)
   network.value = graphNetwork
-  let focusAnimationFinished = !shouldFocusOnParentNode()
+  let focusAnimationFinished = chartSnapshotMode.value || !shouldFocusOnParentNode()
   const markGraphReady = () => {
     if (focusAnimationFinished && generation === graphGeneration) {
       graphRenderReady.value = true
@@ -203,6 +207,14 @@ const createGraph = async () => {
   graphNetwork.on('blurNode', () => {
     networkCanvas.style.cursor = 'default'
   })
+  if (chartSnapshotMode.value) {
+    // Match the learning-path graph's position facade so tests still navigate by clicking the canvas.
+    container.getNodePosition = (projectId, skillId) => {
+      const nodeId = appendForId(projectId, skillId)
+      const position = graphNetwork.getPositions([nodeId])[nodeId]
+      return position ? graphNetwork.canvasToDOM(position) : null
+    }
+  }
 
   focusOnParentNode()
   container.querySelector('.vis-network')?.setAttribute('tabindex', -1)
@@ -214,7 +226,7 @@ const focusOnParentNode = () => {
     const options = {
       scale: 0.7,
       offset: { x: 0, y: 180 },
-      animation: {
+      animation: chartSnapshotMode.value ? false : {
         duration: 1200,
         easingFunction: 'easeInOutQuad'
       }
@@ -351,6 +363,7 @@ const buildNode = (skill, isCrossProject, createdSkillIds, nodes, achievedIds, e
           </div>
         </div>
         <div id="dependent-skills-network"
+             ref="prerequisitesGraph"
              data-cy="prerequisitesGraph"
              :data-render-ready="graphRenderReady"
              class="h-[500px]"

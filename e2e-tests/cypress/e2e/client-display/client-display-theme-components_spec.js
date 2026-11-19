@@ -146,6 +146,7 @@ describe('Client Display Theme Components Tests', () => {
     visitThemePage(`/subjects/subj1/skills/skill1?themeParam=pageTitle|${pageTitle}&${titleBg}&${disableBrand}&${disableBackButton}&${disableSearchButton}&${breadcrumb}`)
 
     cy.get('[data-cy="skillsTitle"]')
+    cy.get('[data-cy="skillsDisplayBreadcrumbBar"]').should('be.visible').and('have.css', 'justify-content', 'start')
     matchComponentSnapshot('[data-cy="skillsTitle"]', { errorThreshold: 0.1 })
   })
 

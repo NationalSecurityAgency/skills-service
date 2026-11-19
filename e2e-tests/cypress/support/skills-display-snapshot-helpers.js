@@ -21,7 +21,9 @@ export const visitSkillsDisplaySnapshotPage = (path = '/', expectPointHistoryDat
   }
 }
 
-const assertSnapshotContentReady = ($root) => {
+const assertSnapshotContentReady = (root) => {
+  // cy.get() yields jQuery collections, while cy.wrapIframe() can yield a raw body element.
+  const $root = Cypress.$(root)
   const findIncludingRoot = selector => $root.find(selector).addBack(selector)
   expect(findIncludingRoot('[data-pc-name="progressspinner"]'), 'loading spinners').to.have.length(0)
 
@@ -70,7 +72,7 @@ export const clickPrerequisiteNode = (projectId, skillId) => {
 
 export const waitForIframeSnapshot = () => {
   cy.wrapIframe().should(assertSnapshotContentReady)
-  cy.wrapIframe().then($body => $body[0].ownerDocument.fonts.ready)
+  cy.wrapIframe().then(body => Cypress.$(body)[0].ownerDocument.fonts.ready)
   // Wait for the SDK's asynchronous height update rather than a fixed post-navigation delay.
   return cy.get('body iframe').should($iframe => {
     const frame = $iframe[0]
