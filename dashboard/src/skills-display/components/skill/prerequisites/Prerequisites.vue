@@ -172,7 +172,6 @@ const createGraph = () => {
 
   focusOnParentNode()
   setVisNetworkTabIndex();
-  applyThemeToNavigationControls();
 }
 
 const setVisNetworkTabIndex = () => {
@@ -182,24 +181,6 @@ const setVisNetworkTabIndex = () => {
       const element = elements[0];
       if (element) {
         element.setAttribute('tabindex', -1);
-      }
-    }
-  }, 500);
-}
-const applyThemeToNavigationControls = () => {
-  setTimeout(() => {
-    const themePrimaryColor = themeState.graphTextPrimaryColor
-    const themeNavButtonsColor = themeState.graphNavButtonsColor
-    if (themePrimaryColor || themeNavButtonsColor) {
-      const networkElement = document.getElementById('dependent-skills-network');
-      if (networkElement) {
-        const buttons = document.getElementsByClassName('vis-button');
-        if (buttons && buttons.length > 0) {
-          for (let i = 0; i < buttons.length; i += 1) {
-            const button = buttons[i];
-            button.style.color = themeNavButtonsColor || themePrimaryColor;
-          }
-        }
       }
     }
   }, 500);
@@ -345,7 +326,10 @@ const buildNode = (skill, isCrossProject, createdSkillIds, nodes, achievedIds, e
             <user-prerequisites-progress :dependencies="dependenciesInternal"/>
           </div>
         </div>
-        <div id="dependent-skills-network" style="height: 500px" aria-hidden="true"></div>
+        <div id="dependent-skills-network"
+             class="h-[500px]"
+             :style="{ '--graph-nav-color': themeState.graphNavButtonsColor || themeState.graphTextPrimaryColor || undefined }"
+             aria-hidden="true"></div>
       </div>
 
       <prerequisites-table :items="dependenciesInternal" />
@@ -390,9 +374,13 @@ const buildNode = (skill, isCrossProject, createdSkillIds, nodes, achievedIds, e
   box-shadow: none !important;
 }
 
+#dependent-skills-network .vis-navigation {
+  background-color: transparent;
+}
+
 #dependent-skills-network .vis-button {
   font-size: 2em;
-  color: #8c8c8c;
+  color: var(--graph-nav-color, #8c8c8c);
   font-family: "Font Awesome 5 Free";
 }
 
@@ -403,7 +391,7 @@ const buildNode = (skill, isCrossProject, createdSkillIds, nodes, achievedIds, e
 }
 
 #dependent-skills-network .vis-button:hover:after {
-  color: #3273dc;
+  color: var(--graph-nav-color, #3273dc);
 }
 
 #dependent-skills-network .vis-button.vis-up:after {

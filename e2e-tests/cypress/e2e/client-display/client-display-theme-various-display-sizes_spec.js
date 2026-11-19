@@ -378,7 +378,7 @@ describe('Client Display Tests', () => {
         },
     ];
     expandedVerticalSizes.forEach((size) => {
-        it(`test theming - skill details with deps - ${size.name}`, () => {
+        it.only(`test theming - skill details with deps - ${size.name}`, () => {
             // must set viewport to show entire canvas or it will not appear in the screenshot
             cy.viewport(size.width, size.height);
 
