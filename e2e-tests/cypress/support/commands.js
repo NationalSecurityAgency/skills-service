@@ -134,8 +134,7 @@ Cypress.Commands.add("matchSnapshotImageForElement", (selector, maybeNameOtherwi
         name : snapName,
         selector,
         blackout: ((options && options.blackout) || null),
-        errorThreshold: options?.errorThreshold,
-        waitForResources: options?.waitForResources
+        errorThreshold: options?.errorThreshold
     };
     cy.doMatchSnapshotImage(params);
 })
@@ -146,8 +145,7 @@ Cypress.Commands.add("matchSnapshotImage", (maybeNameOtherwiseCommandOptions) =>
     const params = {
         name : snapName,
         blackout: ((options && options.blackout) || null),
-        errorThreshold: options?.errorThreshold,
-        waitForResources: options?.waitForResources
+        errorThreshold: options?.errorThreshold
     };
     cy.doMatchSnapshotImage(params);
 })
@@ -159,111 +157,49 @@ Cypress.Commands.add("doMatchSnapshotImage", (options) => {
     if (options && (typeof options.errorThreshold === 'number' && Number.isFinite(options.errorThreshold))) {
         visualRegressionOptions.errorThreshold = options.errorThreshold
     }
-    if (options?.waitForResources) {
-        // Callers must assert page data and canvas animation completion before opting in.
-        return cy.get(options.selector || 'body').should('be.visible').then(async ($element) => {
-            const element = $element[0];
-            const document = element.ownerDocument;
-            if (options.blackout) {
-                Cypress.$(document.body).find(options.blackout).css('visibility', 'hidden');
-            }
-
-            const waitForElementResources = async (root) => {
-                const doc = root.ownerDocument;
-                const win = doc.defaultView;
-                await doc.fonts.ready;
-                const images = [...root.querySelectorAll('img')];
-                if (root.matches('img')) images.push(root);
-                await Promise.all(images.filter(image =>
-                    (image.currentSrc || image.getAttribute('src') || image.getAttribute('srcset')) &&
-                    image.getClientRects().length > 0 && win.getComputedStyle(image).visibility !== 'hidden'
-                ).map(image => image.decode()));
-
-                // An iframe screenshot includes its child document, not just the host's resources.
-                const frames = [...root.querySelectorAll('iframe')];
-                if (root.matches('iframe')) frames.push(root);
-                await Promise.all(frames.filter(frame =>
-                    frame.getClientRects().length > 0 && win.getComputedStyle(frame).visibility !== 'hidden'
-                ).map(frame => {
-                    const body = frame.contentDocument?.body;
-                    if (!body) throw new Error('Snapshot resource readiness requires a loaded, accessible iframe document');
-                    return waitForElementResources(body);
-                }));
-
-                // Allow layout and paint to commit after resources load and blackout styles change.
-                await new Cypress.Promise(resolve => {
-                    win.requestAnimationFrame(() => win.requestAnimationFrame(() => resolve()));
-                });
-            };
-            await waitForElementResources(element);
-        }).then(() => {
-            if (options.selector) {
-                return cy.get(options.selector).compareSnapshot(options.name, visualRegressionOptions);
-            }
-            return cy.compareSnapshot(options.name, visualRegressionOptions);
-        });
-    }
-
-    // Preserve the legacy timing until other visual specs have explicit readiness assertions.
-    cy.wait(2000);
-    if (options && options.blackout) {
-        cy
-            // wait for content to be ready
-            .get('body')
-            // hide ignored elements
-            .then($app => {
-                return new Cypress.Promise((resolve, reject) => {
-                    setTimeout(() => {
-                        $app.find(options.blackout).css("visibility", "hidden");
-                        resolve();
-                        // add a very small delay to wait for the elements to be there, but you should
-                        // make sure your test already handles this
-                    }, 300);
-                });
-            })
-            .then(() => {
-                if (options.selector) {
-                    return cy.get(options.selector).compareSnapshot(options.name, visualRegressionOptions)
-                } else {
-                    return cy.compareSnapshot(options.name, visualRegressionOptions);
-                }
-            });
-    } else {
-        if (options.selector) {
-            return cy.get(options.selector).compareSnapshot(options.name, visualRegressionOptions)
-        } else {
-            return cy.compareSnapshot(options.name, visualRegressionOptions);
+    // Callers must assert page data and canvas animation completion before capturing.
+    return cy.get(options.selector || 'body').should('be.visible').then(async ($element) => {
+        const element = $element[0];
+        const document = element.ownerDocument;
+        if (options.blackout) {
+            Cypress.$(document.body).find(options.blackout).css('visibility', 'hidden');
         }
-    }
-})
 
-// Cypress.Commands.add("doMatchSnapshotImage", (maybeNameOtherwiseCommandOptions, commandOptions, selector) => {
-//     cy.closeToasts();
-//     cy.wait(500);
-//
-//     let options = commandOptions ? commandOptions :
-//         ((maybeNameOtherwiseCommandOptions && typeof maybeNameOtherwiseCommandOptions === 'object') ? maybeNameOtherwiseCommandOptions : null);
-//     const namePresent = maybeNameOtherwiseCommandOptions && typeof maybeNameOtherwiseCommandOptions === 'string'
-//
-//     const snapDir = Cypress.env('customSnapshotsDir');
-//     if (snapDir) {
-//         options = {...options, customSnapshotsDir: snapDir }
-//     }
-//
-//     if (namePresent) {
-//         if (selector) {
-//             cy.get(selector).matchImageSnapshot(maybeNameOtherwiseCommandOptions, options);
-//         } else {
-//             cy.matchImageSnapshot(maybeNameOtherwiseCommandOptions, options);
-//         }
-//     } else {
-//         if (selector) {
-//             cy.get(selector).matchImageSnapshot(options);
-//         } else {
-//             cy.matchImageSnapshot(options);
-//         }
-//     }
-// })
+        const waitForElementResources = async (root) => {
+            const doc = root.ownerDocument;
+            const win = doc.defaultView;
+            await doc.fonts.ready;
+            const images = [...root.querySelectorAll('img')];
+            if (root.matches('img')) images.push(root);
+            await Promise.all(images.filter(image =>
+                (image.currentSrc || image.getAttribute('src') || image.getAttribute('srcset')) &&
+                image.getClientRects().length > 0 && win.getComputedStyle(image).visibility !== 'hidden'
+            ).map(image => image.decode()));
+
+            // An iframe screenshot includes its child document, not just the host's resources.
+            const frames = [...root.querySelectorAll('iframe')];
+            if (root.matches('iframe')) frames.push(root);
+            await Promise.all(frames.filter(frame =>
+                frame.getClientRects().length > 0 && win.getComputedStyle(frame).visibility !== 'hidden'
+            ).map(frame => {
+                const body = frame.contentDocument?.body;
+                if (!body) throw new Error('Snapshot resource readiness requires a loaded, accessible iframe document');
+                return waitForElementResources(body);
+            }));
+
+            // Allow layout and paint to commit after resources load and blackout styles change.
+            await new Cypress.Promise(resolve => {
+                win.requestAnimationFrame(() => win.requestAnimationFrame(() => resolve()));
+            });
+        };
+        await waitForElementResources(element);
+    }).then(() => {
+        if (options.selector) {
+            return cy.get(options.selector).compareSnapshot(options.name, visualRegressionOptions);
+        }
+        return cy.compareSnapshot(options.name, visualRegressionOptions);
+    });
+})
 
 Cypress.Commands.add("enableProdMode", (projNum) => {
     cy.request('POST', `/admin/projects/proj${projNum}/settings/production.mode.enabled`, {

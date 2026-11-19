@@ -55,10 +55,7 @@ describe('Client Display Point History Tests', () => {
 
   const matchPointHistorySnapshot = ({ renderVersion = 1, expectPointHistoryData = true, ...options } = {}) => {
     waitForPointHistoryChart(renderVersion, expectPointHistoryData)
-    return cy.matchSnapshotImageForElement('[data-cy="pointHistoryChart"]', {
-      waitForResources: true,
-      ...options,
-    })
+    return cy.matchSnapshotImageForElement('[data-cy="pointHistoryChart"]', options)
   }
 
   beforeEach(() => {

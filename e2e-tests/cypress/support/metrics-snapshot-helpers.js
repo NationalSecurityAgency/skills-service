@@ -45,5 +45,5 @@ export const matchMetricsSnapshot = (selector, { noDataMessage, ...options } = {
       !mask.closest('[data-metrics-has-data="false"]')).length, 'other loading masks').to.equal(0)
   })
   cy.get('[data-pc-section="overlay"]').should('not.exist')
-  return cy.matchSnapshotImageForElement(selector, { waitForResources: true, ...options })
+  return cy.matchSnapshotImageForElement(selector, options)
 }

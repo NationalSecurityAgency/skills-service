@@ -55,7 +55,7 @@ export const matchSkillsDisplaySnapshot = (selector, nameOrOptions = {}) => {
   const options = typeof nameOrOptions === 'string' ? { name: nameOrOptions } : nameOrOptions
   cy.get('[data-pc-name="progressspinner"]').should('not.exist')
   cy.get(selector).should('be.visible').should(assertSnapshotContentReady)
-  return cy.matchSnapshotImageForElement(selector, { waitForResources: true, ...options })
+  return cy.matchSnapshotImageForElement(selector, options)
 }
 
 export const waitForPrerequisitesGraph = () => {

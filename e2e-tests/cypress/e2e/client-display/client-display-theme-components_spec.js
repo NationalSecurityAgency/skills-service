@@ -32,7 +32,7 @@ describe('Client Display Theme Components Tests', () => {
         .filter((index, mask) => !mask.closest('[data-cy="pointHistoryChartNoData"]'))
       expect(loadingMasks, 'captured loading masks').to.have.length(0)
     })
-    return cy.matchSnapshotImageForElement(selector, { waitForResources: true, ...options })
+    return cy.matchSnapshotImageForElement(selector, options)
   }
 
   const waitForPointHistoryChart = () => {
