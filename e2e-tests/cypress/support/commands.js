@@ -1630,14 +1630,67 @@ Cypress.Commands.add('closeToasts', (retry=true) => {
 });
 
 
-Cypress.Commands.add('dragAndDrop', { prevSubject: 'element' }, (sourceElement, destSelector) => {
+Cypress.Commands.add('dragAndDrop', { prevSubject: 'element' }, (sourceElement, destSelector, { waitForSortableSwap = false, sortableContainer = null } = {}) => {
     const dataTransfer = new DataTransfer()
+    const sourceNode = sourceElement.get(0);
+
+    if (sortableContainer) {
+        // Insertion-style sorting uses wrapper cards, not matching-question list items.
+        return cy.get(sortableContainer).then(($container) => {
+            return cy.get(destSelector).then(($destination) => {
+                const destinationNode = $destination.get(0);
+                const $items = $container.children(':visible');
+                const sourceItem = $items.toArray().find(item => item.contains(sourceNode));
+                const destinationItem = $items.toArray().find(item => item.contains(destinationNode));
+                expect(sourceItem, 'source sortable card').to.exist;
+                expect(destinationItem, 'destination sortable card').to.exist;
+                const destinationIndex = $items.index(destinationItem);
+
+                cy.wrap(Cypress.$([sourceItem, destinationItem])).should(($cards) => {
+                    $cards.each((index, card) => {
+                        expect(Boolean(card.animated), 'Sortable card animation').to.equal(false);
+                    });
+                });
+                return cy.wrap(Cypress.$(sourceNode))
+                    .trigger('pointerdown', { eventConstructor: 'PointerEvent' })
+                    .trigger('dragstart', { dataTransfer, eventConstructor: 'DragEvent' })
+                    .then(() => cy.wrap(Cypress.$(sourceItem)).should('have.class', 'skills-sort-order-ghost-class'))
+                    .then(() => cy.wrap(Cypress.$(destinationNode)).trigger('dragover', { dataTransfer, eventConstructor: 'DragEvent' }))
+                    .then(() => {
+                        // Sortable inserts on dragover. Exclude its hidden clone and wait
+                        // for the intended position before dropping and invoking onUpdate.
+                        return cy.wrap($container).children(':visible').should(($cards) => {
+                            expect($cards.index(sourceItem), 'dragged card position').to.equal(destinationIndex);
+                        });
+                    })
+                    .then(() => cy.wrap(Cypress.$(destinationNode)).trigger('drop', { dataTransfer, eventConstructor: 'DragEvent' }));
+            });
+        });
+    }
 
     return cy.get(destSelector).then((destProject) => {
-        return cy.wrap(sourceElement.get(0))
+        const destinationNode = destProject.get(0);
+        if (waitForSortableSwap) {
+            // Sortable ignores pointerdown on items still animating from the previous swap.
+            cy.wrap(Cypress.$([sourceNode.closest('li'), destinationNode.closest('li')])).should(($items) => {
+                $items.each((index, item) => {
+                    expect(Boolean(item.animated), 'Sortable item animation').to.equal(false);
+                });
+            });
+        }
+        return cy.wrap(sourceNode)
             .trigger('pointerdown', { eventConstructor: 'PointerEvent' })
             .trigger('dragstart', { dataTransfer, eventConstructor: 'DragEvent' })
             .then(() => {
+                if (waitForSortableSwap) {
+                    // Sortable starts the drag asynchronously. Its ghost and swap classes
+                    // identify readiness without sleeping; callers assert the resulting order.
+                    cy.wrap(sourceNode.closest('li')).should('have.class', 'sortable-ghost');
+                    return cy.wrap(destinationNode)
+                        .trigger('dragover', { dataTransfer, eventConstructor: 'DragEvent' })
+                        .then(() => cy.wrap(Cypress.$(destinationNode.closest('li'))).should('have.class', 'sortable-swap-highlight'))
+                        .trigger('drop', { dataTransfer, eventConstructor: 'DragEvent' });
+                }
                 return cy.wrap(destProject.get(0))
                     .trigger('dragover', { dataTransfer, eventConstructor: 'DragEvent' })
                     .wait(1000)
@@ -1650,11 +1703,14 @@ Cypress.Commands.add('dragAndDrop', { prevSubject: 'element' }, (sourceElement, 
     })
 });
 Cypress.Commands.add("validateElementsOrder", (selector, containsValues) => {
-    cy.get(selector).should('have.length', containsValues.length).as('elements');
-    for (const [i, value] of containsValues.entries()) {
-        cy.get('@elements').eq(i).contains(value);
-    }
-    cy.wait(500)
+    // Retry the complete order against a fresh query, rather than retaining old
+    // elements while Vue reorders/replaces them and sleeping after the assertions.
+    return cy.get(selector).should(($elements) => {
+        expect($elements, 'ordered elements').to.have.length(containsValues.length);
+        containsValues.forEach((value, index) => {
+            expect($elements.eq(index), `element at position ${index}`).to.contain.text(String(value));
+        });
+    }).as('elements');
 });
 
 Cypress.Commands.add('formRequest', (method, url, formData, onComplete, includeXSRF = false) => {

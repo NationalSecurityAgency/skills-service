@@ -83,7 +83,7 @@ describe('Inception Skills Tests', () => {
 
     it('change subject display order', () => {
         cy.intercept('POST', '/api/projects/Inception/skills/ChangeSubjectDisplayOrder').as('reportSkill');
-        cy.intercept('/admin/projects/proj1/subjects/subj1').as('subj1Async')
+        cy.intercept('PATCH', '/admin/projects/proj1/subjects/subj1').as('subj1Async')
         cy.assertInceptionPoints('Projects', 'ChangeSubjectDisplayOrder', 0)
 
         cy.createProject(1);
@@ -95,7 +95,7 @@ describe('Inception Skills Tests', () => {
 
         cy.visit('/administrator/projects/proj1')
         cy.validateElementsOrder('[data-cy="subjectCard"]', ['Subject 1', 'Subject 2']);
-        cy.get(subj1Card).dragAndDrop(subj2Card)
+        cy.get(subj1Card).dragAndDrop(subj2Card, { sortableContainer: '#subjectCards' })
         cy.wait('@subj1Async')
         cy.validateElementsOrder('[data-cy="subjectCard"]', ['Subject 2', 'Subject 1']);
 
@@ -118,7 +118,7 @@ describe('Inception Skills Tests', () => {
 
         cy.validateElementsOrder('[data-cy="badgeCard"]', ['Badge 1', 'Badge 2']);
         cy.get(badge1Card)
-            .dragAndDrop(badge2Card);
+            .dragAndDrop(badge2Card, { sortableContainer: '#badgeCards' });
         cy.validateElementsOrder('[data-cy="badgeCard"]', ['Badge 2', 'Badge 1']);
 
         cy.wait('@reportSkill')

@@ -493,16 +493,16 @@ describe('My Progress Tests', () => {
         const proj2Selector = '[data-cy=project-link-card-proj2] [data-cy="sortControlHandle"]';
         const proj3Selector = '[data-cy=project-link-card-proj3] [data-cy="sortControlHandle"]';
 
-        cy.intercept('/api/myprojects/proj1')
+        cy.intercept('POST', '/api/myprojects/proj1')
             .as('updateMyProj1');
-        cy.intercept('/api/myprojects/proj2')
+        cy.intercept('POST', '/api/myprojects/proj2')
             .as('updateMyProj2');
-        cy.intercept('/api/myprojects/proj3')
+        cy.intercept('POST', '/api/myprojects/proj3')
             .as('updateMyProj3');
 
         cy.validateElementsOrder('[data-cy="project-card-project-name"]', ['This is project 3', 'This is project 2', 'This is project 1']);
         cy.get(proj2Selector)
-            .dragAndDrop(proj1Selector);
+            .dragAndDrop(proj1Selector, { sortableContainer: '#projectCards' });
         cy.wait('@updateMyProj2');
         cy.validateElementsOrder('[data-cy="project-card-project-name"]', ['This is project 3', 'This is project 1', 'This is project 2']);
 
@@ -511,17 +511,16 @@ describe('My Progress Tests', () => {
         cy.validateElementsOrder('[data-cy="project-card-project-name"]', ['This is project 3', 'This is project 1', 'This is project 2']);
 
         cy.get(proj3Selector)
-            .dragAndDrop(proj2Selector);
+            .dragAndDrop(proj2Selector, { sortableContainer: '#projectCards' });
         cy.wait('@updateMyProj3');
         cy.validateElementsOrder('[data-cy="project-card-project-name"]', ['This is project 1', 'This is project 2', 'This is project 3']);
 
         cy.get(proj1Selector)
-            .dragAndDrop(proj2Selector);
+            .dragAndDrop(proj2Selector, { sortableContainer: '#projectCards' });
         cy.wait('@updateMyProj1');
         cy.validateElementsOrder('[data-cy="project-card-project-name"]', ['This is project 2', 'This is project 1', 'This is project 3']);
 
         // navigate to My Projects and then return
-        cy.wait(2000)
         cy.get('[data-cy="manageMyProjsBtn"]')
             .click();
         cy.get('[data-cy="backToProgressAndRankingBtn"]')

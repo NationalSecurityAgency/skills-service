@@ -684,6 +684,7 @@ describe('Quiz Question CRUD Tests', () => {
     });
 
     it('drag and drop to sort questions', function () {
+        cy.intercept('PATCH', '/admin/quiz-definitions/quiz1/questions/*').as('saveQuestionOrder');
         cy.createQuizDef(1);
         cy.createQuizQuestionDef(1, 1)
         cy.createQuizQuestionDef(1, 2)
@@ -695,11 +696,14 @@ describe('Quiz Question CRUD Tests', () => {
         const q3Card = '[data-cy="questionDisplayCard-3"] [data-cy="sortControlHandle"]';
 
         cy.validateElementsOrder('[data-cy="questionDisplayCard"]', ['question # 1', 'question # 2', 'question # 3']);
-        cy.get(q1Card).dragAndDrop(q2Card);
+        cy.get(q1Card).dragAndDrop(q2Card, { sortableContainer: '#questionsCard' });
         cy.validateElementsOrder('[data-cy="questionDisplayCard"]', ['question # 2', 'question # 1', 'question # 3']);
-        cy.get(q3Card).dragAndDrop(q2Card);
+        cy.wait('@saveQuestionOrder').its('response.statusCode').should('eq', 200);
+        cy.get('[data-cy="updatingSortMsg"]').should('not.exist');
+        cy.get(q3Card).dragAndDrop(q2Card, { sortableContainer: '#questionsCard' });
         cy.validateElementsOrder('[data-cy="questionDisplayCard"]', ['question # 3', 'question # 2', 'question # 1']);
 
+        cy.wait('@saveQuestionOrder').its('response.statusCode').should('eq', 200);
         cy.visit('/administrator/quizzes/quiz1');
         cy.validateElementsOrder('[data-cy="questionDisplayCard"]', ['question # 3', 'question # 2', 'question # 1']);
     });
@@ -732,8 +736,9 @@ describe('Quiz Question CRUD Tests', () => {
         const q2Card = '[data-cy="questionDisplayCard-2"] [data-cy="sortControlHandle"]';
 
         cy.validateElementsOrder('[data-cy="questionDisplayCard"]', ['question # 1', 'question # 2']);
-        cy.get(q1Card).dragAndDrop(q2Card);
+        cy.get(q1Card).dragAndDrop(q2Card, { sortableContainer: '#questionsCard' });
         cy.validateElementsOrder('[data-cy="questionDisplayCard"]', ['question # 2', 'question # 1']);
+        cy.get('[data-cy="updatingSortMsg"]').should('not.exist');
     });
 
     it('user keyboard to sort questions', function () {

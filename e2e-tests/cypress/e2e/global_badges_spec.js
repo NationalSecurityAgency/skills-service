@@ -1847,6 +1847,7 @@ describe('Global Badges Tests', () => {
         cy.createGlobalBadge(4);
         cy.createGlobalBadge(5);
 
+        cy.intercept('PATCH', '/admin/badges/*').as('saveGlobalBadgeOrder');
         const badge1Card = '[data-cy="badgeCard-globalBadge1"] [data-cy="sortControlHandle"]';
         const badge2Card = '[data-cy="badgeCard-globalBadge2"] [data-cy="sortControlHandle"]';
         const badge4Card = '[data-cy="badgeCard-globalBadge4"] [data-cy="sortControlHandle"]';
@@ -1856,23 +1857,27 @@ describe('Global Badges Tests', () => {
         cy.get('[data-cy="inception-button"]').contains('Level');
         cy.validateElementsOrder('[data-cy="badgeCard"]', ['Badge 1', 'Badge 2', 'Badge 3', 'Badge 4', 'Badge 5']);
         cy.get(badge1Card)
-            .dragAndDrop(badge4Card);
+            .dragAndDrop(badge4Card, { sortableContainer: '#badgeCards' });
         cy.validateElementsOrder('[data-cy="badgeCard"]', ['Badge 2', 'Badge 3', 'Badge 4', 'Badge 1', 'Badge 5']);
 
         // refresh to make sure it was saved
+        cy.wait('@saveGlobalBadgeOrder').its('response.statusCode').should('eq', 200);
         cy.visit('/administrator/globalBadges');
         cy.get('[data-cy="inception-button"]').contains('Level');
         cy.validateElementsOrder('[data-cy="badgeCard"]', ['Badge 2', 'Badge 3', 'Badge 4', 'Badge 1', 'Badge 5']);
 
         cy.get(badge5Card)
-            .dragAndDrop(badge2Card);
+            .dragAndDrop(badge2Card, { sortableContainer: '#badgeCards' });
         cy.validateElementsOrder('[data-cy="badgeCard"]', ['Badge 5', 'Badge 2', 'Badge 3', 'Badge 4', 'Badge 1']);
+        cy.wait('@saveGlobalBadgeOrder').its('response.statusCode').should('eq', 200);
+        cy.get('[data-cy="globalBadge5_overlayShown"]').should('not.exist');
 
         cy.get(badge2Card)
-            .dragAndDrop(badge1Card);
+            .dragAndDrop(badge1Card, { sortableContainer: '#badgeCards' });
         cy.validateElementsOrder('[data-cy="badgeCard"]', ['Badge 5', 'Badge 3', 'Badge 4', 'Badge 1', 'Badge 2']);
 
         // refresh to make sure it was saved
+        cy.wait('@saveGlobalBadgeOrder').its('response.statusCode').should('eq', 200);
         cy.visit('/administrator/globalBadges');
         cy.get('[data-cy="inception-button"]').contains('Level');
         cy.validateElementsOrder('[data-cy="badgeCard"]', ['Badge 5', 'Badge 3', 'Badge 4', 'Badge 1', 'Badge 2']);
@@ -1911,7 +1916,7 @@ describe('Global Badges Tests', () => {
         cy.get('[data-cy="inception-button"]').contains('Level');
         cy.validateElementsOrder('[data-cy="badgeCard"]', ['Badge 1', 'Badge 2']);
         cy.get(badge1Card)
-            .dragAndDrop(badge2Card);
+            .dragAndDrop(badge2Card, { sortableContainer: '#badgeCards' });
 
         // overlay over both cards but loading message only on badge 1
         cy.get('[data-cy="globalBadge1_overlayShown"] [data-cy="updatingSortMsg"]')

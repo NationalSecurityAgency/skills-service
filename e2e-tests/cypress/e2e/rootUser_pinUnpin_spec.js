@@ -1044,13 +1044,15 @@ describe('Root Pin and Unpin Tests', () => {
                 const proj4Card = '[data-cy="projectCard_proj4"] [data-cy="sortControlHandle"]';
                 const newProjCard = '[data-cy="projectCard_ABrandNewProject"] [data-cy="sortControlHandle"]';
 
+                cy.intercept('PATCH', '/admin/projects/proj4').as('savePinnedProjectOrder');
                 cy.get('[data-cy=projectCard]')
                     .eq(0)
                     .should('not.contain', 'A Brand New Project');
                 cy.get(proj4Card)
-                    .dragAndDrop(newProjCard);
+                    .dragAndDrop(newProjCard, { sortableContainer: '#projectCards' });
                 cy.validateElementsOrder('[data-cy="projectCard"]', ['A Brand New Project', 'four']);
 
+                cy.wait('@savePinnedProjectOrder').its('response.statusCode').should('eq', 200);
                 cy.visit('/administrator/');
                 cy.validateElementsOrder('[data-cy="projectCard"]', ['A Brand New Project', 'four']);
             });
@@ -1071,4 +1073,3 @@ describe('Root Pin and Unpin Tests', () => {
   });
 
 });
-

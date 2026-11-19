@@ -526,6 +526,7 @@ describe('Survey Question CRUD Tests', () => {
     });
 
     it('drag and drop to sort questions', function () {
+        cy.intercept('PATCH', '/admin/quiz-definitions/quiz1/questions/*').as('saveQuestionOrder');
         cy.createSurveyDef(1);
         cy.createSurveyMultipleChoiceQuestionDef(1, 1);
         cy.createTextInputQuestionDef(1, 2);
@@ -537,11 +538,14 @@ describe('Survey Question CRUD Tests', () => {
         const q3Card = '[data-cy="questionDisplayCard-3"] [data-cy="sortControlHandle"]';
 
         cy.validateElementsOrder('[data-cy="questionDisplayCard"]', ['question # 1', 'question # 2', 'question # 3']);
-        cy.get(q1Card).dragAndDrop(q2Card);
+        cy.get(q1Card).dragAndDrop(q2Card, { sortableContainer: '#questionsCard' });
         cy.validateElementsOrder('[data-cy="questionDisplayCard"]', ['question # 2', 'question # 1', 'question # 3']);
-        cy.get(q3Card).dragAndDrop(q2Card);
+        cy.wait('@saveQuestionOrder').its('response.statusCode').should('eq', 200);
+        cy.get('[data-cy="updatingSortMsg"]').should('not.exist');
+        cy.get(q3Card).dragAndDrop(q2Card, { sortableContainer: '#questionsCard' });
         cy.validateElementsOrder('[data-cy="questionDisplayCard"]', ['question # 3', 'question # 2', 'question # 1']);
 
+        cy.wait('@saveQuestionOrder').its('response.statusCode').should('eq', 200);
         cy.visit('/administrator/quizzes/quiz1');
         cy.validateElementsOrder('[data-cy="questionDisplayCard"]', ['question # 3', 'question # 2', 'question # 1']);
     });
@@ -573,8 +577,9 @@ describe('Survey Question CRUD Tests', () => {
         cy.get(q2Card).should('exist')
 
         cy.validateElementsOrder('[data-cy="questionDisplayCard"]', ['question # 1', 'question # 2']);
-        cy.get(q1Card).dragAndDrop(q2Card);
+        cy.get(q1Card).dragAndDrop(q2Card, { sortableContainer: '#questionsCard' });
         cy.validateElementsOrder('[data-cy="questionDisplayCard"]', ['question # 2', 'question # 1']);
+        cy.get('[data-cy="updatingSortMsg"]').should('not.exist');
     });
 
     it('user keyboard to sort questions', function () {
@@ -587,7 +592,6 @@ describe('Survey Question CRUD Tests', () => {
 
         cy.validateElementsOrder('[data-cy="questionDisplayCard"]', ['question # 1', 'question # 2', 'question # 3']);
         cy.log("Operation: 1")
-        cy.wait(1000)
         cy.get('[data-cy="btn_Questions"]')
             .tab()
             .type('{downArrow}');
@@ -597,7 +601,6 @@ describe('Survey Question CRUD Tests', () => {
         cy.get('[data-cy="questionDisplayCard-2"] [data-cy="sortControlHandle"]').should('have.focus');
 
         cy.log("Operation: 2")
-        cy.wait(1000)
         cy.get('[data-cy="deleteQuestionButton_1"]')
             .tab()
             .type('{downArrow}');
@@ -607,14 +610,12 @@ describe('Survey Question CRUD Tests', () => {
 
         // attempt to move the lowest item - should not change anything
         cy.log("Operation: 3")
-        cy.wait(1000)
         cy.get('[data-cy="deleteQuestionButton_2"]')
             .tab()
             .type('{downArrow}');
         cy.validateElementsOrder('[data-cy="questionDisplayCard"]', ['question # 2', 'question # 3', 'question # 1']);
 
         cy.log("Operation: 4")
-        cy.wait(1000)
         cy.get('[data-cy="deleteQuestionButton_1"]')
             .tab()
             .type('{upArrow}');
@@ -624,7 +625,6 @@ describe('Survey Question CRUD Tests', () => {
 
         // attempt to move the top item - should not change anything
         cy.log("Operation: 5")
-        cy.wait(1000)
         cy.get('[data-cy="btn_Questions"]')
             .tab()
             .type('{upArrow}');
