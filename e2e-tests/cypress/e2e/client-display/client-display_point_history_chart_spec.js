@@ -36,7 +36,17 @@ describe('Client Display Point History Tests', () => {
 
   const visitPointHistoryPage = (path = '/', expectPointHistoryData = true) => {
     // Snapshot final chart geometry without waiting for animation; other specs retain animations.
-    cy.cdVisit(`${path}?disablePointHistoryChartAnimation=true`)
+    cy.visit(`/test-skills-display/proj1${path}?disablePointHistoryChartAnimation=true`, {
+      onBeforeLoad(win) {
+        // PrimeVue's mask animation-end handler can cancel its removal timer when a large
+        // chart blocks the main thread. Disable only this chart's mask animation before
+        // mounting so unblocking reliably removes the mask, rather than hiding it in snapshots.
+        const style = win.document.createElement('style')
+        style.textContent = '[data-cy="pointHistoryChart"] .p-blockui-mask { animation: none !important; }'
+        win.document.head.appendChild(style)
+      },
+    })
+    cy.validatePoweredBy()
     if (expectPointHistoryData) {
       cy.get('[data-cy="pointHistoryChartWithData"]').should('be.visible')
     }

@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import { matchSkillsDisplaySnapshot, visitSkillsDisplaySnapshotPage } from '../../support/skills-display-snapshot-helpers';
 import moment from 'moment-timezone';
 
 const dateFormatter = value => moment.utc(value)
@@ -183,7 +184,7 @@ describe('Client Display Self Report Skills Tests', () => {
             pointIncrement: 50,
             pointIncrementInterval: 0
         });
-        cy.cdVisit('/');
+        visitSkillsDisplaySnapshotPage('/');
         cy.cdClickSubj(0);
         cy.cdClickSkill(0);
 
@@ -201,7 +202,7 @@ describe('Client Display Self Report Skills Tests', () => {
         cy.get('[data-cy="skillProgress-ptsOverProgressBard"]')
             .contains('50 / 100 Points');
 
-        cy.matchSnapshotImageForElement('[data-cy="skillProgressBar"]', 'Halfway_Progress');
+        matchSkillsDisplaySnapshot('[data-cy="skillProgressBar"]', 'Halfway_Progress');
 
         cy.get('[data-cy="claimPointsBtn"]')
             .click();
@@ -219,7 +220,7 @@ describe('Client Display Self Report Skills Tests', () => {
         cy.get('[data-cy="skillProgress-ptsOverProgressBard"]')
             .contains('100 / 100 Points');
 
-        cy.matchSnapshotImageForElement('[data-cy="skillProgressBar"]', 'Full_Progress');
+        matchSkillsDisplaySnapshot('[data-cy="skillProgressBar"]', 'Full_Progress');
 
         cy.contains('Achieved on ');
     });
@@ -237,7 +238,7 @@ describe('Client Display Self Report Skills Tests', () => {
         });
         cy.createSkill(1, 1, 3);
 
-        cy.cdVisit('/');
+        visitSkillsDisplaySnapshotPage('/');
         cy.cdClickSubj(0);
 
         cy.get('[data-cy=toggleSkillDetails]')
@@ -257,7 +258,7 @@ describe('Client Display Self Report Skills Tests', () => {
         cy.get('[data-cy="skillProgress_index-1"] [data-cy="skillProgress-ptsOverProgressBard"]')
             .contains('50 / 100 Points');
 
-        cy.matchSnapshotImageForElement('[data-cy="skillProgress_index-1"] [data-cy="skillProgressBar"]', 'Halfway_Progress_On_Subj_Page');
+        matchSkillsDisplaySnapshot('[data-cy="skillProgress_index-1"] [data-cy="skillProgressBar"]', 'Halfway_Progress_On_Subj_Page');
 
         cy.get('[data-cy="skillProgress_index-1"] [data-cy="claimPointsBtn"]')
             .click();
@@ -275,7 +276,7 @@ describe('Client Display Self Report Skills Tests', () => {
         cy.get('[data-cy="skillProgress_index-1"] [data-cy="skillProgress-ptsOverProgressBard"]')
             .contains('100 / 100 Points');
 
-        cy.matchSnapshotImageForElement('[data-cy="skillProgress_index-1"] [data-cy="skillProgressBar"]', 'Full_Progress_On_Subj_Page');
+        matchSkillsDisplaySnapshot('[data-cy="skillProgress_index-1"] [data-cy="skillProgressBar"]', 'Full_Progress_On_Subj_Page');
 
         cy.get('[data-cy="skillProgress_index-1"]')
             .contains('Achieved on ');
@@ -762,7 +763,7 @@ describe('Client Display Self Report Skills Tests', () => {
         cy.createSkill(1, 1, 2);
         cy.createSkill(1, 1, 3, { selfReportingType: 'HonorSystem' });
 
-        cy.cdVisit('/');
+        visitSkillsDisplaySnapshotPage('/');
         cy.cdClickSubj(0);
 
         cy.get('[data-cy="skillProgress_index-0"] [data-cy="selfReportApprovalTag"]').contains('Approval');
@@ -770,15 +771,15 @@ describe('Client Display Self Report Skills Tests', () => {
         cy.get('[data-cy="skillProgress_index-1"] [data-cy="selfReportHonorSystemTag"]').should('not.exist');
         cy.get('[data-cy="skillProgress_index-2"] [data-cy="selfReportHonorSystemTag"]').contains('Honor');
 
-        cy.matchSnapshotImageForElement('[data-cy="skillProgress_index-0"]', {
+        matchSkillsDisplaySnapshot('[data-cy="skillProgress_index-0"]', {
             name: 'Self_Reportable Label',
             blackout: '[data-cy="skillProgressTitle"]',
             errorThreshold: 0.05
         });
 
-        cy.cdVisit('/?enableTheme=true');
+        visitSkillsDisplaySnapshotPage('/?enableTheme=true');
         cy.cdClickSubj(0);
-        cy.matchSnapshotImageForElement('[data-cy="skillProgress_index-0"]', {
+        matchSkillsDisplaySnapshot('[data-cy="skillProgress_index-0"]', {
             name: 'Self_Reportable Label - Themed',
             errorThreshold: 0.05
         });
@@ -789,21 +790,21 @@ describe('Client Display Self Report Skills Tests', () => {
         cy.createSkill(1, 1, 2);
         cy.createSkill(1, 1, 3, { selfReportingType: 'HonorSystem' });
 
-        cy.cdVisit('/');
+        visitSkillsDisplaySnapshotPage('/');
         cy.cdClickSubj(0);
         cy.cdClickSkill(0);
         cy.get('[data-cy="skillProgressTitle-skill1"] [data-cy="selfReportApprovalTag"]').contains('Approval')
-        cy.matchSnapshotImageForElement('[data-cy="skillProgressTitle-skill1"]', 'Self_Reportable Label on Skill Overview');
+        matchSkillsDisplaySnapshot('[data-cy="skillProgressTitle-skill1"]', 'Self_Reportable Label on Skill Overview');
 
         cy.cdBack('Subject 1');
         cy.cdClickSkill(1);
         cy.get('[data-cy="skillProgressTitle-skill1"] [data-cy="selfReportApprovalTag"]') .should('not.exist');
         cy.get('[data-cy="skillProgressTitle-skill1"] [data-cy="selfReportHonorSystemTag"]') .should('not.exist');
 
-        cy.cdVisit('/?enableTheme=true');
+        visitSkillsDisplaySnapshotPage('/?enableTheme=true');
         cy.cdClickSubj(0);
         cy.cdClickSkill(0);
-        cy.matchSnapshotImageForElement('[data-cy="skillProgressTitle-skill1"]', 'Self_Reportable Label on Skill Overview - Themed');
+        matchSkillsDisplaySnapshot('[data-cy="skillProgressTitle-skill1"]', 'Self_Reportable Label on Skill Overview - Themed');
     });
 
     it('attempt to report skill with insufficient project points', () => {

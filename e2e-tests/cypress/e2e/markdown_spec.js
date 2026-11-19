@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import { matchSkillsDisplaySnapshot } from '../support/skills-display-snapshot-helpers';
 describe('Markdown Tests', () => {
 
     const markdownInput = '[data-cy=markdownEditorInput] div.toastui-editor-contents[contenteditable="true"]';
@@ -525,7 +526,7 @@ describe('Markdown Tests', () => {
         cy.get('[data-cy="inception-button"]').contains('Level 0');
         cy.get('[data-cy="skillOverviewDescription"]').contains('Emojis');
         cy.get('[data-cy="skillOverviewDescription"]').contains('👍 👍 👍 👍');
-        cy.matchSnapshotImageForElement('[data-cy="childRowDisplay_skill1"] [data-cy="skillOverviewDescription"]', {
+        matchSkillsDisplaySnapshot('[data-cy="childRowDisplay_skill1"] [data-cy="skillOverviewDescription"]', {
             errorThreshold: 0.1
         });
     })
@@ -664,7 +665,7 @@ describe('Markdown Tests', () => {
         cy.get('[data-cy="quizDescription"]').contains('Emojis');
         cy.get('[data-cy="quizDescription"]').contains('👍 👍 👍 👍');
 
-        cy.matchSnapshotImageForElement('[data-cy="quizDescription"]', {
+        matchSkillsDisplaySnapshot('[data-cy="quizDescription"]', {
             errorThreshold: 0.1
         });
     })

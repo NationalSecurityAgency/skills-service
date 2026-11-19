@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import { matchSkillsDisplaySnapshot, visitSkillsDisplaySnapshotPage } from '../../support/skills-display-snapshot-helpers';
 import dayjs from 'dayjs';
 import relativeTimePlugin from 'dayjs/plugin/relativeTime';
 import advancedFormatPlugin from 'dayjs/plugin/advancedFormat';
@@ -595,15 +596,15 @@ describe('Client Display Quiz Matching Question Tests', () => {
         cy.createSubject(1,1)
         cy.createSkill(1, 1, 1, { selfReportingType: 'Quiz', quizId: 'quiz1',  pointIncrement: '150', numPerformToCompletion: 1 });
 
-        cy.cdVisit('/subjects/subj1/skills/skill1/quizzes/quiz1?enableTheme=true');
+        visitSkillsDisplaySnapshotPage('/subjects/subj1/skills/skill1/quizzes/quiz1?enableTheme=true');
         cy.get('[data-cy="quizSplashScreen"] [data-cy="quizDescription"]').contains('What a cool quiz #1! Thank you for taking it!')
         cy.get('[data-cy="startQuizAttempt"]').click()
 
         cy.dragAndDropAnswerMatch(1, 'First Answer', 0)
         cy.dragAndDropAnswerMatch(1, 'Second Answer', 1)
 
-        cy.wait(4000)
-        cy.matchSnapshotImageForElement('[data-cy="question_1"]', { errorThreshold: 0.1 });
+        cy.validateMatchedSelection(1, ['First Answer', 'Second Answer'])
+        matchSkillsDisplaySnapshot('[data-cy="question_1"]', { errorThreshold: 0.1 });
     });
 
     it('theme support: display answers after completing quiz', () => {
@@ -615,7 +616,7 @@ describe('Client Display Quiz Matching Question Tests', () => {
         cy.createSubject(1,1)
         cy.createSkill(1, 1, 1, { selfReportingType: 'Quiz', quizId: 'quiz1',  pointIncrement: '150', numPerformToCompletion: 1 });
 
-        cy.cdVisit('/subjects/subj1/skills/skill1/quizzes/quiz1?enableTheme=true');
+        visitSkillsDisplaySnapshotPage('/subjects/subj1/skills/skill1/quizzes/quiz1?enableTheme=true');
         cy.get('[data-cy="quizSplashScreen"] [data-cy="quizDescription"]').contains('What a cool quiz #1! Thank you for taking it!')
         cy.get('[data-cy="startQuizAttempt"]').click()
 
@@ -626,14 +627,11 @@ describe('Client Display Quiz Matching Question Tests', () => {
 
         cy.clickCompleteQuizBtn()
 
-        cy.get('[data-cy="quizCompletion"] [data-cy="quizFailed"]')
-        cy.get('[data-cy="quizRunQuestions"] [data-cy="question_1"] [data-cy="questionAnsweredWrong"]')
+        cy.get('[data-cy="quizCompletion"] [data-cy="quizFailed"]').should('be.visible')
+        cy.get('[data-cy="quizRunQuestions"] [data-cy="question_1"] [data-cy="questionAnsweredWrong"]').should('be.visible')
 
-        cy.wait(4000)
-        cy.matchSnapshotImageForElement('[data-cy="question_1"]', { errorThreshold: 0.1 });
+        matchSkillsDisplaySnapshot('[data-cy="question_1"]', { errorThreshold: 0.1 });
     });
 
 
 });
-
-

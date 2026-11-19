@@ -14,6 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <script setup>
+import { useMetricsChartSnapshot } from '@/components/metrics/common/UseMetricsChartSnapshot.js'
 import {onMounted, ref} from 'vue';
 import MetricsService from '@/components/metrics/MetricsService.js';
 import {useRoute} from 'vue-router';
@@ -74,6 +75,7 @@ onMounted(() => {
 });
 
 const chartJsOptions = ref();
+const { snapshotOptions, snapshotPlugins } = useMetricsChartSnapshot(chartJsOptions)
 const levelsBarChart = ref(null)
 const setChartOptions = () => {
   const colors = chartSupportColors.getColors()
@@ -145,8 +147,8 @@ const setChartOptions = () => {
                id="levelsBarChart"
                type="bar"
                :data="chartData"
-               :options="chartJsOptions"
-               :plugins="[ChartDataLabels]"
+               :options="snapshotOptions"
+               :plugins="[ChartDataLabels, ...snapshotPlugins]"
                class="h-[30rem]" />
       </metrics-overlay>
     </template>

@@ -14,6 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <script setup>
+import { useMetricsChartSnapshot } from '@/components/metrics/common/UseMetricsChartSnapshot.js'
 import {computed, onMounted, ref} from 'vue';
 import {useRoute} from 'vue-router';
 import MetricsService from "@/components/metrics/MetricsService.js";
@@ -122,6 +123,7 @@ const clearDateFilter = () => {
 
 const isPieChart = computed(() => props.chartType === 'pie')
 const chartJsOptions = ref();
+const { snapshotOptions, snapshotPlugins } = useMetricsChartSnapshot(chartJsOptions)
 const userTagChart = ref(null)
 const setChartOptions = () => {
   const colors = chartSupportColors.getColors()
@@ -200,7 +202,8 @@ const setChartOptions = () => {
                  id="userTagChart"
                  :type="props.chartType"
                  :data="chartData"
-                 :options="chartJsOptions"
+                 :options="snapshotOptions"
+                 :plugins="snapshotPlugins"
                  :class="{
                    'min-h-[16em] w-full': !isPieChart,
                    'h-[16rem]': isEmpty,

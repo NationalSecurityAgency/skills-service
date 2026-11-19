@@ -30,9 +30,14 @@ const assertSnapshotContentReady = (root) => {
   const loadingMasks = findIncludingRoot('[data-pc-section="mask"]')
     .add($root.parents('[data-pc-name="blockui"]').children('[data-pc-section="mask"]'))
     .filter((index, mask) => !mask.closest('[data-cy="pointHistoryChartNoData"]'))
+    // Graded quiz answers keep a transparent mask behind their feedback icons, not a loading state.
+    // Only inspect this mask's sibling overlay so enclosing loading masks are still checked.
+    .filter((index, mask) => Cypress.$(mask).siblings('.overlay-content')
+      .find('[data-cy="wrongSelection"], [data-cy="missedSelection"]').length === 0)
   expect(loadingMasks, 'captured loading masks').to.have.length(0)
 
-  findIncludingRoot('[data-cy="overallPoints"], [data-cy="levelProgress"]').each((index, circle) => {
+  // Subject cards also use levelProgress for text; only CircleProgress wrappers contain radial charts.
+  findIncludingRoot('.progress-circle-wrapper[data-cy="overallPoints"], .progress-circle-wrapper[data-cy="levelProgress"]').each((index, circle) => {
     expect(circle.querySelector('[data-cy="radialChart-rendered"]'), 'circle chart final draw').not.to.be.null
   })
   findIncludingRoot('[data-cy="pointHistoryChart"]').each((index, chart) => {

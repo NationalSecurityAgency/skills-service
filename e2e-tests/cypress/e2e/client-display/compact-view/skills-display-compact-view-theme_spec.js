@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import { matchSkillsDisplaySnapshot, waitForIframeSnapshot } from '../../../support/skills-display-snapshot-helpers';
 
 import {
   addBadgesAndLearningPath,
@@ -23,6 +24,20 @@ import {
 } from '../../../support/compact-view';
 
 describe('Compact view custom theme snapshots', () => {
+  const matchCompactThemeSnapshot = () => {
+    waitForIframeSnapshot();
+    // Compare AUT coordinates only: Cypress's runner preview can be scaled smaller than the test viewport.
+    cy.get('body iframe').should($iframe => {
+      const frame = $iframe[0];
+      const hostWindow = frame.ownerDocument.defaultView;
+      const viewportWidth = hostWindow.document.documentElement.clientWidth;
+      const bounds = frame.getBoundingClientRect();
+      expect(bounds.left, 'iframe left edge inside host viewport').to.be.at.least(0);
+      expect(bounds.right, 'iframe right edge inside host viewport').to.be.at.most(viewportWidth);
+    });
+    return matchSkillsDisplaySnapshot('body iframe', { errorThreshold: 0.05 });
+  };
+
   beforeEach(() => {
     cy.viewport(1440, 1000);
     createCompactMetricsProject();
@@ -33,7 +48,7 @@ describe('Compact view custom theme snapshots', () => {
   [{ name: 'desktop', width: 1440 }, { name: 'mobile', width: 375 }].forEach(({ name, width }) => {
     it(`themed compact project overview on ${name}`, () => {
       cy.viewport(width, 1000);
-      cy.visit(`/test-skills-client/proj1?enableTheme=true`);
+      cy.visit(`/test-skills-client/proj1?enableTheme=true&disableChartAnimations=true`);
       cy.wrapIframe().within(() => {
         assertView(true);
         assertSkillCount(1, 4);
@@ -42,23 +57,23 @@ describe('Compact view custom theme snapshots', () => {
         cy.get('[data-cy="compactMetric-badges"]').should('contain.text', 'Badges earned');
         cy.get('[data-cy="viewLearningPathLink"]').should('be.visible');
       });
-      cy.matchSnapshotImageForElement('body iframe', { errorThreshold: 0.05 });
+      matchCompactThemeSnapshot();
     });
   });
 
   it('themed compact subject card', () => {
-    cy.visit(`/test-skills-client/proj1?enableTheme=true`);
+    cy.visit(`/test-skills-client/proj1?enableTheme=true&disableChartAnimations=true`);
     cy.wrapIframe().within(() => {
       assertView(true);
       cy.get('[data-cy="subjectTile-subj1"]').should('contain.text', 'Subject 1');
       cy.get('[data-cy="subjectTile-subj1"] [data-cy="pointsProgress"]').should('contain.text', '100').and('contain.text', '1,000');
       cy.get('[data-cy="subjectTile-subj1"] [data-cy="subjectTileBtn"]').should('be.visible');
     });
-    cy.matchSnapshotImageForElement('body iframe', { errorThreshold: 0.05 });
+    matchCompactThemeSnapshot();
   });
 
   it('themed compact subject overview', () => {
-    cy.visit(`/test-skills-client/proj1?enableTheme=true`);
+    cy.visit(`/test-skills-client/proj1?enableTheme=true&disableChartAnimations=true`);
     cy.wrapIframe().find('[data-cy="subjectTile-subj1"] [data-cy="subjectTileBtn"]').should('be.visible').click();
     cy.wrapIframe().within(() => {
       cy.get('[data-cy="skillsTitle"]').should('contain.text', 'Subject 1');
@@ -67,6 +82,6 @@ describe('Compact view custom theme snapshots', () => {
       cy.get(compactOverview).contains('+100 today').should('be.visible');
       cy.get('[data-cy="compactMetric-rank"]').should('contain.text', '#1');
     });
-    cy.matchSnapshotImageForElement('body iframe', { errorThreshold: 0.05 });
+    matchCompactThemeSnapshot();
   });
 });

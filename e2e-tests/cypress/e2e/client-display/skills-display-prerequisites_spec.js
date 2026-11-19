@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import { matchSkillsDisplaySnapshot, visitSkillsDisplaySnapshotPage, waitForPrerequisitesGraph } from '../../support/skills-display-snapshot-helpers';
 describe('Prerequisite tests', () => {
 
   beforeEach(() => {
@@ -143,17 +144,17 @@ describe('Prerequisite tests', () => {
 
   it('skill with dependency renders dependency graph', () => {
     cy.viewport(1200, 1000);
-    cy.cdVisit('/', true);
+    visitSkillsDisplaySnapshotPage('/', true);
     cy.cdClickSubj(0, 'Subject 1',true);
     cy.get('[data-cy=toggleSkillDetails]')
       .click();
     cy.get('[data-cy="skillProgress_index-3"] [data-cy="progressBarWithLock"]')
       .click();
 
-    cy.wait(4000);
-    cy.get('[data-cy="prereqTable"] [data-cy="skillLink-proj1-skill2"]')
+    waitForPrerequisitesGraph();
+    cy.get('[data-cy="prereqTable"] [data-cy="skillLink-proj1-skill2"]').should('be.visible')
     cy.get('[data-cy="prerequisitesCard"] [data-cy="graphLegend"]').should('not.exist')
-    cy.matchSnapshotImageForElement('[data-cy="skillsDisplayHome"]', {
+    matchSkillsDisplaySnapshot('[data-cy="skillsDisplayHome"]', {
       blackout: '[data-cy=pointHistoryChart]'
     });
   });

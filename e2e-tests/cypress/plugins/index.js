@@ -95,9 +95,17 @@ module.exports = (on, config) => {
   // `config` is the resolved Cypress config
     on("before:browser:launch", (browser = {}, launchOptions) => {
         prepareAudit(launchOptions);
-        if (browser.name === 'chrome' && browser.isHeadless) {
+        if (browser.family === 'chromium' && browser.name !== 'electron') {
             // Element screenshots are clipped to the browser window, even when cy.viewport() is wider.
             launchOptions.args.push('--window-size=1920,1080');
+            if (browser.isHeadless) {
+                // Modern headless Chrome also constrains that window to its virtual screen size.
+                launchOptions.args.push('--screen-info={1920x1080}');
+            }
+        } else if (browser.name === 'electron') {
+            // Electron ignores launchOptions.args; size its BrowserWindow instead, including open mode.
+            launchOptions.preferences.width = Math.max(launchOptions.preferences.width || 0, 1920);
+            launchOptions.preferences.height = Math.max(launchOptions.preferences.height || 0, 1080);
         }
         return launchOptions
     });

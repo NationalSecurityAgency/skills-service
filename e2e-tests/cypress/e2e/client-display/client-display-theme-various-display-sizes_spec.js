@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 import moment from 'moment-timezone';
+import { matchSkillsDisplaySnapshot, visitSkillsDisplaySnapshotPage } from '../../support/skills-display-snapshot-helpers';
 
 describe('Client Display Tests', () => {
 
@@ -25,11 +26,7 @@ describe('Client Display Tests', () => {
     ];
 
     const matchThemeSnapshot = (options = {}) => {
-        cy.get('[data-pc-name="progressspinner"]').should('not.exist');
-        return cy.matchSnapshotImageForElement('[data-cy="testDisplayTheme"]', {
-            waitForResources: true,
-            ...options,
-        });
+        return matchSkillsDisplaySnapshot('[data-cy="testDisplayTheme"]', options);
     };
 
     before(() => {
@@ -197,7 +194,7 @@ describe('Client Display Tests', () => {
 
             cy.cdInitProjWithSkills();
 
-            cy.cdVisit('/?enableTheme=true');
+            visitSkillsDisplaySnapshotPage('/?enableTheme=true');
 
             cy.get('[data-cy=pointHistoryChart]').should('be.visible');
 
@@ -216,7 +213,7 @@ describe('Client Display Tests', () => {
 
             cy.cdInitProjWithSkills();
 
-            cy.cdVisit('/subjects/subj1/?enableTheme=true');
+            visitSkillsDisplaySnapshotPage('/subjects/subj1/?enableTheme=true');
             cy.contains('Subject 1');
             cy.get('[data-cy=myRank]')
                 .contains('1');
@@ -264,7 +261,7 @@ describe('Client Display Tests', () => {
 
             cy.cdInitProjWithSkills();
 
-            cy.cdVisit('/subjects/subj1/?enableTheme=true');
+            visitSkillsDisplaySnapshotPage('/subjects/subj1/?enableTheme=true');
             cy.contains('Subject 1');
 
             cy.cdClickSkill(3);

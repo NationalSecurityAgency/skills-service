@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import { matchSkillsDisplaySnapshot, visitSkillsDisplaySnapshotPage } from '../../support/skills-display-snapshot-helpers';
 import dayjs from 'dayjs';
 import relativeTimePlugin from 'dayjs/plugin/relativeTime';
 import advancedFormatPlugin from 'dayjs/plugin/advancedFormat';
@@ -163,7 +164,7 @@ describe('Last Achieved date tests', () => {
         timestamp: m.subtract(i, 'day').format('x')
       });
     }
-    cy.cdVisit('/?internalBackButton=true', true);
+    visitSkillsDisplaySnapshotPage('/?internalBackButton=true', true);
     cy.cdClickSubj(0, 'Subject 1',true);
     cy.cdClickSkill(1);
 
@@ -171,7 +172,7 @@ describe('Last Achieved date tests', () => {
     cy.get('[data-cy=achievementDate]').contains(`${orig.fromNow()}`);
     cy.get('[data-cy="overallPointsEarnedCard"] [data-cy="mediaInfoCardTitle"]').contains('500');
 
-    cy.matchSnapshotImageForElement('[data-cy="skillsDisplayHome"]', {
+    matchSkillsDisplaySnapshot('[data-cy="skillsDisplayHome"]', {
       name: 'Skill-Overview-Achieved',
       blackout: '[data-cy=pointHistoryChart], [data-cy="skillTreePoweredBy"]',
       errorThreshold: 0.05
@@ -189,7 +190,7 @@ describe('Last Achieved date tests', () => {
       });
     }
 
-    cy.cdVisit('/?enableTheme=true', true);
+    visitSkillsDisplaySnapshotPage('/?enableTheme=true', true);
     cy.cdClickSubj(0, 'Subject 1',true);
     cy.cdClickSkill(1);
 
@@ -200,7 +201,7 @@ describe('Last Achieved date tests', () => {
     cy.get('[data-cy="overallPointsEarnedCard"] [data-cy="mediaInfoCardTitle"]')
       .contains('500');
 
-    cy.matchSnapshotImageForElement('[data-cy="skillsDisplayHome"]', {
+    matchSkillsDisplaySnapshot('[data-cy="skillsDisplayHome"]', {
       name: 'Skill-Overview-Achieved-Themed',
       blackout: '[data-cy=pointHistoryChart], [data-cy="skillTreePoweredBy"]',
       errorThreshold: 0.05
@@ -220,7 +221,7 @@ describe('Last Achieved date tests', () => {
 
     cy.setResolution('iphone-6');
 
-    cy.cdVisit('/', true);
+    visitSkillsDisplaySnapshotPage('/', true);
     cy.cdClickSubj(0, 'Subject 1',true);
     cy.cdClickSkill(1);
 
@@ -231,7 +232,7 @@ describe('Last Achieved date tests', () => {
     cy.get('[data-cy="overallPointsEarnedCard"] [data-cy="mediaInfoCardTitle"]')
       .contains('500');
 
-    cy.matchSnapshotImageForElement('[data-cy="skillsDisplayHome"]', {
+    matchSkillsDisplaySnapshot('[data-cy="skillsDisplayHome"]', {
       name: 'Skill-Overview-Achieved-iphone6',
       blackout: '[data-cy=pointHistoryChart], [data-cy="skillTreePoweredBy"]',
       errorThreshold: 0.05
@@ -251,7 +252,7 @@ describe('Last Achieved date tests', () => {
     }
     cy.setResolution('ipad-2');
 
-    cy.cdVisit('/', true);
+    visitSkillsDisplaySnapshotPage('/', true);
     cy.cdClickSubj(0, 'Subject 1',true);
     cy.cdClickSkill(1);
 
@@ -262,7 +263,7 @@ describe('Last Achieved date tests', () => {
     cy.get('[data-cy="overallPointsEarnedCard"] [data-cy="mediaInfoCardTitle"]')
       .contains('500');
 
-    cy.matchSnapshotImageForElement('[data-cy="skillsDisplayHome"]', {
+    matchSkillsDisplaySnapshot('[data-cy="skillsDisplayHome"]', {
       name: 'Skill-Overview-Achieved-ipad2',
       blackout: '[data-cy=pointHistoryChart], [data-cy="skillTreePoweredBy"]',
       errorThreshold: 0.05
