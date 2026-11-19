@@ -46,7 +46,7 @@ watch( () => route.params.subjectId, () => {
       <skills-title>{{  subject.subjectSummary.subject }}</skills-title>
       <progress-and-ranking-overview class="mt-4" is-subject />
 
-      <Card v-if="subject.subjectSummary.description" class="mt-2">
+      <Card v-if="subject.subjectSummary.description" class="mt-2" :pt="{ body: { class : 'px-4! py-3!'}}">
         <template #title>
           <div class="h6 card-title mb-0 float-left">Description</div>
         </template>

@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <script setup>
-import { computed, ref, onMounted, watch } from 'vue'
+import { computed, nextTick, onBeforeUnmount, ref, onMounted, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import { Network } from 'vis-network'
 import { useSkillsDisplayAttributesState } from '@/skills-display/stores/UseSkillsDisplayAttributesState.js'
@@ -42,6 +42,8 @@ const loadingData = ref(true)
 const thisSkill = ref({})
 const dependenciesInternal = ref([])
 const network = ref(null)
+const graphRenderReady = ref(false)
+let graphGeneration = 0
 const showLegend = computed(() => dependenciesInternal.value.some((item) => item.skill?.type === 'Badge' || item.dependsOn?.type === 'Badge') &&
   dependenciesInternal.value.some((item) => item.skill?.type === 'Skill' || item.dependsOn?.type === 'Skill'))
 const displayOptions = {
@@ -80,11 +82,16 @@ watch( () => route.params.skillId, () => {
   loadAllDataForPrereq()
 });
 
+onBeforeUnmount(() => clearNetwork())
+
 const loadAllDataForPrereq  = () => {
-  loadData().then(() => {
+  const dataLoad = loadData()
+  const generation = graphGeneration
+  return dataLoad.then(() => {
+    if (generation !== graphGeneration) return
     if (dependenciesInternal.value?.length > 0) {
       initInternalDeps()
-      createGraph()
+      return createGraph()
     }
   })
 }
@@ -96,6 +103,8 @@ const isDependency = () => {
 }
 
 const loadData = () => {
+  clearNetwork()
+  const generation = graphGeneration
   loadingData.value = true
   if (!route.params.crossProjectId) {
     let lookupId = isDependency() ? route.params.dependentSkillId : route.params.skillId
@@ -104,6 +113,7 @@ const loadData = () => {
     }
     return skillsDisplayService.getSkillDependencies(lookupId)
       .then((res) => {
+        if (generation !== graphGeneration) return
         dependenciesInternal.value = res.dependencies
         loadingData.value = false
       })
@@ -143,50 +153,64 @@ const initInternalDeps = () => {
 
 
 const clearNetwork = () => {
-  if (network.value) {
-    return network.value.destroy()
-  }
-  return true
+  graphGeneration += 1
+  graphRenderReady.value = false
+  network.value?.destroy()
+  network.value = null
 }
 const isSmallScreen = () => {
   const width = window.innerWidth
   return width <= 768
 }
-const createGraph = () => {
+const shouldFocusOnParentNode = () => isSmallScreen() || dependenciesInternal.value.length > 5
+const createGraph = async () => {
   clearNetwork()
+  const generation = graphGeneration
+  await nextTick()
 
-  const data = buildData()
   const container = document.getElementById('dependent-skills-network')
-  network.value = new Network(container, data, displayOptions)
-  network.value.on('click', (params) => {
+  if (generation !== graphGeneration || !container?.isConnected) return
+
+  // Canvas icons do not trigger font loading like DOM text does. Load them before layout and drawing.
+  await document.fonts.load('900 50px "Font Awesome 5 Free"', '\uf19d\uf559')
+  await document.fonts.ready
+  if (generation !== graphGeneration || !container.isConnected) return
+
+  const graphNetwork = new Network(container, buildData(), displayOptions)
+  network.value = graphNetwork
+  let focusAnimationFinished = !shouldFocusOnParentNode()
+  const markGraphReady = () => {
+    if (focusAnimationFinished && generation === graphGeneration) {
+      graphRenderReady.value = true
+      graphNetwork.off('afterDrawing', markGraphReady)
+    }
+  }
+  graphNetwork.on('afterDrawing', markGraphReady)
+  if (!focusAnimationFinished) {
+    // animationFinished fires before the final frame is drawn; afterDrawing marks that frame ready.
+    graphNetwork.once('animationFinished', () => {
+      focusAnimationFinished = true
+    })
+  }
+  graphNetwork.on('click', (params) => {
     const skillItem = locateSelectedSkill(params)
     navHelper.navigateToSkill(skillItem);
   })
   const networkCanvas = container.getElementsByTagName('canvas')[0]
-  network.value.on('hoverNode', () => {
+  graphNetwork.on('hoverNode', () => {
     networkCanvas.style.cursor = 'pointer'
   })
-  network.value.on('blurNode', () => {
+  graphNetwork.on('blurNode', () => {
     networkCanvas.style.cursor = 'default'
   })
 
   focusOnParentNode()
-  setVisNetworkTabIndex();
+  container.querySelector('.vis-network')?.setAttribute('tabindex', -1)
+  graphNetwork.redraw()
 }
 
-const setVisNetworkTabIndex = () => {
-  setTimeout(() => {
-    const elements = document.getElementsByClassName('vis-network');
-    if (elements && elements.length === 1) {
-      const element = elements[0];
-      if (element) {
-        element.setAttribute('tabindex', -1);
-      }
-    }
-  }, 500);
-}
 const focusOnParentNode = () => {
-  if (isSmallScreen() || dependenciesInternal.value.length > 5) {
+  if (shouldFocusOnParentNode()) {
     const options = {
       scale: 0.7,
       offset: { x: 0, y: 180 },
@@ -327,6 +351,8 @@ const buildNode = (skill, isCrossProject, createdSkillIds, nodes, achievedIds, e
           </div>
         </div>
         <div id="dependent-skills-network"
+             data-cy="prerequisitesGraph"
+             :data-render-ready="graphRenderReady"
              class="h-[500px]"
              :style="{ '--graph-nav-color': themeState.graphNavButtonsColor || themeState.graphTextPrimaryColor || undefined }"
              aria-hidden="true"></div>

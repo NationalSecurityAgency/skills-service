@@ -134,7 +134,8 @@ Cypress.Commands.add("matchSnapshotImageForElement", (selector, maybeNameOtherwi
         name : snapName,
         selector,
         blackout: ((options && options.blackout) || null),
-        errorThreshold: options?.errorThreshold
+        errorThreshold: options?.errorThreshold,
+        waitForResources: options?.waitForResources
     };
     cy.doMatchSnapshotImage(params);
 })
@@ -145,20 +146,53 @@ Cypress.Commands.add("matchSnapshotImage", (maybeNameOtherwiseCommandOptions) =>
     const params = {
         name : snapName,
         blackout: ((options && options.blackout) || null),
-        errorThreshold: options?.errorThreshold
+        errorThreshold: options?.errorThreshold,
+        waitForResources: options?.waitForResources
     };
     cy.doMatchSnapshotImage(params);
 })
 
 Cypress.Commands.add("doMatchSnapshotImage", (options) => {
-    cy.wait(2000);
-
     const visualRegressionOptions = {
         errorThreshold: 0.05 // in percent
     }
     if (options && (typeof options.errorThreshold === 'number' && Number.isFinite(options.errorThreshold))) {
         visualRegressionOptions.errorThreshold = options.errorThreshold
     }
+    if (options?.waitForResources) {
+        // Callers must assert page data and canvas animation completion before opting in.
+        return cy.get(options.selector || 'body').should('be.visible').then(async ($element) => {
+            const element = $element[0];
+            const document = element.ownerDocument;
+            const window = document.defaultView;
+            if (options.blackout) {
+                Cypress.$(document.body).find(options.blackout).css('visibility', 'hidden');
+            }
+
+            await document.fonts.ready;
+            const images = [...element.querySelectorAll('img')];
+            if (element.matches('img')) {
+                images.push(element);
+            }
+            await Promise.all(images.filter(image =>
+                (image.currentSrc || image.getAttribute('src') || image.getAttribute('srcset')) &&
+                image.getClientRects().length > 0 && window.getComputedStyle(image).visibility !== 'hidden'
+            ).map(image => image.decode()));
+
+            // Allow layout and paint to commit after resources load and blackout styles change.
+            await new Cypress.Promise(resolve => {
+                window.requestAnimationFrame(() => window.requestAnimationFrame(() => resolve()));
+            });
+        }).then(() => {
+            if (options.selector) {
+                return cy.get(options.selector).compareSnapshot(options.name, visualRegressionOptions);
+            }
+            return cy.compareSnapshot(options.name, visualRegressionOptions);
+        });
+    }
+
+    // Preserve the legacy timing until other visual specs have explicit readiness assertions.
+    cy.wait(2000);
     if (options && options.blackout) {
         cy
             // wait for content to be ready
