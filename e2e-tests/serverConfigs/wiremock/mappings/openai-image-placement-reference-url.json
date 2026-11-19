@@ -1,0 +1,23 @@
+{
+  "metadata": {
+    "license": "Copyright 2026 SkillTree\n\nLicensed under the Apache License, Version 2.0 (the \"License\");\nyou may not use this file except in compliance with the License.\nYou may obtain a copy of the License at\n\n    https://www.apache.org/licenses/LICENSE-2.0\n\nUnless required by applicable law or agreed to in writing, software\ndistributed under the License is distributed on an \"AS IS\" BASIS,\nWITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\nSee the License for the specific language governing permissions and\nlimitations under the License."
+  },
+  "priority": 1,
+  "request": {
+    "method": "POST",
+    "urlPath": "/v1/chat/completions",
+    "bodyPatterns": [
+      { "contains": "AI image placement safety - reference URL" },
+      { "matches": "(?s).*(Update an existing SingleChoice Question Type|Modify current descriptions).*" },
+      { "contains": "---IMG-0" },
+      { "doesNotContain": "data:image/" },
+      { "doesNotContain": "AI image placement safety - valid images" }
+    ]
+  },
+  "response": {
+    "status": 200,
+    "headers": { "Content-Type": "text/event-stream" },
+    "bodyFileName": "response-body-image-placement-reference-url.txt",
+    "chunkedDribbleDelay": { "numberOfChunks": 10, "totalDuration": 1000 }
+  }
+}
