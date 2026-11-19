@@ -29,10 +29,11 @@ export const useImgHandler = () => {
     const PLACEHOLDER_PREFIX = '---IMG-';
 
     /**
-     * A regular expression to match standard Markdown image syntax: `![alt text](data:image)` with base64 encoded image.
+     * Match an inline data image's destination separately from its optional Markdown title.
+     * Titles may use double quotes, single quotes, or parentheses, including escaped delimiters.
      * The 'g' flag is for a global search to find all image matches.
      */
-    const IMAGE_REGEX = /!\[([^\]]*?)\]\((data:image\/[^;]+;base64,[^)]+)\)/g;
+    const IMAGE_REGEX = /!\[([^\]]*?)\]\((data:image\/[^;]+;base64,[^\s)]+)(?:\s+(?:"(?:\\[\s\S]|[^"\\])*"|'(?:\\[\s\S]|[^'\\])*'|\((?:\\[\s\S]|[^()\\])*\)))?\s*\)/g;
 
     const extractImages = (markdown) => {
         const extractedImages = [];
@@ -96,7 +97,10 @@ export const useImgHandler = () => {
             const probeUrl = `${image.url.substring(0, image.url.indexOf(',') + 1)}${probeId}${probeUrls.length}X`;
             probeUrls.push(probeUrl);
             usedImages.add(image);
-            return `![${image.alt}](${probeUrl})`;
+            // Replace only the destination, preserving the exact alt text and title
+            // syntax that will be restored. The same URL could also occur in the alt text.
+            const urlStart = image.alt.length + 4; // ![alt](
+            return image.markdown.substring(0, urlStart) + probeUrl + image.markdown.substring(urlStart + image.url.length);
         });
 
         if (probeUrls.length) {

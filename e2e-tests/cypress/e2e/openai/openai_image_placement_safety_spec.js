@@ -19,7 +19,7 @@ describe('AI image placement safety', () => {
     const unsafePlacementMsg = 'The AI placed an image placeholder in an invalid location.'
     const validPrompt = 'AI image placement safety - valid images'
     const safeText = 'Image placement is safe.'
-    const assertImages = (selector, imageUrls, count = 12) => {
+    const assertImages = (selector, imageUrls, count = 12, withTitles = false) => {
         const images = `${selector} img[alt$="diagram"]`
         cy.get(images).should('have.length', count)
         for (let index = 0; index < count; index++) {
@@ -29,6 +29,9 @@ describe('AI image placement safety', () => {
                 .should(($image) => {
                     expect($image[0].naturalWidth, `original image ${index} loaded`).to.be.greaterThan(0)
                 })
+            if (withTitles) {
+                cy.get(images).eq(index).should('have.attr', 'title', index % 2 === 0 ? 'First diagram title' : 'Second diagram title')
+            }
         }
     }
     const assertNoImageDataRequests = () => {
@@ -61,28 +64,40 @@ describe('AI image placement safety', () => {
         const saved = isQuestion
             ? '[data-cy="questionDisplayCard-1"] [data-cy="questionDisplayText"]'
             : '[data-cy="skillOverviewDescription"]'
-        const openAssistant = () => {
+        const openAssistant = (withTitles = false) => {
             return cy.fixture('valid_icon.png', 'base64').then((firstImage) => {
                 return cy.fixture('anothervalid_icon.png', 'base64').then((secondImage) => {
                     const imageUrls = [firstImage, secondImage].map((image) => `data:image/png;base64,${image}`)
                     // Spaces in alt text can invalidate the enclosing attacker URL;
                     // keep captions whitespace-free so the Markdown exploit is exercised.
-                    const original = `Original image content.\n\n![First$&---IMG-99diagram](${imageUrls[0]})\n\n![Seconddiagram](${imageUrls[1]})`
+                    const firstTitle = withTitles ? ' "First diagram title"' : ''
+                    const secondTitle = withTitles ? " 'Second diagram title'" : ''
+                    const original = `Original image content.\n\n![First$&---IMG-99diagram](${imageUrls[0]}${firstTitle})\n\n![Seconddiagram](${imageUrls[1]}${secondTitle})`
                     if (isQuestion) {
                         cy.createQuizDef(1)
                         cy.createQuizQuestionDef(1, 1, { question: original })
                         cy.visit('/administrator/quizzes/quiz1')
-                        assertImages(saved, imageUrls, 2)
+                        assertImages(saved, imageUrls, 2, withTitles)
                         cy.get('[data-cy="editQuestionButton_1"]').click()
                     } else {
                         cy.createProject(1)
                         cy.createSubject(1, 1)
                         cy.createSkill(1, 1, 1, { description: original })
                         cy.visit('/administrator/projects/proj1/subjects/subj1/skills/skill1')
-                        assertImages(saved, imageUrls, 2)
+                        assertImages(saved, imageUrls, 2, withTitles)
                         cy.get('[data-cy="editSkillButton_skill1"]').click()
                     }
                     assertImages(editor, imageUrls, 2)
+                    if (withTitles) {
+                        // Toast UI's WYSIWYG model does not retain image titles. Use
+                        // Markdown mode so the assistant receives the titled source.
+                        cy.get('.toastui-editor-mode-switch').contains('Markdown').click()
+                        cy.get('[data-cy="markdownEditorInput"] .toastui-editor-md-container [contenteditable="true"]')
+                            .type('{selectall}{backspace}', { force: true })
+                            .type(original, { force: true, delay: 0, parseSpecialCharSequences: false })
+                        cy.get('.toastui-editor-md-tab-container').contains('Preview').click()
+                        assertImages('[data-cy="markdownEditorInput"] .toastui-editor-md-preview', imageUrls, 2, true)
+                    }
                     cy.get('[data-cy="aiButton"]').click()
                     cy.get('[data-cy="aiMsg-0"]').should('contain.text', isQuestion ? existingQuestionWelcomeMsg : existingDescWelcomeMsg)
                     return cy.wrap(imageUrls)
@@ -112,33 +127,37 @@ describe('AI image placement safety', () => {
             })
         })
 
-        it(`renders, applies, saves, and reloads safe image placements in a generated ${context}`, () => {
-            openAssistant().then((imageUrls) => {
-                cy.get('[data-cy="instructionsInput"]').type(`${validPrompt}{enter}`)
-                cy.get('[data-cy="aiMsg-2"] [data-cy="finalSegment"]').should('contain.text', completedMsg)
-                const preview = '[data-cy="aiMsg-2"] [data-cy="generatedSegment"]'
-                cy.get(preview).should('contain.text', safeText).and('contain.text', '---IMG-01')
-                assertImages(preview, imageUrls)
-                cy.get(`${preview} img`).first().should('have.attr', 'alt', 'First$&---IMG-99diagram')
-                assertNoImageDataRequests()
-                cy.intercept('POST', '/api/validation/description', (req) => {
-                    if (req.body.value?.includes(safeText)) {
-                        req.alias = 'generatedImageValidation'
-                    }
+        const imageTitleScenarios = [false, true]
+        imageTitleScenarios.forEach((withTitles) => {
+            it(`renders, applies, saves, and reloads safe ${withTitles ? 'titled ' : ''}image placements in a generated ${context}`, () => {
+                openAssistant(withTitles).then((imageUrls) => {
+                    cy.get('[data-cy="instructionsInput"]').type(`${validPrompt}{enter}`)
+                    cy.get('[data-cy="aiMsg-2"] [data-cy="finalSegment"]').should('contain.text', completedMsg)
+                    const preview = '[data-cy="aiMsg-2"] [data-cy="generatedSegment"]'
+                    cy.get(preview).should('contain.text', safeText).and('contain.text', '---IMG-01')
+                    assertImages(preview, imageUrls, 12, withTitles)
+                    cy.get(`${preview} img`).first().should('have.attr', 'alt', 'First$&---IMG-99diagram')
+                    assertNoImageDataRequests()
+                    cy.intercept('POST', '/api/validation/description', (req) => {
+                        if (req.body.value?.includes(safeText)) {
+                            req.alias = 'generatedImageValidation'
+                        }
+                    })
+                    cy.get('[data-cy="useGenValueBtn-2"]').should('be.enabled').click()
+                    cy.get('[data-cy="instructionsInput"]').should('not.exist')
+                    const generatedEditor = withTitles ? '[data-cy="markdownEditorInput"] .toastui-editor-md-preview' : editor
+                    cy.get(generatedEditor).should('contain.text', safeText).and('contain.text', '---IMG-01')
+                    assertImages(generatedEditor, imageUrls, 12, withTitles)
+                    // Applying AI content triggers debounced validation; synchronize before saving.
+                    cy.wait('@generatedImageValidation')
+                    cy.get('[data-cy="saveDialogBtn"]').should('be.enabled').click()
+                    cy.get('[data-cy="saveDialogBtn"]').should('not.exist')
+                    cy.get(saved).should('contain.text', safeText).and('contain.text', '---IMG-01')
+                    assertImages(saved, imageUrls, 12, withTitles)
+                    cy.reload()
+                    cy.get(saved).should('contain.text', safeText).and('contain.text', '---IMG-01')
+                    assertImages(saved, imageUrls, 12, withTitles)
                 })
-                cy.get('[data-cy="useGenValueBtn-2"]').should('be.enabled').click()
-                cy.get('[data-cy="instructionsInput"]').should('not.exist')
-                cy.get(editor).should('contain.text', safeText).and('contain.text', '---IMG-01')
-                assertImages(editor, imageUrls)
-                // Applying AI content triggers debounced validation; synchronize before saving.
-                cy.wait('@generatedImageValidation')
-                cy.get('[data-cy="saveDialogBtn"]').should('be.enabled').click()
-                cy.get('[data-cy="saveDialogBtn"]').should('not.exist')
-                cy.get(saved).should('contain.text', safeText).and('contain.text', '---IMG-01')
-                assertImages(saved, imageUrls)
-                cy.reload()
-                cy.get(saved).should('contain.text', safeText).and('contain.text', '---IMG-01')
-                assertImages(saved, imageUrls)
             })
         })
     })
