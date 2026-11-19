@@ -359,6 +359,120 @@ describe('Manage My Projects Tests', () => {
             .contains('Please modify your search string: [dljlajd]');
     });
 
+    it('search matches project descriptions, subjects and skills', function () {
+        cy.createProject(1, { name: 'Kubernetes Operations' });
+        cy.createProject(2, { name: 'Second Project', description: 'Training on kubernetes clusters' });
+        cy.createProject(3, { name: 'Third Project' });
+        cy.createSubject(3, 1);
+        cy.createSkill(3, 1, 1, { name: 'Kubernetes Deployments' });
+        cy.createProject(4, { name: 'Fourth Project' });
+        cy.createSubject(4, 1, { name: 'Kubernetes Networking' });
+        cy.createProject(5, { name: 'Fifth Project', description: 'Docker only' });
+        for (let i = 1; i <= 5; i += 1) {
+            cy.enableProdMode(i);
+        }
+
+        cy.intercept('GET', '/api/availableForMyProjects').as('loadMyProjects');
+        cy.intercept('GET', '/api/availableForMyProjects/search*').as('searchProjects');
+        cy.visit('/progress-and-rankings/manage-my-projects');
+        cy.wait('@loadMyProjects');
+
+        cy.get('[data-cy="searchInput"]').should('have.attr', 'placeholder', 'Search project names, descriptions and skills');
+        cy.get('[data-cy="searchInput"]').type('KUBERNETES');
+        cy.wait('@searchProjects').its('request.url').should('include', 'query=kubernetes');
+        cy.get('[data-cy="discoverProjectsTable"] [data-cy="skillsBTableTotalRows"]').should('have.text', '4');
+        cy.get('[data-cy="discoverProjectsTable"]').should('not.contain', 'Fifth Project');
+        cy.get('[data-cy="searchMatch_proj1"]').should('not.exist');
+        cy.get('[data-cy="searchMatch_proj2"] [data-cy="matchedDescription"]').should('contain.text', 'Matched in description');
+        cy.get('[data-cy="searchMatch_proj3"] [data-cy="matchedSkills"]').should('contain.text', 'Matched skills: Kubernetes Deployments');
+        cy.get('[data-cy="searchMatch_proj4"] [data-cy="matchedSkills"]').should('not.exist');
+        cy.get('[data-cy="searchMatch_proj4"] [data-cy="matchedDescription"]').should('not.exist');
+
+        cy.get('[data-cy="filterResetBtn"]').click();
+        cy.get('[data-cy="searchInput"]').should('have.value', '');
+        cy.get('[data-cy="discoverProjectsTable"] [data-cy="skillsBTableTotalRows"]').should('have.text', '5');
+        cy.get('[data-cy="searchMatch_proj2"]').should('not.exist');
+    });
+
+    it('every search word must be found, in any order and in any field', function () {
+        cy.createProject(1, { name: 'Cloud Training', description: 'Hands-on security labs' });
+        cy.createSubject(1, 1);
+        cy.createSkill(1, 1, 1, { name: 'Kubernetes Basics' });
+        cy.createProject(2, { name: 'Cloud Training Two' });
+        cy.createSubject(2, 1);
+        cy.createSkill(2, 1, 1, { name: 'Kubernetes Basics' });
+        cy.enableProdMode(1);
+        cy.enableProdMode(2);
+
+        cy.intercept('GET', '/api/availableForMyProjects').as('loadMyProjects');
+        cy.intercept('GET', '/api/availableForMyProjects/search*').as('searchProjects');
+        cy.visit('/progress-and-rankings/manage-my-projects');
+        cy.wait('@loadMyProjects');
+
+        cy.get('[data-cy="searchInput"]').type('security   kubernetes');
+        cy.wait('@searchProjects');
+        cy.get('[data-cy="discoverProjectsTable"] [data-cy="skillsBTableTotalRows"]').should('have.text', '1');
+        cy.get('[data-cy="discoverProjectsTable"]').should('contain', 'Cloud Training').and('not.contain', 'Cloud Training Two');
+        cy.get('[data-cy="searchMatch_proj1"] [data-cy="matchedSkills"]').should('contain.text', 'Matched skills: Kubernetes Basics');
+        cy.get('[data-cy="searchMatch_proj1"] [data-cy="matchedDescription"]').should('exist');
+
+        // name words are matched right away, in any order, before the search returns
+        cy.get('[data-cy="searchInput"]').clear().type('two cloud');
+        cy.get('[data-cy="discoverProjectsTable"] [data-cy="skillsBTableTotalRows"]').should('have.text', '1');
+        cy.get('[data-cy="discoverProjectsTable"]').should('contain', 'Cloud Training Two');
+    });
+
+    it('search lists up to 5 matched skills and the number of other matches', function () {
+        cy.createProject(1, { name: 'Secure Development' });
+        cy.createSubject(1, 1);
+        for (let i = 1; i <= 7; i += 1) {
+            cy.createSkill(1, 1, i, { name: `Coding Exercise ${i}` });
+        }
+        cy.createSkill(1, 1, 8, { name: 'Threat Modeling' });
+        cy.enableProdMode(1);
+
+        cy.intercept('GET', '/api/availableForMyProjects').as('loadMyProjects');
+        cy.intercept('GET', '/api/availableForMyProjects/search*').as('searchProjects');
+        cy.visit('/progress-and-rankings/manage-my-projects');
+        cy.wait('@loadMyProjects');
+
+        cy.get('[data-cy="searchInput"]').type('coding');
+        cy.wait('@searchProjects');
+        cy.get('[data-cy="searchMatch_proj1"] [data-cy="matchedSkills"]')
+            .should('contain.text', 'Matched skills: Coding Exercise 1, Coding Exercise 2, Coding Exercise 3, Coding Exercise 4, Coding Exercise 5')
+            .and('contain.text', '(+2 more)');
+    });
+
+    it('only the latest search is shown', function () {
+        cy.createProject(1, { name: 'First Project' });
+        cy.createSubject(1, 1);
+        cy.createSkill(1, 1, 1, { name: 'Helm Charts' });
+        cy.createProject(2, { name: 'Second Project' });
+        cy.createSubject(2, 1);
+        cy.createSkill(2, 1, 1, { name: 'Terraform Modules' });
+        cy.enableProdMode(1);
+        cy.enableProdMode(2);
+
+        cy.intercept('GET', '/api/availableForMyProjects').as('loadMyProjects');
+        cy.intercept('GET', '/api/availableForMyProjects/search?query=helm', (req) => {
+            req.on('response', (res) => {
+                res.setDelay(2000);
+            });
+        }).as('slowSearch');
+        cy.intercept('GET', '/api/availableForMyProjects/search?query=terraform').as('fastSearch');
+        cy.visit('/progress-and-rankings/manage-my-projects');
+        cy.wait('@loadMyProjects');
+
+        cy.get('[data-cy="searchInput"]').type('helm');
+        cy.get('[data-cy="searchInProgress"]').should('exist');
+        cy.get('[data-cy="searchInput"]').clear().type('terraform');
+        cy.wait('@fastSearch');
+        cy.wait('@slowSearch');
+        cy.get('[data-cy="searchInProgress"]').should('not.exist');
+        cy.get('[data-cy="discoverProjectsTable"] [data-cy="skillsBTableTotalRows"]').should('have.text', '1');
+        cy.get('[data-cy="discoverProjectsTable"]').should('contain', 'Second Project').and('not.contain', 'First Project');
+    });
+
     it('view button is removed when project is added', function () {
         for (let i = 1; i <= 3; i += 1) {
             cy.createProject(i);
