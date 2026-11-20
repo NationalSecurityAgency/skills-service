@@ -57,6 +57,36 @@ describe('Compact view admin settings and previews', () => {
     assertView(false);
   });
 
+  [true, false].forEach((compact) => {
+    it(`applies a saved ${compact ? 'compact' : 'expanded'} project default after returning through SPA navigation`, () => {
+      setProjectDefault(!compact);
+      cy.addToMyProjects(1);
+      cy.visit(projectPath());
+      // Prime the display configuration cache before changing the project default.
+      assertView(!compact);
+
+      cy.document().then((progressDocument) => {
+        cy.get('[data-cy="settings-button"]').click();
+        cy.get('[data-p="popup"][data-pc-name="menu"] [aria-label="Project Admin"]').click();
+        cy.get('[data-cy="projCard_proj1_manageBtn"]').should('be.visible').click();
+        cy.get('[data-cy="nav-Settings"]').should('be.visible').click();
+        cy.get(defaultSwitch).should(compact ? 'not.be.checked' : 'be.checked');
+        cy.get('[data-cy="compactViewDefaultSwitch"]').click();
+        cy.get(defaultSwitch).should(compact ? 'be.checked' : 'not.be.checked');
+        cy.get('[data-cy="saveSettingsBtn"]').should('be.enabled').click();
+        cy.get('[data-cy="settingsSavedAlert"]').should('be.visible').and('contain.text', 'Settings Updated');
+
+        cy.get('[data-cy="settings-button"]').click();
+        cy.get('[data-p="popup"][data-pc-name="menu"] [aria-label="Progress and Ranking"]').click();
+        cy.get('[data-cy="project-link-proj1"]').should('be.visible').click();
+        cy.location('pathname').should('eq', projectPath());
+        // A full-page navigation would discard the stale cache and mask this regression.
+        cy.document().should('eq', progressDocument);
+        assertView(compact);
+      });
+    });
+  });
+
   it('starts previews from the project default without reading, persisting or changing trainee overrides', () => {
     cy.doReportSkill({ skill: 1, date: 'now' });
     saveProgressViewPreference('compact');

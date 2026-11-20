@@ -28,6 +28,7 @@ import SettingService from '@/components/settings/SettingsService'
 import { useInceptionStore } from '@/stores/UseInceptionStore.js'
 import { useAppConfig } from '@/common-components/stores/UseAppConfig.js'
 import { useProjConfig } from '@/stores/UseProjConfig.js'
+import { useSkillsDisplayAttributesState } from '@/skills-display/stores/UseSkillsDisplayAttributesState.js'
 import SkillsSettingTextInput from '@/components/settings/SkillsSettingTextInput.vue'
 import {useDialogMessages} from "@/components/utils/modal/UseDialogMessages.js";
 import SettingsItem from "@/components/settings/SettingsItem.vue";
@@ -38,6 +39,7 @@ const announcer = useSkillsAnnouncer();
 const route = useRoute();
 const appConfig = useAppConfig()
 const projConfig = useProjConfig()
+const displayAttributes = useSkillsDisplayAttributesState()
 
 const publicNotDiscoverable = 'pnd';
 const discoverableProgressAndRanking = 'dpr';
@@ -476,8 +478,12 @@ const save = (() => {
 });
 
 const saveSettings = ((dirtyChanges) => {
-  SettingService.saveSettings(route.params.projectId, dirtyChanges)
+  const projectId = route.params.projectId
+  SettingService.saveSettings(projectId, dirtyChanges)
       .then(() => {
+        if (displayAttributes.projectId === projectId && dirtyChanges.some((setting) => setting.setting === settings.value.compactViewDefault.setting)) {
+          displayAttributes.invalidateConfig()
+        }
         showSavedMsg.value = true;
         announcer.polite('Project Settings have been successfully saved');
         setTimeout(() => {
@@ -495,7 +501,7 @@ const saveSettings = ((dirtyChanges) => {
           }
         });
         labelsHaveBeenCleared.value = false;
-        projConfig.loadProjConfigState({ projectId: route.params.projectId, updateLoadingVar: false })
+        projConfig.loadProjConfigState({ projectId, updateLoadingVar: false })
       })
       .finally(() => {
         // isLoading.value = false;
