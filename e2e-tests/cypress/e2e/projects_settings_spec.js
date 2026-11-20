@@ -124,6 +124,39 @@ describe('Project Settings Tests', () => {
             .should('be.disabled');
     });
 
+    it('project-level settings: set custom label plurals', () => {
+        let labelsSwitch = '[data-cy="customLabelsSwitch"] [data-pc-section="input"]';
+        cy.createProject(1);
+        cy.visit('/administrator/projects/proj1/settings');
+
+        cy.get(labelsSwitch).click({ force: true });
+        cy.get('[data-cy="pointDisplayNamePluralTextInput"]').should('have.value', '');
+        cy.get('[data-cy="levelDisplayNamePluralTextInput"]').should('have.value', '');
+
+        cy.get('[data-cy=pointDisplayNameTextInput]').clear().type('Punkt');
+        cy.get('[data-cy=pointDisplayNamePluralTextInput]').type('Punkte');
+        cy.get('[data-cy=levelDisplayNameTextInput]').clear().type('Nivel');
+        cy.get('[data-cy=levelDisplayNamePluralTextInput]').type('Niveles');
+        cy.get('[data-cy="saveSettingsBtn"]').click();
+        cy.get('[data-cy="settingsSavedAlert"]').contains('Settings Updated');
+
+        cy.visit('/administrator/projects/proj1/settings');
+        cy.get(labelsSwitch).should('be.checked');
+        cy.get('[data-cy="pointDisplayNameTextInput"]').should('have.value', 'Punkt');
+        cy.get('[data-cy="pointDisplayNamePluralTextInput"]').should('have.value', 'Punkte');
+        cy.get('[data-cy="levelDisplayNameTextInput"]').should('have.value', 'Nivel');
+        cy.get('[data-cy="levelDisplayNamePluralTextInput"]').should('have.value', 'Niveles');
+        cy.get('[data-cy="skillDisplayNamePluralTextInput"]').should('have.value', '');
+
+        // clearing a plural removes it
+        cy.get('[data-cy=pointDisplayNamePluralTextInput]').clear();
+        cy.get('[data-cy="saveSettingsBtn"]').click();
+        cy.get('[data-cy="settingsSavedAlert"]').contains('Settings Updated');
+        cy.visit('/administrator/projects/proj1/settings');
+        cy.get('[data-cy="pointDisplayNamePluralTextInput"]').should('have.value', '');
+        cy.get('[data-cy="levelDisplayNamePluralTextInput"]').should('have.value', 'Niveles');
+    });
+
     it('project-level settings: set custom labels', () => {
         let labelsSwitch = '[data-cy="customLabelsSwitch"] [data-pc-section="input"]';
         cy.createProject(1);

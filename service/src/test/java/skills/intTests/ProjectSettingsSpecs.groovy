@@ -161,6 +161,54 @@ class ProjectSettingsSpecs extends DefaultIntSpec {
         projectSettings.find { it.setting == 'level.displayName'}?.value == 'Stage'
     }
 
+    def "save custom label plural project settings"() {
+        def proj = SkillsFactory.createProject()
+        skillsService.createProject(proj)
+
+        when:
+        skillsService.addOrUpdateProjectSetting(proj.projectId, 'project.displayNamePlural', 'Roles de trabajo')
+        skillsService.addOrUpdateProjectSetting(proj.projectId, 'subject.displayNamePlural', 'Kompetenzen')
+        skillsService.addOrUpdateProjectSetting(proj.projectId, 'group.displayNamePlural', 'Gruppen')
+        skillsService.addOrUpdateProjectSetting(proj.projectId, 'skill.displayNamePlural', 'Kurse')
+        skillsService.addOrUpdateProjectSetting(proj.projectId, 'level.displayNamePlural', 'Niveles')
+        skillsService.addOrUpdateProjectSetting(proj.projectId, 'point.displayNamePlural', 'Punkte')
+        def projectSettings = skillsService.getProjectSettings(proj.projectId)
+
+        then:
+        projectSettings.find { it.setting == 'project.displayNamePlural'}?.value == 'Roles de trabajo'
+        projectSettings.find { it.setting == 'subject.displayNamePlural'}?.value == 'Kompetenzen'
+        projectSettings.find { it.setting == 'group.displayNamePlural'}?.value == 'Gruppen'
+        projectSettings.find { it.setting == 'skill.displayNamePlural'}?.value == 'Kurse'
+        projectSettings.find { it.setting == 'level.displayNamePlural'}?.value == 'Niveles'
+        projectSettings.find { it.setting == 'point.displayNamePlural'}?.value == 'Punkte'
+    }
+
+    def "save custom label plural setting with value exceeding max"(){
+        def proj = SkillsFactory.createProject()
+        skillsService.createProject(proj)
+
+        def label = (1..51).collect{"A"}.join()
+
+        when:
+        skillsService.addOrUpdateProjectSetting(proj.projectId, 'point.displayNamePlural', label)
+
+        then:
+        def ex = thrown(SkillsClientException)
+        ex.message.contains("[Point Plural Display Text] must not exceed [20]")
+    }
+
+    def "save custom label plural setting with html is rejected"(){
+        def proj = SkillsFactory.createProject()
+        skillsService.createProject(proj)
+
+        when:
+        skillsService.addOrUpdateProjectSetting(proj.projectId, 'point.displayNamePlural', '<b>Punkte</b>')
+
+        then:
+        def ex = thrown(SkillsClientException)
+        ex.message.contains("Invalid format for [<b>Punkte</b>]")
+    }
+
     def "save custom project label setting with value exceeding max"(){
         def proj = SkillsFactory.createProject()
         skillsService.createProject(proj)

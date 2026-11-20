@@ -154,6 +154,12 @@ class SettingsService {
             "skill.displayName",
             "level.displayName",
             "point.displayName",
+            "project.displayNamePlural",
+            "subject.displayNamePlural",
+            "group.displayNamePlural",
+            "skill.displayNamePlural",
+            "level.displayNamePlural",
+            "point.displayNamePlural",
             "help.url.root"
     ].collect { it.toLowerCase( )}
     private void validateCustomLabels(SettingsRequest request) {
@@ -193,6 +199,10 @@ class SettingsService {
         if (request instanceof ProjectSettingsRequest && request.setting.endsWith('.displayName')) {
             String fieldName = StringUtils.capitalize(StringUtils.split(request.setting, '.')[0])
             propsBasedValidator.validateMaxStrLength(PublicProps.UiProp.maxCustomLabelLength, "${fieldName} Display Text", request.value)
+        }
+        if (request instanceof ProjectSettingsRequest && request.setting.endsWith('.displayNamePlural')) {
+            String fieldName = StringUtils.capitalize(StringUtils.split(request.setting, '.')[0])
+            propsBasedValidator.validateMaxStrLength(PublicProps.UiProp.maxCustomLabelLength, "${fieldName} Plural Display Text", request.value)
         }
     }
 

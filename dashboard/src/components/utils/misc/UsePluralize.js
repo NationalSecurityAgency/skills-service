@@ -21,8 +21,13 @@ export const usePluralize = () => {
         return pluralize(word, count);
     }
 
+    const addIrregularRule = (singular, pluralForm) => {
+        pluralize.addIrregularRule(singular, pluralForm);
+    }
+
     return {
-        plural
+        plural,
+        addIrregularRule
     }
 
 }
