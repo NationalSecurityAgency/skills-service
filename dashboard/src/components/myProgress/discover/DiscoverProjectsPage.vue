@@ -14,12 +14,11 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <script setup>
-import {computed, onMounted, ref} from 'vue'
+import {computed, onMounted, ref, watch} from 'vue'
 import ProjectService from '@/components/projects/ProjectService.js'
 import Column from 'primevue/column'
 import {useResponsiveBreakpoints} from '@/components/utils/misc/UseResponsiveBreakpoints.js'
 import SkillsDataTable from '@/components/utils/table/SkillsDataTable.vue'
-import {FilterMatchMode} from '@primevue/core/api'
 import {useSkillsAnnouncer} from '@/common-components/utilities/UseSkillsAnnouncer.js'
 import MediaInfoCard from '@/components/utils/cards/MediaInfoCard.vue'
 import {useAppInfoState} from '@/stores/UseAppInfoState.js'
@@ -32,7 +31,7 @@ import MyProgressTitle from "@/components/myProgress/MyProgressTitle.vue";
 import BackToMyProgressBtn from "@/components/myProgress/BackToMyProgressBtn.vue";
 import ContactProjectAdminsDialog from "@/components/contact/ContactProjectAdminsDialog.vue";
 import {useNumberFormat} from "@/common-components/filter/UseNumberFormat.js";
-import {useStorage} from "@vueuse/core";
+import {useDebounceFn, useStorage} from "@vueuse/core";
 
 const responsive = useResponsiveBreakpoints()
 const announcer = useSkillsAnnouncer()
@@ -42,15 +41,17 @@ const colors = useColors()
 const numberFormat = useNumberFormat()
 
 const isLoading = ref(true)
-const searchValue = ref('')
 const originalProjects = ref([])
 const projects = ref([])
-const totalRows = ref(0)
 const pageSize = useStorage('discoverProjects-pageSize', 5)
 const possiblePageSizes = [5, 10, 15, 25, 50]
-const filters = ref({
-  global: {value: null, matchMode: FilterMatchMode.CONTAINS}
-})
+const searchText = ref('')
+// the service searches project descriptions, subjects and skills; results are keyed by projectId
+const searchMatches = ref(new Map())
+const isSearching = ref(false)
+let searchRequestNum = 0
+const maxSearchLength = 100
+const maxSearchWords = 10
 const firstRow = ref(0)
 const countsAll = ref(0)
 const countsMyProjects = ref(0)
@@ -62,14 +63,13 @@ onMounted(() => {
 })
 
 const loadAll = () => {
-  searchValue.value = ''
+  searchText.value = ''
   isLoading.value = true
   ProjectService.getAvailableForMyProjects()
       .then((response) => {
         originalProjects.value = response.map((item) => ({loading: false, ...item}))
         // need a shallow copy
         projects.value = originalProjects.value.map((item) => item)
-        totalRows.value = projects.value.length
         updateCounts()
       })
       .finally(() => {
@@ -85,10 +85,64 @@ const updateCounts = () => {
 
 const hasProjects = computed(() => originalProjects.value.length > 0)
 const sortInfo = ref({sortOrder: 1, sortBy: 'name'})
+
+const searchWords = computed(() => searchText.value.trim().toLowerCase().split(/\s+/).filter((word) => word).slice(0, maxSearchWords))
+const isSearchActive = computed(() => searchWords.value.length > 0)
+// every word must appear in the project name, or the project must be returned by the service search
+const filteredProjects = computed(() => {
+  if (!isSearchActive.value) {
+    return projects.value
+  }
+  return projects.value.filter((project) => {
+    const name = project.name.toLowerCase()
+    return searchWords.value.every((word) => name.includes(word)) || searchMatches.value.has(project.projectId)
+  })
+})
+const totalRows = computed(() => filteredProjects.value.length)
+
+const runSearch = useDebounceFn((words) => {
+  const requestNum = ++searchRequestNum
+  if (words.length === 0) {
+    searchMatches.value = new Map()
+    isSearching.value = false
+    return
+  }
+  isSearching.value = true
+  ProjectService.searchAvailableForMyProjects(words.join(' '))
+      .then((results) => {
+        if (requestNum !== searchRequestNum) {
+          return
+        }
+        searchMatches.value = new Map(results.map((result) => [result.projectId, result]))
+        announcer.polite(`Search for ${words.join(' ')} returned ${filteredProjects.value.length} projects`)
+      })
+      .finally(() => {
+        if (requestNum === searchRequestNum) {
+          isSearching.value = false
+        }
+      })
+}, 400)
+
+watch(searchWords, (words, oldWords) => {
+  if (words.join(' ') === (oldWords || []).join(' ')) {
+    return
+  }
+  firstRow.value = 0
+  searchMatches.value = new Map()
+  runSearch(words)
+})
+
+// only matches that the project name doesn't explain are shown: skills and description
+const matchFor = (projectId) => {
+  const match = isSearchActive.value ? searchMatches.value.get(projectId) : null
+  return match && (match.numMatchedSkills > 0 || match.descriptionMatched) ? match : null
+}
+const moreSkillsCount = (match) => match.numMatchedSkills - match.matchedSkills.length
+
 const clearFilter = () => {
   firstRow.value = 0
-  filters.value.global.value = null
-  announcer.polite('Skills filter was reset. Showing all results')
+  searchText.value = ''
+  announcer.polite('Project search was reset. Showing all results')
 }
 
 const addToMyProjects = (item) => {
@@ -180,9 +234,15 @@ const contactProject = (name, id) => {
               <InputText
                   id="projectFilter"
                   class="flex grow"
-                  v-model="filters['global'].value"
+                  v-model="searchText"
+                  :maxlength="maxSearchLength"
                   data-cy="searchInput"
-                  placeholder="Project Name Search"/>
+                  aria-label="Search project names, descriptions and skills"
+                  placeholder="Search project names, descriptions and skills"/>
+              <InputGroupAddon v-if="isSearching" data-cy="searchInProgress">
+                <i class="fas fa-spinner fa-spin" aria-hidden="true"/>
+                <span class="sr-only">Searching</span>
+              </InputGroupAddon>
               <InputGroupAddon class="p-0 m-0">
                 <SkillsButton
                     id="skillsFilterResetBtn"
@@ -198,7 +258,7 @@ const contactProject = (name, id) => {
             <SkillsDataTable
                 class="border border-surface rounded-border border-surface"
                 style="max-width: 100%"
-                :value="projects"
+                :value="filteredProjects"
                 stripedRows
                 paginator
                 :expander="true"
@@ -208,9 +268,7 @@ const contactProject = (name, id) => {
                 v-model:expandedRows="expandedRows"
                 v-model:sort-field="sortInfo.sortBy"
                 v-model:sort-order="sortInfo.sortOrder"
-                v-model:filters="filters"
                 v-model:first="firstRow"
-                :globalFilterFields="['name']"
                 data-cy="discoverProjectsTable"
                 aria-label="Projects"
                 tableStoredStateId="projectCatalogTable">
@@ -218,7 +276,7 @@ const contactProject = (name, id) => {
               <template #empty>
                 <p>
                   No results found! Please modify your search string: <span
-                    class="text-primary">[{{ filters['global'].value }}]</span>
+                    class="text-primary">[{{ searchText }}]</span>
                 </p>
               </template>
 
@@ -229,7 +287,18 @@ const contactProject = (name, id) => {
                 <template #body="slotProps">
                   <div class="flex items-center">
                     <div class="flex-1">
-                      <highlighted-value :value="slotProps.data.name" :filter="filters['global'].value || ''"/>
+                      <highlighted-value :value="slotProps.data.name" :filter="searchText"/>
+                      <div v-if="matchFor(slotProps.data.projectId)"
+                           class="text-sm text-muted-color mt-1"
+                           :data-cy="`searchMatch_${slotProps.data.projectId}`">
+                        <div v-if="matchFor(slotProps.data.projectId).numMatchedSkills > 0" data-cy="matchedSkills">
+                          Matched skills: {{ matchFor(slotProps.data.projectId).matchedSkills.join(', ') }}<span
+                            v-if="moreSkillsCount(matchFor(slotProps.data.projectId)) > 0"> (+{{ moreSkillsCount(matchFor(slotProps.data.projectId)) }} more)</span>
+                        </div>
+                        <div v-if="matchFor(slotProps.data.projectId).descriptionMatched" data-cy="matchedDescription">
+                          Matched in description
+                        </div>
+                      </div>
                     </div>
                     <div v-if="appInfoState.emailEnabled">
                       <SkillsButton
