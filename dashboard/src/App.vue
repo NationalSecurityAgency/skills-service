@@ -15,6 +15,7 @@ limitations under the License.
 */
 <script setup>
 import {computed, onBeforeMount, onMounted, ref, watch} from 'vue'
+import axios from 'axios'
 import {RouterView, useRoute} from 'vue-router'
 import DashboardHeader from '@/components/header/DashboardHeader.vue'
 import SkillsSpinner from '@/components/utils/SkillsSpinner.vue'
@@ -32,6 +33,7 @@ import CustomizableFooter from '@/components/customization/CustomizableFooter.vu
 import {useSkillsDisplayInfo} from '@/skills-display/UseSkillsDisplayInfo.js'
 import {useSkillsDisplayAttributesState} from '@/skills-display/stores/UseSkillsDisplayAttributesState.js'
 import {useIframeInit} from '@/skills-display/iframe/UseIframeInit.js'
+import {useSkillsDisplayParentFrameState} from '@/skills-display/stores/UseSkillsDisplayParentFrameState.js'
 import NewSoftwareVersion from '@/components/header/NewSoftwareVersion.vue'
 import {usePageVisitService} from '@/components/utils/services/UsePageVisitService.js'
 import {invoke, until} from '@vueuse/core'
@@ -125,7 +127,19 @@ onMounted(() => {
       if (iframeInit.initializationError.value) return
       log.debug('App.vue: skillsDisplayInfo.isSkillsClientPath()=true, loaded iframe!')
     }
-    loadConfigs().catch(() => { /* Shared Axios handling displays errors, including iframe authentication failures. */ })
+    loadConfigs().catch((error) => {
+      const isSupersededIframeRequest = skillsDisplayInfo.isSkillsClientPath()
+        && !useSkillsDisplayParentFrameState().isCurrentAuthRequest(error?.config)
+      if (axios.isCancel(error) || isSupersededIframeRequest) {
+        // Older-token failures can be AxiosErrors rather than cancellations; replacement recovery owns startup.
+        return
+      }
+      if (skillsDisplayInfo.isSkillsClientPath() && !iframeInit.authenticationError.value) {
+        // Startup failures must be visible without mounting authenticated content behind the error route.
+        iframeInit.initializationError.value = 'Unable to load Skills Display. Please refresh the page to try again.'
+      }
+      // Dashboard errors and iframe 401s are displayed by their existing error handlers.
+    })
   })
 })
 

@@ -53,6 +53,10 @@ export const useErrorHandling = () => {
     }
 
     const errorCode = error.response ? error.response.status : undefined;
+    if (errorCode !== 401 && skillsDisplayInfo.isSkillsClientPath() && useSkillsDisplayParentFrameState().isAuthenticating) {
+      // Recovery owns its error UI. Keep the learner's route, including when user changes trigger configuration loading.
+      return Promise.reject(error);
+    }
     // check if the caller wants to handle a specific error status code
     if (Object.prototype.hasOwnProperty.call(error.config, 'handleErrorCode')) {
       if (Array.isArray(error.config.handleErrorCode)) {

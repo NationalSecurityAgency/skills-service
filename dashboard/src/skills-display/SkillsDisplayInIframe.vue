@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <script setup>
-import { ref } from 'vue'
+import { onUnmounted, ref } from 'vue'
 import SkillsDisplayHome from '@/skills-display/components/SkillsDisplayHome.vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useSkillsDisplayParentFrameState } from '@/skills-display/stores/UseSkillsDisplayParentFrameState.js'
@@ -53,13 +53,14 @@ const reportRouteChangeToParentFrame = (route) => {
   }
 }
 
-router.afterEach((to, from) => {
+const removeRouteChangeHook = router.afterEach((to, from) => {
   if (log.isDebugEnabled()) {
     log.debug(`SkillsDisplayInIframe.vue: Route changed from ${JSON.stringify(from.fullPath)} to ${JSON.stringify(to.fullPath)}`)
   }
   reportRouteChangeToParentFrame(to)
   pageVisitService.reportPageVisit(to.path, to.fullPath, true, displayAttributes.projectId)
 })
+onUnmounted(removeRouteChangeHook)
 pageVisitService.reportPageVisit(route.path, route.fullPath, true, displayAttributes.projectId)
 
 </script>
