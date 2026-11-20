@@ -371,7 +371,7 @@ const downloadPdf = () => {
             <div id="text-layer" tabindex="-1" class="textLayer absolute top-0 left-0 w-full h-full z-40"
                  style="--total-scale-factor: 1"></div>
             <div ref="annotationLayerRef" data-cy="slidesAnnotationLayer"
-                 class="annotationLayer absolute top-0 left-0 z-40"
+                  class="annotationLayer absolute top-0 left-0 z-40 overflow-hidden"
                  style="--scale-round-x: 1px; --scale-round-y: 1px"></div>
 
             <button

@@ -121,6 +121,58 @@ describe('Slide hyperlinks', () => {
         cy.get('[data-cy="currentSlideMsg"]').should('have.text', 'Slide 1 of 3');
     });
 
+    it('clips oversized and negative-coordinate links without intercepting surrounding controls', () => {
+        const url = `${Cypress.config('baseUrl')}/static/link-tests/slides/out-of-bounds.pdf`;
+        cy.intercept('GET', '**/static/link-tests/slides/out-of-bounds.pdf', {
+            fixture: 'slides-out-of-bounds-links.pdf,null',
+            headers: { 'Content-Type': 'application/pdf' },
+        });
+        cy.saveSlidesAttrs(1, 1, { url });
+        cy.visitSlidesConfPage();
+        const assertClipping = () => {
+            cy.get(links).should('have.length', 2);
+            cy.get('[data-cy="slidesAnnotationLayer"]').should(($layer) => {
+                const layer = $layer[0];
+                const doc = layer.ownerDocument;
+                const rect = layer.getBoundingClientRect();
+                const canvasRect = doc.getElementById('pdfCanvasId').getBoundingClientRect();
+                expect(doc.defaultView.getComputedStyle(layer).overflow).to.equal('hidden');
+                expect(rect.width).to.be.closeTo(canvasRect.width, 1);
+                expect(rect.height).to.be.closeTo(canvasRect.height, 1);
+                // Hit-test just beyond the viewport, including fullscreen's unused
+                // right-hand margin. No document-controlled link may receive hits.
+                const x = rect.right + 2;
+                const y = rect.top + rect.height / 2;
+                expect(x).to.be.lessThan(doc.defaultView.innerWidth);
+                expect(doc.elementFromPoint(x, y)?.closest('[data-cy="slidesAnnotationLayer"]')).to.not.exist;
+            });
+        };
+        assertClipping();
+        cy.get('[data-cy="nextSlideBtn"]').click();
+        cy.get('[data-cy="currentSlideMsg"]').should('have.text', 'Slide 2 of 2');
+        cy.get('[data-cy="slidesResizeHandle"]').then(($handle) => {
+            const originalWidth = $handle[0].ownerDocument.getElementById('pdfCanvasId').getBoundingClientRect().width;
+            cy.wrap($handle).trigger('keyup', { key: 'ArrowRight' });
+            cy.get('#pdfCanvasId').should(($canvas) => {
+                expect($canvas[0].getBoundingClientRect().width).to.be.greaterThan(originalWidth);
+            });
+        });
+        assertClipping();
+        // A wide viewport leaves space outside the slide in fullscreen as well.
+        cy.viewport(1200, 600);
+        stubFullscreen();
+        cy.get('[data-cy="slidesFullscreenBtn"]').click();
+        cy.get('#pdfCanvasId').should(($canvas) => {
+            expect($canvas[0].getBoundingClientRect().width).to.be.closeTo(900, 1);
+        });
+        assertClipping();
+        cy.document().trigger('keydown', { key: 'Escape' });
+        cy.get('[data-cy="slidesFullscreenBtn"]').should('be.visible');
+        assertClipping();
+        cy.get('[data-cy="prevSlideBtn"]').click();
+        cy.get('[data-cy="currentSlideMsg"]').should('have.text', 'Slide 1 of 2');
+    });
+
     it('activates named destinations with native Enter and focuses the destination text', () => {
         stubFullscreen();
         cy.get('[data-cy="slidesFullscreenBtn"]').click();
@@ -147,15 +199,17 @@ describe('Slide hyperlinks', () => {
         cy.get('[data-cy="currentSlideMsg"]').should('have.text', 'Slide 1 of 3');
     });
 
-    it('resolves relative links against the PDF location and excludes unsafe URI and script actions', () => {
+    it('resolves relative links against the PDF location and excludes unsafe URIs and unsupported fixture actions', () => {
         loadActionSlides();
         cy.get(`${links}[href$="/slides/docs/intro.html"]`)
             .should('be.visible')
             .and('have.attr', 'href', `${Cypress.config('baseUrl')}/static/link-tests/slides/docs/intro.html`)
             .and('have.attr', 'target', '_blank')
             .and('have.attr', 'rel', 'noopener noreferrer');
-        // Four supported named actions and two safe external links only. Valid
-        // JavaScript, file Launch and unsupported layer-toggle actions add no anchors.
+        // Four supported named actions and two safe external links only.
+        // The fixture's arbitrary JavaScript, file Launch and unsupported layer-toggle
+        // actions add no anchors. PDF.js may normalize launchURL and HTTP(S) Launch
+        // actions into safe ordinary links; scripting remains disabled.
         cy.get(links).should('have.length', 6);
         cy.get(`${links}[href^="javascript:"], ${links}[href^="data:"], ${links}[href^="file:"]`).should('not.exist');
         cy.window().its('pdfScriptExecuted').should('not.exist');
