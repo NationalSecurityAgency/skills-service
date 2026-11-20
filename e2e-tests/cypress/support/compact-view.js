@@ -17,8 +17,20 @@
 export const overview = '[data-cy="progressAndRankingOverview"]';
 export const compactOverview = '[data-cy="compactProgressOverview"]';
 export const viewButton = '[data-cy="progressViewExpandCollapseButton"]';
-export const preferencePrefix = 'skills-display-compact-view:';
 export const projectPath = (project = 1) => `/progress-and-rankings/projects/proj${project}`;
+
+export const selectProgressViewPreference = (value) => {
+  cy.get(`label[for="progressView-${value}"]`).should('be.visible').click();
+  cy.get(`[data-cy="progressViewPreference-${value}"] input`).should('be.checked');
+  cy.get('[data-cy="unsavedChangesAlert"]').should('be.visible');
+  cy.get('[data-cy="userPrefsSettingsSave"]').should('be.enabled').click();
+  cy.get('[data-cy="settingsSavedAlert"]').should('be.visible');
+};
+
+export const saveProgressViewPreference = (value) => {
+  cy.visit('/settings/preferences');
+  selectProgressViewPreference(value);
+};
 
 export const setProjectDefault = (compact, project = 1) => cy.request('POST', `/admin/projects/proj${project}/settings`, [{
   projectId: `proj${project}`,

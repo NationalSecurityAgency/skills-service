@@ -17,84 +17,126 @@
 import {
   assertView,
   createCompactViewProject,
-  preferencePrefix,
   projectPath,
+  saveProgressViewPreference,
+  selectProgressViewPreference,
   setProjectDefault,
   viewButton,
 } from '../../../support/compact-view';
 
-describe('Compact view browser preferences', () => {
+describe('Progress view user preferences', () => {
   beforeEach(() => {
     cy.viewport(1440, 1000);
     createCompactViewProject();
   });
 
-  it('remembers a browser preference across reloads and project/subject navigation in both directions', () => {
+  it('keeps toggles page-local and shows a dismissible preference reminder in both directions', () => {
     cy.visit(projectPath());
     assertView(false);
+    cy.get('[data-cy="progressViewPreferenceMessage"]').should('not.exist');
     cy.get(viewButton).click();
-    cy.reload();
     assertView(true);
+    cy.get('[data-cy="progressViewPreferenceMessage"]').should('be.visible')
+      .and('contain.text', 'To permanently change your view preference, visit');
+    cy.get('[data-cy="progressViewPreferencesLink"]').should('have.attr', 'href', '/settings/preferences#progress-view-preference');
+    cy.get('[data-cy="progressViewPreferenceMessage"] [data-pc-section="closebutton"]').click();
+    cy.get('[data-cy="progressViewPreferenceMessage"]').should('not.exist');
+    assertView(true);
+    cy.get(viewButton).click();
+    assertView(false);
+    cy.get('[data-cy="progressViewPreferenceMessage"]').should('be.visible');
+    cy.get(viewButton).click();
     cy.get('[data-cy="subjectTile-subj1"] [data-cy="subjectTileBtn"]').click();
-    assertView(true);
+    assertView(false);
+    cy.get('[data-cy="progressViewPreferenceMessage"]').should('not.exist');
     cy.get('[data-cy="subjectDescription"]').should('contain.text', 'The first subject description');
     cy.get(viewButton).click();
-    assertView(false);
+    assertView(true);
     cy.get('[data-cy="breadcrumb-proj1"]').click();
     assertView(false);
+    cy.get(viewButton).click();
     cy.reload();
     assertView(false);
+    cy.get('[data-cy="progressViewPreferenceMessage"]').should('not.exist');
   });
 
-  it('keeps explicit expanded and compact choices when the project default changes', () => {
+  it('saves expanded and compact defaults independently of the project default', () => {
     setProjectDefault(true);
+    saveProgressViewPreference('expanded');
+    cy.reload();
+    cy.get('[data-cy="progressViewPreference-expanded"] input').should('be.checked');
+    cy.get('[data-cy="userPrefsSettingsSave"]').should('be.disabled');
     cy.visit(projectPath());
-    assertView(true);
-    cy.get(viewButton).click();
+    assertView(false);
     cy.reload();
     assertView(false);
     setProjectDefault(false);
     cy.visit(`${projectPath()}/subjects/subj1`);
     assertView(false);
+
+    saveProgressViewPreference('compact');
+    cy.visit(projectPath());
+    assertView(true);
     cy.get(viewButton).click();
+    assertView(false);
     cy.reload();
+    assertView(true);
+    cy.visit(`${projectPath()}/subjects/subj1`);
     assertView(true);
   });
 
-  it('isolates project preferences while navigating between projects in the same app', () => {
+  it('applies one saved preference across projects and restores each project default when requested', () => {
     createCompactViewProject({ project: 2, compact: true });
     cy.addToMyProjects(1);
     cy.addToMyProjects(2);
+    saveProgressViewPreference('expanded');
     cy.visit(projectPath());
-    cy.get(viewButton).click();
-    assertView(true);
-    cy.get('[data-cy="breadcrumb-Progress And Rankings"]').click();
-    cy.get('[data-cy="project-link-proj2"]').click();
-    assertView(true);
-    cy.get(viewButton).click();
     assertView(false);
     cy.get('[data-cy="breadcrumb-Progress And Rankings"]').click();
-    cy.get('[data-cy="project-link-proj1"]').click();
+    cy.get('[data-cy="project-link-proj2"]').click();
+    assertView(false);
+
+    saveProgressViewPreference('project-default');
+    cy.visit(projectPath(2));
     assertView(true);
     cy.get('[data-cy="breadcrumb-Progress And Rankings"]').click();
-    cy.get('[data-cy="project-link-proj2"]').click();
+    cy.get('[data-cy="project-link-proj1"]').click();
     assertView(false);
   });
 
-  it('isolates preferences for different trainees using the same browser', () => {
-    const otherTrainee = 'compact-trainee@skills.org';
+  it('refreshes the cached display configuration after saving via the reminder link', () => {
     cy.visit(projectPath());
     cy.get(viewButton).click();
+    cy.get('[data-cy="progressViewPreferencesLink"]').click();
+    cy.get('[data-cy="progressViewPreferenceSetting"]').should('be.visible');
+    cy.get('[data-cy="progressViewPreference-project-default"] input').should('be.checked');
+    selectProgressViewPreference('compact');
+    cy.get('[data-cy="userPrefsSettingsSave"]').should('be.disabled');
+    cy.go('back');
+    assertView(true);
+    cy.get('[data-cy="progressViewPreferenceMessage"]').should('not.exist');
+  });
+
+  it('does not apply an unsaved preference', () => {
+    cy.visit(projectPath());
+    cy.get(viewButton).click();
+    cy.get('[data-cy="progressViewPreferencesLink"]').click();
+    cy.get('label[for="progressView-compact"]').click();
+    cy.get('[data-cy="unsavedChangesAlert"]').should('be.visible');
+    cy.go('back');
+    assertView(false);
+  });
+
+  it('isolates saved preferences for different trainees using the same browser', () => {
+    const otherTrainee = 'compact-trainee@skills.org';
+    saveProgressViewPreference('compact');
+    cy.visit(projectPath());
     assertView(true);
     cy.fixture('vars.json').then(({ defaultPass }) => {
       cy.register(otherTrainee, defaultPass);
       cy.login(otherTrainee, defaultPass);
     });
     cy.visit(projectPath());
-    assertView(false);
-    cy.get(viewButton).click();
-    assertView(true);
-    cy.get(viewButton).click();
     assertView(false);
     cy.loginAsAdminUser();
     cy.visit(projectPath());
@@ -103,44 +145,5 @@ describe('Compact view browser preferences', () => {
     cy.fixture('vars.json').then(({ defaultPass }) => cy.login(otherTrainee, defaultPass));
     cy.visit(projectPath());
     assertView(false);
-  });
-
-  it('ignores malformed browser preferences and allows the trainee to choose a valid view', () => {
-    cy.visit(projectPath());
-    cy.get(viewButton).click();
-    assertView(true);
-    cy.window().then((win) => {
-      const keys = Object.keys(win.localStorage).filter((key) => key.startsWith(preferencePrefix));
-      expect(keys).to.have.length(1);
-      win.localStorage.setItem(keys[0], 'not-a-boolean');
-    });
-    cy.reload();
-    assertView(false);
-    cy.get(viewButton).click();
-    cy.reload();
-    assertView(true);
-  });
-
-  it('still switches views when browser storage reads and writes are blocked', () => {
-    setProjectDefault(true);
-    cy.visit(projectPath(), {
-      onBeforeLoad(win) {
-        const nativeGet = win.Storage.prototype.getItem;
-        const nativeSet = win.Storage.prototype.setItem;
-        cy.stub(win.Storage.prototype, 'getItem').callsFake(function (key) {
-          if (String(key).startsWith(preferencePrefix)) throw new Error('Progress preference storage is blocked');
-          return nativeGet.call(this, key);
-        });
-        cy.stub(win.Storage.prototype, 'setItem').callsFake(function (key, value) {
-          if (String(key).startsWith(preferencePrefix)) throw new Error('Progress preference storage is blocked');
-          return nativeSet.call(this, key, value);
-        });
-      },
-    });
-    assertView(true);
-    cy.get(viewButton).click();
-    assertView(false);
-    cy.get(viewButton).click();
-    assertView(true);
   });
 });

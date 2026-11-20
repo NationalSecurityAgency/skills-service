@@ -38,6 +38,7 @@ import skills.controller.result.model.UserInfoRes
 import skills.dbupgrade.DBUpgradeSafe
 import skills.metrics.GlobalProgressMetricsService
 import skills.services.AccessSettingsStorageService
+import skills.services.ProgressViewPreferenceService
 import skills.services.UserAdminService
 import skills.services.UserAgreementResult
 import skills.services.UserAgreementService
@@ -64,6 +65,9 @@ class UserInfoController {
     static final String RANK_AND_LEADERBOARD_OPT_OUT_PREF = 'rank_and_leaderboard_optOut'
 
     static final String DISPLAY_UA_HEADER = "skills-display-ua"
+
+    @Autowired
+    ProgressViewPreferenceService progressViewPreferenceService
 
     @Autowired
     UserInfoService userInfoService
@@ -195,6 +199,7 @@ class UserInfoController {
     @RequestMapping(value = "/userInfo/settings", method = [RequestMethod.PUT, RequestMethod.POST], produces = MediaType.APPLICATION_JSON_VALUE)
     RequestResult saveUserSettings(@RequestBody List<UserSettingsRequest> values) {
         SkillsValidator.isNotNull(values, "Settings")
+        progressViewPreferenceService.validate(values)
 
         List<UserSettingsRequest> toDelete = values.findAll { StringUtils.isBlank(it.value)}
         if (toDelete) {
@@ -234,6 +239,7 @@ class UserInfoController {
     @RequestMapping(value = "/userInfo/settings/checkValidity", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     def checkSettingsValidity(@RequestBody List<UserSettingsRequest> values) {
         SkillsValidator.isNotNull(values, "Settings")
+        progressViewPreferenceService.validate(values)
         UserSettingsRequest invalid = values.find {it.settingGroup != USER_PREFS_GROUP }
         SkillsValidator.isTrue(invalid == null, "settingGroup [${invalid?.settingGroup}] does not match expected group [${USER_PREFS_GROUP}]")
         ValidationRes validationRes = settingsService.isValid(values)

@@ -13,47 +13,21 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { computed, effectScope, ref, shallowRef, toValue, watch } from 'vue'
-import { useStorage } from '@vueuse/core'
+import { computed, ref, toValue, watch } from 'vue'
 
-export const useProgressAndRankingView = ({ projectId, userId, serviceUrl, compactViewDefault, preview }) => {
-  const savedChoice = shallowRef(null)
-  const storageKey = computed(() => {
-    // Never read another trainee's override in an admin preview or create an anonymous preference.
-    if (toValue(preview) || !toValue(projectId) || !toValue(userId)) {
-      return null
-    }
-    const service = new URL(toValue(serviceUrl) || window.location.origin, window.location.origin).href.replace(/\/$/, '')
-    return `skills-display-compact-view:${[service, toValue(projectId), toValue(userId)].map(encodeURIComponent).join(':')}`
-  })
-
-  watch(() => [toValue(projectId), toValue(userId), toValue(serviceUrl), toValue(preview)], (_context, _previous, onCleanup) => {
-    const key = storageKey.value
-    if (!key) {
-      savedChoice.value = ref(null)
-      return
-    }
-
-    // Dispose the previous binding on context changes; previews never create a storage binding.
-    const storageScope = effectScope(true)
-    onCleanup(() => storageScope.stop())
-    savedChoice.value = storageScope.run(() => useStorage(key, null, undefined, {
-      writeDefaults: false,
-      flush: 'sync',
-      serializer: {
-        read: (value) => value === 'true' ? true : value === 'false' ? false : null,
-        write: (value) => String(value),
-      },
-      onError: () => {
-        // If iframe storage is blocked, useStorage still retains the in-memory choice.
-      },
-    }))
-  }, { immediate: true, flush: 'sync' })
+export const useProgressAndRankingView = ({ projectId, userId, serviceUrl, pageId, compactViewDefault, compactViewPreference, preview }) => {
+  // This override belongs only to this mounted page, never to a session or browser preference.
+  const temporaryChoice = ref(null)
+  watch(() => [toValue(projectId), toValue(userId), toValue(serviceUrl), toValue(pageId), toValue(preview)], () => {
+    temporaryChoice.value = null
+  }, { flush: 'sync' })
 
   const isCompact = computed({
-    get: () => savedChoice.value.value ?? (toValue(compactViewDefault) === true),
+    get: () => temporaryChoice.value
+      ?? (toValue(preview) ? null : toValue(compactViewPreference))
+      ?? (toValue(compactViewDefault) === true),
     set: (value) => {
-      savedChoice.value.value = value
+      temporaryChoice.value = value
     },
   })
 

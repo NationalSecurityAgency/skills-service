@@ -707,7 +707,7 @@ const toggleCustomLabelConfig = () => {
                 <span>{{ compactViewDefaultLabel }}</span>
               </div>
               <div id="compactViewDefaultHelp" class="text-sm text-muted-color">
-                Start user-facing project and subject progress overview pages in compact view. Users can expand or collapse the view, and their browser preference takes precedence over this project default.
+                Start user-facing project and subject progress overview pages in compact view. A saved User Preferences choice takes precedence over this project default.
               </div>
             </div>
           </settings-item>

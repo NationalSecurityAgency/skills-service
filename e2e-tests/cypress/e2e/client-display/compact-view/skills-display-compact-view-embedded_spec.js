@@ -21,6 +21,7 @@ import {
   createCompactMetricsProject,
   createCompactViewProject,
   projectPath,
+  saveProgressViewPreference,
   viewButton,
 } from '../../../support/compact-view';
 
@@ -29,25 +30,30 @@ describe('Embedded compact view', () => {
     cy.viewport(1440, 1000);
   });
 
-  it('persists embedded preferences and shares them with standalone project and subject overviews', () => {
+  it('loads the saved preference in embedded views and keeps embedded toggles page-local', () => {
     createCompactViewProject({ compact: true });
+    saveProgressViewPreference('expanded');
     cy.visit('/test-skills-client/proj1');
-    cy.wrapIframe().find(compactOverview).should('be.visible');
-    cy.wrapIframe().find(viewButton).should('have.attr', 'aria-expanded', 'false').click();
-    cy.reload();
     cy.wrapIframe().find('[data-cy="overallLevel"]').should('be.visible');
-    cy.wrapIframe().find(compactOverview).should('not.exist');
     cy.wrapIframe().find(viewButton).click();
     cy.wrapIframe().find(compactOverview).should('be.visible');
+    cy.wrapIframe().find('[data-cy="progressViewPreferenceMessage"]').should('be.visible');
+    cy.wrapIframe().find('[data-cy="progressViewPreferencesLink"]').should('have.attr', 'target', '_blank')
+      .and('have.attr', 'href', new URL('/settings/preferences#progress-view-preference', Cypress.config('baseUrl')).href);
+    cy.reload();
+    cy.wrapIframe().find('[data-cy="overallLevel"]').should('be.visible');
+    cy.wrapIframe().find('[data-cy="progressViewPreferenceMessage"]').should('not.exist');
+    cy.wrapIframe().find(viewButton).click();
     cy.wrapIframe().find('[data-cy="subjectTile-subj1"] [data-cy="subjectTileBtn"]').click();
-    cy.wrapIframe().find(compactOverview).should('be.visible');
+    cy.wrapIframe().find('[data-cy="overallLevel"]').should('be.visible');
+    cy.wrapIframe().find(compactOverview).should('not.exist');
     cy.wrapIframe().find('[data-cy="skillsTitle"]').should('contain.text', 'Subject 1');
     cy.visit(projectPath());
-    assertView(true);
-    cy.get(viewButton).click();
     assertView(false);
+
+    saveProgressViewPreference('compact');
     cy.visit('/test-skills-client/proj1');
-    cy.wrapIframe().find('[data-cy="overallLevel"]').should('be.visible');
+    cy.wrapIframe().find(compactOverview).should('be.visible');
   });
 
   it('retains summary-only restrictions in embedded compact view', () => {

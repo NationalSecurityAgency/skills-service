@@ -30,6 +30,7 @@ import { useSkillsDisplaySubjectState } from '@/skills-display/stores/UseSkillsD
 import { useSkillsDisplayService } from '@/skills-display/services/UseSkillsDisplayService.js'
 import AchievementCelebration from '@/skills-display/components/progress/celebration/AchievementCelebration.vue'
 import CompactProgressOverview from '@/skills-display/components/CompactProgressOverview.vue'
+import { useSkillsDisplayInfo } from '@/skills-display/UseSkillsDisplayInfo.js'
 
 const props = defineProps({
   isSubject: { type: Boolean, default: false },
@@ -41,6 +42,9 @@ const progress = useUserProgressSummaryState()
 const subject = useSkillsDisplaySubjectState()
 const displayService = useSkillsDisplayService()
 const route = useRoute()
+const displayInfo = useSkillsDisplayInfo()
+const preferencesRoute = { name: 'Preferences', hash: '#progress-view-preference' }
+const preferencesUrl = computed(() => `${(attributes.serviceUrl || window.location.origin).replace(/\/$/, '')}/settings/preferences#progress-view-preference`)
 const userProgress = computed(() => props.isSubject ? subject.subjectSummary : progress.userProgressSummary)
 const learningPathProgress = ref({ achieved: 0, total: 0 })
 const auth = useAuthState()
@@ -49,10 +53,18 @@ const { isCompact } = useProgressAndRankingView({
   projectId: () => attributes.projectId,
   userId: () => attributes.userId || auth.userInfo?.userId,
   serviceUrl: () => attributes.serviceUrl,
+  pageId: () => route.path,
   compactViewDefault: () => attributes.compactViewDefault,
+  compactViewPreference: () => attributes.compactViewPreference,
   preview: initialization?.preview,
 })
 const viewToggleLabel = computed(() => isCompact.value ? 'Expand progress view' : 'Collapse progress view')
+const showViewPreferenceMessage = ref(false)
+watch(() => route.path, () => { showViewPreferenceMessage.value = false })
+const toggleProgressView = () => {
+  isCompact.value = !isCompact.value
+  showViewPreferenceMessage.value = true
+}
 const hasBadges = computed(() => !props.isSubject && props.badges?.enabled)
 const chartHasBeenShown = ref(false)
 watch(isCompact, (compact) => {
@@ -78,13 +90,22 @@ onMounted(() => {
   <section aria-label="Progress and ranking" data-cy="progressAndRankingOverview" :data-compact="isCompact">
     <achievement-celebration :user-progress="userProgress" />
 
+    <Message v-if="showViewPreferenceMessage" severity="info" :closable="true"
+             data-cy="progressViewPreferenceMessage" @close="showViewPreferenceMessage = false">
+      To permanently change your view preference, visit
+      <a v-if="displayInfo.isSkillsClientPath()" :href="preferencesUrl" target="_blank" rel="noopener noreferrer"
+         class="font-semibold underline" data-cy="progressViewPreferencesLink">User Preferences (opens in a new tab)</a>
+      <router-link v-else :to="preferencesRoute" class="font-semibold underline"
+                   data-cy="progressViewPreferencesLink">User Preferences</router-link>.
+    </Message>
+
     <div class="relative">
       <div class="absolute right-1 top-1 z-10">
         <Button :icon="isCompact ? 'fas fa-expand-alt' : 'fas fa-compress-alt'"
                 severity="primary" outlined size="small"
                 class="h-8! w-8! sd-theme-primary-color"
                 :aria-label="viewToggleLabel" :title="viewToggleLabel" :aria-expanded="!isCompact"
-                data-cy="progressViewExpandCollapseButton" @click="isCompact = !isCompact" />
+                data-cy="progressViewExpandCollapseButton" @click="toggleProgressView" />
       </div>
       <compact-progress-overview v-if="isCompact" :user-progress="userProgress" :is-subject="isSubject"
                                  :badges="badges" :learning-path-progress="learningPathProgress" />

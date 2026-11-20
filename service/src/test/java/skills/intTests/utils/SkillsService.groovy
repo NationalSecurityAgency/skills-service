@@ -1463,6 +1463,15 @@ class SkillsService {
         wsHelper.get("/public/clientDisplay/config", "", projectId ? [projectId: projectId] : [:]) as Map
     }
 
+    Map getPublicClientDisplayConfigsAsProxy(String projectId, String userId) {
+        String token = wsHelper.getTokenForUser(userId)
+        return wsHelper.proxyApiGet(token, '/public/clientDisplay/config', '', [projectId: projectId]) as Map
+    }
+
+    Map checkUserSettingsValidity(List<Map> settings) {
+        return wsHelper.appPost('/userInfo/settings/checkValidity', settings).body as Map
+    }
+
     def getPublicSetting(String setting, String settingGroup){
         return wsHelper.appGet("/public/settings/${setting}/group/${settingGroup}")
     }

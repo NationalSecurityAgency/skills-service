@@ -18,6 +18,7 @@ import {
   assertView,
   createCompactViewProject,
   projectPath,
+  saveProgressViewPreference,
   setProjectDefault,
   viewButton,
 } from '../../../support/compact-view';
@@ -34,7 +35,7 @@ describe('Compact view admin settings and previews', () => {
   it('saves the project default and applies later changes when the trainee has not chosen a view', () => {
     cy.visit('/administrator/projects/proj1/settings');
     cy.contains('label', 'Default to Compact User Progress').should('be.visible');
-    cy.get('#compactViewDefaultHelp').should('contain.text', 'browser preference takes precedence');
+    cy.get('#compactViewDefaultHelp').should('contain.text', 'User Preferences choice takes precedence');
     cy.get(defaultSwitch).should('not.be.checked');
     cy.get('[data-cy="saveSettingsBtn"]').should('be.disabled');
     cy.get('[data-cy="compactViewDefaultSwitch"]').click();
@@ -58,8 +59,8 @@ describe('Compact view admin settings and previews', () => {
 
   it('starts previews from the project default without reading, persisting or changing trainee overrides', () => {
     cy.doReportSkill({ skill: 1, date: 'now' });
+    saveProgressViewPreference('compact');
     cy.visit(projectPath());
-    cy.get(viewButton).click();
     assertView(true);
     cy.visit(previewPath());
     cy.get('[data-cy="subPageHeader"]').should('contain.text', "User's Display");
