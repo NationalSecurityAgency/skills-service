@@ -396,5 +396,34 @@ class QuizDefSurveyManagementSpecs extends DefaultIntSpec {
         updatedQuestion.answers.isCorrect == [false, false, false]
         updatedQuestion.answers.displayOrder == [1, 2, 3]
     }
-}
 
+    def "enable and disable text responses on existing survey answers - #questionType"() {
+        def quiz = QuizDefFactory.createQuizSurvey(1)
+        skillsService.createQuizDef(quiz)
+        def saved = skillsService.createQuizQuestionDef(QuizDefFactory.createChoiceQuestion(1, 1, 3, questionType, QuizDefParent.QuizType.Survey)).body
+        saved.quizId = quiz.quizId
+        def answerIds = saved.answers.id
+
+        when:
+        saved.answers[1].allowCustomText = true
+        saved.answers[2].allowCustomText = true
+        skillsService.updateQuizQuestionDef(saved)
+        def enabled = skillsService.getQuizQuestionDefs(quiz.quizId).questions[0]
+        def enabledFlags = enabled.answers.allowCustomText
+        def enabledIds = enabled.answers.id
+
+        enabled.quizId = quiz.quizId
+        enabled.answers[1].allowCustomText = false
+        skillsService.updateQuizQuestionDef(enabled)
+        def disabled = skillsService.getQuizQuestionDefs(quiz.quizId).questions[0]
+
+        then:
+        enabledFlags == [false, true, true]
+        enabledIds == answerIds
+        disabled.answers.allowCustomText == [false, false, true]
+        disabled.answers.id == answerIds
+
+        where:
+        questionType << [QuizQuestionType.SingleChoice, QuizQuestionType.MultipleChoice]
+    }
+}

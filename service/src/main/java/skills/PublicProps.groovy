@@ -70,6 +70,7 @@ class PublicProps {
         maxAnswersPerQuizQuestion,
         maxQuizTextAnswerLength,
         maxTakeQuizInputTextAnswerLength,
+        maxSurveyChoiceTextAnswerLength,
         maxVideoCaptionsLength,
         maxVideoTranscriptLength,
         motivationalSkillWarningGracePeriod,

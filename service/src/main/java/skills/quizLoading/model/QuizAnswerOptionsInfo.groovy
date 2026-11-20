@@ -20,6 +20,7 @@ import skills.utils.InputSanitizer
 class QuizAnswerOptionsInfo {
     Integer id
     String answerOption
+    Boolean allowCustomText = false
     String getAnswerOption() {
         return InputSanitizer.unsanitizeEscapedHtml(answerOption)
     }

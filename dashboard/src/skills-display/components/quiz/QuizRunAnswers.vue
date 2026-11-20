@@ -49,9 +49,15 @@ const selectionChanged = (selectedStatus) => {
     const isThisId = a.id === selectedStatus.id;
     const isSelected = isThisId && selectedStatus.selected;
     const selectRes = isSelected || (props.q.questionType === QuestionType.MultipleChoice && a.selected && !isThisId);
+    // a deselected answer loses its text response, as on the server
+    let answerText = isThisId ? selectedStatus.answerText : a.answerText;
+    if (!selectRes) {
+      answerText = undefined;
+    }
     return {
       ...a,
       selected: selectRes,
+      answerText,
     };
   });
   value.value = answerOptionsInternal.value
@@ -62,6 +68,8 @@ const selectionChanged = (selectedStatus) => {
     selectedAnswerIds,
     changedAnswerId: selectedStatus.id,
     changedAnswerIdSelected: selectedStatus.selected,
+    answerText: selectedStatus.answerText,
+    isTextEdit: !!selectedStatus.isTextEdit,
   };
   emit('input', answerOptionsInternal.value);
   emit('selected-answer', currentAnswer);
@@ -79,6 +87,7 @@ const { value, errorMessage } = useField(() => props.name, undefined, {syncVMode
           :answer-num="aIndex+1"
           :q-num="qNum"
           :can-select-more-than-one="canSelectMoreThanOne"
+          :text-input-name="a.allowCustomText ? `${name}[${aIndex}].answerText` : undefined"
           @selection-changed="selectionChanged"/>
     </div>
     <Message v-if="errorMessage"

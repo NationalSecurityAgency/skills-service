@@ -38,6 +38,7 @@ class QuizAnswerDef {
     Integer questionRefId
 
     String answer
+    Boolean allowCustomText = false
     String isCorrectAnswer
 
     Integer displayOrder

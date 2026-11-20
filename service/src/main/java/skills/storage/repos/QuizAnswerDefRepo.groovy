@@ -40,6 +40,7 @@ interface QuizAnswerDefRepo extends JpaRepository<QuizAnswerDef, Long> {
         String getIsCorrectAnswer()
         String getQuizId()
         Integer getQuestionRefId()
+        Boolean getAllowCustomText()
         String getMultiPartAnswer()
 
         QuizQuestionType getQuestionType()
@@ -49,6 +50,7 @@ interface QuizAnswerDefRepo extends JpaRepository<QuizAnswerDef, Long> {
                 answer.quizId as quizId, 
                 question.type as questionType,
                 question.id as questionRefId,
+                answer.allowCustomText as allowCustomText,
                 answer.multiPartAnswer as multiPartAnswer
             from QuizAnswerDef answer, QuizQuestionDef question 
             where answer.id = ?1

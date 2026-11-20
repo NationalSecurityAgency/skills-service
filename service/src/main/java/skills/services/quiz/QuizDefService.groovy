@@ -388,6 +388,7 @@ class QuizDefService {
                         questionRefId: savedQuestion.id,
                         answer: fromAnswerDef.answer,
                         isCorrectAnswer: fromAnswerDef.isCorrectAnswer,
+                        allowCustomText: newQuizDef.type == QuizDefParent.QuizType.Survey && fromAnswerDef.allowCustomText,
                         displayOrder: fromAnswerDef.displayOrder,
                         multiPartAnswer: fromAnswerDef.multiPartAnswer,
                 )
@@ -733,6 +734,7 @@ class QuizDefService {
                         questionRefId: savedQuestion.id,
                         answer: InputSanitizer.sanitize(answerDefRequest.answer),
                         isCorrectAnswer: answerDefRequest.isCorrect,
+                        allowCustomText: answerDefRequest.allowCustomText == true,
                         displayOrder: index + 1,
                         multiPartAnswer: null,
                 )
@@ -747,12 +749,15 @@ class QuizDefService {
         boolean isTextInputQuestion = questionDefRequest.questionType == QuizQuestionType.TextInput
         boolean isRating = questionDefRequest.questionType == QuizQuestionType.Rating
         boolean isMatchingQuestion = questionDefRequest.questionType == QuizQuestionType.Matching
+        boolean isChoiceQuestion = questionDefRequest.questionType in [QuizQuestionType.SingleChoice, QuizQuestionType.MultipleChoice]
         List<QuizAnswerDef> savedAnswers
         List<QuizAnswerDef> existingAnswerDefs = quizAnswerRepo.findAllByQuestionRefId(savedQuestion.id).sort { it.displayOrder }
         if (isTextInputQuestion) {
             QuizAnswerDef qToUpdate = existingAnswerDefs[0]
             qToUpdate.answer = null
             qToUpdate.isCorrectAnswer = false
+            // text responses are only for choice questions; the reused answer may have allowed one
+            qToUpdate.allowCustomText = false
             savedAnswers = [quizAnswerRepo.saveAndFlush(qToUpdate)]
             if (existingAnswerDefs.size() > 1) {
                 List<Integer> idsToRemove = existingAnswerDefs.subList(1, existingAnswerDefs.size()).collect { it.id }
@@ -789,6 +794,7 @@ class QuizDefService {
                 if (answerDef) {
                     answerDef.multiPartAnswer = JsonOutput.toJson(multiPartAnswer)
                     answerDef.displayOrder = index + 1
+                    answerDef.allowCustomText = false
                     return answerDef
                 } else {
                     return new QuizAnswerDef(
@@ -808,6 +814,7 @@ class QuizDefService {
                 if (answerDef) {
                     answerDef.answer = InputSanitizer.sanitize(answerDefRequest.answer)
                     answerDef.isCorrectAnswer = answerDefRequest.isCorrect
+                    answerDef.allowCustomText = isChoiceQuestion && answerDefRequest.allowCustomText == true
                     answerDef.displayOrder = index + 1
                 } else {
                     answerDef = new QuizAnswerDef(
@@ -815,6 +822,7 @@ class QuizDefService {
                             questionRefId: savedQuestion.id,
                             answer: InputSanitizer.sanitize(answerDefRequest.answer),
                             isCorrectAnswer: answerDefRequest.isCorrect,
+                            allowCustomText: isChoiceQuestion && answerDefRequest.allowCustomText == true,
                             displayOrder: index + 1,
                     )
                 }
@@ -999,7 +1007,17 @@ class QuizDefService {
 
         Page<UserQuizAnswer> answerAttemptsPage = userQuizAnswerAttemptRepo.findUserAnswers(answerDefId, usersTableAdditionalUserTagKey, startDate, endDate, pageRequest)
         long count = answerAttemptsPage.getTotalElements()
-        List<UserQuizAnswer> answerAttempts = answerAttemptsPage.getContent()
+        List answerAttempts = answerAttemptsPage.getContent()
+        QuizQuestionType questionType = quizQuestionRepo.findById(quizAnswerDef.questionRefId).map({ it.type }).orElse(null)
+        if (questionType in [QuizQuestionType.SingleChoice, QuizQuestionType.MultipleChoice]) {
+            // choice answers store sanitized text responses
+            answerAttempts = answerAttempts.collect { UserQuizAnswer answer ->
+                [updated          : answer.updated, answerTxt: InputSanitizer.unsanitizeEscapedHtml(answer.answerTxt),
+                 status           : answer.status, userId: answer.userId, userIdForDisplay: answer.userIdForDisplay,
+                 userQuizAttemptId: answer.userQuizAttemptId, userTag: answer.userTag,
+                 firstName        : answer.firstName, lastName: answer.lastName]
+            }
+        }
         return new TableResult(totalCount: count, data: answerAttempts, count: count)
     }
 
@@ -1095,6 +1113,7 @@ class QuizDefService {
                                 numAnswered: numAnswered,
                                 numAnsweredCorrect: isSurvey ? numAnswered : (answerCorrectCount?.getCount() ?: 0),
                                 numAnsweredWrong: isSurvey ? 0 : (answerWrongCount?.getCount() ?: 0),
+                                allowCustomText: quizAnswerDefResult.allowCustomText,
                         )
                     }
             )
@@ -1133,6 +1152,7 @@ class QuizDefService {
                 id: savedAnswer.id,
                 answer: savedAnswer.answer,
                 isCorrect: Boolean.valueOf(savedAnswer.isCorrectAnswer),
+                allowCustomText: savedAnswer.allowCustomText,
                 displayOrder: savedAnswer.displayOrder,
                 multiPartAnswer: new QuizMultiPartAnswer(term: multiPartAnswer?.term, value: multiPartAnswer?.value)
         )
@@ -1251,6 +1271,10 @@ class QuizDefService {
                             ]
                         } else {
                             answer = InputSanitizer.unsanitizeEscapedHtml(answerDef.answer)
+                            // saved text is shown even if the answer no longer allows text
+                            if (foundSelected?.answerText) {
+                                answer = "${answer}: ${InputSanitizer.unsanitizeEscapedHtml(foundSelected.answerText)}".toString()
+                            }
                         }
                         Boolean needsGrading = foundSelected && foundSelected.answerStatus == UserQuizAnswerAttempt.QuizAnswerStatus.NEEDS_GRADING
                         AiGradingStatusResult aiGradingStatus = createAiGradingStatusResult(foundSelected?.answerStatus, foundSelected?.aiGradingAttemptCount ?: 0)
@@ -1410,6 +1434,12 @@ class QuizDefService {
     }
 
     private void validate(QuizDef quizDef, QuizQuestionDefRequest questionDefRequest) {
+        if (questionDefRequest.answers?.any { it?.allowCustomText }) {
+            QuizValidator.isTrue(quizDef.type == QuizDefParent.QuizType.Survey &&
+                    questionDefRequest.questionType in [QuizQuestionType.SingleChoice, QuizQuestionType.MultipleChoice],
+                    'Custom text answers are only supported for choice-based survey questions', quizDef.quizId)
+        }
+
         String quizId = quizDef.getQuizId()
         QuizValidator.isNotBlank(questionDefRequest.question, "question", quizId)
         QuizValidator.isNotNull(questionDefRequest.questionType, "questionType", quizId)
