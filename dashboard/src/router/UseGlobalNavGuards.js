@@ -158,6 +158,12 @@ export const useGlobalNavGuards = () => {
   const addNavGuards = () => {
     router.beforeEach(beforeEachNavGuard)
     router.beforeEach((to) => {
+      if (to.matched.some((record) => record.name === 'MyProjectSkillsPage')) {
+        // Clear the preview identity before checking the configuration cache. Clearing it in
+        // component setup invalidates configuration after this guard and leaves App waiting
+        // for a configuration reload that was never requested.
+        skillsDisplayAttributes.userId = null
+      }
       skillsDisplayAttributes.loadConfigStateIfNeeded(to)
       return true
     })

@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { matchSkillsDisplaySnapshot, visitSkillsDisplaySnapshotPage, waitForPrerequisitesGraph } from '../../support/skills-display-snapshot-helpers';
+import { clickPrerequisiteNode, matchSkillsDisplaySnapshot, visitSkillsDisplaySnapshotPage, waitForPrerequisitesGraph } from '../../support/skills-display-snapshot-helpers';
 describe('Prerequisite tests', () => {
 
   beforeEach(() => {
@@ -140,6 +140,35 @@ describe('Prerequisite tests', () => {
     cy.request('POST', '/admin/projects/proj1/badges/badge1', badge1);
     cy.assignSkillToBadge(1, 1, 1);
     cy.enableBadge(1, 1);
+  });
+
+  it('renders prerequisite labels and supports graph navigation when the icon font fails to load', () => {
+    cy.viewport(1200, 1000);
+    const drawnText = [];
+    cy.visit('/test-skills-display/proj1/subjects/subj1/skills/skill4?disableChartAnimations=true', {
+      onBeforeLoad(win) {
+        cy.stub(win.document.fonts, 'load').rejects(new Error('Icon font download failed')).as('loadIconFont');
+        const originalFillText = win.CanvasRenderingContext2D.prototype.fillText;
+        cy.stub(win.CanvasRenderingContext2D.prototype, 'fillText').callsFake(function (text, ...args) {
+          if (this.canvas.closest('[data-cy="prerequisitesGraph"]')) {
+            drawnText.push(String(text));
+          }
+          return originalFillText.call(this, text, ...args);
+        });
+      },
+    });
+
+    waitForPrerequisitesGraph();
+    cy.get('@loadIconFont').should('have.been.calledWith', '900 50px "Font Awesome 5 Free"', '\uf19d\uf559');
+    cy.wrap(null).should(() => {
+      const rendered = drawnText.join(' ');
+      expect(rendered).to.include('This Skill');
+      expect(rendered).to.include('This is 4');
+      expect(rendered).to.include('This is 2');
+    });
+    cy.get('[data-cy="prereqTable"] [data-cy="skillLink-proj1-skill2"]').should('be.visible');
+    clickPrerequisiteNode('proj1', 'skill2');
+    cy.get('[data-cy="skillProgressTitle"]').should('contain.text', 'This is 2');
   });
 
   it('skill with dependency renders dependency graph', () => {

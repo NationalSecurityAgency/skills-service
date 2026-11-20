@@ -22,6 +22,7 @@ import {
   createCompactMetricsProject,
   createCompactViewProject,
   projectPath,
+  viewButton,
 } from '../../../support/compact-view';
 
 describe('Compact view progress metrics', () => {
@@ -117,6 +118,36 @@ describe('Compact view progress metrics', () => {
     assertSkillCount(1, 4);
     cy.get('[data-cy="compactAchievedSkillsPercent"]').should('have.text', '25%');
     cy.get('[data-cy="compactLevelProgress"]').should('contain.text', '50 points remaining');
+  });
+
+  it('retains rounded achieved-skill percentages when switching project and subject views', () => {
+    createCompactViewProject({ compact: true });
+    cy.createSkill(1, 1, 2, { pointIncrement: 100, numPerformToCompletion: 1 });
+    cy.createSkill(1, 1, 3, { pointIncrement: 100, numPerformToCompletion: 1 });
+    cy.doReportSkill({ skill: 1, date: 'now' });
+    cy.doReportSkill({ skill: 2, date: 'now' });
+
+    [projectPath(), `${projectPath()}/subjects/subj1`].forEach((path) => {
+      cy.visit(path);
+      assertView(true);
+      assertSkillCount(2, 3);
+      cy.get('[data-cy="compactAchievedSkillsPercent"]').should('have.text', '67%');
+      cy.get('[data-cy="compactAchievedSkillsProgress"] [role="progressbar"]').should('have.attr', 'aria-valuenow', '67');
+      cy.get('[data-cy="compactOverallPercent"]').should('have.text', '66%');
+
+      cy.get(viewButton).click();
+      assertView(false);
+      cy.get('[data-cy="numAchievedSkills"]').should('have.text', '2');
+      cy.get('[data-cy="numTotalSkills"]').should('have.text', '3');
+      cy.get('[data-cy="achievedSkillsProgress"] [role="progressbar"]').should('have.attr', 'aria-valuenow', '67');
+      cy.get('[data-cy="overallPoints"] [data-cy="circleProgressPercent"]').should('have.text', '66%');
+
+      cy.get(viewButton).click();
+      assertView(true);
+      assertSkillCount(2, 3);
+      cy.get('[data-cy="compactAchievedSkillsPercent"]').should('have.text', '67%');
+      cy.get('[data-cy="compactAchievedSkillsProgress"] [role="progressbar"]').should('have.attr', 'aria-valuenow', '67');
+    });
   });
 
   it('shows completed levels and skills without suggesting another level', () => {

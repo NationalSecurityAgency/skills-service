@@ -21,6 +21,7 @@ import { useSkillsDisplayAttributesState } from '@/skills-display/stores/UseSkil
 import { useUserProgressSummaryState } from '@/skills-display/stores/UseUserProgressSummaryState.js'
 import { useSkillsDisplayInfo } from '@/skills-display/UseSkillsDisplayInfo.js'
 import VerticalProgressBar from '@/skills-display/components/progress/VerticalProgressBar.vue'
+import { calculateSkillsCompletionPercent } from '@/skills-display/components/progress/SkillsProgressUtil.js'
 
 const props = defineProps({
   userProgress: { type: Object, required: true },
@@ -43,7 +44,7 @@ const metrics = computed(() => {
   const ranking = progress.userRanking
   const allLevelsComplete = summary.levelTotalPoints === -1
   const pointsToNextLevel = Math.max(0, summary.levelTotalPoints - summary.levelPoints)
-  const skillsPercent = percentage(summary.skillsAchieved, summary.totalSkills)
+  const skillsPercent = calculateSkillsCompletionPercent(summary.skillsAchieved, summary.totalSkills)
   const rankDetailsRoute = {
     name: displayInfo.getContextSpecificRouteName(props.isSubject ? 'subjectRankDetails' : 'myRankDetails'),
     ...(props.isSubject ? { params: { subjectId: route.params.subjectId } } : {}),

@@ -26,6 +26,7 @@ import VerticalProgressBar from '@/skills-display/components/progress/VerticalPr
 import {usePluralize} from "@/components/utils/misc/UsePluralize.js";
 import {useSkillsDisplayInfo} from '@/skills-display/UseSkillsDisplayInfo.js'
 import { useRouter } from 'vue-router'
+import { calculateSkillsCompletionPercent } from '@/skills-display/components/progress/SkillsProgressUtil.js'
 
 const props = defineProps({
   learningPathProgress: {
@@ -53,7 +54,7 @@ const learningPathProgress = computed(() => props.learningPathProgress)
 
 const totalSkills = computed(() => userProgress.value?.totalSkills || 0)
 const skillsAchieved = computed(() => userProgress.value?.skillsAchieved || 0)
-const skillsPercentAchieved = computed(() => totalSkills.value > 0 ? Math.round((skillsAchieved.value / totalSkills.value) * 100) : 0)
+const skillsPercentAchieved = computed(() => calculateSkillsCompletionPercent(skillsAchieved.value, totalSkills.value))
 const hasLearningPath = computed(() => learningPathProgress.value.total > 0)
 const learningPathPercent = computed(() => Math.round((learningPathProgress.value.achieved / learningPathProgress.value.total) * 100))
 const viewLearningPath = () => router.push({ name: skillsDisplayInfo.getContextSpecificRouteName('projectLearningPathPage'), params: { projectId: attributes.projectId } })

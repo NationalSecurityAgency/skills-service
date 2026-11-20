@@ -176,8 +176,12 @@ const createGraph = async () => {
   if (generation !== graphGeneration || !container?.isConnected) return
 
   // Canvas icons do not trigger font loading like DOM text does. Load them before layout and drawing.
-  await document.fonts.load('900 50px "Font Awesome 5 Free"', '\uf19d\uf559')
-  await document.fonts.ready
+  try {
+    await document.fonts.load('900 50px "Font Awesome 5 Free"', '\uf19d\uf559')
+    await document.fonts.ready
+  } catch {
+    // Icons are optional: still render the graph's labels and connections if font loading fails.
+  }
   if (generation !== graphGeneration || !container.isConnected) return
 
   const graphNetwork = new Network(container, buildData(), displayOptions)

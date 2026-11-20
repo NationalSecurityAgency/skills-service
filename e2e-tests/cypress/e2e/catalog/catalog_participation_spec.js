@@ -298,9 +298,13 @@ describe('Learner catalog participation', () => {
         cy.get('[data-cy="overallPointsEarnedCard"] [data-cy="mediaInfoCardTitle"]').should('contain.text', '100 Total');
         cy.get(loadingMessage).should('not.exist');
         cy.get('@initialize.all').should('have.length', 0);
-        cy.get('[aria-label="User Settings Button"]').click();
-        cy.contains('[role="menuitem"]', 'Progress and Ranking').click();
-        cy.get('[data-cy="project-link-proj1"]').click();
+        cy.get('[data-cy="settings-button"]').click();
+        cy.get('[data-p="popup"][data-pc-name="menu"] [aria-label="Progress and Ranking"]')
+            .should('be.visible').click();
+        cy.location('pathname').should('eq', '/progress-and-rankings');
+        // Click the View button rather than the inline router-link wrapper's bounding-box center.
+        cy.get('[data-cy="project-link-proj1"]').find('button').should('be.visible').and('be.enabled').click();
+        cy.location('pathname').should('eq', '/progress-and-rankings/projects/proj1');
         cy.wait('@initialize').then(({ request, response }) => {
             expect(request.url).not.to.contain('userId');
             expect(response.body.backfillStatus).to.be.oneOf(['PENDING', 'COMPLETED']);

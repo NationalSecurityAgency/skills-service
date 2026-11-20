@@ -85,6 +85,56 @@ describe('Compact view admin settings and previews', () => {
         assertView(compact);
       });
     });
+
+    it(`reloads the ${compact ? 'compact' : 'expanded'} default when a delayed save finishes after returning to progress`, () => {
+      setProjectDefault(!compact);
+      cy.addToMyProjects(1);
+      cy.visit(projectPath());
+      assertView(!compact);
+
+      let releaseSaveResponse;
+      let saveResponseReceived = false;
+      const saveResponseGate = new Cypress.Promise((resolve) => {
+        releaseSaveResponse = resolve;
+      });
+      cy.intercept('POST', '/admin/projects/proj1/settings', (req) => {
+        req.continue(() => {
+          // Save on the server, but withhold the response until progress is active again.
+          saveResponseReceived = true;
+          return saveResponseGate;
+        });
+      }).as('saveCompactDefault');
+
+      cy.document().then((progressDocument) => {
+        cy.get('[data-cy="settings-button"]').click();
+        cy.get('[data-p="popup"][data-pc-name="menu"] [aria-label="Project Admin"]').click();
+        cy.get('[data-cy="projCard_proj1_manageBtn"]').should('be.visible').click();
+        cy.get('[data-cy="nav-Settings"]').should('be.visible').click();
+        cy.get(defaultSwitch).should(compact ? 'not.be.checked' : 'be.checked');
+        cy.get('[data-cy="compactViewDefaultSwitch"]').click();
+        cy.get(defaultSwitch).should(compact ? 'be.checked' : 'not.be.checked');
+        cy.get('[data-cy="saveSettingsBtn"]').should('be.enabled').click();
+        cy.wrap(null).should(() => {
+          expect(saveResponseReceived, 'save response is held before navigation').to.be.true;
+        });
+        cy.get('[data-cy="settingsSavedAlert"]').should('not.exist');
+
+        cy.get('[data-cy="settings-button"]').click();
+        cy.get('[data-p="popup"][data-pc-name="menu"] [aria-label="Progress and Ranking"]').click();
+        cy.get('[data-cy="project-link-proj1"]').should('be.visible').click();
+        cy.location('pathname').should('eq', projectPath());
+        cy.document().should('eq', progressDocument);
+        // The cached default is still visible because the save callback has not run yet.
+        assertView(!compact);
+
+        cy.then(() => releaseSaveResponse());
+        cy.wait('@saveCompactDefault');
+        assertView(compact);
+        cy.get('[data-cy="earnedPoints"]').should('have.text', '0');
+        cy.get('[data-cy="totalPoints"]').should('have.text', '100');
+        cy.document().should('eq', progressDocument);
+      });
+    });
   });
 
   it('starts previews from the project default without reading, persisting or changing trainee overrides', () => {

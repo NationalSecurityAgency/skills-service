@@ -483,6 +483,8 @@ const saveSettings = ((dirtyChanges) => {
       .then(() => {
         if (displayAttributes.projectId === projectId && dirtyChanges.some((setting) => setting.setting === settings.value.compactViewDefault.setting)) {
           displayAttributes.invalidateConfig()
+          // The save may finish after SPA navigation back to an active display.
+          displayAttributes.loadConfigStateIfNeeded().catch(() => { /* Shared Axios handling displays configuration errors. */ })
         }
         showSavedMsg.value = true;
         announcer.polite('Project Settings have been successfully saved');
