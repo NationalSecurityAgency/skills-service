@@ -74,16 +74,30 @@ export const useImgHandler = () => {
         };
     }
 
-    const reinsertImages = (processedText, extractedImages) => {
+    const reinsertImages = (processedText, extractedImages, maxLength = Infinity) => {
+        if (processedText.length > maxLength) {
+            throw generatedContentTooLongError(maxLength);
+        }
         if (!extractedImages?.length) {
             return { text: processedText, unusedImages: [] };
         }
 
         const imagesByPlaceholder = new Map(extractedImages.map((image) => [image.placeholder, image]));
-        // Match once so placeholders in the original image's alt text are not expanded.
+        // Match only response placeholders so those in the original image's alt text are not expanded.
         // AI responses may Markdown-escape any of the placeholder's hyphens.
         const placeholders = extractedImages.map((image) => escapeRegExp(image.placeholder).replace(/-/g, '\\\\?-'));
         const placeholderRegex = new RegExp(`(?:${placeholders.join('|')})(?!\\d)`, 'g');
+        // Count every occurrence, including escaped placeholders, before allocating
+        // probes or the restored string. A short response can repeat large images.
+        let restoredLength = processedText.length;
+        let match;
+        while ((match = placeholderRegex.exec(processedText)) !== null) {
+            const image = imagesByPlaceholder.get(match[0].replace(/\\-/g, '-'));
+            restoredLength += image.markdown.length - match[0].length;
+            if (restoredLength > maxLength) {
+                throw generatedContentTooLongError(maxLength);
+            }
+        }
         const usedImages = new Set();
         const probeUrls = [];
         const probeId = Array.from(crypto.getRandomValues(new Uint32Array(4)), (value) => value.toString(16).padStart(8, '0')).join('');
@@ -112,6 +126,12 @@ export const useImgHandler = () => {
             text: processedText.replace(placeholderRegex, (placeholder) => imagesByPlaceholder.get(placeholder.replace(/\\-/g, '-')).markdown),
             unusedImages: extractedImages.filter((image) => !usedImages.has(image))
         };
+    }
+
+    const generatedContentTooLongError = (maxLength) => {
+        const error = new Error(`Generated content exceeds the maximum length of ${maxLength} characters after restoring images.`);
+        error.userMessage = 'The generated content exceeds the maximum allowed length. Please ask the AI to shorten it or use fewer images.';
+        return error;
     }
 
     const unsafeImagePlacementError = () => {
