@@ -159,6 +159,8 @@ function saveUserSettings(dirtyChanges) {
       .then(() => {
         if (dirtyChanges.some((setting) => setting.setting === 'sd_progress_view')) {
           displayAttributes.invalidateConfig()
+          // The save may finish after SPA navigation back to an active display.
+          displayAttributes.loadConfigStateIfNeeded().catch(() => { /* Shared Axios handling displays configuration errors. */ })
         }
         showSavedMsg.value = true;
         setTimeout(() => { showSavedMsg.value = false; }, 4000);

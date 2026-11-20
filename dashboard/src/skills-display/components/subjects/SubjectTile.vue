@@ -93,7 +93,7 @@ const activePointsColor = computed(() => {
       <component :is="attributes.isSummaryOnly ? 'div' : RouterLink"
                  v-bind="attributes.isSummaryOnly ? {} : { to: subjectRoute, 'aria-label': `View ${subject.subject} ${attributes.subjectDisplayName.toLowerCase()}` }"
                  :data-cy="attributes.isSummaryOnly ? undefined : 'subjectTileBtn'"
-                 class="group block h-full rounded-[var(--p-card-border-radius)] p-4 text-color sd-theme-primary-color"
+                 class="group block h-full rounded-[var(--p-card-border-radius)] p-4 text-color sd-theme-primary-color sd-theme-tile-background"
                  :class="{ 'hover:bg-surface-50 focus-visible:outline-2 focus-visible:outline-primary focus-visible:outline-offset-4 motion-safe:transition-colors dark:hover:bg-surface-800': !attributes.isSummaryOnly }">
         <div class="flex items-start gap-3">
           <span class="flex h-10 w-10 shrink-0 items-center justify-center" aria-hidden="true">
@@ -127,7 +127,7 @@ const activePointsColor = computed(() => {
             {{ numFormat.pretty(pointsToNextLevel) }} {{ attributes.pointDisplayNamePlural.toLowerCase() }} to {{ attributes.levelDisplayName }} {{ subject.skillsLevel + 1 }}
           </span>
           <span v-if="!attributes.isSummaryOnly" class="inline-flex shrink-0 items-center gap-2 font-medium text-primary sd-theme-primary-color">
-            View<i class="fas fa-arrow-right" aria-hidden="true" />
+            <span class="group-hover:underline">View</span><i class="fas fa-arrow-right" aria-hidden="true" />
           </span>
         </div>
       </component>

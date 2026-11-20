@@ -72,6 +72,27 @@ describe('Compact view custom theme snapshots', () => {
     matchCompactThemeSnapshot();
   });
 
+  it('preserves custom theme contrast when hovering a compact subject card without dark mode', () => {
+    cy.visit(`/test-skills-client/proj1?enableTheme=true&disableChartAnimations=true`);
+    cy.get('html').should('not.have.class', 'st-dark-theme');
+    cy.wrapIframe().within(() => {
+      assertView(true);
+      cy.get('[data-cy="subjectTile-subj1"] [data-cy="subjectTileBtn"]')
+        .should('be.visible').realHover().should(($card) => {
+          const card = $card[0];
+          const frameWindow = card.ownerDocument.defaultView;
+          expect(card.ownerDocument.querySelector('.st-dark-theme'), 'embedded display is not in dark mode').to.be.null;
+          expect(card.matches(':hover'), 'subject card is hovered').to.be.true;
+          expect(frameWindow.getComputedStyle(card).backgroundColor, 'custom tile background on hover').to.equal('rgb(21, 46, 77)');
+          $card.find('h3, [data-cy="levelTitle"], [data-cy="pointsProgress"], [data-cy="levelProgress"]').each((index, text) => {
+            expect(frameWindow.getComputedStyle(text).color, `themed text color for ${text.textContent.trim()}`).to.equal('rgb(255, 255, 255)');
+          });
+        });
+      cy.get('[data-cy="subjectTile-subj1"] h3').should('have.text', 'Subject 1');
+      cy.get('[data-cy="subjectTile-subj1"] [data-cy="pointsProgress"]').should('contain.text', '100').and('contain.text', '1,000');
+    });
+  });
+
   it('themed compact subject overview', () => {
     cy.visit(`/test-skills-client/proj1?enableTheme=true&disableChartAnimations=true`);
     cy.wrapIframe().find('[data-cy="subjectTile-subj1"] [data-cy="subjectTileBtn"]').should('be.visible').click();

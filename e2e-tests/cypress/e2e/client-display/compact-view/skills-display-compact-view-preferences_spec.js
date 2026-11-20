@@ -117,6 +117,55 @@ describe('Progress view user preferences', () => {
     cy.get('[data-cy="progressViewPreferenceMessage"]').should('not.exist');
   });
 
+  [true, false].forEach((compact) => {
+    it(`reloads the ${compact ? 'compact' : 'expanded'} preference when a delayed save finishes after returning to progress`, () => {
+      setProjectDefault(!compact);
+      cy.visit(projectPath());
+      assertView(!compact);
+
+      let releaseSaveResponse;
+      let saveResponseReceived = false;
+      const saveResponseGate = new Cypress.Promise((resolve) => {
+        releaseSaveResponse = resolve;
+      });
+      cy.intercept('POST', '/app/userInfo/settings', (req) => {
+        req.continue(() => {
+          // Save on the server, but withhold the response until progress is active again.
+          saveResponseReceived = true;
+          return saveResponseGate;
+        });
+      }).as('saveProgressViewPreference');
+
+      cy.document().then((progressDocument) => {
+        cy.get(viewButton).click();
+        cy.get('[data-cy="progressViewPreferencesLink"]').click();
+        cy.get('[data-cy="progressViewPreferenceSetting"]').should('be.visible');
+        const preference = compact ? 'compact' : 'expanded';
+        cy.get(`label[for="progressView-${preference}"]`).click();
+        cy.get(`[data-cy="progressViewPreference-${preference}"] input`).should('be.checked');
+        cy.get('[data-cy="userPrefsSettingsSave"]').should('be.enabled').click();
+        cy.wrap(null).should(() => {
+          expect(saveResponseReceived, 'save response is held before navigation').to.be.true;
+        });
+        cy.get('[data-cy="settingsSavedAlert"]').should('not.exist');
+
+        cy.go('back');
+        cy.location('pathname').should('eq', projectPath());
+        // A full-page navigation would discard the stale cache and mask this regression.
+        cy.document().should('eq', progressDocument);
+        assertView(!compact);
+
+        cy.then(() => releaseSaveResponse());
+        cy.wait('@saveProgressViewPreference');
+        assertView(compact);
+        cy.get('[data-cy="earnedPoints"]').should('have.text', '0');
+        cy.get('[data-cy="totalPoints"]').should('have.text', '100');
+        cy.get('[data-cy="progressViewPreferenceMessage"]').should('not.exist');
+        cy.document().should('eq', progressDocument);
+      });
+    });
+  });
+
   it('does not apply an unsaved preference', () => {
     cy.visit(projectPath());
     cy.get(viewButton).click();
