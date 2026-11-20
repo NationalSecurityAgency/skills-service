@@ -20,6 +20,8 @@ import { validateSkillsDisplayServiceUrl } from '@/skills-display/iframe/SkillsD
 
 export const useSkillsDisplayParentFrameState = defineStore('skillsDisplayParentFrameState', () => {
   const authToken = ref('')
+  const authGeneration = ref(0)
+  const authenticationFailureRevision = ref(0)
   const isAuthenticating = ref(false)
   const parentFrame = ref(null)
   const serviceUrl = ref('')
@@ -38,18 +40,28 @@ export const useSkillsDisplayParentFrameState = defineStore('skillsDisplayParent
     return options.value?.parentPath || '/skilltree';
   })
   const setAuthToken = (token) => {
+    authGeneration.value += 1
     authToken.value = token
   }
+  const clearAuthToken = () => {
+    setAuthToken('')
+    // A failed initial request must be observable even if no user was ever loaded.
+    authenticationFailureRevision.value += 1
+  }
+  const isCurrentAuthRequest = (config) => {
+    return config?.skillsDisplayAuthGeneration === undefined || config.skillsDisplayAuthGeneration === authGeneration.value
+  }
   const interceptor = axios.interceptors.request.use((config) => {
-    if (!authToken.value) {
-      return config
-    }
     try {
       validateSkillsDisplayServiceUrl(serviceUrl.value)
       // getUri uses Axios's URL/baseURL combination rules, including allowAbsoluteUrls.
       const destination = new URL(axios.getUri(config), window.location.href)
       if (destination.origin === window.location.origin && !destination.username && !destination.password) {
-        config.headers.set('Authorization', `Bearer ${authToken.value}`)
+        // Keep this local to Axios config; do not transmit it as a header or URL parameter.
+        config.skillsDisplayAuthGeneration = authGeneration.value
+        if (authToken.value) {
+          config.headers.set('Authorization', `Bearer ${authToken.value}`)
+        }
       }
     } catch {
       // Invalid or untrusted URLs must never receive the display token.
@@ -59,7 +71,11 @@ export const useSkillsDisplayParentFrameState = defineStore('skillsDisplayParent
   onScopeDispose(() => axios.interceptors.request.eject(interceptor))
   return {
     authToken,
+    authGeneration,
+    authenticationFailureRevision,
     setAuthToken,
+    clearAuthToken,
+    isCurrentAuthRequest,
     isAuthenticating,
     parentFrame,
     serviceUrl,

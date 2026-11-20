@@ -21,6 +21,7 @@ import { userErrorState } from '@/stores/UserErrorState.js'
 import { useSkillsDisplayInfo} from '@/skills-display/UseSkillsDisplayInfo.js'
 import { useLog } from '@/components/utils/misc/useLog.js'
 import { useUpgradeInProgressErrorChecker } from '@/components/utils/errors/UseUpgradeInProgressErrorChecker.js'
+import { useSkillsDisplayParentFrameState } from '@/skills-display/stores/UseSkillsDisplayParentFrameState.js'
 
 export const useErrorHandling = () => {
 
@@ -70,6 +71,10 @@ export const useErrorHandling = () => {
 
     const path = window.location.pathname;
     if (errorCode === 401) {
+      if (skillsDisplayInfo.isSkillsClientPath() && !useSkillsDisplayParentFrameState().isCurrentAuthRequest(error.config)) {
+        // A response from an older token must not clear a replacement token or its user.
+        return Promise.reject(error);
+      }
       authState.clearAuthData()
       if (skillsDisplayInfo.isSkillsClientPath()) {
         // The iframe handles re-authentication through its parent, not a dashboard login route.

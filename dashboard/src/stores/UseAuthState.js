@@ -57,12 +57,16 @@ export const useAuthState = defineStore('authState', () => {
         userInfoState.value = null
         localAuth.value = false
         oAuthAuth.value = false
-        localStorage.removeItem('localAuth')
-        localStorage.removeItem('oAuthAuth')
-        localStorage.removeItem('expirationDate')
-        localStorage.removeItem('userInfo')
         delete axios.defaults.headers.common.Authorization
-        useSkillsDisplayParentFrameState().setAuthToken('')
+        useSkillsDisplayParentFrameState().clearAuthToken()
+        try {
+            localStorage.removeItem('localAuth')
+            localStorage.removeItem('oAuthAuth')
+            localStorage.removeItem('expirationDate')
+            localStorage.removeItem('userInfo')
+        } catch {
+            // Blocked browser storage must not prevent clearing in-memory authentication.
+        }
     }
 
     const handleLogin = (result) => {
@@ -148,6 +152,9 @@ export const useAuthState = defineStore('authState', () => {
     const fetchUser = (storeInLocalStorage = true) => {
         return axios.get('/app/userInfo')
           .then((response) => {
+              if (!useSkillsDisplayParentFrameState().isCurrentAuthRequest(response.config)) {
+                  throw new axios.CanceledError('Authentication request was superseded')
+              }
               storeUser(response.data)
               if (storeInLocalStorage) {
                   localStorage.setItem('userInfo', JSON.stringify(response.data))

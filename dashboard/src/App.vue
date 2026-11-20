@@ -125,22 +125,22 @@ onMounted(() => {
       if (iframeInit.initializationError.value) return
       log.debug('App.vue: skillsDisplayInfo.isSkillsClientPath()=true, loaded iframe!')
     }
-    loadConfigs()
+    loadConfigs().catch(() => { /* Shared Axios handling displays errors, including iframe authentication failures. */ })
   })
 })
 
 const restoreSessionIfAvailable = () => {
   if (skillsDisplayInfo.isSkillsClientPath()) {
     authState.setRestoringSession(false)
-    return authState.fetchUser()
+    return authState.fetchUser(false)
   }
   return authState.restoreSessionIfAvailable()
 }
 
 const loadConfigs = () => {
-  appConfig.loadConfigState().finally(() => {
-    restoreSessionIfAvailable().finally(() => {
-      skillsDisplayAttributes.loadConfigStateIfNeeded().then(() => {
+  return appConfig.loadConfigState().finally(() => {
+    const loadDisplayConfig = () => {
+      return skillsDisplayAttributes.loadConfigStateIfNeeded().then(() => {
 
         if (!skillsDisplayInfo.isSkillsClientPath()) {
           globalNavGuards.addNavGuards()
@@ -157,7 +157,12 @@ const loadConfigs = () => {
 
         initMatomo()
       })
-    })
+    }
+    const restoringSession = restoreSessionIfAvailable()
+    // An iframe needs a valid identity before continuing; dashboard startup still installs its navigation guards.
+    return skillsDisplayInfo.isSkillsClientPath()
+      ? restoringSession.then(loadDisplayConfig)
+      : restoringSession.finally(loadDisplayConfig)
   })
 }
 
