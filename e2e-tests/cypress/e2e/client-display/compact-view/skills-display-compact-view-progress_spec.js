@@ -150,6 +150,41 @@ describe('Compact view progress metrics', () => {
     });
   });
 
+  it('preserves fractional subject progress so points earned today extend beyond the previous-progress layer', () => {
+    createCompactViewProject({ compact: true, skillOverrides: { pointIncrement: 666 } });
+    cy.createSkill(1, 1, 2, { pointIncrement: 1, numPerformToCompletion: 1 });
+    cy.createSkill(1, 1, 3, { pointIncrement: 333, numPerformToCompletion: 1 });
+    cy.doReportSkill({ skill: 1, date: 'yesterday' });
+    cy.doReportSkill({ skill: 2, date: 'now' });
+    cy.visit(projectPath());
+    assertView(true);
+    cy.get('[data-cy="subjectTile-subj1"]').should('contain.text', '66%');
+
+    const assertFractionalProgress = () => {
+      cy.get('[data-cy="subjectTile-subj1"] [data-cy="pointsProgress"]').should('contain.text', '667').and('contain.text', '1,000');
+      cy.get('[data-cy="subjectTile-subj1"] [data-cy="firstProgressBar"]').first().should(($bar) => {
+        expect(Number($bar.attr('aria-valuenow'))).to.be.closeTo(66.7, 0.0001);
+      });
+      cy.get('[data-cy="subjectTile-subj1"] [data-cy="secondProgressBar"]').first().should(($bar) => {
+        expect(Number($bar.attr('aria-valuenow'))).to.be.closeTo(66.6, 0.0001);
+      });
+      cy.get('[data-cy="subjectTile-subj1"] .user-skill-progress-layers').first().should(($layers) => {
+        const current = $layers.find('[data-cy="firstProgressBar"] [data-pc-section="value"]')[0];
+        const previous = $layers.find('[data-cy="secondProgressBar"] [data-pc-section="value"]')[0];
+        expect(current.getBoundingClientRect().right, 'today\'s progress extends beyond yesterday\'s').to.be.greaterThan(previous.getBoundingClientRect().right);
+      });
+    };
+
+    cy.get('[data-cy="subjectTile-subj1"] [data-cy="firstProgressBar"]').should('have.attr', 'aria-label', 'Overall progress for Subject 1: 66%');
+    assertFractionalProgress();
+    cy.get(viewButton).click();
+    assertView(false);
+    assertFractionalProgress();
+    cy.get(viewButton).click();
+    assertView(true);
+    assertFractionalProgress();
+  });
+
   it('shows completed levels and skills without suggesting another level', () => {
     createCompactViewProject({ compact: true, skillOverrides: { pointIncrement: 1000 } });
     cy.doReportSkill({ skill: 1, date: 'now' });

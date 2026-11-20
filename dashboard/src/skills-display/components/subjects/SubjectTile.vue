@@ -118,11 +118,11 @@ const activePointsColor = computed(() => {
           <span class="font-medium sd-theme-primary-color">{{ overallPercent }}%</span>
         </div>
         <div class="mt-2">
-          <vertical-progress-bar :total-progress="overallPercent" :total-progress-before-today="progress.totalBeforeToday" :bar-size="5"
+          <vertical-progress-bar :total-progress="progress.total" :total-progress-before-today="progress.totalBeforeToday" :bar-size="5"
                                  :aria-label="`Overall progress for ${subject.subject}: ${overallPercent}%`" />
         </div>
         <div class="mt-3 flex items-center justify-between gap-3 text-base">
-          <span v-if="progress.allLevelsComplete" class="text-emerald-800 dark:text-emerald-300" data-cy="allLevelsComplete">All {{ attributes.levelDisplayNamePlural.toLowerCase() }} complete</span>
+          <span v-if="progress.allLevelsComplete" class="text-emerald-800 dark:text-emerald-300 sd-theme-primary-color" data-cy="allLevelsComplete">All {{ attributes.levelDisplayNamePlural.toLowerCase() }} complete</span>
           <span v-else class="text-muted-color sd-theme-primary-color" data-cy="levelProgress">
             {{ numFormat.pretty(pointsToNextLevel) }} {{ attributes.pointDisplayNamePlural.toLowerCase() }} to {{ attributes.levelDisplayName }} {{ subject.skillsLevel + 1 }}
           </span>

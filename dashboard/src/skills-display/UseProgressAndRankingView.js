@@ -32,6 +32,8 @@ export const useProgressAndRankingView = ({ projectId, userId, serviceUrl, pageI
       onCleanup(() => storageScope.stop())
       localChoice.value = storageScope.run(() => useStorage(embeddedProgressViewStorageKey, null, undefined, {
         writeDefaults: false,
+        // Multiple Skills Displays on one page are unsupported. Cross-tab synchronization
+        // is provided by useStorage itself, without custom synchronization code.
         flush: 'sync',
         serializer: {
           read: (value) => value === 'compact' ? true : value === 'expanded' ? false : null,
