@@ -16,9 +16,13 @@
 package skills.utils
 
 
+import skills.controller.exceptions.ErrorCode
+import skills.controller.exceptions.SkillException
+
 import java.time.LocalDateTime
 import java.time.LocalTime
 import java.time.format.DateTimeFormatter
+import java.time.format.DateTimeParseException
 
 class TimeRangeFormatterUtil {
 
@@ -27,8 +31,8 @@ class TimeRangeFormatterUtil {
 
     static List<Date> formatTimeRange(String start, String end, Boolean exactTime = true) {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")
-        LocalDateTime startDate = start && !start.equalsIgnoreCase("null") ? LocalDateTime.parse(start, formatter) : LocalDateTime.parse(defaultStart, formatter) //start ? format.parse(start) : format.parse(defaultStart)
-        LocalDateTime endDate = end && !end.equalsIgnoreCase("null") ? LocalDateTime.parse(end, formatter) : LocalDateTime.parse(defaultEnd, formatter)
+        LocalDateTime startDate = start && !start.equalsIgnoreCase("null") ? parseRequestValue("start", start, formatter) : LocalDateTime.parse(defaultStart, formatter) //start ? format.parse(start) : format.parse(defaultStart)
+        LocalDateTime endDate = end && !end.equalsIgnoreCase("null") ? parseRequestValue("end", end, formatter) : LocalDateTime.parse(defaultEnd, formatter)
 
         if(!exactTime) {
             startDate = startDate.toLocalDate().atTime(LocalTime.MIN)
@@ -36,5 +40,14 @@ class TimeRangeFormatterUtil {
         }
 
         return [startDate.toDate(), endDate.toDate()]
+    }
+
+    private static LocalDateTime parseRequestValue(String paramName, String value, DateTimeFormatter formatter) {
+        try {
+            return LocalDateTime.parse(value, formatter)
+        } catch (DateTimeParseException ignored) {
+            throw new SkillException("${paramName} must be a date and time in the yyyy-MM-dd HH:mm:ss format. Provided [${value}]".toString(),
+                    SkillException.NA, SkillException.NA, ErrorCode.BadParam)
+        }
     }
 }
