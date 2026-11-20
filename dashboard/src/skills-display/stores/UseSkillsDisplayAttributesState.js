@@ -47,7 +47,9 @@ export const useSkillsDisplayAttributesState = defineStore('skillsDisplayAttribu
     configRevision += 1
     config.value = {}
     pendingConfig = null
-    loadingConfig.value = true
+    // Invalidating cached data does not schedule a request, especially after logout.
+    // Only loadConfigState should mark configuration as loading.
+    loadingConfig.value = false
   }
   watch(configContext, () => {
     invalidateConfig()

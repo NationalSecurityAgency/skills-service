@@ -189,13 +189,29 @@ const isDashboardFooter = computed(() => notSkillsClient.value && !isLoadingApp.
       <div v-if="iframeInit.initializationError.value" role="alert" data-cy="skillsDisplayInitError" class="p-4">
         {{ iframeInit.initializationError.value }}
       </div>
+      <div v-else-if="iframeInit.authenticationError.value" class="flex min-h-80 items-center justify-center p-4 sm:p-6">
+        <div role="alert"
+             aria-labelledby="skills-display-authentication-title"
+             data-cy="skillsDisplayAuthenticationError"
+             class="w-full max-w-lg rounded-xl border border-slate-200 bg-white p-6 text-center shadow-sm dark:border-slate-700 dark:bg-slate-900 sm:p-8">
+          <div aria-hidden="true" class="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-blue-50 text-blue-700 dark:bg-blue-950 dark:text-blue-300">
+            <i class="fas fa-lock text-2xl"></i>
+          </div>
+          <h1 id="skills-display-authentication-title" class="mb-3 text-xl font-semibold text-slate-900 dark:text-slate-100">
+            Re-authentication required
+          </h1>
+          <p class="m-0 text-base leading-relaxed text-slate-700 dark:text-slate-300">
+            {{ iframeInit.authenticationError.value }}
+          </p>
+        </div>
+      </div>
       <div v-else-if="isLoadingApp" role="main" class="flex content-center justify-center flex-wrap" style="min-height: 40rem">
         <div class="flex items-center justify-center m-2">
           <skills-spinner :is-loading="true" class="text-center"/>
           <h1 class="text-sm sr-only">Loading...</h1>
         </div>
       </div>
-      <div v-if="!isLoadingApp && !iframeInit.initializationError.value" class="m-0">
+      <div v-if="!isLoadingApp && !iframeInit.initializationError.value && !iframeInit.authenticationError.value" class="m-0">
         <pki-app-bootstrap v-if="inBootstrapMode" role="region"/>
 
         <div v-if="!inBootstrapMode" :class="{ 'overall-container' : notSkillsClient, 'sd-theme-background-color': !notSkillsClient }">

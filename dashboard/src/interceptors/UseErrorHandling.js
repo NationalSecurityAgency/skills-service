@@ -71,6 +71,10 @@ export const useErrorHandling = () => {
     const path = window.location.pathname;
     if (errorCode === 401) {
       authState.clearAuthData()
+      if (skillsDisplayInfo.isSkillsClientPath()) {
+        // The iframe handles re-authentication through its parent, not a dashboard login route.
+        return Promise.reject(error);
+      }
       if (path !== '/skills-login' && route.meta.requiresAuth) {
         let loginRoute = path !== '/' ? { name: 'Login', query: { redirect: path } } : { name: 'Login' };
         if (appConfig.isPkiAuthenticated) {

@@ -17,13 +17,14 @@ import { useSkillsDisplayParentFrameState } from '@/skills-display/stores/UseSki
 import { useSkillsDisplayAttributesState } from '@/skills-display/stores/UseSkillsDisplayAttributesState.js'
 import { useLog } from '@/components/utils/misc/useLog.js'
 import Postmate from 'postmate'
-import { ref, computed } from 'vue'
+import { ref, computed, watch, nextTick } from 'vue'
 import { useSkillsDisplayThemeState } from '@/skills-display/stores/UseSkillsDisplayThemeState.js'
 import ThemeHelper from '@/skills-display/theme/ThemeHelper.js'
 import { useAppConfig } from '@/common-components/stores/UseAppConfig.js'
 import { useSkillsDisplayInfo } from '@/skills-display/UseSkillsDisplayInfo.js'
 import { useRouter } from 'vue-router'
 import { validateSkillsDisplayServiceUrl } from '@/skills-display/iframe/SkillsDisplayServiceUrl.js'
+import { useAuthState } from '@/stores/UseAuthState.js'
 
 export const useIframeInit = () => {
 
@@ -33,9 +34,41 @@ export const useIframeInit = () => {
   const appConfig = useAppConfig()
   const router = useRouter()
   const log = useLog()
+  const authState = useAuthState()
   const completedHandshake = ref(false)
   const updatedAuthToken = ref(false)
   const initializationError = ref('')
+  const authenticationError = ref('')
+  const authenticationExpiredMessage = 'Your authentication has expired. Waiting for the embedding application to re-authenticate.'
+
+  watch(() => authState.userInfo?.userId, (currentUser, previousUser) => {
+    if (!currentUser && previousUser && displayInfo.isSkillsClientPath() && completedHandshake.value) {
+      authenticationError.value = authenticationExpiredMessage
+      // clearAuthData also clears the token; let it finish before requesting a replacement.
+      nextTick(() => {
+        if (authenticationError.value && !parentState.isAuthenticating) {
+          parentState.parentFrame?.emit('needs-authentication')
+        }
+      })
+    }
+  }, { flush: 'sync' })
+
+  const recoverAuthentication = async () => {
+    if (parentState.isAuthenticating) return
+    parentState.isAuthenticating = true
+    try {
+      await authState.fetchUser()
+      if (!authState.userInfo?.userId) throw new Error('Unable to restore Skills Display authentication')
+      await displayAttributes.loadConfigStateIfNeeded()
+      if (authState.userInfo?.userId) {
+        authenticationError.value = ''
+      }
+    } catch {
+      authenticationError.value = 'Unable to reconnect your session. Please refresh the page to try again.'
+    } finally {
+      parentState.isAuthenticating = false
+    }
+  }
 
   const loadedIframe = computed(() => completedHandshake.value && updatedAuthToken.value)
 
@@ -57,6 +90,9 @@ export const useIframeInit = () => {
         if (!completedHandshake.value || initializationError.value) return
         parentState.setAuthToken(authToken)
         updatedAuthToken.value = true
+        if (authToken && authenticationError.value) {
+          return recoverAuthentication()
+        }
       },
       updateVersion(newVersion) {
         if (!completedHandshake.value || initializationError.value) return
@@ -170,6 +206,7 @@ export const useIframeInit = () => {
   return {
     handleHandshake,
     initializationError,
+    authenticationError,
     loadedIframe
   }
 }
