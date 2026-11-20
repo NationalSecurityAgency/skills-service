@@ -13,21 +13,51 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { computed, ref, toValue, watch } from 'vue'
+import { computed, effectScope, ref, shallowRef, toValue, watch } from 'vue'
+import { useStorage } from '@vueuse/core'
 
-export const useProgressAndRankingView = ({ projectId, userId, serviceUrl, pageId, compactViewDefault, compactViewPreference, preview }) => {
-  // This override belongs only to this mounted page, never to a session or browser preference.
+// Embedded displays intentionally share a browser choice across projects and learners.
+export const embeddedProgressViewStorageKey = 'skills-display:progress-view'
+
+export const useProgressAndRankingView = ({ projectId, userId, serviceUrl, pageId, compactViewDefault, compactViewPreference, preview, embedded }) => {
+  // Native and preview toggles belong only to this mounted page.
   const temporaryChoice = ref(null)
-  watch(() => [toValue(projectId), toValue(userId), toValue(serviceUrl), toValue(pageId), toValue(preview)], () => {
+  const localChoice = shallowRef(null)
+  const usesLocalPreference = computed(() => toValue(embedded) && !toValue(preview))
+  watch(usesLocalPreference, (enabled, previous, onCleanup) => {
+    localChoice.value = null
+    if (enabled) {
+      // Dispose storage watchers/listeners when leaving embedded mode or entering preview.
+      const storageScope = effectScope()
+      onCleanup(() => storageScope.stop())
+      localChoice.value = storageScope.run(() => useStorage(embeddedProgressViewStorageKey, null, undefined, {
+        writeDefaults: false,
+        flush: 'sync',
+        serializer: {
+          read: (value) => value === 'compact' ? true : value === 'expanded' ? false : null,
+          write: (value) => value === true ? 'compact' : value === false ? 'expanded' : '',
+        },
+        onError: () => {
+          // Blocked or full iframe storage must not prevent in-memory toggles.
+        },
+      }))
+    }
+  }, { immediate: true, flush: 'sync' })
+
+  watch(() => [toValue(projectId), toValue(userId), toValue(serviceUrl), toValue(pageId), toValue(preview), toValue(embedded)], () => {
     temporaryChoice.value = null
   }, { flush: 'sync' })
 
   const isCompact = computed({
     get: () => temporaryChoice.value
-      ?? (toValue(preview) ? null : toValue(compactViewPreference))
+      ?? (toValue(preview) ? null : usesLocalPreference.value ? localChoice.value?.value : toValue(compactViewPreference))
       ?? (toValue(compactViewDefault) === true),
     set: (value) => {
-      temporaryChoice.value = value
+      if (usesLocalPreference.value) {
+        localChoice.value.value = value
+      } else {
+        temporaryChoice.value = value
+      }
     },
   })
 

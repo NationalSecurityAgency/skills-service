@@ -17,6 +17,7 @@
 import {
   assertView,
   createCompactViewProject,
+  embeddedProgressViewStorageKey,
   projectPath,
   saveProgressViewPreference,
   setProjectDefault,
@@ -142,6 +143,7 @@ describe('Compact view admin settings and previews', () => {
     saveProgressViewPreference('compact');
     cy.visit(projectPath());
     assertView(true);
+    cy.window().then((win) => win.localStorage.setItem(embeddedProgressViewStorageKey, 'compact'));
     cy.visit(previewPath());
     cy.get('[data-cy="subPageHeader"]').should('contain.text', "User's Display");
     assertView(false);
@@ -152,10 +154,14 @@ describe('Compact view admin settings and previews', () => {
     cy.get(viewButton).click();
     cy.get(viewButton).click();
     assertView(false);
+    cy.window().then((win) => {
+      expect(win.localStorage.getItem(embeddedProgressViewStorageKey)).to.eq('compact');
+    });
     cy.visit(projectPath());
     assertView(true);
 
     setProjectDefault(true);
+    cy.window().then((win) => win.localStorage.setItem(embeddedProgressViewStorageKey, 'expanded'));
     cy.visit(previewPath());
     assertView(true);
   });

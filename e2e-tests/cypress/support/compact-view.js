@@ -17,6 +17,7 @@
 export const overview = '[data-cy="progressAndRankingOverview"]';
 export const compactOverview = '[data-cy="compactProgressOverview"]';
 export const viewButton = '[data-cy="progressViewExpandCollapseButton"]';
+export const embeddedProgressViewStorageKey = 'skills-display:progress-view';
 export const projectPath = (project = 1) => `/progress-and-rankings/projects/proj${project}`;
 
 export const selectProgressViewPreference = (value) => {

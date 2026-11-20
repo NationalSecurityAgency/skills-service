@@ -17,6 +17,7 @@
 import {
   assertView,
   createCompactViewProject,
+  embeddedProgressViewStorageKey,
   projectPath,
   saveProgressViewPreference,
   selectProgressViewPreference,
@@ -83,6 +84,20 @@ describe('Progress view user preferences', () => {
     assertView(true);
     cy.visit(`${projectPath()}/subjects/subj1`);
     assertView(true);
+  });
+
+  it('ignores the embedded browser preference in native views', () => {
+    cy.visit(projectPath(), {
+      onBeforeLoad(win) {
+        win.localStorage.setItem(embeddedProgressViewStorageKey, 'compact');
+      },
+    });
+    assertView(false);
+    cy.get(viewButton).click();
+    assertView(true);
+    cy.get('[data-cy="progressViewPreferenceMessage"]').should('be.visible');
+    cy.reload();
+    assertView(false);
   });
 
   it('applies one saved preference across projects and restores each project default when requested', () => {
