@@ -42,6 +42,37 @@ describe('Next learning path items on skill details', () => {
     cy.get('[data-cy="nextLearningPathItems"]').should('not.exist')
   })
 
+  it('follows local successors without cross-project routing in the embedded skills-client display', () => {
+    cy.addLearningPathItem(1, 1, 2)
+    cy.addLearningPathItem(1, 2, 3)
+    cy.visit('/test-skills-client/proj1?skillsClientDisplayPath=%2Fsubjects%2Fsubj1%2Fskills%2Fskill1')
+    cy.wrapIframe().find('[data-cy="nextLearningPathItem_skill2"]')
+      .should('have.attr', 'href', `${Cypress.config('baseUrl')}/test-skills-client/proj1?skillsClientDisplayPath=%2Fsubjects%2Fsubj1%2Fskills%2Fskill2`).click()
+    cy.wrapIframe().find('[data-cy="skillProgressTitle"]').should('contain.text', 'Very Great Skill 2')
+    cy.wrapIframe().find('[data-cy="crossProjAlert"]').should('not.exist')
+    cy.wrapIframe().find('[data-cy="prerequisitesCard"]').should('contain.text', 'Very Great Skill 1')
+    cy.wrapIframe().find('[data-cy="nextLearningPathItem_skill3"]')
+      .should('have.attr', 'href', `${Cypress.config('baseUrl')}/test-skills-client/proj1?skillsClientDisplayPath=%2Fsubjects%2Fsubj1%2Fskills%2Fskill3`).click()
+    cy.wrapIframe().find('[data-cy="skillProgressTitle"]').should('contain.text', 'Very Great Skill 3')
+    cy.wrapIframe().find('[data-cy="crossProjAlert"]').should('not.exist')
+    cy.wrapIframe().find('[data-cy="nextLearningPathItems"]').should('not.exist')
+  })
+
+  it('returns from a shared prerequisite to a local successor in the embedded skills-client display', () => {
+    cy.createProject(2)
+    cy.createSubject(2, 1)
+    cy.createSkill(2, 1, 1)
+    cy.addCrossProjectLearningPathItem(2, 1, 1, 2)
+    cy.visit('/test-skills-client/proj1?skillsClientDisplayPath=%2Flearning-path')
+    cy.wrapIframe().find('[data-cy="fromNodeLink_skill1"]')
+      .should('have.attr', 'href', `${Cypress.config('baseUrl')}/test-skills-client/proj1?skillsClientDisplayPath=%2Fsubjects%2Fsubj1%2Fskills%2Fskill1%2FcrossProject%2Fproj2%2Fskill1`).click()
+    cy.wrapIframe().find('[data-cy="skillProgressTitle"]').should('contain.text', 'Very Great Skill 1')
+    cy.wrapIframe().find('[data-cy="nextLearningPathItem_skill2"]')
+      .should('have.attr', 'href', `${Cypress.config('baseUrl')}/test-skills-client/proj1?skillsClientDisplayPath=%2Fsubjects%2Fsubj1%2Fskills%2Fskill2`).click()
+    cy.wrapIframe().find('[data-cy="skillProgressTitle"]').should('contain.text', 'Very Great Skill 2')
+    cy.wrapIframe().find('[data-cy="crossProjAlert"]').should('not.exist')
+  })
+
   ;['/test-skills-display/proj1', '/progress-and-rankings/projects/proj1'].forEach((projectPath) => {
     it(`links the heading to the current project's learning path in ${projectPath}`, () => {
       cy.addLearningPathItem(1, 1, 2)

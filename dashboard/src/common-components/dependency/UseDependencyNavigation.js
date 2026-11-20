@@ -17,12 +17,14 @@ import { useRoute, useRouter } from 'vue-router'
 import SkillType from '@/common-components/utilities/SkillType.js'
 import { useSkillOverviewRouteUtil } from '@/components/skills/UseSkillOverviewRouteUtil.js'
 import { useSkillsDisplayInfo } from '@/skills-display/UseSkillsDisplayInfo.js'
+import { useSkillsDisplayAttributesState } from '@/skills-display/stores/UseSkillsDisplayAttributesState.js'
 
 export const useDependencyNavigation = () => {
   const router = useRouter()
   const route = useRoute()
   const skillRouteUtil = useSkillOverviewRouteUtil()
   const skillsDisplayInfo = useSkillsDisplayInfo()
+  const attributes = useSkillsDisplayAttributesState()
 
   const getAdminRoute = (item) => {
     if (SkillType.isSkill(item.type)) {
@@ -35,7 +37,7 @@ export const useDependencyNavigation = () => {
   }
 
   const getSkillsDisplayRoute = (item) => {
-    const currentProjectId = route.params.projectId
+    const currentProjectId = route.params.projectId || attributes.projectId
     const isCrossProject = item.isCrossProject ?? item.projectId !== currentProjectId
     if (isCrossProject && SkillType.isSkill(item.type)) {
       return {
