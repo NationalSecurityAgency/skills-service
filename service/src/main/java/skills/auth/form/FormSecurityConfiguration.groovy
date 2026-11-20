@@ -158,6 +158,7 @@ class FormSecurityConfiguration {
                 hydra: new OAuth2UserConverterService.HydraUserConverter(),
                 keycloak: new OAuth2UserConverterService.KeycloakUserConverter(),
                 azure: new OAuth2UserConverterService.AzureConverter(),
+                cognito: new OAuth2UserConverterService.CognitoUserConverter(),
         ]
     }
 
