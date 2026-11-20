@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import { matchSkillsDisplaySnapshot, visitSkillsDisplaySnapshotPage } from '../../support/skills-display-snapshot-helpers';
 import dayjs from 'dayjs';
 import relativeTimePlugin from 'dayjs/plugin/relativeTime';
 import advancedFormatPlugin from 'dayjs/plugin/advancedFormat';
@@ -392,9 +393,9 @@ describe('Client Display Tests', () => {
             projectId: 'proj1'
         }]);
 
-        cy.cdVisit('/', true);
+        visitSkillsDisplaySnapshotPage('/', true);
         cy.get('[data-cy="projectDescription"]').contains('I am a description');
-        cy.matchSnapshotImageForElement('[data-cy="projectDescription"]', {
+        matchSkillsDisplaySnapshot('[data-cy="projectDescription"]', {
             blackout: '[data-cy=pointHistoryChart]'
         });
     });
@@ -515,5 +516,4 @@ describe('Client Display Tests', () => {
         }
     }
 });
-
 

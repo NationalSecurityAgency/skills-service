@@ -17,19 +17,22 @@ limitations under the License.
 import {useUserProgressSummaryState} from '@/skills-display/stores/UseUserProgressSummaryState.js'
 import CircleProgress from '@/skills-display/components/progress/CircleProgress.vue'
 import {useSkillsDisplayThemeState} from '@/skills-display/stores/UseSkillsDisplayThemeState.js'
-import {computed, onMounted, ref} from 'vue'
+import {computed} from 'vue'
 import {useNumberFormat} from '@/common-components/filter/UseNumberFormat.js'
 import SkillLevel from '@/skills-display/components/progress/MySkillLevel.vue'
 import {useSkillsDisplaySubjectState} from '@/skills-display/stores/UseSkillsDisplaySubjectState.js'
 import {useSkillsDisplayAttributesState} from '@/skills-display/stores/UseSkillsDisplayAttributesState.js'
 import VerticalProgressBar from '@/skills-display/components/progress/VerticalProgressBar.vue'
-import AchievementCelebration from "@/skills-display/components/progress/celebration/AchievementCelebration.vue";
 import {usePluralize} from "@/components/utils/misc/UsePluralize.js";
-import {useSkillsDisplayService} from '@/skills-display/services/UseSkillsDisplayService.js'
 import {useSkillsDisplayInfo} from '@/skills-display/UseSkillsDisplayInfo.js'
 import { useRouter } from 'vue-router'
+import { calculateSkillsCompletionPercent } from '@/skills-display/components/progress/SkillsProgressUtil.js'
 
 const props = defineProps({
+  learningPathProgress: {
+    type: Object,
+    default: () => ({ achieved: 0, total: 0 }),
+  },
   isSubject: {
     type: Boolean,
     default: false,
@@ -45,14 +48,13 @@ const themeState = useSkillsDisplayThemeState()
 const attributes = useSkillsDisplayAttributesState()
 const pluralize = usePluralize()
 const numFormat = useNumberFormat()
-const skillsDisplayService = useSkillsDisplayService()
 const skillsDisplayInfo = useSkillsDisplayInfo()
 const router = useRouter()
-const learningPathProgress = ref({ achieved: 0, total: 0 })
+const learningPathProgress = computed(() => props.learningPathProgress)
 
 const totalSkills = computed(() => userProgress.value?.totalSkills || 0)
 const skillsAchieved = computed(() => userProgress.value?.skillsAchieved || 0)
-const skillsPercentAchieved = computed(() => totalSkills.value > 0 ? Math.round((skillsAchieved.value / totalSkills.value) * 100) : 0)
+const skillsPercentAchieved = computed(() => calculateSkillsCompletionPercent(skillsAchieved.value, totalSkills.value))
 const hasLearningPath = computed(() => learningPathProgress.value.total > 0)
 const learningPathPercent = computed(() => Math.round((learningPathProgress.value.achieved / learningPathProgress.value.total) * 100))
 const viewLearningPath = () => router.push({ name: skillsDisplayInfo.getContextSpecificRouteName('projectLearningPathPage'), params: { projectId: attributes.projectId } })
@@ -66,27 +68,13 @@ const levelStats = computed(() => {
   }
 })
 
-onMounted(() => {
-  if (!props.isSubject) {
-    skillsDisplayService.getSkillDependenciesGraphForProject().then((graph) => {
-      if (graph?.edges?.length > 0) {
-        const pathNodes = graph.nodes || []
-        learningPathProgress.value = {
-          achieved: pathNodes.filter((node) => node.achieved).length,
-          total: pathNodes.length,
-        }
-      }
-    })
-  }
-})
 </script>
 
 <template>
   <div>
-    <achievement-celebration :user-progress="userProgress"/>
-    <Card>
+    <Card :pt="{ body: { class: '!px-0 !py-2'}}">
     <template #content>
-      <div class="flex flex-col lg:flex-row gap-8 items-stretch text-center">
+      <div class="flex flex-col lg:flex-row gap-8 items-stretch text-center pr-6">
         <div class="flex-1">
           <div>
             <circle-progress
@@ -162,6 +150,7 @@ onMounted(() => {
               @click="viewLearningPath"
               class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded border border-green-600 text-green-700 dark:text-green-400 px-3 py-2 text-sm font-medium no-underline hover:bg-green-50 dark:hover:bg-green-950/30"
               data-cy="viewLearningPathLink"
+              size="small"
               aria-label="View project learning path">
               <i class="far fa-eye" aria-hidden="true" />
               <span>View</span>

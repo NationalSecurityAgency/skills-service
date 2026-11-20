@@ -16,11 +16,11 @@
 package skills.controller
 
 import groovy.util.logging.Slf4j
-import org.apache.commons.lang3.BooleanUtils
+import jakarta.servlet.http.HttpServletResponse
 import org.apache.commons.lang3.StringUtils
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
-import org.springframework.core.env.Environment
+import org.springframework.http.HttpHeaders
 import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository
 import org.springframework.web.bind.annotation.*
 import skills.HealthChecker
@@ -32,6 +32,7 @@ import skills.icons.IconSetsIndexService
 import skills.profile.EnableCallStackProf
 import skills.services.AccessSettingsStorageService
 import skills.services.FeatureService
+import skills.services.ProgressViewPreferenceService
 import skills.services.SystemSettingsService
 import skills.services.admin.ProjAdminService
 import skills.services.admin.UserCommunityService
@@ -92,6 +93,9 @@ class PublicConfigController {
     @Autowired
     IconSetsIndexService iconSetsIndexService
 
+    @Autowired
+    ProgressViewPreferenceService progressViewPreferenceService
+
     @RequestMapping(value = "/config", method = RequestMethod.GET, produces = "application/json")
     @ResponseBody
     Map<String,Object> getConfig(){
@@ -139,7 +143,8 @@ class PublicConfigController {
 
     @RequestMapping(value = "/clientDisplay/config", method = RequestMethod.GET, produces = "application/json")
     @ResponseBody
-    Map<String,Object> getClientDisplayConfig(@RequestParam(required = false) String projectId){
+    Map<String,Object> getClientDisplayConfig(@RequestParam(required = false) String projectId, HttpServletResponse response){
+        response.setHeader(HttpHeaders.CACHE_CONTROL, 'no-store')
         String docsHost = uiConfigProperties.ui.docsHost
         Map<String,Object> res = new HashMap<>()
         configureUserCommunityProps(res)
@@ -162,6 +167,8 @@ class PublicConfigController {
         res["groupDescriptionsOn"] = false
         res["groupInfoOnSkillPage"] = false
         res["displayProjectDescription"] = true
+        res["compactViewDefault"] = false
+        res["compactViewPreference"] = progressViewPreferenceService.compactViewPreference
         if (Boolean.valueOf(uiConfigProperties.dbUpgradeInProgress)) {
             res["dbUpgradeInProgress"] = uiConfigProperties.dbUpgradeInProgress
         }
@@ -177,7 +184,8 @@ class PublicConfigController {
                     Settings.SHOW_PROJECT_DESCRIPTION_EVERYWHERE.settingName,
                     Settings.GROUP_INFO_ON_SKILL_PAGE.settingName,
                     Settings.SHOW_PROJECT_DESCRIPTION_EVERYWHERE.settingName,
-                    Settings.DISABLE_SKILLS_DISPLAY_ACHIEVEMENTS_CELEBRATIONS.settingName
+                    Settings.DISABLE_SKILLS_DISPLAY_ACHIEVEMENTS_CELEBRATIONS.settingName,
+                    Settings.SKILLS_DISPLAY_COMPACT_VIEW_DEFAULT.settingName
             ])?.collectEntries {
                 [it.setting, it.value]
             }
@@ -223,6 +231,7 @@ class PublicConfigController {
 
             Boolean disableAchievementsCelebrations = Boolean.valueOf(projectSettings?[Settings.DISABLE_SKILLS_DISPLAY_ACHIEVEMENTS_CELEBRATIONS.settingName])
             res["disableAchievementsCelebrations"] = disableAchievementsCelebrations
+            res["compactViewDefault"] = Boolean.valueOf(projectSettings?[Settings.SKILLS_DISPLAY_COMPACT_VIEW_DEFAULT.settingName])
 
             String name = projAdminService.lookupProjectName(projectId)
             res["projectName"] = name

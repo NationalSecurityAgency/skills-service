@@ -17,13 +17,14 @@ import { useSkillsDisplayParentFrameState } from '@/skills-display/stores/UseSki
 import { useSkillsDisplayAttributesState } from '@/skills-display/stores/UseSkillsDisplayAttributesState.js'
 import { useLog } from '@/components/utils/misc/useLog.js'
 import Postmate from 'postmate'
-import { ref, computed } from 'vue'
+import { ref, computed, watch, nextTick } from 'vue'
 import { useSkillsDisplayThemeState } from '@/skills-display/stores/UseSkillsDisplayThemeState.js'
 import ThemeHelper from '@/skills-display/theme/ThemeHelper.js'
 import { useAppConfig } from '@/common-components/stores/UseAppConfig.js'
 import { useSkillsDisplayInfo } from '@/skills-display/UseSkillsDisplayInfo.js'
 import { useRouter } from 'vue-router'
 import { validateSkillsDisplayServiceUrl } from '@/skills-display/iframe/SkillsDisplayServiceUrl.js'
+import { useAuthState } from '@/stores/UseAuthState.js'
 
 export const useIframeInit = () => {
 
@@ -33,9 +34,61 @@ export const useIframeInit = () => {
   const appConfig = useAppConfig()
   const router = useRouter()
   const log = useLog()
+  const authState = useAuthState()
   const completedHandshake = ref(false)
   const updatedAuthToken = ref(false)
   const initializationError = ref('')
+  const authenticationError = ref('')
+  const authenticationExpiredMessage = 'Your authentication has expired. Waiting for the embedding application to re-authenticate.'
+  const authenticationFailedMessage = 'Unable to reconnect your session. Please refresh the page to try again.'
+  let authenticationRequested = false
+  let recovery = null
+
+  watch(() => parentState.authenticationFailureRevision, () => {
+    if (displayInfo.isSkillsClientPath() && completedHandshake.value && updatedAuthToken.value) {
+      authenticationError.value = authenticationExpiredMessage
+      if (parentState.isAuthenticating || authenticationRequested) return
+      authenticationRequested = true
+      // clearAuthData also clears the token; let it finish before requesting a replacement.
+      nextTick(() => {
+        if (authenticationRequested && authenticationError.value && !parentState.isAuthenticating) {
+          parentState.parentFrame?.emit('needs-authentication')
+        }
+      })
+    }
+  }, { flush: 'sync' })
+
+  const recoverAuthentication = () => {
+    if (recovery) return recovery
+    parentState.isAuthenticating = true
+    recovery = (async () => {
+      // Only retry when the parent supplies a newer token, never repeatedly retry a failed token.
+      while (true) {
+        const generation = parentState.authGeneration
+        try {
+          await authState.fetchUser(false)
+          if (generation !== parentState.authGeneration || !authState.userInfo?.userId) {
+            throw new Error('Unable to restore Skills Display authentication')
+          }
+          await displayAttributes.loadConfigStateIfNeeded()
+          if (generation !== parentState.authGeneration || !authState.userInfo?.userId) {
+            throw new Error('Skills Display authentication was lost during recovery')
+          }
+          authenticationError.value = ''
+          return
+        } catch {
+          if (generation !== parentState.authGeneration && parentState.authToken) continue
+          // A current-token failure during recovery is explicit, not a silent wait for a token.
+          authenticationError.value = authenticationFailedMessage
+          return
+        }
+      }
+    })().finally(() => {
+      parentState.isAuthenticating = false
+      recovery = null
+    })
+    return recovery
+  }
 
   const loadedIframe = computed(() => completedHandshake.value && updatedAuthToken.value)
 
@@ -55,8 +108,13 @@ export const useIframeInit = () => {
     const handshake = new Postmate.Model({
       updateAuthenticationToken(authToken) {
         if (!completedHandshake.value || initializationError.value) return
+        const needsRecovery = updatedAuthToken.value && (authenticationError.value || !authState.userInfo?.userId)
+        authenticationRequested = false
         parentState.setAuthToken(authToken)
         updatedAuthToken.value = true
+        if (authToken && needsRecovery) {
+          return recoverAuthentication()
+        }
       },
       updateVersion(newVersion) {
         if (!completedHandshake.value || initializationError.value) return
@@ -170,6 +228,7 @@ export const useIframeInit = () => {
   return {
     handleHandshake,
     initializationError,
+    authenticationError,
     loadedIframe
   }
 }

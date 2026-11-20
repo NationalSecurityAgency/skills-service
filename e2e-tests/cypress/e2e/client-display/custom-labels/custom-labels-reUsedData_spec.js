@@ -127,10 +127,14 @@ describe('Custom Label with Reused Data Tests', () => {
             .contains('Stage 0');
         cy.get('[data-cy="achievedSkillsProgress"]').contains('Achieved Courses');
         cy.get('[data-cy="downloadTranscriptCard"]').contains('You have Completed 0 out of 6 courses!')
+        cy.get('[data-cy="subjectTile-subj1"] [data-cy="subjectTileBtn"]')
+            .should('be.visible')
+            .invoke('attr', 'aria-label')
+            .should('match', /\bCompetency\b/i);
 
         cy.get('[data-cy="skillsDisplayHome"]').contains('Level', { matchCase: false }).should('not.exist');
         cy.get('[data-cy="skillsDisplayHome"]').contains('Skill', { matchCase: false }).should('not.exist');
-        cy.get('[data-cy="skillsDisplayHome"]').contains('Subject', { matchCase: false }).should('be.visible');
+        cy.get('[data-cy="skillsDisplayHome"]').contains('Subject', { matchCase: false }).should('not.exist');
         cy.contains('[data-cy="skillsDisplayHome"]', /\bProject\b/i).should('not.exist');
         cy.get('[data-cy="skillsDisplayHome"]').contains('Point', { matchCase: false }).should('not.exist');
         cy.get('[data-cy="skillsDisplayHome"]').contains('Group', { matchCase: false }).should('not.exist');
@@ -153,10 +157,14 @@ describe('Custom Label with Reused Data Tests', () => {
             .contains('Stage 0');
         cy.get('[data-cy="achievedSkillsProgress"]').contains('Achieved Courses');
         cy.get('[data-cy="downloadTranscriptCard"]').contains('You have Completed 0 out of 6 courses!')
+        cy.get('[data-cy="subjectTile-subj1"] [data-cy="subjectTileBtn"]')
+            .should('be.visible')
+            .invoke('attr', 'aria-label')
+            .should('match', /\bCompetency\b/i);
 
         cy.get('[data-cy="skillsDisplayHome"]').contains('Level', { matchCase: false }).should('not.exist');
         cy.get('[data-cy="skillsDisplayHome"]').contains('Skill', { matchCase: false }).should('not.exist');
-        cy.get('[data-cy="skillsDisplayHome"]').contains('Subject', { matchCase: false }).should('be.visible');
+        cy.get('[data-cy="skillsDisplayHome"]').contains('Subject', { matchCase: false }).should('not.exist');
         cy.contains('[data-cy="skillsDisplayHome"]', /\bProject\b/i).should('not.exist');
         cy.get('[data-cy="skillsDisplayHome"]').contains('Point', { matchCase: false }).should('not.exist');
         cy.get('[data-cy="skillsDisplayHome"]').contains('Group', { matchCase: false }).should('not.exist');

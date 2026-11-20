@@ -36,6 +36,7 @@ describe('Projects Sort Order Tests', () => {
         cy.createProject(3);
         cy.createProject(4);
         cy.createProject(5);
+        cy.intercept('PATCH', '/admin/projects/*').as('saveProjectOrder');
         cy.visit('/administrator');
 
         const project1Card = '[data-cy="projectCard_proj1"] [data-cy="sortControlHandle"]';
@@ -45,22 +46,26 @@ describe('Projects Sort Order Tests', () => {
 
         cy.validateElementsOrder('[data-cy="projectCard"]', ['This is project 1', 'This is project 2', 'This is project 3', 'This is project 4', 'This is project 5']);
         cy.get(project1Card)
-            .dragAndDrop(project4Card);
+            .dragAndDrop(project4Card, { sortableContainer: '#projectCards' });
         cy.validateElementsOrder('[data-cy="projectCard"]', ['This is project 2', 'This is project 3', 'This is project 4', 'This is project 1', 'This is project 5']);
 
         // refresh to make sure it was saved
+        cy.wait('@saveProjectOrder').its('response.statusCode').should('eq', 200);
         cy.visit('/administrator');
         cy.validateElementsOrder('[data-cy="projectCard"]', ['This is project 2', 'This is project 3', 'This is project 4', 'This is project 1', 'This is project 5']);
 
         cy.get(project5Card)
-            .dragAndDrop(project2Card);
+            .dragAndDrop(project2Card, { sortableContainer: '#projectCards' });
         cy.validateElementsOrder('[data-cy="projectCard"]', ['This is project 5', 'This is project 2', 'This is project 3', 'This is project 4', 'This is project 1']);
+        cy.wait('@saveProjectOrder').its('response.statusCode').should('eq', 200);
+        cy.get('[data-cy="proj5_overlayShown"]').should('not.exist');
 
         cy.get(project2Card)
-            .dragAndDrop(project1Card);
+            .dragAndDrop(project1Card, { sortableContainer: '#projectCards' });
         cy.validateElementsOrder('[data-cy="projectCard"]', ['This is project 5', 'This is project 3', 'This is project 4', 'This is project 1', 'This is project 2']);
 
         // refresh to make sure it was saved
+        cy.wait('@saveProjectOrder').its('response.statusCode').should('eq', 200);
         cy.visit('/administrator');
         cy.validateElementsOrder('[data-cy="projectCard"]', ['This is project 5', 'This is project 3', 'This is project 4', 'This is project 1', 'This is project 2']);
 
@@ -97,7 +102,7 @@ describe('Projects Sort Order Tests', () => {
         cy.visit('/administrator');
         cy.validateElementsOrder('[data-cy="projectCard"]', ['This is project 1', 'This is project 2']);
         cy.get(proj1Card)
-            .dragAndDrop(proj2Card);
+            .dragAndDrop(proj2Card, { sortableContainer: '#projectCards' });
 
         // overlay over both cards but loading message only on project 1
         cy.get('[data-cy="proj1_overlayShown"] [data-cy="overlaySpinner"]')

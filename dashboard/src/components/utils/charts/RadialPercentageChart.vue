@@ -52,6 +52,10 @@ const props = defineProps({
   percentLabel: {
     type: String,
     default: 'Complete'
+  },
+  disableAnimation: {
+    type: Boolean,
+    default: false
   }
 });
 
@@ -80,6 +84,15 @@ const chartData = computed(() => {
 })
 
 const animationCompleted = ref(false)
+const snapshotDrawn = ref(false)
+const resetSnapshotReadiness = () => { snapshotDrawn.value = false }
+const snapshotPlugin = {
+  id: 'radialChartSnapshotReadiness',
+  beforeInit: resetSnapshotReadiness,
+  beforeUpdate: resetSnapshotReadiness,
+  beforeDestroy: resetSnapshotReadiness,
+  afterDraw: () => { snapshotDrawn.value = true },
+}
 const chartOptions = computed(() => {
   return {
     responsive: true,
@@ -97,7 +110,7 @@ const chartOptions = computed(() => {
         enabled: false
       }
     },
-    animation: {
+    animation: props.disableAnimation ? false : {
       animateScale: true,
       animateRotate: true,
       onComplete: function() {
@@ -124,6 +137,7 @@ const chartStyle = computed(() => ({
           type="doughnut"
           :data="chartData"
           :options="chartOptions"
+          :plugins="disableAnimation ? [snapshotPlugin] : []"
           :style="chartStyle"
       />
       <div class="absolute inset-0 flex flex-col justify-center items-center">
@@ -133,7 +147,8 @@ const chartStyle = computed(() => ({
         </slot>
       </div>
     </div>
-    <div v-if="animationCompleted" data-cy="animationCompleted" />
+    <div v-if="disableAnimation ? snapshotDrawn : animationCompleted" data-cy="animationCompleted" />
+    <div v-if="disableAnimation && snapshotDrawn" data-cy="radialChart-rendered" />
   </div>
 </template>
 

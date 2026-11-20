@@ -207,10 +207,12 @@ const toggle = (event) => {
 <template>
   <Card data-cy="skillsProgressList"
         :class="{'skills-display-test-link': skillsDisplayInfo.isLocalTestPath() && themeHelper.isDarkTheme.value }"
-        v-if="(skillsInternal && skillsInternal.length > 0 || searchString || showNoDataMsg)">
+        v-if="(skillsInternal && skillsInternal.length > 0 || searchString || showNoDataMsg)"
+        :pt="{ body: { class: ['px-4! pt-2!', skillsToShow.length > 0 ? 'pb-0!' : 'pb-2!'] } }">
     <template #header>
       <h2 class="sr-only">Skills</h2>
-      <div class="px-6 pt-4">
+      <div class="px-4 pt-4"
+           :class="{ 'border-b border-current/15 pb-4': skillsInternal && skillsInternal.length > 0 }">
         <div class=" flex flex-wrap gap-4 flex-col md:flex-row"
              v-if="skillsInternal && skillsInternal.length > 0">
           <div class="flex-1">
@@ -288,29 +290,28 @@ const toggle = (event) => {
       </div>
     </template>
     <template #content>
-      <div v-if="skillsToShow.length > 0" class="skills-theme-progress-rows">
+      <div v-if="skillsToShow.length > 0" class="skills-theme-progress-rows -mx-4">
         <div v-for="(skill, index) in skillsToShow"
              :key="`skill-${skill.skillId}`"
              :id="`skillRow-${skill.skillId}`"
-             class="skills-theme-bottom-border-with-background-color"
+             class="px-4 py-4 last:pb-12 last:rounded-b-[var(--p-card-border-radius)]"
+             :class="{ 'bg-current/4': index % 2 === 1 }"
         >
-          <div class="p-4 pt-6">
-            <skill-progress
-              :id="`skill-${skill.skillId}`"
-              :ref="`skillProgress${skill.skillId}`"
-              :skill="skill"
-              :type="type"
-              :expand-groups="expandGroups"
-              @reset-group-expansion="resetGroupExpansion"
-              :enable-drill-down="true"
-              :show-description="showDescriptionsInternal"
-              :data-cy="`skillProgress_index-${index}`"
-              :badge-is-locked="badgeIsLocked"
-              :child-skill-highlight-string="searchString"
-              :video-collapsed-by-default="true"
-              :index="index"
-            />
-          </div>
+          <skill-progress
+            :id="`skill-${skill.skillId}`"
+            :ref="`skillProgress${skill.skillId}`"
+            :skill="skill"
+            :type="type"
+            :expand-groups="expandGroups"
+            @reset-group-expansion="resetGroupExpansion"
+            :enable-drill-down="true"
+            :show-description="showDescriptionsInternal"
+            :data-cy="`skillProgress_index-${index}`"
+            :badge-is-locked="badgeIsLocked"
+            :child-skill-highlight-string="searchString"
+            :video-collapsed-by-default="true"
+            :index="index"
+          />
         </div>
       </div>
 

@@ -21,6 +21,7 @@ import { userErrorState } from '@/stores/UserErrorState.js'
 import { useSkillsDisplayInfo} from '@/skills-display/UseSkillsDisplayInfo.js'
 import { useLog } from '@/components/utils/misc/useLog.js'
 import { useUpgradeInProgressErrorChecker } from '@/components/utils/errors/UseUpgradeInProgressErrorChecker.js'
+import { useSkillsDisplayParentFrameState } from '@/skills-display/stores/UseSkillsDisplayParentFrameState.js'
 
 export const useErrorHandling = () => {
 
@@ -52,6 +53,10 @@ export const useErrorHandling = () => {
     }
 
     const errorCode = error.response ? error.response.status : undefined;
+    if (errorCode !== 401 && skillsDisplayInfo.isSkillsClientPath() && useSkillsDisplayParentFrameState().isAuthenticating) {
+      // Recovery owns its error UI. Keep the learner's route, including when user changes trigger configuration loading.
+      return Promise.reject(error);
+    }
     // check if the caller wants to handle a specific error status code
     if (Object.prototype.hasOwnProperty.call(error.config, 'handleErrorCode')) {
       if (Array.isArray(error.config.handleErrorCode)) {
@@ -70,7 +75,15 @@ export const useErrorHandling = () => {
 
     const path = window.location.pathname;
     if (errorCode === 401) {
+      if (skillsDisplayInfo.isSkillsClientPath() && !useSkillsDisplayParentFrameState().isCurrentAuthRequest(error.config)) {
+        // A response from an older token must not clear a replacement token or its user.
+        return Promise.reject(error);
+      }
       authState.clearAuthData()
+      if (skillsDisplayInfo.isSkillsClientPath()) {
+        // The iframe handles re-authentication through its parent, not a dashboard login route.
+        return Promise.reject(error);
+      }
       if (path !== '/skills-login' && route.meta.requiresAuth) {
         let loginRoute = path !== '/' ? { name: 'Login', query: { redirect: path } } : { name: 'Login' };
         if (appConfig.isPkiAuthenticated) {

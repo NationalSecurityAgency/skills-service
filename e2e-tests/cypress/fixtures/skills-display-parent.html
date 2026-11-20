@@ -22,8 +22,12 @@ limitations under the License.
 </head>
 <body>
   <div id="skills-client-container"></div>
+  <button data-cy="refreshDisplayAuthentication" hidden>Refresh display authentication</button>
+  <div>Route changes received: <output data-cy="routeChangedCount">0</output></div>
   <script>
-    const serviceUrl = new URLSearchParams(window.location.search).get('serviceUrl') || window.location.origin;
+    const params = new URLSearchParams(window.location.search);
+    const serviceUrl = params.get('serviceUrl') || window.location.origin;
+    const manualRecovery = params.get('manualRecovery') === 'true';
     new Postmate({
       container: document.querySelector('#skills-client-container'),
       // Keep the iframe on SkillTree even when the model supplies an attacker URL.
@@ -33,12 +37,31 @@ limitations under the License.
       child.frame.title = 'Skills Display';
       child.frame.style.width = '100%';
       child.frame.style.height = '1000px';
-      child.on('needs-authentication', async () => {
+      const refreshButton = document.querySelector('[data-cy="refreshDisplayAuthentication"]');
+      // Allow a test to rotate the token while the initial user-information response is still pending.
+      if (params.get('allowManualRefresh') === 'true') refreshButton.hidden = false;
+      const routeChangedCount = document.querySelector('[data-cy="routeChangedCount"]');
+      let routeChanges = 0;
+      child.on('route-changed', () => {
+        routeChanges += 1;
+        routeChangedCount.textContent = routeChanges;
+      });
+      let authenticationRequests = 0;
+      const authenticate = async () => {
         const response = await fetch('/api/projects/proj1/token');
         if (!response.ok) throw new Error('Unable to obtain the fixture authentication token');
         const token = await response.json();
         if (!token.access_token) throw new Error('Missing fixture authentication token');
         child.call('updateAuthenticationToken', token.access_token);
+      };
+      refreshButton.addEventListener('click', authenticate);
+      child.on('needs-authentication', async () => {
+        authenticationRequests += 1;
+        if (manualRecovery && authenticationRequests > 1) {
+          refreshButton.hidden = false;
+          return;
+        }
+        await authenticate();
       });
     });
   </script>

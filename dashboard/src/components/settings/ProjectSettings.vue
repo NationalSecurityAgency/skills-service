@@ -28,6 +28,7 @@ import SettingService from '@/components/settings/SettingsService'
 import { useInceptionStore } from '@/stores/UseInceptionStore.js'
 import { useAppConfig } from '@/common-components/stores/UseAppConfig.js'
 import { useProjConfig } from '@/stores/UseProjConfig.js'
+import { useSkillsDisplayAttributesState } from '@/skills-display/stores/UseSkillsDisplayAttributesState.js'
 import SkillsSettingTextInput from '@/components/settings/SkillsSettingTextInput.vue'
 import {useDialogMessages} from "@/components/utils/modal/UseDialogMessages.js";
 import SettingsItem from "@/components/settings/SettingsItem.vue";
@@ -38,6 +39,7 @@ const announcer = useSkillsAnnouncer();
 const route = useRoute();
 const appConfig = useAppConfig()
 const projConfig = useProjConfig()
+const displayAttributes = useSkillsDisplayAttributesState()
 
 const publicNotDiscoverable = 'pnd';
 const discoverableProgressAndRanking = 'dpr';
@@ -166,6 +168,13 @@ let settings = ref({
     dirty: false,
     projectId: route.params.projectId,
   },
+  compactViewDefault: {
+    value: false,
+    setting: 'skills-display-compact-view-default',
+    lastLoadedValue: false,
+    dirty: false,
+    projectId: route.params.projectId,
+  },
   projectDisplayName: {
     value: 'Project',
     setting: 'project.displayName',
@@ -256,6 +265,8 @@ const disableAchievementCelebrationLabel = computed(() => {
   return formatToggleLabel(settings.value.disableAchievementsCelebration.value);
 });
 
+const compactViewDefaultLabel = computed(() => formatToggleLabel(settings.value.compactViewDefault.value));
+
 const projectDeletionProtectionLabel = computed(() => {
   return formatToggleLabel(settings.value.projectDeletionProtection.value);
 });
@@ -332,6 +343,10 @@ const groupInfoOnSkillPageChanged = ((value) => {
 
 const disableAchievementsCelebrationChanged = ((value) => {
   settings.value.disableAchievementsCelebration.dirty = `${value}` !== `${settings.value.disableAchievementsCelebration.lastLoadedValue}`;
+})
+
+const compactViewDefaultChanged = ((value) => {
+  settings.value.compactViewDefault.dirty = `${value}` !== `${settings.value.compactViewDefault.lastLoadedValue}`;
 })
 
 const inviteOnlyProjectChanged = ((value) => {
@@ -463,8 +478,14 @@ const save = (() => {
 });
 
 const saveSettings = ((dirtyChanges) => {
-  SettingService.saveSettings(route.params.projectId, dirtyChanges)
+  const projectId = route.params.projectId
+  SettingService.saveSettings(projectId, dirtyChanges)
       .then(() => {
+        if (displayAttributes.projectId === projectId && dirtyChanges.some((setting) => setting.setting === settings.value.compactViewDefault.setting)) {
+          displayAttributes.invalidateConfig()
+          // The save may finish after SPA navigation back to an active display.
+          displayAttributes.loadConfigStateIfNeeded().catch(() => { /* Shared Axios handling displays configuration errors. */ })
+        }
         showSavedMsg.value = true;
         announcer.polite('Project Settings have been successfully saved');
         setTimeout(() => {
@@ -482,7 +503,7 @@ const saveSettings = ((dirtyChanges) => {
           }
         });
         labelsHaveBeenCleared.value = false;
-        projConfig.loadProjConfigState({ projectId: route.params.projectId, updateLoadingVar: false })
+        projConfig.loadProjConfigState({ projectId, updateLoadingVar: false })
       })
       .finally(() => {
         // isLoading.value = false;
@@ -680,6 +701,23 @@ const toggleCustomLabelConfig = () => {
                          aria-labelledby="groupInfoOnSkillPageLabel"
                          data-cy="groupInfoOnSkillPageSwitch" />
             <span class="ml-1">{{ groupInfoOnSkillPageLabel }}</span>
+          </settings-item>
+
+          <settings-item label="Default to Compact User Progress" input-id="compactViewDefaultSwitchInput">
+            <div class="flex flex-col gap-2">
+              <div class="flex items-center gap-2">
+                <ToggleSwitch v-model="settings.compactViewDefault.value"
+                              inputId="compactViewDefaultSwitchInput"
+                              @update:modelValue="compactViewDefaultChanged"
+                              aria-labelledby="labelForcompactViewDefaultSwitchInput"
+                              aria-describedby="compactViewDefaultHelp"
+                              data-cy="compactViewDefaultSwitch" />
+                <span>{{ compactViewDefaultLabel }}</span>
+              </div>
+              <div id="compactViewDefaultHelp" class="text-sm text-muted-color">
+                Start user-facing project and subject progress overview pages in compact view. A saved User Preferences choice takes precedence over this project default.
+              </div>
+            </div>
           </settings-item>
 
           <settings-item label="Hide Achievement Celebration" input-id="disableAchievementsCelebrationSwitchInput">

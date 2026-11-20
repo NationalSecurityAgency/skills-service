@@ -277,16 +277,15 @@ const canSkillBeSelfReported = computed(() => SelfReportType.isSelfReportType(pr
       </div>
     </div>
 
-    <div v-if="skill.isSkillsGroupType && childSkillsInternal && expanded" class="ml-6 mt-4">
+    <div v-if="skill.isSkillsGroupType && childSkillsInternal && expanded" class="ml-2 mt-4 sm:ml-6">
       <div v-for="(childSkill, index) in childSkillsInternal"
            :key="`group-${skill.skillId}_skill-${childSkill.skillId}`"
            :id="`skillRow-${childSkill.skillId}`"
-           class="skills-theme-bottom-border-with-background-color"
+           class="py-4"
       >
         <!--        @points-earned="onChildSkillPointsEarned"-->
         <skill-progress
           :id="`group-${skill.skillId}_skillProgress-${childSkill.skillId}`"
-          class="mb-4"
           :skill="childSkill"
           :subjectId="subjectId"
           :badgeId="badgeId"

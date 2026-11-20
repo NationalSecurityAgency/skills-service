@@ -26,18 +26,29 @@ import dayjs from "dayjs";
 import {useChartSupportColors} from "@/components/metrics/common/UseChartSupportColors.js";
 import ChartDownloadControls from "@/components/metrics/common/ChartDownloadControls.vue";
 import {useAppConfig} from "@/common-components/stores/UseAppConfig.js";
+import {useSkillsDisplayInfo} from '@/skills-display/UseSkillsDisplayInfo.js'
+import {useChartSnapshotMode} from '@/skills-display/components/test/UseChartSnapshotMode.js'
 
 const appConfig = useAppConfig()
 const pointHistoryState = useSkillsDisplayPointHistoryState()
 const themeState = useSkillsDisplayThemeState()
 const route = useRoute()
 const attributes = useSkillsDisplayAttributesState()
+const skillsDisplayInfo = useSkillsDisplayInfo()
 const chartSupportColors = useChartSupportColors()
 const colors = chartSupportColors.getColors()
+const chartSnapshotMode = useChartSnapshotMode()
 
+// Only test harnesses can opt into static charts, before Chart.js creates an instance.
+const disableAnimation = computed(() => chartSnapshotMode.value || (skillsDisplayInfo.isLocalTestPath() &&
+    route.query.disablePointHistoryChartAnimation === 'true'))
 const loading = ref(true)
 const animationEnded = ref(false)
 const chartLoaded = ref(false)
+const chartRenderVersion = ref(0)
+const snapshotDrawn = ref(false)
+const chartRenderReady = computed(() => !loading.value && chartLoaded.value &&
+    (disableAnimation.value ? snapshotDrawn.value : animationEnded.value))
 
 const chartData = ref({});
 const achievedLevels = ref([])
@@ -133,6 +144,11 @@ const combineOverlappingAchievements = (achievements, numItems) => {
 }
 
 const setupData = () => {
+  // Each refresh must wait for its own chart instance and animation, not the previous render.
+  animationEnded.value = false
+  chartLoaded.value = false
+  snapshotDrawn.value = false
+  chartRenderVersion.value += 1
   const pointHistoryRes = pointHistoryState.getPointHistory(route.params.subjectId)
   const numItems = pointHistoryRes.pointsHistory?.length || 0
 
@@ -193,6 +209,7 @@ const hasManyPoints = computed(() => {
 })
 
 const chartJsOptions = computed(() => {
+  const renderVersion = chartRenderVersion.value
   const axisLabelColor = themeState.theme.charts.axisLabelColor || colors.textMutedColor
   const dataLabelBackgroundColor = themeState.theme.charts.labelBackgroundColor || colors.surface100Color
   const dataLabelBorderColor = themeState.theme.charts.labelBorderColor || colors.surface600Color
@@ -282,15 +299,45 @@ const chartJsOptions = computed(() => {
         }
       }
     },
-    animation: {
+    animation: disableAnimation.value ? false : {
+      onProgress: function() {
+        if (renderVersion === chartRenderVersion.value) {
+          animationEnded.value = false;
+        }
+      },
       onComplete: function() {
-        animationEnded.value = true;
+        if (renderVersion === chartRenderVersion.value) {
+          animationEnded.value = true;
+        }
       }
     },
   };
 })
 
 const pointsChartRef = ref(null)
+
+const chartPlugins = computed(() => {
+  if (!disableAnimation.value) return [ChartDataLabels]
+  const renderVersion = chartRenderVersion.value
+  const resetSnapshotReadiness = () => {
+    if (renderVersion === chartRenderVersion.value) {
+      snapshotDrawn.value = false
+    }
+  }
+  return [ChartDataLabels, {
+    id: 'pointHistorySnapshotReadiness',
+    beforeInit: resetSnapshotReadiness,
+    beforeUpdate: resetSnapshotReadiness,
+    beforeDestroy: resetSnapshotReadiness,
+    // With animation disabled, afterDraw observes final geometry and achievement labels.
+    // Unlike onComplete/afterRender, it is not fired merely because a chart is destroyed.
+    afterDraw: () => {
+      if (renderVersion === chartRenderVersion.value) {
+        snapshotDrawn.value = true
+      }
+    },
+  }]
+})
 
 watch(() => pointHistoryState.pointHistoryDateLoadedMap.get(route.params.subjectId), (newVal, oldVal) => {
   if (oldVal && newVal) {
@@ -323,7 +370,7 @@ watch(() => pointHistoryState.pointHistoryDateLoadedMap.get(route.params.subject
                type="line"
                :data="hasData ? chartData : splashChartData"
                :options="chartJsOptions"
-               :plugins="[ChartDataLabels]"
+                :plugins="chartPlugins"
                @loaded="chartLoaded = true"
                class="h-[14rem]"/>
         <template #no-data>
@@ -336,7 +383,12 @@ watch(() => pointHistoryState.pointHistoryDateLoadedMap.get(route.params.subject
             </template>
           </Card>
         </template>
-        <span v-if="!loading && animationEnded && chartLoaded" data-cy="pointHistoryChart-animationEnded"></span>
+        <span v-if="chartRenderReady"
+              data-cy="pointHistoryChart-animationEnded"
+              :data-render-version="chartRenderVersion"></span>
+        <span v-if="disableAnimation && chartRenderReady"
+              data-cy="pointHistoryChart-rendered"
+              :data-render-version="chartRenderVersion"></span>
       </metrics-overlay>
     </template>
   </Card>

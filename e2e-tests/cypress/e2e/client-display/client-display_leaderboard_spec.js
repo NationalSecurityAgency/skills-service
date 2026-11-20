@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import { matchSkillsDisplaySnapshot, visitSkillsDisplaySnapshotPage } from '../../support/skills-display-snapshot-helpers';
 import moment from 'moment';
 import format from 'number-format.js';
 
@@ -38,14 +39,14 @@ describe('Client Display Leaderboard Tests', () => {
         cy.createProject(1);
         cy.createSubject(1, 1);
 
-        cy.cdVisit('/');
+        visitSkillsDisplaySnapshotPage('/');
         cy.contains('Overall Points');
         cy.cdClickSubj(0, 'Subject 1');
         cy.cdClickRank();
 
         cy.get('[data-cy="noContent"]')
             .contains('No Users');
-        cy.matchSnapshotImageForElement('[data-cy="leaderboard"]', {
+        matchSkillsDisplaySnapshot('[data-cy="leaderboard"]', {
             blackout: '[data-cy="userFirstSeen"]'
         });
     });
@@ -102,4 +103,3 @@ describe('Client Display Leaderboard Tests', () => {
     });
 
 });
-

@@ -38,7 +38,7 @@ const exportTranscriptToPdf = () => {
 </script>
 
 <template>
-  <Card :pt="{ content: { class: 'p-0' } }" data-cy="downloadTranscriptCard">
+  <Card :pt="{ body: { class: 'py-2! !px-4' } }" data-cy="downloadTranscriptCard">
     <template #content>
       <div class="flex flex-col md:flex-row gap-2 items-center">
         <div class="flex-1">
@@ -49,6 +49,7 @@ const exportTranscriptToPdf = () => {
         <div>
           <SkillsButton
             icon="fas fa-download"
+            size="small"
             label="Download Transcript"
             :loading="loadTranscriptData.isLoading.value"
             @click="exportTranscriptToPdf"

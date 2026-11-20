@@ -14,6 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <script setup>
+import { useMetricsChartSnapshot } from '@/components/metrics/common/UseMetricsChartSnapshot.js'
 import {onMounted, ref} from 'vue';
 import {useRoute} from 'vue-router';
 import MetricsOverlay from "@/components/metrics/utils/MetricsOverlay.vue";
@@ -27,6 +28,7 @@ const route = useRoute();
 const chartSupportColors = useChartSupportColors()
 
 const chartJsOptions = ref();
+const { snapshotOptions, snapshotPlugins } = useMetricsChartSnapshot(chartJsOptions)
 const chartData = ref({})
 const loading = ref(true);
 const hasData = ref(false);
@@ -94,7 +96,8 @@ const postAchievementUserCountsChartRef = ref(null)
           <Chart ref="postAchievementUserCountsChartRef"
                  type="pie"
                  :data="chartData"
-                 :options="chartJsOptions"
+                 :options="snapshotOptions"
+                 :plugins="snapshotPlugins"
                  class="w-full h-full"/>
         </div>
       </metrics-overlay>

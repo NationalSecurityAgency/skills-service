@@ -14,6 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <script setup>
+import { useMetricsChartSnapshot } from '@/components/metrics/common/UseMetricsChartSnapshot.js'
 import {computed, onMounted, ref} from 'vue';
 import {useRoute} from 'vue-router';
 import MetricsService from "@/components/metrics/MetricsService.js";
@@ -30,6 +31,7 @@ const chartSupportColors = useChartSupportColors()
 const layoutSizes = useLayoutSizesState()
 
 const chartJsOptions = ref();
+const { snapshotOptions, snapshotPlugins } = useMetricsChartSnapshot(chartJsOptions)
 const chartData = ref({})
 const hasData = computed(() => Boolean(chartData.value.labels?.length > 0))
 const loading = ref(true);
@@ -140,7 +142,8 @@ const topUserCountsChartRef = ref(null)
         <Chart ref="topUserCountsChartRef"
                type="bar"
                :data="chartData"
-               :options="chartJsOptions"
+               :options="snapshotOptions"
+               :plugins="snapshotPlugins"
                class="min-h-[16em]"/>
       </metrics-overlay>
     </template>

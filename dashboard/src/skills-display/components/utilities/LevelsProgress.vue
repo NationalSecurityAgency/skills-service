@@ -34,7 +34,7 @@ watch(() => props.level, (newVal) => {
     disabled
     :cancel="false"
     aria-hidden="true"
-    class="override-readonly-opacity" />
+    class="override-readonly-opacity inline-flex! flex-row! flex-nowrap! items-center gap-[var(--p-rating-gap,0.25rem)]" />
 </template>
 
 <style>

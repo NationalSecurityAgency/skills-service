@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import { matchMetricsSnapshot, visitMetricsSnapshotPage } from '../../support/metrics-snapshot-helpers';
 var moment = require('moment-timezone');
 
 describe('Metrics Using User Tags Tests', () => {
@@ -349,13 +350,12 @@ describe('Metrics Using User Tags Tests', () => {
         });
 
         it('bar chart', () => {
-            cy.visit('/administrator/projects/proj1/metrics');
+            visitMetricsSnapshotPage('/administrator/projects/proj1/metrics');
             cy.wait('@getConfig');
 
             cy.get('[data-cy="userTagChart"] [data-pc-section="header"]')
                 .contains('Some Values (Top 20)');
-            cy.wait(2000)
-            cy.matchSnapshotImageForElement('[data-cy="userTagChart"]')
+            matchMetricsSnapshot('[data-cy="userTagChart"]')
         });
 
         it('navigate to user tag metrics', () => {
@@ -365,7 +365,7 @@ describe('Metrics Using User Tags Tests', () => {
 
             cy.intercept('**distinctUsersOverTimeForProject**').as('distinctUsersOverTimeForProject');
             cy.intercept('**numUsersPerTagBuilder**').as('numUsersPerTagBuilder');
-            cy.visit('/administrator/projects/proj1/metrics');
+            visitMetricsSnapshotPage('/administrator/projects/proj1/metrics');
 
             cy.get('[data-cy="usersTimeChart_animationCompleted"]')
             cy.wait('@getConfig');
@@ -375,12 +375,11 @@ describe('Metrics Using User Tags Tests', () => {
             cy.get('[data-cy="userTagTableCard"] [data-pc-section="header"]').contains('Many Values');
             cy.get(`${userTagsTableSelector} th`).contains('Best Label');
             cy.get(`${userTagsTableSelector} th`).contains('# Users');
-            cy.wait(2000)
 
             cy.intercept('**numUsersPerLevelChartBuilder**').as('numUsersPerLevelChartBuilder')
             cy.get(`${userTagsTableSelector} [data-cy="userTagTable-${tableTagKey}_viewMetricsLink"]`).first().click();
             cy.wait('@numUsersPerLevelChartBuilder')
-            cy.matchSnapshotImageForElement('[data-cy="levelsChart"]')
+            matchMetricsSnapshot('[data-cy="levelsChart"]')
 
             cy.intercept(`/admin/projects/proj1/userTags/${tableTagKey}/tag0/users*`).as('getUsers');
             cy.get(`${usersTableSelector}`).contains('User').click();
@@ -399,7 +398,7 @@ describe('Metrics Using User Tags Tests', () => {
             cy.wait('@distinctUsersOverTimeForProject');
             cy.wait('@numUsersPerTagBuilder');
             cy.wait('@numUsersPerTagBuilder');
-            cy.wait(2000)
+            cy.get('[data-pc-name="progressspinner"]').should('not.exist')
             cy.get(`[data-cy="cell_tagValue-tag5"] [data-cy="userTagTable-${tableTagKey}_viewMetricsLink"]`).click()
             cy.get('[data-cy="usersTable"] [data-cy="skillsBTableTotalRows"]').should('have.text', '20')
             cy.get('[data-cy="users-userTagFilter"]').should('not.exist')

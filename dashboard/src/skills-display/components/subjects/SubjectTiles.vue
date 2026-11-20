@@ -20,6 +20,8 @@ import SubjectTile from '@/skills-display/components/subjects/SubjectTile.vue'
 import NoContent2 from '@/components/utils/NoContent2.vue'
 import {useSkillsDisplayAttributesState} from '@/skills-display/stores/UseSkillsDisplayAttributesState.js'
 
+defineProps({ compact: { type: Boolean, default: false } })
+
 const userProgress = useUserProgressSummaryState()
 const attributes = useSkillsDisplayAttributesState()
 const hasData = computed(() => userProgress.userProgressSummary.subjects?.length > 0)
@@ -35,12 +37,12 @@ const hasData = computed(() => userProgress.userProgressSummary.subjects?.length
           :message="`Please contact this ${attributes.projectDisplayName.toLowerCase()}'s administrator.`" />
       </template>
     </Card>
-    <h2 class="sr-only">Subjects</h2>
-    <div v-if="hasData" class="grid grid-cols-12 gap-4 mx-0">
+    <h2 class="sr-only">{{ attributes.subjectDisplayNamePlural }}</h2>
+    <div v-if="hasData" class="grid grid-cols-12 mx-0" :class="compact ? 'gap-3' : 'gap-4'">
       <div v-for="(subject, index) in userProgress.userProgressSummary.subjects"
            :key="`unique-subject-${index}`"
            class="col-span-12 md:col-span-6 xl:col-span-4">
-          <subject-tile :subject="subject" :tile-index="index"/>
+           <subject-tile :subject="subject" :tile-index="index" :compact="compact"/>
       </div>
     </div>
   </div>

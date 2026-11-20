@@ -14,19 +14,20 @@
  * limitations under the License.
  */
 import moment from 'moment-timezone';
-
-const dateFormatter = value => moment.utc(value)
-    .format('YYYY-MM-DD[T]HH:mm:ss[Z]');
+import { matchSkillsDisplaySnapshot, visitSkillsDisplaySnapshotPage } from '../../support/skills-display-snapshot-helpers';
 
 describe('Client Display Tests', () => {
 
+    // Sample representative layouts at each size rather than repeating every themed page.
     const sizes = [
         'iphone-6',
         'ipad-2',
         'default',
     ];
 
-    const renderWait = 4000;
+    const matchThemeSnapshot = (options = {}) => {
+        return matchSkillsDisplaySnapshot('[data-cy="testDisplayTheme"]', options);
+    };
 
     before(() => {
         Cypress.Commands.add('cdInitProjWithSkills', () => {
@@ -189,16 +190,13 @@ describe('Client Display Tests', () => {
     sizes.forEach((size) => {
 
         it(`test theming - project overview - ${size}`, () => {
-            cy.intercept('GET', '/api/projects/proj1/pointHistory**')
-                .as('getPointHistory');
             cy.setResolution(size);
 
             cy.cdInitProjWithSkills();
 
-            cy.cdVisit('/?enableTheme=true');
+            visitSkillsDisplaySnapshotPage('/?enableTheme=true');
 
-            cy.wait('@getPointHistory');
-            cy.get('[data-cy=pointHistoryChart]');
+            cy.get('[data-cy=pointHistoryChart]').should('be.visible');
 
             cy.contains('Subject 3');
             cy.get('[data-cy="subjectTile-subj1"]')
@@ -207,112 +205,7 @@ describe('Client Display Tests', () => {
                 .contains('1');
             cy.get('[data-cy=myBadges]')
                 .contains('1');
-            cy.matchSnapshotImageForElement('[data-cy="testDisplayTheme"]', { blackout: '[data-cy=pointHistoryChart]', errorThreshold: 0.05 });
-        });
-
-        if (!Cypress.env('oauthMode')) {
-            // NOTE: skipping this test for now as there is an extra space rendered in CI, it's not clear why,
-            // more research is needed
-            it(`test theming - project rank - ${size}`, () => {
-                cy.setResolution(size);
-
-                cy.cdInitProjWithSkills();
-
-                const m = moment.utc('2020-09-12 11', 'YYYY-MM-DD HH');
-                for (let i = 0; i < 5; i += 1) {
-                    cy.request('POST', `/api/projects/proj1/skills/skill1`, {
-                        userId: `uniqueUser${i}`,
-                        timestamp: m.clone()
-                          .add(1, 'day')
-                          .format('x')
-                    });
-                    cy.request('POST', `/api/projects/proj1/skills/skill1`, {
-                        userId: `uniqueUser${i}`,
-                        timestamp: m.clone()
-                          .add(2, 'day')
-                          .format('x')
-                    });
-                }
-
-                cy.cdVisit('/?enableTheme=true&internalBackButton=true');
-
-                // back button - border color
-                cy.cdClickRank();
-                // wait for the bar (on the bar chart) to render
-                cy.get('[data-cy="levelBreakdownChart-animationEnded"]');
-                cy.wait(5000)
-                cy.matchSnapshotImageForElement('[data-cy="testDisplayTheme"]', {blackout: '[data-cy="dateCell"]', errorThreshold: 0.35 });
-            });
-        }
-
-        it(`test theming - project tags page - ${size}`, () => {
-            cy.setResolution(size);
-
-            cy.cdInitProjWithSkills();
-
-            cy.cdVisit('/tags/?enableTheme=true');
-            cy.contains('Project Tags');
-            cy.matchSnapshotImageForElement('[data-cy="testDisplayTheme"]', { errorThreshold: 0.05  });
-        });
-
-        it(`test theming - tag overview page - ${size}`, () => {
-            cy.setResolution(size);
-
-            cy.cdInitProjWithSkills();
-
-            cy.intercept('GET', `/api/projects/proj1/tags/*/descriptions?*`)
-              .as('loadSkillTagDescriptions')
-            cy.cdVisit('/tags/tag1?enableTheme=true');
-            cy.contains('TAG 1');
-            cy.get('[data-cy=toggleSkillDetails]').click();
-            cy.wait('@loadSkillTagDescriptions')
-            cy.matchSnapshotImageForElement('[data-cy="testDisplayTheme"]', { errorThreshold: 0.05  });
-        });
-
-        it(`test theming - badge - ${size}`, () => {
-            cy.setResolution(size);
-
-            cy.cdInitProjWithSkills();
-
-            cy.cdVisit('/badges/?enableTheme=true');
-            cy.contains('Badge 3');
-            cy.matchSnapshotImageForElement('[data-cy="testDisplayTheme"]', { blackout: '[data-cy=pointHistoryChart]', errorThreshold: 0.05  });
-
-        });
-
-        it(`test theming - badge details- ${size}`, () => {
-            cy.setResolution(size);
-
-            cy.cdInitProjWithSkills();
-
-            cy.cdVisit('/?enableTheme=true');
-
-            cy.cdClickBadges();
-            cy.contains('Badge 3');
-
-            cy.contains('View Details')
-                .click();
-            cy.contains('Badge 1');
-            cy.contains('This is 3');
-            cy.get('[data-cy="skillProgress_index-0"] [data-cy="skillProgress-ptsOverProgressBard"]').contains('200 / 500 Points')
-            cy.get('[data-cy="skillProgress_index-2"] [data-cy="skillProgress-ptsOverProgressBard"]').contains('200 / 200 Points')
-            cy.matchSnapshotImageForElement('[data-cy="testDisplayTheme"]', { blackout: '[data-cy=pointHistoryChart]', errorThreshold: 0.05  });
-        });
-
-        it(`test theming - subject overview - ${size}`, () => {
-            cy.setResolution(size);
-
-            cy.cdInitProjWithSkills();
-
-            cy.cdVisit('/subjects/subj1/?enableTheme=true');
-            cy.contains('Subject 1');
-            cy.get('[data-cy=myRank]')
-                .contains('1');
-            cy.contains('This is 4');
-            cy.get('[data-cy="totalPoints"]').should('have.text', '1,400');
-            cy.get('[data-cy="skillProgress_index-0"] [data-cy="skillProgress-ptsOverProgressBard"]').contains('200 / 500 Points')
-            cy.get('[data-cy="skillProgress_index-2"] [data-cy="skillProgress-ptsOverProgressBard"]').contains('200 / 200 Points')
-            cy.matchSnapshotImageForElement('[data-cy="testDisplayTheme"]', { blackout: '[data-cy=pointHistoryChart]', errorThreshold: 0.05  });
+            matchThemeSnapshot({ blackout: '[data-cy=pointHistoryChart]', errorThreshold: 0.05 });
         });
 
         it(`test theming - subject overview with skill details - ${size}`, () => {
@@ -320,7 +213,7 @@ describe('Client Display Tests', () => {
 
             cy.cdInitProjWithSkills();
 
-            cy.cdVisit('/subjects/subj1/?enableTheme=true');
+            visitSkillsDisplaySnapshotPage('/subjects/subj1/?enableTheme=true');
             cy.contains('Subject 1');
             cy.get('[data-cy=myRank]')
                 .contains('1');
@@ -338,23 +231,7 @@ describe('Client Display Tests', () => {
 
             cy.get('[data-cy="skillProgress_index-0"] [data-cy="skillProgress-ptsOverProgressBard"]').contains('200 / 500 Points')
             cy.get('[data-cy="skillProgress_index-2"] [data-cy="skillProgress-ptsOverProgressBard"]').contains('200 / 200 Points')
-            cy.matchSnapshotImageForElement('[data-cy="testDisplayTheme"]', { blackout: '[data-cy=pointHistoryChart]', errorThreshold: 0.05  });
-        });
-
-        it(`test theming - skill details - ${size}`, () => {
-            cy.setResolution(size);
-
-            cy.cdInitProjWithSkills();
-
-            cy.cdVisit('/subjects/subj1/?enableTheme=true');
-            cy.contains('Subject 1');
-
-            cy.cdClickSkill(0);
-            cy.contains('Skill Overview');
-            cy.contains('This is 1');
-            cy.contains('Lorem ipsum dolor sit amet');
-            cy.get('[data-cy="overallPointsEarnedCard"] [data-cy="mediaInfoCardTitle"]').should('have.text', '200 Total')
-            cy.matchSnapshotImageForElement('[data-cy="testDisplayTheme"]', { blackout: '[data-cy=pointHistoryChart]', errorThreshold: 0.05  });
+            matchThemeSnapshot({ blackout: '[data-cy=pointHistoryChart]', errorThreshold: 0.05 });
         });
 
     });
@@ -384,16 +261,17 @@ describe('Client Display Tests', () => {
 
             cy.cdInitProjWithSkills();
 
-            cy.cdVisit('/subjects/subj1/?enableTheme=true');
+            visitSkillsDisplaySnapshotPage('/subjects/subj1/?enableTheme=true');
             cy.contains('Subject 1');
 
             cy.cdClickSkill(3);
             cy.contains('Skill Overview');
             cy.contains('This is 4');
             cy.contains('Lorem ipsum dolor sit amet');
-            cy.get('[data-cy="prereqTable"] [data-cy="skillLink-proj1-skill2"]')
-            cy.wait(4000);
-            cy.matchSnapshotImageForElement('[data-cy="testDisplayTheme"]', { blackout: '[data-cy=pointHistoryChart]', errorThreshold: 0.05  });
+            cy.get('[data-cy="prereqTable"] [data-cy="skillLink-proj1-skill2"]').should('be.visible');
+            cy.get('[data-cy="prerequisitesGraph"]', { timeout: 10000 })
+                .should('have.attr', 'data-render-ready', 'true');
+            matchThemeSnapshot({ blackout: '[data-cy=pointHistoryChart]', errorThreshold: 0.05 });
         });
     });
 

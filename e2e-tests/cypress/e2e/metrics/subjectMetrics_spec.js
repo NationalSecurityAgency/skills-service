@@ -13,11 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import { matchMetricsSnapshot, visitMetricsSnapshotPage } from '../../support/metrics-snapshot-helpers';
 var moment = require('moment-timezone');
 
 describe('Metrics Tests - Subject', () => {
 
-    const waitForSnap = 6000;
 
     before(() => {
         Cypress.Commands.add('addUserTag', (userId, tagKey, tags) => {
@@ -89,12 +89,11 @@ describe('Metrics Tests - Subject', () => {
             }
         }
 
-        cy.visit('/administrator/projects/proj1/subjects/subj1');
+        visitMetricsSnapshotPage('/administrator/projects/proj1/subjects/subj1');
         cy.clickNav('Metrics');
         cy.wait('@numUsersPerLevelChartBuilderSubj1');
 
-        cy.wait(waitForSnap);
-        cy.matchSnapshotImageForElement('[data-cy=levelsChart]', { errorThreshold: 0.07 });
+        matchMetricsSnapshot('[data-cy=levelsChart]', { errorThreshold: 0.07 });
 
         cy.visit('/administrator/projects/proj1/subjects/subj2');
         cy.clickNav('Metrics');
@@ -305,12 +304,11 @@ describe('Metrics Tests - Subject', () => {
             name: 'Interesting Subject 1',
         });
 
-        cy.visit('/administrator/projects/proj1/subjects/subj1');
+        visitMetricsSnapshotPage('/administrator/projects/proj1/subjects/subj1');
         cy.clickNav('Metrics');
         cy.wait('@distinctUsersOverTimeForProject');
 
-        cy.wait(waitForSnap);
-        cy.matchSnapshotImageForElement('[data-cy=distinctNumUsersOverTime]', { errorThreshold: 0.07 });
+        matchMetricsSnapshot('[data-cy=distinctNumUsersOverTime]', { errorThreshold: 0.07 });
     });
 
     if (!Cypress.env('oauthMode')) {
@@ -383,13 +381,12 @@ describe('Metrics Tests - Subject', () => {
                   cy.login(vars.defaultUser, vars.defaultPass);
               });
 
-            cy.visit('/administrator/projects/proj1/subjects/subj1');
+            visitMetricsSnapshotPage('/administrator/projects/proj1/subjects/subj1');
             cy.wait('@getConfig');
             cy.clickNav('Metrics');
             cy.wait('@skillAchievementsByTagBuilder');
 
-            cy.wait(waitForSnap);
-            cy.matchSnapshotImageForElement('[data-cy=numUsersByTag-dutyOrganization]', { errorThreshold: 0.07 });
+            matchMetricsSnapshot('[data-cy=numUsersByTag-dutyOrganization]', { errorThreshold: 0.07 });
         });
     }
 });

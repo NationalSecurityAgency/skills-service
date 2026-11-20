@@ -582,11 +582,9 @@ describe('Subjects Tests', () => {
     });
 
     it('drag-and-drop sort order', () => {
-        cy.intercept('/admin/projects/proj1/subjects/subj1').as('subj1Async')
-        cy.intercept('/admin/projects/proj1/subjects/subj2').as('subj2Async')
-        cy.intercept('/admin/projects/proj1/subjects/subj3').as('subj3Async')
-        cy.intercept('/admin/projects/proj1/subjects/subj4').as('subj4Async')
-        cy.intercept('/admin/projects/proj1/subjects/subj5').as('subj5Async')
+        cy.intercept('PATCH', '/admin/projects/proj1/subjects/subj1').as('subj1Async')
+        cy.intercept('PATCH', '/admin/projects/proj1/subjects/subj2').as('subj2Async')
+        cy.intercept('PATCH', '/admin/projects/proj1/subjects/subj5').as('subj5Async')
 
         cy.createSubject(1, 1)
         cy.createSubject(1, 2)
@@ -603,20 +601,21 @@ describe('Subjects Tests', () => {
 
 
         cy.validateElementsOrder('[data-cy="subjectCard"]', ['Subject 1', 'Subject 2', 'Subject 3', 'Subject 4', 'Subject 5']);
-        cy.get(subj1Card).dragAndDrop(subj4Card)
-        cy.wait('@subj1Async')
+        cy.get(subj1Card).dragAndDrop(subj4Card, { sortableContainer: '#subjectCards' })
+        cy.wait('@subj1Async').its('response.statusCode').should('eq', 200)
         cy.validateElementsOrder('[data-cy="subjectCard"]', ['Subject 2', 'Subject 3', 'Subject 4', 'Subject 1', 'Subject 5']);
 
         // refresh to make sure it was saved
         cy.visit('/administrator/projects/proj1');
         cy.validateElementsOrder('[data-cy="subjectCard"]', ['Subject 2', 'Subject 3', 'Subject 4', 'Subject 1', 'Subject 5']);
 
-        cy.get(subj5Card).dragAndDrop(subj2Card)
-        cy.wait('@subj5Async')
+        cy.get(subj5Card).dragAndDrop(subj2Card, { sortableContainer: '#subjectCards' })
+        cy.wait('@subj5Async').its('response.statusCode').should('eq', 200)
+        cy.get('[data-cy="subj5_overlayShown"]').should('not.exist');
         cy.validateElementsOrder('[data-cy="subjectCard"]', ['Subject 5', 'Subject 2', 'Subject 3', 'Subject 4', 'Subject 1']);
 
-        cy.get(subj2Card).dragAndDrop(subj1Card)
-        cy.wait('@subj2Async')
+        cy.get(subj2Card).dragAndDrop(subj1Card, { sortableContainer: '#subjectCards' })
+        cy.wait('@subj2Async').its('response.statusCode').should('eq', 200)
         cy.validateElementsOrder('[data-cy="subjectCard"]', ['Subject 5', 'Subject 3', 'Subject 4', 'Subject 1', 'Subject 2']);
 
         // refresh to make sure it was saved
@@ -652,7 +651,7 @@ describe('Subjects Tests', () => {
 
         cy.visit('/administrator/projects/proj1');
         cy.validateElementsOrder('[data-cy="subjectCard"]', ['Subject 1', 'Subject 2']);
-        cy.get(subj1Card).dragAndDrop(subj2Card)
+        cy.get(subj1Card).dragAndDrop(subj2Card, { sortableContainer: '#subjectCards' })
 
         // overlay over both cards but loading message only on subject 1
         cy.get('[data-cy="subj1_overlayShown"] [data-cy="updatingSortMsg"]').contains('Updating sort order');

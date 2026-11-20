@@ -13,7 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import moment from 'moment-timezone';
+import {
+    matchSkillsDisplaySnapshot,
+    visitSkillsDisplaySnapshotPage,
+    waitForPrerequisitesGraph,
+} from '../../support/skills-display-snapshot-helpers';
 
 describe('Client Display Prerequisites Snapshot Tests', () => {
 
@@ -22,26 +26,18 @@ describe('Client Display Prerequisites Snapshot Tests', () => {
         errorThreshold: 0.05
     };
 
+    const matchGraphSnapshot = (selector, options) => {
+        waitForPrerequisitesGraph();
+        return matchSkillsDisplaySnapshot(selector, options);
+    };
+
     beforeEach(() => {
         Cypress.env('disabledUILoginProp', true);
         cy.createProject(1);
         cy.createSubject(1, 1);
 
-        Cypress.Commands.add('clickOnNode', (x, y) => {
-            cy.contains('Prerequisites');
-            cy.get('[data-cy="graphLegend"]').contains('Legend');
-            cy.wait(2000); // wait for chart
-            // have to click twice to it to work...
-            cy.get('#dependent-skills-network canvas')
-                .should('be.visible')
-                .click(x, y);
-        });
-
-        Cypress.Commands.add('navToTheFirstSkill', (x, y) => {
-            cy.cdVisit('/');
-            cy.cdClickSubj(0);
-            cy.cdClickSkill(1);
-        });
+        // Give the graph enough height without widening the page beyond the screenshot area.
+        cy.viewport(Cypress.config('viewportWidth'), 1280);
     });
 
     it('skill prerequisite graph', () => {
@@ -65,12 +61,12 @@ describe('Client Display Prerequisites Snapshot Tests', () => {
         cy.reportSkill(1, 4, Cypress.env('proxyUser'), 'yesterday')
         cy.reportSkill(1, 4, Cypress.env('proxyUser'), 'now')
 
-        cy.cdVisit('/?enableTheme=true', true);
+        visitSkillsDisplaySnapshotPage('/?enableTheme=true', true);
         cy.cdClickSubj(0, 'Subject 1', true);
         cy.cdClickSkill(1);
 
-        cy.wait(5000)
-        cy.matchSnapshotImageForElement('[data-cy="skillsDisplayHome"]', snapshotOptions);
+        cy.get('[data-cy="skillProgressTitle"]').should('contain.text', 'Very Great Skill 2');
+        matchGraphSnapshot('[data-cy="skillsDisplayHome"]', snapshotOptions);
     });
 
     it('skill prerequisite graph - with paging', () => {
@@ -86,12 +82,13 @@ describe('Client Display Prerequisites Snapshot Tests', () => {
             cy.addLearningPathItem(1, i, i+1)
         }
 
-        cy.cdVisit('/?enableTheme=true');
+        visitSkillsDisplaySnapshotPage('/?enableTheme=true');
         cy.cdClickSubj(0);
         cy.cdClickSkill(9);
 
-        cy.wait(5000)
-        cy.matchSnapshotImageForElement('[data-cy="skillsDisplayHome"]', snapshotOptions);
+        cy.get('[data-cy="depsProgress"] [data-cy="numDeps"]').should('have.text', '9');
+        cy.get('[data-cy="prereqTable"] [data-cy="isAchievedCell"]').should('have.length', 5);
+        matchGraphSnapshot('[data-cy="skillsDisplayHome"]', snapshotOptions);
     });
 
     it('skill prerequisite graph on badge page', () => {
@@ -128,15 +125,14 @@ describe('Client Display Prerequisites Snapshot Tests', () => {
         cy.reportSkill(1, 13, Cypress.env('proxyUser'), 'yesterday')
         cy.reportSkill(1, 13, Cypress.env('proxyUser'), 'now')
 
-        cy.cdVisit('/badges/badge1?enableTheme=true');
+        visitSkillsDisplaySnapshotPage('/badges/badge1?enableTheme=true');
 
         cy.get('[data-cy="prereqTable"] [data-p-index="0"] [data-cy="skillLink-proj1-badge2"]')
         cy.get('[data-cy="prereqTable"] [data-p-index="1"] [data-cy="skillLink-proj1-badge3"]')
         cy.get('[data-cy="prereqTable"] [data-p-index="2"] [data-cy="skillLink-proj1-skill1"]')
         cy.get('[data-cy="prereqTable"] [data-p-index="3"] [data-cy="skillLink-proj1-skill2"]')
         cy.get('[data-cy="prereqTable"] [data-p-index="4"] [data-cy="skillLink-proj1-skill3"]')
-        cy.wait(5000)
-        cy.matchSnapshotImageForElement('[data-cy="skillsDisplayHome"]', snapshotOptions);
+        matchGraphSnapshot('[data-cy="skillsDisplayHome"]', snapshotOptions);
     });
 
 });

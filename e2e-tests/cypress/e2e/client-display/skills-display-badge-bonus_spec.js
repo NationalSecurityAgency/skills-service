@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import { matchSkillsDisplaySnapshot, visitSkillsDisplaySnapshotPage } from '../../support/skills-display-snapshot-helpers';
 describe('Skills Display Badge Bonus Tests', () => {
 
   beforeEach(() => {
@@ -267,7 +268,7 @@ describe('Skills Display Badge Bonus Tests', () => {
 
     cy.reportSkill(1, 5, Cypress.env('proxyUser'), anHourAgo); // achieve badge 2
 
-    cy.cdVisit('/', true);
+    visitSkillsDisplaySnapshotPage('/', true);
     cy.cdClickBadges();
     cy.get('[data-cy=achievedBadges]')
       .contains('Badge 2');
@@ -276,7 +277,7 @@ describe('Skills Display Badge Bonus Tests', () => {
 
     cy.get('[data-cy="achievedBadge-badge2"]').contains('Test Badge Award')
 
-    cy.matchSnapshotImageForElement('[data-cy="achievedBadges"]')
+    matchSkillsDisplaySnapshot('[data-cy="achievedBadges"]')
   });
 
   it('ten badges and one has a bonus', () => {
@@ -295,7 +296,7 @@ describe('Skills Display Badge Bonus Tests', () => {
 
     cy.reportSkill(1, 5, Cypress.env('proxyUser'), anHourAgo); // achieve badge 2
 
-    cy.cdVisit('/', true);
+    visitSkillsDisplaySnapshotPage('/', true);
     cy.cdClickBadges();
     cy.get('[data-cy=achievedBadges]')
       .contains('Badge 2');
@@ -308,7 +309,7 @@ describe('Skills Display Badge Bonus Tests', () => {
       cy.get(`[data-cy="earnedBadgeLink_badge${i}"]`)
     }
 
-    cy.matchSnapshotImageForElement('[data-cy="achievedBadges"]')
+    matchSkillsDisplaySnapshot('[data-cy="achievedBadges"]')
   });
 
 })

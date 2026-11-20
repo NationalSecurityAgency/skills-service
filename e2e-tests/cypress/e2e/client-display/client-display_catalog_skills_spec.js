@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import { matchSkillsDisplaySnapshot, visitSkillsDisplaySnapshotPage } from '../../support/skills-display-snapshot-helpers';
 
 describe('Client Display Skills Imported from Catalog Tests', () => {
 
@@ -207,31 +208,35 @@ describe('Client Display Skills Imported from Catalog Tests', () => {
             },
         ]);
 
-        cy.cdVisit('/');
+        visitSkillsDisplaySnapshotPage('/');
         cy.cdClickSubj(0);
 
-        cy.matchSnapshotImageForElement('[data-cy="skillProgress_index-0"]', {
+        cy.get('[data-cy="skillProgress_index-0"]').should('contain.text', '0 / 200');
+        matchSkillsDisplaySnapshot('[data-cy="skillProgress_index-0"]', {
             name: 'catalog imported skill visual regression - skill preview',
             blackout: '[data-cy="skillProgressTitle"]',
             errorThreshold: 0.08
         });
 
         cy.cdClickSkill(0);
-        cy.matchSnapshotImageForElement('[data-cy="skillProgress"]', {
+        cy.get('[data-cy="skillProgress"]').should('contain.text', '0 / 200');
+        matchSkillsDisplaySnapshot('[data-cy="skillProgress"]', {
             name: 'catalog imported skill visual regression - skill details',
             errorThreshold: 0.08
         });
 
-        cy.cdVisit('/?enableTheme=true');
+        visitSkillsDisplaySnapshotPage('/?enableTheme=true');
         cy.cdClickSubj(0);
 
-        cy.matchSnapshotImageForElement('[data-cy="skillProgress_index-0"]', {
+        cy.get('[data-cy="skillProgress_index-0"]').should('contain.text', '0 / 200');
+        matchSkillsDisplaySnapshot('[data-cy="skillProgress_index-0"]', {
             name: 'catalog imported skill visual regression - skill preview themed',
             errorThreshold: 0.08
         });
 
         cy.cdClickSkill(0);
-        cy.matchSnapshotImageForElement('[data-cy="skillProgress"]', {
+        cy.get('[data-cy="skillProgress"]').should('contain.text', '0 / 200');
+        matchSkillsDisplaySnapshot('[data-cy="skillProgress"]', {
             name: 'catalog imported skill visual regression - skill details themed',
             errorThreshold: 0.08
         });
@@ -399,5 +404,3 @@ describe('Client Display Skills Imported from Catalog Tests', () => {
     });
 
 });
-
-

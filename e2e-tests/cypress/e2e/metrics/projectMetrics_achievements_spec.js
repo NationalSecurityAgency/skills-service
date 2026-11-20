@@ -13,10 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import { matchMetricsSnapshot, visitMetricsSnapshotPage } from '../../support/metrics-snapshot-helpers';
 var moment = require('moment-timezone');
 
 describe('Metrics Tests - Achievements', () => {
-    const waitForSnap = 4000;
     const exportedFileName = `cypress/downloads/proj1-achievements-${moment.utc().format('YYYY-MM-DD')}.xlsx`;
 
     before(() => {
@@ -96,13 +96,12 @@ describe('Metrics Tests - Achievements', () => {
             .as('getLevels');
 
         cy.intercept('**userAchievementsChartBuilder**').as('userAchievementsChartBuilder')
-        cy.visit('/administrator/projects/proj1/metrics/achievements');
+        visitMetricsSnapshotPage('/administrator/projects/proj1/metrics/achievements');
         cy.wait('@userAchievementsChartBuilder')
 
         cy.get('[data-cy=levelsChart] [data-pc-name="chart"]')
 
-        cy.wait(5000)
-        cy.matchSnapshotImageForElement('[data-cy=levelsChart] [data-pc-name="chart"]')
+        matchMetricsSnapshot('[data-cy=levelsChart] [data-pc-name="chart"]')
     });
 
     it('achievements table - empty table', () => {

@@ -14,6 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <script setup>
+import { useMetricsChartSnapshot } from '@/components/metrics/common/UseMetricsChartSnapshot.js'
 import {onMounted, ref} from 'vue';
 import {useRoute} from 'vue-router';
 import dayjs from 'dayjs';
@@ -34,6 +35,7 @@ const loading = ref(true);
 const hasData = ref(false);
 const chartData = ref({})
 const chartJsOptions = ref();
+const { snapshotOptions, snapshotPlugins } = useMetricsChartSnapshot(chartJsOptions)
 const animationEnded = ref(false)
 const start = ref(dayjs().subtract(30, 'day').valueOf());
 const timeSelectorOptions = [
@@ -181,7 +183,8 @@ const skillEventsOverTimeChartRef = ref(null)
         <Chart ref="skillEventsOverTimeChartRef"
                type="line"
                :data="chartData"
-               :options="chartJsOptions"
+               :options="snapshotOptions"
+               :plugins="snapshotPlugins"
                :class="{ 'h-[30rem]': hasData, 'h-[16rem]': !hasData }" />
         <div v-if="animationEnded" data-cy="skillEventsOverTimeChart-animationEnded"></div>
       </metrics-overlay>

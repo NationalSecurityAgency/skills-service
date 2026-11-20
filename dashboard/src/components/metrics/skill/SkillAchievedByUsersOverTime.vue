@@ -14,6 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <script setup>
+import { useMetricsChartSnapshot } from '@/components/metrics/common/UseMetricsChartSnapshot.js'
 import {onMounted, ref} from 'vue';
 import {useRoute} from 'vue-router';
 import MetricsService from "@/components/metrics/MetricsService.js";
@@ -28,6 +29,7 @@ const chartSupportColors = useChartSupportColors()
 
 const chartData = ref({})
 const chartJsOptions = ref();
+const { snapshotOptions, snapshotPlugins } = useMetricsChartSnapshot(chartJsOptions)
 const loading = ref(true);
 const hasData = ref(false);
 
@@ -129,7 +131,8 @@ const skillsAchievedOverTimeChartRef = ref(null)
       <Chart ref="skillsAchievedOverTimeChartRef"
              type="line"
              :data="chartData"
-             :options="chartJsOptions"
+             :options="snapshotOptions"
+             :plugins="snapshotPlugins"
              :class="{ 'h-[16rem]' : !hasData, 'h-[30rem]' : hasData }"
       />
       </metrics-overlay>

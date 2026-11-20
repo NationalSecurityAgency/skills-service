@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import { matchSkillsDisplaySnapshot, visitSkillsDisplaySnapshotPage } from '../../support/skills-display-snapshot-helpers';
 import moment from 'moment';
 
 const dateFormatter = value => moment.utc(value)
@@ -151,13 +152,14 @@ describe('Client Display Markdown Tests', () => {
         cy.assignSkillToBadge(1, 1, 1);
         cy.enableBadge(1, 1, badge);
 
-        cy.cdVisit('/?internalBackButton=true');
+        visitSkillsDisplaySnapshotPage('/?internalBackButton=true');
         cy.contains('Overall Points');
 
         // check subject
         cy.cdClickSubj(0, 'Subject 1');
         cy.contains('Emphasis');
-        cy.matchSnapshotImageForElement('[data-cy="skillsDisplayHome"] [data-cy="subjectDescription"] [data-cy="markdownViewer"]', {
+        cy.get('[data-cy="skillsDisplayHome"] [data-cy="subjectDescription"] [data-cy="markdownViewer"]').should('contain.text', 'Separate me');
+        matchSkillsDisplaySnapshot('[data-cy="skillsDisplayHome"] [data-cy="subjectDescription"] [data-cy="markdownViewer"]', {
             name: 'Markdown-subject',
             blackout: '[data-cy=pointHistoryChart]'
         });
@@ -166,7 +168,8 @@ describe('Client Display Markdown Tests', () => {
         cy.cdClickSkill(0);
         cy.contains('This is 1');
         cy.contains('Emphasis');
-        cy.matchSnapshotImageForElement('[data-cy="skillsDisplayHome"] [data-cy="markdownViewer"]', {
+        cy.get('[data-cy="skillsDisplayHome"] [data-cy="markdownViewer"]').should('contain.text', 'Separate me');
+        matchSkillsDisplaySnapshot('[data-cy="skillsDisplayHome"] [data-cy="markdownViewer"]', {
             name: 'Markdown-skill',
             blackout: '[data-cy=pointHistoryChart]'
         });
@@ -176,19 +179,21 @@ describe('Client Display Markdown Tests', () => {
         cy.get('[data-cy=toggleSkillDetails]')
             .click();
         cy.contains('Overall Points Earned');
-        cy.matchSnapshotImageForElement('[data-cy="skillsDisplayHome"] [data-cy="skillDescription-skill1"] [data-cy="markdownViewer"]', {
+        cy.get('[data-cy="skillsDisplayHome"] [data-cy="skillDescription-skill1"] [data-cy="markdownViewer"]').should('contain.text', 'Separate me');
+        matchSkillsDisplaySnapshot('[data-cy="skillsDisplayHome"] [data-cy="skillDescription-skill1"] [data-cy="markdownViewer"]', {
             name: 'Markdown-Skill-Preview',
             blackout: '[data-cy=pointHistoryChart]'
         });
 
-        cy.cdVisit('/?internalBackButton=true');
+        visitSkillsDisplaySnapshotPage('/?internalBackButton=true');
         cy.contains('Overall Points');
 
         // check badge
         cy.cdClickBadges();
         cy.contains('Badges');
         cy.contains('Emphasis');
-        cy.matchSnapshotImageForElement('[data-cy="skillsDisplayHome"] [data-cy="markdownViewer"]', {
+        cy.get('[data-cy="skillsDisplayHome"] [data-cy="markdownViewer"]').should('contain.text', 'Separate me');
+        matchSkillsDisplaySnapshot('[data-cy="skillsDisplayHome"] [data-cy="markdownViewer"]', {
             name: 'Markdown-Badge',
             blackout: '[data-cy=pointHistoryChart]'
         });

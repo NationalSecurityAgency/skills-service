@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import { matchSkillsDisplaySnapshot, visitSkillsDisplaySnapshotPage } from '../../support/skills-display-snapshot-helpers';
 import moment from 'moment';
 import format from 'number-format.js';
 
@@ -111,8 +112,21 @@ describe('Client Display Leaderboard (with shared data) Tests', () => {
         it('leaderboard 10 Around Me', () => {
             cy.cdVisit('/rank');
             cy.get('[data-cy="myRankPositionStatCard"]').contains('13')
+            cy.intercept('GET', '/api/projects/proj1/leaderboard?type=tenAroundMe').as('aroundMeLeaderboard');
             cy.get('[data-cy="leaderboard"] [data-cy="badge-selector"] [data-cy="select-tenAroundMe"]')
                 .click();
+
+            cy.wait('@aroundMeLeaderboard').then(({ response }) => {
+                expect(response.statusCode).to.equal(200);
+                expect(response.body.rankedUsers).to.have.length(6);
+                // The current user's account may predate this run. Match the actual creation
+                // timestamps in the browser's timezone, just like the rendered DateCell.
+                const userSinceDates = response.body.rankedUsers.map((user) => {
+                    expect(user.userFirstSeenTimestamp).to.be.a('number');
+                    return moment(user.userFirstSeenTimestamp).format('YYYY-MM-DD');
+                });
+                cy.wrap(userSinceDates).as('userSinceDates');
+            });
 
             cy.get(tableSelector)
                 .contains('Loading...')
@@ -121,8 +135,6 @@ describe('Client Display Leaderboard (with shared data) Tests', () => {
                 .should('have.length', 6)
                 .as('cyRows');
 
-            const date = moment.utc()
-                .format('YYYY-MM-DD');
             for (let i = 0; i < 6; i += 1) {
                 cy.get('@cyRows')
                     .eq(i)
@@ -137,9 +149,13 @@ describe('Client Display Leaderboard (with shared data) Tests', () => {
                 cy.get('@row')
                     .eq(2)
                     .should('contain.text', `${format('#,##0.', 500 - (i * 100))} Points`);
-                cy.get('@row')
-                    .eq(3)
-                    .should('contain.text', `${date}`);
+                cy.get('@userSinceDates').then((dates) => {
+                    cy.get('@row')
+                        .eq(3)
+                        .find('[data-cy="dateCell"] span')
+                        .first()
+                        .should('have.text', dates[i]);
+                });
             }
 
             // TODO: investigate why snapshots continue to fail on CI with a slight difference in spacing
@@ -294,13 +310,12 @@ describe('Client Display Leaderboard (with shared data) Tests', () => {
             'dirty': true
         }]);
 
-        cy.cdVisit('/?loginAsUser=skills@skills.org');
+        visitSkillsDisplaySnapshotPage('/?loginAsUser=skills@skills.org');
         cy.get('[data-cy="optedOutMessage"]')
           .contains('Opted-Out');
         cy.get('[data-cy="optedOutMessage"]')
           .contains('Your position would be #13 if you opt-in');
-        cy.wait(2000)
-        cy.matchSnapshotImageForElement('[data-cy="myRank"]', {
+        matchSkillsDisplaySnapshot('[data-cy="myRank"]', {
             name: 'my-rank-opted-out',
             blackout: '[data-cy="dateCell"]',
             errorThreshold: 0.05
@@ -313,8 +328,7 @@ describe('Client Display Leaderboard (with shared data) Tests', () => {
         cy.get('[data-cy="leaderboard"]')
           .contains('You selected to opt-out');
 
-        cy.wait(2000)
-        cy.matchSnapshotImageForElement('[data-cy="skillsDisplayHome"]', {
+        matchSkillsDisplaySnapshot('[data-cy="skillsDisplayHome"]', {
             name: 'rank-overview-leaderboard-opted-out',
             blackout: '[data-cy="dateCell"]',
             errorThreshold: 0.05

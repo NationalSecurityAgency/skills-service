@@ -15,6 +15,7 @@ limitations under the License.
 */
 <script setup>
 import {computed, onBeforeMount, onMounted, ref, watch} from 'vue'
+import axios from 'axios'
 import {RouterView, useRoute} from 'vue-router'
 import DashboardHeader from '@/components/header/DashboardHeader.vue'
 import SkillsSpinner from '@/components/utils/SkillsSpinner.vue'
@@ -32,6 +33,7 @@ import CustomizableFooter from '@/components/customization/CustomizableFooter.vu
 import {useSkillsDisplayInfo} from '@/skills-display/UseSkillsDisplayInfo.js'
 import {useSkillsDisplayAttributesState} from '@/skills-display/stores/UseSkillsDisplayAttributesState.js'
 import {useIframeInit} from '@/skills-display/iframe/UseIframeInit.js'
+import {useSkillsDisplayParentFrameState} from '@/skills-display/stores/UseSkillsDisplayParentFrameState.js'
 import NewSoftwareVersion from '@/components/header/NewSoftwareVersion.vue'
 import {usePageVisitService} from '@/components/utils/services/UsePageVisitService.js'
 import {invoke, until} from '@vueuse/core'
@@ -125,22 +127,34 @@ onMounted(() => {
       if (iframeInit.initializationError.value) return
       log.debug('App.vue: skillsDisplayInfo.isSkillsClientPath()=true, loaded iframe!')
     }
-    loadConfigs()
+    loadConfigs().catch((error) => {
+      const isSupersededIframeRequest = skillsDisplayInfo.isSkillsClientPath()
+        && !useSkillsDisplayParentFrameState().isCurrentAuthRequest(error?.config)
+      if (axios.isCancel(error) || isSupersededIframeRequest) {
+        // Older-token failures can be AxiosErrors rather than cancellations; replacement recovery owns startup.
+        return
+      }
+      if (skillsDisplayInfo.isSkillsClientPath() && !iframeInit.authenticationError.value) {
+        // Startup failures must be visible without mounting authenticated content behind the error route.
+        iframeInit.initializationError.value = 'Unable to load Skills Display. Please refresh the page to try again.'
+      }
+      // Dashboard errors and iframe 401s are displayed by their existing error handlers.
+    })
   })
 })
 
 const restoreSessionIfAvailable = () => {
   if (skillsDisplayInfo.isSkillsClientPath()) {
     authState.setRestoringSession(false)
-    return authState.fetchUser()
+    return authState.fetchUser(false)
   }
   return authState.restoreSessionIfAvailable()
 }
 
 const loadConfigs = () => {
-  appConfig.loadConfigState().finally(() => {
-    restoreSessionIfAvailable().finally(() => {
-      skillsDisplayAttributes.loadConfigStateIfNeeded().then(() => {
+  return appConfig.loadConfigState().finally(() => {
+    const loadDisplayConfig = () => {
+      return skillsDisplayAttributes.loadConfigStateIfNeeded().then(() => {
 
         if (!skillsDisplayInfo.isSkillsClientPath()) {
           globalNavGuards.addNavGuards()
@@ -157,7 +171,12 @@ const loadConfigs = () => {
 
         initMatomo()
       })
-    })
+    }
+    const restoringSession = restoreSessionIfAvailable()
+    // An iframe needs a valid identity before continuing; dashboard startup still installs its navigation guards.
+    return skillsDisplayInfo.isSkillsClientPath()
+      ? restoringSession.then(loadDisplayConfig)
+      : restoringSession.finally(loadDisplayConfig)
   })
 }
 
@@ -189,13 +208,29 @@ const isDashboardFooter = computed(() => notSkillsClient.value && !isLoadingApp.
       <div v-if="iframeInit.initializationError.value" role="alert" data-cy="skillsDisplayInitError" class="p-4">
         {{ iframeInit.initializationError.value }}
       </div>
+      <div v-else-if="iframeInit.authenticationError.value" class="flex min-h-80 items-center justify-center p-4 sm:p-6">
+        <div role="alert"
+             aria-labelledby="skills-display-authentication-title"
+             data-cy="skillsDisplayAuthenticationError"
+             class="w-full max-w-lg rounded-xl border border-slate-200 bg-white p-6 text-center shadow-sm dark:border-slate-700 dark:bg-slate-900 sm:p-8">
+          <div aria-hidden="true" class="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-blue-50 text-blue-700 dark:bg-blue-950 dark:text-blue-300">
+            <i class="fas fa-lock text-2xl"></i>
+          </div>
+          <h1 id="skills-display-authentication-title" class="mb-3 text-xl font-semibold text-slate-900 dark:text-slate-100">
+            Re-authentication required
+          </h1>
+          <p class="m-0 text-base leading-relaxed text-slate-700 dark:text-slate-300">
+            {{ iframeInit.authenticationError.value }}
+          </p>
+        </div>
+      </div>
       <div v-else-if="isLoadingApp" role="main" class="flex content-center justify-center flex-wrap" style="min-height: 40rem">
         <div class="flex items-center justify-center m-2">
           <skills-spinner :is-loading="true" class="text-center"/>
           <h1 class="text-sm sr-only">Loading...</h1>
         </div>
       </div>
-      <div v-if="!isLoadingApp && !iframeInit.initializationError.value" class="m-0">
+      <div v-if="!isLoadingApp && !iframeInit.initializationError.value && !iframeInit.authenticationError.value" class="m-0">
         <pki-app-bootstrap v-if="inBootstrapMode" role="region"/>
 
         <div v-if="!inBootstrapMode" :class="{ 'overall-container' : notSkillsClient, 'sd-theme-background-color': !notSkillsClient }">

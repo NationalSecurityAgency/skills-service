@@ -57,6 +57,7 @@ describe('Badges Tests', () => {
         cy.createBadge(1, 4);
         cy.createBadge(1, 5);
 
+        cy.intercept('PATCH', '/admin/projects/proj1/badges/*').as('saveBadgeOrder');
         cy.visit('/administrator/projects/proj1/badges');
         // // cy.get('[data-cy="inception-button"]').contains('Level');
 
@@ -67,23 +68,27 @@ describe('Badges Tests', () => {
 
         cy.validateElementsOrder('[data-cy="badgeCard"]', ['Badge 1', 'Badge 2', 'Badge 3', 'Badge 4', 'Badge 5']);
         cy.get(badge1Card)
-            .dragAndDrop(badge4Card);
+            .dragAndDrop(badge4Card, { sortableContainer: '#badgeCards' });
         cy.validateElementsOrder('[data-cy="badgeCard"]', ['Badge 2', 'Badge 3', 'Badge 4', 'Badge 1', 'Badge 5']);
 
         // refresh to make sure it was saved
+        cy.wait('@saveBadgeOrder').its('response.statusCode').should('eq', 200);
         cy.visit('/administrator/projects/proj1/badges');
         // // cy.get('[data-cy="inception-button"]').contains('Level');
         cy.validateElementsOrder('[data-cy="badgeCard"]', ['Badge 2', 'Badge 3', 'Badge 4', 'Badge 1', 'Badge 5']);
 
         cy.get(badge5Card)
-            .dragAndDrop(badge2Card);
+            .dragAndDrop(badge2Card, { sortableContainer: '#badgeCards' });
         cy.validateElementsOrder('[data-cy="badgeCard"]', ['Badge 5', 'Badge 2', 'Badge 3', 'Badge 4', 'Badge 1']);
+        cy.wait('@saveBadgeOrder').its('response.statusCode').should('eq', 200);
+        cy.get('[data-cy="badge5_overlayShown"]').should('not.exist');
 
         cy.get(badge2Card)
-            .dragAndDrop(badge1Card);
+            .dragAndDrop(badge1Card, { sortableContainer: '#badgeCards' });
         cy.validateElementsOrder('[data-cy="badgeCard"]', ['Badge 5', 'Badge 3', 'Badge 4', 'Badge 1', 'Badge 2']);
 
         // refresh to make sure it was saved
+        cy.wait('@saveBadgeOrder').its('response.statusCode').should('eq', 200);
         cy.visit('/administrator/projects/proj1/badges');
         // // cy.get('[data-cy="inception-button"]').contains('Level');
         cy.validateElementsOrder('[data-cy="badgeCard"]', ['Badge 5', 'Badge 3', 'Badge 4', 'Badge 1', 'Badge 2']);
@@ -123,7 +128,7 @@ describe('Badges Tests', () => {
         // // cy.get('[data-cy="inception-button"]').contains('Level');
         cy.validateElementsOrder('[data-cy="badgeCard"]', ['Badge 1', 'Badge 2']);
         cy.get(badge1Card)
-            .dragAndDrop(badge2Card);
+            .dragAndDrop(badge2Card, { sortableContainer: '#badgeCards' });
 
         // overlay over both cards but loading message only on badge 1
         cy.get('[data-cy="badge1_overlayShown"] [data-cy="updatingSortMsg"]')

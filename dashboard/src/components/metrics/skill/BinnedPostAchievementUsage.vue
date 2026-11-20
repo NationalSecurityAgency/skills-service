@@ -14,6 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <script setup>
+import { useMetricsChartSnapshot } from '@/components/metrics/common/UseMetricsChartSnapshot.js'
 import {onMounted, ref} from 'vue'
 import {useRoute} from 'vue-router'
 import MetricsService from '@/components/metrics/MetricsService.js'
@@ -28,6 +29,7 @@ const chartSupportColors = useChartSupportColors()
 const loading = ref(true);
 const isEmpty = ref(true);
 const chartJsOptions = ref(null)
+const { snapshotOptions, snapshotPlugins } = useMetricsChartSnapshot(chartJsOptions)
 const chartData = ref({})
 
 onMounted(() => {
@@ -106,7 +108,8 @@ const binnedNumUsersPostAchievementChartRef = ref(null)
         <Chart ref="binnedNumUsersPostAchievementChartRef"
                type="bar"
                :data="chartData"
-               :options="chartJsOptions"
+               :options="snapshotOptions"
+               :plugins="snapshotPlugins"
                class="min-h-[16em]"/>
       </MetricsOverlay>
       <div class="font-light text-sm">Number of times this Skill is performed per user after having fully achieved it.</div>

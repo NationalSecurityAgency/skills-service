@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <script setup>
-import { computed, onMounted } from 'vue'
+import { computed } from 'vue'
 import { useUserProgressSummaryState } from '@/skills-display/stores/UseUserProgressSummaryState.js'
 import { useNumberFormat } from '@/common-components/filter/UseNumberFormat.js'
 import { useSkillsDisplayInfo } from '@/skills-display/UseSkillsDisplayInfo.js'
@@ -33,9 +33,6 @@ const totalUsers = computed(() => numberFormat.pretty(progress.userRanking.numUs
 const optedOut = computed(() => progress.userRanking.optedOut)
 const userArchived = computed(() => progress.userRanking.archivedUser)
 const showRanking = computed(() => !optedOut.value && !userArchived.value)
-onMounted(() => {
-  progress.loadUserSkillsRanking(route.params.subjectId)
-})
 
 const toRankDetailsPage = computed(() => {
   if (skillsDisplayInfo.isSubjectPage.value) {
