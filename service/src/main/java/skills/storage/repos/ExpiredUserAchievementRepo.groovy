@@ -30,6 +30,8 @@ import skills.storage.model.UserAchievement
 @CompileStatic
 interface ExpiredUserAchievementRepo extends CrudRepository<ExpiredUserAchievement, Integer> {
 
+    void deleteAllByProjectIdAndUserId(String projectId, String userId)
+
     @Modifying
     @Query(value = '''
         WITH expired_rows AS (

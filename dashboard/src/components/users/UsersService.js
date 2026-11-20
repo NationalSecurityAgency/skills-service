@@ -61,6 +61,12 @@ export default {
       )
       .then((res) => res.data)
   },
+  removeUserFromProject(projectId, userId) {
+    return axios.delete(
+      `/admin/projects/${encodeURIComponent(projectId)}/users/${encodeURIComponent(userId)}`,
+      { handleError: false }
+    ).then((res) => res.data)
+  },
   canAccess(projectId, userId) {
     return axios
       .get(
