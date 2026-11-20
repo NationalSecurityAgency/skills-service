@@ -16,7 +16,7 @@ limitations under the License.
 <script setup>
 import '@toast-ui/editor/dist/toastui-editor-viewer.css';
 import Viewer from '@toast-ui/editor/dist/toastui-editor-viewer';
-import { onMounted } from 'vue';
+import { onMounted, ref } from 'vue';
 
 const props = defineProps({
   options: Object,
@@ -31,16 +31,16 @@ const props = defineProps({
   }
 });
 
+const viewerElement = ref(null);
 const viewerContainer = {
   viewer: null,
 };
 onMounted(() => {
-  const el = document.querySelector(`#viewer-${props.instanceId}`);
   const options = {
     ...props.options,
     initialValue: props.initialValue,
     height: props.height,
-    el,
+    el: viewerElement.value,
   };
   viewerContainer.viewer = new Viewer(options);
 });
@@ -62,7 +62,7 @@ defineExpose({
 
 <template>
   <div>
-    <div :id="`viewer-${instanceId}`"></div>
+    <div ref="viewerElement" :id="`viewer-${instanceId}`"></div>
   </div>
 </template>
 

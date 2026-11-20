@@ -1,0 +1,14 @@
+{
+  "metadata": { "license": "Copyright 2026 SkillTree\n\nLicensed under the Apache License, Version 2.0 (the \"License\");\nyou may not use this file except in compliance with the License.\nYou may obtain a copy of the License at\n\n    https://www.apache.org/licenses/LICENSE-2.0\n\nUnless required by applicable law or agreed to in writing, software\ndistributed under the License is distributed on an \"AS IS\" BASIS,\nWITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\nSee the License for the specific language governing permissions and\nlimitations under the License." },
+  "priority": 0,
+  "request": {
+    "method": "POST", "urlPath": "/v1/chat/completions",
+    "bodyPatterns": [
+      { "matchesJsonPath": { "expression": "$.messages.length()", "equalTo": "4" } },
+      { "matchesJsonPath": { "expression": "$.messages[3].content", "contains": "AI format history regression - update MultipleChoice answers" } },
+      { "contains": "Generate a MultipleChoice Question Type" },
+      { "matchesJsonPath": { "expression": "$.messages[2].content", "equalTo": "### Question:\nSelect rock bands? \n\n### Answers:\n[\n      {\"answer\": \"Led Zeppelin\", \"isCorrect\": true},      {\"answer\": \"Daft Punk\", \"isCorrect\": false},      {\"answer\": \"Pink Floyd\", \"isCorrect\": true},      {\"answer\": \"The Beatles\", \"isCorrect\": true},      {\"answer\": \"Norah Jones\", \"isCorrect\": false}]" } }
+    ]
+  },
+  "response": { "status": 200, "headers": { "Content-Type": "text/event-stream" }, "bodyFileName": "response-body-history-multiplechoice.txt", "chunkedDribbleDelay": { "numberOfChunks": 10, "totalDuration": 1000 } }
+}

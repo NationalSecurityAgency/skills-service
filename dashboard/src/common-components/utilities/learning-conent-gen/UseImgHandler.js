@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 import {useLog} from "@/components/utils/misc/useLog.js";
+import Viewer from '@toast-ui/editor/dist/toastui-editor-viewer';
+import {useCommonMarkdownOptions} from '@/common-components/utilities/markdown/UseCommonMarkdownOptions.js';
 
 
 export const useImgHandler = () => {
@@ -27,10 +29,11 @@ export const useImgHandler = () => {
     const PLACEHOLDER_PREFIX = '---IMG-';
 
     /**
-     * A regular expression to match standard Markdown image syntax: `![alt text](data:image)` with base64 encoded image.
+     * Match an inline data image's destination separately from its optional Markdown title.
+     * Titles may use double quotes, single quotes, or parentheses, including escaped delimiters.
      * The 'g' flag is for a global search to find all image matches.
      */
-    const IMAGE_REGEX = /!\[([^\]]*?)\]\((data:image\/[^;]+;base64,[^)]+)\)/g;
+    const IMAGE_REGEX = /!\[([^\]]*?)\]\((data:image\/[^;]+;base64,[^\s)]+)(?:\s+(?:"(?:\\[\s\S]|[^"\\])*"|'(?:\\[\s\S]|[^'\\])*'|\((?:\\[\s\S]|[^()\\])*\)))?\s*\)/g;
 
     const extractImages = (markdown) => {
         const extractedImages = [];
@@ -71,33 +74,102 @@ export const useImgHandler = () => {
         };
     }
 
-    const reinsertImages = (processedText, extractedImages) => {
+    const reinsertImages = (processedText, extractedImages, maxLength = Infinity) => {
+        if (processedText.length > maxLength) {
+            throw generatedContentTooLongError(maxLength);
+        }
         if (!extractedImages?.length) {
             return { text: processedText, unusedImages: [] };
         }
 
-        let restoredText = processedText;
-        const unusedImages = [];
-        const processedImages = [...extractedImages];
-
-        // Process in reverse order to handle multiple occurrences correctly
-        for (let i = processedImages.length - 1; i >= 0; i--) {
-            const image = processedImages[i];
-            const placeholder = escapeRegExp(image.placeholder);
-            const placeholderRegex = new RegExp(placeholder, 'g'); // Removed 'i' flag for case-sensitive matching
-            const newText = restoredText.replace(placeholderRegex, image.markdown);
-
-            if (newText === restoredText) {
-                unusedImages.unshift(image); // Add to beginning to maintain order
-            } else {
-                restoredText = newText;
+        const imagesByPlaceholder = new Map(extractedImages.map((image) => [image.placeholder, image]));
+        // Match only response placeholders so those in the original image's alt text are not expanded.
+        // AI responses may Markdown-escape any of the placeholder's hyphens.
+        const placeholders = extractedImages.map((image) => escapeRegExp(image.placeholder).replace(/-/g, '\\\\?-'));
+        const placeholderRegex = new RegExp(`(?:${placeholders.join('|')})(?!\\d)`, 'g');
+        // Count every occurrence, including escaped placeholders, before allocating
+        // probes or the restored string. A short response can repeat large images.
+        let restoredLength = processedText.length;
+        let match;
+        while ((match = placeholderRegex.exec(processedText)) !== null) {
+            const image = imagesByPlaceholder.get(match[0].replace(/\\-/g, '-'));
+            restoredLength += image.markdown.length - match[0].length;
+            if (restoredLength > maxLength) {
+                throw generatedContentTooLongError(maxLength);
             }
+        }
+        const usedImages = new Set();
+        const probeUrls = [];
+        const probeId = Array.from(crypto.getRandomValues(new Uint32Array(4)), (value) => value.toString(16).padStart(8, '0')).join('');
+        const probeText = processedText.replace(placeholderRegex, (placeholder) => {
+            const image = imagesByPlaceholder.get(placeholder.replace(/\\-/g, '-'));
+            // Only base64 image URLs are eligible for restoration. Keeping their syntax
+            // equivalent to the probes prevents the real data from changing parsing.
+            if (!/^data:image\/[a-z\d.+-]+;base64,[a-z\d+/=]+$/i.test(image.url)) {
+                throw unsafeImagePlacementError();
+            }
+            const probeUrl = `${image.url.substring(0, image.url.indexOf(',') + 1)}${probeId}${probeUrls.length}X`;
+            probeUrls.push(probeUrl);
+            usedImages.add(image);
+            // Replace only the destination, preserving the exact alt text and title
+            // syntax that will be restored. The same URL could also occur in the alt text.
+            const urlStart = image.alt.length + 4; // ![alt](
+            return image.markdown.substring(0, urlStart) + probeUrl + image.markdown.substring(urlStart + image.url.length);
+        });
+
+        if (probeUrls.length) {
+            validateImagePlacement(probeText, probeUrls);
         }
 
         return {
-            text: restoredText,
-            unusedImages
+            // Use a callback so dollar signs in alt text remain literal replacement text.
+            text: processedText.replace(placeholderRegex, (placeholder) => imagesByPlaceholder.get(placeholder.replace(/\\-/g, '-')).markdown),
+            unusedImages: extractedImages.filter((image) => !usedImages.has(image))
         };
+    }
+
+    const generatedContentTooLongError = (maxLength) => {
+        const error = new Error(`Generated content exceeds the maximum length of ${maxLength} characters after restoring images.`);
+        error.userMessage = 'The generated content exceeds the maximum allowed length. Please ask the AI to shorten it or use fewer images.';
+        return error;
+    }
+
+    const unsafeImagePlacementError = () => {
+        const error = new Error('Generated content placed an image placeholder in an unsafe context.');
+        error.userMessage = 'The AI placed an image placeholder in an invalid location. Please ask it to regenerate with image placeholders only where images should be displayed, not inside links, HTML attributes, or code.';
+        return error;
+    }
+
+    const validateImagePlacement = (markdown, probeUrls) => {
+        const renderedHtml = [];
+        // Use the same renderer as the preview, but NEVER attach its generated HTML
+        // to a live element. Even detached image elements can initiate requests.
+        const viewer = new Viewer({
+            ...useCommonMarkdownOptions().markdownOptions,
+            el: document.createElement('div'),
+            initialValue: markdown,
+            usageStatistics: false,
+            customHTMLSanitizer: (html) => {
+                renderedHtml.push(html);
+                return '';
+            }
+        });
+        try {
+            const html = renderedHtml.join('');
+            // Template contents are inert, including images and other remote resources.
+            const template = document.createElement('template');
+            template.innerHTML = html;
+            const imageSources = [...template.content.querySelectorAll('img')].map((image) => image.getAttribute('src'));
+            for (const probeUrl of probeUrls) {
+                // Each occurrence must become exactly one complete image src, and
+                // must not also appear in a link, attribute, raw HTML, or code sample.
+                if (html.split(probeUrl).length !== 2 || imageSources.filter((src) => src === probeUrl).length !== 1) {
+                    throw unsafeImagePlacementError();
+                }
+            }
+        } finally {
+            viewer.destroy();
+        }
     }
     // Helper function to escape special regex characters
     function escapeRegExp(string) {

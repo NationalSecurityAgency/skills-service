@@ -151,6 +151,128 @@ describe('Generate Single Question Tests', () => {
         validateSavedAnswers(expectedAnswers)
     })
 
+    it('preserves generated answers and correctness in follow-up conversation history', () => {
+        const refinedQuestion = 'Which of these performers is a rock band?'
+        const expectedAnswers = [
+            { text: 'Led Zeppelin', isCorrect: true },
+            { text: 'Mozart', isCorrect: false },
+            { text: 'Eminem', isCorrect: false },
+            { text: 'Bach', isCorrect: false },
+        ]
+        cy.intercept('GET', '/public/config', (req) => {
+            req.reply((res) => {
+                res.body.enableOpenAIIntegration = true
+                res.send(res.body)
+            })
+        })
+        cy.createQuizDef(1)
+        cy.visit('/administrator/quizzes/quiz1')
+        cy.get('[data-cy="btn_Questions"]').click()
+        cy.get('[data-cy="aiButton"]').click()
+        cy.get('[data-cy="genQuestionTypeSelector"]').click()
+        cy.get('[data-cy="selectionItem_SingleChoice"]').click()
+        cy.get('[data-cy="instructionsInput"]').type('AI answer history regression - generate a rock band question{enter}')
+        cy.get('[data-cy="aiMsg-2"] [data-cy="finalSegment"]').should('contain.text', completedMsg)
+        cy.get('[data-cy="aiMsg-2"] [data-cy="generatedSegment"]').should('contain.text', selectSingleRockBandQuestion)
+        expectedAnswers.forEach((answer) => {
+            cy.get('[data-cy="aiMsg-2"] [data-cy="generatedAnswers"]').should('contain.text', answer.text)
+        })
+
+        // This fixture only matches if the assistant history includes the complete original answers.
+        cy.get('[data-cy="instructionsInput"]').should('be.enabled')
+            .type('AI answer history regression - clarify the question but preserve every answer and its correctness{enter}')
+        cy.get('[data-cy="aiMsg-4"] [data-cy="finalSegment"]').should('contain.text', completedMsg)
+        cy.get('[data-cy="aiMsg-4"] [data-cy="generatedSegment"]').should('contain.text', refinedQuestion)
+        expectedAnswers.forEach((answer) => {
+            cy.get('[data-cy="aiMsg-4"] [data-cy="generatedAnswers"]').should('contain.text', answer.text)
+        })
+        cy.get('[data-cy="useGenValueBtn-4"]').should('be.enabled').click()
+        cy.get('[data-cy="questionText"] [data-cy="markdownEditorInput"]').should('contain.text', refinedQuestion)
+        validateAnswers(expectedAnswers)
+        cy.get('[data-cy="answer-4"]').should('not.exist')
+        cy.get('[data-cy="saveDialogBtn"]').should('be.enabled').click()
+        cy.get('[data-cy="markdownEditorInput"]').should('not.exist')
+        cy.get('[data-cy="questionDisplayCard-1"] [data-cy="questionDisplayText"]').should('contain.text', refinedQuestion)
+        validateSavedAnswers(expectedAnswers)
+    })
+
+    const imageGenerationScenarios = [false, true]
+    imageGenerationScenarios.forEach((withFollowUp) => {
+        it(`preserves an embedded quiz question image after ${withFollowUp ? 'a follow-up' : 'the first AI response'} and saving`, () => {
+            const initialQuestion = 'Which shape is shown in the diagram?'
+            const refinedQuestion = 'Which geometric shape is shown in the diagram?'
+            const expectedQuestion = withFollowUp ? refinedQuestion : initialQuestion
+            const expectedAnswers = [
+                { text: 'Triangle', isCorrect: true },
+                { text: 'Circle', isCorrect: false },
+            ]
+            cy.intercept('GET', '/public/config', (req) => {
+                req.reply((res) => {
+                    res.body.enableOpenAIIntegration = true
+                    res.send(res.body)
+                })
+            })
+            cy.createQuizDef(1)
+            cy.fixture('skilltree_logo.png', 'base64').then((imageBase64) => {
+                const imageUrl = `data:image/png;base64,${imageBase64}`
+                const editor = '[data-cy="questionText"] [data-cy="markdownEditorInput"]'
+                const savedQuestion = '[data-cy="questionDisplayCard-1"] [data-cy="questionDisplayText"]'
+                const assertImage = (selector) => {
+                    cy.get(selector).should('not.contain.text', 'IMG-0')
+                    cy.get(`${selector} img`).filter(':visible').should('have.length', 1)
+                        .and('be.visible').and('have.attr', 'src', imageUrl)
+                        .should(($image) => {
+                            expect($image[0].naturalWidth, 'original image loaded').to.be.greaterThan(0)
+                        })
+                }
+                cy.createQuizQuestionDef(1, 1, {
+                    question: `Identify the shape in this diagram.\n\n![Quiz diagram](${imageUrl})`,
+                })
+                cy.visit('/administrator/quizzes/quiz1')
+                assertImage(savedQuestion)
+                cy.get('[data-cy="editQuestionButton_1"]').click()
+                assertImage(`${editor} .toastui-editor-ww-container`)
+                cy.get('[data-cy="aiButton"]').click()
+                cy.get('[data-cy="aiMsg-0"]').should('contain.text', existingQuestionWelcomeMsg)
+                cy.get('[data-cy="instructionsInput"]').type('AI quiz image regression - improve the question and keep the diagram{enter}')
+                cy.get('[data-cy="aiMsg-2"] [data-cy="finalSegment"]').should('contain.text', completedMsg)
+                cy.get('[data-cy="aiMsg-2"] [data-cy="generatedSegment"]').should('contain.text', initialQuestion)
+                assertImage('[data-cy="aiMsg-2"] [data-cy="generatedSegment"]')
+
+                if (withFollowUp) {
+                    cy.get('[data-cy="instructionsInput"]').should('be.enabled')
+                        .type('AI quiz image regression - clarify the question and keep the diagram{enter}')
+                    cy.get('[data-cy="aiMsg-4"] [data-cy="finalSegment"]').should('contain.text', completedMsg)
+                    cy.get('[data-cy="aiMsg-4"] [data-cy="generatedSegment"]').should('contain.text', refinedQuestion)
+                    assertImage('[data-cy="aiMsg-4"] [data-cy="generatedSegment"]')
+                }
+
+                cy.intercept('POST', '/api/validation/description', (req) => {
+                    if (req.body.value?.startsWith(expectedQuestion)) {
+                        req.alias = 'generatedQuestionValidation'
+                    }
+                })
+                cy.get(`[data-cy="useGenValueBtn-${withFollowUp ? 4 : 2}"]`).should('be.enabled').click()
+                cy.get('[data-cy="instructionsInput"]').should('not.exist')
+                cy.get(editor).should('contain.text', expectedQuestion)
+                assertImage(`${editor} .toastui-editor-ww-container`)
+                validateAnswers(expectedAnswers)
+                // Applying AI content triggers debounced validation; wait for it before submitting.
+                cy.wait('@generatedQuestionValidation')
+                cy.get('[data-cy="saveDialogBtn"]').should('be.enabled').click()
+                cy.get(editor).should('not.exist')
+                cy.get(savedQuestion).should('contain.text', expectedQuestion)
+                assertImage(savedQuestion)
+                validateSavedAnswers(expectedAnswers)
+
+                cy.reload()
+                cy.get(savedQuestion).should('contain.text', expectedQuestion)
+                assertImage(savedQuestion)
+                validateSavedAnswers(expectedAnswers)
+            })
+        })
+    })
+
     it('generate a new Multiple Choice question and change answers before saving', () => {
         cy.intercept('GET', '/public/config', (req) => {
             req.reply((res) => {

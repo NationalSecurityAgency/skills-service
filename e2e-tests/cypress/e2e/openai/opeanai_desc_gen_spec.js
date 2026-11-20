@@ -25,6 +25,152 @@ import {
 
 describe('Generate Desc Tests', () => {
 
+    const imageDescriptionEditor = '[data-cy="markdownEditorInput"] .toastui-editor-ww-container'
+    const assertDescriptionImages = (selector, expectedSources, allowUnmappedPlaceholders = false) => {
+        cy.get(selector).scrollIntoView().should('be.visible')
+        if (!allowUnmappedPlaceholders) {
+            cy.get(selector).should('not.contain.text', 'IMG-')
+        }
+        // Ignore the editor's hidden separator images; verify the original image alt text too.
+        const images = `${selector} .toastui-editor-contents img[alt$="diagram"]`
+        cy.get(images).should('have.length', expectedSources.length)
+        expectedSources.forEach((source, index) => {
+            cy.get(images).eq(index).scrollIntoView().should('be.visible')
+                .and('have.attr', 'src', source).should(($image) => {
+                    expect($image[0].naturalWidth, `image ${index} loaded`).to.be.greaterThan(0)
+                })
+        })
+    }
+    const openImageDescription = () => {
+        cy.intercept('GET', '/public/config', (req) => {
+            req.reply((res) => {
+                res.body.enableOpenAIIntegration = true
+                res.send(res.body)
+            })
+        })
+        cy.createProject(1)
+        cy.createSubject(1, 1)
+        return cy.fixture('valid_icon.png', 'base64').then((firstImage) => {
+            return cy.fixture('icon_with_wrong_dimensions.png', 'base64').then((secondImage) => {
+                const imageUrls = [firstImage, secondImage].map((image) => `data:image/png;base64,${image}`)
+                cy.createSkill(1, 1, 1, {
+                    description: `Original image description.\n\n![First diagram](${imageUrls[0]})\n\n![Second diagram](${imageUrls[1]})`,
+                })
+                cy.visit('/administrator/projects/proj1/subjects/subj1/skills/skill1')
+                assertDescriptionImages('[data-cy="skillOverviewDescription"]', imageUrls)
+                cy.get('[data-cy="editSkillButton_skill1"]').click()
+                assertDescriptionImages(imageDescriptionEditor, imageUrls)
+                cy.get('[data-cy="aiButton"]').click()
+                cy.get('[data-cy="aiMsg-0"]').should('contain.text', existingDescWelcomeMsg)
+                return cy.wrap(imageUrls)
+            })
+        })
+    }
+
+    const imageDescriptionScenarios = [false, true]
+    imageDescriptionScenarios.forEach((restoreAfterOmission) => {
+        it(`preserves description images ${restoreAfterOmission ? 'when a follow-up restores omitted images' : 'with repeated and mixed escaped placeholders'}`, () => {
+            openImageDescription().then((imageUrls) => {
+                cy.get('[data-cy="instructionsInput"]').type('AI description image regression - improve the description and keep both diagrams{enter}')
+                cy.get('[data-cy="aiMsg-2"] [data-cy="finalSegment"]').should('contain.text', completedMsg)
+                const firstPreview = '[data-cy="aiMsg-2"] [data-cy="generatedSegment"]'
+                cy.get(firstPreview).should('contain.text', 'using these diagrams.')
+                cy.get(`${firstPreview} strong`).should('have.text', 'Practice')
+                const repeatedImageUrls = [0, 1, 0, 1, 0, 1].map((index) => imageUrls[index])
+                assertDescriptionImages(firstPreview, repeatedImageUrls)
+
+                let historyId = 2
+                let expectedText = 'using these diagrams.'
+                let expectedImages = repeatedImageUrls
+                if (restoreAfterOmission) {
+                    cy.get('[data-cy="instructionsInput"]').should('be.enabled')
+                        .type('AI description image regression - omit the images for this draft{enter}')
+                    cy.get('[data-cy="aiMsg-4"] [data-cy="finalSegment"]').should('contain.text', completedMsg)
+                    cy.get('[data-cy="aiMsg-4"] [data-cy="generatedSegment"]').should('contain.text', 'without pictures.')
+                    cy.get('[data-cy="aiMsg-4"] [data-cy="generatedSegment"] img').should('not.exist')
+                    cy.get('[data-cy="instructionsInput"]').should('be.enabled')
+                        .type('AI description image regression - restore both original images{enter}')
+                    cy.get('[data-cy="aiMsg-6"] [data-cy="finalSegment"]').should('contain.text', completedMsg)
+                    expectedText = 'Practice using the original diagrams again.'
+                    expectedImages = [imageUrls[1], imageUrls[0]]
+                    historyId = 6
+                    cy.get('[data-cy="aiMsg-6"] [data-cy="generatedSegment"]').should('contain.text', expectedText)
+                    assertDescriptionImages('[data-cy="aiMsg-6"] [data-cy="generatedSegment"]', expectedImages)
+                }
+
+                cy.intercept('POST', '/api/validation/description', (req) => {
+                    if (req.body.value?.includes(expectedText)) {
+                        req.alias = 'generatedDescriptionValidation'
+                    }
+                })
+                cy.get(`[data-cy="useGenValueBtn-${historyId}"]`).should('be.enabled').click()
+                cy.get('[data-cy="instructionsInput"]').should('not.exist')
+                cy.get(imageDescriptionEditor).should('contain.text', expectedText)
+                assertDescriptionImages(imageDescriptionEditor, expectedImages)
+                // Synchronize debounced validation rather than sleeping before saving.
+                cy.wait('@generatedDescriptionValidation')
+                cy.get('[data-cy="saveDialogBtn"]').should('be.enabled').click()
+                cy.get('[data-cy="saveDialogBtn"]').should('not.exist')
+                cy.get('[data-cy="skillOverviewDescription"]').should('contain.text', expectedText)
+                assertDescriptionImages('[data-cy="skillOverviewDescription"]', expectedImages)
+                cy.reload()
+                cy.get('[data-cy="skillOverviewDescription"]').should('contain.text', expectedText)
+                assertDescriptionImages('[data-cy="skillOverviewDescription"]', expectedImages)
+            })
+        })
+    })
+
+    it('preserves embedded images across successive description refinements, saving and reloading', () => {
+        openImageDescription().then((imageUrls) => {
+            cy.get('[data-cy="instructionsInput"]').type('AI description image regression - improve the description and keep both diagrams{enter}')
+            cy.get('[data-cy="aiMsg-2"] [data-cy="finalSegment"]').should('contain.text', completedMsg)
+            assertDescriptionImages('[data-cy="aiMsg-2"] [data-cy="generatedSegment"]', [0, 1, 0, 1, 0, 1].map((index) => imageUrls[index]))
+
+            cy.get('[data-cy="instructionsInput"]').should('be.enabled')
+                .type('AI description image regression - simplify while keeping both diagrams{enter}')
+            cy.get('[data-cy="aiMsg-4"] [data-cy="finalSegment"]').should('contain.text', completedMsg)
+            cy.get('[data-cy="aiMsg-4"] [data-cy="generatedSegment"]').should('contain.text', 'Study both diagrams step by step.')
+            assertDescriptionImages('[data-cy="aiMsg-4"] [data-cy="generatedSegment"]', imageUrls)
+
+            // The third fixture requires the second draft with raw placeholders in assistant history.
+            cy.get('[data-cy="instructionsInput"]').should('be.enabled')
+                .type('AI description image regression - reorder the diagrams in the simplified draft{enter}')
+            const finalText = 'Compare the second diagram with the first diagram.'
+            cy.get('[data-cy="aiMsg-6"] [data-cy="finalSegment"]').should('contain.text', completedMsg)
+            cy.get('[data-cy="aiMsg-6"] [data-cy="generatedSegment"]').should('contain.text', finalText)
+            const reorderedImages = [imageUrls[1], imageUrls[0]]
+            assertDescriptionImages('[data-cy="aiMsg-6"] [data-cy="generatedSegment"]', reorderedImages)
+            cy.intercept('POST', '/api/validation/description', (req) => {
+                if (req.body.value?.includes(finalText)) {
+                    req.alias = 'refinedDescriptionValidation'
+                }
+            })
+            cy.get('[data-cy="useGenValueBtn-6"]').should('be.enabled').click()
+            cy.get(imageDescriptionEditor).should('contain.text', finalText)
+            assertDescriptionImages(imageDescriptionEditor, reorderedImages)
+            cy.wait('@refinedDescriptionValidation')
+            cy.get('[data-cy="saveDialogBtn"]').should('be.enabled').click()
+            cy.get('[data-cy="saveDialogBtn"]').should('not.exist')
+            cy.get('[data-cy="skillOverviewDescription"]').should('contain.text', finalText)
+            assertDescriptionImages('[data-cy="skillOverviewDescription"]', reorderedImages)
+            cy.reload()
+            cy.get('[data-cy="skillOverviewDescription"]').should('contain.text', finalText)
+            assertDescriptionImages('[data-cy="skillOverviewDescription"]', reorderedImages)
+        })
+    })
+
+    it('does not replace an unmapped image placeholder with a different image', () => {
+        openImageDescription().then((imageUrls) => {
+            cy.get('[data-cy="instructionsInput"]').type('AI description image regression - return an unmapped image reference{enter}')
+            cy.get('[data-cy="aiMsg-2"] [data-cy="finalSegment"]').should('contain.text', completedMsg)
+            const preview = '[data-cy="aiMsg-2"] [data-cy="generatedSegment"]'
+            assertDescriptionImages(preview, [imageUrls[0]], true)
+            cy.get(preview).should(($preview) => {
+                expect($preview.text().match(/---IMG-01/g)).to.have.length(2)
+            })
+        })
+    })
+
     it('generate a new description for a skill', () => {
         cy.intercept('GET', '/public/config', (req) => {
             req.reply((res) => {
@@ -302,5 +448,3 @@ describe('Generate Desc Tests', () => {
     });
 
 });
-
-

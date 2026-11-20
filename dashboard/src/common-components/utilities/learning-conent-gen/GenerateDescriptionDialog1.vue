@@ -23,6 +23,7 @@ import AiPromptDialog from "@/common-components/utilities/learning-conent-gen/Ai
 import GenerateDescriptionType from "@/common-components/utilities/learning-conent-gen/GenerateDescriptionType.js";
 import {useLog} from "@/components/utils/misc/useLog.js";
 import AssistantGenUtil from "@/common-components/utilities/learning-conent-gen/AssistantGenUtil.js";
+import {useAppConfig} from "@/common-components/stores/UseAppConfig.js";
 
 const model = defineModel()
 const props = defineProps({
@@ -40,6 +41,7 @@ const props = defineProps({
 })
 const emit = defineEmits(['generated-desc'])
 const imgHandler = useImgHandler()
+const appConfig = useAppConfig()
 const instructionsGenerator = useInstructionGenerator()
 const log = useLog()
 
@@ -114,17 +116,8 @@ const handleGenerationCompleted = (generated) => {
     log.debug(`GenerateDescriptionDialog1.vue: handleGenerationCompleted: generatedValue=[${generated.generatedValue}]`)
   }
   const {genValue, getValueNotes} = AssistantGenUtil.handleWhatChangedSection(generated.generatedValue)
-  let generatedValue = genValue
+  const { text: generatedValue } = imgHandler.reinsertImages(genValue, extractedImageState.extractedImages, appConfig.descriptionMaxLength)
   const generateValueChangedNotes = getValueNotes
-
-  if (extractedImageState.extractedImages) {
-    const {
-      text,
-      unusedImages
-    } = imgHandler.reinsertImages(generatedValue, extractedImageState.extractedImages)
-    generatedValue = text
-    extractedImageState.extractedImages = unusedImages
-  }
 
   return {
     generatedValue,

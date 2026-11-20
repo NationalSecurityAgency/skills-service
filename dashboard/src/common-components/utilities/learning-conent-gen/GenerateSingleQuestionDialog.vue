@@ -69,9 +69,12 @@ const createPromptInstructions = (userEnterInstructions) => {
   if (lastGeneratedQuestionInfo.value) {
     const question = lastGeneratedQuestionInfo.value.question
     const extractedImagesRes = imgHandler.extractImages(question)
-    lastGeneratedQuestionInfo.value.question = extractedImagesRes.hasImages ? extractedImagesRes.processedText : question
+    const questionForPrompt = {
+      ...lastGeneratedQuestionInfo.value,
+      question: extractedImagesRes.hasImages ? extractedImagesRes.processedText : question
+    }
     const instructionsToKeepPlaceholders = extractedImagesRes.hasImages? imgHandler.instructionsToKeepPlaceholders() : ''
-    instructionsToSend = instructionsGenerator.singleQuestionInstructions(userEnterInstructions, props.questionType.selectedType, lastGeneratedQuestionInfo.value, instructionsToKeepPlaceholders)
+    instructionsToSend = instructionsGenerator.singleQuestionInstructions(userEnterInstructions, props.questionType.selectedType, questionForPrompt, instructionsToKeepPlaceholders)
     if (extractedImagesRes.hasImages) {
       extractedImageState.extractedImages = extractedImagesRes.extractedImages
     }
@@ -162,7 +165,12 @@ const handleGenerationCompleted = (generated) => {
   }
   try {
     const answers = QuestionType.isTextInput(props.questionType.selectedType?.id) ? [] : JSON.parse(cleanJsonString(answersMatch[1].trim()))
-    const question = questionMatch[1].trim()
+    // Retain mappings because raw assistant history keeps placeholders for follow-ups.
+    const { text: question } = imgHandler.reinsertImages(questionMatch[1].trim(), extractedImageState.extractedImages, appConfig.descriptionMaxLength)
+    // The preview includes display-only headings and their blank-line separators.
+    // Keep this allowance fixed so arbitrary extra content cannot enlarge the budget.
+    const previewMaxLength = Number(appConfig.descriptionMaxLength) + questionsTitle.length + answersTitle.length + 4
+    const { text: generatedValue } = imgHandler.reinsertImages(generated.generatedValue, extractedImageState.extractedImages, previewMaxLength)
     if (QuestionType.isFillInTheBlank(props.questionType.selectedType?.id)) {
       try {
         validateGeneratedBlanks(question, answers, appConfig.maxAnswersPerQuizQuestion)
@@ -181,7 +189,7 @@ const handleGenerationCompleted = (generated) => {
     lastGeneratedQuestionInfo.value = generatedInfo
     isGenerating.value = false
     return {
-      generatedValue: generated.generatedValue,
+      generatedValue,
       generateValueChangedNotes,
       generatedInfo
     }
