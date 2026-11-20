@@ -468,7 +468,9 @@ class UserSkillsController {
                                                        @RequestParam(name = "userId", required = false) String userIdParam,
                                                        @RequestParam(name = "idType", required = false) String idType) {
         String userId = userInfoService.getUserName(userIdParam, true, idType);
-        return skillsLoader.loadSkillDependencyInfo(projectId, userId, skillId);
+        SkillDependencyInfo result = skillsLoader.loadSkillDependencyInfo(projectId, userId, skillId);
+        result.setDependencies(skillsDepsService.filterAccessibleDependencies(projectId, result.getDependencies()));
+        return result;
     }
 
     @RequestMapping(value = "/projects/{projectId}/dependency/graph", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
@@ -495,9 +497,11 @@ class UserSkillsController {
         String userId = userInfoService.getUserName(userIdParam, true, idType);
         boolean sharedSkill = StringUtils.isNotBlank(crossProjectId) && !projectId.equals(crossProjectId);
         if (sharedSkill) {
+            // Authorize before checking membership so hidden relationships cannot be inferred from the response status.
+            skillsDepsService.validateProjectAccess(crossProjectId);
             boolean partOfLP = skillsDepsService.checkIfSkillInAnotherProjectPartOfLearningPath(projectId, crossProjectId, skillId);
             boolean partOfGB = globalBadgesService.checkIfSkillBelongsToBadgeThatThisProjectIsPartOf(projectId, crossProjectId, skillId);
-            SkillsValidator.isTrue(partOfLP || partOfGB, "The shared skill must be associated with this project through a Learning Path or Global Badge");
+            SkillsValidator.isTrue(partOfLP || partOfGB, "The shared skill must be associated with this project through a Learning Path or Global Badge", projectId, skillId);
         }
         // Shared skill pages do not expose the source project's prerequisite graph.
         SkillDependencyInfo result = sharedSkill ? new SkillDependencyInfo() : skillsLoader.loadSkillDependencyInfo(projectId, userId, skillId);

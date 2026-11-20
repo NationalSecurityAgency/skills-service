@@ -19,9 +19,11 @@ import callStack.profiler.Profile
 import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
+import org.springframework.security.access.AccessDeniedException
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import skills.auth.UserInfo
 import skills.auth.UserInfoService
 import skills.auth.UserSkillsGrantedAuthority
 import skills.controller.exceptions.ErrorCode
@@ -217,22 +219,33 @@ class SkillsDepsService {
         }
     }
 
-    private Set<String> getAccessibleProjectIds(String projectId, Set<String> referencedProjectIds) {
-        referencedProjectIds.remove(projectId)
+    @Transactional(readOnly = true)
+    void validateProjectAccess(String projectId) {
+        if (!filterAccessibleProjectIds([projectId] as Set<String>).contains(projectId)) {
+            throw new AccessDeniedException('Access is denied')
+        }
+    }
 
-        String currentUserId = userInfoService.getCurrentUserId()
+    private Set<String> getAccessibleProjectIds(String projectId, Set<String> referencedProjectIds) {
+        Set<String> otherProjectIds = referencedProjectIds.findAll { String id -> id != projectId }.toSet()
+        Set<String> accessibleProjectIds = filterAccessibleProjectIds(otherProjectIds)
+        accessibleProjectIds.add(projectId)
+        return accessibleProjectIds
+    }
+
+    private Set<String> filterAccessibleProjectIds(Set<String> projectIds) {
+        UserInfo currentUser = userInfoService.getCurrentUser()
+        String currentUserId = currentUser.username?.toLowerCase()
         boolean isRoot = SecurityContextHolder.context.authentication?.authorities?.any { authority ->
             authority instanceof UserSkillsGrantedAuthority && authority.role?.roleName == RoleName.ROLE_SUPER_DUPER_USER
         }
         boolean isCommunityMember = userCommunityService.isUserCommunityMember(currentUserId)
-        Set<String> accessibleProjectIds = referencedProjectIds.findAll { referencedProjectId ->
+        return projectIds.findAll { String referencedProjectId ->
             (!userCommunityService.isUserCommunityOnlyProject(referencedProjectId) || isCommunityMember) &&
-                    (!inviteOnlyProjectService.isInviteOnlyProject(referencedProjectId) || isRoot ||
-                            inviteOnlyProjectService.isPrivateProjRoleOrAdminRole(referencedProjectId, currentUserId))
+                    (!inviteOnlyProjectService.isInviteOnlyProject(referencedProjectId) ||
+                            (!currentUser.proxied && (isRoot ||
+                                    inviteOnlyProjectService.canUserAccess(referencedProjectId, currentUserId, true))))
         }.toSet()
-        accessibleProjectIds.add(projectId)
-
-        return accessibleProjectIds
     }
 
 
