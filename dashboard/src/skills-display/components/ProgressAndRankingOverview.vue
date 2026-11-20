@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <script setup>
-import { computed, onMounted, ref, watch } from 'vue'
+import { computed, onMounted, ref, toValue, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import Button from 'primevue/button'
 import UserOverallProgress from '@/skills-display/components/home/UserOverallProgress.vue'
@@ -60,11 +60,12 @@ const { isCompact } = useProgressAndRankingView({
   embedded: isEmbedded,
 })
 const viewToggleLabel = computed(() => isCompact.value ? 'Expand progress view' : 'Collapse progress view')
+const canShowViewPreferenceMessage = computed(() => !isEmbedded && !toValue(initialization?.preview))
 const showViewPreferenceMessage = ref(false)
 watch(() => route.path, () => { showViewPreferenceMessage.value = false })
 const toggleProgressView = () => {
   isCompact.value = !isCompact.value
-  showViewPreferenceMessage.value = !isEmbedded
+  showViewPreferenceMessage.value = canShowViewPreferenceMessage.value
 }
 const hasBadges = computed(() => !props.isSubject && props.badges?.enabled)
 const chartHasBeenShown = ref(false)
@@ -91,7 +92,7 @@ onMounted(() => {
   <section aria-label="Progress and ranking" data-cy="progressAndRankingOverview" :data-compact="isCompact">
     <achievement-celebration :user-progress="userProgress" />
 
-    <Message v-if="!isEmbedded && showViewPreferenceMessage" severity="info" :closable="true"
+    <Message v-if="canShowViewPreferenceMessage && showViewPreferenceMessage" severity="info" :closable="true"
              data-cy="progressViewPreferenceMessage" @close="showViewPreferenceMessage = false">
       To permanently change your view preference, visit
       <router-link :to="preferencesRoute" class="font-semibold underline"

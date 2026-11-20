@@ -149,11 +149,18 @@ describe('Compact view admin settings and previews', () => {
     assertView(false);
     cy.get(viewButton).click();
     assertView(true);
+    cy.get('[data-cy="progressViewPreferenceMessage"]').should('not.exist');
+    cy.get('[data-cy="progressViewPreferencesLink"]').should('not.exist');
     cy.reload();
     assertView(false);
     cy.get(viewButton).click();
+    assertView(true);
+    cy.get('[data-cy="progressViewPreferenceMessage"]').should('not.exist');
+    cy.get('[data-cy="progressViewPreferencesLink"]').should('not.exist');
     cy.get(viewButton).click();
     assertView(false);
+    cy.get('[data-cy="progressViewPreferenceMessage"]').should('not.exist');
+    cy.get('[data-cy="progressViewPreferencesLink"]').should('not.exist');
     cy.window().then((win) => {
       expect(win.localStorage.getItem(embeddedProgressViewStorageKey)).to.eq('compact');
     });
