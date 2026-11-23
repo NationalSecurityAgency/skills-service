@@ -29,20 +29,35 @@ limitations under the License.
     const params = new URLSearchParams(window.location.search);
     const serviceUrl = params.get('serviceUrl') || window.location.origin;
     const manualRecovery = params.get('manualRecovery') === 'true';
+    const autoHeight = params.get('autoHeight') === 'true';
+    const minHeight = params.get('minHeight') || (autoHeight ? '960px' : null);
+    const container = document.querySelector('#skills-client-container');
     new Postmate({
-      container: document.querySelector('#skills-client-container'),
+      container,
       // Keep the iframe on SkillTree even when the model supplies an attacker URL.
       url: `${window.location.origin}/static/clientPortal/index.html`,
       model: {
         serviceUrl,
         projectId: 'proj1',
-        minHeight: params.get('minHeight'),
+        minHeight,
         theme: params.has('theme') ? JSON.parse(params.get('theme')) : undefined,
+        ...(params.has('modelOverrides') ? JSON.parse(params.get('modelOverrides')) : {}),
       },
     }).then((child) => {
       child.frame.title = 'Skills Display';
       child.frame.style.width = '100%';
-      child.frame.style.height = '1000px';
+      if (autoHeight) {
+        // Match SkillsDisplayJS: the real child ResizeObserver drives the host's
+        // container height, with the SDK minimum, and the iframe fills that container.
+        child.frame.style.border = '0';
+        child.frame.style.height = '100%';
+        container.style.height = '0px';
+        child.on('height-changed', (height) => {
+          container.style.height = `${Math.max(height, parseFloat(minHeight))}px`;
+        });
+      } else {
+        child.frame.style.height = '1000px';
+      }
       const refreshButton = document.querySelector('[data-cy="refreshDisplayAuthentication"]');
       document.querySelector('[data-cy="navigateDisplayHome"]').addEventListener('click', () => {
         child.call('navigate', { name: 'SkillsDisplaySkillsClient' });

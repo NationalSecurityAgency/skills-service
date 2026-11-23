@@ -52,7 +52,7 @@ export const useErrorHandling = () => {
   const errorResponseHandler = (error) => {
     // Token refresh can leave late requests for the SAME learner. Their failures
     // must not disrupt the recovered route, regardless of status or recovery timing.
-    if (isSupersededIframeRequest(error.config)) return Promise.reject(error)
+    if (isSupersededIframeRequest(error?.config)) return Promise.reject(error)
 
     if (axios.isCancel(error)) {
       // Cancellation is not a successful empty response; iframe loaders must not store it.
@@ -61,12 +61,12 @@ export const useErrorHandling = () => {
     }
 
     // check if the caller wants to handle all errors
-    const config = error.config || {}
+    const config = error?.config || {}
     if (config.handleError === false) {
       return Promise.reject(error);
     }
 
-    const errorCode = error.response ? error.response.status : undefined;
+    const errorCode = error?.response?.status;
     if (errorCode !== 401 && skillsDisplayInfo.isSkillsClientPath() && parentState.isAuthenticating) {
       // Recovery owns its error UI. Keep the learner's route while its configuration reloads.
       return Promise.reject(error);
@@ -115,7 +115,13 @@ export const useErrorHandling = () => {
       navToErrorPage()
       return Promise.reject(error);
     } else if (upgradeInProgressErrorChecker.isUpgrading(error)) {
-      upgradeInProgressErrorChecker.navToUpgradeInProgressPage()
+      if (skillsDisplayInfo.isSkillsClientPath()) {
+        // The iframe router has no dashboard upgrade route.
+        errorState.setErrorParams('Upgrade in Progress', 'SkillTree is being upgraded. Please try again later.', 'fas fa-tools')
+        navToErrorPage()
+      } else {
+        upgradeInProgressErrorChecker.navToUpgradeInProgressPage()
+      }
       return Promise.reject(error);
     } else {
       errorState.resetToDfeault()

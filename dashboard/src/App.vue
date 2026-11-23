@@ -108,7 +108,7 @@ watch(() => themeHelper.currentTheme, (newTheme, oldTheme) => {
   document.documentElement.classList.toggle('st-dark-theme');
 })
 
-const iframeInit = useIframeInit()
+const iframeInit = useIframeInit(isLoadingApp)
 onBeforeMount(() => {
   if (skillsDisplayInfo.isSkillsClientPath()) {
     log.trace('App.vue: skillsDisplayInfo.isSkillsClientPath()=true, initiating iframe handshake')
@@ -153,7 +153,7 @@ const restoreSessionIfAvailable = () => {
 }
 
 const loadConfigs = () => {
-  return appConfig.loadConfigState().finally(() => {
+  const loadUserAndDisplayConfig = () => {
     const loadDisplayConfig = () => {
       return skillsDisplayAttributes.loadConfigStateIfNeeded().then(() => {
 
@@ -178,7 +178,13 @@ const loadConfigs = () => {
     return skillsDisplayInfo.isSkillsClientPath()
       ? restoringSession.then(loadDisplayConfig)
       : restoringSession.finally(loadDisplayConfig)
-  })
+  }
+  const loadingAppConfig = appConfig.loadConfigState()
+  // Superseded iframe bootstrap must not start new work for the replacement token.
+  // Dashboard startup still installs navigation guards when public config fails.
+  return skillsDisplayInfo.isSkillsClientPath()
+    ? loadingAppConfig.then(loadUserAndDisplayConfig)
+    : loadingAppConfig.finally(loadUserAndDisplayConfig)
 }
 
 const initMatomo = () => {

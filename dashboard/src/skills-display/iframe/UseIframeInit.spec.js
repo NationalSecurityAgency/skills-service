@@ -15,6 +15,7 @@
  */
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { createPinia, disposePinia, setActivePinia } from 'pinia'
+import { effectScope, ref } from 'vue'
 import { useIframeInit } from './UseIframeInit.js'
 import { useSkillsDisplayParentFrameState } from '../stores/UseSkillsDisplayParentFrameState.js'
 
@@ -23,6 +24,7 @@ const mocks = vi.hoisted(() => ({
   model: null,
   attributes: {},
   config: {},
+  auth: {},
   push: vi.fn(),
   routerPush: vi.fn(),
   emit: vi.fn(),
@@ -35,29 +37,37 @@ vi.mock('postmate', () => ({ default: { Model: class {
 } } }))
 vi.mock('@/skills-display/stores/UseSkillsDisplayAttributesState.js', () => ({ useSkillsDisplayAttributesState: () => mocks.attributes }))
 vi.mock('@/common-components/stores/UseAppConfig.js', () => ({ useAppConfig: () => mocks.config }))
+vi.mock('@/stores/UseAuthState.js', () => ({ useAuthState: () => mocks.auth }))
+vi.mock('@/skills-display/stores/UseUserProgressSummaryState.js', () => ({ useUserProgressSummaryState: () => ({ reset: vi.fn() }) }))
+vi.mock('@/skills-display/stores/UseSkillsDisplaySubjectState.js', () => ({ useSkillsDisplaySubjectState: () => ({ reset: vi.fn() }) }))
+vi.mock('@/skills-display/stores/UseSkillsDisplayPointHistoryState.js', () => ({ useSkillsDisplayPointHistoryState: () => ({ reset: vi.fn() }) }))
 vi.mock('@/skills-display/stores/UseSkillsDisplayThemeState.js', () => ({ useSkillsDisplayThemeState: () => ({}) }))
 vi.mock('@/skills-display/theme/ThemeHelper.js', () => ({ default: { build: vi.fn() } }))
-vi.mock('@/skills-display/UseSkillsDisplayInfo.js', () => ({ useSkillsDisplayInfo: () => ({ routerPush: mocks.routerPush }) }))
+vi.mock('@/skills-display/UseSkillsDisplayInfo.js', () => ({ useSkillsDisplayInfo: () => ({ routerPush: mocks.routerPush, isSkillsClientPath: () => true }) }))
 vi.mock('vue-router', () => ({ useRouter: () => ({ push: mocks.push }) }))
 vi.mock('@/components/utils/misc/useLog.js', () => ({ useLog: () => ({ debug: vi.fn(), error: vi.fn(), isTraceEnabled: () => false }) }))
 
 describe('iframe service initialization', () => {
   let pinia
+  let scope
   beforeEach(() => {
     vi.clearAllMocks()
     pinia = createPinia()
     setActivePinia(pinia)
-    mocks.attributes = { loadingConfig: true }
+    scope = effectScope()
+    mocks.attributes = { loadingConfig: true, invalidateConfig: vi.fn() }
     mocks.config = { isPkiAuthenticated: false }
+    mocks.auth = { userInfo: null, clearAuthData: vi.fn(), fetchUser: vi.fn(), setRestoringSession: vi.fn() }
     mocks.parent = {
       parentOrigin: 'https://customer.example',
       model: { serviceUrl: `${window.location.origin}/skilltree/`, projectId: 'project' },
       emit: mocks.emit,
     }
     document.body.innerHTML = '<div id="skills-display-app"></div>'
-    vi.stubGlobal('ResizeObserver', class { observe() {} })
+    vi.stubGlobal('ResizeObserver', class { observe() {} disconnect() {} })
   })
   afterEach(() => {
+    scope.stop()
     disposePinia(pinia)
     vi.unstubAllGlobals()
     document.body.innerHTML = ''
@@ -65,7 +75,7 @@ describe('iframe service initialization', () => {
   })
 
   it('accepts a cross-origin parent and waits for its token', async () => {
-    const init = useIframeInit()
+    const init = scope.run(() => useIframeInit(ref(false)))
     await init.handleHandshake()
     expect(mocks.attributes.serviceUrl).toBe(`${window.location.origin}/skilltree`)
     expect(mocks.emit).toHaveBeenCalledWith('needs-authentication')
@@ -78,7 +88,7 @@ describe('iframe service initialization', () => {
 
   it.each(['https://attacker.example', 'http://[invalid', undefined])('rejects an invalid destination before requesting authentication: %s', async (serviceUrl) => {
     mocks.parent.model.serviceUrl = serviceUrl
-    const init = useIframeInit()
+    const init = scope.run(() => useIframeInit(ref(false)))
     await init.handleHandshake()
     mocks.model.updateAuthenticationToken('token')
     mocks.model.navigate('/somewhere')
@@ -95,7 +105,7 @@ describe('iframe service initialization', () => {
 
   it('retains PKI initialization without requiring a bearer token', async () => {
     mocks.config.isPkiAuthenticated = true
-    const init = useIframeInit()
+    const init = scope.run(() => useIframeInit(ref(false)))
     await init.handleHandshake()
     expect(init.loadedIframe.value).toBe(true)
     expect(useSkillsDisplayParentFrameState().authToken).toBe('')
