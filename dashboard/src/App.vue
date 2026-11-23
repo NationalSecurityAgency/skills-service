@@ -138,66 +138,31 @@ onMounted(() => {
       await until(() => iframeInit.loadedIframe.value || Boolean(iframeInit.initializationError.value)).toBe(true)
       if (iframeInit.initializationError.value) return
       log.debug('App.vue: skillsDisplayInfo.isSkillsClientPath()=true, loaded iframe!')
+      await iframeInit.initializeDisplay({ startup: true })
+      return
     }
-    loadConfigs().catch((error) => {
-      if (iframeInit.handleIdentityChange(error)) return
-      const isSupersededIframeRequest = skillsDisplayInfo.isSkillsClientPath()
-        && !useSkillsDisplayParentFrameState().isCurrentAuthRequest(error?.config)
-      if (axios.isCancel(error) || isSupersededIframeRequest) {
-        // Older-token failures can be AxiosErrors rather than cancellations; replacement recovery owns startup.
-        return
-      }
-      if (skillsDisplayInfo.isSkillsClientPath() && !iframeInit.authenticationError.value) {
-        // Startup failures must be visible without mounting authenticated content behind the error route.
-        iframeInit.initializationError.value = 'Unable to load Skills Display. Please refresh the page to try again.'
-      }
-      // Dashboard errors and iframe 401s are displayed by their existing error handlers.
+    loadConfigs().catch(() => {
+      // Dashboard failures are displayed by the shared request-error handler.
     })
   })
 })
 
-const restoreSessionIfAvailable = () => {
-  if (skillsDisplayInfo.isSkillsClientPath()) {
-    authState.setRestoringSession(false)
-    return authState.fetchUser(false)
-  }
-  return authState.restoreSessionIfAvailable()
-}
-
 const loadConfigs = () => {
   const loadUserAndDisplayConfig = () => {
-    const requestConfig = skillsDisplayInfo.isSkillsClientPath() ? { skillsDisplayHandleError: true } : {}
     const loadDisplayConfig = () => {
-      return skillsDisplayAttributes.loadConfigStateIfNeeded(null, requestConfig).then(() => {
-
-        if (!skillsDisplayInfo.isSkillsClientPath()) {
-          globalNavGuards.addNavGuards()
-        }
+      return skillsDisplayAttributes.loadConfigStateIfNeeded().then(() => {
+        globalNavGuards.addNavGuards()
         if (!authState.isAuthenticated) {
           isAppLoaded.value = true
         }
-        if (skillsDisplayInfo.isSkillsClientPath()) {
-          return initializeEmbeddedDisplay(requestConfig)
-        } else {
-          // do not need to set isAppLoaded to true here because it will be handled
-          // by the watch of authState.userInfo
-        }
-
+        // Authenticated dashboard readiness is owned by the userInfo watcher.
         initMatomo()
       })
     }
-    const restoringSession = restoreSessionIfAvailable()
-    // An iframe needs a valid identity before continuing; dashboard startup still installs its navigation guards.
-    return skillsDisplayInfo.isSkillsClientPath()
-      ? restoringSession.then(loadDisplayConfig)
-      : restoringSession.finally(loadDisplayConfig)
+    return authState.restoreSessionIfAvailable().finally(loadDisplayConfig)
   }
-  const loadingAppConfig = appConfig.loadConfigState()
-  // Superseded iframe bootstrap must not start new work for the replacement token.
   // Dashboard startup still installs navigation guards when public config fails.
-  return skillsDisplayInfo.isSkillsClientPath()
-    ? loadingAppConfig.then(loadUserAndDisplayConfig)
-    : loadingAppConfig.finally(loadUserAndDisplayConfig)
+  return appConfig.loadConfigState().finally(loadUserAndDisplayConfig)
 }
 
 const initMatomo = () => {

@@ -112,13 +112,15 @@ export const useIframeInit = (isLoadingApp, initializeEmbeddedDisplay = () => {}
     displayAttributes.invalidateConfig()
   }
 
-  const recoverAuthentication = () => {
+  const initializeDisplay = ({ startup = false } = {}) => {
     if (recovery) return recovery
-    parentState.isAuthenticating = true
+    // Initial 401s must be able to request credentials from the parent. A new
+    // token can replace startup immediately, without waiting for its old requests.
+    if (!startup) parentState.isAuthenticating = true
     // Iframe authentication comes from the parent, never persisted dashboard state.
     // Superseded bootstrap may not have reached App's normal restoration boundary.
     authState.setRestoringSession(false)
-    recovery = (async () => {
+    const initialization = (async () => {
       // Retry only after a token/version update supersedes this attempt, never
       // repeatedly retry a failure for the current generation.
       while (!disposed) {
@@ -158,24 +160,37 @@ export const useIframeInit = (isLoadingApp, initializeEmbeddedDisplay = () => {}
           return
         } catch (error) {
           if (disposed) return
+          // Replacement recovery owns readiness and errors for superseded startup.
+          if (startup && generation !== parentState.authGeneration) return
           if (handleIdentityChange(error)) return
           // PKI version refreshes have no bearer token. An actual 401 still sets
           // authenticationError and must stop rather than retrying indefinitely.
           const canRetry = parentState.authToken || (appConfig.isPkiAuthenticated && !authenticationError.value)
           if (generation !== parentState.authGeneration && canRetry) continue
-          // A current-token failure during recovery is explicit, not a silent wait for a token.
-          authenticationError.value = authenticationFailedMessage
+          if (startup) {
+            // The 401 watcher owns initial expiration UI and token acquisition.
+            // Other startup failures must not mount learner content behind an error route.
+            if (!authenticationError.value) {
+              initializationError.value = 'Unable to load Skills Display. Please refresh the page to try again.'
+            }
+          } else {
+            // A current-token failure during recovery is explicit, not a silent wait for a token.
+            authenticationError.value = authenticationFailedMessage
+          }
           return
         }
       }
     })().finally(() => {
-      if (!disposed) {
-        parentState.isAuthenticating = false
-        isRefreshingDisplay.value = false
+      if (!startup) {
+        if (!disposed) {
+          parentState.isAuthenticating = false
+          isRefreshingDisplay.value = false
+        }
+        recovery = null
       }
-      recovery = null
     })
-    return recovery
+    if (!startup) recovery = initialization
+    return initialization
   }
 
   const loadedIframe = computed(() => completedHandshake.value && updatedAuthToken.value)
@@ -281,7 +296,7 @@ export const useIframeInit = (isLoadingApp, initializeEmbeddedDisplay = () => {}
         parentState.setAuthToken(authToken)
         updatedAuthToken.value = true
         if (needsRecovery) {
-          return recoverAuthentication()
+          return initializeDisplay()
         }
       },
       updateVersion(newVersion) {
@@ -299,7 +314,7 @@ export const useIframeInit = (isLoadingApp, initializeEmbeddedDisplay = () => {}
         // or starting a new learner lifetime. Recovery coalesces rapid updates,
         // verifies the same learner and remounts App's unchanged current route.
         parentState.setAuthToken(parentState.authToken)
-        return recoverAuthentication()
+        return initializeDisplay()
       },
       navigate(route) {
         if (disposed || !completedHandshake.value || initializationError.value) return
@@ -455,10 +470,10 @@ export const useIframeInit = (isLoadingApp, initializeEmbeddedDisplay = () => {}
 
   return {
     handleHandshake,
+    initializeDisplay,
     initializationError,
     authenticationError,
     isRefreshingDisplay,
-    handleIdentityChange,
     loadedIframe
   }
 }

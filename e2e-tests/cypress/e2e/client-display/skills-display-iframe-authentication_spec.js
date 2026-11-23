@@ -88,6 +88,23 @@ describe('Embedded Skills Display authentication recovery', () => {
     beforeEach(() => { releaseStartup = null; });
     afterEach(() => releaseStartup?.());
 
+    it('loads each required embedded resource once per startup or recovery', () => {
+      cy.intercept('GET', '**/app/userInfo').as('embeddedUserInfo');
+      cy.intercept('GET', '**/public/clientDisplay/config*').as('embeddedDisplayConfig');
+      cy.visit('/__e2e/skills-display-parent?manualRecovery=true');
+      assertHome();
+      // Rendering establishes readiness; request counts verify that App and the
+      // iframe initializer did not both launch the embedded loading sequence.
+      cy.get('@embeddedUserInfo.all').should('have.length', 1);
+      cy.get('@embeddedDisplayConfig.all').should('have.length', 1);
+      expireAuthentication();
+      cy.get(refreshAuthentication).click();
+      assertRecoveredSubject();
+      cy.get('@embeddedUserInfo.all').should('have.length', 2);
+      cy.get('@embeddedDisplayConfig.all').should('have.length', 2);
+      cy.wrapIframe().find('[data-cy="skillsDisplayInitError"]').should('not.exist');
+    });
+
     it('sizes the host for the loading screen before startup authentication completes', () => {
       let userInfoReceived = false;
       const startupGate = new Cypress.Promise((resolve) => { releaseStartup = resolve; });
@@ -107,20 +124,26 @@ describe('Embedded Skills Display authentication recovery', () => {
       assertHeightFitsDisplay(100);
     });
 
-    it('requests a replacement token and initializes the display when the first user-information request returns 401', () => {
-      cy.intercept({ method: 'GET', url: '**/app/userInfo', times: 1 }, { statusCode: 401, body: {} });
-      // A new iframe has never populated its user information.
-      // A small configured minimum makes stale loading-screen heights detectable.
-      cy.visit('/__e2e/skills-display-parent?manualRecovery=true&autoHeight=true&minHeight=100px');
-      cy.wrapIframe().find(authenticationError).should('be.visible').and('contain.text', 'authentication has expired');
-      cy.wrapIframe().find('[data-pc-name="progressspinner"]').should('not.exist');
-      assertHeightFitsDisplay(100);
-      cy.get(refreshAuthentication).should('be.visible').click();
-      assertHome();
-      assertHeightFitsDisplay(100);
-      cy.wrapIframe().find('[data-cy="subjectTile-subj1"] [data-cy="subjectTileBtn"]').click();
-      assertRecoveredSubject();
-      assertHeightFitsDisplay(100);
+    [
+      { loader: 'public configuration', url: '**/public/config' },
+      { loader: 'user information', url: '**/app/userInfo' },
+      { loader: 'display configuration', url: '**/public/clientDisplay/config*' },
+    ].forEach(({ loader, url }) => {
+      it(`requests a replacement token and initializes the display when initial ${loader} returns 401`, () => {
+        cy.intercept({ method: 'GET', url, times: 1 }, { statusCode: 401, body: {} });
+        // A new iframe has never populated its user information.
+        // A small configured minimum makes stale loading-screen heights detectable.
+        cy.visit('/__e2e/skills-display-parent?manualRecovery=true&autoHeight=true&minHeight=100px');
+        cy.wrapIframe().find(authenticationError).should('be.visible').and('contain.text', 'authentication has expired');
+        cy.wrapIframe().find('[data-pc-name="progressspinner"]').should('not.exist');
+        assertHeightFitsDisplay(100);
+        cy.get(refreshAuthentication).should('be.visible').click();
+        assertHome();
+        assertHeightFitsDisplay(100);
+        cy.wrapIframe().find('[data-cy="subjectTile-subj1"] [data-cy="subjectTileBtn"]').click();
+        assertRecoveredSubject();
+        assertHeightFitsDisplay(100);
+      });
     });
 
     describe('Superseded startup authentication', () => {
@@ -326,6 +349,7 @@ describe('Embedded Skills Display authentication recovery', () => {
     });
 
     [
+      { loader: 'public configuration', url: '**/public/config' },
       { loader: 'user information', url: '**/app/userInfo' },
       { loader: 'display configuration', url: '**/public/clientDisplay/config*' },
     ].forEach(({ loader, url }) => {
