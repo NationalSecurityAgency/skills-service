@@ -42,6 +42,7 @@ export const useIframeInit = (isLoadingApp, initializeEmbeddedDisplay = () => {}
   const updatedAuthToken = ref(false)
   const initializationError = ref('')
   const authenticationError = ref('')
+  const isRefreshingDisplay = ref(false)
   const authenticationExpiredMessage = 'Your authentication has expired. Waiting for the embedding application to re-authenticate.'
   const authenticationFailedMessage = 'Unable to reconnect your session. Please refresh the page to try again.'
   let authenticationRequested = false
@@ -55,7 +56,7 @@ export const useIframeInit = (isLoadingApp, initializeEmbeddedDisplay = () => {}
   let originalOverflowY = null
   let parentMessageGuard = null
   let trustedParentOrigin = null
-  const displayBlocked = computed(() => initializationError.value || authenticationError.value || isLoadingApp.value)
+  const displayBlocked = computed(() => initializationError.value || authenticationError.value || isLoadingApp.value || isRefreshingDisplay.value)
   const disconnectHeightListener = () => {
     clearTimeout(heightListenerTimeout)
     heightListenerTimeout = null
@@ -104,8 +105,7 @@ export const useIframeInit = (isLoadingApp, initializeEmbeddedDisplay = () => {}
   const resetEmbeddedProgress = () => {
     // Startup establishes a new iframe lifetime; recovery is for the SAME learner.
     // Pinia outlives a remounted display, so discard cached progress and restore
-    // loading flags at these explicit boundaries, before authenticated content mounts.
-    // Do not install general learner/project/version switching watchers in shared stores.
+    // loading flags before authenticated content mounts again.
     useUserProgressSummaryState().reset()
     useSkillsDisplaySubjectState().reset()
     useSkillsDisplayPointHistoryState().reset()
@@ -119,8 +119,13 @@ export const useIframeInit = (isLoadingApp, initializeEmbeddedDisplay = () => {}
     // Superseded bootstrap may not have reached App's normal restoration boundary.
     authState.setRestoringSession(false)
     recovery = (async () => {
-      // Only retry when the parent supplies a newer token, never repeatedly retry a failed token.
+      // Retry only after a token/version update supersedes this attempt, never
+      // repeatedly retry a failure for the current generation.
       while (!disposed) {
+        // App owns the whole routed subtree. Let it unmount before resetting
+        // shared caches; retain this initializer and its fixed-learner binding.
+        await nextTick()
+        if (disposed) return
         const generation = parentState.authGeneration
         const requestConfig = { skillsDisplayHandleError: true }
         try {
@@ -154,14 +159,20 @@ export const useIframeInit = (isLoadingApp, initializeEmbeddedDisplay = () => {}
         } catch (error) {
           if (disposed) return
           if (handleIdentityChange(error)) return
-          if (generation !== parentState.authGeneration && parentState.authToken) continue
+          // PKI version refreshes have no bearer token. An actual 401 still sets
+          // authenticationError and must stop rather than retrying indefinitely.
+          const canRetry = parentState.authToken || (appConfig.isPkiAuthenticated && !authenticationError.value)
+          if (generation !== parentState.authGeneration && canRetry) continue
           // A current-token failure during recovery is explicit, not a silent wait for a token.
           authenticationError.value = authenticationFailedMessage
           return
         }
       }
     })().finally(() => {
-      if (!disposed) parentState.isAuthenticating = false
+      if (!disposed) {
+        parentState.isAuthenticating = false
+        isRefreshingDisplay.value = false
+      }
       recovery = null
     })
     return recovery
@@ -278,7 +289,17 @@ export const useIframeInit = (isLoadingApp, initializeEmbeddedDisplay = () => {}
         if (newVersion != null && typeof newVersion !== 'string' &&
           (typeof newVersion !== 'number' || !Number.isFinite(newVersion))) return
         if ((newVersion ?? null) === displayAttributes.version) return
-        log.warn('Skills Display ignored a version change. The embedding application must destroy and recreate Skills Display to use a different skills version.')
+        displayAttributes.version = newVersion ?? null
+        // Before authentication, startup will read the latest version. While
+        // waiting for renewed credentials, leave the existing auth block intact.
+        if (!updatedAuthToken.value || (authenticationError.value && !recovery)) return
+        if (!parentState.authToken && !appConfig.isPkiAuthenticated) return
+        isRefreshingDisplay.value = true
+        // Reuse the existing stale-response guard without changing credentials
+        // or starting a new learner lifetime. Recovery coalesces rapid updates,
+        // verifies the same learner and remounts App's unchanged current route.
+        parentState.setAuthToken(parentState.authToken)
+        return recoverAuthentication()
       },
       navigate(route) {
         if (disposed || !completedHandshake.value || initializationError.value) return
@@ -349,10 +370,9 @@ export const useIframeInit = (isLoadingApp, initializeEmbeddedDisplay = () => {}
       if (parent.model.options != null && (typeof parent.model.options !== 'object' || Array.isArray(parent.model.options))) {
         throw new Error('Invalid Skills Display options')
       }
-      // Embedded contract: the learner, optional display userId and skills version
-      // are fixed for this iframe lifetime. Tokens may be renewed for the same
-      // learner, but changing any of these targets requires the host to destroy
-      // and recreate Skills Display. Nullish handling preserves version 0.
+      // Embedded contract: the learner and optional display userId are fixed for
+      // this iframe lifetime. Tokens may be renewed for the same learner and the
+      // SDK version setter may refresh the skills version. Nullish handling preserves 0.
       parentState.beginAuthenticationSession()
       resetEmbeddedProgress()
       // Make sure to freeze the parent object so Pinia won't try to make it reactive
@@ -437,6 +457,7 @@ export const useIframeInit = (isLoadingApp, initializeEmbeddedDisplay = () => {}
     handleHandshake,
     initializationError,
     authenticationError,
+    isRefreshingDisplay,
     handleIdentityChange,
     loadedIframe
   }

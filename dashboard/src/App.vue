@@ -120,6 +120,7 @@ watch(() => themeHelper.currentTheme, (newTheme, oldTheme) => {
 })
 
 const iframeInit = useIframeInit(isLoadingApp, initializeEmbeddedDisplay)
+const isLoadingDisplay = computed(() => isLoadingApp.value || iframeInit.isRefreshingDisplay.value)
 onBeforeMount(() => {
   if (skillsDisplayInfo.isSkillsClientPath()) {
     log.trace('App.vue: skillsDisplayInfo.isSkillsClientPath()=true, initiating iframe handshake')
@@ -243,13 +244,13 @@ const isDashboardFooter = computed(() => notSkillsClient.value && !isLoadingApp.
           </p>
         </div>
       </div>
-      <div v-else-if="isLoadingApp" role="main" class="flex content-center justify-center flex-wrap" style="min-height: 40rem">
+      <div v-else-if="isLoadingDisplay" role="main" class="flex content-center justify-center flex-wrap" style="min-height: 40rem">
         <div class="flex items-center justify-center m-2">
           <skills-spinner :is-loading="true" class="text-center"/>
           <h1 class="text-sm sr-only">Loading...</h1>
         </div>
       </div>
-      <div v-if="!isLoadingApp && !iframeInit.initializationError.value && !iframeInit.authenticationError.value" class="m-0">
+      <div v-if="!isLoadingDisplay && !iframeInit.initializationError.value && !iframeInit.authenticationError.value" class="m-0">
         <pki-app-bootstrap v-if="inBootstrapMode" role="region"/>
 
         <div v-if="!inBootstrapMode" :class="{ 'overall-container' : notSkillsClient, 'sd-theme-background-color': !notSkillsClient }">
