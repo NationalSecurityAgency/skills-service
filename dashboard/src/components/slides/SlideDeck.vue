@@ -17,8 +17,10 @@ limitations under the License.
 import {ref, onMounted, watch, computed, shallowRef, onUnmounted, isReadonly, useTemplateRef} from 'vue';
 import { useFullscreen } from '@vueuse/core'
 import * as pdfjsLib from 'pdfjs-dist';
+import type { PDFDocumentProxy } from 'pdfjs-dist';
 import pdfWorker from 'pdfjs-dist/build/pdf.worker.min.mjs?url';
 import 'pdfjs-dist/web/pdf_viewer.css';
+import { EventBus, LinkTarget, PDFLinkService } from 'pdfjs-dist/web/pdf_viewer.mjs';
 import {useDebounceFn} from '@vueuse/core'
 import {useSkillsAnnouncer} from "@/common-components/utilities/UseSkillsAnnouncer.js";
 import PrevNextBtns from "@/components/slides/PrevNextBtns.vue";
@@ -56,8 +58,26 @@ const announcer = useSkillsAnnouncer()
 
 const isInitLoading = ref(true);
 const isRendingPage = ref(false);
-const pdfDoc = shallowRef({});
+const pdfDoc = shallowRef<PDFDocumentProxy | null>(null);
 const currentPage = ref(1)
+const annotationLayerRef = ref<HTMLDivElement | null>(null)
+const linkService = new PDFLinkService({
+  eventBus: new EventBus(),
+  externalLinkTarget: LinkTarget.BLANK,
+  externalLinkRel: 'noopener noreferrer',
+  ignoreDestinationZoom: true,
+})
+// Adapt PDF.js destination navigation to our single-page slide viewer.
+linkService.setViewer({
+  get currentPageNumber() { return currentPage.value },
+  set currentPageNumber(pageNum) { renderPage(pageNum) },
+  pagesRotation: 0,
+  isInPresentationMode: false,
+  scrollPageIntoView: ({ pageNumber }) => renderPage(pageNumber),
+  nextPage: () => nextPage(),
+  previousPage: () => prevPage(),
+  pageLabelToPageNumber: () => null,
+})
 
 const width = ref(0)
 const height = ref(0)
@@ -98,6 +118,8 @@ onUnmounted(() => {
 
 const handleKeyDown = (e) => {
   if (!isFullscreen.value) return;
+  if (['Enter', ' '].includes(e.key) && e.target instanceof Element &&
+      e.target.closest('a, button, input, select, textarea, [contenteditable="true"]')) return;
 
   switch (e.key) {
     case 'ArrowRight':
@@ -120,9 +142,11 @@ const handleKeyDown = (e) => {
 };
 
 const loadPdf = () => {
-  const loadingTask = pdfjsLib.getDocument(props.pdfUrl);
+  const documentUrl = new URL(props.pdfUrl, window.location.href).href;
+  const loadingTask = pdfjsLib.getDocument({ url: documentUrl, docBaseUrl: documentUrl });
   return loadingTask.promise.then((pdf) => {
     pdfDoc.value = pdf;
+    linkService.setDocument(pdf);
     return renderPage(currentPage.value).then(() => {
       isInitLoading.value = false;
     })
@@ -145,11 +169,15 @@ const renderPage = (pageNum, requestedWidth = null, announce = true) => {
   }
   isRendingPage.value = true;
   const pdfDocLocal = pdfDoc.value;
+  if (!pdfDocLocal) {
+    isRendingPage.value = false;
+    return Promise.resolve();
+  }
   return pdfDocLocal.getPage(pageNum).then((page) => {
     const scale = 1;
     let viewport = page.getViewport({scale: scale,});
     if (isFullscreen.value) {
-      const newScale = window.innerWidth / viewport.width;
+      const newScale = Math.min(window.innerWidth / viewport.width, window.innerHeight / viewport.height);
       viewport = page.getViewport({scale: newScale,});
     } else if (requestedWidth != null) {
       const newScale = requestedWidth / viewport.width;
@@ -167,7 +195,9 @@ const renderPage = (pageNum, requestedWidth = null, announce = true) => {
     let outputScale = window.devicePixelRatio || 1;
 
     const canvas = document.getElementById('pdfCanvasId');
+    if (!(canvas instanceof HTMLCanvasElement)) return;
     const context = canvas.getContext('2d');
+    if (!context) return;
 
     canvas.width = Math.floor(viewport.width * outputScale);
     canvas.height = Math.floor(viewport.height * outputScale);
@@ -176,6 +206,10 @@ const renderPage = (pageNum, requestedWidth = null, announce = true) => {
 
     width.value = viewport.width
     height.value = viewport.height
+    const annotationLayerDiv = annotationLayerRef.value
+    if (!annotationLayerDiv) return
+    annotationLayerDiv.replaceChildren()
+    annotationLayerDiv.style.setProperty('--total-scale-factor', String(viewport.scale * viewport.userUnit))
 
     const transform = outputScale !== 1
         ? [outputScale, 0, 0, outputScale, 0, 0]
@@ -187,7 +221,7 @@ const renderPage = (pageNum, requestedWidth = null, announce = true) => {
       viewport: viewport
     };
 
-    page.render(renderContext).promise.then(function () {
+    return page.render(renderContext).promise.then(function () {
       return page.getTextContent();
     }).then(function (textContent) {
       // const textLayerDiv = document.getElementById("text-layer")
@@ -202,15 +236,48 @@ const renderPage = (pageNum, requestedWidth = null, announce = true) => {
         container: textLayerDiv,
       });
 
-      textLayer.render().then(() => {
+      return textLayer.render().then(async () => {
+        const annotations = await page.getAnnotations({ intent: 'display' })
+        const annotationLayer = new pdfjsLib.AnnotationLayer({
+          div: annotationLayerDiv,
+          page,
+          viewport: viewport.clone({ dontFlip: true }),
+          linkService,
+          accessibilityManager: null,
+          annotationCanvasMap: null,
+          annotationEditorUIManager: null,
+          structTreeLayer: null,
+          commentManager: null,
+          annotationStorage: pdfDocLocal.annotationStorage,
+        })
+        await annotationLayer.render({
+          div: annotationLayerDiv,
+          page,
+          viewport: viewport.clone({ dontFlip: true }),
+          linkService,
+          // Only expose actions supported by this single-page viewer. In particular,
+          // SetOCGState needs optional-content rendering that our adapter does not provide.
+          annotations: annotations.filter((annotation) =>
+              annotation.annotationType === pdfjsLib.AnnotationType.LINK &&
+              (annotation.url || annotation.dest ||
+                  ['NextPage', 'PrevPage', 'FirstPage', 'LastPage'].includes(annotation.action))),
+          renderForms: false,
+          enableScripting: false,
+        })
         currentPage.value = pageNum
         isRendingPage.value = false
+        linkService.eventBus.dispatch('textlayerrendered', {
+          pageNumber: pageNum,
+          source: { textLayer: { div: textLayerDiv } },
+        })
         page.cleanup();
         if (announce) {
-          announcer.polite(`Rendered pdf page ${pageNum} of ${pdfDoc.value.numPages}`)
+          announcer.polite(`Rendered pdf page ${pageNum} of ${pdfDocLocal.numPages}`)
         }
       })
     });
+  }).finally(() => {
+    isRendingPage.value = false
   })
 }
 
@@ -298,11 +365,14 @@ const downloadPdf = () => {
           </div>
           <div ref="containerRef" :id="`${slidesId}Container`"
                class="border-r-1 border-l-1 relative hover-resize-container"
-               :class="{'presentation-mode bg-surface-700': isFullscreen}"
+               :class="{'presentation-mode bg-surface-700 w-screen h-screen': isFullscreen}"
                :style="slidesContainerStyle">
             <canvas id="pdfCanvasId" class="z-0 absolute top-0 left-0"></canvas>
-            <div id="text-layer" class="textLayer absolute top-0 left-0 w-full h-full z-40"
+            <div id="text-layer" tabindex="-1" class="textLayer absolute top-0 left-0 w-full h-full z-40"
                  style="--total-scale-factor: 1"></div>
+            <div ref="annotationLayerRef" data-cy="slidesAnnotationLayer"
+                  class="annotationLayer absolute top-0 left-0 z-40 overflow-hidden"
+                 style="--scale-round-x: 1px; --scale-round-y: 1px"></div>
 
             <button
                 v-if="!isFullscreen && ableToResize"
@@ -318,7 +388,7 @@ const downloadPdf = () => {
 
             <div v-if="isFullscreen"
                  :class="{ 'only-on-hover': !showFullScreenMsg && !isLastSlideInFullscreen }"
-                 class="fixed bottom-4 left-1/2 transform -translate-x-1/2">
+                  class="fixed bottom-4 left-1/2 transform -translate-x-1/2 z-50">
               <Message data-cy="slidesFullscreenMsg" :closable="false">
                 <div class="flex flex-col gap-2 min-w-[40rem] text-center">
                   <div v-if="!isLastSlideInFullscreen">Use left/right arrow keys to navigate between slides and <Tag>Esc</Tag>to exit or use the</div>

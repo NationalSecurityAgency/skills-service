@@ -20,8 +20,6 @@ import skills.intTests.utils.SkillsService
 
 import static skills.intTests.utils.SkillsFactory.*
 import static skills.metrics.GlobalProgressMetricsService.getUSER_PREF_GLOBAL_METRICS_EXCLUSION
-import static skills.metrics.GlobalProgressMetricsService.getUSER_PREF_GLOBAL_METRICS_EXCLUSION
-import static skills.metrics.GlobalProgressMetricsService.getUSER_PREF_GLOBAL_METRICS_EXCLUSION
 
 class ExportGlobalUserProgressSpec extends ExportBaseIntSpec {
 
@@ -432,7 +430,7 @@ class ExportGlobalUserProgressSpec extends ExportBaseIntSpec {
     }
 
     def "export users progress for UC protected project"() {
-        def users = getRandomUsers(3).sort()
+        List<String> users = getCommunityExportUsers()
         def user1 = users[0]
         def user2 = users[1]
 
@@ -473,7 +471,7 @@ class ExportGlobalUserProgressSpec extends ExportBaseIntSpec {
     }
 
     def "export users progress for UC protected global badge"() {
-        def users = getRandomUsers(3).sort()
+        List<String> users = getCommunityExportUsers()
         def user1 = users[0]
         def user2 = users[1]
 
@@ -534,7 +532,7 @@ class ExportGlobalUserProgressSpec extends ExportBaseIntSpec {
     }
 
     def "export users progress for UC protected quiz"() {
-        def users = getRandomUsers(3).sort()
+        List<String> users = getCommunityExportUsers()
         def user1 = users[0]
         def user2 = users[1]
 
@@ -599,6 +597,12 @@ class ExportGlobalUserProgressSpec extends ExportBaseIntSpec {
 
         then:
         results
+    }
+
+    private List<String> getCommunityExportUsers() {
+        // PKI's random certificate pool includes this spec's root account. Root exports
+        // only include pinned projects, while these fixtures require a project admin.
+        return getRandomUsers(3, true, [DEFAULT_ROOT_USER_ID, SkillsService.UseParams.DEFAULT_USER_NAME, rootSkillsService.userName]).sort()
     }
 
     def createQuiz(int num, SkillsService serviceToUse = null, boolean isTextInputQuestion = false) {
