@@ -396,6 +396,9 @@ export const useIframeInit = (isLoadingApp, initializeEmbeddedDisplay = () => {}
 
       completedHandshake.value = true
       registerHeightListener()
+      // The embedding host owns initial token acquisition and its failure UI.
+      // An initial-authentication timeout is intentionally deferred to broader SDK
+      // resilience work to avoid premature failure during slow authentication.
       parentState.parentFrame.emit('needs-authentication')
     }).catch(() => {
       clearTimeout(handshakeTimeout)
