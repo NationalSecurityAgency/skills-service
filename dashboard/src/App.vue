@@ -128,6 +128,7 @@ onMounted(() => {
       log.debug('App.vue: skillsDisplayInfo.isSkillsClientPath()=true, loaded iframe!')
     }
     loadConfigs().catch((error) => {
+      if (iframeInit.handleIdentityChange(error)) return
       const isSupersededIframeRequest = skillsDisplayInfo.isSkillsClientPath()
         && !useSkillsDisplayParentFrameState().isCurrentAuthRequest(error?.config)
       if (axios.isCancel(error) || isSupersededIframeRequest) {

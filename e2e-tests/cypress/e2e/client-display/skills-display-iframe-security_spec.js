@@ -59,4 +59,27 @@ describe('Skills Display iframe destination security', () => {
     cy.get('@attackerRequests.all').should('have.length', 0);
     cy.get('@tokenRequests.all').should('have.length', 0);
   });
+
+  it('supports valid parent-provided theme declarations', () => {
+    const theme = { pageTitle: { textColor: '#123456' }, tiles: { backgroundColor: '#ffffff' }, breadcrumb: { align: 'center' } };
+    cy.visit(`/__e2e/skills-display-parent?minHeight=450px&theme=${encodeURIComponent(JSON.stringify(theme))}`);
+    cy.wrapIframe().find('[data-cy="skillsTitle"]').should('be.visible').and('have.css', 'color', 'rgb(18, 52, 86)');
+    cy.wrapIframe().find('#skills-display-app').should('have.css', 'min-height', '450px');
+    cy.wrapIframe().find('[data-cy="skillsDisplayInitError"]').should('not.exist');
+  });
+
+  [
+    { pageTitle: { textColor: 'red } body { background: url(https://attacker.example/css)' } },
+    { tiles: { backgroundColor: 'red; background-image: url(https://attacker.example/css)' } },
+    { trophyIconColor: 'url(https://attacker.example/css)' },
+  ].forEach((theme, index) => {
+    it(`rejects parent theme CSS injection or external-resource references (${index + 1})`, () => {
+      cy.intercept('https://attacker.example/**', { statusCode: 200, body: '' }).as('themeRequests');
+      cy.visit(`/__e2e/skills-display-parent?theme=${encodeURIComponent(JSON.stringify(theme))}`);
+      cy.wrapIframe().find('[data-cy="skillsDisplayInitError"]').should('be.visible')
+        .and('contain.text', 'verify the embedding configuration');
+      cy.wrapIframe().find('[data-cy="subjectTile-subj1"]').should('not.exist');
+      cy.get('@themeRequests.all').should('have.length', 0);
+    });
+  });
 });

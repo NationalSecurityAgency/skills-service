@@ -42,6 +42,8 @@ export const useSkillsDisplayAttributesState = defineStore('skillsDisplayAttribu
   const auth = useAuthState()
   let configRevision = 0
   let pendingConfig = null
+  // Shared native/preview pages can change project or displayed user. Embedded
+  // displays have a fixed learner; their recovery explicitly invalidates this cache.
   const configContext = computed(() => JSON.stringify([serviceUrl.value, projectId.value, userId.value, auth.userInfo?.userId]))
   const invalidateConfig = () => {
     configRevision += 1
@@ -54,11 +56,8 @@ export const useSkillsDisplayAttributesState = defineStore('skillsDisplayAttribu
   watch(configContext, () => {
     invalidateConfig()
   }, { flush: 'sync' })
-  watch(() => auth.userInfo?.userId, (currentUser, previousUser) => {
-    if (currentUser && currentUser !== previousUser && projectId.value && skillsDisplayInfo.isSkillsDisplayPath()) {
-      loadConfigState().catch(() => { /* Shared Axios handling displays configuration errors. */ })
-    }
-  })
+  // Startup, navigation, settings updates and iframe recovery own configuration
+  // loading. Cache invalidation must not start a competing identity-change request.
   const loadConfigStateIfNeeded = (optionalToPathObj = null) => {
     if (skillsDisplayInfo.isSkillsDisplayPath(optionalToPathObj)) {
       if (route.params.projectId) {

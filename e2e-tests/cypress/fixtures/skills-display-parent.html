@@ -23,6 +23,7 @@ limitations under the License.
 <body>
   <div id="skills-client-container"></div>
   <button data-cy="refreshDisplayAuthentication" hidden>Refresh display authentication</button>
+  <button data-cy="navigateDisplayHome">Display homepage</button>
   <div>Route changes received: <output data-cy="routeChangedCount">0</output></div>
   <script>
     const params = new URLSearchParams(window.location.search);
@@ -32,12 +33,20 @@ limitations under the License.
       container: document.querySelector('#skills-client-container'),
       // Keep the iframe on SkillTree even when the model supplies an attacker URL.
       url: `${window.location.origin}/static/clientPortal/index.html`,
-      model: { serviceUrl, projectId: 'proj1' },
+      model: {
+        serviceUrl,
+        projectId: 'proj1',
+        minHeight: params.get('minHeight'),
+        theme: params.has('theme') ? JSON.parse(params.get('theme')) : undefined,
+      },
     }).then((child) => {
       child.frame.title = 'Skills Display';
       child.frame.style.width = '100%';
       child.frame.style.height = '1000px';
       const refreshButton = document.querySelector('[data-cy="refreshDisplayAuthentication"]');
+      document.querySelector('[data-cy="navigateDisplayHome"]').addEventListener('click', () => {
+        child.call('navigate', { name: 'SkillsDisplaySkillsClient' });
+      });
       // Allow a test to rotate the token while the initial user-information response is still pending.
       if (params.get('allowManualRefresh') === 'true') refreshButton.hidden = false;
       const routeChangedCount = document.querySelector('[data-cy="routeChangedCount"]');
@@ -48,6 +57,9 @@ limitations under the License.
       });
       let authenticationRequests = 0;
       const authenticate = async () => {
+        // Match the SDK contract: renew credentials through the same authenticator.
+        // The fixture has no live learner-switch operation; identity-mismatch tests
+        // override this endpoint to verify that the iframe rejects a contract violation.
         const response = await fetch('/api/projects/proj1/token');
         if (!response.ok) throw new Error('Unable to obtain the fixture authentication token');
         const token = await response.json();

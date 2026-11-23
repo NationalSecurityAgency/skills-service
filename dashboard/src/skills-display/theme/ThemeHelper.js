@@ -398,13 +398,24 @@ export default {
       themeModule: new Map()
     }
 
+    const validateCssValue = (property, value) => {
+      // A parent-provided value must remain a single CSS declaration, not a rule,
+      // import or external-resource reference. Text nodes alone do not prevent CSS injection.
+      // Legacy prefixed declarations (for example -ms-flex-pack) may be unsupported
+      // in the current browser; their standard counterpart is validated separately.
+      const invalidDeclaration = typeof value === 'string' && CSS.supports(property, 'initial') && !CSS.supports(property, value)
+      if (typeof value !== 'string' || /[{};\\]/.test(value) || /url\s*\(/i.test(value) || invalidDeclaration) {
+        throw new Error(`Skills Theme Error! Invalid CSS value for [${property}]`)
+      }
+      return value
+    }
+
     const appendCSS = (selectorKeyElement, inputThemeElement) => {
       if (!(selectorKeyElement.selector && selectorKeyElement.styleName)) {
         throw new Error(`Bug in the custom theme code. Both selector and styleName must be present for [${selectorKeyElement}]`)
       }
 
-      // No injection
-      const sanitizedValue = inputThemeElement.split(';')[0]
+      const sanitizedValue = validateCssValue(selectorKeyElement.styleName, inputThemeElement)
       res.css += `${selectorKeyElement.selector} { ${selectorKeyElement.styleName}: ${sanitizedValue} !important } `
     }
 
@@ -420,8 +431,9 @@ export default {
         '.sd-theme-home .toastui-editor-toolbar-group button { background-color: #f5f5f5 !important; color: #454545 !important; } ' +
         '.sd-theme-home .attachment-button.toastui-editor-toolbar-icons { color: #454545 !important; }';
     if (theme?.tiles?.backgroundColor) {
-      tilesBackgroundColor = tilesBackgroundColor + ` .sd-theme-home .toastui-editor-mode-switch .tab-item.active { border-top: ${theme.tiles.backgroundColor} !important; } ` +
-          `.sd-theme-home .toastui-editor-tabs .tab-item.active { border-bottom: ${theme.tiles.backgroundColor} !important; } `;
+      const backgroundColor = validateCssValue('background-color', theme.tiles.backgroundColor)
+      tilesBackgroundColor = tilesBackgroundColor + ` .sd-theme-home .toastui-editor-mode-switch .tab-item.active { border-top: ${backgroundColor} !important; } ` +
+          `.sd-theme-home .toastui-editor-tabs .tab-item.active { border-bottom: ${backgroundColor} !important; } `;
     }
 
     const cssBasedOnKeyPathMapping = {

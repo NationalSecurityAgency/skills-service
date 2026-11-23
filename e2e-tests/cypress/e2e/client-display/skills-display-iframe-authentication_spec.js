@@ -44,6 +44,7 @@ describe('Embedded Skills Display authentication recovery', () => {
     // Do not suppress unrelated exceptions.
     cy.on('uncaught:exception', (error) => {
       if (error.name === 'AxiosError' && error.message === 'Request failed with status code 401') return false;
+      if (error.name === 'CanceledError' && error.message === 'Skills Display request was superseded') return false;
     });
   });
 
@@ -112,7 +113,26 @@ describe('Embedded Skills Display authentication recovery', () => {
         }
       });
 
-      [200, 401].forEach((statusCode) => {
+      it('does not reuse pending startup configuration when a replacement token belongs to the same learner', () => {
+        let configReceived = false;
+        const configGate = new Cypress.Promise((resolve) => { releaseConfig = resolve; });
+        cy.intercept({ method: 'GET', url: '**/public/clientDisplay/config*', times: 1 }, (req) => {
+          req.continue(() => {
+            configReceived = true;
+            return configGate;
+          });
+        }).as('oldStartupConfig');
+        cy.visit('/__e2e/skills-display-parent?manualRecovery=true&allowManualRefresh=true');
+        cy.wrap(null).should(() => { expect(configReceived, 'startup configuration is held').to.be.true; });
+        cy.get(refreshAuthentication).click();
+        assertHome();
+        cy.then(() => releaseConfig());
+        cy.wait('@oldStartupConfig');
+        assertHome();
+        cy.wrapIframe().find('[data-cy="skillsDisplayInitError"]').should('not.exist');
+      });
+
+      [200, 401, 403, 404, 500].forEach((statusCode) => {
         [true, false].forEach((duringRecovery) => {
           it(`ignores superseded startup authentication returning ${statusCode} ${duringRecovery ? 'during' : 'after'} replacement-token recovery`, () => {
             let initialUserInfoReceived = false;
@@ -122,9 +142,9 @@ describe('Embedded Skills Display authentication recovery', () => {
 
             cy.intercept({ method: 'GET', url: '**/app/userInfo', times: 1 }, (req) => {
               req.continue((res) => {
-                if (statusCode === 401) {
-                  res.statusCode = 401;
-                  res.body = { explanation: 'Authentication token has expired' };
+                if (statusCode !== 200) {
+                  res.statusCode = statusCode;
+                  res.body = { explanation: 'Superseded authentication request' };
                 }
                 initialUserInfoReceived = true;
                 return initialUserInfoGate;
@@ -192,13 +212,20 @@ describe('Embedded Skills Display authentication recovery', () => {
   });
 
   describe('Recovery', () => {
+    let pendingReleases;
     beforeEach(() => {
+      pendingReleases = [];
       cy.visit('/__e2e/skills-display-parent?manualRecovery=true');
       assertHome();
     });
+    afterEach(() => pendingReleases.forEach((release) => release()));
 
-    [true, false].forEach((duringRecovery) => {
-      it(`ignores an expired-token 401 arriving ${duringRecovery ? 'during' : 'after'} replacement-token recovery`, () => {
+    [401, 403, 404, 500].flatMap((statusCode) => [true, false].map((duringRecovery) => ({ statusCode, duringRecovery })))
+      .forEach(({ statusCode, duringRecovery }) => {
+      it(`ignores an expired-token ${statusCode} arriving ${duringRecovery ? 'during' : 'after'} replacement-token recovery`, () => {
+        cy.on('uncaught:exception', (error) => {
+          if (error.name === 'AxiosError' && error.message === `Request failed with status code ${statusCode}`) return false;
+        });
         let releaseFirstFailure;
         let releaseLateFailure;
         let releaseConfig;
@@ -208,6 +235,7 @@ describe('Embedded Skills Display authentication recovery', () => {
         const firstFailureGate = new Cypress.Promise((resolve) => { releaseFirstFailure = resolve; });
         const lateFailureGate = new Cypress.Promise((resolve) => { releaseLateFailure = resolve; });
         const configGate = new Cypress.Promise((resolve) => { releaseConfig = resolve; });
+        pendingReleases.push(releaseFirstFailure, releaseLateFailure, releaseConfig);
 
         // Hold both requests until they have been issued with the same expired token.
         cy.intercept('GET', '**/api/projects/proj1/subjects/subj1/rank*', (req) => {
@@ -220,7 +248,7 @@ describe('Embedded Skills Display authentication recovery', () => {
           if (historyRequested) return req.continue();
           historyRequested = true;
           req.alias = 'lateExpiredTokenFailure';
-          return lateFailureGate.then(() => req.reply({ statusCode: 401, body: {} }));
+          return lateFailureGate.then(() => req.reply({ statusCode, body: {} }));
         });
         cy.wrapIframe().find('[data-cy="subjectTile-subj1"] [data-cy="subjectTileBtn"]').click();
         cy.wrap(null).should(() => {
@@ -250,7 +278,7 @@ describe('Embedded Skills Display authentication recovery', () => {
         }
         cy.then(() => releaseLateFailure());
         // Synchronize with the intentionally late response before allowing recovery to finish.
-        cy.wait('@lateExpiredTokenFailure').its('response.statusCode').should('eq', 401);
+        cy.wait('@lateExpiredTokenFailure').its('response.statusCode').should('eq', statusCode);
         cy.then(() => releaseConfig());
         assertRecoveredSubject();
         // A further user action verifies the replacement authentication remains usable.
@@ -314,6 +342,195 @@ describe('Embedded Skills Display authentication recovery', () => {
       cy.wrapIframe().find(authenticationError).should('be.visible').and('contain.text', recoveryFailedMessage);
       cy.reload();
       assertHome();
+    });
+
+    it('keeps a current private-project denial inside the iframe error page', () => {
+      cy.on('uncaught:exception', (error) => {
+        if (error.name === 'AxiosError' && error.message === 'Request failed with status code 403') return false;
+      });
+      cy.intercept('GET', '**/api/projects/proj1/subjects/subj1/summary*', {
+        statusCode: 403,
+        body: { errorCode: 'private_project', projectId: 'proj1', explanation: 'This learner cannot access the private project' },
+      });
+      cy.wrapIframe().find('[data-cy="subjectTile-subj1"] [data-cy="subjectTileBtn"]').click();
+      cy.wrapIframe().find('[data-cy="errorPage"]').should('be.visible').and('contain.text', 'User Not Authorized');
+      cy.wrapIframe().find('[data-cy="errExplanation"]').should('have.text', 'This learner cannot access the private project');
+      cy.wrapIframe().find(authenticationError).should('not.exist');
+    });
+  });
+
+  describe('Same-learner progress recovery', () => {
+    // One iframe belongs to one learner. A renewed token must not accept stale
+    // snapshots or loading cleanup, even when progress changes for that SAME learner.
+    const parentUrl = '/__e2e/skills-display-parent?manualRecovery=true&allowManualRefresh=true';
+    let releases;
+    const holdResponse = (url, alias, modifyResponse = () => {}) => {
+      let received = false;
+      let release;
+      const gate = new Cypress.Promise((resolve) => { release = resolve; });
+      releases.push(release);
+      cy.intercept({ method: 'GET', url, times: 1 }, (req) => {
+        req.continue((res) => {
+          modifyResponse(res);
+          received = true;
+          return gate;
+        });
+      }).as(alias);
+      return { release, isReceived: () => received };
+    };
+    beforeEach(() => {
+      releases = [];
+      // Leave room for more progress without replacing the counter with the completed UI.
+      cy.createSkill(1, 1, 1, { pointIncrement: 100, numPerformToCompletion: 3 });
+      cy.doReportSkill({ userId: Cypress.env('proxyUser'), date: '2020-09-12 11:00' });
+      if (Cypress.browser.family === 'chromium') {
+        cy.then(() => Cypress.automation('remote:debugger:protocol', {
+          command: 'Network.setCacheDisabled', params: { cacheDisabled: true },
+        }));
+      }
+    });
+    afterEach(() => {
+      releases.forEach((release) => release());
+      if (Cypress.browser.family === 'chromium') {
+        cy.then(() => Cypress.automation('remote:debugger:protocol', {
+          command: 'Network.setCacheDisabled', params: { cacheDisabled: false },
+        }));
+      }
+    });
+
+    const addMoreProgress = () => cy.doReportSkill({ userId: Cypress.env('proxyUser'), date: '2020-09-13 11:00' });
+    const assertFreshHome = () => {
+      assertHome();
+      cy.wrapIframe().find('[data-cy="earnedPoints"]').should('have.text', '200');
+      cy.wrapIframe().find('[data-cy="myRankPosition"]').should('have.text', '#1');
+    };
+
+    it('restores loading flags while refreshing cached progress for the same learner after a 401', () => {
+      cy.visit(parentUrl);
+      assertHome();
+      cy.wrapIframe().find('[data-cy="earnedPoints"]').should('have.text', '100');
+      addMoreProgress();
+      expireAuthentication();
+      // Preserve the homepage as the requested recovery route.
+      cy.get('[data-cy="navigateDisplayHome"]').click();
+      const fresh = holdResponse('**/api/projects/proj1/summary*', 'replacementSummary');
+      cy.get(refreshAuthentication).click();
+      cy.wrap(null).should(() => { expect(fresh.isReceived(), 'new summary is held').to.be.true; });
+      cy.wrapIframe().find('[data-pc-name="progressspinner"]').should('be.visible');
+      cy.wrapIframe().find('[data-cy="earnedPoints"]').should('not.exist');
+      cy.wrapIframe().find('[data-cy="subjectTile-subj1"]').should('not.exist');
+      cy.then(fresh.release);
+      assertFreshHome();
+    });
+
+    [true, false].forEach((duringLoad) => {
+      it(`ignores an old-token summary that succeeds ${duringLoad ? 'while' : 'after'} fresh progress loads for the same learner`, () => {
+        const old = holdResponse('**/api/projects/proj1/summary*', 'oldSummary');
+        cy.visit(parentUrl);
+        cy.wrap(null).should(() => { expect(old.isReceived(), 'old summary is held').to.be.true; });
+        addMoreProgress();
+        const fresh = duringLoad ? holdResponse('**/api/projects/proj1/summary*', 'newSummary') : null;
+        cy.get(refreshAuthentication).click();
+        if (duringLoad) {
+          cy.wrap(null).should(() => { expect(fresh.isReceived(), 'new summary is held').to.be.true; });
+        } else {
+          assertFreshHome();
+        }
+        cy.then(old.release);
+        cy.wait('@oldSummary');
+        if (duringLoad) {
+          cy.wrapIframe().find('[data-pc-name="progressspinner"]').should('be.visible');
+          cy.wrapIframe().find('[data-cy="earnedPoints"]').should('not.exist');
+          cy.then(fresh.release);
+        }
+        assertFreshHome();
+      });
+    });
+
+    it('ignores an old-token subject snapshot after fresh subject and skill progress loads for the same learner', () => {
+      cy.visit(parentUrl);
+      assertHome();
+      const old = holdResponse('**/api/projects/proj1/subjects/subj1/summary*', 'oldSubject');
+      cy.wrapIframe().find('[data-cy="subjectTile-subj1"] [data-cy="subjectTileBtn"]').click();
+      cy.wrap(null).should(() => { expect(old.isReceived(), 'old subject is held').to.be.true; });
+      addMoreProgress();
+      cy.get(refreshAuthentication).click();
+      assertRecoveredSubject();
+      cy.wrapIframe().find('[data-cy="earnedPoints"]').should('have.text', '200');
+      cy.wrapIframe().find('[data-cy="skillPoints"]').should('have.text', '200');
+      cy.then(old.release);
+      cy.wait('@oldSubject');
+      cy.wrapIframe().find('[data-cy="earnedPoints"]').should('have.text', '200');
+      cy.wrapIframe().find('[data-cy="skillPoints"]').should('have.text', '200');
+    });
+
+    it('ignores successful old-token ranking and point-history responses after recovery for the same learner', () => {
+      const oldRank = holdResponse('**/api/projects/proj1/rank*', 'oldRank', (res) => {
+        res.body.position = 99;
+      });
+      const oldHistory = holdResponse('**/api/projects/proj1/pointHistory*', 'oldHistory', (res) => {
+        res.body = { pointsHistory: [], achievements: [] };
+      });
+      cy.visit(parentUrl);
+      cy.wrapIframe().find('[data-cy="earnedPoints"]').should('have.text', '100');
+      cy.wrap(null).should(() => {
+        expect(oldRank.isReceived(), 'old ranking is held').to.be.true;
+        expect(oldHistory.isReceived(), 'old history is held').to.be.true;
+      });
+      addMoreProgress();
+      cy.get(refreshAuthentication).click();
+      assertFreshHome();
+      cy.wrapIframe().find('[data-cy="pointHistoryChartWithData"]').should('be.visible');
+      cy.then(() => { oldRank.release(); oldHistory.release(); });
+      cy.wait(['@oldRank', '@oldHistory']);
+      assertFreshHome();
+      cy.wrapIframe().find('[data-cy="pointHistoryChartWithData"]').should('be.visible');
+      cy.wrapIframe().find('[data-cy="pointHistoryChartNoData"]').should('not.exist');
+    });
+
+    it('rejects a different authenticated learner until the hosting application recreates the iframe', () => {
+      cy.visit(parentUrl);
+      assertHome();
+      let originalDocument;
+      let originalToken;
+      let otherLearnerToken;
+      let tokenForDisplay;
+      cy.get('iframe').then(($iframe) => { originalDocument = $iframe[0].contentDocument; });
+      cy.request('/api/projects/proj1/token').then(({ body }) => { originalToken = body; });
+      cy.request('/admin/projects/proj1/token/another-learner@skills.org').then(({ body }) => {
+        otherLearnerToken = body;
+        tokenForDisplay = body;
+      });
+      // The authenticator returning another identity violates the fixed-learner contract.
+      // There is deliberately no fixture or SDK operation to switch learners in place.
+      cy.intercept('GET', '**/api/projects/proj1/token', (req) => req.reply(tokenForDisplay)).as('displayAuthenticator');
+      expireAuthentication();
+      cy.get(refreshAuthentication).click();
+      cy.wait('@displayAuthenticator');
+      const initializationError = '[data-cy="skillsDisplayInitError"]';
+      cy.wrapIframe().find(initializationError).should('be.visible').and('have.attr', 'role', 'alert')
+        .and('contain.text', 'authenticated learner has changed').and('contain.text', 'destroy and recreate');
+      cy.wrapIframe().find('[data-cy="skillsDisplayHome"]').should('not.exist');
+      cy.wrapIframe().find('[data-cy="earnedPoints"]').should('not.exist');
+      cy.wrapIframe().find('[data-pc-name="progressspinner"]').should('not.exist');
+
+      // Even a later token for the original learner cannot reopen this violated lifetime.
+      cy.then(() => { tokenForDisplay = originalToken; });
+      cy.get(refreshAuthentication).click();
+      // The UI must remain unchanged; synchronize with token delivery rather than
+      // letting an assertion on the already-visible fatal error race the authenticator.
+      cy.wait('@displayAuthenticator').then(({ response }) => {
+        expect(response.body.access_token).to.equal(originalToken.access_token);
+      });
+      cy.wrapIframe().find(initializationError).should('be.visible').and('contain.text', 'destroy and recreate');
+      cy.wrapIframe().find('[data-cy="skillsDisplayHome"]').should('not.exist');
+
+      // Reloading the host destroys the old iframe; a new instance can bind to the other learner.
+      cy.then(() => { tokenForDisplay = otherLearnerToken; });
+      cy.reload();
+      assertHome();
+      cy.wrapIframe().find('[data-cy="earnedPoints"]').should('have.text', '0');
+      cy.get('iframe').then(($iframe) => { expect($iframe[0].contentDocument).not.to.equal(originalDocument); });
     });
   });
 

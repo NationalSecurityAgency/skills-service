@@ -27,6 +27,11 @@ export const useSkillsDisplayPointHistoryState = defineStore('skillsDisplayPoint
 
   const pointHistoryMap = ref(new Map())
   const pointHistoryDateLoadedMap = ref(new Map())
+  // Reload the fixed iframe learner's history after recovery, before view remounting.
+  const reset = () => {
+    pointHistoryMap.value.clear()
+    pointHistoryDateLoadedMap.value.clear()
+  }
 
   const getUserIdAndVersionParams = () => {
     let config = {}
@@ -72,6 +77,7 @@ export const useSkillsDisplayPointHistoryState = defineStore('skillsDisplayPoint
   }
 
   return {
+    reset,
     loadPointHistory,
     isInitialLoad,
     getPointHistory,

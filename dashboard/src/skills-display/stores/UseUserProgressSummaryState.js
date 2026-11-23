@@ -16,36 +16,50 @@
 import { ref } from 'vue'
 import { defineStore } from 'pinia'
 import { useSkillsDisplayService } from '@/skills-display/services/UseSkillsDisplayService.js'
+import { useSkillsDisplayParentFrameState } from '@/skills-display/stores/UseSkillsDisplayParentFrameState.js'
 
 export const useUserProgressSummaryState = defineStore('userProgressSummaryState', () => {
 
   const skillsDisplayService = useSkillsDisplayService()
+  const parentState = useSkillsDisplayParentFrameState()
 
   const loadingUserProgressSummary = ref(true)
   const userProgressSummary = ref({})
   const loadingUserSkillsRanking = ref(true)
   const userRanking = ref({})
+  // The iframe initializer resets its fixed learner's cache explicitly on recovery.
+  // These shared stores do not subscribe to live learner/context switching.
+  const reset = () => {
+    userProgressSummary.value = {}
+    userRanking.value = {}
+    loadingUserProgressSummary.value = true
+    loadingUserSkillsRanking.value = true
+  }
 
   const loadUserProgressSummary = () => {
+    const isCurrent = parentState.captureAuthGeneration()
+    loadingUserProgressSummary.value = true
     return skillsDisplayService.loadUserProjectSummary()
       .then((result) => {
         userProgressSummary.value = result
       }).finally(() => {
-        loadingUserProgressSummary.value = false
+        if (isCurrent()) loadingUserProgressSummary.value = false
       })
   }
 
   const loadUserSkillsRanking = (subjectId) => {
+    const isCurrent = parentState.captureAuthGeneration()
     loadingUserSkillsRanking.value = true
     return skillsDisplayService.loadUserSkillsRanking(subjectId)
       .then((result) => {
         userRanking.value = result
       }).finally(() => {
-        loadingUserSkillsRanking.value = false
+        if (isCurrent()) loadingUserSkillsRanking.value = false
       })
   }
 
   return {
+    reset,
     userProgressSummary,
     loadUserProgressSummary,
     loadingUserProgressSummary,

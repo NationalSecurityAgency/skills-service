@@ -21,6 +21,7 @@ import { useAppConfig } from '@/common-components/stores/UseAppConfig.js'
 import { useAppInfoState } from '@/stores/UseAppInfoState.js'
 import { useInceptionStore } from '@/stores/UseInceptionStore.js'
 import { useSkillsDisplayParentFrameState } from '@/skills-display/stores/UseSkillsDisplayParentFrameState.js'
+import SkillsClientPath from '@/router/SkillsClientPath.js'
 
 
 export const useAuthState = defineStore('authState', () => {
@@ -152,8 +153,15 @@ export const useAuthState = defineStore('authState', () => {
     const fetchUser = (storeInLocalStorage = true) => {
         return axios.get('/app/userInfo')
           .then((response) => {
-              if (!useSkillsDisplayParentFrameState().isCurrentAuthRequest(response.config)) {
+              const parentState = useSkillsDisplayParentFrameState()
+              if (!parentState.isCurrentAuthRequest(response.config)) {
                   throw new axios.CanceledError('Authentication request was superseded')
+              }
+              if (SkillsClientPath.isSkillsClientIframePath()) {
+                  // An iframe renews credentials for its original learner. Verify before
+                  // storing identity or triggering user-dependent loaders; changing learners
+                  // requires a new iframe. Native login and admin previews remain unrestricted.
+                  parentState.verifyAuthenticatedUser(response.data?.userId)
               }
               storeUser(response.data)
               if (storeInLocalStorage) {
