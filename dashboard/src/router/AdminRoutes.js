@@ -27,6 +27,7 @@ import SkillOverview from '@//components/skills/SkillOverview.vue'
 import Users from '@/components/users/Users.vue'
 import UsersTablePage from '@/components/users/UsersTablePage.vue'
 import SlidesConfigPage from '@/components/slides/SlidesConfigPage.vue'
+import FlashCardsConfigPage from '@/components/flashCards/FlashCardsConfigPage.vue'
 import VideoConfigPage from '@/components/video/VideoConfigPage.vue'
 import ExpirationConfigPage from '@/components/expiration/ExpirationConfigPage.vue'
 import SkillMetricsPage from '@/components/metrics/skill/SkillMetricsPage.vue'
@@ -173,6 +174,17 @@ const createAdminSkillChildRoutes = (baseName) => [
       requiresAuth: true,
       announcer: {
         message: 'Configure Slides',
+      },
+    },
+    props: true,
+  }, {
+    name: `ConfigureFlashCards${baseName}`,
+    path: 'config-flash-cards',
+    component: FlashCardsConfigPage,
+    meta: {
+      requiresAuth: true,
+      announcer: {
+        message: 'Configure Flash Cards',
       },
     },
     props: true,
