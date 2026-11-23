@@ -16,6 +16,30 @@
 
 describe('Skills Display iframe destination security', () => {
   let cleanupSibling;
+  let parentMessageSequence = 0;
+  const sendParentMessages = (messages) => cy.window().then((parentWindow) => new Cypress.Promise((resolve) => {
+    const displayWindow = parentWindow.document.querySelector('#skills-client-container iframe').contentWindow;
+    const type = 'application/x-postmate-v1+json';
+    const uid = `parent-message-fence-${++parentMessageSequence}`;
+    const receiveFence = (event) => {
+      if (event.source === displayWindow && event.data?.postmate === 'reply' && event.data.uid === uid) {
+        cleanupSibling();
+        resolve();
+      }
+    };
+    cleanupSibling = () => parentWindow.removeEventListener('message', receiveFence);
+    parentWindow.addEventListener('message', receiveFence);
+    const fencedMessages = [
+      ...messages.map((message) => ({ type, ...message })),
+      { postmate: 'request', type, property: 'serviceUrl', uid },
+    ];
+    // Execute in the actual embedding window, not the Cypress runner. The reply
+    // fences message delivery so unchanged UI assertions do not race the calls.
+    const script = parentWindow.document.createElement('script');
+    script.textContent = `${JSON.stringify(fencedMessages)}.forEach(message => document.querySelector('#skills-client-container iframe').contentWindow.postMessage(message, window.location.origin));`;
+    parentWindow.document.body.appendChild(script);
+    script.remove();
+  }));
   beforeEach(() => {
     cleanupSibling = null;
     cy.createProject(1);
@@ -66,16 +90,99 @@ describe('Skills Display iframe destination security', () => {
     cy.wrapIframe().find('[data-cy="skillProgressTitle-skill2"]').should('not.exist');
   });
 
+  [0, '0', null].forEach((version) => {
+    it(`keeps the initial version ${JSON.stringify(version)} and current route when the parent repeats or changes the version`, () => {
+      cy.createSkill(1, 1, 2, { version: 1 });
+      // loglevel binds console methods during initialization; capture warnings
+      // before the real iframe bundle loads rather than spying on a later binding.
+      cy.intercept('GET', '**/static/clientPortal/index.html', (req) => {
+        req.continue((res) => {
+          res.body = res.body.replace('<head>', `<head><script>
+            window.skillsDisplayWarnings = [];
+            const originalWarn = console.warn;
+            console.warn = function (...args) {
+              window.skillsDisplayWarnings.push(args.join(' '));
+              originalWarn.apply(console, args);
+            };
+          </script>`);
+        });
+      });
+      const modelOverrides = encodeURIComponent(JSON.stringify({ version }));
+      cy.visit(`/__e2e/skills-display-parent?modelOverrides=${modelOverrides}`);
+      const expectedSkillCount = version === null ? '2' : '1';
+      cy.wrapIframe().find('[data-cy="numTotalSkills"]').should('have.text', expectedSkillCount);
+      cy.wrapIframe().find('[data-cy="subjectTile-subj1"] [data-cy="subjectTileBtn"]').click();
+      cy.wrapIframe().find('[data-cy="skillsTitle"]').should('contain.text', 'Subject 1');
+      let routeChangedCount;
+      cy.get('[data-cy="routeChangedCount"]').invoke('text').then((text) => { routeChangedCount = text; });
+      sendParentMessages([
+        { postmate: 'call', property: 'updateVersion', data: version },
+        { postmate: 'call', property: 'updateVersion', data: version },
+      ]);
+      cy.wrapIframe().should((body) => {
+        const warnings = Cypress.$(body)[0].ownerDocument.defaultView.skillsDisplayWarnings;
+        expect(warnings.filter((message) => message.includes('ignored a version change')), 'identical versions do not warn').to.have.length(0);
+      });
+      cy.wrapIframe().find('[data-cy="skillsTitle"]').should('contain.text', 'Subject 1');
+      cy.get('[data-cy="routeChangedCount"]').should(($count) => {
+        expect($count.text(), 'identical versions do not navigate').to.equal(routeChangedCount);
+      });
+
+      const differentVersions = version === null ? [0, 1] : [1, null];
+      sendParentMessages(differentVersions.map((data) => ({ postmate: 'call', property: 'updateVersion', data })));
+      cy.wrapIframe().should((body) => {
+        const warnings = Cypress.$(body)[0].ownerDocument.defaultView.skillsDisplayWarnings
+          .filter((message) => message.includes('ignored a version change'));
+        expect(warnings, 'different versions warn').to.have.length(2);
+        warnings.forEach((message) => expect(message).to.include('destroy and recreate Skills Display'));
+      });
+      cy.wrapIframe().find('[data-cy="skillsTitle"]').should('contain.text', 'Subject 1');
+      cy.get('[data-cy="routeChangedCount"]').should(($count) => {
+        expect($count.text(), 'different versions do not navigate').to.equal(routeChangedCount);
+      });
+      // Fresh navigation proves the ignored updates did not change version state.
+      cy.wrapIframe().find('[data-cy="back"]').click();
+      cy.wrapIframe().find('[data-cy="numTotalSkills"]').should('have.text', expectedSkillCount);
+      cy.wrapIframe().find('[data-cy="subjectTile-subj1"] [data-cy="subjectTileBtn"]').click();
+      cy.wrapIframe().find('[data-cy="skillProgressTitle-skill1"]').should('be.visible');
+      cy.wrapIframe().find('[data-cy="skillProgressTitle-skill2"]').should(version === null ? 'be.visible' : 'not.exist');
+    });
+  });
+
+  it('does not re-authenticate or navigate when the parent repeats the current authentication token', () => {
+    cy.intercept('GET', '**/api/projects/proj1/token').as('initialToken');
+    cy.visit('/__e2e/skills-display-parent');
+    cy.wrapIframe().find('[data-cy="subjectTile-subj1"] [data-cy="subjectTileBtn"]').should('be.visible').click();
+    cy.wrapIframe().find('[data-cy="skillsTitle"]').should('contain.text', 'Subject 1');
+    cy.intercept('GET', '**/app/userInfo').as('unexpectedAuthentication');
+    cy.wait('@initialToken').then(({ response }) => sendParentMessages([
+      { postmate: 'call', property: 'updateAuthenticationToken', data: response.body.access_token },
+      { postmate: 'call', property: 'updateAuthenticationToken', data: response.body.access_token },
+    ]));
+    cy.wrapIframe().find('[data-cy="skillsTitle"]').should('be.visible').and('contain.text', 'Subject 1');
+    cy.wrapIframe().find('[data-cy="skillsDisplayAuthenticationError"]').should('not.exist');
+    // Request absence is intentional: duplicate credentials must not start recovery.
+    cy.get('@unexpectedAuthentication.all').should('have.length', 0);
+  });
+
   it('rejects an attacker service URL without sending requests to it', () => {
     const attackerUrl = 'https://attacker.example';
     cy.intercept(`${attackerUrl}/**`, { statusCode: 200, body: {} }).as('attackerRequests');
     cy.intercept('GET', '**/api/projects/proj1/token').as('tokenRequests');
-    cy.visit(`/__e2e/skills-display-parent?serviceUrl=${encodeURIComponent(attackerUrl)}`);
+    cy.visit(`/__e2e/skills-display-parent?autoHeight=true&minHeight=100px&serviceUrl=${encodeURIComponent(attackerUrl)}`);
 
     cy.get('iframe').should('have.attr', 'src', `${new URL(Cypress.config('baseUrl')).origin}/static/clientPortal/index.html`);
     cy.wrapIframe().find('[data-cy="skillsDisplayInitError"]')
       .should('be.visible').and('contain.text', 'same origin as the SkillTree iframe');
     cy.wrapIframe().find('[data-cy="subjectTile-subj1"]').should('not.exist');
+    cy.get('#skills-client-container iframe').should(($iframe) => {
+      const frame = $iframe[0];
+      const root = frame.contentDocument.querySelector('#skilltree-main-container');
+      expect(root, 'initialization-error content root').not.to.be.null;
+      const expectedHeight = Math.max(root.getBoundingClientRect().height + 10, 100);
+      expect(frame.getBoundingClientRect().height, 'initialization error is not clipped by a zero-height iframe').to.be.closeTo(expectedHeight, 1);
+      expect(frame.parentElement.getBoundingClientRect().height, 'host fits initialization error').to.be.closeTo(expectedHeight, 1);
+    });
     // The rendered error establishes that initialization has finished rejecting the model.
     cy.get('@attackerRequests.all').should('have.length', 0);
     cy.get('@tokenRequests.all').should('have.length', 0);
@@ -122,40 +229,20 @@ describe('Skills Display iframe destination security', () => {
     cy.get('@unexpectedAuthentication.all').should('have.length', 0);
   });
 
-  it('ignores malformed parent navigation and supports a valid parent version update', () => {
+  it('ignores malformed parent navigation and version values without leaving the current route', () => {
     cy.visit('/__e2e/skills-display-parent');
     cy.wrapIframe().find('[data-cy="subjectTile-subj1"] [data-cy="subjectTileBtn"]').should('be.visible').click();
     cy.wrapIframe().find('[data-cy="skillsTitle"]').should('contain.text', 'Subject 1');
-    cy.window().then((parentWindow) => new Cypress.Promise((resolve) => {
-      const displayWindow = parentWindow.document.querySelector('#skills-client-container iframe').contentWindow;
-      const type = 'application/x-postmate-v1+json';
-      const uid = 'parent-navigation-fence';
-      const receiveFence = (event) => {
-        if (event.source === displayWindow && event.data?.postmate === 'reply' && event.data.uid === uid) {
-          cleanupSibling();
-          resolve();
-        }
-      };
-      cleanupSibling = () => parentWindow.removeEventListener('message', receiveFence);
-      parentWindow.addEventListener('message', receiveFence);
-      const messages = [
-        { postmate: 'call', type, property: 'navigate', data: null },
-        { postmate: 'call', type, property: 'navigate', data: { name: 'NonexistentEmbeddedRoute' } },
-        { postmate: 'call', type, property: 'navigate', data: { name: 'SkillsDisplayInIframe' } },
-        { postmate: 'call', type, property: { toString: 'not-a-function' }, data: 'invalid-token' },
-        { postmate: 'request', type, property: ['updateAuthenticationToken'], uid: 'malformed-property' },
-        { postmate: 'call', type, property: 'updateVersion', data: { invalid: 'version' } },
-        { postmate: 'call', type, property: 'updateVersion', data: 0 },
-        { postmate: 'request', type, property: 'serviceUrl', uid },
-      ];
-      // Post the calls from the actual embedding window, not the Cypress runner.
-      const script = parentWindow.document.createElement('script');
-      script.textContent = `${JSON.stringify(messages)}.forEach(message => document.querySelector('#skills-client-container iframe').contentWindow.postMessage(message, window.location.origin));`;
-      parentWindow.document.body.appendChild(script);
-      script.remove();
-    }));
-    cy.wrapIframe().find('[data-cy="subjectTile-subj1"]').should('be.visible');
-    cy.wrapIframe().find('[data-cy="skillsTitle"]').should('contain.text', 'User Skills');
+    sendParentMessages([
+      { postmate: 'call', property: 'navigate', data: null },
+      { postmate: 'call', property: 'navigate', data: { name: 'NonexistentEmbeddedRoute' } },
+      { postmate: 'call', property: 'navigate', data: { name: 'SkillsDisplayInIframe' } },
+      { postmate: 'call', property: { toString: 'not-a-function' }, data: 'invalid-token' },
+      { postmate: 'request', property: ['updateAuthenticationToken'], uid: 'malformed-property' },
+      { postmate: 'call', property: 'updateVersion', data: { invalid: 'version' } },
+    ]);
+    cy.wrapIframe().find('[data-cy="skillProgressTitle-skill1"]').should('be.visible');
+    cy.wrapIframe().find('[data-cy="skillsTitle"]').should('contain.text', 'Subject 1');
     cy.wrapIframe().find('[data-cy="skillsDisplayInitError"]').should('not.exist');
     cy.wrapIframe().find('[data-cy="skillsDisplayAuthenticationError"]').should('not.exist');
   });
@@ -195,7 +282,7 @@ describe('Skills Display iframe destination security', () => {
     const theme = { pageTitle: { textColor: '#123456' }, tiles: { backgroundColor: '#ffffff' }, breadcrumb: { align: 'center' } };
     cy.visit(`/__e2e/skills-display-parent?minHeight=450px&theme=${encodeURIComponent(JSON.stringify(theme))}`);
     cy.wrapIframe().find('[data-cy="skillsTitle"]').should('be.visible').and('have.css', 'color', 'rgb(18, 52, 86)');
-    cy.wrapIframe().find('#skills-display-app').should('have.css', 'min-height', '450px');
+    cy.wrapIframe().find('#skilltree-main-container').should('have.css', 'min-height', '450px');
     cy.wrapIframe().find('[data-cy="skillsDisplayInitError"]').should('not.exist');
   });
 

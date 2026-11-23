@@ -27,6 +27,14 @@ describe('Embedded Skills Display authentication recovery', () => {
     cy.wrapIframe().find(authenticationError).should('not.exist');
     cy.wrapIframe().find('[data-pc-name="progressspinner"]').should('not.exist');
   };
+  const assertHeightFitsDisplay = (minHeight = 960) => cy.get('#skills-client-container iframe').should(($iframe) => {
+    const frame = $iframe[0];
+    const root = frame.contentDocument.querySelector('#skilltree-main-container');
+    expect(root, 'persistent iframe content root').not.to.be.null;
+    const expectedHeight = Math.max(root.getBoundingClientRect().height + 10, minHeight);
+    expect(frame.getBoundingClientRect().height, 'iframe fits its current content').to.be.closeTo(expectedHeight, 1);
+    expect(frame.parentElement.getBoundingClientRect().height, 'host container fits its current content').to.be.closeTo(expectedHeight, 1);
+  });
 
   beforeEach(() => {
     createCompactViewProject({ compact: false });
@@ -76,14 +84,43 @@ describe('Embedded Skills Display authentication recovery', () => {
   };
 
   describe('Startup', () => {
+    let releaseStartup;
+    beforeEach(() => { releaseStartup = null; });
+    afterEach(() => releaseStartup?.());
+
+    it('sizes the host for the loading screen before startup authentication completes', () => {
+      let userInfoReceived = false;
+      const startupGate = new Cypress.Promise((resolve) => { releaseStartup = resolve; });
+      cy.intercept({ method: 'GET', url: '**/app/userInfo', times: 1 }, (req) => {
+        req.continue(() => {
+          userInfoReceived = true;
+          return startupGate;
+        });
+      });
+      cy.visit('/__e2e/skills-display-parent?autoHeight=true&minHeight=100px');
+      cy.wrap(null).should(() => { expect(userInfoReceived, 'startup identity response is held').to.be.true; });
+      cy.wrapIframe().find('[data-pc-name="progressspinner"]').should('be.visible');
+      cy.wrapIframe().find('[data-cy="skillsDisplayHome"]').should('not.exist');
+      assertHeightFitsDisplay(100);
+      cy.then(() => releaseStartup());
+      assertHome();
+      assertHeightFitsDisplay(100);
+    });
+
     it('requests a replacement token and initializes the display when the first user-information request returns 401', () => {
       cy.intercept({ method: 'GET', url: '**/app/userInfo', times: 1 }, { statusCode: 401, body: {} });
       // A new iframe has never populated its user information.
-      cy.visit('/__e2e/skills-display-parent?manualRecovery=true');
+      // A small configured minimum makes stale loading-screen heights detectable.
+      cy.visit('/__e2e/skills-display-parent?manualRecovery=true&autoHeight=true&minHeight=100px');
       cy.wrapIframe().find(authenticationError).should('be.visible').and('contain.text', 'authentication has expired');
       cy.wrapIframe().find('[data-pc-name="progressspinner"]').should('not.exist');
+      assertHeightFitsDisplay(100);
       cy.get(refreshAuthentication).should('be.visible').click();
       assertHome();
+      assertHeightFitsDisplay(100);
+      cy.wrapIframe().find('[data-cy="subjectTile-subj1"] [data-cy="subjectTileBtn"]').click();
+      assertRecoveredSubject();
+      assertHeightFitsDisplay(100);
     });
 
     describe('Superseded startup authentication', () => {
@@ -303,14 +340,16 @@ describe('Embedded Skills Display authentication recovery', () => {
             if (failRequests) return req.reply(response);
             return req.continue();
           });
-          cy.visit('/__e2e/skills-display-parent?manualRecovery=true');
+          cy.visit('/__e2e/skills-display-parent?manualRecovery=true&autoHeight=true&minHeight=100px');
           cy.wrapIframe().find('[data-cy="skillsDisplayInitError"]').should('be.visible')
             .and('have.attr', 'role', 'alert').and('contain.text', 'Unable to load Skills Display');
           cy.wrapIframe().find('[data-pc-name="progressspinner"]').should('not.exist');
           cy.wrapIframe().find('[data-cy="skillsDisplayHome"]').should('not.exist');
+          assertHeightFitsDisplay(100);
           cy.then(() => { failRequests = false; });
           cy.reload();
           assertHome();
+          assertHeightFitsDisplay(100);
         });
       });
     });
@@ -768,14 +807,6 @@ describe('Embedded Skills Display authentication recovery', () => {
     cy.createSubject(1, 1, { description });
     cy.visit('/__e2e/skills-display-parent?manualRecovery=true&autoHeight=true');
     assertHome();
-    const assertHeightFitsDisplay = () => cy.get('#skills-client-container iframe').should(($iframe) => {
-      const frame = $iframe[0];
-      const root = frame.contentDocument.querySelector('#skills-display-app');
-      expect(root, 'current display root').not.to.be.null;
-      const expectedHeight = Math.max(Cypress.$(root).height() + 10, 960);
-      expect(frame.getBoundingClientRect().height, 'iframe fits its current content').to.be.closeTo(expectedHeight, 1);
-      expect(frame.parentElement.getBoundingClientRect().height, 'host container fits its current content').to.be.closeTo(expectedHeight, 1);
-    });
     assertHeightFitsDisplay();
     let iframeDocument;
     cy.get('#skills-client-container iframe').then(($iframe) => { iframeDocument = $iframe[0].contentDocument; });
@@ -783,16 +814,17 @@ describe('Embedded Skills Display authentication recovery', () => {
       let previousRoot;
       let homeHeight;
       cy.get('#skills-client-container iframe').then(($iframe) => {
-        previousRoot = $iframe[0].contentDocument.querySelector('#skills-display-app');
+        previousRoot = $iframe[0].contentDocument.querySelector('#skilltree-main-container');
       });
       expireAuthentication();
+      assertHeightFitsDisplay();
       cy.get('[data-cy="navigateDisplayHome"]').click();
       cy.get(refreshAuthentication).click();
       assertHome();
       assertHeightFitsDisplay();
       cy.get('#skills-client-container iframe').then(($iframe) => {
         expect($iframe[0].contentDocument, 'recovery retains the iframe document').to.equal(iframeDocument);
-        expect($iframe[0].contentDocument.querySelector('#skills-display-app'), 'recovery replaces the observed root').not.to.equal(previousRoot);
+        expect($iframe[0].contentDocument.querySelector('#skilltree-main-container'), 'recovery retains the observed root').to.equal(previousRoot);
         homeHeight = $iframe[0].getBoundingClientRect().height;
       });
       cy.wrapIframe().find('[data-cy="subjectTile-subj1"] [data-cy="subjectTileBtn"]').click();

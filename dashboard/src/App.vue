@@ -223,7 +223,7 @@ const isDashboardFooter = computed(() => notSkillsClient.value && !isLoadingApp.
     <VueAnnouncer class="sr-only" />
 
     <customizable-header v-if="isCustomizableHeader" role="region" aria-label="dynamic customizable header"></customizable-header>
-    <div id="skilltree-main-container">
+    <div id="skilltree-main-container" :class="{ 'flow-root': skillsDisplayInfo.isSkillsClientPath() }">
       <div v-if="iframeInit.initializationError.value" role="alert" data-cy="skillsDisplayInitError" class="p-4">
         {{ iframeInit.initializationError.value }}
       </div>

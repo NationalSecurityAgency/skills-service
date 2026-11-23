@@ -25,10 +25,11 @@ import { useSkillsDisplayAttributesState } from '@/skills-display/stores/UseSkil
 
 const appStyleObject = ref({})
 
-// Embedded contract: this iframe belongs to one authenticated learner for its
-// entire lifetime. Re-authentication may remount this view for the same learner;
-// switching learners requires the host to destroy/recreate the iframe. The iframe
-// initializer owns recovery resets because Pinia stores survive a view remount.
+// Embedded contract: this iframe has one authenticated learner, fixed display
+// userId and skills version for its entire lifetime. Re-authentication may remount
+// this view for the same learner; changing targets requires the host to destroy
+// and recreate the iframe. The initializer owns recovery resets because Pinia
+// stores survive a view remount.
 const skillDisplayParentFrameState = useSkillsDisplayParentFrameState()
 const skillsDisplayInfo = useSkillsDisplayInfo()
 const displayAttributes = useSkillsDisplayAttributesState()

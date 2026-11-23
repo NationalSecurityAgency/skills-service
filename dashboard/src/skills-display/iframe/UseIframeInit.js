@@ -97,7 +97,6 @@ export const useIframeInit = (isLoadingApp, initializeEmbeddedDisplay = () => {}
     // Keep the iframe blocked even if the parent subsequently sends the original
     // learner's token; only destroying/recreating the display starts a new lifetime.
     initializationError.value = error.message
-    disconnectHeightListener()
     authState.clearAuthData()
     return true
   }
@@ -173,8 +172,12 @@ export const useIframeInit = (isLoadingApp, initializeEmbeddedDisplay = () => {}
   const registerHeightListener = () => {
     clearTimeout(heightListenerTimeout)
     heightListenerTimeout = null
-    if (disposed || displayBlocked.value || !resizeObserver) return
-    const elementToObserve = document.querySelector("#skills-display-app")
+    if (disposed || !resizeObserver) return
+    // This persistent root includes loading, authentication and initialization
+    // errors as well as routed content. The SDK starts its container at 0px.
+    // Do not observe the viewport-sized outer wrapper: that would feed host
+    // height changes back into the reported content height.
+    const elementToObserve = document.querySelector('#skilltree-main-container')
     if (elementToObserve) {
       if (appStyleObject.value['min-height']) elementToObserve.style.minHeight = appStyleObject.value['min-height']
       if (observedElement !== elementToObserve) {
@@ -189,8 +192,8 @@ export const useIframeInit = (isLoadingApp, initializeEmbeddedDisplay = () => {}
     }
   }
   watch(displayBlocked, () => {
-    disconnectHeightListener()
-    if (resizeObserver && !displayBlocked.value) nextTick(registerHeightListener)
+    // Recheck after branch changes, without disconnecting while an error is shown.
+    if (resizeObserver) nextTick(registerHeightListener)
   })
 
   const handleHandshake =() => {
@@ -265,14 +268,8 @@ export const useIframeInit = (isLoadingApp, initializeEmbeddedDisplay = () => {}
         if (disposed || !completedHandshake.value || initializationError.value) return
         if (newVersion != null && typeof newVersion !== 'string' &&
           (typeof newVersion !== 'number' || !Number.isFinite(newVersion))) return
-        displayAttributes.version = newVersion
-        if (log.isTraceEnabled()) {
-          log.trace(`UseIframeInit.js: updateVersion: ${newVersion}`)
-        }
-        // The iframe's home CHILD route is context-specific; appending the client
-        // suffix to SkillsDisplayInIframe would name a nonexistent parent route.
-        router.push({ name: displayInfo.getContextSpecificRouteName('SkillsDisplay') })
-          .catch(() => log.warn('Skills Display could not navigate after a version update'))
+        if ((newVersion ?? null) === displayAttributes.version) return
+        log.warn('Skills Display ignored a version change. The embedding application must destroy and recreate Skills Display to use a different skills version.')
       },
       navigate(route) {
         if (disposed || !completedHandshake.value || initializationError.value) return
@@ -301,6 +298,22 @@ export const useIframeInit = (isLoadingApp, initializeEmbeddedDisplay = () => {}
       clearTimeout(handshakeTimeout)
       if (disposed || initializationError.value) return
       log.debug('UseIframeInit.js: handshake.then')
+      // Keep a height-only channel to the trusted Postmate parent even if model
+      // validation fails. Authentication and navigation still require successful
+      // initialization; an invalid model must never be stored in parentState.
+      resizeObserver = new ResizeObserver(function(entries) {
+        if (disposed) return
+        // Ignore queued notifications for a disconnected root.
+        const observedEntry = entries.find((entry) => entry.target === observedElement && entry.target.isConnected)?.contentRect;
+        if (observedEntry && observedEntry.height > 0) {
+          const newHeight = observedEntry.height + 10;
+          log.debug(`UseIframeInit.js: changing height to [${newHeight}]`)
+          parent.emit('height-changed', newHeight)
+        } else {
+          log.warn('UseIframeInit.js: resize event got height of 0')
+        }
+      });
+      registerHeightListener()
       let serviceUrl
       try {
         serviceUrl = validateSkillsDisplayServiceUrl(parent.model.serviceUrl)
@@ -327,23 +340,15 @@ export const useIframeInit = (isLoadingApp, initializeEmbeddedDisplay = () => {}
       if (parent.model.options != null && (typeof parent.model.options !== 'object' || Array.isArray(parent.model.options))) {
         throw new Error('Invalid Skills Display options')
       }
+      // Embedded contract: the learner, optional display userId and skills version
+      // are fixed for this iframe lifetime. Tokens may be renewed for the same
+      // learner, but changing any of these targets requires the host to destroy
+      // and recreate Skills Display. Nullish handling preserves version 0.
       parentState.beginAuthenticationSession()
       resetEmbeddedProgress()
       // Make sure to freeze the parent object so Pinia won't try to make it reactive
       // CORs won't allow this because parent object can't be changed from an iframe
       parentState.parentFrame = Object.freeze(parent)
-      resizeObserver = new ResizeObserver(function(entries) {
-        if (disposed || displayBlocked.value || !parentState.parentFrame) return
-        // A queued notification from a removed root cannot resize its replacement.
-        const observedEntry = entries.find((entry) => entry.target === observedElement && entry.target.isConnected)?.contentRect;
-        if (observedEntry && observedEntry.height > 0) {
-          const newHeight = observedEntry.height + 10;
-          log.debug(`UseIframeInit.js: changing height to [${newHeight}]`)
-          parentState.parentFrame.emit('height-changed', newHeight)
-        } else {
-          log.warn('UseIframeInit.js: resize event got height of 0')
-        }
-      });
 
       // will only display summary and component will not be interactive
       displayAttributes.isSummaryOnly = parent.model.isSummaryOnly ? parent.model.isSummaryOnly : false
@@ -386,7 +391,6 @@ export const useIframeInit = (isLoadingApp, initializeEmbeddedDisplay = () => {}
     }).catch(() => {
       clearTimeout(handshakeTimeout)
       if (disposed) return
-      disconnectHeightListener()
       parentState.parentFrame = null
       parentState.setAuthToken('')
       completedHandshake.value = false

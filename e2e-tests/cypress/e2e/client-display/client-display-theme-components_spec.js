@@ -60,9 +60,9 @@ describe('Client Display Theme Components Tests', () => {
     // The SDK updates the host height asynchronously after the child's ResizeObserver fires.
     cy.get('body iframe').should($iframe => {
       const frame = $iframe[0]
-      const display = frame.contentDocument.querySelector('#skills-display-app')
+      const display = frame.contentDocument.querySelector('#skilltree-main-container')
       expect(display, 'embedded display root').not.to.be.null
-      const expectedHeight = Math.max(Cypress.$(display).height() + 10, 960)
+      const expectedHeight = Math.max(display.getBoundingClientRect().height + 10, 960)
       expect(frame.getBoundingClientRect().height, 'iframe height').to.be.closeTo(expectedHeight, 1)
     })
   }
