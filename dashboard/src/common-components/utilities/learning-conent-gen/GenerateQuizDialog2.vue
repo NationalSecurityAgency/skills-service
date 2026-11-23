@@ -180,6 +180,9 @@ const handleGeneratedChunk = (chunk, historyId) => {
             log.debug(`found complete question [jsonStr: ${jsonStr}]`)
             const question = safeJsonParse(jsonStr);
             if (question && question.question) {  // Basic validation
+              // Question cards also mount WYSIWYG editors; do not publish unsafe
+              // questions even while the surrounding JSON is still streaming.
+              imgHandler.validateGeneratedImages(question.question)
               const questionIdx = currentQuizData && currentQuizData.value && currentQuizData.value.length ? currentQuizData.value.length : 0
               question.name = `q${historyId}${questionIdx + 1}`;
               ensureValidQuestionType(question);
@@ -266,6 +269,7 @@ const handleGenerationCompleted = (generated) => {
       throw new Error(`Generated quiz question ${questionIdx + 1} is invalid`)
     }
     question.name = `q${generated.id}${questionIdx + 1}`
+    imgHandler.validateGeneratedImages(question.question)
     ensureValidQuestionType(question)
     return question
   })

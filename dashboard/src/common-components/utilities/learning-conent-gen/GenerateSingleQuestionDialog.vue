@@ -167,6 +167,7 @@ const handleGenerationCompleted = (generated) => {
     const answers = QuestionType.isTextInput(props.questionType.selectedType?.id) ? [] : JSON.parse(cleanJsonString(answersMatch[1].trim()))
     // Retain mappings because raw assistant history keeps placeholders for follow-ups.
     const { text: question } = imgHandler.reinsertImages(questionMatch[1].trim(), extractedImageState.extractedImages, appConfig.descriptionMaxLength)
+    imgHandler.validateGeneratedImages(question)
     // Build the preview from the validated question with canonical heading separators.
     // Preserve formatting within the question, including fenced code examples.
     const generatedValue = `${questionsTitle}\n\n${question}\n\n${answersTitle}`

@@ -14,7 +14,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <script setup>
-import {computed, onMounted, ref} from 'vue'
+import {computed, inject, onMounted, ref} from 'vue'
+import { restrictedMarkdownImagesKey } from '@/common-components/utilities/markdown/MarkdownImagePolicy.js'
 import {useField} from 'vee-validate'
 import ToastUiEditor from '@/common-components/utilities/markdown/ToastUiEditor.vue'
 import MarkdownText from "@/common-components/utilities/markdown/MarkdownText.vue";
@@ -160,7 +161,7 @@ const options = {
   plugins: [fontSize],
 }
 const announcer = useSkillsAnnouncer()
-const commonOptions = useCommonMarkdownOptions()
+const commonOptions = useCommonMarkdownOptions(inject(restrictedMarkdownImagesKey, false))
 const markdownAccessibilityFixes = useMarkdownAccessibilityFixes()
 const editorOptions = Object.assign(commonOptions.markdownOptions, options)
 

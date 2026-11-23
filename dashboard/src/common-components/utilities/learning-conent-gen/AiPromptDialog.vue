@@ -14,7 +14,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <script setup>
-import {computed, nextTick, onMounted, ref, useTemplateRef} from 'vue'
+import {computed, nextTick, onMounted, provide, ref, useTemplateRef} from 'vue'
+import { restrictedMarkdownImagesKey } from '@/common-components/utilities/markdown/MarkdownImagePolicy.js'
 import SkillsDialog from "@/components/utils/inputForm/SkillsDialog.vue";
 import MarkdownText from "@/common-components/utilities/markdown/MarkdownText.vue";
 import AssistantMsg from "@/common-components/utilities/learning-conent-gen/AssistantMsg.vue";
@@ -35,6 +36,8 @@ import InputSanitizer from "@/components/utils/InputSanitizer.js";
 
 
 const model = defineModel()
+// Include slotted previews (such as quiz question cards), chat, and change notes.
+provide(restrictedMarkdownImagesKey, true)
 const props = defineProps({
   createInstructionsFn: {
     type: Function,

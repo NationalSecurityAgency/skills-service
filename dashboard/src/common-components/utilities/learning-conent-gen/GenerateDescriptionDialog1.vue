@@ -117,6 +117,8 @@ const handleGenerationCompleted = (generated) => {
   }
   const {genValue, getValueNotes} = AssistantGenUtil.handleWhatChangedSection(generated.generatedValue)
   const { text: generatedValue } = imgHandler.reinsertImages(genValue, extractedImageState.extractedImages, appConfig.descriptionMaxLength)
+  // Reject before this content can be applied to an unrestricted editor.
+  imgHandler.validateGeneratedImages(generatedValue)
   const generateValueChangedNotes = getValueNotes
 
   return {
