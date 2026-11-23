@@ -225,10 +225,19 @@ export const useIframeInit = (isLoadingApp, initializeEmbeddedDisplay = () => {}
         // Postmate merges the parent's model onto the child API with assignment.
         // Do not allow that merge to replace methods or alter the API's prototype.
         const reservedKeys = ['updateAuthenticationToken', 'updateVersion', 'navigate', '__proto__', 'constructor', 'prototype']
+        const rejectedReservedKey = model && typeof model === 'object' && !Array.isArray(model)
+          ? reservedKeys.find((key) => Object.prototype.hasOwnProperty.call(model, key))
+          : undefined
         if (!model || typeof model !== 'object' || Array.isArray(model) ||
-          reservedKeys.some((key) => Object.prototype.hasOwnProperty.call(model, key))) {
+          rejectedReservedKey) {
+          // Intentionally reject before Postmate completes its handshake. A zero-height SDK
+          // container may hide the error, but this malformed/hostile-model edge case does
+          // not justify a separate error/height channel.
           event.stopImmediatePropagation()
           initializationError.value = 'Unable to initialize Skills Display. Please verify the embedding configuration and refresh the page.'
+          if (rejectedReservedKey) {
+            log.error(`Skills Display rejected the handshake model: reserved key [${rejectedReservedKey}] is not allowed.`)
+          }
           return
         }
         trustedParentOrigin = event.origin
