@@ -48,6 +48,7 @@ import skills.services.attributes.BonusAwardAttrs
 import skills.services.attributes.ExpirationAttrs
 import skills.services.attributes.SkillAttributeService
 import skills.services.attributes.SlidesAttrs
+import skills.services.flashCards.AdminFlashCardsService
 import skills.services.settings.ClientPrefKey
 import skills.services.settings.ClientPrefService
 import skills.services.settings.Settings
@@ -698,6 +699,7 @@ class SkillsLoader {
                 tags: loadSkillTags(skillDef.id),
                 videoSummary: getVideoSummary(skillDef.copiedFrom ?: skillDef.id),
                 slidesSummary: getSlidesSummary(skillDef.copiedFrom ?: skillDef.id),
+                flashCards: AdminFlashCardsService.unsanitize(skillAttributeService.getFlashCardsAttrs(skillDef.copiedFrom ?: skillDef.id)).cards ?: null,
                 expirationDate: expirationDate,
                 isMotivationalSkill: isMotivationalSkill,
                 daysOfInactivityBeforeExp: daysOfInactivityBeforeExp,
