@@ -194,6 +194,31 @@ describe('Contact Project Admins Specs', () => {
         })
     });
 
+    it('sanitizes unsafe editor links before exporting an email body', () => {
+        cy.visit('/administrator/contactAdmins');
+        cy.get('[data-cy="emailUsers_subject"]').type('Safe HTML export');
+        cy.get('[data-cy="markdownEditorInput"] .toastui-editor-mode-switch').contains('Markdown').click();
+        cy.typeInMarkdownEditor('[data-cy="markdownEditorInput"]',
+            '[unsafe](javascript:alert(1)) and [safe](https://example.com)', true);
+        cy.get('[data-cy="markdownEditorInput"] .toastui-editor-mode-switch').contains('WYSIWYG').click();
+        cy.get('[data-cy="markdownEditorInput"] .toastui-editor-contents').should('contain.text', 'unsafe and safe');
+
+        // The outbound body is the behavior under test: server-side cleaning must
+        // not hide a regression in the dashboard's HTML-export sanitization.
+        cy.intercept('POST', '/root/users/previewEmail', (request) => {
+            expect(request.body.emailBody).not.to.contain('javascript:');
+            expect(request.body.emailBody).to.contain('https://example.com');
+        }).as('safeHtmlPreview');
+        cy.get('[data-cy="previewAdminEmail"]').should('be.enabled').click();
+        cy.wait('@safeHtmlPreview');
+        cy.get('[data-cy="emailSent"]').should('be.visible');
+        cy.getEmails().then((emails) => {
+            expect(emails[0].html).not.to.contain('javascript:');
+            expect(emails[0].html).to.contain('https://example.com');
+            expect(emails[0].text).to.contain('unsafe');
+        });
+    });
+
     it('attachments are not enabled', () => {
 
         cy.intercept('GET', '/public/isFeatureSupported?feature=emailservice')
