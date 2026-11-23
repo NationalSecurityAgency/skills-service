@@ -70,6 +70,25 @@ class BatchUpdateSkillsValidationSpec extends DefaultIntSpec {
         ex.message.contains("Must provide at least 1 attribute to update")
     }
 
+    def "justificationRequired must be true or false"() {
+        given:
+        def p1 = createProject(1)
+        def p1subj1 = createSubject(1, 1)
+        def p1skills = createSkills(1, 1, 1, 100)
+        p1skills[0].selfReportingType = SkillDef.SelfReportingType.Approval.toString()
+        skillsService.createProjectAndSubjectAndSkills(p1, p1subj1, p1skills)
+
+        when:
+        skillsService.batchUpdateSkills(p1.projectId, [
+                skills: [p1skills[0].skillId],
+                justificationRequired: "yes"
+        ])
+
+        then:
+        def ex = thrown(SkillsClientException)
+        ex.message.contains("justificationRequired must be true or false")
+    }
+
     def "should return error when skill is not of skill type"() {
         given:
         def p1 = createProject(1)
