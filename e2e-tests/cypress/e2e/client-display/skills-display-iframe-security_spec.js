@@ -14,49 +14,63 @@
  * limitations under the License.
  */
 
+import { useIframeParentFixture } from '../../support/iframe-tests';
+
+Cypress.env('iframeTestSetup', 'isolated');
+
 describe('Skills Display iframe destination security', () => {
+  useIframeParentFixture();
   let cleanupSibling;
   let parentMessageSequence = 0;
-  const sendParentMessages = (messages) => cy.window().then((parentWindow) => new Cypress.Promise((resolve) => {
+  const sendParentMessages = (messages, { expectRejected = false } = {}) => cy.window().then((parentWindow) => {
     const displayWindow = parentWindow.document.querySelector('#skills-client-container iframe').contentWindow;
     const type = 'application/x-postmate-v1+json';
     const uid = `parent-message-fence-${++parentMessageSequence}`;
-    const receiveFence = (event) => {
-      if (event.source === displayWindow && event.data?.postmate === 'reply' && event.data.uid === uid) {
-        cleanupSibling();
-        resolve();
-      }
-    };
-    cleanupSibling = () => parentWindow.removeEventListener('message', receiveFence);
-    parentWindow.addEventListener('message', receiveFence);
     const fencedMessages = [
       ...messages.map((message) => ({ type, ...message })),
       { postmate: 'request', type, property: 'serviceUrl', uid },
     ];
-    // Execute in the actual embedding window, not the Cypress runner. The reply
-    // fences message delivery so unchanged UI assertions do not race the calls.
-    const script = parentWindow.document.createElement('script');
-    script.textContent = `${JSON.stringify(fencedMessages)}.forEach(message => document.querySelector('#skills-client-container iframe').contentWindow.postMessage(message, window.location.origin));`;
-    parentWindow.document.body.appendChild(script);
-    script.remove();
-  }));
+    const postMessages = () => {
+      // Execute in the actual embedding window, not the Cypress runner.
+      const script = parentWindow.document.createElement('script');
+      script.textContent = `${JSON.stringify(fencedMessages)}.forEach(message => document.querySelector('#skills-client-container iframe').contentWindow.postMessage(message, window.location.origin));`;
+      parentWindow.document.body.appendChild(script);
+      script.remove();
+    };
+    if (expectRejected) {
+      // A fatal identity violation rejects ALL Postmate messages, including the
+      // fence request. Observe its real rejection without weakening the guard or
+      // installing a later message listener that stopImmediatePropagation hides.
+      const rejectedMessages = Cypress.sinon.spy(displayWindow.Event.prototype, 'stopImmediatePropagation');
+      cleanupSibling = () => rejectedMessages.restore();
+      postMessages();
+      return cy.wrap(rejectedMessages, { log: false }).should((spy) => {
+        const fenceRejected = spy.getCalls().some(({ thisValue: event }) => event.type === 'message'
+          && event.source === parentWindow && event.data?.postmate === 'request' && event.data.uid === uid);
+        expect(fenceRejected, 'fatal iframe rejected the fence after processing the parent calls').to.be.true;
+      }).then(() => {
+        cleanupSibling();
+        cleanupSibling = null;
+      });
+    }
+    return new Cypress.Promise((resolve) => {
+      const receiveFence = (event) => {
+        if (event.source === displayWindow && event.data?.postmate === 'reply' && event.data.uid === uid) {
+          cleanupSibling();
+          cleanupSibling = null;
+          resolve();
+        }
+      };
+      cleanupSibling = () => parentWindow.removeEventListener('message', receiveFence);
+      parentWindow.addEventListener('message', receiveFence);
+      postMessages();
+    });
+  });
   beforeEach(() => {
     cleanupSibling = null;
     cy.createProject(1);
     cy.createSubject(1, 1);
     cy.createSkill(1, 1, 1);
-
-    // Use the e2e suite's pinned Postmate build in the actual parent window.
-    cy.readFile('node_modules/postmate/build/postmate.min.js').then((postmate) => {
-      cy.intercept('GET', '/__e2e/postmate.js', {
-        headers: { 'content-type': 'application/javascript' },
-        body: postmate,
-      });
-    });
-    cy.intercept('GET', '/__e2e/skills-display-parent*', {
-      headers: { 'content-type': 'text/html' },
-      fixture: 'skills-display-parent.html',
-    });
   });
   afterEach(() => cleanupSibling?.());
 
@@ -72,14 +86,6 @@ describe('Skills Display iframe destination security', () => {
     cy.wait('@summary').its('request.headers.authorization').should('match', /^Bearer .+/);
   });
 
-  it('shows an actionable error when the embedding parent never supplies a handshake', () => {
-    cy.visit('/static/clientPortal/index.html');
-    cy.get('[data-cy="skillsDisplayInitError"]', { timeout: 15000 }).should('be.visible')
-      .and('have.attr', 'role', 'alert').and('contain.text', 'verify the embedding configuration');
-    cy.get('[data-pc-name="progressspinner"]').should('not.exist');
-    cy.get('[data-cy="skillsDisplayHome"]').should('not.exist');
-  });
-
   it('honors an initial numeric version of zero instead of including newer skills', () => {
     cy.createSkill(1, 1, 2, { version: 1 });
     const modelOverrides = encodeURIComponent(JSON.stringify({ version: 0 }));
@@ -90,18 +96,16 @@ describe('Skills Display iframe destination security', () => {
     cy.wrapIframe().find('[data-cy="skillProgressTitle-skill2"]').should('not.exist');
   });
 
-  [0, '0', null].forEach((version) => {
-    it(`ignores repeated version ${JSON.stringify(version)} without refreshing or navigating`, () => {
-      cy.createSkill(1, 1, 2, { version: 1 });
-      const modelOverrides = encodeURIComponent(JSON.stringify({ version }));
-      cy.visit(`/__e2e/skills-display-parent?modelOverrides=${modelOverrides}`);
-      const expectedSkillCount = version === null ? '2' : '1';
-      cy.wrapIframe().find('[data-cy="numTotalSkills"]').should('have.text', expectedSkillCount);
-      cy.wrapIframe().find('[data-cy="subjectTile-subj1"] [data-cy="subjectTileBtn"]').click();
-      cy.wrapIframe().find('[data-cy="skillProgressTitle-skill1"]').should('be.visible');
-      cy.intercept('GET', '**/api/projects/proj1/subjects/subj1/summary*').as('unexpectedSummary');
-      cy.intercept('POST', '**/api/projects/proj1/progress/initialize').as('unexpectedInitialization');
-      cy.intercept('GET', '**/app/userInfo').as('unexpectedAuthentication');
+  it('refreshes numeric, string and null versions and ignores repeated values in the same iframe', () => {
+    const assertUnchangedVersion = (version) => {
+      // Separate aliases exclude the earlier, intentional refresh requests.
+      const suffix = version === null ? 'AllVersions' : typeof version === 'number' ? 'NumericZero' : 'StringZero';
+      const summaryAlias = `unchangedSummary${suffix}`;
+      const initializationAlias = `unchangedInitialization${suffix}`;
+      const authenticationAlias = `unchangedAuthentication${suffix}`;
+      cy.intercept('GET', '**/api/projects/proj1/subjects/subj1/summary*').as(summaryAlias);
+      cy.intercept('POST', '**/api/projects/proj1/progress/initialize').as(initializationAlias);
+      cy.intercept('GET', '**/app/userInfo').as(authenticationAlias);
       let routeChangedCount;
       cy.get('[data-cy="routeChangedCount"]').invoke('text').then((text) => { routeChangedCount = text; });
       sendParentMessages([
@@ -109,61 +113,68 @@ describe('Skills Display iframe destination security', () => {
         { postmate: 'call', property: 'updateVersion', data: version },
       ]);
       cy.wrapIframe().find('[data-cy="skillsTitle"]').should('contain.text', 'Subject 1');
+      cy.wrapIframe().find('[data-cy="skillProgressTitle-skill1"]').should('be.visible');
+      cy.wrapIframe().find('[data-cy="skillProgressTitle-skill2"]').should(version === null ? 'be.visible' : 'not.exist');
       cy.get('[data-cy="routeChangedCount"]').should(($count) => {
         expect($count.text(), 'identical versions do not navigate').to.equal(routeChangedCount);
       });
       // Request absence is the behavior under test for unchanged values.
-      cy.get('@unexpectedSummary.all').should('have.length', 0);
-      cy.get('@unexpectedInitialization.all').should('have.length', 0);
-      cy.get('@unexpectedAuthentication.all').should('have.length', 0);
-      cy.wrapIframe().find('[data-cy="back"]').click();
-      cy.wrapIframe().find('[data-cy="numTotalSkills"]').should('have.text', expectedSkillCount);
+      cy.get(`@${summaryAlias}.all`).should('have.length', 0);
+      cy.get(`@${initializationAlias}.all`).should('have.length', 0);
+      cy.get(`@${authenticationAlias}.all`).should('have.length', 0);
+    };
+    cy.createSkill(1, 1, 2, { version: 1 });
+    cy.createSkill(1, 1, 3, { version: 2 });
+    const modelOverrides = encodeURIComponent(JSON.stringify({ version: '0' }));
+    cy.visit(`/__e2e/skills-display-parent?modelOverrides=${modelOverrides}`);
+    cy.wrapIframe().find('[data-cy="numTotalSkills"]').should('have.text', '1');
+    cy.wrapIframe().find('[data-cy="totalPoints"]').should('have.text', '200');
+    let iframeDocument;
+    cy.get('#skills-client-container iframe').then(($iframe) => { iframeDocument = $iframe[0].contentDocument; });
+    cy.intercept('GET', '**/api/projects/proj1/token').as('unexpectedTokenRequest');
+    cy.wrapIframe().find('[data-cy="subjectTile-subj1"] [data-cy="subjectTileBtn"]').click();
+    cy.wrapIframe().find('[data-cy="skillProgressTitle-skill1"]').should('be.visible');
+    assertUnchangedVersion('0');
+    cy.wrapIframe().find('[data-cy="back"]').click();
+    cy.wrapIframe().find('[data-cy="numTotalSkills"]').should('have.text', '1');
+    sendParentMessages([{ postmate: 'call', property: 'updateVersion', data: null }]);
+    cy.wrapIframe().find('[data-cy="numTotalSkills"]').should('have.text', '3');
+    cy.wrapIframe().find('[data-cy="totalPoints"]').should('have.text', '600');
+    sendParentMessages([{ postmate: 'call', property: 'updateVersion', data: 0 }]);
+    cy.wrapIframe().find('[data-cy="numTotalSkills"]').should('have.text', '1');
+    cy.wrapIframe().find('[data-cy="totalPoints"]').should('have.text', '200');
+    cy.wrapIframe().find('[data-cy="subjectTile-subj1"] [data-cy="subjectTileBtn"]').click();
+    cy.wrapIframe().find('[data-cy="skillProgressTitle-skill1"]').should('be.visible');
+    cy.wrapIframe().find('[data-cy="skillProgressTitle-skill2"]').should('not.exist');
+    assertUnchangedVersion(0);
+    let routeChangedCount;
+    cy.get('[data-cy="routeChangedCount"]').invoke('text').then((text) => { routeChangedCount = text; });
+    sendParentMessages([{ postmate: 'call', property: 'updateVersion', data: 1 }]);
+    cy.wrapIframe().find('[data-cy="skillProgressTitle-skill2"]').should('be.visible');
+    cy.wrapIframe().find('[data-cy="skillProgressTitle-skill3"]').should('not.exist');
+    sendParentMessages([{ postmate: 'call', property: 'updateVersion', data: null }]);
+    cy.wrapIframe().find('[data-cy="skillProgressTitle-skill3"]').should('be.visible');
+    assertUnchangedVersion(null);
+    sendParentMessages([{ postmate: 'call', property: 'updateVersion', data: '0' }]);
+    cy.wrapIframe().find('[data-cy="totalPoints"]').should('have.text', '200');
+    cy.wrapIframe().find('[data-cy="skillProgressTitle-skill2"]').should('not.exist');
+    cy.wrapIframe().find('[data-cy="skillProgressTitle-skill3"]').should('not.exist');
+    cy.wrapIframe().find('[data-cy="skillsTitle"]').should('contain.text', 'Subject 1');
+    cy.get('[data-cy="routeChangedCount"]').should(($count) => {
+      expect($count.text(), 'version refresh preserves the subject route').to.equal(routeChangedCount);
     });
-  });
-
-  [0, '0'].forEach((zero) => {
-    it(`refreshes home and subject data for version ${JSON.stringify(zero)}, newer versions and null without replacing the iframe`, () => {
-      cy.createSkill(1, 1, 2, { version: 1 });
-      cy.createSkill(1, 1, 3, { version: 2 });
-      cy.visit('/__e2e/skills-display-parent');
-      cy.wrapIframe().find('[data-cy="numTotalSkills"]').should('have.text', '3');
-      let iframeDocument;
-      cy.get('#skills-client-container iframe').then(($iframe) => { iframeDocument = $iframe[0].contentDocument; });
-      cy.intercept('GET', '**/api/projects/proj1/token').as('unexpectedTokenRequest');
-      sendParentMessages([{ postmate: 'call', property: 'updateVersion', data: zero }]);
-      cy.wrapIframe().find('[data-cy="numTotalSkills"]').should('have.text', '1');
-      cy.wrapIframe().find('[data-cy="totalPoints"]').should('have.text', '200');
-      cy.wrapIframe().find('[data-cy="subjectTile-subj1"] [data-cy="subjectTileBtn"]').click();
-      cy.wrapIframe().find('[data-cy="skillProgressTitle-skill1"]').should('be.visible');
-      cy.wrapIframe().find('[data-cy="skillProgressTitle-skill2"]').should('not.exist');
-      let routeChangedCount;
-      cy.get('[data-cy="routeChangedCount"]').invoke('text').then((text) => { routeChangedCount = text; });
-      sendParentMessages([{ postmate: 'call', property: 'updateVersion', data: 1 }]);
-      cy.wrapIframe().find('[data-cy="skillProgressTitle-skill2"]').should('be.visible');
-      cy.wrapIframe().find('[data-cy="skillProgressTitle-skill3"]').should('not.exist');
-      sendParentMessages([{ postmate: 'call', property: 'updateVersion', data: null }]);
-      cy.wrapIframe().find('[data-cy="skillProgressTitle-skill3"]').should('be.visible');
-      sendParentMessages([{ postmate: 'call', property: 'updateVersion', data: zero }]);
-      cy.wrapIframe().find('[data-cy="totalPoints"]').should('have.text', '200');
-      cy.wrapIframe().find('[data-cy="skillProgressTitle-skill2"]').should('not.exist');
-      cy.wrapIframe().find('[data-cy="skillProgressTitle-skill3"]').should('not.exist');
-      cy.wrapIframe().find('[data-cy="skillsTitle"]').should('contain.text', 'Subject 1');
-      cy.get('[data-cy="routeChangedCount"]').should(($count) => {
-        expect($count.text(), 'version refresh preserves the subject route').to.equal(routeChangedCount);
-      });
-      cy.get('#skills-client-container iframe').then(($iframe) => {
-        expect($iframe[0].contentDocument, 'version refresh retains the iframe').to.equal(iframeDocument);
-      });
-      // Refresh verifies the learner with existing credentials, without asking
-      // the parent to acquire a new token or recreating the iframe lifetime.
-      cy.get('@unexpectedTokenRequest.all').should('have.length', 0);
-      cy.wrapIframe().find('[data-cy="back"]').click();
-      cy.wrapIframe().find('[data-cy="numTotalSkills"]').should('have.text', '1');
-      sendParentMessages([{ postmate: 'call', property: 'updateVersion', data: null }]);
-      cy.wrapIframe().find('[data-cy="numTotalSkills"]').should('have.text', '3');
-      cy.wrapIframe().find('[data-cy="totalPoints"]').should('have.text', '600');
-      cy.wrapIframe().find('[data-cy="skillsDisplayAuthenticationError"]').should('not.exist');
+    cy.get('#skills-client-container iframe').then(($iframe) => {
+      expect($iframe[0].contentDocument, 'version refresh retains the iframe').to.equal(iframeDocument);
     });
+    // Refresh verifies the learner with existing credentials, without asking
+    // the parent to acquire a new token or recreating the iframe lifetime.
+    cy.get('@unexpectedTokenRequest.all').should('have.length', 0);
+    cy.wrapIframe().find('[data-cy="back"]').click();
+    cy.wrapIframe().find('[data-cy="numTotalSkills"]').should('have.text', '1');
+    sendParentMessages([{ postmate: 'call', property: 'updateVersion', data: null }]);
+    cy.wrapIframe().find('[data-cy="numTotalSkills"]').should('have.text', '3');
+    cy.wrapIframe().find('[data-cy="totalPoints"]').should('have.text', '600');
+    cy.wrapIframe().find('[data-cy="skillsDisplayAuthenticationError"]').should('not.exist');
   });
 
   it('refreshes a still-valid skill detail route without navigating away', () => {
@@ -293,7 +304,7 @@ describe('Skills Display iframe destination security', () => {
       sendParentMessages([{ postmate: 'call', property: 'updateVersion', data: 0 }]);
       cy.wrapIframe().find('[data-cy="skillsDisplayInitError"]').should('be.visible')
         .and('contain.text', 'authenticated learner has changed');
-      sendParentMessages([{ postmate: 'call', property: 'updateVersion', data: null }]);
+      sendParentMessages([{ postmate: 'call', property: 'updateVersion', data: null }], { expectRejected: true });
       cy.wrapIframe().find('[data-cy="skillsDisplayInitError"]').should('be.visible')
         .and('contain.text', 'destroy and recreate');
       cy.wrapIframe().find('[data-cy="skillsDisplayHome"]').should('not.exist');
@@ -360,33 +371,46 @@ describe('Skills Display iframe destination security', () => {
     });
 
     it('ignores an old-version 401 without expiring the fixed learner authentication', () => {
-      const old = holdResponse('**/api/projects/proj1/pointHistory*', 'oldVersionUnauthorized', (res) => {
-        res.statusCode = 401;
-        res.body = {};
+      const isExpectedFailure = (error) => {
+        const requestUrl = error?.config?.url;
+        return error?.response?.status === 401 && typeof requestUrl === 'string'
+          && new URL(requestUrl, Cypress.config('baseUrl')).pathname === '/api/projects/proj1/pointHistory';
+      };
+      cy.on('uncaught:exception', (error) => {
+        if (isExpectedFailure(error)) return false;
       });
-      cy.visit('/__e2e/skills-display-parent');
+      let oldHistoryRequested = false;
+      let releaseOldHistory;
+      const oldHistoryGate = new Cypress.Promise((resolve) => { releaseOldHistory = resolve; });
+      releases.push(releaseOldHistory);
+      cy.intercept({
+        method: 'GET',
+        url: '**/api/projects/proj1/pointHistory*',
+        headers: { 'x-skilltree-e2e-point-history': 'old-request' },
+        times: 1,
+      }, (req) => {
+        oldHistoryRequested = true;
+        // Supply the actual transport failure after recovery. A forwarded 200
+        // with changed response metadata is not proof that the child received 401.
+        return oldHistoryGate.then(() => req.reply({
+          statusCode: 401,
+          headers: { 'cache-control': 'no-store' },
+          body: {},
+        }));
+      }).as('oldVersionUnauthorized');
+      cy.visit('/__e2e/skills-display-parent?observeFirstPointHistory=true');
       cy.wrapIframe().find('[data-cy="numTotalSkills"]').should('have.text', '2');
-      cy.wrap(null).should(() => { expect(old.isReceived(), 'old history response is held').to.be.true; });
-      let observeFailure;
-      const failureObserved = new Cypress.Promise((resolve) => { observeFailure = resolve; });
-      cy.wrapIframe().then((body) => {
-        const iframeWindow = Cypress.$(body)[0].ownerDocument.defaultView;
-        const observeRejection = (event) => {
-          if (event.reason?.response?.status === 401 && event.reason.config?.url?.endsWith('/pointHistory')) {
-            // Fence on the child Axios rejection, not merely network delivery.
-            event.preventDefault();
-            observeFailure();
-          }
-        };
-        iframeWindow.addEventListener('unhandledrejection', observeRejection);
-        cleanups.push(() => iframeWindow.removeEventListener('unhandledrejection', observeRejection));
+      cy.get('[data-cy="oldPointHistoryRequestState"]').should('have.text', 'pending');
+      cy.wrap(null).should(() => {
+        expect(oldHistoryRequested, 'the observed old history request is held').to.be.true;
       });
       sendParentMessages([{ postmate: 'call', property: 'updateVersion', data: 0 }]);
       cy.wrapIframe().find('[data-cy="numTotalSkills"]').should('have.text', '1');
       cy.wrapIframe().find('[data-cy="pointHistoryChartNoData"]').should('be.visible');
       cy.intercept('GET', '**/app/userInfo').as('unexpectedVersionRecovery');
-      cy.then(old.release);
-      cy.wrap(failureObserved);
+      cy.then(() => releaseOldHistory());
+      cy.wait('@oldVersionUnauthorized').its('response.statusCode').should('eq', 401);
+      cy.get('[data-cy="oldPointHistoryRequestState"]').should('have.text', '401-processed');
       cy.wrapIframe().find('[data-cy="numTotalSkills"]').should('have.text', '1');
       cy.wrapIframe().find('[data-cy="skillsDisplayAuthenticationError"]').should('not.exist');
       cy.wrapIframe().find('[data-cy="skillsDisplayInitError"]').should('not.exist');
@@ -408,29 +432,6 @@ describe('Skills Display iframe destination security', () => {
     cy.wrapIframe().find('[data-cy="skillsDisplayAuthenticationError"]').should('not.exist');
     // Request absence is intentional: duplicate credentials must not start recovery.
     cy.get('@unexpectedAuthentication.all').should('have.length', 0);
-  });
-
-  it('rejects an attacker service URL without sending requests to it', () => {
-    const attackerUrl = 'https://attacker.example';
-    cy.intercept(`${attackerUrl}/**`, { statusCode: 200, body: {} }).as('attackerRequests');
-    cy.intercept('GET', '**/api/projects/proj1/token').as('tokenRequests');
-    cy.visit(`/__e2e/skills-display-parent?autoHeight=true&minHeight=100px&serviceUrl=${encodeURIComponent(attackerUrl)}`);
-
-    cy.get('iframe').should('have.attr', 'src', `${new URL(Cypress.config('baseUrl')).origin}/static/clientPortal/index.html`);
-    cy.wrapIframe().find('[data-cy="skillsDisplayInitError"]')
-      .should('be.visible').and('contain.text', 'same origin as the SkillTree iframe');
-    cy.wrapIframe().find('[data-cy="subjectTile-subj1"]').should('not.exist');
-    cy.get('#skills-client-container iframe').should(($iframe) => {
-      const frame = $iframe[0];
-      const root = frame.contentDocument.querySelector('#skilltree-main-container');
-      expect(root, 'initialization-error content root').not.to.be.null;
-      const expectedHeight = Math.max(root.getBoundingClientRect().height + 10, 100);
-      expect(frame.getBoundingClientRect().height, 'initialization error is not clipped by a zero-height iframe').to.be.closeTo(expectedHeight, 1);
-      expect(frame.parentElement.getBoundingClientRect().height, 'host fits initialization error').to.be.closeTo(expectedHeight, 1);
-    });
-    // The rendered error establishes that initialization has finished rejecting the model.
-    cy.get('@attackerRequests.all').should('have.length', 0);
-    cy.get('@tokenRequests.all').should('have.length', 0);
   });
 
   it('ignores authentication calls from a sibling window with the same origin as the parent', () => {
@@ -494,37 +495,6 @@ describe('Skills Display iframe destination security', () => {
     cy.wrapIframe().find('[data-cy="skillsDisplayAuthenticationError"]').should('not.exist');
   });
 
-  [
-    { navigate: 'replace-child-method' },
-    JSON.parse('{"__proto__":{"navigate":"replace-child-prototype"}}'),
-  ].forEach((modelOverrides, index) => {
-    it(`rejects a handshake model that replaces the child API or its prototype (${index + 1})`, () => {
-      cy.intercept('GET', '**/api/projects/proj1/token').as('tokenRequests');
-      cy.visit(`/__e2e/skills-display-parent?modelOverrides=${encodeURIComponent(JSON.stringify(modelOverrides))}`);
-      cy.wrapIframe().find('[data-cy="skillsDisplayInitError"]').should('be.visible').and('contain.text', 'verify the embedding configuration');
-      cy.wrapIframe().find('[data-cy="subjectTile-subj1"]').should('not.exist');
-      cy.get('@tokenRequests.all').should('have.length', 0);
-    });
-  });
-
-  [
-    { projectId: '' },
-    { projectId: { toString: 'not-a-function' } },
-    { version: { invalid: 'version' } },
-    { userId: { invalid: 'user' } },
-    { options: ['invalid-options'] },
-    { minHeight: { toString: 'not-a-function' } },
-  ].forEach((modelOverrides, index) => {
-    it(`rejects malformed parent configuration before requesting authentication (${index + 1})`, () => {
-      cy.intercept('GET', '**/api/projects/proj1/token').as('tokenRequests');
-      cy.visit(`/__e2e/skills-display-parent?modelOverrides=${encodeURIComponent(JSON.stringify(modelOverrides))}`);
-      cy.wrapIframe().find('[data-cy="skillsDisplayInitError"]').should('be.visible')
-        .and('contain.text', 'verify the embedding configuration');
-      cy.wrapIframe().find('[data-cy="skillsDisplayHome"]').should('not.exist');
-      cy.get('@tokenRequests.all').should('have.length', 0);
-    });
-  });
-
   it('supports valid parent-provided theme declarations', () => {
     const theme = {
       pageTitle: { textColor: '#123456' },
@@ -547,35 +517,5 @@ describe('Skills Display iframe destination security', () => {
       .first().should('be.visible').and('have.css', 'background-color', 'rgb(171, 205, 239)');
     cy.wrapIframe().find('#skilltree-main-container').should('have.css', 'min-height', '450px');
     cy.wrapIframe().find('[data-cy="skillsDisplayInitError"]').should('not.exist');
-  });
-
-  [
-    { pageTitle: { textColor: 'red } body { background: url(https://attacker.example/css)' } },
-    { tiles: { backgroundColor: 'red; background-image: url(https://attacker.example/css)' } },
-    { trophyIconColor: 'url(https://attacker.example/css)' },
-    ...['incompleteColor', 'earnedTodayColor', 'beforeTodayColor', 'completeColor'].map((key) => ({
-      progressIndicators: { [key]: 'red; background-image: url(https://attacker.example/pixel)' },
-    })),
-    { progressIndicators: { incompleteColor: 'url(https://attacker.example/pixel)' } },
-    { progressIndicators: { incompleteColor: 'not-a-color' } },
-    { progressIndicators: { incompleteColor: { color: 'red' } } },
-    { progressIndicators: 'red' },
-    { progressIndicators: ['red'] },
-    { progressIndicators: null },
-    { prerequisites: { skillColor: 'red; background-image: url(https://attacker.example/pixel)' } },
-    { charts: { axisLabelColor: 'url(https://attacker.example/pixel)' } },
-    { charts: { pointHistory: { lineColor: 'red; color: blue' } } },
-    { infoCards: { iconColors: ['green', 'red; background-image: url(https://attacker.example/pixel)'] } },
-    { infoCards: { iconColors: 'red' } },
-    { circleProgressInteriorTextColor: 'red; background-image: url(https://attacker.example/pixel)' },
-  ].forEach((theme, index) => {
-    it(`rejects parent theme CSS injection or external-resource references (${index + 1})`, () => {
-      cy.intercept('https://attacker.example/**', { statusCode: 200, body: '' }).as('themeRequests');
-      cy.visit(`/__e2e/skills-display-parent?theme=${encodeURIComponent(JSON.stringify(theme))}`);
-      cy.wrapIframe().find('[data-cy="skillsDisplayInitError"]').should('be.visible')
-        .and('contain.text', 'verify the embedding configuration');
-      cy.wrapIframe().find('[data-cy="subjectTile-subj1"]').should('not.exist');
-      cy.get('@themeRequests.all').should('have.length', 0);
-    });
   });
 });

@@ -44,6 +44,40 @@ limitations under the License.
         ...(params.has('modelOverrides') ? JSON.parse(params.get('modelOverrides')) : {}),
       },
     }).then((child) => {
+      if (params.get('observeFirstPointHistory') === 'true') {
+        // Install after the real handshake, but before registering the host's
+        // authenticator below. The child cannot issue authenticated XHRs yet.
+        const requestState = document.createElement('output');
+        requestState.dataset.cy = 'oldPointHistoryRequestState';
+        requestState.textContent = 'ready';
+        document.body.appendChild(requestState);
+        const childWindow = child.frame.contentWindow;
+        const xhrPrototype = childWindow.XMLHttpRequest.prototype;
+        const originalOpen = xhrPrototype.open;
+        xhrPrototype.open = function (method, url, ...args) {
+          const result = originalOpen.call(this, method, url, ...args);
+          if (method === 'GET' && new URL(url, childWindow.location.href).pathname === '/api/projects/proj1/pointHistory') {
+            // Track exactly the old request; replacement requests use the original API.
+            xhrPrototype.open = originalOpen;
+            // Let Cypress target this same native XHR, not another request/cache entry.
+            this.setRequestHeader('X-SkillTree-E2E-Point-History', 'old-request');
+            requestState.textContent = 'pending';
+            this.addEventListener('loadend', () => {
+              const status = this.status;
+              const channel = new childWindow.MessageChannel();
+              channel.port1.onmessage = () => {
+                // This child task runs after Axios/Vue response microtasks drain,
+                // even when no unhandledrejection event is emitted.
+                requestState.textContent = `${status}-processed`;
+                channel.port1.close();
+                channel.port2.close();
+              };
+              channel.port2.postMessage(null);
+            }, { once: true });
+          }
+          return result;
+        };
+      }
       child.frame.title = 'Skills Display';
       child.frame.style.width = '100%';
       if (autoHeight) {
