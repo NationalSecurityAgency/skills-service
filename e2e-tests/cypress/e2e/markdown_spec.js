@@ -815,7 +815,8 @@ describe('Markdown Tests', () => {
 
       // reopen the editor - the whole table must load back
       cy.get('[data-cy="editSkillButton_skill1"]').click();
-      cy.get('.toastui-editor-contents table').within(() => {
+      cy.get(`${markdownInput} table`).should('have.length', 1);
+      cy.get(`${markdownInput} table`).within(() => {
         cy.get('tr').should('have.length', 3);
         cy.get('tbody tr').each(($row) => {
           cy.wrap($row).find('td').should('have.length', 4);
