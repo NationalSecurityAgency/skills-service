@@ -32,6 +32,7 @@ import dayjs from 'dayjs';
 import {useStorage} from "@vueuse/core";
 import {useSkillsAnnouncer} from "@/common-components/utilities/UseSkillsAnnouncer.js";
 import SkillSlides from "@/skills-display/components/progress/SkillSlides.vue";
+import SkillFlashCards from "@/skills-display/components/progress/SkillFlashCards.vue";
 import SelfReportType from "@/components/skills/selfReport/SelfReportType.js";
 
 const props = defineProps({
@@ -263,6 +264,10 @@ const canSkillBeSelfReported = computed(() => SelfReportType.isSelfReportType(pr
         <skill-slides v-if="skill"
                       :skill="skill"
                       class="mt-2"
+        />
+        <skill-flash-cards v-if="skill"
+                           :skill="skill"
+                           class="mt-4"
         />
         <p class="skills-text-description text-primary mt-4" style="font-size: 0.9rem;">
           <markdown-text
