@@ -388,7 +388,7 @@ const downloadPdf = () => {
 
             <div v-if="isFullscreen"
                  :class="{ 'only-on-hover': !showFullScreenMsg && !isLastSlideInFullscreen }"
-                 class="fixed bottom-4 left-1/2 transform -translate-x-1/2">
+                  class="fixed bottom-4 left-1/2 transform -translate-x-1/2 z-50">
               <Message data-cy="slidesFullscreenMsg" :closable="false">
                 <div class="flex flex-col gap-2 min-w-[40rem] text-center">
                   <div v-if="!isLastSlideInFullscreen">Use left/right arrow keys to navigate between slides and <Tag>Esc</Tag>to exit or use the</div>

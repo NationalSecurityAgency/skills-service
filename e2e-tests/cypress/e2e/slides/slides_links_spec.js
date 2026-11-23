@@ -165,8 +165,28 @@ describe('Slide hyperlinks', () => {
         cy.get('#pdfCanvasId').should(($canvas) => {
             expect($canvas[0].getBoundingClientRect().width).to.be.closeTo(900, 1);
         });
+        cy.get('#proj1-skill1Container').scrollIntoView();
         assertClipping();
-        cy.document().trigger('keydown', { key: 'Escape' });
+        // These trusted controls overlap the slide. Clipping alone cannot protect
+        // them: the toolbar must also stack above document-controlled links.
+        ['prevSlideBtn', 'nextSlideBtn', 'slidesExitFullscreenBtn'].forEach((control) => {
+            cy.get(`[data-cy="${control}"]`).should(($button) => {
+                const button = $button[0];
+                const doc = button.ownerDocument;
+                const buttonRect = button.getBoundingClientRect();
+                const layerRect = doc.querySelector('[data-cy="slidesAnnotationLayer"]').getBoundingClientRect();
+                const x = buttonRect.left + buttonRect.width / 2;
+                const y = buttonRect.top + buttonRect.height / 2;
+                expect(x).to.be.within(layerRect.left, layerRect.right);
+                expect(y).to.be.within(layerRect.top, layerRect.bottom);
+                expect(button.contains(doc.elementFromPoint(x, y)), `${control} receives clicks`).to.equal(true);
+            });
+        });
+        cy.get('[data-cy="prevSlideBtn"]').should('be.enabled').click();
+        cy.get('[data-cy="currentSlideMsg"]').should('have.text', 'Slide 1 of 2');
+        cy.get('[data-cy="nextSlideBtn"]').should('be.enabled').click();
+        cy.get('[data-cy="currentSlideMsg"]').should('have.text', 'Slide 2 of 2');
+        cy.get('[data-cy="slidesExitFullscreenBtn"]').click();
         cy.get('[data-cy="slidesFullscreenBtn"]').should('be.visible');
         assertClipping();
         cy.get('[data-cy="prevSlideBtn"]').click();
