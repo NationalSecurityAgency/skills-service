@@ -32,5 +32,8 @@ class MultiSkillUpdateRequest {
 
     String selfReportingType
 
+    // "true" or "false"; applies to Approval skills, null leaves it unchanged
+    String justificationRequired
+
     List<String> skills
 }
