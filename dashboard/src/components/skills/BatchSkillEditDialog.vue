@@ -21,7 +21,7 @@ import {useAppConfig} from '@/common-components/stores/UseAppConfig';
 import {useSkillsAnnouncer} from '@/common-components/utilities/UseSkillsAnnouncer';
 import {usePluralize} from "@/components/utils/misc/UsePluralize.js";
 import {useFocusState} from "@/stores/UseFocusState.js";
-import {computed, ref} from "vue";
+import {computed, ref, watch} from "vue";
 import TotalPointsField from "@/components/skills/inputForm/TotalPointsField.vue";
 import SkillsService from "@/components/skills/SkillsService.js";
 import {useRoute} from "vue-router";
@@ -77,6 +77,7 @@ const atLeastOne = (value, testContext) => {
       || parent.pointIncrementIntervalHrs !== null
       || parent.pointIncrementIntervalMins !== null
       || parent.selfReportingType !== null
+      || parent.justificationRequired !== null
       || (parent.enabled !== null && parent.enabled !== false)
 }
 const oneMsg = 'You must change at least one value'
@@ -132,6 +133,9 @@ const schema = object({
   'selfReportingType': object()
       .test('atLeastOne', oneMsg, async (v, t) => atLeastOne(v, t))
       .label('Minutes').nullable(),
+  'justificationRequired': object()
+      .test('atLeastOne', oneMsg, async (v, t) => atLeastOne(v, t))
+      .label('Justification Required').nullable(),
   'enabled': boolean()
       .test('atLeastOne', oneMsg, async (v, t) => atLeastOne(v, t))
       .label('Visibility').nullable(),
@@ -144,9 +148,10 @@ const initialValues = {
   pointIncrementIntervalHrs: null,
   pointIncrementIntervalMins: null,
   selfReportingType: null,
+  justificationRequired: null,
   enabled: null,
 }
-const { values, meta, validate } = useForm({ validationSchema: schema, initialValues });
+const { values, meta, validate, setFieldValue } = useForm({ validationSchema: schema, initialValues });
 const selfReportingType = useFieldValue('selfReportingType')
 
 const isUpdating = ref(false)
@@ -156,6 +161,17 @@ const selfReportOptions = [
   { name: 'Approval Queue', key: approvalKey },
   { name: 'Honor System', key: honorKey },
 ]
+const justificationOptions = [
+  { name: 'Required', key: 'true' },
+  { name: 'Not Required', key: 'false' },
+]
+// Justification applies only to the Approval Queue; Honor System clears it
+const justificationDisabled = computed(() => selfReportingType.value?.key === honorKey)
+watch(justificationDisabled, (disabled) => {
+  if (disabled) {
+    setFieldValue('justificationRequired', null)
+  }
+})
 const skillsIds = props.skills.map((it) => it.skillId)
 
 const close = () => {
@@ -180,6 +196,7 @@ const doUpdate = () => {
     ...values,
     skills: skillsIds,
     selfReportingType: values.selfReportingType?.key,
+    justificationRequired: values.justificationRequired?.key,
     numMaxOccurrencesIncrementInterval: values.numPointIncrementMaxOccurrences
   }
   if (values.pointIncrementIntervalHrs !== null || values.pointIncrementIntervalMins !== null ) {
@@ -265,6 +282,17 @@ const hasDisabledSkills = computed(() => numOfDisabledSkills.value > 0)
             :options="selfReportOptions"
             :show-clear-button="true"
             name="selfReportingType" />
+
+        <div>
+          <SkillsDropDown
+              label="Justification Required"
+              optionLabel="name"
+              :options="justificationOptions"
+              :show-clear-button="true"
+              :disabled="justificationDisabled"
+              name="justificationRequired" />
+          <Message :closable="false" severity="info" data-cy="justificationRequiredMsg">Applies only to skills that use the <span class="italic font-bold">Approval Queue</span></Message>
+        </div>
 
         <pending-approvals-warning
             :self-reporting-type="selfReportingType?.key || SelfReportType.Approval"
