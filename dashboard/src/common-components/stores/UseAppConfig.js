@@ -157,6 +157,9 @@ export const useAppConfig = defineStore('dashboardAppConfig', () => {
   const slidesUploadWarningMessage = computed(() => config.value.slidesUploadWarningMessage)
   const maxVideoCaptionsLength = computed(() => config.value.maxVideoCaptionsLength)
   const maxVideoTranscriptLength = computed(() => config.value.maxVideoTranscriptLength)
+  const maxFlashCardsPerSkill = computed(() => config.value.maxFlashCardsPerSkill)
+  const maxFlashCardTextLength = computed(() => config.value.maxFlashCardTextLength)
+  const maxFlashCardHintLength = computed(() => config.value.maxFlashCardHintLength)
   const userPageTagsToDisplay = computed(() => config.value.userPageTagsToDisplay)
   const maxProjectInviteEmails = computed(() => config.value.maxProjectInviteEmails)
   const artifactBuildTimestamp = computed(() => config.value.artifactBuildTimestamp)
@@ -293,6 +296,9 @@ export const useAppConfig = defineStore('dashboardAppConfig', () => {
     slidesUploadWarningMessage,
     maxVideoCaptionsLength,
     maxVideoTranscriptLength,
+    maxFlashCardsPerSkill,
+    maxFlashCardTextLength,
+    maxFlashCardHintLength,
     userPageTagsToDisplay,
     maxProjectInviteEmails,
     artifactBuildTimestamp,
