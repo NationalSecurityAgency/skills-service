@@ -60,13 +60,21 @@ export const useErrorHandling = () => {
       return Promise.resolve({ data: {} });
     }
 
-    // check if the caller wants to handle all errors
     const config = error?.config || {}
+    const errorCode = error?.response?.status;
+    if (errorCode === 401 && skillsDisplayInfo.isSkillsClientPath() && config.skillsDisplayAuthGeneration !== undefined) {
+      // Local error-handling opt-outs do not suppress iframe authentication recovery.
+      // Recovery remounts learner content; losing rare unsaved quiz edits or component-local
+      // video-credit retry state is accepted for this scoped fix. Failed writes are not replayed.
+      authState.clearAuthData()
+      return Promise.reject(error);
+    }
+
+    // check if the caller wants to handle all errors
     if (config.handleError === false) {
       return Promise.reject(error);
     }
 
-    const errorCode = error?.response?.status;
     if (errorCode !== 401 && skillsDisplayInfo.isSkillsClientPath() && config.skillsDisplayHandleError === true) {
       // Only callers with an explicit local rejection handler own their error UI.
       // Being concurrent with recovery does not make an unrelated failure recoverable.
