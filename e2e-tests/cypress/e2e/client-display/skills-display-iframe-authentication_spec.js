@@ -576,6 +576,35 @@ describe('Embedded Skills Display authentication recovery', () => {
     });
   });
 
+  [
+    { initialUserId: 'LearnerA@skills.org', replacementUserId: 'learnera@skills.org' },
+    { initialUserId: 'learnera@skills.org', replacementUserId: 'LearnerA@skills.org' },
+  ].forEach(({ initialUserId, replacementUserId }) => {
+    it(`recovers in the same iframe when proxy learner casing changes from ${initialUserId} to ${replacementUserId}`, () => {
+      let tokenForDisplay;
+      let replacementToken;
+      let iframeDocument;
+      // Use service-issued proxy credentials without creating a persisted account,
+      // so /app/userInfo exposes the raw proxy_user casing on each authentication.
+      cy.request(`/admin/projects/proj1/token/${initialUserId}`).then(({ body }) => { tokenForDisplay = body; });
+      cy.request(`/admin/projects/proj1/token/${replacementUserId}`).then(({ body }) => { replacementToken = body; });
+      cy.intercept('GET', '**/api/projects/proj1/token', (req) => req.reply(tokenForDisplay));
+      cy.visit('/__e2e/skills-display-parent?manualRecovery=true');
+      assertHome();
+      cy.get('#skills-client-container iframe').then(($iframe) => { iframeDocument = $iframe[0].contentDocument; });
+      expireAuthentication();
+      cy.then(() => { tokenForDisplay = replacementToken; });
+      cy.get(refreshAuthentication).click();
+      assertRecoveredSubject();
+      cy.wrapIframe().find('[data-cy="skillsDisplayInitError"]').should('not.exist');
+      cy.get('#skills-client-container iframe').then(($iframe) => {
+        expect($iframe[0].contentDocument, 'same learner retains the iframe document').to.equal(iframeDocument);
+      });
+      cy.wrapIframe().find('[data-cy="back"]').click();
+      assertHome();
+    });
+  });
+
   describe('Same-learner progress recovery', () => {
     // One iframe belongs to one learner. A renewed token must not accept stale
     // snapshots or loading cleanup, even when progress changes for that SAME learner.

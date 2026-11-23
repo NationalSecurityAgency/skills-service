@@ -68,8 +68,11 @@ export const useSkillsDisplayParentFrameState = defineStore('skillsDisplayParent
   }
   const verifyAuthenticatedUser = (userId) => {
     if (typeof userId !== 'string' || !userId) throw new Error('Skills Display authentication did not return a user ID')
-    if (authenticatedUserId !== null && authenticatedUserId !== userId) throw new SkillsDisplayIdentityChangedError()
-    authenticatedUserId = userId
+    // Match the service's case-insensitive usernames, including proxy users whose
+    // /app/userInfo ID retains the token's casing until an account is persisted.
+    const canonicalUserId = userId.toLowerCase()
+    if (authenticatedUserId !== null && authenticatedUserId !== canonicalUserId) throw new SkillsDisplayIdentityChangedError()
+    authenticatedUserId = canonicalUserId
   }
   const captureAuthGeneration = () => {
     // Generations isolate old-token work for the SAME learner, not live user switching.
