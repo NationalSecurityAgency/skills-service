@@ -95,7 +95,7 @@ const getTypeIconColor = (type) => {
         <template #body="slotProps">
           <div class="flex items-center gap-1">
             <Avatar :icon="`fas ${getTypeIcon(slotProps.data.type)}`"
-                    :style="`color: ${getTypeIconColor(slotProps.data.type)}`" />
+                    :style="{ color: getTypeIconColor(slotProps.data.type) }" />
             <div :aria-label="`Prerequisite's type is ${slotProps.data.type}`" data-cy="prereqType">
               {{ slotProps.data.type }}
             </div>
@@ -112,7 +112,7 @@ const getTypeIconColor = (type) => {
             <div v-if="slotProps.data.achieved" class="font-weight-bold sd-theme-primary-color"
                  data-cy="achievedCellYes"
                  :aria-label="`${slotProps.data.skillName} ${slotProps.data.type} was achieved`"
-                 :style="`color: ${themeState.graphAchievedColor}`">✓Yes
+                 :style="{ color: themeState.graphAchievedColor }">✓Yes
             </div>
             <div v-else class=""
                  data-cy="achievedCellNo"

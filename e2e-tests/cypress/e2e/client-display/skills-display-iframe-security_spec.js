@@ -279,9 +279,25 @@ describe('Skills Display iframe destination security', () => {
   });
 
   it('supports valid parent-provided theme declarations', () => {
-    const theme = { pageTitle: { textColor: '#123456' }, tiles: { backgroundColor: '#ffffff' }, breadcrumb: { align: 'center' } };
+    const theme = {
+      pageTitle: { textColor: '#123456' },
+      tiles: { backgroundColor: '#ffffff' },
+      breadcrumb: { align: 'center' },
+      progressIndicators: {
+        incompleteColor: '#abcdef',
+        earnedTodayColor: 'rgb(18, 52, 86)',
+        beforeTodayColor: 'hsl(120, 100%, 25%)',
+        completeColor: 'green',
+      },
+      prerequisites: { skillColor: 'orange', badgeColor: '#123456' },
+      charts: { axisLabelColor: 'black', pointHistory: { lineColor: 'blue' } },
+      infoCards: { iconColors: ['green', '#123456', 'rgb(18, 52, 86)'] },
+      circleProgressInteriorTextColor: '#123456',
+    };
     cy.visit(`/__e2e/skills-display-parent?minHeight=450px&theme=${encodeURIComponent(JSON.stringify(theme))}`);
     cy.wrapIframe().find('[data-cy="skillsTitle"]').should('be.visible').and('have.css', 'color', 'rgb(18, 52, 86)');
+    cy.wrapIframe().find('[data-cy="subjectTile-subj1"] [data-cy="firstProgressBar"]')
+      .first().should('be.visible').and('have.css', 'background-color', 'rgb(171, 205, 239)');
     cy.wrapIframe().find('#skilltree-main-container').should('have.css', 'min-height', '450px');
     cy.wrapIframe().find('[data-cy="skillsDisplayInitError"]').should('not.exist');
   });
@@ -290,6 +306,21 @@ describe('Skills Display iframe destination security', () => {
     { pageTitle: { textColor: 'red } body { background: url(https://attacker.example/css)' } },
     { tiles: { backgroundColor: 'red; background-image: url(https://attacker.example/css)' } },
     { trophyIconColor: 'url(https://attacker.example/css)' },
+    ...['incompleteColor', 'earnedTodayColor', 'beforeTodayColor', 'completeColor'].map((key) => ({
+      progressIndicators: { [key]: 'red; background-image: url(https://attacker.example/pixel)' },
+    })),
+    { progressIndicators: { incompleteColor: 'url(https://attacker.example/pixel)' } },
+    { progressIndicators: { incompleteColor: 'not-a-color' } },
+    { progressIndicators: { incompleteColor: { color: 'red' } } },
+    { progressIndicators: 'red' },
+    { progressIndicators: ['red'] },
+    { progressIndicators: null },
+    { prerequisites: { skillColor: 'red; background-image: url(https://attacker.example/pixel)' } },
+    { charts: { axisLabelColor: 'url(https://attacker.example/pixel)' } },
+    { charts: { pointHistory: { lineColor: 'red; color: blue' } } },
+    { infoCards: { iconColors: ['green', 'red; background-image: url(https://attacker.example/pixel)'] } },
+    { infoCards: { iconColors: 'red' } },
+    { circleProgressInteriorTextColor: 'red; background-image: url(https://attacker.example/pixel)' },
   ].forEach((theme, index) => {
     it(`rejects parent theme CSS injection or external-resource references (${index + 1})`, () => {
       cy.intercept('https://attacker.example/**', { statusCode: 200, body: '' }).as('themeRequests');

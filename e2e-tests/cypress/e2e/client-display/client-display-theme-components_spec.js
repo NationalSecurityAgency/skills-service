@@ -204,6 +204,12 @@ describe('Client Display Theme Components Tests', () => {
     cy.get('[data-cy="skillsTitle"]')
 
     cy.get('[data-cy="subjectTile-subj1"]').should('contain.text', 'Subject 1')
+    cy.get('[data-cy="subjectTile-subj1"] [data-cy="firstProgressBar"]')
+      .first().should('be.visible').and('have.css', 'background-color', 'rgb(236, 236, 5)')
+    cy.get('[data-cy="subjectTile-subj1"] [data-cy="firstProgressBar"] [data-pc-section="value"]')
+      .first().should('be.visible').and('have.css', 'background-color', 'rgb(236, 9, 51)')
+    cy.get('[data-cy="subjectTile-subj1"] [data-cy="secondProgressBar"] [data-pc-section="value"]')
+      .first().should('be.visible').and('have.css', 'background-color', 'rgb(253, 112, 210)')
     matchComponentSnapshot('[data-cy="subjectTile-subj1"]', {
       name: 'progressIndicators settings - beforeTodayColor earnedTodayColor and incompleteColor',
       errorThreshold: 0.1
@@ -216,6 +222,8 @@ describe('Client Display Theme Components Tests', () => {
     })
 
     cy.get('[data-cy="subjectTile-subj3"]').should('contain.text', 'Completed')
+    cy.get('[data-cy="subjectTile-subj3"] [data-cy="thirdProgressBar"] [data-pc-section="value"]')
+      .first().should('be.visible').and('have.css', 'background-color', 'rgb(3, 39, 15)')
     matchComponentSnapshot('[data-cy="subjectTile-subj3"]', {
       name: 'progressIndicators settings - completeColor',
       errorThreshold: 0.1
