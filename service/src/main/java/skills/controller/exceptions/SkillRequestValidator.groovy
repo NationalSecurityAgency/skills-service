@@ -44,6 +44,9 @@ class SkillRequestValidator {
     }
 
     void validateMultiSkillUpdateRequest(String projectId, MultiSkillUpdateRequest request) {
+        if (request.justificationRequired != null) {
+            SkillsValidator.isTrue(request.justificationRequired in ["true", "false"], "justificationRequired must be true or false", projectId)
+        }
         if (request.pointIncrement != null) {
             validatePointIncrement(projectId, null, request.pointIncrement)
         }
