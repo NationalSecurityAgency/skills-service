@@ -70,34 +70,45 @@ const isLoadingApp = computed(() => !isAppLoaded.value || appConfig.isLoadingCon
 
 const themeHelper = useThemesHelper()
 
-const addCustomIconCSSForClientDisplay = () => {
-  if (skillsDisplayInfo.isSkillsClientPath()) {
-    IconManagerService.refreshCustomIconCss(skillsDisplayAttributes.projectId, null)
-  }
-}
 const pageVisitService = usePageVisitService()
 const userPreferences = useUserPreferences()
-const loadUserAndDisplayInfo = () => {
+const initializeEmbeddedDisplay = (requestConfig) => {
+  const parentState = useSkillsDisplayParentFrameState()
+  // Icons are optional presentation support, not an iframe readiness dependency.
+  // Catch synchronous errors too; HTTP 401s still use iframe authentication handling.
+  Promise.resolve()
+    .then(() => IconManagerService.refreshCustomIconCss(skillsDisplayAttributes.projectId, null, requestConfig))
+    .catch((error) => {
+      if (!axios.isCancel(error) && parentState.isCurrentAuthRequest(error?.config)) {
+        log.warn('Unable to load optional Skills Display custom icons')
+      }
+    })
+  try {
+    initMatomo()
+  } catch {
+    log.warn('Unable to initialize optional Skills Display analytics')
+  }
+  isAppLoaded.value = true
+}
+const loadDashboardUserInfo = () => {
   pageVisitService.reportPageVisit(route.path, route.fullPath)
+  // These settings are consumed by dashboard features, not the embedded learner UI.
   const loadRoot = accessState.loadIsRoot()
   const loadEmailEnabled = appInfoState.loadEmailEnabled()
-  const loadCustomIconCSS = addCustomIconCSSForClientDisplay()
   const loadAiPromptSettings = aiPrompts.loadAiPromptSettings()
-  const promises = [loadRoot, loadEmailEnabled, loadCustomIconCSS, loadAiPromptSettings]
-  if (!skillsDisplayInfo.isSkillsClientPath()) {
-    const loadUserPreferences =
-        userPreferences.loadUserPreferences().then(() => {
-          return themeHelper.loadTheme()
-        })
-    promises.push(loadUserPreferences)
-  }
-  return Promise.all(promises).then(() => {
+  const loadUserPreferences = userPreferences.loadUserPreferences().then(() => {
+    return themeHelper.loadTheme()
+  })
+  return Promise.all([loadRoot, loadEmailEnabled, loadAiPromptSettings, loadUserPreferences]).then(() => {
     isAppLoaded.value = true
   })
 }
 watch(() => authState.userInfo, async (newUserInfo) => {
+  // Embedded readiness is owned by its startup/recovery path. Do not launch
+  // dashboard-only loaders when the iframe stores a newly authenticated user.
+  if (skillsDisplayInfo.isSkillsClientPath()) return
   if (newUserInfo) {
-    await loadUserAndDisplayInfo()
+    await loadDashboardUserInfo()
     initMatomo()
   } else {
     isAppLoaded.value = true
@@ -108,7 +119,7 @@ watch(() => themeHelper.currentTheme, (newTheme, oldTheme) => {
   document.documentElement.classList.toggle('st-dark-theme');
 })
 
-const iframeInit = useIframeInit(isLoadingApp)
+const iframeInit = useIframeInit(isLoadingApp, initializeEmbeddedDisplay)
 onBeforeMount(() => {
   if (skillsDisplayInfo.isSkillsClientPath()) {
     log.trace('App.vue: skillsDisplayInfo.isSkillsClientPath()=true, initiating iframe handshake')
@@ -154,8 +165,9 @@ const restoreSessionIfAvailable = () => {
 
 const loadConfigs = () => {
   const loadUserAndDisplayConfig = () => {
+    const requestConfig = skillsDisplayInfo.isSkillsClientPath() ? { skillsDisplayHandleError: true } : {}
     const loadDisplayConfig = () => {
-      return skillsDisplayAttributes.loadConfigStateIfNeeded().then(() => {
+      return skillsDisplayAttributes.loadConfigStateIfNeeded(null, requestConfig).then(() => {
 
         if (!skillsDisplayInfo.isSkillsClientPath()) {
           globalNavGuards.addNavGuards()
@@ -164,7 +176,7 @@ const loadConfigs = () => {
           isAppLoaded.value = true
         }
         if (skillsDisplayInfo.isSkillsClientPath()) {
-          loadUserAndDisplayInfo()
+          return initializeEmbeddedDisplay(requestConfig)
         } else {
           // do not need to set isAppLoaded to true here because it will be handled
           // by the watch of authState.userInfo

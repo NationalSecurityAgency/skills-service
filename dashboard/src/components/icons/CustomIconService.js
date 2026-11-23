@@ -16,7 +16,7 @@
 import axios from 'axios'
 
 export default {
-  getCustomIconCss(projectId, globalBadgeId) {
+  getCustomIconCss(projectId, globalBadgeId, requestConfig = {}) {
     let url
     if (projectId) {
       url = `/api/projects/${encodeURIComponent(projectId)}/customIconCss`
@@ -24,7 +24,7 @@ export default {
       url = `/api/badges/${encodeURIComponent(globalBadgeId)}/customIconCss`
     }
     if (url) {
-      return axios.get(url).then((response) => response.data)
+      return axios.get(url, requestConfig).then((response) => response.data)
     }
     return new Promise((resolve) => resolve(null))
   }

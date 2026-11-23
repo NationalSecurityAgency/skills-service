@@ -29,7 +29,7 @@ import { useUserProgressSummaryState } from '@/skills-display/stores/UseUserProg
 import { useSkillsDisplaySubjectState } from '@/skills-display/stores/UseSkillsDisplaySubjectState.js'
 import { useSkillsDisplayPointHistoryState } from '@/skills-display/stores/UseSkillsDisplayPointHistoryState.js'
 
-export const useIframeInit = (isLoadingApp) => {
+export const useIframeInit = (isLoadingApp, initializeEmbeddedDisplay = () => {}) => {
 
   const parentState = useSkillsDisplayParentFrameState()
   const displayAttributes = useSkillsDisplayAttributesState()
@@ -50,6 +50,7 @@ export const useIframeInit = (isLoadingApp) => {
   let resizeObserver = null
   let observedElement = null
   let heightListenerTimeout = null
+  let handshakeTimeout = null
   let themeStyle = null
   let originalOverflowY = null
   let parentMessageGuard = null
@@ -63,6 +64,7 @@ export const useIframeInit = (isLoadingApp) => {
   }
   onScopeDispose(() => {
     disposed = true
+    clearTimeout(handshakeTimeout)
     disconnectHeightListener()
     if (parentMessageGuard) window.removeEventListener('message', parentMessageGuard, true)
     themeStyle?.remove()
@@ -90,7 +92,7 @@ export const useIframeInit = (isLoadingApp) => {
   }, { flush: 'sync' })
 
   const handleIdentityChange = (error) => {
-    if (!displayInfo.isSkillsClientPath() || !(error instanceof SkillsDisplayIdentityChangedError)) return false
+    if (disposed || !displayInfo.isSkillsClientPath() || !(error instanceof SkillsDisplayIdentityChangedError)) return false
     // A learner change is a contract violation, not another recoverable expiration.
     // Keep the iframe blocked even if the parent subsequently sends the original
     // learner's token; only destroying/recreating the display starts a new lifetime.
@@ -121,21 +123,29 @@ export const useIframeInit = (isLoadingApp) => {
       // Only retry when the parent supplies a newer token, never repeatedly retry a failed token.
       while (!disposed) {
         const generation = parentState.authGeneration
+        const requestConfig = { skillsDisplayHandleError: true }
         try {
           resetEmbeddedProgress()
           // Token rotation can supersede /public/config before startup stores it.
           // Recovery must replace that bootstrap request, not mount with empty app config.
-          if (!appConfig.hasLoadedConfig) await appConfig.loadConfigState()
+          if (!appConfig.hasLoadedConfig) await appConfig.loadConfigState(requestConfig)
           if (disposed) return
           if (generation !== parentState.authGeneration) {
             throw new Error('Skills Display authentication changed during bootstrap')
           }
-          await authState.fetchUser(false)
+          await authState.fetchUser(false, requestConfig)
           if (disposed) return
           if (generation !== parentState.authGeneration || !authState.userInfo?.userId) {
             throw new Error('Unable to restore Skills Display authentication')
           }
-          await displayAttributes.loadConfigStateIfNeeded()
+          await displayAttributes.loadConfigStateIfNeeded(null, requestConfig)
+          if (disposed) return
+          if (generation !== parentState.authGeneration || !authState.userInfo?.userId) {
+            throw new Error('Skills Display authentication was lost during recovery')
+          }
+          // Required iframe data is ready. Initialize optional presentation support
+          // and mark App ready without loading unrelated dashboard settings.
+          await initializeEmbeddedDisplay(requestConfig)
           if (disposed) return
           if (generation !== parentState.authGeneration || !authState.userInfo?.userId) {
             throw new Error('Skills Display authentication was lost during recovery')
@@ -197,7 +207,8 @@ export const useIframeInit = (isLoadingApp) => {
         return
       }
       if (!Object.prototype.hasOwnProperty.call(message, 'postmate')) return
-      if (event.source !== window.parent || message.type !== 'application/x-postmate-v1+json' ||
+      if (disposed || initializationError.value || Array.isArray(message) || event.source !== window.parent ||
+        message.type !== 'application/x-postmate-v1+json' ||
         (trustedParentOrigin !== null && event.origin !== trustedParentOrigin)) {
         event.stopImmediatePropagation()
         return
@@ -219,11 +230,19 @@ export const useIframeInit = (isLoadingApp) => {
         }
         trustedParentOrigin = event.origin
       } else if (!['call', 'request'].includes(message.postmate) || trustedParentOrigin === null ||
+        typeof message.property !== 'string' ||
         !Object.prototype.hasOwnProperty.call(parentState.parentFrame?.model || {}, message.property)) {
         event.stopImmediatePropagation()
       }
     }
     window.addEventListener('message', parentMessageGuard, true)
+    // Postmate leaves its child handshake pending indefinitely when no parent replies.
+    // Fail closed with an actionable error instead of an unbounded loading screen.
+    handshakeTimeout = setTimeout(() => {
+      if (!disposed && !completedHandshake.value) {
+        initializationError.value ||= 'Unable to initialize Skills Display. Please verify the embedding configuration and refresh the page.'
+      }
+    }, 10000)
     const handshake = new Postmate.Model({
       updateAuthenticationToken(authToken) {
         if (disposed || !completedHandshake.value || initializationError.value) return
@@ -260,7 +279,9 @@ export const useIframeInit = (isLoadingApp) => {
         if (typeof route !== 'string' && (!route || typeof route !== 'object' || Array.isArray(route))) return
         try {
           const resolved = router.resolve(route)
-          if (!resolved.matched.length) return
+          // The iframe layout alone has no learner content. Only embedded child
+          // routes may be selected by the parent, including during recovery.
+          if (!resolved.matched.length || !displayInfo.isSkillsDisplayPath(resolved)) return
           if (log.isTraceEnabled()) {
             log.trace(`UseIframeInit.js: navigate: ${resolved.path}`)
           }
@@ -277,7 +298,8 @@ export const useIframeInit = (isLoadingApp) => {
       updatedAuthToken.value = true
     }
     return handshake.then((parent) => {
-      if (disposed) return
+      clearTimeout(handshakeTimeout)
+      if (disposed || initializationError.value) return
       log.debug('UseIframeInit.js: handshake.then')
       let serviceUrl
       try {
@@ -285,6 +307,25 @@ export const useIframeInit = (isLoadingApp) => {
       } catch (error) {
         initializationError.value = 'Unable to initialize Skills Display. The service URL must use the same origin as the SkillTree iframe.'
         throw error
+      }
+      // Required model values must be validated before storing them or starting requests.
+      if (typeof parent.model.projectId !== 'string' || !parent.model.projectId.trim()) {
+        throw new Error('A Skills Display project ID is required')
+      }
+      const version = parent.model.version
+      if (version != null && typeof version !== 'string' &&
+        (typeof version !== 'number' || !Number.isFinite(version))) {
+        throw new Error('Invalid Skills Display version')
+      }
+      const minHeight = parent.model.minHeight
+      if (minHeight != null && (typeof minHeight !== 'string' || !CSS.supports('min-height', minHeight))) {
+        throw new Error('Invalid Skills Display minimum height')
+      }
+      if (parent.model.userId != null && typeof parent.model.userId !== 'string') {
+        throw new Error('Invalid Skills Display user ID')
+      }
+      if (parent.model.options != null && (typeof parent.model.options !== 'object' || Array.isArray(parent.model.options))) {
+        throw new Error('Invalid Skills Display options')
       }
       parentState.beginAuthenticationSession()
       resetEmbeddedProgress()
@@ -319,22 +360,18 @@ export const useIframeInit = (isLoadingApp) => {
       displayAttributes.serviceUrl = serviceUrl
       log.debug(`UseIframeInit.js: serviceUrl: [${displayAttributes.serviceUrl}], projectId: [${displayAttributes.projectId}]`)
 
-      if (parent.model.options) {
-        parentState.options = { ...parent.model.options }
-      }
+      parentState.options = { ...parent.model.options }
 
-      if (parent.model.version) {
-        displayAttributes.version = parent.model.version
-      }
+      displayAttributes.version = version ?? null
       // A PKI display target is fixed by the handshake. It is distinct from the
       // authenticated principal bound by /app/userInfo, and has no live update API.
       displayAttributes.userId = parent.model.userId
 
       handleTheming(parent.model.theme);
 
-      if (parent.model.minHeight) {
-        log.debug(`UseIframeInit.js: parent.model.minHeight: ${parent.model.minHeight}`)
-        appStyleObject.value['min-height'] = parent.model.minHeight
+      if (minHeight) {
+        log.debug(`UseIframeInit.js: parent.model.minHeight: ${minHeight}`)
+        appStyleObject.value['min-height'] = minHeight
       }
 
       // No scroll bars for iframe.
@@ -347,6 +384,7 @@ export const useIframeInit = (isLoadingApp) => {
       registerHeightListener()
       parentState.parentFrame.emit('needs-authentication')
     }).catch(() => {
+      clearTimeout(handshakeTimeout)
       if (disposed) return
       disconnectHeightListener()
       parentState.parentFrame = null

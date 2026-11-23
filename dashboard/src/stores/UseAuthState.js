@@ -150,8 +150,8 @@ export const useAuthState = defineStore('authState', () => {
             logout()
         }, expiresInMillis)
     }
-    const fetchUser = (storeInLocalStorage = true) => {
-        return axios.get('/app/userInfo')
+    const fetchUser = (storeInLocalStorage = true, requestConfig = {}) => {
+        return axios.get('/app/userInfo', requestConfig)
           .then((response) => {
               const parentState = useSkillsDisplayParentFrameState()
               if (!parentState.isCurrentAuthRequest(response.config)) {

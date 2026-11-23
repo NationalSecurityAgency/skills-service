@@ -24,10 +24,10 @@ export const useAppConfig = defineStore('dashboardAppConfig', () => {
   const hasLoadedConfig = ref(false)
   let configRequestRevision = 0
 
-  const loadConfigState = () => {
+  const loadConfigState = (requestConfig = {}) => {
     const revision = ++configRequestRevision
     loadingConfig.value = true
-    return SettingsService.getConfig()
+    return SettingsService.getConfig(requestConfig)
       .then((response) => {
         if (revision !== configRequestRevision) return
         config.value = response

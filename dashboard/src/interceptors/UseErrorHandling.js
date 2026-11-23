@@ -67,8 +67,9 @@ export const useErrorHandling = () => {
     }
 
     const errorCode = error?.response?.status;
-    if (errorCode !== 401 && skillsDisplayInfo.isSkillsClientPath() && parentState.isAuthenticating) {
-      // Recovery owns its error UI. Keep the learner's route while its configuration reloads.
+    if (errorCode !== 401 && skillsDisplayInfo.isSkillsClientPath() && config.skillsDisplayHandleError === true) {
+      // Only callers with an explicit local rejection handler own their error UI.
+      // Being concurrent with recovery does not make an unrelated failure recoverable.
       return Promise.reject(error);
     }
     // check if the caller wants to handle a specific error status code

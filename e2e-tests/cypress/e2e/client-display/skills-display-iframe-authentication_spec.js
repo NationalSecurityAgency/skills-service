@@ -163,6 +163,75 @@ describe('Embedded Skills Display authentication recovery', () => {
         cy.wrapIframe().find('[data-cy="skillsDisplayInitError"]').should('not.exist');
       });
 
+      [false, true].forEach((rotateDuringStartup) => {
+        it(`does not load dashboard-only settings during embedded startup ${rotateDuringStartup ? 'with' : 'without'} token rotation or subsequent recovery`, () => {
+          let initialUserInfoReceived = false;
+          const initialUserInfoGate = new Cypress.Promise((resolve) => { releaseInitialUserInfo = resolve; });
+          cy.intercept('GET', '**/public/config', (req) => {
+            req.continue((res) => { res.body.enableOpenAIIntegration = true; });
+          });
+          cy.intercept('GET', '**/app/userInfo/hasRole/ROLE_SUPER_DUPER_USER', { statusCode: 500, body: {} }).as('dashboardRole');
+          cy.intercept('GET', '**/public/isFeatureSupported?feature=emailservice', { statusCode: 500, body: {} }).as('dashboardEmail');
+          cy.intercept('GET', '**/openai/getAiPromptSettings', { statusCode: 500, body: {} }).as('dashboardAi');
+          cy.intercept({ method: 'GET', url: '**/app/userInfo', times: 1 }, (req) => {
+            req.continue(() => {
+              initialUserInfoReceived = true;
+              return initialUserInfoGate;
+            });
+          }).as('heldInitialUserInfo');
+          cy.visit('/__e2e/skills-display-parent?manualRecovery=true&allowManualRefresh=true');
+          cy.wrap(null).should(() => { expect(initialUserInfoReceived, 'initial identity is held').to.be.true; });
+          if (rotateDuringStartup) {
+            cy.get(refreshAuthentication).click();
+            assertHome();
+          }
+          cy.then(() => releaseInitialUserInfo());
+          cy.wait('@heldInitialUserInfo');
+          assertHome();
+          expireAuthentication();
+          cy.get(refreshAuthentication).click();
+          assertRecoveredSubject();
+          // Request absence is the behavior under test; rendered recovery establishes completion.
+          cy.get('@dashboardRole.all').should('have.length', 0);
+          cy.get('@dashboardEmail.all').should('have.length', 0);
+          cy.get('@dashboardAi.all').should('have.length', 0);
+        });
+      });
+
+      [
+        { failure: '500', response: { statusCode: 500, body: {} } },
+        { failure: 'network error', response: { forceNetworkError: true } },
+      ].forEach(({ failure, response }) => {
+        it(`completes startup recovery without waiting for optional custom icons, including a late ${failure}`, () => {
+          let initialUserInfoReceived = false;
+          let optionalRequested = false;
+          const initialUserInfoGate = new Cypress.Promise((resolve) => { releaseInitialUserInfo = resolve; });
+          const optionalGate = new Cypress.Promise((resolve) => { releaseConfig = resolve; });
+          cy.intercept({ method: 'GET', url: '**/app/userInfo', times: 1 }, (req) => {
+            req.continue(() => {
+              initialUserInfoReceived = true;
+              return initialUserInfoGate;
+            });
+          });
+          cy.intercept('GET', '**/api/projects/proj1/customIconCss', (req) => {
+            optionalRequested = true;
+            return optionalGate.then(() => req.reply(response));
+          }).as('optionalStartupIcons');
+          cy.visit('/__e2e/skills-display-parent?manualRecovery=true&allowManualRefresh=true');
+          cy.wrap(null).should(() => { expect(initialUserInfoReceived, 'initial identity is held').to.be.true; });
+          cy.get(refreshAuthentication).click();
+          cy.wrap(null).should(() => { expect(optionalRequested, 'optional request is held').to.be.true; });
+          // Required loaders finish while the optional request is still pending.
+          assertHome();
+          cy.then(() => releaseConfig());
+          cy.wait('@optionalStartupIcons');
+          assertHome();
+          cy.wrapIframe().find('[data-cy="errorPage"]').should('not.exist');
+          cy.wrapIframe().find('[data-cy="skillsDisplayInitError"]').should('not.exist');
+          cy.then(() => releaseInitialUserInfo());
+        });
+      });
+
       [200, 401, 403, 404, 500].forEach((statusCode) => {
         [true, false].forEach((duringRecovery) => {
           it(`ignores superseded startup authentication returning ${statusCode} ${duringRecovery ? 'during' : 'after'} replacement-token recovery`, () => {
@@ -220,24 +289,29 @@ describe('Embedded Skills Display authentication recovery', () => {
     });
 
     [
-      { name: 'server error', response: { statusCode: 500, body: {} } },
-      { name: 'network error', response: { forceNetworkError: true } },
-    ].forEach(({ name, response }) => {
-      it(`shows a visible startup error without learner content when user information fails with a ${name}`, () => {
-        let failRequests = true;
-        // Keep network failures active across automatic browser retries.
-        cy.intercept('GET', '**/app/userInfo', (req) => {
-          if (failRequests) return req.reply(response);
-          return req.continue();
+      { loader: 'user information', url: '**/app/userInfo' },
+      { loader: 'display configuration', url: '**/public/clientDisplay/config*' },
+    ].forEach(({ loader, url }) => {
+      [
+        { name: 'server error', response: { statusCode: 500, body: {} } },
+        { name: 'network error', response: { forceNetworkError: true } },
+      ].forEach(({ name, response }) => {
+        it(`shows a visible startup error without learner content when ${loader} fails with a ${name}`, () => {
+          let failRequests = true;
+          // Keep network failures active across automatic browser retries.
+          cy.intercept('GET', url, (req) => {
+            if (failRequests) return req.reply(response);
+            return req.continue();
+          });
+          cy.visit('/__e2e/skills-display-parent?manualRecovery=true');
+          cy.wrapIframe().find('[data-cy="skillsDisplayInitError"]').should('be.visible')
+            .and('have.attr', 'role', 'alert').and('contain.text', 'Unable to load Skills Display');
+          cy.wrapIframe().find('[data-pc-name="progressspinner"]').should('not.exist');
+          cy.wrapIframe().find('[data-cy="skillsDisplayHome"]').should('not.exist');
+          cy.then(() => { failRequests = false; });
+          cy.reload();
+          assertHome();
         });
-        cy.visit('/__e2e/skills-display-parent?manualRecovery=true');
-        cy.wrapIframe().find('[data-cy="skillsDisplayInitError"]').should('be.visible')
-          .and('have.attr', 'role', 'alert').and('contain.text', 'Unable to load Skills Display');
-        cy.wrapIframe().find('[data-pc-name="progressspinner"]').should('not.exist');
-        cy.wrapIframe().find('[data-cy="skillsDisplayHome"]').should('not.exist');
-        cy.then(() => { failRequests = false; });
-        cy.reload();
-        assertHome();
       });
     });
   });
@@ -261,7 +335,7 @@ describe('Embedded Skills Display authentication recovery', () => {
       { name: 'network failure', response: { forceNetworkError: true } },
     ].flatMap((failure) => [true, false].map((duringRecovery) => ({ ...failure, duringRecovery })))
       .forEach(({ name, response, duringRecovery }) => {
-      it.only(`ignores an expired-token ${name} arriving ${duringRecovery ? 'during' : 'after'} replacement-token recovery`, () => {
+      it(`ignores an expired-token ${name} arriving ${duringRecovery ? 'during' : 'after'} replacement-token recovery`, () => {
         cy.on('uncaught:exception', (error) => {
           const expectedMessage = response.forceNetworkError ? 'Network Error' : `Request failed with status code ${response.statusCode}`;
           if (error.name === 'AxiosError' && error.message === expectedMessage

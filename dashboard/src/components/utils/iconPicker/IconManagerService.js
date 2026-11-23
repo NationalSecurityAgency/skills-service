@@ -58,9 +58,9 @@ export default {
     const existingStyles = createCustomIconStyleElementIfNotExist()
     existingStyles.innerText += css
   },
-  refreshCustomIconCss(projectId, globalBadgeId) {
+  refreshCustomIconCss(projectId, globalBadgeId, requestConfig = {}) {
     const existingStyles = createCustomIconStyleElementIfNotExist(projectId || globalBadgeId)
-    CustomIconService.getCustomIconCss(projectId, globalBadgeId).then((response) => {
+    return CustomIconService.getCustomIconCss(projectId, globalBadgeId, requestConfig).then((response) => {
       if (response) {
         existingStyles.innerText = response
       }

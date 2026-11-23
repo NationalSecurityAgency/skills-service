@@ -41,7 +41,7 @@ export const useSkillsDisplayPointHistoryState = defineStore('skillsDisplayPoint
     if (appConfig.isPkiAuthenticated) {
       config.idType = 'ID'
     }
-    if (attributes.version) {
+    if (attributes.version != null && attributes.version !== '') {
       config.version = attributes.version
     }
     return config

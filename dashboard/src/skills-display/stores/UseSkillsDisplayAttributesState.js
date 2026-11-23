@@ -58,7 +58,7 @@ export const useSkillsDisplayAttributesState = defineStore('skillsDisplayAttribu
   }, { flush: 'sync' })
   // Startup, navigation, settings updates and iframe recovery own configuration
   // loading. Cache invalidation must not start a competing identity-change request.
-  const loadConfigStateIfNeeded = (optionalToPathObj = null) => {
+  const loadConfigStateIfNeeded = (optionalToPathObj = null, requestConfig = {}) => {
     if (skillsDisplayInfo.isSkillsDisplayPath(optionalToPathObj)) {
       if (route.params.projectId) {
         projectId.value = route.params.projectId
@@ -70,13 +70,13 @@ export const useSkillsDisplayAttributesState = defineStore('skillsDisplayAttribu
       const sameContext = projectId.value && config.value.configForContext === configContext.value
       if (!sameContext) {
         log.debug(`loadConfigStateIfNeeded for [${projectId.value}]`)
-        return loadConfigState()
+        return loadConfigState(requestConfig)
       }
     }
 
     return Promise.resolve()
   }
-  const loadConfigState = () => {
+  const loadConfigState = (requestConfig = {}) => {
     if (pendingConfig) {
       return pendingConfig
     }
@@ -84,12 +84,13 @@ export const useSkillsDisplayAttributesState = defineStore('skillsDisplayAttribu
     const context = configContext.value
     loadingConfig.value = true
     pendingConfig = axios.get(`${serviceUrl.value}/public/clientDisplay/config?projectId=${encodeURIComponent(projectId.value)}`, {
+      ...requestConfig,
       withCredentials: false
     }).then((result) => {
       if (revision === configRevision) {
         config.value = { ...result.data, configForContext: context }
       } else if (auth.userInfo && skillsDisplayInfo.isSkillsDisplayPath()) {
-        return loadConfigState()
+        return loadConfigState(requestConfig)
       }
     }).finally(() => {
       if (revision === configRevision) {
