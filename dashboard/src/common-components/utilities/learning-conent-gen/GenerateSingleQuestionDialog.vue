@@ -167,10 +167,9 @@ const handleGenerationCompleted = (generated) => {
     const answers = QuestionType.isTextInput(props.questionType.selectedType?.id) ? [] : JSON.parse(cleanJsonString(answersMatch[1].trim()))
     // Retain mappings because raw assistant history keeps placeholders for follow-ups.
     const { text: question } = imgHandler.reinsertImages(questionMatch[1].trim(), extractedImageState.extractedImages, appConfig.descriptionMaxLength)
-    // The preview includes display-only headings and their blank-line separators.
-    // Keep this allowance fixed so arbitrary extra content cannot enlarge the budget.
-    const previewMaxLength = Number(appConfig.descriptionMaxLength) + questionsTitle.length + answersTitle.length + 4
-    const { text: generatedValue } = imgHandler.reinsertImages(generated.generatedValue, extractedImageState.extractedImages, previewMaxLength)
+    // Build the preview from the validated question with canonical heading separators.
+    // Preserve formatting within the question, including fenced code examples.
+    const generatedValue = `${questionsTitle}\n\n${question}\n\n${answersTitle}`
     if (QuestionType.isFillInTheBlank(props.questionType.selectedType?.id)) {
       try {
         validateGeneratedBlanks(question, answers, appConfig.maxAnswersPerQuizQuestion)

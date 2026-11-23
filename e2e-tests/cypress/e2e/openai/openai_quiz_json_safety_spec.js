@@ -61,6 +61,51 @@ describe('Generated quiz JSON safety', () => {
         assertRejectedResponse()
     })
 
+    const completenessScenarios = ['single', 'split']
+    completenessScenarios.forEach((scenario) => {
+        it(`retains every question with escaped quotes and trailing backslashes in ${scenario} content chunks`, () => {
+            cy.get('[data-cy="instructionsInput"]').type(`Quiz completeness regression - ${scenario}{enter}`)
+            cy.get('[data-cy="aiMsg-2"] [data-cy="finalSegment"]').should('contain.text', completedMsg)
+            cy.get('[data-cy="generatedQuestion"]').should('have.length', 3)
+            const expectedQuestions = [
+                'Which parser handles a literal "quote"?',
+                'Which path ends with a backslash: C:\\',
+                'Which answer preserves a backslash followed by a quote?',
+            ]
+            expectedQuestions.forEach((question, index) => {
+                cy.get(`[data-cy="questionDisplayCard-${index + 1}"] [data-cy="questionDisplayText"]`)
+                    .should('contain.text', question)
+            })
+            cy.get('[data-cy="questionDisplayCard-3"] [data-cy="answer-0_displayText"]')
+                .should('have.text', 'A backslash and quote: \\"')
+            cy.get('[data-cy="questionDisplayCard-3"] [data-cy="answer-1_displayText"]')
+                .should('have.text', 'A trailing backslash: \\')
+            cy.get('[data-cy="useGenValueBtn-2"]').should('be.enabled').click()
+            cy.get('[data-cy="useGenValueBtn-2"]').should('not.exist')
+            cy.get('[data-cy="selfReportMediaCard"]').should('contain.text', 'Self Report: Quiz')
+            cy.get('[data-cy="buttonToQuiz"]').click()
+            cy.get('[data-cy="btn_Questions"]').click()
+            cy.get('[data-cy^="questionDisplayCard-"]').should('have.length', 3)
+            expectedQuestions.forEach((question) => {
+                cy.contains('[data-cy^="questionDisplayCard-"]', question).should('be.visible')
+            })
+            cy.contains('[data-cy^="questionDisplayCard-"]', expectedQuestions[2]).within(() => {
+                cy.get('[data-cy="answer-0_displayText"]').should('have.text', 'A backslash and quote: \\"')
+                cy.get('[data-cy="answer-1_displayText"]').should('have.text', 'A trailing backslash: \\')
+                // Completion must retain the existing question-type normalization.
+                cy.get('[data-cy="answerDisplay-0"] [data-cy="selected"]').should('be.visible')
+            })
+        })
+    })
+
+    it('rejects a completed quiz with an invalid question instead of applying its partial preview', () => {
+        cy.get('[data-cy="instructionsInput"]').type('Quiz completeness regression - invalid{enter}')
+        cy.get('[data-cy="aiMsg-2"] [data-cy="finalSegment"]').should('contain.text', errMsg)
+        cy.get('[data-cy="useGenValueBtn-2"]').should('not.exist')
+        cy.get('[data-cy="instructionsInput"]').should('be.enabled').and('have.focus')
+        cy.get('[data-cy="selfReportMediaCard"]').should('not.contain.text', 'Self Report: Quiz')
+    })
+
     it('renders, applies, and saves valid JSON questions split across content chunks', () => {
         cy.get('[data-cy="instructionsInput"]').type('Quiz JSON safety regression - valid split chunks{enter}')
         cy.get('[data-cy="aiMsg-2"] [data-cy="finalSegment"]').should('contain.text', completedMsg)

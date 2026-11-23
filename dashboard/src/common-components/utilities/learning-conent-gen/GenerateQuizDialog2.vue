@@ -145,11 +145,16 @@ const handleGeneratedChunk = (chunk, historyId) => {
   // Process the buffer to find complete objects
   for (; i < newBuffer.length; i++) {
     const char = newBuffer[i];
-    const prevChar = i > 0 ? newBuffer[i - 1] : '';
 
-    // Track if we're inside a string (accounting for escaped quotes)
-    if (char === '"' && prevChar !== '\\') {
-      inString = !inString;
+    // A quote is escaped only after an odd number of consecutive backslashes.
+    if (char === '"') {
+      let backslashCount = 0;
+      for (let j = i - 1; j >= 0 && newBuffer[j] === '\\'; j--) {
+        backslashCount++;
+      }
+      if (backslashCount % 2 === 0) {
+        inString = !inString;
+      }
     }
 
     // Only process structure when not in a string
@@ -244,19 +249,38 @@ const ensureValidQuestionType = (question) => {
 
 const handleGenerationCompleted = (generated) => {
   log.debug(`handleGenerationCompleted: ${JSON.stringify(generated, null, 2)}`)
-  currentJsonString.value = ''
-  isGenerating.value = false
-  allQuestions.value.push(...generated.generatedInfo.generatedQuiz)
   const generatedValue = generated.generatedValue
       .replace(/^[\s\S]*?```(?:json)?\s*([\s\S]*?)\s*```[\s\S]*$/i, '$1')
       .trim()
   const parsedGeneratedValue = JSON.parse(generatedValue)
+
+  if (!Array.isArray(parsedGeneratedValue?.questions) || parsedGeneratedValue.questions.length === 0) {
+    throw new Error('Generated quiz must contain a non-empty questions array')
+  }
+  // Streaming extraction is only a preview; the complete JSON is authoritative.
+  const questions = parsedGeneratedValue.questions.map((question, questionIdx) => {
+    if (typeof question?.question !== 'string' || !question.question.trim() ||
+        typeof question.questionType !== 'string' || !question.questionType.trim() ||
+        !Array.isArray(question.answers) ||
+        question.answers.some((answer) => !answer || typeof answer !== 'object' || Array.isArray(answer))) {
+      throw new Error(`Generated quiz question ${questionIdx + 1} is invalid`)
+    }
+    question.name = `q${generated.id}${questionIdx + 1}`
+    ensureValidQuestionType(question)
+    return question
+  })
 
   const changedNotes = Object.entries(parsedGeneratedValue)
       .find(([key]) => key.toLowerCase().includes('change'))?.[1] || null;
   if (changedNotes) {
     generated.generateValueChangedNotes = `### Here is what was changed\n- ${changedNotes.join('\n- ')}`
   }
+  currentQuizData.value = questions
+  generated.generatedInfo.generatedQuiz = questions
+  questions.forEach((question) => setFieldValue(question.name, question.question))
+  allQuestions.value.push(...questions)
+  currentJsonString.value = ''
+  isGenerating.value = false
   validate()
   currentQuizHistoryId.value = generated.id
   return generated
