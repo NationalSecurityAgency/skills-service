@@ -24,7 +24,7 @@ import static skills.intTests.utils.SkillsFactory.*
 
 class ProjectUserRemovalQuizSpecs extends QuizSkillAchievementsBaseIntSpec {
 
-    def "#operation for an absent project user preserves shared quiz attempts and other project progress"() {
+    def "#operation for an absent project user preserves shared quiz attempts and other project progress - archived #archived"() {
         List<String> users = getRandomUsers(4)
         SkillsService projectAdmin = createService(users[0])
         SkillsService otherProjectAdmin = createService(users[1])
@@ -43,19 +43,23 @@ class ProjectUserRemovalQuizSpecs extends QuizSkillAchievementsBaseIntSpec {
         Integer passedAttempt = passQuiz(learner, quiz)
         otherProjectAdmin.addSkill(unrelated, learner.userName)
         waitForAsyncTasksCompletion.waitForAllScheduleTasks()
+        if (archived) {
+            projectAdmin.archiveUsers([learner.userName], 'TestProject1')
+        }
         Long actionsBefore = projectAdmin.getUserActionsForProject('TestProject1').totalCount
 
         expect:
         otherProjectAdmin.getUserRolesForProjectAndUser('TestProject2', projectAdmin.userName).isEmpty()
         quizAdmin.getQuizUserRoles(quiz.quizId)*.userId == [quizAdmin.userName]
         projectAdmin.getProjectUsers('TestProject1').count == 0
+        projectAdmin.getArchivedUsers('TestProject1').data*.userId == (archived ? [learner.userName] : [])
         learner.getSkillsSummaryForCurrentUser('TestProject1').points == 0
         learner.getSkillsSummaryForCurrentUser('TestProject2').points == 200
         learner.getSkillsSummaryForCurrentUser('TestProject2').skillsAchieved == 2
         quizAdmin.getQuizRuns(quiz.quizId).data*.attemptId == [passedAttempt]
 
         when:
-        // Repeated requests must remain no-ops, including their audit and async effects.
+        // Only the first removal of archived membership should add an audit action.
         List<Map> results = (1..2).collect { int request ->
             if (removeFromProject) {
                 return projectAdmin.removeUserFromProject('TestProject1', learner.userName)
@@ -67,7 +71,8 @@ class ProjectUserRemovalQuizSpecs extends QuizSkillAchievementsBaseIntSpec {
         then:
         results.every { Map result -> result.success }
         projectAdmin.getProjectUsers('TestProject1').count == 0
-        projectAdmin.getUserActionsForProject('TestProject1').totalCount == actionsBefore
+        projectAdmin.getUserActionsForProject('TestProject1').totalCount == actionsBefore + (archived && removeFromProject ? 1 : 0)
+        projectAdmin.getArchivedUsers('TestProject1').data*.userId == (archived && !removeFromProject ? [learner.userName] : [])
         quizAdmin.getQuizRuns(quiz.quizId).data*.attemptId == [passedAttempt]
         learner.getSkillsSummaryForCurrentUser('TestProject2').points == 200
         learner.getSkillsSummaryForCurrentUser('TestProject2').skillsAchieved == 2
@@ -76,9 +81,11 @@ class ProjectUserRemovalQuizSpecs extends QuizSkillAchievementsBaseIntSpec {
         otherProjectAdmin.getProjectUsers('TestProject2').data*.userId == [learner.userName]
 
         where:
-        operation     | removeFromProject
-        'Remove User' | true
-        'Delete All'  | false
+        operation     | removeFromProject | archived
+        'Remove User' | true              | false
+        'Delete All'  | false             | false
+        'Remove User' | true              | true
+        'Delete All'  | false             | true
     }
 
     def "removal clears passed shared quiz attempts and dependent progress but retains failed attempts and unrelated progress"() {

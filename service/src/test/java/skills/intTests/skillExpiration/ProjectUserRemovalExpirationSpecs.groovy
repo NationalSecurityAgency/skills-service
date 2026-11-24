@@ -20,6 +20,7 @@ import skills.intTests.utils.DefaultIntSpec
 import skills.intTests.utils.SkillsService
 import skills.services.attributes.ExpirationAttrs
 import skills.services.settings.SettingsService
+import skills.storage.repos.ProjectParticipationRepo
 import skills.tasks.executors.ExpireUserAchievementsTaskExecutor
 
 import static skills.intTests.utils.SkillsFactory.*
@@ -28,6 +29,7 @@ class ProjectUserRemovalExpirationSpecs extends DefaultIntSpec {
 
     @Autowired ExpireUserAchievementsTaskExecutor expirationExecutor
     @Autowired SettingsService settingsService
+    @Autowired ProjectParticipationRepo participationRepo
 
     def cleanup() {
         settingsService.deleteGlobalSetting(ExpireUserAchievementsTaskExecutor.SKILL_EXPIRATION_LAST_RUN_DATE)
@@ -99,12 +101,15 @@ class ProjectUserRemovalExpirationSpecs extends DefaultIntSpec {
         operation << ['removal', 'Delete All']
     }
 
-    def "#operation is a no-op for expired-only history without participation or active progress"() {
+    def "#operation preserves expired-only history without participation or active progress - archived #archived"() {
         Map skill = createSkill(1, 1, 1, 0, 1, 0, 100)
         skillsService.createProjectAndSubjectAndSkills(createProject(1), createSubject(1, 1), [skill])
         String userId = getRandomUsers(1)[0]
         SkillsService learner = createService(userId)
         assert skillsService.addSkill(skill, userId, new Date() - 10).body.skillApplied
+        if (archived) {
+            skillsService.archiveUsers([userId], 'TestProject1')
+        }
         expire([skill])
         String lastExpirationDate = learner.getSingleSkillSummaryForCurrentUser('TestProject1', skill.skillId).lastExpirationDate
         Long actionsBefore = skillsService.getUserActionsForProject('TestProject1').totalCount
@@ -113,13 +118,15 @@ class ProjectUserRemovalExpirationSpecs extends DefaultIntSpec {
         skillsService.getProjectUsers('TestProject1').count == 0
         skillsService.getPerformedSkills(userId, 'TestProject1').totalCount == 0
         learner.getSkillsSummaryForCurrentUser('TestProject1').points == 0
+        skillsService.getArchivedUsers('TestProject1').data*.userId == (archived ? [userId] : [])
         !userPointsRepo.existsByProjectIdAndUserId('TestProject1', userId)
+        !participationRepo.existsByProjectIdAndUserId('TestProject1', userId)
         skillsService.getExpiredSkills('TestProject1', '', '').data*.skillId == [skill.skillId]
         lastExpirationDate != null
 
         when:
         if (removeFromProject) {
-            skillsService.removeUserFromProject('TestProject1', userId)
+            skillsService.removeUserFromProject('testproject1', userId.toUpperCase(Locale.ROOT))
         } else {
             skillsService.deleteAllSkillEvents([projectId: 'TestProject1', userId: userId])
         }
@@ -128,12 +135,22 @@ class ProjectUserRemovalExpirationSpecs extends DefaultIntSpec {
         skillsService.getExpiredSkills('TestProject1', '', '').data*.skillId == [skill.skillId]
         learner.getSingleSkillSummaryForCurrentUser('TestProject1', skill.skillId).lastExpirationDate == lastExpirationDate
         skillsService.getProjectUsers('TestProject1').count == 0
-        skillsService.getUserActionsForProject('TestProject1').totalCount == actionsBefore
+        skillsService.getUserActionsForProject('TestProject1').totalCount == actionsBefore + (archived && removeFromProject ? 1 : 0)
+        skillsService.getArchivedUsers('TestProject1').data*.userId == (archived && !removeFromProject ? [userId] : [])
+
+        when:
+        learner.initializeProjectProgress('TestProject1')
+
+        then:
+        skillsService.getArchivedUsers('TestProject1').data*.userId == (archived && !removeFromProject ? [userId] : [])
+        skillsService.getProjectUsers('TestProject1').data*.userId == (archived && !removeFromProject ? [] : [userId])
 
         where:
-        operation     | removeFromProject
-        'Remove User' | true
-        'Delete All'  | false
+        operation     | removeFromProject | archived
+        'Remove User' | true              | false
+        'Delete All'  | false             | false
+        'Remove User' | true              | true
+        'Delete All'  | false             | true
     }
 
     def "Delete All clears active progress and expired history and summary state"() {

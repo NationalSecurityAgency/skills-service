@@ -253,15 +253,20 @@ class SkillEventAdminService {
                 'This user cannot be removed because Skills Catalog finalization failed. Please resolve finalization before trying again.', canonicalProjectId)
 
         boolean hadLocalEvents = performedSkillRepository.existsLocalEventByProjectIdAndUserId(canonicalProjectId, canonicalUserId)
-        if (!hasProjectUserData(canonicalProjectId, canonicalUserId, hadLocalEvents)) {
-            return RequestResult.success()
-        }
-        deleteUserProgress(canonicalProjectId, canonicalUserId)
-        projectParticipationRepo.deleteByProjectIdAndUserId(canonicalProjectId, canonicalUserId)
+        // Archived membership can outlive all active progress (for example, after expiration).
+        // Remove it independently; it must not authorize cross-project shared-quiz cleanup.
         ArchivedUser archivedUser = archivedUsersRepo.findByProjectIdAndUserId(canonicalProjectId, canonicalUserId)
         if (archivedUser) {
             archivedUsersRepo.delete(archivedUser)
         }
+        if (!hasProjectUserData(canonicalProjectId, canonicalUserId, hadLocalEvents)) {
+            if (archivedUser) {
+                recordUserProgressDeletion(canonicalProjectId, canonicalUserId, true)
+            }
+            return RequestResult.success()
+        }
+        deleteUserProgress(canonicalProjectId, canonicalUserId)
+        projectParticipationRepo.deleteByProjectIdAndUserId(canonicalProjectId, canonicalUserId)
         // Unlike Delete All, do not reset participation or restore imported credit.
         achievedGlobalBadgeHandler.reconcileGlobalBadgesForProject(canonicalUserId, canonicalProjectId)
         propagateUpdatesToQuizSkillsAndImportedSkills(canonicalProjectId, canonicalUserId)
