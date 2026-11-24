@@ -1753,7 +1753,8 @@ describe('Settings Tests', () => {
         cy.get('[data-cy="resetToDefault-systemInstructions"]').should('be.disabled')
 
         // modify value
-        cy.get('[data-cy="aiPromptSetting-systemInstructions"] textarea').type('{selectall}X')
+        cy.get('[data-cy="aiPromptSetting-systemInstructions"] textarea').clear()
+        cy.get('[data-cy="aiPromptSetting-systemInstructions"] textarea').should('have.value', '').type('X')
         cy.get('[data-cy="aiPromptSetting-systemInstructions"] textarea')
           .should('have.value', 'X')
           .and('have.attr', 'aria-invalid', 'false')
@@ -1786,7 +1787,8 @@ describe('Settings Tests', () => {
         cy.get('[data-cy="aiPromptSettingsSave"').should('be.disabled')
 
         // update value again
-        cy.get('[data-cy="aiPromptSetting-systemInstructions"] textarea').type('{selectall}X')
+        cy.get('[data-cy="aiPromptSetting-systemInstructions"] textarea').clear()
+        cy.get('[data-cy="aiPromptSetting-systemInstructions"] textarea').should('have.value', '').type('X')
         cy.get('[data-cy="aiPromptSetting-systemInstructions"] textarea')
           .should('have.value', 'X')
           .and('have.attr', 'aria-invalid', 'false')
@@ -1807,7 +1809,8 @@ describe('Settings Tests', () => {
         cy.get('[data-cy="resetToDefault-newSkillDescriptionInstructions"]').should('be.disabled')
 
         // modify value
-        cy.get('[data-cy="aiPromptSetting-newSkillDescriptionInstructions"] textarea').type('{selectall}XYZ')
+        cy.get('[data-cy="aiPromptSetting-newSkillDescriptionInstructions"] textarea').clear()
+        cy.get('[data-cy="aiPromptSetting-newSkillDescriptionInstructions"] textarea').should('have.value', '').type('XYZ')
         cy.get('[data-cy="aiPromptSetting-newSkillDescriptionInstructions"] textarea')
           .should('have.value', 'XYZ')
           .and('have.attr', 'aria-invalid', 'false')
@@ -1945,4 +1948,3 @@ describe('Settings Tests', () => {
         cy.get('[data-cy="nav-AI Prompts"]').should('not.exist');
     });
 });
-
