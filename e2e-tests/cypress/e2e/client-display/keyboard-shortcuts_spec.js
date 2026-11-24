@@ -23,10 +23,7 @@ describe('Training Keyboard Shortcuts Tests', () => {
         cy.createSkill(1, 1, 2)
         cy.createSkill(1, 1, 3)
 
-        cy.intercept('/api/projects/proj1/skills/skill1/dependencies').as('skills1Deps')
-
         cy.visit('/progress-and-rankings/projects/proj1/subjects/subj1/skills/skill1')
-        cy.wait('@skills1Deps')
         cy.get('[data-cy="skillProgressTitle"]').contains('Very Great Skill 1')
         cy.get('[data-cy="skillOrder"]').contains('Skill 1 of 3')
 
@@ -90,10 +87,7 @@ describe('Training Keyboard Shortcuts Tests', () => {
         cy.get('[data-cy="userPrefsSettingsSave"]').click()
         cy.get('[data-cy="settingsSavedAlert"]')
 
-        cy.intercept('/api/projects/proj1/skills/skill1/dependencies').as('skills1Deps')
-
         cy.visit('/progress-and-rankings/projects/proj1/subjects/subj1/skills/skill1')
-        cy.wait('@skills1Deps')
         cy.get('[data-cy="skillProgressTitle"]').contains('Very Great Skill 1')
         cy.get('[data-cy="skillOrder"]').contains('Skill 1 of 3')
 
@@ -148,13 +142,10 @@ describe('Training Keyboard Shortcuts Tests', () => {
         cy.get('[data-cy="userPrefsSettingsSave"]').click()
         cy.get('[data-cy="settingsSavedAlert"]')
 
-        cy.intercept('/api/projects/proj1/skills/skill3/dependencies').as('skills1Deps')
-
         cy.get('[data-cy="skillTreeLogo"]').click()
         cy.get('[data-cy="project-link-proj1"]').click()
         cy.get('[data-cy="subjectTileBtn"]').click()
         cy.get('[data-cy="skillProgressTitle-skill3"] [data-cy="skillProgressTitle"]').click()
-        cy.wait('@skills1Deps')
         cy.get('[data-cy="skillProgressTitle"]').contains('Very Great Skill 3')
         cy.get('[data-cy="skillOrder"]').contains('Skill 3 of 3')
 
@@ -171,11 +162,8 @@ describe('Training Keyboard Shortcuts Tests', () => {
         cy.createSkill(1, 1, 2)
         cy.createSkill(1, 1, 3)
 
-        cy.intercept('/api/projects/proj1/skills/skill1/dependencies').as('skills1Deps')
-
         // initiate training-wide search dialog from the skill page
         cy.visit('/progress-and-rankings/projects/proj1/subjects/subj1/skills/skill1')
-        cy.wait('@skills1Deps')
         cy.get('[data-cy="skillProgressTitle"]').contains('Very Great Skill 1')
         cy.get('[data-cy="skillOrder"]').contains('Skill 1 of 3')
 
@@ -219,13 +207,10 @@ describe('Training Keyboard Shortcuts Tests', () => {
         cy.get('[data-cy="userPrefsSettingsSave"]').click()
         cy.get('[data-cy="settingsSavedAlert"]')
 
-        cy.intercept('/api/projects/proj1/skills/skill3/dependencies').as('skills1Deps')
-
         cy.get('[data-cy="skillTreeLogo"]').click()
         cy.get('[data-cy="project-link-proj1"]').click()
         cy.get('[data-cy="subjectTileBtn"]').click()
         cy.get('[data-cy="skillProgressTitle-skill3"] [data-cy="skillProgressTitle"]').click()
-        cy.wait('@skills1Deps')
         cy.get('[data-cy="skillProgressTitle"]').contains('Very Great Skill 3')
         cy.get('[data-cy="skillOrder"]').contains('Skill 3 of 3')
 
@@ -234,6 +219,36 @@ describe('Training Keyboard Shortcuts Tests', () => {
         cy.realPress(["Control", "Shift", "l"]);
         cy.get('[data-cy="trainingSearchDialog"]').should('be.visible')
         cy.realPress('Escape');
+    })
+
+    it('can navigate away while project and subject point history are loading', () => {
+        cy.createProject(1)
+        cy.createSubject(1, 1)
+        cy.createSkill(1, 1, 1)
+        cy.createSkill(1, 1, 2)
+        cy.createSkill(1, 1, 3)
+        const releaseResponses = []
+        cy.intercept('GET', /\/api\/projects\/proj1\/(?:subjects\/subj1\/)?pointHistory(?:\?|$)/, (req) => {
+            req.on('response', () => new Cypress.Promise((resolve) => releaseResponses.push(resolve)))
+        }).as('pendingPointHistory')
+
+        cy.visit('/progress-and-rankings/projects/proj1')
+        cy.get('[data-cy="subjectTileBtn"]').should('be.visible')
+        cy.wrap(null).should(() => expect(releaseResponses).to.have.length(1))
+        cy.get('[data-cy="subjectTileBtn"]').click()
+        cy.get('[data-cy="skillProgressTitle-skill3"] [data-cy="skillProgressTitle"]').should('be.visible')
+        cy.wrap(null).should(() => expect(releaseResponses).to.have.length(2))
+        cy.get('[data-cy="skillProgressTitle-skill3"] [data-cy="skillProgressTitle"]').click()
+        cy.get('[data-cy="skillOrder"]').should('contain.text', 'Skill 3 of 3')
+
+        cy.then(() => releaseResponses[0]())
+        cy.wait('@pendingPointHistory')
+        cy.then(() => releaseResponses[1]())
+        cy.wait('@pendingPointHistory')
+        cy.get('[data-cy="skillProgressTitle"]').should('contain.text', 'Very Great Skill 3')
+        cy.get('[data-cy="breadcrumb-subj1"]').focus()
+        cy.realPress(['Control', 'Alt', 'p'])
+        cy.get('[data-cy="skillProgressTitle"]').should('contain.text', 'Very Great Skill 2')
     })
 
     it('tab should not be one of the shortcut keys', () => {

@@ -56,6 +56,7 @@ import skills.services.events.AddSkillHelper;
 import skills.services.events.SkillEventResult;
 import skills.services.events.SkillEventsService;
 import skills.skillLoading.RankingLoader;
+import skills.skillLoading.SkillLearningPathLoader;
 import skills.skillLoading.SkillsLoader;
 import skills.skillLoading.SkillsService;
 import skills.skillLoading.model.*;
@@ -87,6 +88,9 @@ class UserSkillsController {
 
     @Autowired
     private SkillsLoader skillsLoader;
+
+    @Autowired
+    private SkillLearningPathLoader skillLearningPathLoader;
 
     @Autowired
     private SkillsService skillsService;
@@ -344,7 +348,7 @@ class UserSkillsController {
                                                     @RequestParam(name = "userId", required = false) String userIdParam,
                                                     @RequestParam(name = "idType", required = false) String idType) {
         String userId = userInfoService.getUserName(userIdParam, true, idType);
-        return skillsLoader.loadSkillSummary(projectId, userId, crossProjectId, skillId, null);
+        return skillLearningPathLoader.loadSharedSkillSummary(projectId, userId, crossProjectId, skillId, null);
     }
 
     /**
@@ -360,7 +364,7 @@ class UserSkillsController {
                                                     @RequestParam(name = "userId", required = false) String userIdParam,
                                                     @RequestParam(name = "idType", required = false) String idType) {
         String userId = userInfoService.getUserName(userIdParam, true, idType);
-        return skillsLoader.loadSkillSummary(projectId, userId, crossProjectId, skillId, subjectId);
+        return skillLearningPathLoader.loadSharedSkillSummary(projectId, userId, crossProjectId, skillId, subjectId);
     }
 
     @RequestMapping(value = "/projects/{projectId}/badges/summary", method = RequestMethod.GET, produces = "application/json")
@@ -468,7 +472,9 @@ class UserSkillsController {
                                                        @RequestParam(name = "userId", required = false) String userIdParam,
                                                        @RequestParam(name = "idType", required = false) String idType) {
         String userId = userInfoService.getUserName(userIdParam, true, idType);
-        return skillsLoader.loadSkillDependencyInfo(projectId, userId, skillId);
+        SkillDependencyInfo result = skillsLoader.loadSkillDependencyInfo(projectId, userId, skillId);
+        result.setDependencies(skillsDepsService.filterAccessibleDependencies(projectId, skillId, result.getDependencies()));
+        return result;
     }
 
     @RequestMapping(value = "/projects/{projectId}/dependency/graph", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
@@ -481,6 +487,19 @@ class UserSkillsController {
         String userId = userInfoService.getUserName(userIdParam, true, idType);
 
         return skillsDepsService.getUserDependentSkillsGraph(projectId, userId, getProvidedVersionOrReturnDefault(version));
+    }
+
+    @GetMapping(value = "/projects/{projectId}/skills/{skillId}/learningPath", produces = MediaType.APPLICATION_JSON_VALUE)
+    public SkillDependencyInfo loadSkillLearningPath(@PathVariable("projectId") String projectId,
+                                                     @PathVariable("skillId") String skillId,
+                                                     @RequestParam(name = "userId", required = false) String userIdParam,
+                                                     @RequestParam(name = "idType", required = false) String idType,
+                                                     @RequestParam(name = "version", required = false) Integer version,
+                                                     @RequestParam(name = "crossProjectId", required = false) String crossProjectId) {
+        SkillsValidator.isNotBlank(projectId, "Project Id");
+        SkillsValidator.isNotBlank(skillId, "Skill Id");
+        String userId = userInfoService.getUserName(userIdParam, true, idType);
+        return skillLearningPathLoader.load(projectId, userId, skillId, getProvidedVersionOrReturnDefault(version), crossProjectId);
     }
 
     @RequestMapping(value = "/projects/{projectId}/skills/{skillId}", method = {RequestMethod.PUT, RequestMethod.POST}, produces = "application/json")

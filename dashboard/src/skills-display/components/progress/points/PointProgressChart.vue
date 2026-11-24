@@ -31,6 +31,7 @@ const appConfig = useAppConfig()
 const pointHistoryState = useSkillsDisplayPointHistoryState()
 const themeState = useSkillsDisplayThemeState()
 const route = useRoute()
+const subjectId = route.params.subjectId
 const attributes = useSkillsDisplayAttributesState()
 const chartSupportColors = useChartSupportColors()
 const colors = chartSupportColors.getColors()
@@ -58,7 +59,7 @@ const splashChartData = ({
 
 
 onMounted(() => {
-  pointHistoryState.loadPointHistory(route.params.subjectId)
+  pointHistoryState.loadPointHistory(subjectId)
       .then(() => {
         setupData()
       })
@@ -133,7 +134,7 @@ const combineOverlappingAchievements = (achievements, numItems) => {
 }
 
 const setupData = () => {
-  const pointHistoryRes = pointHistoryState.getPointHistory(route.params.subjectId)
+  const pointHistoryRes = pointHistoryState.getPointHistory(subjectId)
   const numItems = pointHistoryRes.pointsHistory?.length || 0
 
   if (pointHistoryRes.achievements) {
@@ -292,7 +293,7 @@ const chartJsOptions = computed(() => {
 
 const pointsChartRef = ref(null)
 
-watch(() => pointHistoryState.pointHistoryDateLoadedMap.get(route.params.subjectId), (newVal, oldVal) => {
+watch(() => pointHistoryState.pointHistoryDateLoadedMap.get(subjectId), (newVal, oldVal) => {
   if (oldVal && newVal) {
     setupData()
   }

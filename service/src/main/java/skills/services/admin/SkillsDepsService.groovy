@@ -19,9 +19,11 @@ import callStack.profiler.Profile
 import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
+import org.springframework.security.access.AccessDeniedException
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import skills.auth.UserInfo
 import skills.auth.UserInfoService
 import skills.auth.UserSkillsGrantedAuthority
 import skills.controller.exceptions.ErrorCode
@@ -29,6 +31,8 @@ import skills.controller.exceptions.SkillException
 import skills.controller.result.model.*
 import skills.services.DependencyValidator
 import skills.services.RuleSetDefGraphService
+import skills.skillLoading.model.SkillDependencyInfo.SkillRelationship
+import skills.skillLoading.model.SkillDependencyInfo.SkillRelationshipItem
 import skills.services.userActions.DashboardAction
 import skills.services.userActions.DashboardItem
 import skills.services.userActions.UserActionInfo
@@ -197,27 +201,80 @@ class SkillsDepsService {
     }
 
     @Transactional(readOnly = true)
-    SkillsGraphRes getUserDependentSkillsGraph(String projectId, String userId, Integer version=null) {
-        List<Object[]> rows = skillRelDefRepo.getGraph(projectId, SkillRelDef.RelationshipType.Dependence, version)
+    SkillsGraphRes getUserDependentSkillsGraph(String projectId, String userId, Integer version=null, String prerequisiteProjectId=null, String prerequisiteSkillId=null) {
+        List<Object[]> rows = skillRelDefRepo.getGraph(projectId, SkillRelDef.RelationshipType.Dependence, version, prerequisiteProjectId, prerequisiteSkillId)
         Set<String> referencedProjectIds = rows.collectMany { [it[5] as String, it[15] as String] }.toSet()
-        referencedProjectIds.remove(projectId)
-
-        String currentUserId = userInfoService.getCurrentUserId()
-        boolean isRoot = SecurityContextHolder.context.authentication?.authorities?.any { authority ->
-            authority instanceof UserSkillsGrantedAuthority && authority.role?.roleName == RoleName.ROLE_SUPER_DUPER_USER
-        }
-        boolean isCommunityMember = userCommunityService.isUserCommunityMember(currentUserId)
-        Set<String> accessibleProjectIds = referencedProjectIds.findAll { referencedProjectId ->
-            (!userCommunityService.isUserCommunityOnlyProject(referencedProjectId) || isCommunityMember) &&
-                    (!inviteOnlyProjectService.isInviteOnlyProject(referencedProjectId) || isRoot ||
-                            inviteOnlyProjectService.isPrivateProjRoleOrAdminRole(referencedProjectId, currentUserId))
-        }.toSet()
-        accessibleProjectIds.add(projectId)
-
+        Set<String> accessibleProjectIds = getAccessibleProjectIds(projectId, referencedProjectIds)
         List<Object[]> visibleRows = rows.findAll { row ->
             accessibleProjectIds.contains(row[5]) && accessibleProjectIds.contains(row[15])
         }
         return convertToSkillsGraphRes(mapGraphEdges(visibleRows, userId, version))
+    }
+
+    @Transactional(readOnly = true)
+    List<SkillRelationship> filterAccessibleDependencies(String projectId, String skillId, List<SkillRelationship> dependencies) {
+        Set<String> referencedProjectIds = dependencies.collectMany { SkillRelationship relationship ->
+            [relationship.skill.projectId, relationship.dependsOn.projectId]
+        }.toSet()
+        Set<String> accessibleProjectIds = getAccessibleProjectIds(projectId, referencedProjectIds)
+        List<SkillRelationship> visibleRelationships = dependencies.findAll { SkillRelationship relationship ->
+            accessibleProjectIds.contains(relationship.skill.projectId) && accessibleProjectIds.contains(relationship.dependsOn.projectId)
+        }
+        Map<List<String>, List<SkillRelationship>> byParent = visibleRelationships.groupBy { SkillRelationship relationship ->
+            dependencyKey(relationship.skill)
+        }
+        Set<List<String>> reachable = []
+        Deque<List<String>> pending = new ArrayDeque<>()
+        pending.add([projectId, skillId.toLowerCase()])
+        while (!pending.isEmpty()) {
+            List<String> parentKey = pending.removeFirst()
+            if (reachable.add(parentKey)) {
+                byParent.getOrDefault(parentKey, []).each { SkillRelationship relationship ->
+                    pending.add(dependencyKey(relationship.dependsOn))
+                }
+            }
+        }
+        // Filtering a private intermediate node must also remove its now-disconnected descendants.
+        return visibleRelationships.findAll { SkillRelationship relationship ->
+            reachable.contains(dependencyKey(relationship.skill))
+        }.collect { SkillRelationship relationship ->
+            // Badge expansion can load relationships in other projects; flags must use the viewing project.
+            new SkillRelationship(skill: relationship.skill, dependsOn: relationship.dependsOn,
+                    achieved: relationship.achieved, crossProject: relationship.dependsOn.projectId != projectId)
+        }
+    }
+
+    private static List<String> dependencyKey(SkillRelationshipItem item) {
+        return [item.projectId, item.skillId.toLowerCase()]
+    }
+
+    @Transactional(readOnly = true)
+    void validateProjectAccess(String projectId) {
+        if (!filterAccessibleProjectIds([projectId] as Set<String>).contains(projectId)) {
+            throw new AccessDeniedException('Access is denied')
+        }
+    }
+
+    private Set<String> getAccessibleProjectIds(String projectId, Set<String> referencedProjectIds) {
+        Set<String> otherProjectIds = referencedProjectIds.findAll { String id -> id != projectId }.toSet()
+        Set<String> accessibleProjectIds = filterAccessibleProjectIds(otherProjectIds)
+        accessibleProjectIds.add(projectId)
+        return accessibleProjectIds
+    }
+
+    private Set<String> filterAccessibleProjectIds(Set<String> projectIds) {
+        UserInfo currentUser = userInfoService.getCurrentUser()
+        String currentUserId = currentUser.username?.toLowerCase()
+        boolean isRoot = SecurityContextHolder.context.authentication?.authorities?.any { authority ->
+            authority instanceof UserSkillsGrantedAuthority && authority.role?.roleName == RoleName.ROLE_SUPER_DUPER_USER
+        }
+        boolean isCommunityMember = userCommunityService.isUserCommunityMember(currentUserId)
+        return projectIds.findAll { String referencedProjectId ->
+            (!userCommunityService.isUserCommunityOnlyProject(referencedProjectId) || isCommunityMember) &&
+                    (!inviteOnlyProjectService.isInviteOnlyProject(referencedProjectId) ||
+                            (!currentUser.proxied && (isRoot ||
+                                    inviteOnlyProjectService.canUserAccess(referencedProjectId, currentUserId, true))))
+        }.toSet()
     }
 
 
@@ -294,7 +351,7 @@ class SkillsDepsService {
 
     @Profile
     List<GraphSkillDefEdge> loadGraphEdges(String projectId, SkillRelDef.RelationshipType type, String userId=null, Integer version=null) {
-        List<Object[]> edges = skillRelDefRepo.getGraph(projectId, type, version)
+        List<Object[]> edges = skillRelDefRepo.getGraph(projectId, type, version, null, null)
         return mapGraphEdges(edges, userId, version)
     }
 
