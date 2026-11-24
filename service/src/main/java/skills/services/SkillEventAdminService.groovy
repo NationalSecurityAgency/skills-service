@@ -265,7 +265,7 @@ class SkillEventAdminService {
             }
             return RequestResult.success()
         }
-        deleteUserProgress(canonicalProjectId, canonicalUserId)
+        deleteUserProgress(canonicalProjectId, canonicalUserId, true)
         projectParticipationRepo.deleteByProjectIdAndUserId(canonicalProjectId, canonicalUserId)
         // Unlike Delete All, do not reset participation or restore imported credit.
         achievedGlobalBadgeHandler.reconcileGlobalBadgesForProject(canonicalUserId, canonicalProjectId)
@@ -283,14 +283,17 @@ class SkillEventAdminService {
                 userPointsRepo.existsByProjectIdAndUserId(projectId, userId)
     }
 
-    private void deleteUserProgress(String projectId, String userId) {
+    private void deleteUserProgress(String projectId, String userId, boolean cancelPendingQuizGrading = false) {
         performedSkillRepository.deleteAllByUserIdAndProjectId(userId, projectId)
         userEventService.removeAllEvents(projectId, userId)
         achievedLevelRepo.deleteAllByProjectIdAndUserId(projectId, userId)
         expiredUserAchievementRepo.deleteAllByProjectIdAndUserId(projectId, userId)
         userPointsRepo.deleteAllByProjectIdAndUserId(projectId, userId)
         skillApprovalRepo.deleteAllByProjectIdAndUserId(projectId, userId)
-        userQuizAttemptRepo.deleteAllAttemptsForQuizzesAssociatedToProjectAndByUserId(projectId, userId)
+        // Removal must invalidate pending grading as well as earned quiz credit;
+        // otherwise an outstanding manual or AI grade can restore deleted progress.
+        List<String> quizStatuses = cancelPendingQuizGrading ? ['PASSED', 'NEEDS_GRADING'] : ['PASSED']
+        userQuizAttemptRepo.deleteAllAttemptsForQuizzesAssociatedToProjectAndByUserId(projectId, userId, quizStatuses)
     }
 
     private void recordUserProgressDeletion(String projectId, String userId, boolean removedFromProject) {

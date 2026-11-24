@@ -763,6 +763,11 @@ class QuizRunService {
         }
         log.debug("Obtaining lock for quizAttemptId [${quizAttemptId}], grader [${graderUserId}]")
         lockingService.lockUserQuizAttempt(quizAttemptId)
+        if (aiAssistantGrader && !quizAttemptRepo.existsById(quizAttemptId)) {
+            // AI responses can arrive after project removal cancelled the pending attempt.
+            log.info('Discarding AI grade for deleted quiz attempt [{}]', quizAttemptId)
+            return new QuizAnswerGradingResult()
+        }
         UserQuizAttempt userQuizAttempt = getQuizAttempt(quizAttemptId)
         boolean wasQuizAlreadyPassed = userQuizAttempt.status == UserQuizAttempt.QuizAttemptStatus.PASSED
         validateAttempt(userQuizAttempt, quizDef, quizAttemptId, quizId, userId, gradeAnswerReq)
@@ -1064,6 +1069,10 @@ class QuizRunService {
     @Transactional
     int incrementAiGradingAttemptCount(Integer quizAttemptId, Integer answerDefId) {
         UserQuizAnswerAttempt userQuizAnswerAttempt = quizAttemptAnswerRepo.findByUserQuizAttemptRefIdAndQuizAnswerDefinitionRefId(quizAttemptId, answerDefId)
+        if (!userQuizAnswerAttempt) {
+            // Deleted answers have no retry budget or failure notification to update.
+            return 0
+        }
         log.debug("Incrementing aiGradingAttemptCount for userQuizAnswerAttempt=[{}]", userQuizAnswerAttempt)
         userQuizAnswerAttempt.aiGradingAttemptCount++
         return userQuizAnswerAttempt.aiGradingAttemptCount

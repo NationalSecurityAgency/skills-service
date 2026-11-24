@@ -302,8 +302,8 @@ interface UserQuizAttemptRepo extends JpaRepository<UserQuizAttempt, Long> {
                                    and self_reporting_type = 'Quiz'
                                    and q_to_s.skill_ref_id = skill.id
                                    and q_to_s.quiz_ref_id = attempt.quiz_definition_ref_id
-                                   and attempt.status = 'PASSED')''' , nativeQuery = true)
-    int deleteAllAttemptsForQuizzesAssociatedToProjectAndByUserId(String projectId, String userId)
+                                    and attempt.status in ?3)''' , nativeQuery = true)
+    int deleteAllAttemptsForQuizzesAssociatedToProjectAndByUserId(String projectId, String userId, List<String> statuses)
 
     static interface TagValueCount {
         String getTagValue()

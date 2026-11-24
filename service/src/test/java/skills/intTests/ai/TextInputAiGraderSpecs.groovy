@@ -25,12 +25,14 @@ import skills.intTests.utils.SkillsService
 import skills.quizLoading.QuizSettings
 import skills.storage.model.UserAttrs
 import skills.storage.model.UserQuizAttempt
+import skills.storage.model.SkillDef.SelfReportingType
 import skills.utils.WaitFor
 
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
 
 import static com.github.tomakehurst.wiremock.client.WireMock.*
+import static skills.intTests.utils.SkillsFactory.*
 
 @Slf4j
 class TextInputAiGraderSpecs extends DefaultAiIntSpec {
@@ -64,6 +66,42 @@ class TextInputAiGraderSpecs extends DefaultAiIntSpec {
 
     private void releaseAiGradingResponse() {
         releaseAiResponse.countDown()
+    }
+
+    def "an AI grading response arriving after project removal cannot restore the attempt or credit"() {
+        CountDownLatch gradingStarted = holdAiGradingResponse()
+        Map quiz = QuizDefFactory.createQuiz(1)
+        skillsService.createQuizDef(quiz)
+        skillsService.createQuizQuestionDefs([QuizDefFactory.createTextInputQuestion(1, 1)])
+        Map question = skillsService.getQuizQuestionDefs(quiz.quizId).questions[0]
+        skillsService.saveQuizTextInputAiGraderConfigs(quiz.quizId, question.id, 'This is the correct answer.', 90, true)
+        Map skill = createSkill(1, 1, 1, 0, 1, 0, 100) + [selfReportingType: SelfReportingType.Quiz, quizId: quiz.quizId]
+        skillsService.createProjectAndSubjectAndSkills(createProject(1), createSubject(1, 1), [skill])
+        SkillsService learner = createService(getRandomUsers(1)[0])
+        learner.initializeProjectProgress('TestProject1')
+        Map attempt = learner.startQuizAttempt(quiz.quizId).body
+        learner.reportQuizAnswer(quiz.quizId, attempt.id, attempt.questions[0].answerOptions[0].id,
+                [isSelected: true, answerText: 'This is user provided answer. this answer should pass'])
+        assert learner.completeQuizAttempt(quiz.quizId, attempt.id).body.needsGrading
+        assert gradingStarted.await(30, TimeUnit.SECONDS)
+        assert skillsService.getQuizAttemptResult(quiz.quizId, attempt.id).status == 'NEEDS_GRADING'
+
+        when:
+        skillsService.removeUserFromProject('TestProject1', learner.userName)
+
+        then:
+        skillsService.getProjectUsers('TestProject1').count == 0
+
+        when:
+        releaseAiGradingResponse()
+        waitForAsyncTasksCompletion.waitForAllScheduleTasks()
+
+        then:
+        learner.getSkillsSummaryForCurrentUser('TestProject1').points == 0
+        skillsService.getQuizRuns(quiz.quizId).totalCount == 0
+        skillsService.getProjectUsers('TestProject1').count == 0
+        learner.getSkillsSummaryForCurrentUser('TestProject1').skillsAchieved == 0
+        skillsService.getPerformedSkills(learner.userName, 'TestProject1').totalCount == 0
     }
 
     def "AI grading isolates student data and validates confidence #confidence"() {

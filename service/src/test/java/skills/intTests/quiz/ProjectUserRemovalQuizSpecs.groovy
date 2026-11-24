@@ -15,14 +15,127 @@
  */
 package skills.intTests.quiz
 
+import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.http.HttpStatus
 import skills.intTests.utils.QuizDefFactory
+import skills.intTests.utils.SkillsClientException
 import skills.intTests.utils.SkillsService
 import skills.storage.model.SkillDef.SelfReportingType
 import skills.storage.model.auth.RoleName
+import spock.util.concurrent.PollingConditions
+
+import javax.sql.DataSource
+import java.sql.Connection
+import java.util.concurrent.Callable
+import java.util.concurrent.ExecutorService
+import java.util.concurrent.Executors
+import java.util.concurrent.Future
+import java.util.concurrent.TimeUnit
 
 import static skills.intTests.utils.SkillsFactory.*
 
 class ProjectUserRemovalQuizSpecs extends QuizSkillAchievementsBaseIntSpec {
+
+    @Autowired DataSource dataSource
+
+    def "removal waits for quiz completion to commit and clears shared credit without restoring participation"() {
+        Map quiz = createQuiz(1)
+        Map source = createSkill(1, 1, 1, 0, 1, 0, 100) + [selfReportingType: SelfReportingType.Quiz, quizId: quiz.quizId]
+        Map shared = createSkill(2, 1, 2, 0, 1, 0, 100) + [selfReportingType: SelfReportingType.Quiz, quizId: quiz.quizId]
+        Map unrelated = createSkill(2, 1, 3, 0, 1, 0, 100)
+        skillsService.createProjectAndSubjectAndSkills(createProject(1), createSubject(1, 1), [source])
+        skillsService.createProjectAndSubjectAndSkills(createProject(2), createSubject(2, 1), [shared, unrelated])
+        SkillsService learner = createService(getRandomUsers(1)[0])
+        learner.initializeProjectProgress('TestProject1')
+        skillsService.addSkill(unrelated, learner.userName)
+        Map attempt = learner.startQuizAttempt(quiz.quizId).body
+        learner.reportQuizAnswer(quiz.quizId, attempt.id, attempt.questions[0].answerOptions[0].id)
+        long barrier = 4072402L
+        Connection connection = dataSource.connection
+        ExecutorService callers = Executors.newFixedThreadPool(2)
+        connection.createStatement().execute("select pg_advisory_lock(${barrier})")
+        // A deferred trigger pauses commit after completion has awarded all linked credit.
+        jdbcTemplate.execute("""create function removal_quiz_commit_pause() returns trigger language plpgsql as \$\$
+            begin if NEW.id = ${attempt.id} and NEW.status = 'PASSED' then
+                perform pg_advisory_xact_lock(${barrier}); end if; return NEW; end; \$\$""")
+        jdbcTemplate.execute('''create constraint trigger removal_quiz_commit_pause after update on user_quiz_attempt
+            deferrable initially deferred for each row execute function removal_quiz_commit_pause()''')
+
+        when:
+        Future<Map> completion = callers.submit({ learner.completeQuizAttempt(quiz.quizId, attempt.id).body } as Callable<Map>)
+        new PollingConditions(timeout: 15).eventually {
+            assert jdbcTemplate.queryForObject("select count(*) from pg_locks where locktype = 'advisory' and objid = ? and not granted", Integer, barrier) > 0
+        }
+        Future<Map> removal = callers.submit({ skillsService.removeUserFromProject('TestProject1', learner.userName) } as Callable<Map>)
+        new PollingConditions(timeout: 15).eventually {
+            assert jdbcTemplate.queryForObject('''select count(*) from pg_stat_activity remover
+                where remover.datname = current_database() and remover.wait_event_type = 'Lock'
+                and exists(select 1 from pg_locks completer where completer.locktype = 'advisory'
+                    and completer.objid = ? and not completer.granted
+                    and completer.pid = any(pg_blocking_pids(remover.pid)))''', Integer, barrier) > 0
+        }
+
+        then:
+        !completion.isDone()
+        !removal.isDone()
+
+        when:
+        connection.createStatement().execute('select pg_advisory_unlock_all()')
+        Map result = completion.get(20, TimeUnit.SECONDS)
+        Map removed = removal.get(20, TimeUnit.SECONDS)
+        waitForAsyncTasksCompletion.waitForAllScheduleTasks()
+
+        then:
+        result.passed
+        removed.success
+        skillsService.getProjectUsers('TestProject1').count == 0
+        learner.getSkillsSummaryForCurrentUser('TestProject1').points == 0
+        learner.getSkillsSummaryForCurrentUser('TestProject1').skillsAchieved == 0
+        learner.getSkillsSummaryForCurrentUser('TestProject2').points == 100
+        learner.getSkillsSummaryForCurrentUser('TestProject2').skillsAchieved == 1
+        skillsService.getPerformedSkills(learner.userName, 'TestProject2').data*.skillId == [unrelated.skillId]
+        skillsService.getQuizRuns(quiz.quizId).totalCount == 0
+
+        cleanup:
+        connection?.createStatement()?.execute('select pg_advisory_unlock_all()')
+        connection?.close()
+        callers?.shutdown()
+        assert callers == null || callers.awaitTermination(30, TimeUnit.SECONDS)
+        jdbcTemplate.execute('drop trigger if exists removal_quiz_commit_pause on user_quiz_attempt')
+        jdbcTemplate.execute('drop function if exists removal_quiz_commit_pause()')
+    }
+
+    def "a stale manual grade after removal cannot restore a pending attempt or project credit"() {
+        Map quiz = QuizDefFactory.createQuiz(1)
+        skillsService.createQuizDef(quiz)
+        skillsService.createQuizQuestionDefs([QuizDefFactory.createTextInputQuestion(1, 1)])
+        Map skill = createSkill(1, 1, 1, 0, 1, 0, 100) + [selfReportingType: SelfReportingType.Quiz, quizId: quiz.quizId]
+        skillsService.createProjectAndSubjectAndSkills(createProject(1), createSubject(1, 1), [skill])
+        SkillsService learner = createService(getRandomUsers(1)[0])
+        learner.initializeProjectProgress('TestProject1')
+        Map attempt = learner.startQuizAttempt(quiz.quizId).body
+        Integer answerId = attempt.questions[0].answerOptions[0].id
+        learner.reportQuizAnswer(quiz.quizId, attempt.id, answerId, [isSelected: true, answerText: 'Pending answer'])
+        assert learner.completeQuizAttempt(quiz.quizId, attempt.id).body.needsGrading
+        assert skillsService.getQuizRuns(quiz.quizId).data*.attemptId == [attempt.id]
+        skillsService.removeUserFromProject('TestProject1', learner.userName)
+        assert skillsService.getProjectUsers('TestProject1').count == 0
+
+        when:
+        // A deleted attempt may reject the stale request; a no-op is also safe.
+        try {
+            skillsService.gradeAnswer(learner.userName, quiz.quizId, attempt.id, answerId, true, 'Accepted')
+        } catch (SkillsClientException error) {
+            assert error.httpStatus == HttpStatus.BAD_REQUEST
+            assert error.message.contains('does not exist')
+        }
+
+        then:
+        learner.getSkillsSummaryForCurrentUser('TestProject1').points == 0
+        skillsService.getQuizRuns(quiz.quizId).totalCount == 0
+        skillsService.getProjectUsers('TestProject1').count == 0
+        learner.getSkillsSummaryForCurrentUser('TestProject1').skillsAchieved == 0
+    }
 
     def "#operation for an absent project user preserves shared quiz attempts and other project progress - archived #archived"() {
         List<String> users = getRandomUsers(4)

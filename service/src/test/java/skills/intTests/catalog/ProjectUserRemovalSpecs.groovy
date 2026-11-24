@@ -345,23 +345,40 @@ class ProjectUserRemovalSpecs extends CatalogBackfillSpecBase {
     }
 
     def "removal clears archived membership and records a distinct project user audit action"() {
-        skillsService.createProject(createProject(1))
+        skillsService.createProjectAndSubjectAndSkills(createProject(1), createSubject(1, 1),
+                [createSkill(1, 1, 1, 0, 1, 0, 100)])
         SkillsService learner = createService(users[0])
-        learner.initializeProjectProgress('TestProject1')
         skillsService.archiveUsers([users[0]], 'TestProject1')
 
+        expect:
+        archivedUsersRepo.existsByProjectIdAndUserId('TestProject1', users[0])
+        !participationRepo.existsByProjectIdAndUserId('TestProject1', users[0])
+        !userPointsRepo.existsByProjectIdAndUserId('TestProject1', users[0])
+        skillsService.getPerformedSkills(users[0], 'TestProject1').totalCount == 0
+        skillsService.getArchivedUsers('TestProject1').data*.userId == [users[0]]
+
         when:
+        skillsService.removeUserFromProject('TestProject1', users[0])
         skillsService.removeUserFromProject('TestProject1', users[0])
         Map history = skillsService.getUserActionsForProject('TestProject1', 10, 1, 'created', false,
                 DashboardItem.ProjectUser, '', '', DashboardAction.Delete)
 
         then:
         !archivedUsersRepo.existsByProjectIdAndUserId('TestProject1', users[0])
+        skillsService.getArchivedUsers('TestProject1').totalCount == 0
         !participationRepo.existsByProjectIdAndUserId('TestProject1', users[0])
         history.totalCount == 1
         history.data[0].item == 'ProjectUser'
         history.data[0].itemId == userAttrsRepo.findByUserIdIgnoreCase(users[0]).userIdForDisplay
         skillsService.getProjectUserActionAttributes('TestProject1', history.data[0].id).removedFromProject == true
+
+        when:
+        learner.initializeProjectProgress('TestProject1')
+
+        then:
+        !learner.getSkillsSummaryForCurrentUser('TestProject1').archivedUser
+        learner.getSkillsSummaryForCurrentUser('TestProject1').points == 0
+        skillsService.getProjectUsers('TestProject1').data*.userId == [users[0]]
     }
 
     def "finalization cannot start after removal's state check until removal commits"() {
