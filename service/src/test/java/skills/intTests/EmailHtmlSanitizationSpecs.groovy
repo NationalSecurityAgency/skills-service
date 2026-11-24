@@ -32,7 +32,9 @@ class EmailHtmlSanitizationSpecs extends DefaultIntSpec {
     private static final String EMAIL_BODY = '''<h1>Safe title</h1>
 <p><strong>bold</strong> <em>italic</em> <del>deleted</del> <span style="font-size: 24px;">large</span></p>
 <ul><li>list item</li></ul>
-<table><thead><tr><th>header</th></tr></thead><tbody><tr><td>cell</td></tr></tbody></table>
+<hr>
+<table><thead><tr><th align="left">left header</th><th align="center">center header</th><th align="right">right header</th></tr></thead>
+<tbody><tr><td align="left">left cell</td><td align="center">center cell</td><td align="right">right cell</td></tr></tbody></table>
 <a href="https://example.com/path?one=1&amp;two=2" target="_blank" rel="noopener noreferrer">safe link</a>
 <a href="mailto:user@example.com">mail link</a>
 <img src="https://example.com/image.png" alt="safe image" onerror="alert(1)">
@@ -74,7 +76,8 @@ class EmailHtmlSanitizationSpecs extends DefaultIntSpec {
         admin.createSubject(subject)
         admin.createSkill(skill)
         learner.addSkill(skill)
-        String emailBody = EMAIL_BODY + "<img src=\"${RASTER_IMAGE}\" alt=\"pasted image\">"
+        String emailBody = EMAIL_BODY + "<img src=\"${RASTER_IMAGE}\" alt=\"pasted image\">" +
+                "<span style=\"font-size: 1px${' ' * 10000}!\">almost valid font size</span>"
         int expectedMessages = emailPath == 'root broadcast' ? root.countAllProjectAdminsWithEmail() : 1
         String expectedRecipient = emailPath == 'project broadcast' ? users[1] :
                 emailPath == 'project preview' ? users[0] : DEFAULT_ROOT_USER_ID
@@ -127,13 +130,17 @@ class EmailHtmlSanitizationSpecs extends DefaultIntSpec {
         assert document.select('em').text() == 'italic'
         assert document.select('del').text() == 'deleted'
         assert document.select('li').text() == 'list item'
-        assert document.select('th').text() == 'header'
-        assert document.select('td').text() == 'cell'
+        assert document.select('hr').size() == 1
+        assert document.select('th').collect { Element cell -> cell.text() } == ['left header', 'center header', 'right header']
+        assert document.select('td').collect { Element cell -> cell.text() } == ['left cell', 'center cell', 'right cell']
+        assert document.select('th').collect { Element cell -> cell.attr('align') } == ['left', 'center', 'right']
+        assert document.select('td').collect { Element cell -> cell.attr('align') } == ['left', 'center', 'right']
         assert document.select('code').text() == '<script>literal example</script>'
         assert document.select('a').find { Element link -> link.text() == 'safe link' }.attr('href') == 'https://example.com/path?one=1&two=2'
         assert document.select('a').find { Element link -> link.text() == 'mail link' }.attr('href') == 'mailto:user@example.com'
         assert document.select('span[style]').size() == 1
         assert document.select('span[style]').attr('style') == 'font-size: 24px;'
+        assert !document.select('span').find { Element span -> span.text() == 'almost valid font size' }.hasAttr('style')
         assert document.select('img[src]').collect { Element image -> image.attr('src') } == ['https://example.com/image.png', RASTER_IMAGE]
     }
 
@@ -145,7 +152,7 @@ class EmailHtmlSanitizationSpecs extends DefaultIntSpec {
         SkillsService root = createRootSkillService()
         Map project = SkillsFactory.createProject(1)
         admin.createProject(project)
-        String markdown = '**formatted text** and [unsafe](javascript:alert(1)) and [safe](https://example.com)'
+        String markdown = '**formatted text** and [unsafe](javascript:alert(1)) and [safe](https://example.com)\n\n---\n\nafter rule'
 
         when:
         if (emailPath == 'project preview') {
@@ -160,9 +167,10 @@ class EmailHtmlSanitizationSpecs extends DefaultIntSpec {
         then:
         email.subj == 'Markdown preview'
         document.select('strong').text() == 'formatted text'
+        document.select('hr').size() == 1
         document.select('a').find { Element link -> link.text() == 'unsafe' }.attr('href') == ''
         document.select('a').find { Element link -> link.text() == 'safe' }.attr('href') == 'https://example.com'
-        email.plainText.contains(markdown)
+        email.plainText.replace('\r\n', '\n').contains(markdown)
 
         where:
         emailPath << ['project preview', 'root preview']

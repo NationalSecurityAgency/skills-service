@@ -25,8 +25,10 @@ import java.util.regex.Pattern
 
 class EmailHtmlSanitizer {
 
-    private static final Pattern FONT_SIZE = ~/(?i)^\s*font-size\s*:\s*\d+(?:\.\d+)?px\s*;?\s*$/
+    private static final int MAX_FONT_SIZE_STYLE_LENGTH = 128
+    private static final Pattern FONT_SIZE = ~/(?i)\A\s*+font-size\s*+:\s*+\d++(?:\.\d++)?px\s*+(?:;\s*+)?\z/
     private static final Pattern RASTER_IMAGE = ~/(?i)^data:image\/(?:png|jpeg|gif|webp);base64,[a-z0-9+\/]+={0,2}$/
+    private static final Set<String> TABLE_ALIGNMENTS = Set.of('left', 'center', 'right')
     private static final Safelist EMAIL_SAFELIST = new EmailSafelist()
     // Used only for protocol validation; relative URLs retain their original values.
     private static final String RELATIVE_LINK_BASE = 'https://relative-link.invalid/'
@@ -42,9 +44,11 @@ class EmailHtmlSanitizer {
     private static class EmailSafelist extends Safelist {
         EmailSafelist() {
             super(Safelist.relaxed()
-                    .addTags('del', 'span')
+                    .addTags('del', 'span', 'hr')
                     .addAttributes('a', 'target', 'rel')
                     .addAttributes('span', 'style')
+                    .addAttributes('th', 'align')
+                    .addAttributes('td', 'align')
                     .preserveRelativeLinks(true))
         }
 
@@ -52,7 +56,11 @@ class EmailHtmlSanitizer {
         boolean isSafeAttribute(String tagName, Element element, Attribute attribute) {
             // Keep the editor's font-size formatting, but not arbitrary inline CSS.
             if (tagName == 'span' && attribute.key == 'style') {
-                return FONT_SIZE.matcher(attribute.value).matches()
+                // Notification rendering holds a shared lock; bound work before matching.
+                return attribute.value.length() <= MAX_FONT_SIZE_STYLE_LENGTH && FONT_SIZE.matcher(attribute.value).matches()
+            }
+            if (tagName in ['th', 'td'] && attribute.key == 'align') {
+                return TABLE_ALIGNMENTS.contains(attribute.value.toLowerCase(Locale.ROOT))
             }
             // Pasted images use data URLs; do not allow SVG or other active content.
             if (tagName == 'img' && attribute.key == 'src' && RASTER_IMAGE.matcher(attribute.value).matches()) {

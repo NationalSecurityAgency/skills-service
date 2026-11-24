@@ -17,7 +17,9 @@ package skills.utils
 
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
+import org.jsoup.nodes.Element
 import spock.lang.Specification
+import spock.lang.Timeout
 
 class EmailHtmlSanitizerSpec extends Specification {
 
@@ -82,10 +84,85 @@ class EmailHtmlSanitizerSpec extends Specification {
         'font-size: 24px;'                                      | true
         'font-size: 12.5px'                                     | true
         'FONT-SIZE: 18PX;'                                      | true
+        '  font-size : 24px  ;  '                               | true
+        'font-size: 24px  '                                     | true
         'color: red'                                           | false
         'font-size: 24px; background: url(https://example.com)'  | false
         'font-size: expression(alert(1))'                       | false
         'font-size: 24px; position: fixed'                      | false
+    }
+
+    def "font size styles have a small maximum length"() {
+        given:
+        String declaration = 'font-size: 1px'
+        String style = declaration + (' ' * (length - declaration.length()))
+
+        when:
+        Document document = Jsoup.parse(EmailHtmlSanitizer.sanitize("<span style=\"${style}\">text</span>"))
+
+        then:
+        document.select('span').text() == 'text'
+        document.select('span').first().hasAttr('style') == allowed
+
+        where:
+        length | allowed
+        128    | true
+        129    | false
+        100000 | false
+    }
+
+    @Timeout(5)
+    def "long almost-valid font size styles are rejected without expensive matching"() {
+        when:
+        Document document = Jsoup.parse(EmailHtmlSanitizer.sanitize("<span style=\"${style}\">text</span>"))
+
+        then:
+        document.select('span').text() == 'text'
+        !document.select('span').first().hasAttr('style')
+
+        where:
+        style << [
+                'font-size: 1px' + (' ' * 100000) + '!',
+                'font-size: 1px;' + (' ' * 100000) + '!',
+                (' ' * 100000) + 'font-size: 1px!',
+                'font-size: ' + ('1' * 100000) + 'px!',
+        ]
+    }
+
+    def "horizontal rules survive without executable attributes"() {
+        when:
+        Document document = Jsoup.parse(EmailHtmlSanitizer.sanitize('<p>before</p><hr onclick="alert(1)"><p>after</p>'))
+
+        then:
+        document.select('hr').size() == 1
+        !document.select('hr').first().hasAttr('onclick')
+        document.select('p').collect { Element paragraph -> paragraph.text() } == ['before', 'after']
+    }
+
+    def "only supported table column alignments are preserved"() {
+        when:
+        Document document = Jsoup.parse(EmailHtmlSanitizer.sanitize("""<table>
+<thead><tr><th align="${alignment}">header</th></tr></thead>
+<tbody><tr><td align="${alignment}" onclick="alert(1)">cell</td></tr></tbody>
+</table>"""))
+
+        then:
+        document.select('th').text() == 'header'
+        document.select('td').text() == 'cell'
+        document.select('th, td').every { Element cell -> cell.hasAttr('align') == allowed }
+        document.select('th, td').collect { Element cell -> cell.attr('align') } == (allowed ? [alignment, alignment] : ['', ''])
+        !document.select('td').first().hasAttr('onclick')
+
+        where:
+        alignment            | allowed
+        'left'               | true
+        'center'             | true
+        'right'              | true
+        'LEFT'               | true
+        'justify'            | false
+        'javascript:alert(1)' | false
+        'center; color: red'  | false
+        ''                   | false
     }
 
     def "empty HTML is left unchanged"() {
