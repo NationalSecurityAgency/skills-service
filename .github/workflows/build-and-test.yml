@@ -45,11 +45,9 @@ jobs:
         uses: actions/setup-node@v6
         with:
           node-version: ${{ env.NODE_VERSION }}
-          cache: npm
-          cache-dependency-path: dashboard/package-lock.json
 
       - name: Install dashboard dependencies
-        run: npm ci
+        run: npm install
 
       - name: Run dashboard unit tests
         run: npm run test:unit -- --run
