@@ -764,6 +764,66 @@ describe('Markdown Tests', () => {
       });
     });
 
+    it('pasting text with windows line endings into a table cell does not break the table', () => {
+      cy.viewport(1000, 1400);
+      cy.request('POST', '/admin/projects/proj1/subjects/subj1/skills/skill1', {
+          projectId: 'proj1',
+          subjectId: 'subj1',
+          skillId: 'skill1',
+          name: 'Skill 1',
+          pointIncrement: '50',
+          numPerformToCompletion: '5',
+      });
+      cy.visit('/administrator/projects/proj1/subjects/subj1/skills/skill1');
+
+      cy.get('[data-cy="editSkillButton_skill1"]').click();
+      cy.typeInMarkdownEditor('[data-cy=markdownEditorInput]', '{selectall}{backspace}Table:');
+
+      // 4 columns, 3 rows (1 header + 2 body rows)
+      cy.clickToolbarButton('table')
+      cy.get('.toastui-editor-popup-body .toastui-editor-table')
+        .within(() => {
+          cy.get('.toastui-editor-table-row').eq(2)
+            .find('.toastui-editor-table-cell').eq(3)
+            .click();
+        });
+
+      cy.get('.toastui-editor-contents table tbody tr').eq(0)
+        .find('td').eq(1)
+        .click()
+        .trigger('paste', {
+          clipboardData: {
+            items: [{ type: 'text/plain' }],
+            getData: (type) => type === 'text/plain' ? 'first line\r\n\r\nsecond line\r\n' : '',
+          },
+        });
+
+      cy.get('.toastui-editor-contents table tbody tr').eq(0)
+        .find('td').eq(1)
+        .should('contain.text', 'first line')
+        .and('contain.text', 'second line');
+
+      cy.clickSaveDialogBtn();
+      cy.get('[data-cy="skillOverviewDescription"]').within(() => {
+        cy.get('thead tr th').should('have.length', 4);
+        cy.get('tbody tr').should('have.length', 2);
+        cy.get('tbody tr').eq(0).find('td').eq(1)
+          .should('contain.text', 'first line')
+          .and('contain.text', 'second line');
+        cy.contains('| ').should('not.exist');
+      });
+
+      // reopen the editor - the whole table must load back
+      cy.get('[data-cy="editSkillButton_skill1"]').click();
+      cy.get(`${markdownInput} table`).should('have.length', 1);
+      cy.get(`${markdownInput} table`).within(() => {
+        cy.get('tr').should('have.length', 3);
+        cy.get('tbody tr').each(($row) => {
+          cy.wrap($row).find('td').should('have.length', 4);
+        });
+      });
+    });
+
     it('enter link and its description', () => {
         cy.viewport(1000, 1400);
         cy.request('POST', '/admin/projects/proj1/subjects/subj1/skills/skill1', {

@@ -41,6 +41,7 @@ import GenerateDescriptionDialog1
   from "@/common-components/utilities/learning-conent-gen/GenerateDescriptionDialog1.vue";
 import GenerateDescriptionType from "@/common-components/utilities/learning-conent-gen/GenerateDescriptionType.js";
 import InsertTableDialog from '@/common-components/utilities/markdown/InsertTableDialog.vue'
+import {normalizeLineEndings} from '@/common-components/utilities/markdown/MarkdownPasteUtils.js'
 
 const appConfig = useAppConfig()
 const quizConfig = useQuizConfig()
@@ -227,7 +228,7 @@ const handlePasteAsText = (event) => {
     return
   }
 
-  const plainText = event.clipboardData?.getData('text/plain') || ''
+  const plainText = normalizeLineEndings(event.clipboardData?.getData('text/plain') || '')
   if (log.isDebugEnabled()) {
     log.debug(`Paste event contains plain text: ${plainText}`)
   }
