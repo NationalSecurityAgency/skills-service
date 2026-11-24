@@ -506,7 +506,7 @@ describe('Client Display Theme Components Tests', () => {
       backgroundColor: 'lightgray',
       borderColor: 'blue'
     })
-    const url = `/?themeParam=tiles|${tiles}&themeParam=textPrimaryColor|black}`
+    const url = `/?themeParam=tiles|${tiles}&themeParam=textPrimaryColor|black`
     visitThemePage(url)
     waitForPointHistoryChart()
     waitForCircleProgress('[data-cy="overallPoints"]')
@@ -526,7 +526,7 @@ describe('Client Display Theme Components Tests', () => {
       borderColor: 'blue',
       watermarkIconColor: 'purple'
     })
-    const url = `/?themeParam=tiles|${tiles}&themeParam=textPrimaryColor|black}`
+    const url = `/?themeParam=tiles|${tiles}&themeParam=textPrimaryColor|black`
     visitThemePage(url)
     cy.get('[data-cy="myRankPosition"]').should('contain.text', '#1')
     matchComponentSnapshot('[data-cy="myRank"]', { name: 'watermarkIconColor for my rank', errorThreshold: 0.1 })
@@ -544,7 +544,7 @@ describe('Client Display Theme Components Tests', () => {
       subTitleOverlayTextColor: 'rgb(0,255,0)',
       subTitleOverlayBackgroundColor: 'rgba(243,198,54,0.3)'
     })
-    const url = `/?themeParam=tiles|${tiles}&themeParam=textPrimaryColor|black}&themeParam=textPrimaryColor|white`
+    const url = `/?themeParam=tiles|${tiles}&themeParam=textPrimaryColor|white`
     visitThemePage(url)
     cy.get('[data-cy="myRankPosition"]').should('contain.text', '#1')
     matchComponentSnapshot('[data-cy="myRank"]', { name: 'subtitle overlay colors for my rank', errorThreshold: 0.1 })
@@ -627,7 +627,7 @@ describe('Client Display Theme Components Tests', () => {
     const tiles = JSON.stringify( {
       backgroundColor:encodeURIComponent('#152E4d')
     })
-    const url = `/subjects/subj1/skills/skill5?themeParam=tiles|${tiles}&themeParam=textPrimaryColor|white}`
+    const url = `/subjects/subj1/skills/skill5?themeParam=tiles|${tiles}&themeParam=textPrimaryColor|white`
     visitThemePage(url)
 
     cy.get('[data-cy="requestApprovalBtn"]').click()
@@ -694,7 +694,7 @@ describe('Client Display Theme Components Tests', () => {
     const tiles = JSON.stringify( {
       backgroundColor:encodeURIComponent('#152E4d')
     })
-    const url = `/subjects/subj1/skills/skill5?themeParam=tiles|${tiles}&themeParam=textPrimaryColor|white}`
+    const url = `/subjects/subj1/skills/skill5?themeParam=tiles|${tiles}&themeParam=textPrimaryColor|white`
     visitThemePage(url)
 
     cy.get('[data-cy="pointsPerOccurrenceCard"] [data-cy="mediaInfoCardTitle"]').should('have.text', '100 Increment')
