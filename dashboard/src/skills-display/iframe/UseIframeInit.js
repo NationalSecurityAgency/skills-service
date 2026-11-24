@@ -42,6 +42,9 @@ export const useIframeInit = (isLoadingApp, initializeEmbeddedDisplay = () => {}
   const updatedAuthToken = ref(false)
   const initializationError = ref('')
   const authenticationError = ref('')
+  const sessionRestored = ref(false)
+  let hasInitializedDisplay = false
+  let notifyAfterRecovery = false
   const isRefreshingDisplay = ref(false)
   const authenticationExpiredMessage = 'Your authentication has expired. Waiting for the embedding application to re-authenticate.'
   const authenticationFailedMessage = 'Unable to reconnect your session. Please refresh the page to try again.'
@@ -81,6 +84,8 @@ export const useIframeInit = (isLoadingApp, initializeEmbeddedDisplay = () => {}
   watch(() => parentState.authenticationFailureRevision, () => {
     if (displayInfo.isSkillsClientPath() && completedHandshake.value && updatedAuthToken.value && !initializationError.value) {
       authenticationError.value = authenticationExpiredMessage
+      sessionRestored.value = false
+      notifyAfterRecovery = hasInitializedDisplay
       if (parentState.isAuthenticating || authenticationRequested) return
       authenticationRequested = true
       // clearAuthData also clears the token; let it finish before requesting a replacement.
@@ -124,7 +129,7 @@ export const useIframeInit = (isLoadingApp, initializeEmbeddedDisplay = () => {}
       // Retry only after a token/version update supersedes this attempt, never
       // repeatedly retry a failure for the current generation.
       while (!disposed) {
-        // App owns the whole routed subtree. Let it unmount before resetting
+        // The iframe host owns the routed subtree. Let it unmount before resetting
         // shared caches; retain this initializer and its fixed-learner binding.
         await nextTick()
         if (disposed) return
@@ -150,13 +155,18 @@ export const useIframeInit = (isLoadingApp, initializeEmbeddedDisplay = () => {}
             throw new Error('Skills Display authentication was lost during recovery')
           }
           // Required iframe data is ready. Initialize optional presentation support
-          // and mark App ready without loading unrelated dashboard settings.
+          // and mark the iframe host ready without loading unrelated dashboard settings.
           await initializeEmbeddedDisplay(requestConfig)
           if (disposed) return
           if (generation !== parentState.authGeneration || !authState.userInfo?.userId) {
             throw new Error('Skills Display authentication was lost during recovery')
           }
           authenticationError.value = ''
+          // Only an expired, previously initialized session merits a notice:
+          // startup retries, proactive token rotations and version refreshes do not.
+          sessionRestored.value = notifyAfterRecovery
+          notifyAfterRecovery = false
+          hasInitializedDisplay = true
           return
         } catch (error) {
           if (disposed) return
@@ -473,6 +483,7 @@ export const useIframeInit = (isLoadingApp, initializeEmbeddedDisplay = () => {}
     initializeDisplay,
     initializationError,
     authenticationError,
+    sessionRestored,
     isRefreshingDisplay,
     loadedIframe
   }

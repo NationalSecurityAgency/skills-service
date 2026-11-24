@@ -81,9 +81,10 @@ export const waitForIframeSnapshot = () => {
   // Wait for the SDK's asynchronous height update rather than a fixed post-navigation delay.
   return cy.get('body iframe').should($iframe => {
     const frame = $iframe[0]
-    const display = frame.contentDocument.querySelector('#skills-display-app')
+    // Match the content box observed by UseIframeInit, including its configured min-height.
+    const display = frame.contentDocument.querySelector('#skilltree-main-container')
     expect(display, 'embedded display root').not.to.be.null
-    const expectedHeight = Math.max(Cypress.$(display).height() + 10, 960)
+    const expectedHeight = Cypress.$(display).height() + 10
     expect(frame.getBoundingClientRect().height, 'iframe height').to.be.closeTo(expectedHeight, 1)
   })
 }

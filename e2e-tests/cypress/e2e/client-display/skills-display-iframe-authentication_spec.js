@@ -42,6 +42,51 @@ describe('Embedded Skills Display authentication recovery', () => {
     });
   });
 
+  describe('Real SkillsDisplayJS authentication', () => {
+    let releaseToken;
+    beforeEach(() => { releaseToken = null; });
+    afterEach(() => releaseToken?.());
+
+    it('restores an expired session and explains recovery when history-disabled navigation replays the initial page', () => {
+      cy.visit('/test-skills-client/proj1?updateHistory=false&skillsClientDisplayPath=/');
+      assertHome();
+      cy.wrapIframe().find('[data-cy="skillsDisplaySessionRestored"]').should('not.exist');
+      cy.wrapIframe().find('[data-cy="subjectTile-subj1"] [data-cy="subjectTileBtn"]').click();
+      assertRecoveredSubject();
+      cy.location('search').should('include', 'skillsClientDisplayPath=/');
+
+      // Expire credentials on a user-driven request after reaching the subject.
+      // Hold token renewal until the expiration UI proves recovery was requested.
+      const tokenGate = new Cypress.Promise((resolve) => { releaseToken = resolve; });
+      cy.intercept('GET', '**/api/projects/proj1/token', (req) => {
+        req.continue(() => tokenGate);
+      });
+      cy.intercept({ method: 'GET', url: '**/api/projects/proj1/subjects/subj1/skills/skill1/summary*', times: 1 }, {
+        statusCode: 401, body: { explanation: 'Authentication token has expired' },
+      });
+      cy.wrapIframe().find('[data-cy="skillProgress_index-0"] [data-cy="skillProgressTitle"]').click();
+      cy.wrapIframe().find(authenticationError).should('be.visible');
+      cy.then(() => releaseToken());
+      // Accepted SDK 3.6.5 limitation: renewal replays the stale host deep link.
+      assertHome();
+      cy.wrapIframe().find('[data-cy="skillsDisplaySessionRestored"]').should('be.visible')
+        .and('contain.text', 'Your session was restored.');
+      cy.wrapIframe().find('[data-cy="skillsDisplaySessionRestored"] [role="status"]')
+        .should('have.attr', 'aria-live', 'polite');
+      cy.wrapIframe().find('[data-cy="subjectTile-subj1"] [data-cy="subjectTileBtn"]').click();
+      assertRecoveredSubject();
+      cy.wrapIframe().find('[data-cy="skillsDisplaySessionRestored"]').should('be.visible');
+      cy.wrapIframe().find('[data-cy="dismissSkillsDisplaySessionRestored"]').click();
+      cy.wrapIframe().find('[data-cy="skillsDisplaySessionRestored"]').should('not.exist');
+    });
+
+    it('honors the initial deep link with history disabled without announcing recovery', () => {
+      cy.visit('/test-skills-client/proj1?updateHistory=false&skillsClientDisplayPath=/subjects/subj1');
+      assertRecoveredSubject();
+      cy.wrapIframe().find('[data-cy="skillsDisplaySessionRestored"]').should('not.exist');
+    });
+  });
+
   describe('Startup', () => {
     let releaseStartup;
     beforeEach(() => { releaseStartup = null; });
