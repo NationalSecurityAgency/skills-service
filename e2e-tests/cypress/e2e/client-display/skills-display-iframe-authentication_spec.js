@@ -517,7 +517,8 @@ describe('Embedded Skills Display authentication recovery', () => {
       });
     });
 
-    ['SecurityError', 'QuotaExceededError'].forEach((storageError) => {
+    // UseAuthState.spec.js covers both exception shapes; retain browser recovery wiring.
+    ['SecurityError'].forEach((storageError) => {
       it(`recovers without persisting user information when browser storage throws ${storageError}`, () => {
         cy.wrapIframe().then((body) => {
           const iframeWindow = Cypress.$(body)[0].ownerDocument.defaultView;
@@ -590,8 +591,8 @@ describe('Embedded Skills Display authentication recovery', () => {
 
     [
       { name: '404', response: { statusCode: 404, body: {} }, title: 'Resource Not Found' },
-      { name: '500', response: { statusCode: 500, body: {} }, title: 'Tiny-bit of an error!' },
-      { name: 'network error', response: { forceNetworkError: true }, title: 'Tiny-bit of an error!' },
+      // UseErrorHandling.spec.js covers server/network error classification.
+      // Keep ordinary and upgrade error rendering after real browser recovery.
       { name: 'upgrade response', response: { statusCode: 503, body: { errorCode: 'DbUpgradeInProgress' } }, title: 'Upgrade in Progress' },
     ].forEach(({ name, response, title }) => {
       it(`handles a current-token ${name} normally after recovery`, () => {

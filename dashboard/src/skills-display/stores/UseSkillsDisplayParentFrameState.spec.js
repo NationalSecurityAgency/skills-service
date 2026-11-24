@@ -16,7 +16,7 @@
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import { createPinia, disposePinia, setActivePinia } from 'pinia'
 import axios from 'axios'
-import { useSkillsDisplayParentFrameState } from './UseSkillsDisplayParentFrameState.js'
+import { SkillsDisplayIdentityChangedError, useSkillsDisplayParentFrameState } from './UseSkillsDisplayParentFrameState.js'
 
 describe('skills display bearer token', () => {
   let pinia
@@ -82,5 +82,27 @@ describe('skills display bearer token', () => {
 
   it('preserves independently supplied credentials for unrelated requests', async () => {
     expect(await request({ url: 'https://other.example', headers: { Authorization: 'Basic other-credentials' } })).toBe('Basic other-credentials')
+  })
+
+  it('binds the learner case-insensitively across token renewal and expiration', () => {
+    state.verifyAuthenticatedUser('LearnerA@skills.org')
+    state.clearAuthToken()
+    state.setAuthToken('replacement')
+    expect(() => state.verifyAuthenticatedUser('learnera@skills.org')).not.toThrow()
+    expect(() => state.verifyAuthenticatedUser('LearnerA@skills.org')).not.toThrow()
+    expect(() => state.verifyAuthenticatedUser('other@skills.org')).toThrow(SkillsDisplayIdentityChangedError)
+    state.beginAuthenticationSession()
+    expect(() => state.verifyAuthenticatedUser('other@skills.org')).not.toThrow()
+  })
+
+  it.each([undefined, null, '', {}, []])('rejects missing or malformed authenticated identities: %j', (userId) => {
+    expect(() => state.verifyAuthenticatedUser(userId)).toThrow('did not return a user ID')
+  })
+
+  it('invalidates captured work even when a refresh reuses the same token', () => {
+    const isCurrent = state.captureAuthGeneration()
+    state.setAuthToken(state.authToken)
+    expect(isCurrent()).toBe(false)
+    expect(state.captureAuthGeneration()()).toBe(true)
   })
 })

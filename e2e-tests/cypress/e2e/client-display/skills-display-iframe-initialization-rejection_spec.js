@@ -71,7 +71,8 @@ describe('Skills Display iframe initialization rejection', () => {
   });
 
   [
-    { navigate: 'replace-child-method' },
+    // The complete reserved-key matrix is covered by UseIframeInit.spec.js.
+    // Retain a real Postmate prototype-injection regression.
     JSON.parse('{"__proto__":{"navigate":"replace-child-prototype"}}'),
   ].forEach((modelOverrides, index) => {
     it(`rejects a handshake model that replaces the child API or its prototype (${index + 1})`, () => {
@@ -83,12 +84,9 @@ describe('Skills Display iframe initialization rejection', () => {
   });
 
   [
-    { projectId: '' },
-    { projectId: { toString: 'not-a-function' } },
-    { version: { invalid: 'version' } },
-    { userId: { invalid: 'user' } },
+    // Unit tests cover malformed model permutations; retain error rendering
+    // and absence of authentication through the actual embedding path.
     { options: ['invalid-options'] },
-    { minHeight: { toString: 'not-a-function' } },
   ].forEach((modelOverrides, index) => {
     it(`rejects malformed parent configuration before requesting authentication (${index + 1})`, () => {
       cy.visit(`/__e2e/skills-display-parent?modelOverrides=${encodeURIComponent(JSON.stringify(modelOverrides))}`);
@@ -100,22 +98,11 @@ describe('Skills Display iframe initialization rejection', () => {
   });
 
   [
+    // ThemeHelper.spec.js covers declaration safety and nested schema variants.
+    // Keep real CSS-parser rejection and representative resource-injection checks.
     { pageTitle: { textColor: 'red } body { background: url(https://attacker.example/css)' } },
-    { tiles: { backgroundColor: 'red; background-image: url(https://attacker.example/css)' } },
-    { trophyIconColor: 'url(https://attacker.example/css)' },
-    // Sibling progress colors use the same schema/validator; retain one injection.
     { progressIndicators: { incompleteColor: 'red; background-image: url(https://attacker.example/pixel)' } },
     { progressIndicators: { incompleteColor: 'not-a-color' } },
-    { progressIndicators: { incompleteColor: { color: 'red' } } },
-    { progressIndicators: 'red' },
-    { progressIndicators: ['red'] },
-    { progressIndicators: null },
-    { prerequisites: { skillColor: 'red; background-image: url(https://attacker.example/pixel)' } },
-    // Cover chart-module validation through its recursive, nested color path.
-    { charts: { pointHistory: { lineColor: 'red; color: blue' } } },
-    { infoCards: { iconColors: ['green', 'red; background-image: url(https://attacker.example/pixel)'] } },
-    { infoCards: { iconColors: 'red' } },
-    { circleProgressInteriorTextColor: 'red; background-image: url(https://attacker.example/pixel)' },
   ].forEach((theme, index) => {
     it(`rejects parent theme CSS injection or external-resource references (${index + 1})`, () => {
       cy.intercept('https://attacker.example/**', { statusCode: 200, body: '' }).as('themeRequests');

@@ -418,22 +418,6 @@ describe('Skills Display iframe destination security', () => {
     });
   });
 
-  it('does not re-authenticate or navigate when the parent repeats the current authentication token', () => {
-    cy.intercept('GET', '**/api/projects/proj1/token').as('initialToken');
-    cy.visit('/__e2e/skills-display-parent');
-    cy.wrapIframe().find('[data-cy="subjectTile-subj1"] [data-cy="subjectTileBtn"]').should('be.visible').click();
-    cy.wrapIframe().find('[data-cy="skillsTitle"]').should('contain.text', 'Subject 1');
-    cy.intercept('GET', '**/app/userInfo').as('unexpectedAuthentication');
-    cy.wait('@initialToken').then(({ response }) => sendParentMessages([
-      { postmate: 'call', property: 'updateAuthenticationToken', data: response.body.access_token },
-      { postmate: 'call', property: 'updateAuthenticationToken', data: response.body.access_token },
-    ]));
-    cy.wrapIframe().find('[data-cy="skillsTitle"]').should('be.visible').and('contain.text', 'Subject 1');
-    cy.wrapIframe().find('[data-cy="skillsDisplayAuthenticationError"]').should('not.exist');
-    // Request absence is intentional: duplicate credentials must not start recovery.
-    cy.get('@unexpectedAuthentication.all').should('have.length', 0);
-  });
-
   it('ignores authentication calls from a sibling window with the same origin as the parent', () => {
     cy.visit('/__e2e/skills-display-parent');
     cy.wrapIframe().find('[data-cy="subjectTile-subj1"]').should('be.visible');

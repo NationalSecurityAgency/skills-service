@@ -31,6 +31,29 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  dashboard-unit-tests:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    defaults:
+      run:
+        working-directory: dashboard
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Setup node version [${{ env.NODE_VERSION }}]
+        uses: actions/setup-node@v6
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+          cache-dependency-path: dashboard/package-lock.json
+
+      - name: Install dashboard dependencies
+        run: npm ci
+
+      - name: Run dashboard unit tests
+        run: npm run test:unit -- --run
+
   build-skills-service-for-ui-tests:
     runs-on: ubuntu-latest
     permissions:

@@ -171,8 +171,9 @@ describe('Embedded Skills Display progress and lifecycle recovery', () => {
     });
 
     [
+      // SkillsDisplayLoadingState.spec.js covers subject, skill and rank cleanup,
+      // plus the other shared loaders. Keep one real transport/UI regression.
       { name: 'subject', url: '**/api/projects/proj1/subjects/subj1/summary*' },
-      { name: 'skill', url: '**/api/projects/proj1/subjects/subj1/skills/skill1/summary*' },
     ].forEach(({ name, url }) => {
       it(`keeps replacement ${name} loading visible when an old-token request finishes`, () => {
         cy.visit(parentUrl);
@@ -202,23 +203,6 @@ describe('Embedded Skills Display progress and lifecycle recovery', () => {
         cy.wrapIframe().find('[data-pc-name="progressspinner"]').should('not.exist');
         cy.wrapIframe().find(authenticationError).should('not.exist');
       });
-    });
-
-    it('keeps the replacement rank loading visible when old-token ranking cleanup runs', () => {
-      const old = holdResponse('**/api/projects/proj1/rank*', 'oldPendingRank');
-      cy.visit(parentUrl);
-      cy.wrapIframe().find('[data-cy="earnedPoints"]').should('have.text', '100');
-      cy.wrap(null).should(() => { expect(old.isReceived(), 'old rank response is held').to.be.true; });
-      addMoreProgress();
-      const fresh = holdResponse('**/api/projects/proj1/rank*', 'replacementRank');
-      cy.get(refreshAuthentication).click();
-      cy.wrap(null).should(() => { expect(fresh.isReceived(), 'replacement rank response is held').to.be.true; });
-      cy.then(old.release);
-      cy.wait('@oldPendingRank');
-      cy.wrapIframe().find('[data-cy="myRank"] [data-pc-name="progressspinner"]').should('be.visible');
-      cy.wrapIframe().find('[data-cy="myRankPosition"]').should('not.exist');
-      cy.then(fresh.release);
-      assertFreshHome();
     });
 
     it('ignores successful old-token ranking and point-history responses after recovery for the same learner', () => {
