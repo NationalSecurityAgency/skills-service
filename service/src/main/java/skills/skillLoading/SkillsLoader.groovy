@@ -565,7 +565,8 @@ class SkillsLoader {
     }
 
     @Transactional(readOnly = true)
-    SkillSummary loadSkillSummary(String projectId, String userId, String crossProjectId, String skillId, String subjectId) {
+    SkillSummary loadSkillSummary(String projectId, String userId, String crossProjectId, String skillId, String subjectId,
+                                 boolean inheritedPrerequisite = false) {
         ProjDef projDef = getProjDef(userId, crossProjectId ?: projectId)
         String skillProjectId = crossProjectId ?: projectId
         SkillDefWithExtra skillDef = subjectId && !crossProjectId ?
@@ -593,7 +594,8 @@ class SkillsLoader {
             orderInfo = getSkillOrderStats(projectId, subjectId, skillId)
         }
 
-        if (crossProjectId) {
+        // The read-only inherited path is authorized by SkillLearningPathLoader against a caller-visible graph.
+        if (crossProjectId && !inheritedPrerequisite) {
             dependencyValidator.validateDependencyEligibility(projectId, skillDef)
         }
 

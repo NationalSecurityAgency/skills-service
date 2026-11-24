@@ -233,6 +233,209 @@ class UserSkillLearningPathSecuritySpec extends DefaultIntSpec {
         role << [RoleName.ROLE_PRIVATE_PROJECT_USER, RoleName.ROLE_PROJECT_ADMIN, RoleName.ROLE_PROJECT_APPROVER, RoleName.ROLE_SUPER_DUPER_USER]
     }
 
+    def "nested badge prerequisites use the viewing project in #endpoint"() {
+        Map fixture = createNestedBadgeFixture()
+        SkillsService learner = createService(getRandomUsers(1)[0])
+
+        when:
+        Map result = learner.wsHelper.apiGet("/projects/${fixture.projects[0].projectId}/skills/${fixture.skills[0][1].skillId}/${endpoint}")
+
+        then:
+        result.dependencies.collect { Map relationship ->
+            [relationship.skill.projectId, relationship.skill.skillId, relationship.dependsOn.projectId, relationship.dependsOn.skillId]
+        }.toSet() == [
+                [fixture.projects[0].projectId, fixture.skills[0][1].skillId, fixture.projects[0].projectId, fixture.skills[0][0].skillId],
+                [fixture.projects[0].projectId, fixture.skills[0][1].skillId, fixture.projects[1].projectId, fixture.skills[1][0].skillId],
+                [fixture.projects[1].projectId, fixture.skills[1][0].skillId, fixture.projects[2].projectId, fixture.skills[2][0].skillId],
+                [fixture.projects[2].projectId, fixture.skills[2][0].skillId, fixture.projects[2].projectId, fixture.skills[2][1].skillId]
+        ].toSet()
+        result.dependencies.every { Map relationship ->
+            relationship.crossProject == (relationship.dependsOn.projectId != fixture.projects[0].projectId)
+        }
+
+        where:
+        endpoint << ['learningPath', 'dependencies']
+    }
+
+    def "#endpoint removes orphan branches through a #protection intermediate project"() {
+        Map fixture = createNestedBadgeFixture()
+        SkillsService learner = createService(getRandomUsers(1)[0])
+        String path = "/projects/${fixture.projects[0].projectId}/skills/${fixture.skills[0][1].skillId}/${endpoint}"
+
+        expect:
+        learner.wsHelper.apiGet(path).dependencies.size() == 4
+
+        when:
+        protectProject(fixture.projects[1].projectId, protection)
+        Map denied = learner.wsHelper.apiGet(path)
+
+        then:
+        denied.dependencies*.skill*.skillId == [fixture.skills[0][1].skillId]
+        denied.dependencies*.dependsOn*.skillId == [fixture.skills[0][0].skillId]
+        denied.dependencies*.dependsOn*.projectId == [fixture.projects[0].projectId]
+        denied.dependencies*.crossProject == [false]
+
+        when:
+        grantIntermediateAccess(learner, fixture.projects[1].projectId, protection)
+        Map restored = learner.wsHelper.apiGet(path)
+
+        then:
+        restored.dependencies.size() == 4
+        restored.dependencies.find { Map relationship -> relationship.dependsOn.skillId == fixture.skills[2][1].skillId }.dependsOn.projectId == fixture.projects[2].projectId
+
+        where:
+        endpoint       | protection
+        'learningPath' | 'invite-only'
+        'dependencies' | 'invite-only'
+        'learningPath' | 'community'
+        'dependencies' | 'community'
+    }
+
+    def "indirect shared prerequisites require a visible chain through a #protection intermediate"() {
+        Map fixture = createNestedBadgeFixture()
+        SkillsService learner = createService(getRandomUsers(1)[0])
+        String path = "api/projects/${fixture.projects[0].projectId}/skills/${fixture.skills[2][0].skillId}/learningPath"
+        Map query = [crossProjectId: fixture.projects[2].projectId]
+
+        when:
+        ResponseEntity<String> allowed = learner.wsHelper.rawGet(path, query)
+        ResponseEntity<String> unrelated = learner.wsHelper.rawGet(
+                "api/projects/${fixture.projects[0].projectId}/skills/${fixture.skills[2][2].skillId}/learningPath", query)
+        List<ResponseEntity<String>> summaries = [false, true].collect { boolean withSubject ->
+            loadIndirectSummary(learner, fixture, 0, withSubject)
+        }
+        ResponseEntity<String> unrelatedSummary = loadIndirectSummary(learner, fixture, 2, true)
+
+        then:
+        allowed.statusCode == HttpStatus.OK
+        !parseBody(allowed).dependencies
+        !parseBody(allowed).nextItems
+        unrelated.statusCode == HttpStatus.BAD_REQUEST
+        parseBody(unrelated).errorCode == 'BadParam'
+        summaries.every { ResponseEntity<String> response ->
+            response.statusCode == HttpStatus.OK && parseBody(response).skillId == fixture.skills[2][0].skillId &&
+                    parseBody(response).projectId == fixture.projects[2].projectId && parseBody(response).crossProject
+        }
+        unrelatedSummary.statusCode == HttpStatus.BAD_REQUEST
+
+        when:
+        protectProject(fixture.projects[1].projectId, protection)
+        ResponseEntity<String> hidden = learner.wsHelper.rawGet(path, query)
+        List<ResponseEntity<String>> hiddenSummaries = [false, true].collect { boolean withSubject ->
+            loadIndirectSummary(learner, fixture, 0, withSubject)
+        }
+
+        then:
+        hidden.statusCode == HttpStatus.BAD_REQUEST
+        parseBody(hidden).explanation == parseBody(unrelated).explanation
+        hiddenSummaries.every { ResponseEntity<String> response -> response.statusCode == HttpStatus.BAD_REQUEST }
+
+        when:
+        grantIntermediateAccess(learner, fixture.projects[1].projectId, protection)
+        ResponseEntity<String> restored = learner.wsHelper.rawGet(path, query)
+        ResponseEntity<String> nestedLeaf = learner.wsHelper.rawGet(
+                "api/projects/${fixture.projects[0].projectId}/skills/${fixture.skills[2][1].skillId}/learningPath", query)
+        ResponseEntity<String> restoredSummary = loadIndirectSummary(learner, fixture, 0, true)
+        ResponseEntity<String> leafSummary = loadIndirectSummary(learner, fixture, 1, false)
+
+        then:
+        restored.statusCode == HttpStatus.OK
+        nestedLeaf.statusCode == HttpStatus.OK
+        !parseBody(restored).dependencies
+        !parseBody(nestedLeaf).dependencies
+        restoredSummary.statusCode == HttpStatus.OK
+        parseBody(restoredSummary).skill == fixture.skills[2][0].name
+        leafSummary.statusCode == HttpStatus.OK
+        parseBody(leafSummary).skill == fixture.skills[2][1].name
+
+        when:
+        if (protection == 'invite-only') {
+            skillsService.deleteUserRole(learner.getUsername(learner.userName).toLowerCase(), fixture.projects[1].projectId,
+                    RoleName.ROLE_PRIVATE_PROJECT_USER.toString())
+        } else {
+            // The tag API only adds tags; simulate membership revocation through the scoped repository.
+            String userId = learner.getUsername(learner.userName).toLowerCase()
+            userTagRepo.deleteAll(userTagRepo.findAllByUserIdAndKey(userId, 'dragons'))
+        }
+
+        then:
+        learner.wsHelper.rawGet(path, query).statusCode == HttpStatus.BAD_REQUEST
+        loadIndirectSummary(learner, fixture, 0, true).statusCode == HttpStatus.BAD_REQUEST
+
+        where:
+        protection << ['invite-only', 'community']
+    }
+
+    @IgnoreIf({ env['SPRING_PROFILES_ACTIVE'] == 'pki' })
+    def "proxied identities cannot traverse an indirect private prerequisite chain"() {
+        Map fixture = createNestedBadgeFixture()
+        protectProject(fixture.projects[1].projectId, 'invite-only')
+        SkillsService learner = createService(getRandomUsers(1)[0])
+        grantSourceRole(learner, fixture.projects[1].projectId, RoleName.ROLE_PRIVATE_PROJECT_USER)
+        String path = "api/projects/${fixture.projects[0].projectId}/skills/${fixture.skills[2][0].skillId}/learningPath"
+        Map query = [crossProjectId: fixture.projects[2].projectId]
+
+        expect:
+        learner.wsHelper.rawGet(path, query).statusCode == HttpStatus.OK
+
+        when:
+        skillsService.setProxyCredentials(fixture.projects[0].projectId, skillsService.getClientSecret(fixture.projects[0].projectId))
+        String token = skillsService.wsHelper.getTokenForUser(learner.userName)
+        ResponseEntity<String> context = bearerGet(skillsService, token, "api/projects/${fixture.projects[0].projectId}/summary")
+        ResponseEntity<String> indirect = bearerGet(skillsService, token, path, query)
+        String summaryPath = "api/projects/${fixture.projects[0].projectId}/projects/${fixture.projects[2].projectId}/skills/${fixture.skills[2][0].skillId}/summary"
+        ResponseEntity<String> indirectSummary = bearerGet(skillsService, token, summaryPath)
+
+        then:
+        context.statusCode == HttpStatus.OK
+        indirect.statusCode == HttpStatus.BAD_REQUEST
+        indirectSummary.statusCode == HttpStatus.BAD_REQUEST
+    }
+
+    private static ResponseEntity<String> loadIndirectSummary(SkillsService learner, Map fixture, int skillIndex, boolean withSubject) {
+        String subjectPath = withSubject ? "subjects/${fixture.skills[2][skillIndex].subjectId}/" : ''
+        return learner.wsHelper.rawGet(
+                "api/projects/${fixture.projects[0].projectId}/projects/${fixture.projects[2].projectId}/${subjectPath}skills/${fixture.skills[2][skillIndex].skillId}/summary", [:])
+    }
+
+    private Map createNestedBadgeFixture() {
+        List<Map> projects = (1..3).collect { int i -> SkillsFactory.createProject(i) }
+        List<List<Map>> skills = [SkillsFactory.createSkills(2, 1, 1, 100),
+                                 SkillsFactory.createSkills(2, 2, 1, 100),
+                                 SkillsFactory.createSkillsStartingAt(3, 3, 3, 1, 100)]
+        (0..2).each { int i ->
+            skillsService.createProjectAndSubjectAndSkills(projects[i], SkillsFactory.createSubject(i + 1, 1), skills[i])
+        }
+        skillsService.addLearningPathPrerequisite(projects[0].projectId, skills[0][1].skillId, skills[0][0].skillId)
+
+        Map publicBadge = SkillsFactory.createBadge(3, 1)
+        skillsService.createBadge(publicBadge)
+        skillsService.assignSkillToBadge([projectId: projects[2].projectId, badgeId: publicBadge.badgeId, skillId: skills[2][0].skillId])
+        publicBadge.enabled = true
+        skillsService.createBadge(publicBadge)
+        skillsService.addLearningPathPrerequisite(projects[2].projectId, publicBadge.badgeId, skills[2][1].skillId)
+
+        Map intermediateBadge = SkillsFactory.createBadge(2, 1)
+        skillsService.createBadge(intermediateBadge)
+        skillsService.assignSkillToBadge([projectId: projects[1].projectId, badgeId: intermediateBadge.badgeId, skillId: skills[1][0].skillId])
+        intermediateBadge.enabled = true
+        skillsService.createBadge(intermediateBadge)
+        skillsService.shareSkill(projects[2].projectId, skills[2][0].skillId, projects[1].projectId)
+        skillsService.addLearningPathPrerequisite(projects[1].projectId, intermediateBadge.badgeId, projects[2].projectId, skills[2][0].skillId)
+
+        skillsService.shareSkill(projects[1].projectId, skills[1][0].skillId, projects[0].projectId)
+        skillsService.addLearningPathPrerequisite(projects[0].projectId, skills[0][1].skillId, projects[1].projectId, skills[1][0].skillId)
+        return [projects: projects, skills: skills]
+    }
+
+    private void grantIntermediateAccess(SkillsService learner, String projectId, String protection) {
+        if (protection == 'invite-only') {
+            grantSourceRole(learner, projectId, RoleName.ROLE_PRIVATE_PROJECT_USER)
+        } else {
+            createRootSkillService().saveUserTag(learner.userName, 'dragons', ['DivineDragon'])
+        }
+    }
+
     private Map createLearningPathFixture(boolean viaGlobalBadge = false) {
         Map project = SkillsFactory.createProject(1)
         List<Map> skills = SkillsFactory.createSkills(3, 1, 1, 100)

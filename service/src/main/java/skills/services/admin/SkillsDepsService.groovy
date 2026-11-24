@@ -31,7 +31,8 @@ import skills.controller.exceptions.SkillException
 import skills.controller.result.model.*
 import skills.services.DependencyValidator
 import skills.services.RuleSetDefGraphService
-import skills.skillLoading.model.SkillDependencyInfo
+import skills.skillLoading.model.SkillDependencyInfo.SkillRelationship
+import skills.skillLoading.model.SkillDependencyInfo.SkillRelationshipItem
 import skills.services.userActions.DashboardAction
 import skills.services.userActions.DashboardItem
 import skills.services.userActions.UserActionInfo
@@ -211,12 +212,40 @@ class SkillsDepsService {
     }
 
     @Transactional(readOnly = true)
-    List<SkillDependencyInfo.SkillRelationship> filterAccessibleDependencies(String projectId, List<SkillDependencyInfo.SkillRelationship> dependencies) {
-        Set<String> referencedProjectIds = dependencies.collectMany { [it.skill.projectId, it.dependsOn.projectId] }.toSet()
+    List<SkillRelationship> filterAccessibleDependencies(String projectId, String skillId, List<SkillRelationship> dependencies) {
+        Set<String> referencedProjectIds = dependencies.collectMany { SkillRelationship relationship ->
+            [relationship.skill.projectId, relationship.dependsOn.projectId]
+        }.toSet()
         Set<String> accessibleProjectIds = getAccessibleProjectIds(projectId, referencedProjectIds)
-        return dependencies.findAll {
-            accessibleProjectIds.contains(it.skill.projectId) && accessibleProjectIds.contains(it.dependsOn.projectId)
+        List<SkillRelationship> visibleRelationships = dependencies.findAll { SkillRelationship relationship ->
+            accessibleProjectIds.contains(relationship.skill.projectId) && accessibleProjectIds.contains(relationship.dependsOn.projectId)
         }
+        Map<List<String>, List<SkillRelationship>> byParent = visibleRelationships.groupBy { SkillRelationship relationship ->
+            dependencyKey(relationship.skill)
+        }
+        Set<List<String>> reachable = []
+        Deque<List<String>> pending = new ArrayDeque<>()
+        pending.add([projectId, skillId.toLowerCase()])
+        while (!pending.isEmpty()) {
+            List<String> parentKey = pending.removeFirst()
+            if (reachable.add(parentKey)) {
+                byParent.getOrDefault(parentKey, []).each { SkillRelationship relationship ->
+                    pending.add(dependencyKey(relationship.dependsOn))
+                }
+            }
+        }
+        // Filtering a private intermediate node must also remove its now-disconnected descendants.
+        return visibleRelationships.findAll { SkillRelationship relationship ->
+            reachable.contains(dependencyKey(relationship.skill))
+        }.collect { SkillRelationship relationship ->
+            // Badge expansion can load relationships in other projects; flags must use the viewing project.
+            new SkillRelationship(skill: relationship.skill, dependsOn: relationship.dependsOn,
+                    achieved: relationship.achieved, crossProject: relationship.dependsOn.projectId != projectId)
+        }
+    }
+
+    private static List<String> dependencyKey(SkillRelationshipItem item) {
+        return [item.projectId, item.skillId.toLowerCase()]
     }
 
     @Transactional(readOnly = true)

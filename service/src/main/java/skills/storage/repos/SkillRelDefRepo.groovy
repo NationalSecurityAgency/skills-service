@@ -380,6 +380,12 @@ interface SkillRelDefRepo extends CrudRepository<SkillRelDef, Integer> {
               ''')
     Boolean checkIfSkillInAnotherProjectPartOfLearningPath(String projectId, String otherProjectId, String otherProjectSkillId )
 
+    @Query('''select distinct srd.parent.skillId from SkillRelDef srd
+        where srd.parent.projectId=?1
+          and srd.child.projectId<>?1
+          and srd.type='Dependence' ''')
+    List<String> findCrossProjectDependencyParentSkillIds(String projectId)
+
     @Query(value = '''
                 SELECT EXISTS (
                     SELECT 1
@@ -454,7 +460,7 @@ interface SkillRelDefRepo extends CrudRepository<SkillRelDef, Integer> {
             and sd2 = srd.child
             and srd.type=?2 
             and sd1.projectId=?1
-            and (?3 is null or (sd1.version <= ?3 and sd2.version <= ?3))
+            and (?3 is null or ?3 = -1 or (sd1.version <= ?3 and sd2.version <= ?3))
             and (?4 is null or sd2.projectId=?4)
             and (?5 is null or lower(sd2.skillId)=lower(cast(?5 as String)))
             and (?5 is null or sd1.type != 'Badge' or sd1.enabled is null or sd1.enabled = 'true')

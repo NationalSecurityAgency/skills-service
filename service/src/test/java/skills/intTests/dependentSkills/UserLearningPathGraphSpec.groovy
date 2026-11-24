@@ -71,6 +71,34 @@ class UserLearningPathGraphSpec extends DefaultIntSpec {
         !result.dependencies
     }
 
+    def "all versions sentinel retains skill and badge successors"() {
+        Map project = SkillsFactory.createProject()
+        List<Map> skills = SkillsFactory.createSkillsWithDifferentVersions([0, 0, 1])
+        skillsService.createProjectAndSubjectAndSkills(project, SkillsFactory.createSubject(), skills)
+        Map badge = SkillsFactory.createBadge()
+        skillsService.createBadge(badge)
+        skillsService.assignSkillToBadge([projectId: project.projectId, badgeId: badge.badgeId, skillId: skills[1].skillId])
+        badge.enabled = true
+        skillsService.createBadge(badge)
+        skillsService.addLearningPathPrerequisite(project.projectId, badge.badgeId, skills[0].skillId)
+        skillsService.addLearningPathPrerequisite(project.projectId, skills[2].skillId, skills[0].skillId)
+        SkillsService learner = createService(getRandomUsers(1)[0])
+        String path = "/projects/${project.projectId}/skills/${skills[0].skillId}/learningPath"
+
+        when:
+        Map defaultPath = learner.wsHelper.apiGet(path)
+        Map allVersions = learner.wsHelper.apiGet(path, [version: -1])
+        Map version0 = learner.wsHelper.apiGet(path, [version: 0])
+        Map allVersionsGraph = learner.getUserDependencyGraph(project.projectId, null, -1)
+
+        then:
+        defaultPath.nextItems*.skillId.toSet() == [skills[2].skillId, badge.badgeId].toSet()
+        allVersions.nextItems*.skillId.toSet() == [skills[2].skillId, badge.badgeId].toSet()
+        allVersions.nextItems.find { Map item -> item.skillId == badge.badgeId }.containedSkills*.skillId == [skills[1].skillId]
+        version0.nextItems*.skillId == [badge.badgeId]
+        allVersionsGraph.nodes*.skillId.toSet() == [skills[0].skillId, skills[2].skillId, badge.badgeId].toSet()
+    }
+
     def "skill learning path omits a successor badge after it is disabled"() {
         def project = SkillsFactory.createProject()
         def skills = SkillsFactory.createSkills(2)
