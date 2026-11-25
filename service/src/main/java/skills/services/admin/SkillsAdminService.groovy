@@ -528,6 +528,12 @@ class SkillsAdminService {
                 skillApprovalService.modifyApprovalsWhenSelfReportingTypeChanged(skill, newType)
 
                 skill.selfReportingType = newType
+                if (newType != SelfReportingType.Approval) {
+                    skill.justificationRequired = Boolean.FALSE.toString()
+                }
+            }
+            if (updateRequest.justificationRequired != null && skill.selfReportingType == SelfReportingType.Approval) {
+                skill.justificationRequired = updateRequest.justificationRequired
             }
             if (updateRequest.enabled == "true" ) {
                 if (skill.enabled != "true") {
@@ -615,6 +621,7 @@ class SkillsAdminService {
                 || updateRequest.numMaxOccurrencesIncrementInterval != null
                 || updateRequest.enabled != null
                 || updateRequest.selfReportingType != null
+                || updateRequest.justificationRequired != null
         if (!atLeastOneAttributeProvided) {
             throw new SkillException("Must provide at least 1 attribute to update", projectId)
         }

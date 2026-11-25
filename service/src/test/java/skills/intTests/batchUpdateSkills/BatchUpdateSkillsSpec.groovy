@@ -336,6 +336,63 @@ class BatchUpdateSkillsSpec extends DefaultIntSpec {
     }
 
 
+    def "batch update justificationRequired - applies only to Approval skills"() {
+        def p1 = createProject(1)
+        def p1subj1 = createSubject(1, 1)
+        def p1skills = createSkills(4, 1, 1, 100)
+        p1skills[0].selfReportingType = SkillDef.SelfReportingType.Approval.toString()
+        p1skills[1].selfReportingType = SkillDef.SelfReportingType.Approval.toString()
+        p1skills[1].justificationRequired = true
+        p1skills[2].selfReportingType = SkillDef.SelfReportingType.HonorSystem.toString()
+        skillsService.createProjectAndSubjectAndSkills(p1, p1subj1, p1skills)
+
+        when:
+        skillsService.batchUpdateSkills(p1.projectId, [
+                justificationRequired: "true",
+                skills: p1skills.skillId
+        ])
+        def afterEnable = p1skills.collect { skillsService.getSkill([projectId: p1.projectId, subjectId: p1subj1.subjectId, skillId: it.skillId]) }
+
+        skillsService.batchUpdateSkills(p1.projectId, [
+                justificationRequired: "false",
+                skills: p1skills[0..1].skillId
+        ])
+        def afterDisable = p1skills.collect { skillsService.getSkill([projectId: p1.projectId, subjectId: p1subj1.subjectId, skillId: it.skillId]) }
+
+        then:
+        afterEnable.collect { it.justificationRequired } == [true, true, false, false]
+        afterEnable.collect { it.selfReportingType } == ["Approval", "Approval", "HonorSystem", null]
+        afterDisable.collect { it.justificationRequired } == [false, false, false, false]
+    }
+
+    def "batch update selfReportingType and justificationRequired at the same time"() {
+        def p1 = createProject(1)
+        def p1subj1 = createSubject(1, 1)
+        def p1skills = createSkills(3, 1, 1, 100)
+        p1skills[0].selfReportingType = SkillDef.SelfReportingType.HonorSystem.toString()
+        skillsService.createProjectAndSubjectAndSkills(p1, p1subj1, p1skills)
+
+        when:
+        skillsService.batchUpdateSkills(p1.projectId, [
+                selfReportingType: SkillDef.SelfReportingType.Approval.toString(),
+                justificationRequired: "true",
+                skills: p1skills[0..1].skillId
+        ])
+        def afterApproval = p1skills.collect { skillsService.getSkill([projectId: p1.projectId, subjectId: p1subj1.subjectId, skillId: it.skillId]) }
+
+        skillsService.batchUpdateSkills(p1.projectId, [
+                selfReportingType: SkillDef.SelfReportingType.HonorSystem.toString(),
+                skills: p1skills[0..0].skillId
+        ])
+        def afterHonor = skillsService.getSkill([projectId: p1.projectId, subjectId: p1subj1.subjectId, skillId: p1skills[0].skillId])
+
+        then:
+        afterApproval.collect { it.selfReportingType } == ["Approval", "Approval", null]
+        afterApproval.collect { it.justificationRequired } == [true, true, false]
+        afterHonor.selfReportingType == "HonorSystem"
+        !afterHonor.justificationRequired
+    }
+
     def "batch update all attributes at the same time"() {
         def p1 = createProject(1)
         def p1subj1 = createSubject(1, 1)

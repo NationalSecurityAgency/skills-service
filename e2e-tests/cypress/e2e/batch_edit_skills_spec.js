@@ -542,6 +542,45 @@ describe('batch edit skills', () => {
         ])
     });
 
+    it('batch update justification required for approval skills', () => {
+        cy.createSkill(1, 1, 1, { selfReportingType: 'Approval' });
+        cy.createSkill(1, 1, 2, { selfReportingType: 'Approval' });
+        cy.createSkill(1, 1, 3, { selfReportingType: 'HonorSystem' });
+        cy.visit('/administrator/projects/proj1/subjects/subj1');
+
+        cy.get('[data-cy="skillsTable"] [data-p-index="0"] [data-pc-name="pcrowcheckbox"]').click()
+        cy.get('[data-cy="skillsTable"] [data-p-index="1"] [data-pc-name="pcrowcheckbox"]').click()
+        cy.get('[data-cy="skillsTable"] [data-p-index="2"] [data-pc-name="pcrowcheckbox"]').click()
+        cy.get('[data-cy="skillActionsBtn"]').click();
+        cy.openDialog('[data-cy="skillsActionsMenu"] [aria-label="Batch Edit"]', true)
+
+        cy.get('[data-cy="justificationRequiredMsg"]').contains('Applies only to skills that use the Approval Queue')
+
+        // Honor System has no justification: the dropdown is disabled and cleared
+        cy.get('[data-cy="justificationRequired"]').click()
+        cy.get('[data-pc-section="overlay"] [aria-label="Required"]').click()
+        cy.get('[data-cy="justificationRequired"]').contains('Required')
+        cy.get('[data-cy="selfReportingType"]').click()
+        cy.get('[data-pc-section="overlay"] [aria-label="Honor System"]').click()
+        cy.get('[data-cy="justificationRequired"]').should('have.class', 'p-disabled')
+        cy.get('[data-cy="justificationRequired"]').should('not.contain', 'Required')
+        cy.get('[data-cy="selfReportingType_clearBtn"]').click()
+        cy.get('[data-cy="justificationRequired"]').should('not.have.class', 'p-disabled')
+
+        // justification alone is enough to update
+        cy.get('[data-cy="justificationRequired"]').click()
+        cy.get('[data-pc-section="overlay"] [aria-label="Required"]').click()
+        cy.get('[data-cy="saveDialogBtn"]').should('be.enabled')
+
+        cy.intercept('POST', '/admin/projects/proj1/batchUpdateSkills').as('batchUpdateSkills')
+        cy.get('[data-cy="saveDialogBtn"]').click()
+        cy.wait('@batchUpdateSkills').its('request.body').should('include', { justificationRequired: 'true' })
+
+        cy.request('/admin/projects/proj1/subjects/subj1/skills/skill1').its('body.justificationRequired').should('eq', true)
+        cy.request('/admin/projects/proj1/subjects/subj1/skills/skill2').its('body.justificationRequired').should('eq', true)
+        cy.request('/admin/projects/proj1/subjects/subj1/skills/skill3').its('body.justificationRequired').should('eq', false)
+    });
+
     it('warn if switching self report skills to honor will cause pending approval request to be applied', () => {
         Cypress.Commands.add('rejectRequest', (requestNum = 0, rejectionMsg = 'Skill was rejected') => {
             cy.request('/admin/projects/proj1/approvals?limit=10&ascending=true&page=1&orderBy=userId')
