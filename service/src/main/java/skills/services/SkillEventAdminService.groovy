@@ -303,9 +303,7 @@ class SkillEventAdminService {
         List<String> quizStatuses = cancelPendingQuizGrading ? ['PASSED', 'NEEDS_GRADING'] : ['PASSED']
         // Deleting quiz attempts removes their answer records, not uploaded attachments.
         // Existing attachment links may remain usable. Asynchronous cleanup is planned.
-        return quizToSkillDefRepo.getQuizRefIdsForProject(projectId).findAll { Integer quizRefId ->
-            userQuizAttemptRepo.deleteAttemptsForQuizAndUser(quizRefId, userId, quizStatuses) > 0
-        }
+        return userQuizAttemptRepo.deleteAttemptsForProjectAndUser(projectId, userId, quizStatuses)
     }
 
     private void recordUserProgressDeletion(String projectId, String userId, boolean removedFromProject) {

@@ -143,13 +143,6 @@ interface QuizToSkillDefRepo extends JpaRepository<QuizToSkillDef, Long> {
     @Query('''select qToS.quizRefId from QuizToSkillDef qToS where qToS.skillRefId = ?1''')
     List<Integer> getQuizRefIdsBySkillRefId(Integer skillRefId)
 
-    @Query(value = '''select distinct q.quiz_ref_id
-            from quiz_to_skill_definition q join skill_definition s on s.id = q.skill_ref_id
-            where s.project_id = ?1 and s.self_reporting_type = 'Quiz'
-            order by q.quiz_ref_id''', nativeQuery = true)
-    List<Integer> getQuizRefIdsForProject(String projectId)
-
-
     static interface AssociatedSkill {
         String getQuizId()
         String getSkillId()

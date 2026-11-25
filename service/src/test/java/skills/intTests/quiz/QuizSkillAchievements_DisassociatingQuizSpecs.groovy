@@ -24,10 +24,44 @@ import skills.storage.model.UserPerformedSkill
 import skills.storage.model.UserPoints
 
 import static skills.intTests.utils.SkillsFactory.createProject
+import static skills.intTests.utils.SkillsFactory.createSkill
 import static skills.intTests.utils.SkillsFactory.createSubject
 
 @Slf4j
 class QuizSkillAchievements_DisassociatingQuizSpecs extends QuizSkillAchievementsBaseIntSpec {
+
+    def "removing a learner after unlinking a shared quiz preserves its attempt and credit in the other project"() {
+        Map quiz = createQuiz(1)
+        Map sourceSkill = createSkill(1, 1, 1, 0, 1, 0, 100) +
+                [selfReportingType: SkillDef.SelfReportingType.Quiz, quizId: quiz.quizId]
+        Map localSkill = createSkill(1, 1, 2, 0, 1, 0, 100)
+        Map sharedSkill = createSkill(2, 1, 1, 0, 1, 0, 100) +
+                [selfReportingType: SkillDef.SelfReportingType.Quiz, quizId: quiz.quizId]
+        skillsService.createProjectAndSubjectAndSkills(createProject(1), createSubject(1, 1), [sourceSkill, localSkill])
+        skillsService.createProjectAndSubjectAndSkills(createProject(2), createSubject(2, 1), [sharedSkill])
+        SkillsService learner = createService(getRandomUsers(1)[0])
+        Integer attemptId = passQuiz(learner, quiz)
+        skillsService.addSkill(localSkill, learner.userName)
+        waitForAsyncTasksCompletion.waitForAllScheduleTasks()
+
+        when:
+        skillsService.createSkill(sourceSkill + [selfReportingType: SkillDef.SelfReportingType.HonorSystem, quizId: null])
+        waitForAsyncTasksCompletion.waitForAllScheduleTasks()
+
+        then:
+        learner.getSkillsSummaryForCurrentUser('TestProject1').points == 100
+        learner.getSkillsSummaryForCurrentUser('TestProject2').points == 100
+        skillsService.getQuizRuns(quiz.quizId).data*.attemptId == [attemptId]
+
+        when:
+        skillsService.removeUserFromProject('TestProject1', learner.userName)
+        waitForAsyncTasksCompletion.waitForAllScheduleTasks()
+
+        then:
+        learner.getSkillsSummaryForCurrentUser('TestProject1').points == 0
+        learner.getSkillsSummaryForCurrentUser('TestProject2').points == 100
+        skillsService.getQuizRuns(quiz.quizId).data*.attemptId == [attemptId]
+    }
 
     def "disassociating quiz removes associated skill achievements - multiple subjects"() {
         def quiz1 = createQuiz(1)
@@ -1050,6 +1084,5 @@ class QuizSkillAchievements_DisassociatingQuizSpecs extends QuizSkillAchievement
         !user2Badge2_t2.badgeAchieved
     }
 }
-
 
 

@@ -18,7 +18,6 @@ package skills.storage.repos
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.PageRequest
 import org.springframework.data.jpa.repository.JpaRepository
-import org.springframework.data.jpa.repository.Modifying
 import org.springframework.data.jpa.repository.Query
 import org.springframework.data.repository.query.Param
 import org.springframework.lang.Nullable
@@ -291,10 +290,20 @@ interface UserQuizAttemptRepo extends JpaRepository<UserQuizAttempt, Long> {
                     and q.status = ?3''')
     List<Integer> findSkillRefIdsByUserIdAndStatus(List<Integer> skillRefIds, String userId, QuizAttemptStatus status)
 
-    @Modifying
-    @Query(value = '''delete from user_quiz_attempt
-                      where quiz_definition_ref_id = ?1 and user_id = ?2 and status in ?3''', nativeQuery = true)
-    int deleteAttemptsForQuizAndUser(Integer quizRefId, String userId, List<String> statuses)
+    @Query(value = '''with deleted_attempts as (
+                          delete from user_quiz_attempt attempt
+                          where attempt.user_id = ?2 and attempt.status in ?3
+                            and exists (
+                                select 1 from quiz_to_skill_definition q
+                                join skill_definition s on s.id = q.skill_ref_id
+                                where q.quiz_ref_id = attempt.quiz_definition_ref_id
+                                  and s.project_id = ?1 and s.self_reporting_type = 'Quiz'
+                            )
+                          returning attempt.quiz_definition_ref_id
+                      )
+                      select distinct quiz_definition_ref_id from deleted_attempts
+                      order by quiz_definition_ref_id''', nativeQuery = true)
+    List<Integer> deleteAttemptsForProjectAndUser(String projectId, String userId, List<String> statuses)
 
     static interface TagValueCount {
         String getTagValue()
