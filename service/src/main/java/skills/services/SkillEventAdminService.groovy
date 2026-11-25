@@ -328,6 +328,9 @@ class SkillEventAdminService {
         }.findAll { !it.projectId.equalsIgnoreCase(projectId) }
         List<Integer> quizSkillIds = skillsToUpdateInOtherProjects.collect { it.skillRefId }.unique()
         // Capture existing credit identity even if a retake kept an older event at max points.
+        // Captured IDs protect events recorded after cleanup is queued; they do not identify
+        // which quiz awarded the credit. If a skill was reassigned to this quiz, cleanup may
+        // also remove existing credit earned under the previous quiz. This is intentional.
         Map<Integer, List<Integer>> eventIdsBySkill = quizSkillIds ?
                 performedSkillRepository.findSkillEventIds(userId, quizSkillIds).groupBy { it.skillRefId }
                         .collectEntries { skillRefId, events -> [(skillRefId): events.collect { it.eventId }] } : [:]
