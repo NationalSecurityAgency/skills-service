@@ -52,9 +52,9 @@ describe('Remove a project user', () => {
             .and('contain.text', 'This action cannot be undone and permanently deletes');
         cy.get('[data-cy="removeProjectUserQuizWarning"]').should('be.visible')
             .and('contain.text', 'Quizzes:')
-            .and('contain.text', 'If this project has skills associated with quizzes')
-            .and('contain.text', "this user's passed attempts for those quizzes will also be removed")
-            .and('contain.text', 'Their progress in other projects that use the same quizzes may be affected');
+            .and('contain.text', "This user's passed attempts and submissions awaiting manual or AI grading")
+            .and('contain.text', 'for quizzes associated with this project will be permanently deleted, including answers and partial grading')
+            .and('contain.text', 'This also affects those submissions and quiz progress in other projects using the same quizzes');
         cy.get('[data-cy="removeProjectUserCatalogWarning"]').should('be.visible')
             .and('contain.text', 'Skills Catalog:')
             .and('contain.text', 'If this project exports skills to the Skills Catalog')

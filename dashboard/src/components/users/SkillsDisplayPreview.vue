@@ -142,7 +142,7 @@ const isLoading = computed(() => checkingAccess.value || skillsDisplayAttributes
         <p class="font-semibold mb-2">Additional effects, if applicable:</p>
         <ul class="list-disc pl-5 space-y-3">
           <li data-cy="removeProjectUserQuizWarning">
-            <strong>Quizzes:</strong> If this project has skills associated with quizzes, this user's passed attempts for those quizzes will also be removed. Their progress in other projects that use the same quizzes may be affected.
+            <strong>Quizzes:</strong> This user's passed attempts and submissions awaiting manual or AI grading for quizzes associated with this project will be permanently deleted, including answers and partial grading. This also affects those submissions and quiz progress in other projects using the same quizzes.
           </li>
           <li data-cy="removeProjectUserCatalogWarning">
             <strong>Skills Catalog:</strong> If this project exports skills to the Skills Catalog, removing this user's progress may also remove their points and achievements in other projects that import those skills.

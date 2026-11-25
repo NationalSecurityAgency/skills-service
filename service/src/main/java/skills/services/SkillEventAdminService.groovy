@@ -292,6 +292,9 @@ class SkillEventAdminService {
         skillApprovalRepo.deleteAllByProjectIdAndUserId(projectId, userId)
         // Removal must invalidate pending grading as well as earned quiz credit;
         // otherwise an outstanding manual or AI grade can restore deleted progress.
+        // Queued AI grading tasks are not canceled: they may still submit the stored
+        // answer to the provider and retry after removal, but their results cannot
+        // restore deleted progress. This is an accepted tradeoff for infrequent removals.
         List<String> quizStatuses = cancelPendingQuizGrading ? ['PASSED', 'NEEDS_GRADING'] : ['PASSED']
         userQuizAttemptRepo.deleteAllAttemptsForQuizzesAssociatedToProjectAndByUserId(projectId, userId, quizStatuses)
     }
