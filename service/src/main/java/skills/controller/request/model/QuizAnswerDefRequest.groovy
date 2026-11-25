@@ -22,6 +22,7 @@ class QuizAnswerDefRequest {
     // optional id in case the question is being edited
     Integer id
     String answer
+    Boolean allowCustomText = false
     Boolean isCorrect
     QuizMultiPartAnswer multiPartAnswer
 }

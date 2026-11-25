@@ -27,6 +27,7 @@ class QuizAnswerMetricsResult {
     int numAnswered
     int numAnsweredCorrect
     int numAnsweredWrong
+    Boolean allowCustomText = false
 
     String getAnswer() {
         return InputSanitizer.unsanitizeEscapedHtml(answer)

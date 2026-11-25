@@ -276,6 +276,13 @@ const matchesMustNotBeBlank = (value) => {
   });
 }
 
+const textResponseAnswersMustHaveText = (value) => {
+  if (!isSurveyType.value || !(isQuestionTypeSingleChoice.value || isQuestionTypeMultipleChoice.value) || !value) {
+    return true;
+  }
+  return !value.some((a) => a.allowCustomText && (!a.answer || a.answer.trim().length === 0));
+}
+
 const allAnswersFilledIn = (value) => {
   if(!isQuestionTypeFillInTheBlank.value) {
     return true;
@@ -333,6 +340,7 @@ const schema = object({
           object({
             'answer': string().nullable().label('Answer').max(appConfig.maxQuizTextAnswerLength),
             'isCorrect': boolean().label('Is Correct'),
+            'allowCustomText': boolean().default(false),
             'multiPartAnswer': object({
               term: string().nullable().max(appConfig.maxQuizTextAnswerLength).when([], {
                 is: () => isQuestionTypeMatching.value,
@@ -355,6 +363,7 @@ const schema = object({
       .test('noRepeatAnswers', 'Answers can not contain duplicate terms or values', (value) => noRepeatAnswers(value))
       .test('mustHaveBlanks', 'Question must have blank fields', (value) => mustHaveBlanks(value))
       .test('allAnswersFilledIn', 'All answers must be filled in', (value) => allAnswersFilledIn(value))
+      .test('textResponseAnswersMustHaveText', 'Answers that allow a text response must have text', (value) => textResponseAnswersMustHaveText(value))
   ,
 })
 const initialQuestionData = {
@@ -392,6 +401,9 @@ const saveQuestionDef = (values) => {
     // address a race condition where isCorrect could be undefined
     processedAnswers = processedAnswers.map((ans) => ans.isCorrect !== undefined ? ans : ({...ans, isCorrect: false}))
   }
+  // text responses only apply to choice questions in a survey
+  const allowsTextResponses = isSurveyType.value && (QuestionType.isSingleChoice(questionType) || QuestionType.isMultipleChoice(questionType))
+  processedAnswers = processedAnswers.map((ans) => ({ ...ans, allowCustomText: allowsTextResponses && !!ans.allowCustomText }))
   const questionToSave = {
     id: props.questionDef.id,
     quizId: quizId.value,

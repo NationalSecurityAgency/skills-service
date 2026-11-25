@@ -38,6 +38,10 @@ const props = defineProps({
     type: String,
     default: '',
   },
+  allowCustomText: {
+    type: Boolean,
+    default: false,
+  },
   dateRange: Array,
 })
 
@@ -127,6 +131,15 @@ const isFillInTheBlank = computed(() => {
   return props.questionType === 'FillInTheBlank';
 });
 
+const isChoice = computed(() => {
+  return props.questionType === 'SingleChoice' || props.questionType === 'MultipleChoice';
+});
+
+// saved text responses are shown even if the answer no longer allows text
+const showResponses = computed(() => {
+  return isTextInput.value || (isChoice.value && (props.allowCustomText || answerHistory.value.some((item) => item.answerTxt)));
+});
+
 const loadData = () => {
   tableOptions.value.busy = true;
   const dateRange = timeUtils.prepareDateRange(props.dateRange)
@@ -207,7 +220,7 @@ const collapseAll = () => {
         aria-label="Answer History"
         data-cy="quizAnswerHistoryTable">
 
-      <template v-if="isTextInput" #header>
+      <template v-if="showResponses" #header>
         <div class="text-right">
           <SkillsButton v-if="expanded" label="Collapse All"
                         icon="fas fa-compress-alt"
@@ -233,12 +246,16 @@ const collapseAll = () => {
         <table-no-res />
       </template>
       <template #expansion="slotProps">
+        <div v-if="isChoice"
+             class="whitespace-pre-wrap break-words"
+             :data-cy="`row${slotProps.index}-colAnswerTxt`">{{ slotProps.data.answerTxt }}</div>
         <MarkdownText
+            v-else
             :text="slotProps.data.answerTxt"
             :instance-id="`${answerDefId}-${slotProps.index}-answerTxt`"
             :data-cy="`row${slotProps.index}-colAnswerTxt`"/>
       </template>
-      <Column v-if="isTextInput" expander style="width: 5rem">
+      <Column v-if="showResponses" expander style="width: 5rem">
         <template #header>
           <span class="sr-only">Expander Control</span>
         </template>

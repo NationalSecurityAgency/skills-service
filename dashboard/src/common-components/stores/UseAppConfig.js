@@ -178,6 +178,7 @@ export const useAppConfig = defineStore('dashboardAppConfig', () => {
   const limitAdminAccess = computed(() => config.value.limitAdminAccess)
   const maxGraderFeedbackMessageLength = computed(() => config.value.maxGraderFeedbackMessageLength)
   const maxTakeQuizInputTextAnswerLength = computed(() => config.value.maxTakeQuizInputTextAnswerLength)
+  const maxSurveyChoiceTextAnswerLength = computed(() => config.value.maxSurveyChoiceTextAnswerLength)
   const maxTextInputAiGradingCorrectAnswerLength = computed(() => config.value.maxTextInputAiGradingCorrectAnswerLength)
   const disableEncouragementsConfetti = computed(() => isTrue(config.value.disableEncouragementsConfetti))
   const contactSupportEnabled = computed(() => isTrue(config.value.contactSupportEnabled))
@@ -316,6 +317,7 @@ export const useAppConfig = defineStore('dashboardAppConfig', () => {
     maxHostLength,
     maxGraderFeedbackMessageLength,
     maxTakeQuizInputTextAnswerLength,
+    maxSurveyChoiceTextAnswerLength,
     maxTextInputAiGradingCorrectAnswerLength,
     disableEncouragementsConfetti,
     contactSupportEnabled,
