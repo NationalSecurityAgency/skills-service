@@ -14,6 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <script setup>
+import { useMetricsChartSnapshot } from '@/components/metrics/common/UseMetricsChartSnapshot.js'
 import {computed, onMounted, ref} from 'vue';
 import MetricsService from "@/components/metrics/MetricsService.js";
 import {useRoute} from 'vue-router';
@@ -33,6 +34,7 @@ const skillsDisplayAttributesState = useSkillsDisplayAttributesState()
 
 const loading = ref(true);
 const chartJsOptions = ref();
+const { snapshotOptions, snapshotPlugins } = useMetricsChartSnapshot(chartJsOptions)
 const chartData = ref({})
 
 onMounted(() => {
@@ -153,7 +155,8 @@ const heightInRem = computed(() => {
         <Chart ref="userTagsByLevelChartRef"
                type="bar"
                :data="chartData"
-               :options="chartJsOptions"
+               :options="snapshotOptions"
+               :plugins="snapshotPlugins"
                :style="`min-height: ${heightInRem}rem;`"/>
       </metrics-overlay>
     </template>

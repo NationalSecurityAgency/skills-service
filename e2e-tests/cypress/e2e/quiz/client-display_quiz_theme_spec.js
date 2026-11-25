@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import { matchSkillsDisplaySnapshot, visitSkillsDisplaySnapshotPage } from '../../support/skills-display-snapshot-helpers';
 import dayjs from 'dayjs';
 import relativeTimePlugin from 'dayjs/plugin/relativeTime';
 import advancedFormatPlugin from 'dayjs/plugin/advancedFormat';
@@ -34,9 +35,9 @@ describe('Client Display Quiz Theme Tests', () => {
         cy.createSubject(1,1)
         cy.createSkill(1, 1, 1, { selfReportingType: 'Quiz', quizId: 'quiz1',  pointIncrement: '150', numPerformToCompletion: 1 });
 
-        cy.cdVisit('/subjects/subj1/skills/skill1/quizzes/quiz1?enableTheme=true');
+        visitSkillsDisplaySnapshotPage('/subjects/subj1/skills/skill1/quizzes/quiz1?enableTheme=true');
         cy.get('[data-cy="quizSplashScreen"]').contains('You will earn 150 points for Very Great Skill 1');
-        cy.matchSnapshotImageForElement('[data-cy="skillsDisplayHome"]');
+        matchSkillsDisplaySnapshot('[data-cy="skillsDisplayHome"]');
     });
 
     it('theme - quiz questions', () => {
@@ -51,7 +52,7 @@ describe('Client Display Quiz Theme Tests', () => {
         cy.createSubject(1,1)
         cy.createSkill(1, 1, 1, { selfReportingType: 'Quiz', quizId: 'quiz1',  pointIncrement: '150', numPerformToCompletion: 1 });
 
-        cy.cdVisit('/subjects/subj1/skills/skill1/quizzes/quiz1?enableTheme=true');
+        visitSkillsDisplaySnapshotPage('/subjects/subj1/skills/skill1/quizzes/quiz1?enableTheme=true');
         cy.get('[data-cy="startQuizAttempt"]').click()
         cy.get('[data-cy="question_1"] [data-cy="answer_1"]').click()
         cy.get('[data-cy="question_3"] [data-cy="answer_3"]').click()
@@ -62,7 +63,7 @@ describe('Client Display Quiz Theme Tests', () => {
         cy.get('[data-cy="question_5"] [data-cy="answer_4"]').click()
         cy.get('[data-cy="question_5"] [data-cy="answer_4"]').blur()
 
-        cy.matchSnapshotImageForElement('[data-cy="skillsDisplayHome"]');
+        matchSkillsDisplaySnapshot('[data-cy="skillsDisplayHome"]');
     });
 
     it('theme - quiz results - passed quiz - all correct', () => {
@@ -84,7 +85,7 @@ describe('Client Display Quiz Theme Tests', () => {
         cy.createSubject(1,1)
         cy.createSkill(1, 1, 1, { selfReportingType: 'Quiz', quizId: 'quiz1',  pointIncrement: '150', numPerformToCompletion: 1 });
 
-        cy.cdVisit('/subjects/subj1/skills/skill1/quizzes/quiz1?enableTheme=true');
+        visitSkillsDisplaySnapshotPage('/subjects/subj1/skills/skill1/quizzes/quiz1?enableTheme=true');
         cy.get('[data-cy="startQuizAttempt"]').click()
         cy.get('[data-cy="question_1"] [data-cy="answer_1"]').click()
         cy.get('[data-cy="question_2"] [data-cy="answer_1"]').click()
@@ -93,7 +94,7 @@ describe('Client Display Quiz Theme Tests', () => {
         cy.wait('@completeSurvey')
         cy.get('[data-cy="quizPassed"]').should('exist')
         cy.get('[data-cy="quizCompletion"]').contains('You just earned 150 points')
-        cy.matchSnapshotImageForElement('[data-cy="skillsDisplayHome"]');
+        matchSkillsDisplaySnapshot('[data-cy="skillsDisplayHome"]');
     });
 
     it('theme - quiz results - passed quiz - some correct', () => {
@@ -116,7 +117,7 @@ describe('Client Display Quiz Theme Tests', () => {
         cy.createSubject(1,1)
         cy.createSkill(1, 1, 1, { selfReportingType: 'Quiz', quizId: 'quiz1',  pointIncrement: '150', numPerformToCompletion: 1 });
 
-        cy.cdVisit('/subjects/subj1/skills/skill1/quizzes/quiz1?enableTheme=true');
+        visitSkillsDisplaySnapshotPage('/subjects/subj1/skills/skill1/quizzes/quiz1?enableTheme=true');
         cy.get('[data-cy="startQuizAttempt"]').click()
         cy.get('[data-cy="question_1"] [data-cy="answer_1"]').click()
         cy.get('[data-cy="question_2"] [data-cy="answer_1"]').click()
@@ -127,7 +128,7 @@ describe('Client Display Quiz Theme Tests', () => {
         cy.wait('@completeSurvey')
         cy.get('[data-cy="quizPassed"]').should('exist')
         cy.get('[data-cy="quizCompletion"]').contains('You just earned 150 points')
-        cy.matchSnapshotImageForElement('[data-cy="skillsDisplayHome"]');
+        matchSkillsDisplaySnapshot('[data-cy="skillsDisplayHome"]');
     });
 
     it('theme - quiz results - failed', () => {
@@ -141,13 +142,13 @@ describe('Client Display Quiz Theme Tests', () => {
         cy.createSubject(1,1)
         cy.createSkill(1, 1, 1, { selfReportingType: 'Quiz', quizId: 'quiz1',  pointIncrement: '150', numPerformToCompletion: 1 });
 
-        cy.cdVisit('/subjects/subj1/skills/skill1/quizzes/quiz1?enableTheme=true');
+        visitSkillsDisplaySnapshotPage('/subjects/subj1/skills/skill1/quizzes/quiz1?enableTheme=true');
         cy.get('[data-cy="startQuizAttempt"]').click()
         cy.get('[data-cy="question_1"] [data-cy="answer_2"]').click()
         cy.get('[data-cy="question_2"] [data-cy="answer_2"]').click()
         cy.clickCompleteQuizBtn()
         cy.get('[data-cy="quizFailed"]').should('exist')
-        cy.matchSnapshotImageForElement('[data-cy="skillsDisplayHome"]');
+        matchSkillsDisplaySnapshot('[data-cy="skillsDisplayHome"]');
     });
 
     it('theme - survey splash screen', () => {
@@ -158,9 +159,9 @@ describe('Client Display Quiz Theme Tests', () => {
         cy.createSubject(1,1)
         cy.createSkill(1, 1, 1, { selfReportingType: 'Quiz', quizId: 'quiz1',  pointIncrement: '150', numPerformToCompletion: 1 });
 
-        cy.cdVisit('/subjects/subj1/skills/skill1/quizzes/quiz1?enableTheme=true');
+        visitSkillsDisplaySnapshotPage('/subjects/subj1/skills/skill1/quizzes/quiz1?enableTheme=true');
         cy.get('[data-cy="quizSplashScreen"]').contains('You will earn 150 points for Very Great Skill 1');
-        cy.matchSnapshotImageForElement('[data-cy="skillsDisplayHome"]');
+        matchSkillsDisplaySnapshot('[data-cy="skillsDisplayHome"]');
     });
 
     it('theme - survey questions', () => {
@@ -176,7 +177,7 @@ describe('Client Display Quiz Theme Tests', () => {
         cy.createSubject(1,1)
         cy.createSkill(1, 1, 1, { selfReportingType: 'Quiz', quizId: 'quiz1',  pointIncrement: '150', numPerformToCompletion: 1 });
 
-        cy.cdVisit('/subjects/subj1/skills/skill1/quizzes/quiz1?enableTheme=true');
+        visitSkillsDisplaySnapshotPage('/subjects/subj1/skills/skill1/quizzes/quiz1?enableTheme=true');
         cy.get('[data-cy="startQuizAttempt"]').click()
         cy.get('[data-cy="question_1"] [data-cy="answer_1"]').click()
         cy.get('[data-cy="question_3"] [data-cy="answer_3"]').click()
@@ -186,7 +187,7 @@ describe('Client Display Quiz Theme Tests', () => {
         cy.get('[data-cy="question_5"] [data-cy="answer_3"]').click()
         cy.get('[data-cy="question_5"] [data-cy="answer_3"]').blur()
 
-        cy.matchSnapshotImageForElement('[data-cy="skillsDisplayHome"]');
+        matchSkillsDisplaySnapshot('[data-cy="skillsDisplayHome"]');
     });
 
     it('theme - survey complete', () => {
@@ -206,15 +207,14 @@ describe('Client Display Quiz Theme Tests', () => {
         cy.createSubject(1,1)
         cy.createSkill(1, 1, 1, { selfReportingType: 'Quiz', quizId: 'quiz1',  pointIncrement: '150', numPerformToCompletion: 1 });
 
-        cy.cdVisit('/subjects/subj1/skills/skill1/quizzes/quiz1?enableTheme=true');
+        visitSkillsDisplaySnapshotPage('/subjects/subj1/skills/skill1/quizzes/quiz1?enableTheme=true');
         cy.get('[data-cy="startQuizAttempt"]').click()
         cy.get('[data-cy="question_1"] [data-cy="answer_1"]').click()
         cy.clickCompleteQuizBtn()
         cy.wait('@completeSurvey')
         cy.get('[data-cy="surveyCompletion"]').contains('You just earned 150 points')
-        cy.matchSnapshotImageForElement('[data-cy="skillsDisplayHome"]');
+        matchSkillsDisplaySnapshot('[data-cy="skillsDisplayHome"]');
     });
 
 });
-
 

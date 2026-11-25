@@ -16,6 +16,23 @@
 
 describe('Client Display Accessibility Quiz Tests', () => {
 
+    const dragMatchingAnswer = (questionNumber, bankIndex, slotIndex) => {
+        const questionSelector = `[data-cy="question_${questionNumber}"]`;
+        const destinationSelector = `${questionSelector} [data-cy="matchedList"] [data-cy="matchedNum-${slotIndex}"]`;
+        return cy.get(`${questionSelector} [data-cy="availableItems"] [data-cy="bank-${bankIndex}"]`).then(($answer) => {
+            const answerText = $answer.text().trim();
+            return cy.wrap($answer).dragAndDrop(destinationSelector, { waitForSortableSwap: true }).then(() => {
+                // Sortable moves the bank's li, preserving its original inner markup.
+                // Verify the rendered slot text without requiring a matchedAnswer child.
+                cy.get(`${questionSelector} [data-cy="matchedList"]`).children('li').eq(slotIndex)
+                    .should(($slot) => {
+                        expect($slot.text().trim(), `answer in matched slot ${slotIndex}`).to.equal(answerText);
+                    });
+                return cy.get(`${questionSelector} [data-cy="availableItems"]`).should('not.contain.text', answerText);
+            });
+        });
+    };
+
     beforeEach(() => {
     });
 
@@ -88,10 +105,10 @@ describe('Client Display Accessibility Quiz Tests', () => {
             cy.get('[data-cy="question_5"] [data-cy="answer_3"]').click()
             cy.get('[data-cy="question_5"] [data-cy="answer_4"]').click()
 
-            cy.get('[data-cy="question_7"] [data-cy="bank-0"]').dragAndDrop('[data-cy="question_7"] [data-cy="matchedList"] [data-cy="matchedNum-0"]')
-            cy.get('[data-cy="question_8"] [data-cy="bank-0"]').dragAndDrop('[data-cy="question_8"] [data-cy="matchedList"] [data-cy="matchedNum-0"]')
-            cy.get('[data-cy="question_8"] [data-cy="bank-1"]').dragAndDrop('[data-cy="question_8"] [data-cy="matchedList"] [data-cy="matchedNum-1"]')
-            cy.get('[data-cy="question_8"] [data-cy="bank-2"]').dragAndDrop('[data-cy="question_8"] [data-cy="matchedList"] [data-cy="matchedNum-2"]')
+            dragMatchingAnswer(7, 0, 0);
+            dragMatchingAnswer(8, 0, 0);
+            dragMatchingAnswer(8, 1, 1);
+            dragMatchingAnswer(8, 2, 2);
 
             cy.customLighthouse();
             cy.injectAxe();

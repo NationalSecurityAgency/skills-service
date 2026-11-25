@@ -31,16 +31,13 @@ import CustomizableHeader from '@/components/customization/CustomizableHeader.vu
 import CustomizableFooter from '@/components/customization/CustomizableFooter.vue'
 import {useSkillsDisplayInfo} from '@/skills-display/UseSkillsDisplayInfo.js'
 import {useSkillsDisplayAttributesState} from '@/skills-display/stores/UseSkillsDisplayAttributesState.js'
-import {useIframeInit} from '@/skills-display/iframe/UseIframeInit.js'
+import SkillsDisplayIframeHost from '@/skills-display/iframe/SkillsDisplayIframeHost.vue'
 import NewSoftwareVersion from '@/components/header/NewSoftwareVersion.vue'
 import {usePageVisitService} from '@/components/utils/services/UsePageVisitService.js'
-import {invoke, until} from '@vueuse/core'
 import DashboardFooter from '@/components/header/DashboardFooter.vue'
 import {useUserAgreementInterceptor} from '@/interceptors/UseUserAgreementInterceptor.js'
 import PkiAppBootstrap from '@/components/access/PkiAppBootstrap.vue'
 import ScrollToTop from '@/common-components/utilities/ScrollToTop.vue'
-import IconManagerService from '@/components/utils/iconPicker/IconManagerService.js'
-import log from 'loglevel';
 import {useUserPreferences} from "@/stores/UseUserPreferences.js";
 import {useMatomoSupport} from "@/stores/UseMatomoSupport.js";
 import {useAiPromptState} from '@/common-components/utilities/learning-conent-gen/UseAiPromptState.js'
@@ -68,34 +65,27 @@ const isLoadingApp = computed(() => !isAppLoaded.value || appConfig.isLoadingCon
 
 const themeHelper = useThemesHelper()
 
-const addCustomIconCSSForClientDisplay = () => {
-  if (skillsDisplayInfo.isSkillsClientPath()) {
-    IconManagerService.refreshCustomIconCss(skillsDisplayAttributes.projectId, null)
-  }
-}
 const pageVisitService = usePageVisitService()
 const userPreferences = useUserPreferences()
-const loadUserAndDisplayInfo = () => {
+const loadDashboardUserInfo = () => {
   pageVisitService.reportPageVisit(route.path, route.fullPath)
+  // These settings are consumed by dashboard features, not the embedded learner UI.
   const loadRoot = accessState.loadIsRoot()
   const loadEmailEnabled = appInfoState.loadEmailEnabled()
-  const loadCustomIconCSS = addCustomIconCSSForClientDisplay()
   const loadAiPromptSettings = aiPrompts.loadAiPromptSettings()
-  const promises = [loadRoot, loadEmailEnabled, loadCustomIconCSS, loadAiPromptSettings]
-  if (!skillsDisplayInfo.isSkillsClientPath()) {
-    const loadUserPreferences =
-        userPreferences.loadUserPreferences().then(() => {
-          return themeHelper.loadTheme()
-        })
-    promises.push(loadUserPreferences)
-  }
-  return Promise.all(promises).then(() => {
+  const loadUserPreferences = userPreferences.loadUserPreferences().then(() => {
+    return themeHelper.loadTheme()
+  })
+  return Promise.all([loadRoot, loadEmailEnabled, loadAiPromptSettings, loadUserPreferences]).then(() => {
     isAppLoaded.value = true
   })
 }
 watch(() => authState.userInfo, async (newUserInfo) => {
+  // Embedded readiness is owned by its startup/recovery path. Do not launch
+  // dashboard-only loaders when the iframe stores a newly authenticated user.
+  if (skillsDisplayInfo.isSkillsClientPath()) return
   if (newUserInfo) {
-    await loadUserAndDisplayInfo()
+    await loadDashboardUserInfo()
     initMatomo()
   } else {
     isAppLoaded.value = true
@@ -106,65 +96,39 @@ watch(() => themeHelper.currentTheme, (newTheme, oldTheme) => {
   document.documentElement.classList.toggle('st-dark-theme');
 })
 
-const iframeInit = useIframeInit()
 onBeforeMount(() => {
-  if (skillsDisplayInfo.isSkillsClientPath()) {
-    log.trace('App.vue: skillsDisplayInfo.isSkillsClientPath()=true, initiating iframe handshake')
-    iframeInit.handleHandshake()
-  }
   errorHandling.registerErrorHandling()
   userAgreementInterceptor.register()
   customGlobalValidators.addValidators()
 })
 
 onMounted(() => {
-  invoke(async () => {
-    if (skillsDisplayInfo.isSkillsClientPath()) {
-      log.trace('App.vue: skillsDisplayInfo.isSkillsClientPath()=true, waiting for iframe to load')
-      await until(() => iframeInit.loadedIframe.value || Boolean(iframeInit.initializationError.value)).toBe(true)
-      if (iframeInit.initializationError.value) return
-      log.debug('App.vue: skillsDisplayInfo.isSkillsClientPath()=true, loaded iframe!')
-    }
-    loadConfigs()
+  if (skillsDisplayInfo.isSkillsClientPath()) return
+  loadConfigs().catch(() => {
+    // Dashboard failures are displayed by the shared request-error handler.
   })
 })
 
-const restoreSessionIfAvailable = () => {
-  if (skillsDisplayInfo.isSkillsClientPath()) {
-    authState.setRestoringSession(false)
-    return authState.fetchUser()
-  }
-  return authState.restoreSessionIfAvailable()
-}
-
 const loadConfigs = () => {
-  appConfig.loadConfigState().finally(() => {
-    restoreSessionIfAvailable().finally(() => {
-      skillsDisplayAttributes.loadConfigStateIfNeeded().then(() => {
-
-        if (!skillsDisplayInfo.isSkillsClientPath()) {
-          globalNavGuards.addNavGuards()
-        }
+  const loadUserAndDisplayConfig = () => {
+    const loadDisplayConfig = () => {
+      return skillsDisplayAttributes.loadConfigStateIfNeeded().then(() => {
+        globalNavGuards.addNavGuards()
         if (!authState.isAuthenticated) {
           isAppLoaded.value = true
         }
-        if (skillsDisplayInfo.isSkillsClientPath()) {
-          loadUserAndDisplayInfo()
-        } else {
-          // do not need to set isAppLoaded to true here because it will be handled
-          // by the watch of authState.userInfo
-        }
-
+        // Authenticated dashboard readiness is owned by the userInfo watcher.
         initMatomo()
       })
-    })
-  })
+    }
+    return authState.restoreSessionIfAvailable().finally(loadDisplayConfig)
+  }
+  // Dashboard startup still installs navigation guards when public config fails.
+  return appConfig.loadConfigState().finally(loadUserAndDisplayConfig)
 }
 
 const initMatomo = () => {
-  if (skillsDisplayInfo.isSkillsClientPath()){
-    matomo.init({ isSkillsClient: true, projectId: skillsDisplayAttributes.projectId })
-  } else if (authState.isAuthenticated) {
+  if (authState.isAuthenticated) {
     matomo.init()
   }
 }
@@ -185,34 +149,33 @@ const isDashboardFooter = computed(() => notSkillsClient.value && !isLoadingApp.
     <VueAnnouncer class="sr-only" />
 
     <customizable-header v-if="isCustomizableHeader" role="region" aria-label="dynamic customizable header"></customizable-header>
-    <div id="skilltree-main-container">
-      <div v-if="iframeInit.initializationError.value" role="alert" data-cy="skillsDisplayInitError" class="p-4">
-        {{ iframeInit.initializationError.value }}
-      </div>
-      <div v-else-if="isLoadingApp" role="main" class="flex content-center justify-center flex-wrap" style="min-height: 40rem">
-        <div class="flex items-center justify-center m-2">
-          <skills-spinner :is-loading="true" class="text-center"/>
-          <h1 class="text-sm sr-only">Loading...</h1>
-        </div>
-      </div>
-      <div v-if="!isLoadingApp && !iframeInit.initializationError.value" class="m-0">
-        <pki-app-bootstrap v-if="inBootstrapMode" role="region"/>
-
-        <div v-if="!inBootstrapMode" :class="{ 'overall-container' : notSkillsClient, 'sd-theme-background-color': !notSkillsClient }">
-          <new-software-version  />
-          <dashboard-header v-if="showHeader" role="banner" />
-          <div role="main" id="mainContent1"
-               :class="{ 'px-3': !skillsDisplayInfo.isSkillsClientPath() }"
-               tabindex="-1"
-               aria-label="Main content area, click tab to navigate">
-            <RouterView />
+    <div id="skilltree-main-container" :class="{ 'flow-root': skillsDisplayInfo.isSkillsClientPath() }">
+      <skills-display-iframe-host v-if="skillsDisplayInfo.isSkillsClientPath()" />
+      <template v-else>
+        <div v-if="isLoadingApp" role="main" class="flex content-center justify-center flex-wrap" style="min-height: 40rem">
+          <div class="flex items-center justify-center m-2">
+            <skills-spinner :is-loading="true" class="text-center"/>
+            <h1 class="text-sm sr-only">Loading...</h1>
           </div>
         </div>
-        <ConfirmDialog :pt="{ root: { class: 'w-2/3' } }"></ConfirmDialog>
-        <dashboard-footer v-if="isDashboardFooter" role="region" />
-        <customizable-footer v-if="isDashboardFooter" role="region" aria-label="dynamic customizable footer"></customizable-footer>
-        <scroll-to-top v-if="!isScrollToTopDisabled && !inBootstrapMode" />
-      </div>
+        <div v-else class="m-0">
+          <pki-app-bootstrap v-if="inBootstrapMode" role="region"/>
+
+          <div v-if="!inBootstrapMode" class="overall-container">
+            <new-software-version  />
+            <dashboard-header v-if="showHeader" role="banner" />
+            <div role="main" id="mainContent1" class="px-3"
+                 tabindex="-1"
+                 aria-label="Main content area, click tab to navigate">
+              <RouterView />
+            </div>
+          </div>
+          <ConfirmDialog :pt="{ root: { class: 'w-2/3' } }"></ConfirmDialog>
+          <dashboard-footer v-if="isDashboardFooter" role="region" />
+          <customizable-footer v-if="isDashboardFooter" role="region" aria-label="dynamic customizable footer"></customizable-footer>
+          <scroll-to-top v-if="!isScrollToTopDisabled && !inBootstrapMode" />
+        </div>
+      </template>
     </div>
   </div>
 </template>

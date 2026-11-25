@@ -48,7 +48,7 @@ const hasTags = computed(() => tags.value?.length > 0)
 
 <template>
   <div class="">
-    <Card v-if="hasTags" class="mb-3">
+    <Card v-if="hasTags" class="mb-3" :pt="{ body: { class : 'px-4! py-2!'}}">
       <template #content>
         <h2 class="sr-only">Skill Tags</h2>
         <div data-cy="skillTags" class="flex flex-wrap gap-2 items-start justify-center md:justify-start">
@@ -60,10 +60,10 @@ const hasTags = computed(() => tags.value?.length > 0)
             <router-link
                 :to="{ name: skillsDisplayInfo.getContextSpecificRouteName('skillTagDetails'), params: { tagId: tag.tagId } }"
                 :data-cy="`tagLink-${tag.tagId}`">
-              <div class="flex gap-1 items-center">
+              <div class="flex gap-1 items-center text-sm">
                 <i class="fa-solid fa-tag" aria-hidden="true" :class="colors.getTextClass(index)"></i>
-                <div data-cy="tagName">{{ tag.tagValue }}</div>
-                <div data-cy="numSkills" class="border rounded-3xl px-2 bg-gray-200 text-slate-900 dark:bg-slate-700 dark:text-slate-100 dark:border-slate-500">
+                <div data-cy="tagName" class="text-sm">{{ tag.tagValue }}</div>
+                <div data-cy="numSkills" class="text-sm border rounded-3xl px-2 bg-gray-200 text-slate-900 dark:bg-slate-700 dark:text-slate-100 dark:border-slate-500">
                   {{ tag.numSkills }}
                 </div>
               </div>

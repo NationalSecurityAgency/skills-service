@@ -14,13 +14,14 @@
  * limitations under the License.
  */
 import { defineStore } from 'pinia'
-import { ref, computed } from 'vue'
+import { ref, computed, watch } from 'vue'
 import axios from 'axios'
 import { useSkillsDisplayInfo } from '@/skills-display/UseSkillsDisplayInfo.js'
 import { useRoute } from 'vue-router'
 import { useLog } from '@/components/utils/misc/useLog.js'
 import {usePluralize} from "@/components/utils/misc/UsePluralize.js";
 import SkillType from "@/common-components/utilities/SkillType.js";
+import { useAuthState } from '@/stores/UseAuthState.js'
 
 export const useSkillsDisplayAttributesState = defineStore('skillsDisplayAttributesState', () => {
   const loadingConfig = ref(true)
@@ -38,7 +39,26 @@ export const useSkillsDisplayAttributesState = defineStore('skillsDisplayAttribu
   const skillsDisplayInfo = useSkillsDisplayInfo()
   const pluralize = usePluralize()
   const route = useRoute()
-  const loadConfigStateIfNeeded = (optionalToPathObj = null) => {
+  const auth = useAuthState()
+  let configRevision = 0
+  let pendingConfig = null
+  // Shared native/preview pages can change project or displayed user. Embedded
+  // displays have a fixed learner; their recovery explicitly invalidates this cache.
+  const configContext = computed(() => JSON.stringify([serviceUrl.value, projectId.value, userId.value, auth.userInfo?.userId]))
+  const invalidateConfig = () => {
+    configRevision += 1
+    config.value = {}
+    pendingConfig = null
+    // Invalidating cached data does not schedule a request, especially after logout.
+    // Only loadConfigState should mark configuration as loading.
+    loadingConfig.value = false
+  }
+  watch(configContext, () => {
+    invalidateConfig()
+  }, { flush: 'sync' })
+  // Startup, navigation, settings updates and iframe recovery own configuration
+  // loading. Cache invalidation must not start a competing identity-change request.
+  const loadConfigStateIfNeeded = (optionalToPathObj = null, requestConfig = {}) => {
     if (skillsDisplayInfo.isSkillsDisplayPath(optionalToPathObj)) {
       if (route.params.projectId) {
         projectId.value = route.params.projectId
@@ -47,24 +67,38 @@ export const useSkillsDisplayAttributesState = defineStore('skillsDisplayAttribu
         projectId.value = optionalToPathObj.params.projectId
       }
 
-      const sameProjId = projectId.value && config.value && config.value.configForProjectId === projectId.value
-      if (!sameProjId) {
+      const sameContext = projectId.value && config.value.configForContext === configContext.value
+      if (!sameContext) {
         log.debug(`loadConfigStateIfNeeded for [${projectId.value}]`)
-        return loadConfigState()
+        return loadConfigState(requestConfig)
       }
     }
 
     return Promise.resolve()
   }
-  const loadConfigState = () => {
+  const loadConfigState = (requestConfig = {}) => {
+    if (pendingConfig) {
+      return pendingConfig
+    }
+    const revision = configRevision
+    const context = configContext.value
     loadingConfig.value = true
-    return axios.get(`${serviceUrl.value}/public/clientDisplay/config?projectId=${projectId.value}`, {
+    pendingConfig = axios.get(`${serviceUrl.value}/public/clientDisplay/config?projectId=${encodeURIComponent(projectId.value)}`, {
+      ...requestConfig,
       withCredentials: false
     }).then((result) => {
-      config.value = { ...result.data, configForProjectId: projectId.value }
+      if (revision === configRevision) {
+        config.value = { ...result.data, configForContext: context }
+      } else if (auth.userInfo && skillsDisplayInfo.isSkillsDisplayPath()) {
+        return loadConfigState(requestConfig)
+      }
     }).finally(() => {
-      loadingConfig.value = false
+      if (revision === configRevision) {
+        loadingConfig.value = false
+        pendingConfig = null
+      }
     })
+    return pendingConfig
   }
 
   const displayProjectDescription = computed(() => config.value.displayProjectDescription)
@@ -107,6 +141,8 @@ export const useSkillsDisplayAttributesState = defineStore('skillsDisplayAttribu
   const groupDescriptionsOn = computed(() => config.value.groupDescriptionsOn)
   const groupInfoOnSkillPage = computed(() => config.value.groupInfoOnSkillPage)
   const disableAchievementsCelebrations = computed(() => config.value.disableAchievementsCelebrations)
+  const compactViewDefault = computed(() => config.value.compactViewDefault === true)
+  const compactViewPreference = computed(() => typeof config.value.compactViewPreference === 'boolean' ? config.value.compactViewPreference : null)
 
   const afterPropsAreSet = () => {
     return new Promise((resolve) => {
@@ -128,6 +164,7 @@ export const useSkillsDisplayAttributesState = defineStore('skillsDisplayAttribu
     afterPropsAreSet,
     serviceUrl,
     loadConfigStateIfNeeded,
+    invalidateConfig,
     loadingConfig,
     displayProjectDescription,
     levelDisplayName,
@@ -156,6 +193,8 @@ export const useSkillsDisplayAttributesState = defineStore('skillsDisplayAttribu
     version,
     projectName,
     projectUserCommunityDescriptor,
-    disableAchievementsCelebrations
+    disableAchievementsCelebrations,
+    compactViewDefault,
+    compactViewPreference
   }
 })

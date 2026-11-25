@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import { matchSkillsDisplaySnapshot, visitSkillsDisplaySnapshotPage } from '../../support/skills-display-snapshot-helpers';
 import moment from 'moment-timezone';
 
 const dateFormatter = value => moment.utc(value)
@@ -1150,7 +1151,7 @@ describe('Client Display Skills Filtering Tests', () => {
         cy.reportSkill(1, 3, Cypress.env('proxyUser'), 'now');
         cy.reportSkill(1, 4, Cypress.env('proxyUser'), 'now');
 
-        cy.cdVisit('/');
+        visitSkillsDisplaySnapshotPage('/');
         cy.cdClickSubj(0);
 
         cy.get('[data-cy="skillsSearchInput"]')
@@ -1174,7 +1175,8 @@ describe('Client Display Skills Filtering Tests', () => {
         cy.get('[data-cy="skillProgress_index-2"]')
             .should('not.exist');
 
-        cy.matchSnapshotImageForElement('[data-cy="skillsProgressList"]', { errorThreshold: 0.05 });
+        cy.get('[data-cy="filter_inProgress"]').should('not.exist');
+        matchSkillsDisplaySnapshot('[data-cy="skillsProgressList"]', { errorThreshold: 0.05 });
     });
 
     it('Visual Test skills filter open', () => {
@@ -1204,7 +1206,7 @@ describe('Client Display Skills Filtering Tests', () => {
         cy.reportSkill(1, 1, Cypress.env('proxyUser'), '8 days ago');
         cy.reportSkill(1, 1, Cypress.env('proxyUser'), '9 days ago');
 
-        cy.cdVisit('/subjects/subj1');
+        visitSkillsDisplaySnapshotPage('/subjects/subj1');
         cy.get('[data-cy="filterMenu"] [data-cy="filterBtn"]')
             .click();
 
@@ -1240,7 +1242,8 @@ describe('Client Display Skills Filtering Tests', () => {
 
         cy.get('[data-cy="skillProgress_index-6"]')
             .should('not.exist');
-        cy.matchSnapshotImageForElement('[data-cy="skillsDisplayHome"]', { blackout: '[data-cy=pointHistoryChart]', errorThreshold: 0.05 });
+        cy.get('[data-pc-name="panelmenu"]').should('be.visible');
+        matchSkillsDisplaySnapshot('[data-cy="skillsDisplayHome"]', { blackout: '[data-cy=pointHistoryChart]', errorThreshold: 0.05 });
     });
 
     it('Visual Tests filter selected and last viewed button present', () => {
@@ -1251,7 +1254,7 @@ describe('Client Display Skills Filtering Tests', () => {
         cy.assignSkillToBadge(1, 1, 1);
         cy.createBadge(1, 1, { enabled: true });
 
-        cy.cdVisit('/');
+        visitSkillsDisplaySnapshotPage('/');
         cy.cdClickSubj(0);
         cy.cdClickSkill(0);
         cy.get('[data-cy="skillProgressTitle"]').should('exist')
@@ -1261,7 +1264,8 @@ describe('Client Display Skills Filtering Tests', () => {
         cy.get('[data-cy="filterMenu"] [data-cy="filterBtn"]').click();
         cy.get('[data-cy="filter_approval"]').click({force: true});
         cy.get('[data-cy="selectedFilter"]').contains('Approval');
-        cy.matchSnapshotImageForElement('[data-cy="skillsProgressList"] [data-pc-section="header"]');
+        cy.get('[data-cy="filter_approval"]').should('not.exist');
+        matchSkillsDisplaySnapshot('[data-cy="skillsProgressList"] [data-pc-section="header"]');
     });
 
     it('filter on has tag', () => {
@@ -1320,3 +1324,4 @@ describe('Client Display Skills Filtering Tests', () => {
     });
 
 });
+        // The filter popover leaves asynchronously after a selection.

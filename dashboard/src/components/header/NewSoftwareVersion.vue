@@ -17,6 +17,7 @@ limitations under the License.
 import { useAppVersionState } from '@/stores/UseAppVersionState.js'
 import axios from 'axios'
 import { useSkillsDisplayInfo } from '@/skills-display/UseSkillsDisplayInfo.js'
+import { onScopeDispose } from 'vue'
 
 const appVersionState = useAppVersionState()
 const skillsDisplayInfo = useSkillsDisplayInfo()
@@ -25,7 +26,7 @@ const refresh = () => {
   window.location.reload();
 }
 
-axios.interceptors.response.use(
+const interceptor = axios.interceptors.response.use(
   (response) => {
     const incomingVersion = response?.headers?.['skills-client-lib-version'];
     if (incomingVersion) {
@@ -34,6 +35,8 @@ axios.interceptors.response.use(
     return response;
   },
 );
+// Authentication recovery remounts this component; do not accumulate handlers.
+onScopeDispose(() => axios.interceptors.response.eject(interceptor))
 </script>
 
 <template>

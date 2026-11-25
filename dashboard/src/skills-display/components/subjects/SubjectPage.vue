@@ -18,12 +18,10 @@ import SkillsTitle from '@/skills-display/components/utilities/SkillsTitle.vue'
 import { useSkillsDisplaySubjectState } from '@/skills-display/stores/UseSkillsDisplaySubjectState.js'
 import { onMounted, watch } from 'vue'
 import { useRoute } from 'vue-router'
-import UserOverallProgress from '@/skills-display/components/home/UserOverallProgress.vue'
+import ProgressAndRankingOverview from '@/skills-display/components/ProgressAndRankingOverview.vue'
 import { tryOnBeforeMount } from '@vueuse/core'
 import MarkdownText from '@/common-components/utilities/markdown/MarkdownText.vue'
 import SkillsProgressList from '@/skills-display/components/progress/SkillsProgressList.vue'
-import MyRank from '@/skills-display/components/rank/MyRank.vue'
-import PointProgressChart from '@/skills-display/components/progress/points/PointProgressChart.vue'
 import TagList from "@/skills-display/components/skill/tags/TagList.vue";
 
 const subject = useSkillsDisplaySubjectState()
@@ -46,20 +44,9 @@ watch( () => route.params.subjectId, () => {
     <skills-spinner :is-loading="subject.loadingSubjectSummary" />
     <div v-if="!subject.loadingSubjectSummary">
       <skills-title>{{  subject.subjectSummary.subject }}</skills-title>
-      <div class="mt-4">
-        <user-overall-progress :is-subject="true"/>
-      </div>
+      <progress-and-ranking-overview class="mt-4" is-subject />
 
-      <div class="mt-4 flex flex-col lg:flex-row gap-6 ">
-        <div class="flex items-center">
-          <my-rank class="w-full"/>
-        </div>
-        <div class="flex-1 min-w-0">
-          <point-progress-chart class="w-full" />
-        </div>
-      </div>
-
-      <Card v-if="subject.subjectSummary.description" class="mt-2">
+      <Card v-if="subject.subjectSummary.description" class="mt-2" :pt="{ body: { class : 'px-4! py-3!'}}">
         <template #title>
           <div class="h6 card-title mb-0 float-left">Description</div>
         </template>

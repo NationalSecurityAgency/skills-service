@@ -18,11 +18,13 @@ import { defineStore } from 'pinia'
 import { useSkillsDisplayService } from '@/skills-display/services/UseSkillsDisplayService.js'
 import { useRoute } from 'vue-router'
 import GlobalBadgeService from '@/components/badges/global/GlobalBadgeService.js'
+import { useSkillsDisplayParentFrameState } from '@/skills-display/stores/UseSkillsDisplayParentFrameState.js'
 
 export const useSkillsDisplaySubjectState = defineStore('skillDisplaySubjectState', () => {
 
     const skillsDisplayService = useSkillsDisplayService()
     const route = useRoute()
+    const parentState = useSkillsDisplayParentFrameState()
 
     const loadingSubjectSummary = ref(true)
     const loadingBadgeSummary = ref(true)
@@ -31,18 +33,31 @@ export const useSkillsDisplaySubjectState = defineStore('skillDisplaySubjectStat
     const subjectSummary = ref({})
     const loadingSkillSummary = ref(true)
     const skillSummary = ref({})
+    // Explicit iframe recovery reset, not a watcher for switching preview learners.
+    const reset = () => {
+      subjectSummary.value = {}
+      skillSummary.value = {}
+      loadingSubjectSummary.value = true
+      loadingBadgeSummary.value = true
+      loadingSkillsGroupSummary.value = true
+      loadingSkillTagSummary.value = true
+      loadingSkillSummary.value = true
+    }
 
     const loadSubjectSummary = (subjectId, includeSkills = true) => {
+      const isCurrent = parentState.captureAuthGeneration()
+      loadingSubjectSummary.value = true
       return skillsDisplayService.loadSubjectSummary(subjectId, includeSkills)
         .then((res) => {
           res.skills?.forEach(skill => skill.subjectId = subjectId)
           subjectSummary.value = res
           return res
         }).finally(() => {
-          loadingSubjectSummary.value = false
+          if (isCurrent()) loadingSubjectSummary.value = false
         })
     }
   const loadBadgeSummary = (badgeId, isGlobal = false, includeSkills = true) => {
+    const isCurrent = parentState.captureAuthGeneration()
     loadingBadgeSummary.value = true
     const isGlobalAndIndependentOfProject = isGlobal && route.name === 'globalBadgeDetails'
 
@@ -52,40 +67,43 @@ export const useSkillsDisplaySubjectState = defineStore('skillDisplaySubjectStat
         subjectSummary.value = badgeSummary
         return badgeSummary
       }).finally(() => {
-        loadingBadgeSummary.value = false
+        if (isCurrent()) loadingBadgeSummary.value = false
       })
   }
 
     const loadSkillSummary = (skillId, optionalCrossProjectId, subjectId) => {
+      const isCurrent = parentState.captureAuthGeneration()
       loadingSkillSummary.value = true
       return skillsDisplayService.getSkillSummary(skillId, optionalCrossProjectId, subjectId)
         .then((res) => {
           skillSummary.value = res
           return res
         }).finally(() => {
-          loadingSkillSummary.value = false
+          if (isCurrent()) loadingSkillSummary.value = false
         })
     }
 
     const loadSkillsGroupSummary = (groupId) => {
+      const isCurrent = parentState.captureAuthGeneration()
       loadingSkillsGroupSummary.value = true
       return skillsDisplayService.getSkillsGroupSummary(groupId)
           .then((res) => {
             subjectSummary.value = res
             return res
           }).finally(() => {
-            loadingSkillsGroupSummary.value = false
+            if (isCurrent()) loadingSkillsGroupSummary.value = false
           })
     }
 
     const loadSkillTagSummary = (tagId) => {
+      const isCurrent = parentState.captureAuthGeneration()
       loadingSkillTagSummary.value = true
       return skillsDisplayService.getSkillTagSummary(tagId)
         .then((res) => {
           subjectSummary.value = res
           return res
         }).finally(() => {
-          loadingSkillTagSummary.value = false
+          if (isCurrent()) loadingSkillTagSummary.value = false
         })
     }
 
@@ -178,6 +196,7 @@ export const useSkillsDisplaySubjectState = defineStore('skillDisplaySubjectStat
   }
 
     return {
+      reset,
       loadSubjectSummary,
       loadingSubjectSummary,
       subjectSummary,

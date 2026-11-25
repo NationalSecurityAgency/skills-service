@@ -14,6 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <script setup>
+import { useMetricsChartSnapshot } from '@/components/metrics/common/UseMetricsChartSnapshot.js'
 import {computed, onMounted, ref} from 'vue';
 import {useRoute} from 'vue-router';
 import MetricsService from "@/components/metrics/MetricsService.js";
@@ -97,6 +98,7 @@ const overlayMessage  = computed(() => {
 })
 
 const chartJsOptions = ref();
+const { snapshotOptions, snapshotPlugins } = useMetricsChartSnapshot(chartJsOptions)
 const subjectLevelsOverTimeChart = ref(null);
 const setChartOptions = () => {
   const colors = chartSupportColors.getColors()
@@ -196,7 +198,8 @@ const setChartOptions = () => {
                id="subjectLevelsOverTimeChart"
                type="line"
                :data="chartData"
-               :options="chartJsOptions"
+               :options="snapshotOptions"
+               :plugins="snapshotPlugins"
                class="h-[17rem]"
         />
       </metrics-overlay>

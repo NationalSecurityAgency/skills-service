@@ -13,30 +13,30 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import moment from 'moment-timezone';
+import {
+    clickPrerequisiteNode,
+    matchSkillsDisplaySnapshot,
+    visitSkillsDisplaySnapshotPage,
+    waitForPrerequisitesGraph,
+} from '../../support/skills-display-snapshot-helpers';
 
 describe('Client Display Prerequisites Snapshot Tests', () => {
+
+    const navToTheFirstSkill = () => {
+        visitSkillsDisplaySnapshotPage('/');
+        cy.cdClickSubj(0);
+        cy.cdClickSkill(1);
+    };
+
+    const matchGraphSnapshot = (selector, nameOrOptions = {}, expectGraph = true) => {
+        if (expectGraph) waitForPrerequisitesGraph();
+        return matchSkillsDisplaySnapshot(selector, nameOrOptions);
+    };
 
     beforeEach(() => {
         Cypress.env('disabledUILoginProp', true);
         cy.createProject(1);
         cy.createSubject(1, 1);
-
-        Cypress.Commands.add('clickOnNode', (x, y) => {
-            cy.contains('Prerequisites');
-            cy.get('[data-cy="graphLegend"]').should('not.exist');
-            cy.wait(2000); // wait for chart
-            // have to click twice to it to work...
-            cy.get('#dependent-skills-network canvas')
-                .should('be.visible')
-                .click(x, y);
-        });
-
-        Cypress.Commands.add('navToTheFirstSkill', (x, y) => {
-            cy.cdVisit('/');
-            cy.cdClickSubj(0);
-            cy.cdClickSkill(1);
-        });
 
         // must set viewport to show entire canvas or it will not appear in the screenshot
         cy.viewport(1280, 1280);
@@ -57,9 +57,8 @@ describe('Client Display Prerequisites Snapshot Tests', () => {
         cy.addLearningPathItem(1, 5, 2)
 
         cy.reportSkill(1, 4, Cypress.env('proxyUser'), 'now');
-        cy.wait(1000);
 
-        cy.navToTheFirstSkill();
+        navToTheFirstSkill();
         cy.contains('Prerequisites');
         cy.get('[data-cy="graphLegend"]').should('not.exist');
         cy.get('[data-cy="depsProgress"] [data-cy="numDeps"]')
@@ -77,8 +76,7 @@ describe('Client Display Prerequisites Snapshot Tests', () => {
         cy.get('[data-cy="prereqTable"] [data-p-index="2"] [data-cy="isAchievedCell"]').contains('Yes')
         cy.get('[data-cy="prereqTable"] [data-p-index="3"] [data-cy="isAchievedCell"]').contains('Not Yet')
 
-        cy.wait(1000); // wait for chart
-        cy.matchSnapshotImageForElement('[data-cy="prerequisitesCard"]');
+        matchGraphSnapshot('[data-cy="prerequisitesCard"]');
     });
 
     it('Deps Chart - partially completed deps - 3 out 4', () => {
@@ -98,9 +96,8 @@ describe('Client Display Prerequisites Snapshot Tests', () => {
         cy.reportSkill(1, 4, Cypress.env('proxyUser'), 'now');
         cy.reportSkill(1, 5, Cypress.env('proxyUser'), 'now');
         cy.reportSkill(1, 2, Cypress.env('proxyUser'), 'now');
-        cy.wait(1000);
 
-        cy.navToTheFirstSkill();
+        navToTheFirstSkill();
         cy.contains('Prerequisites');
         cy.get('[data-cy="graphLegend"]').should('not.exist');
         cy.get('[data-cy="depsProgress"] [data-cy="numDeps"]')
@@ -118,8 +115,7 @@ describe('Client Display Prerequisites Snapshot Tests', () => {
         cy.get('[data-cy="prereqTable"] [data-p-index="2"] [data-cy="isAchievedCell"]').contains('Yes')
         cy.get('[data-cy="prereqTable"] [data-p-index="3"] [data-cy="isAchievedCell"]').contains('Yes')
 
-        cy.wait(1000); // wait for chart
-        cy.matchSnapshotImageForElement('[data-cy="prerequisitesCard"]');
+        matchGraphSnapshot('[data-cy="prerequisitesCard"]');
     });
 
     it('Deps Chart - fully satisfied deps', () => {
@@ -140,9 +136,8 @@ describe('Client Display Prerequisites Snapshot Tests', () => {
         cy.reportSkill(1, 4, Cypress.env('proxyUser'), 'now');
         cy.reportSkill(1, 5, Cypress.env('proxyUser'), 'now');
         cy.reportSkill(1, 2, Cypress.env('proxyUser'), 'now');
-        cy.wait(1000);
 
-        cy.navToTheFirstSkill();
+        navToTheFirstSkill();
         cy.contains('Prerequisites');
         cy.get('[data-cy="graphLegend"]').should('not.exist');
         cy.get('[data-cy="depsProgress"] [data-cy="numDeps"]')
@@ -160,8 +155,7 @@ describe('Client Display Prerequisites Snapshot Tests', () => {
         cy.get('[data-cy="prereqTable"] [data-p-index="2"] [data-cy="isAchievedCell"]').contains('Yes')
         cy.get('[data-cy="prereqTable"] [data-p-index="3"] [data-cy="isAchievedCell"]').contains('Yes')
 
-        cy.wait(1000); // wait for chart
-        cy.matchSnapshotImageForElement('[data-cy="prerequisitesCard"]');
+        matchGraphSnapshot('[data-cy="prerequisitesCard"]');
     });
 
     it('Deps Chart - fully satisfied deps with cross-project dep', () => {
@@ -186,7 +180,7 @@ describe('Client Display Prerequisites Snapshot Tests', () => {
         cy.reportSkill(2, 2, Cypress.env('proxyUser'), 'now');
         cy.reportSkill(2, 1, Cypress.env('proxyUser'), 'now');
 
-        cy.navToTheFirstSkill();
+        navToTheFirstSkill();
         cy.contains('Prerequisites');
         cy.get('[data-cy="graphLegend"]').should('not.exist');
         cy.get('[data-cy="depsProgress"] [data-cy="numDeps"]')
@@ -204,7 +198,7 @@ describe('Client Display Prerequisites Snapshot Tests', () => {
         cy.get('[data-cy="prereqTable"] [data-p-index="1"] [data-cy="isAchievedCell"]').contains('Yes')
         cy.get('[data-cy="prereqTable"] [data-p-index="2"] [data-cy="isAchievedCell"]').contains('Yes')
 
-        cy.matchSnapshotImageForElement('[data-cy="prerequisitesCard"]');
+        matchGraphSnapshot('[data-cy="prerequisitesCard"]');
     });
 
     it('cross-project dependency properly displayed', () => {
@@ -241,14 +235,13 @@ describe('Client Display Prerequisites Snapshot Tests', () => {
         cy.request('POST', '/admin/projects/proj1/skill1/prerequisite/proj2/skill42');
 
         cy.viewport(1200, 2000);
-        cy.cdVisit('/subjects/subj1/skills/skill1');
+        visitSkillsDisplaySnapshotPage('/subjects/subj1/skills/skill1');
         cy.contains('Very Great Skill 1');
         // should render Prerequisites section
         cy.contains('Prerequisites');
         cy.get('[data-cy="skillLink-proj2-skill42"]')
 
-        cy.wait(4000);
-        cy.matchSnapshotImageForElement('[data-cy="skillsDisplayHome"]',
+        matchGraphSnapshot('[data-cy="skillsDisplayHome"]',
           {
               name: `LockedSkill-CrossProjectDependency`,
               blackout: '[data-cy="skillTreePoweredBy"]',
@@ -266,22 +259,20 @@ describe('Client Display Prerequisites Snapshot Tests', () => {
         cy.request('POST', `/admin/projects/proj1/skill2/prerequisite/proj1/skill1`);
 
         // Go to parent dependency page
-        cy.cdVisit('/subjects/subj1/skills/skill3');
+        visitSkillsDisplaySnapshotPage('/subjects/subj1/skills/skill3');
 
         cy.get('[data-cy="skillProgressTitle"]')
             .contains('Very Great Skill 3');
         cy.get('[data-cy="depsProgress"] [data-cy="numDeps"]').should('have.text', '2')
-        cy.wait(4000);
-        cy.matchSnapshotImageForElement('[data-cy="skillsDisplayHome"] [data-cy="prerequisitesCard"]', `InProjectDependency-parent`);
+        matchGraphSnapshot('[data-cy="skillsDisplayHome"] [data-cy="prerequisitesCard"]', `InProjectDependency-parent`);
 
         // Go to child dependency page
-        cy.clickOnNode(600, 262);
+        clickPrerequisiteNode('proj1', 'skill2');
         cy.get('[data-cy="skillProgressTitle"]')
             .contains('Very Great Skill 2');
         // should render Prerequisites section
         cy.get('[data-cy="depsProgress"] [data-cy="numDeps"]').should('have.text', '1')
-        cy.wait(4000);
-        cy.matchSnapshotImageForElement('[data-cy="skillsDisplayHome"] [data-cy="prerequisitesCard"]', `InProjectDependency-child`);
+        matchGraphSnapshot('[data-cy="skillsDisplayHome"] [data-cy="prerequisitesCard"]', `InProjectDependency-child`);
     });
 
     it('cross-project skill dep is shown when skill ids match', function () {
@@ -295,7 +286,7 @@ describe('Client Display Prerequisites Snapshot Tests', () => {
 
         // Go to parent dependency page
         cy.viewport(1200, 2000);
-        cy.cdVisit('/subjects/subj1/skills/skill1');
+        visitSkillsDisplaySnapshotPage('/subjects/subj1/skills/skill1');
 
         cy.get('[data-cy="skillProgressTitle"]')
             .contains('Very Great Skill 1');
@@ -305,8 +296,7 @@ describe('Client Display Prerequisites Snapshot Tests', () => {
 
         // should render Prerequisites section
         cy.contains('Prerequisites');
-        cy.wait(4000);
-        cy.matchSnapshotImageForElement('[data-cy="skillsDisplayHome"]',
+        matchGraphSnapshot('[data-cy="skillsDisplayHome"]',
           {
               name: `CrossProject Dep with the same skillId`,
               blackout: '[data-cy="skillTreePoweredBy"]',
@@ -327,16 +317,17 @@ describe('Client Display Prerequisites Snapshot Tests', () => {
         cy.request('POST', `/admin/projects/proj1/skill2/prerequisite/proj1/skill3`);
 
         cy.viewport(1200, 2000);
-        cy.cdVisit('/?internalBackButton=true');
+        visitSkillsDisplaySnapshotPage('/?internalBackButton=true');
 
         cy.cdClickSubj(0, 'Subject 1');
 
-        cy.wait(4000);
-        cy.matchSnapshotImageForElement('[data-cy="skillsDisplayHome"]', {
+        cy.get('[data-cy="skillProgressTitle-skill1"]').should('be.visible');
+        cy.get('[data-cy="skillProgress_index-0"] [data-cy="skillProgress-ptsOverProgressBard"]').should('contain.text', '100 / 200 Points');
+        matchGraphSnapshot('[data-cy="skillsDisplayHome"]', {
             name: 'Subject-WithLockedSkills-ThatWerePartiallyAchieved',
             blackout: '[data-cy="pointHistoryChart"], [data-cy="skillTreePoweredBy"]',
             errorThreshold: 0.05
-        });
+        }, false);
 
         cy.cdClickSkill(0);
         cy.contains('Very Great Skill 1');
@@ -346,8 +337,7 @@ describe('Client Display Prerequisites Snapshot Tests', () => {
         cy.contains('Prerequisites');
         cy.get('[data-cy="prereqTable"] [data-cy="skillLink-proj1-skill2"]')
 
-        cy.wait(4000);
-        cy.matchSnapshotImageForElement('[data-cy="skillsDisplayHome"]', {
+        matchGraphSnapshot('[data-cy="skillsDisplayHome"]', {
             name: 'LockedSkill-ThatWasPartiallyAchieved',
             blackout: '[data-cy="skillTreePoweredBy"]',
             errorThreshold: 0.05
@@ -379,14 +369,15 @@ describe('Client Display Prerequisites Snapshot Tests', () => {
         cy.request('POST', `/admin/projects/proj1/skill1/prerequisite/proj1/skill2`);
 
         cy.viewport(1200, 2000);
-        cy.cdVisit('/?internalBackButton=true', true);
+        visitSkillsDisplaySnapshotPage('/?internalBackButton=true', true);
         cy.cdClickSubj(0, 'Subject 1', true);
 
-        cy.matchSnapshotImageForElement('[data-cy="skillsDisplayHome"]', {
+        cy.get('[data-cy="skillProgress_index-0"] [data-cy="skillProgress-ptsOverProgressBard"]').should('contain.text', '200 / 200 Points');
+        matchGraphSnapshot('[data-cy="skillsDisplayHome"]', {
             name: 'Subject-WithLockedSkills-ThatWereFullyAchieved',
             blackout: '[data-cy="pointHistoryChart"], [data-cy="skillTreePoweredBy"]',
             errorThreshold: 0.05
-        });
+        }, false);
 
         cy.cdClickSkill(0);
         cy.contains('Very Great Skill 1');
@@ -394,8 +385,7 @@ describe('Client Display Prerequisites Snapshot Tests', () => {
         cy.contains(msg);
         cy.get('[data-cy="progressBarWithLock"]').should('not.exist')
 
-        cy.wait(4000);
-        cy.matchSnapshotImageForElement('[data-cy="skillsDisplayHome"]', {
+        matchGraphSnapshot('[data-cy="skillsDisplayHome"]', {
             name: 'LockedSkill-ThatWasFullyAchieved',
             blackout: '[data-cy="achievementOn"], [data-cy="skillTreePoweredBy"]',
             errorThreshold: 0.05
@@ -440,9 +430,9 @@ describe('Client Display Prerequisites Snapshot Tests', () => {
         cy.reportSkill(1, 4, Cypress.env('proxyUser'), 'now')
 
         cy.viewport(1200, 2000);
-        cy.cdVisit('/subjects/subj1/skills/skill2');
+        visitSkillsDisplaySnapshotPage('/subjects/subj1/skills/skill2');
 
-        cy.matchSnapshotImageForElement('[data-cy="skillsDisplayHome"]', {
+        matchGraphSnapshot('[data-cy="skillsDisplayHome"]', {
             name: 'BadgeSkill-WithBadgeDependencies',
             blackout: '[data-cy="skillTreePoweredBy"]',
             errorThreshold: 0.05

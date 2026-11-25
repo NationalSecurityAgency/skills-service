@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import { matchSkillsDisplaySnapshot, visitSkillsDisplaySnapshotPage } from '../../support/skills-display-snapshot-helpers';
 import dayjs from 'dayjs';
 import relativeTimePlugin from 'dayjs/plugin/relativeTime';
 import advancedFormatPlugin from 'dayjs/plugin/advancedFormat';
@@ -23,6 +24,28 @@ dayjs.extend(advancedFormatPlugin);
 
 describe('Client Display Quiz Matching Question Tests', () => {
 
+    const dragAndVerifyMatch = (qNum, sourceSelector, destSelector) => {
+        return cy.get(sourceSelector).closest('li').then(($source) => {
+            const sourceList = $source.parent().attr('data-cy');
+            const sourceIndex = $source.index();
+            const sourceText = $source.text().trim();
+            return cy.get(destSelector).closest('li').then(($destination) => {
+                const destinationIndex = $destination.index();
+                const destinationText = $destination.text().trim();
+                return cy.wrap($source).dragAndDrop(destSelector, { waitForSortableSwap: true }).then(() => {
+                    // Sortable moves the elements, including their data-cy attributes.
+                    // Assert physical slot positions rather than the old element selectors.
+                    return cy.get(`[data-cy="question_${qNum}"]`).should(($question) => {
+                        expect($question.find('[data-cy="matchedList"]').children('li').eq(destinationIndex).text().trim(), 'destination answer')
+                            .to.equal(sourceText);
+                        expect($question.find(`[data-cy="${sourceList}"]`).children('li').eq(sourceIndex).text().trim(), `swapped answer in ${sourceList} slot ${sourceIndex}, moving ${sourceText} to slot ${destinationIndex}`)
+                            .to.equal(destinationText);
+                    });
+                });
+            });
+        });
+    };
+
     beforeEach(() => {
         Cypress.Commands.add("dragAndDropAnswerMatch", (qNum, availableStr, toIndex) => {
 
@@ -30,11 +53,8 @@ describe('Client Display Quiz Matching Question Tests', () => {
 
             return cy.get(`[data-cy="question_${qNum}"] [data-cy^="bank-"]`).contains(availableStr).then((bankItem) => {
                 const dragHandle = bankItem[0].getAttribute('data-cy')
-                cy.get(`[data-cy="question_${qNum}"] [data-cy="availableItems"] [data-cy="${dragHandle}"]`)
-                    .dragAndDrop(destSelector)
-                    .then(() => {
-                        cy.get(`[data-cy="question_${qNum}"] [data-cy="matchedList"]`).contains(availableStr);
-                    })
+                return dragAndVerifyMatch(qNum,
+                    `[data-cy="question_${qNum}"] [data-cy="availableItems"] [data-cy="${dragHandle}"]`, destSelector);
 
             })
         });
@@ -50,11 +70,11 @@ describe('Client Display Quiz Matching Question Tests', () => {
                 cy.log(`dragHandle = ${dragHandle}`)
 
                 if (isDestValueASelector) {
-                    return cy.get(getLocSelector(dragHandle)).dragAndDrop(destValue)
+                    return dragAndVerifyMatch(qNum, getLocSelector(dragHandle), destValue)
                 }
                 return cy.get(selectorToSearch).contains(destValue).then((moveToItem) => {
                     const destLocation = moveToItem[0].parentElement.getAttribute('data-cy')
-                    return cy.get(getLocSelector(dragHandle)).dragAndDrop(getLocSelector(destLocation))
+                    return dragAndVerifyMatch(qNum, getLocSelector(dragHandle), getLocSelector(destLocation))
                 })
             })
         });
@@ -263,17 +283,23 @@ describe('Client Display Quiz Matching Question Tests', () => {
 
         cy.get('[data-cy="startQuizAttempt"]').click()
 
+        cy.intercept('POST', '/api/quizzes/quiz1/attempt/*/answers/*').as('saveMatchingAnswer');
         cy.dragAndDropAnswerMatch(1, 'First Answer', 0)
         cy.dragAndDropAnswerMatch(1, 'Third Answer', 2)
         cy.dragAndDropAnswerMatch(2, 'Second Answer', 1)
 
         cy.validateMatchedSelection(1, ['First Answer', 'Third Answer'])
 
+        // Rendered placement does not guarantee persistence before navigating away.
+        for (let answerIndex = 0; answerIndex < 3; answerIndex++) {
+            cy.wait('@saveMatchingAnswer').its('response.statusCode').should('eq', 200);
+        }
         cy.cdVisit('/subjects/subj1/skills/skill1');
         cy.get('[data-cy="takeQuizBtn"]').contains('Take Quiz')
         cy.get('[data-cy="takeQuizBtn"]').click();
 
         cy.validateMatchedSelection(1, ['First Answer', 'Third Answer'])
+        cy.validateMatchedSelection(2, ['Second Answer'])
 
         cy.dragAndDropAnswerMatch(1, 'Second Answer', 1)
         cy.dragAndDropAnswerMatch(2, 'First Answer', 0)
@@ -568,7 +594,7 @@ describe('Client Display Quiz Matching Question Tests', () => {
         moveAnswer(2, 'First Answer', '{leftArrow}', 'available')
         moveAnswer(2, 'Third Answer', '{leftArrow}', 'available')
 
-        cy.get('[data-cy="question_2"] [data-cy="matchedNum-2"]').dragAndDrop('[data-cy="question_2"] [data-cy="matchedNum-0"]')
+        dragAndVerifyMatch(2, '[data-cy="question_2"] [data-cy="matchedNum-2"]', '[data-cy="question_2"] [data-cy="matchedNum-0"]')
 
         cy.clickCompleteQuizBtn()
         cy.get('[data-cy="quizCompletion"]').contains('Congrats!! You just earned 150 points for Very Great Skill 1 skill by passing the quiz.')
@@ -595,15 +621,15 @@ describe('Client Display Quiz Matching Question Tests', () => {
         cy.createSubject(1,1)
         cy.createSkill(1, 1, 1, { selfReportingType: 'Quiz', quizId: 'quiz1',  pointIncrement: '150', numPerformToCompletion: 1 });
 
-        cy.cdVisit('/subjects/subj1/skills/skill1/quizzes/quiz1?enableTheme=true');
+        visitSkillsDisplaySnapshotPage('/subjects/subj1/skills/skill1/quizzes/quiz1?enableTheme=true');
         cy.get('[data-cy="quizSplashScreen"] [data-cy="quizDescription"]').contains('What a cool quiz #1! Thank you for taking it!')
         cy.get('[data-cy="startQuizAttempt"]').click()
 
         cy.dragAndDropAnswerMatch(1, 'First Answer', 0)
         cy.dragAndDropAnswerMatch(1, 'Second Answer', 1)
 
-        cy.wait(4000)
-        cy.matchSnapshotImageForElement('[data-cy="question_1"]', { errorThreshold: 0.1 });
+        cy.validateMatchedSelection(1, ['First Answer', 'Second Answer'])
+        matchSkillsDisplaySnapshot('[data-cy="question_1"]', { errorThreshold: 0.1 });
     });
 
     it('theme support: display answers after completing quiz', () => {
@@ -615,7 +641,7 @@ describe('Client Display Quiz Matching Question Tests', () => {
         cy.createSubject(1,1)
         cy.createSkill(1, 1, 1, { selfReportingType: 'Quiz', quizId: 'quiz1',  pointIncrement: '150', numPerformToCompletion: 1 });
 
-        cy.cdVisit('/subjects/subj1/skills/skill1/quizzes/quiz1?enableTheme=true');
+        visitSkillsDisplaySnapshotPage('/subjects/subj1/skills/skill1/quizzes/quiz1?enableTheme=true');
         cy.get('[data-cy="quizSplashScreen"] [data-cy="quizDescription"]').contains('What a cool quiz #1! Thank you for taking it!')
         cy.get('[data-cy="startQuizAttempt"]').click()
 
@@ -626,14 +652,11 @@ describe('Client Display Quiz Matching Question Tests', () => {
 
         cy.clickCompleteQuizBtn()
 
-        cy.get('[data-cy="quizCompletion"] [data-cy="quizFailed"]')
-        cy.get('[data-cy="quizRunQuestions"] [data-cy="question_1"] [data-cy="questionAnsweredWrong"]')
+        cy.get('[data-cy="quizCompletion"] [data-cy="quizFailed"]').should('be.visible')
+        cy.get('[data-cy="quizRunQuestions"] [data-cy="question_1"] [data-cy="questionAnsweredWrong"]').should('be.visible')
 
-        cy.wait(4000)
-        cy.matchSnapshotImageForElement('[data-cy="question_1"]', { errorThreshold: 0.1 });
+        matchSkillsDisplaySnapshot('[data-cy="question_1"]', { errorThreshold: 0.1 });
     });
 
 
 });
-
-

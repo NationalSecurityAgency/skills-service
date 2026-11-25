@@ -37,27 +37,34 @@ describe('Achieved Skills Progress Tests', () => {
     cy.get('[data-cy="numAchievedSkills"]').should('have.text', '3')
     cy.get('[data-cy="numTotalSkills"]').should('have.text', '8')
 
+    // Counts can appear before point history loads; finish rendering before changing routes.
+    cy.get('[data-cy="pointHistoryChart-animationEnded"]').should('exist')
     cy.get('[data-cy="subjectTile-subj1"] [data-cy="subjectTileBtn"]').click()
     cy.get('[data-cy="numAchievedSkills"]').should('have.text', '2')
     cy.get('[data-cy="numTotalSkills"]').should('have.text', '6')
 
+    cy.get('[data-cy="pointHistoryChart-animationEnded"]').should('exist')
     cy.get('[data-cy="breadcrumb-proj1"]').click()
     cy.get('[data-cy="numAchievedSkills"]').should('have.text', '3')
     cy.get('[data-cy="numTotalSkills"]').should('have.text', '8')
 
+    cy.get('[data-cy="pointHistoryChart-animationEnded"]').should('exist')
     cy.get('[data-cy="subjectTile-subj2"] [data-cy="subjectTileBtn"]').click()
     cy.get('[data-cy="numAchievedSkills"]').should('have.text', '1')
     cy.get('[data-cy="numTotalSkills"]').should('have.text', '2')
 
+    cy.get('[data-cy="pointHistoryChart-animationEnded"]').should('exist')
     cy.cdVisit('/subjects/subj1')
     cy.get('[data-cy="numAchievedSkills"]').should('have.text', '2')
     cy.get('[data-cy="numTotalSkills"]').should('have.text', '6')
     cy.get('[data-cy="skillProgress_index-0"]')
 
+    cy.get('[data-cy="pointHistoryChart-animationEnded"]').should('exist')
     cy.cdVisit('/subjects/subj2')
     cy.get('[data-cy="numAchievedSkills"]').should('have.text', '1')
     cy.get('[data-cy="numTotalSkills"]').should('have.text', '2')
     cy.get('[data-cy="skillProgress_index-0"]')
+    cy.get('[data-cy="pointHistoryChart-animationEnded"]').should('exist')
   })
 
   it('Achieved skill count should get updated when an Honor skill is completed by reporting from the subject page', () => {

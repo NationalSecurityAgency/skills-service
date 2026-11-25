@@ -15,6 +15,7 @@ limitations under the License.
 */
 <script setup>
 import { computed } from 'vue'
+import { RouterLink } from 'vue-router'
 import Ribbon from '@/skills-display/components/subjects/Ribbon.vue'
 import { useNumberFormat } from '@/common-components/filter/UseNumberFormat.js'
 import VerticalProgressBar from '@/skills-display/components/progress/VerticalProgressBar.vue'
@@ -25,6 +26,7 @@ import LevelsProgress from '@/skills-display/components/utilities/LevelsProgress
 import { useThemesHelper } from '@/components/header/UseThemesHelper.js'
 
 const props = defineProps({
+  compact: { type: Boolean, default: false },
   subject: {
     type: Object,
     required: true
@@ -40,6 +42,17 @@ const skillsDisplayInfo = useSkillsDisplayInfo()
 const numFormat = useNumberFormat()
 const ribbonColor = ['#4472ba', '#c74a41', '#44843E', '#BE5A09', '#A15E9A', '#23806A'][props.tileIndex % 6]
 const themeHelper = useThemesHelper()
+const subjectRoute = computed(() => ({ name: skillsDisplayInfo.getContextSpecificRouteName('SubjectDetailsPage'), params: { subjectId: props.subject.subjectId } }))
+const overallPercent = computed(() => Math.min(100, Math.max(0, Math.trunc(progress.value.total))))
+const pointsToNextLevel = computed(() => Math.max(0, props.subject.levelTotalPoints - props.subject.levelPoints))
+const compactIconColor = computed(() => [
+  'text-blue-700 dark:text-blue-300',
+  'text-red-700 dark:text-red-300',
+  'text-green-700 dark:text-green-300',
+  'text-orange-700 dark:text-orange-300',
+  'text-purple-700 dark:text-purple-300',
+  'text-teal-700 dark:text-teal-300',
+][props.tileIndex % 6])
 
 const progress = computed(() => {
   let levelBeforeToday = 0
@@ -75,9 +88,54 @@ const activePointsColor = computed(() => {
 
 <template>
   <div data-cy="subjectTile" class="h-full">
-  <CardWithVericalSections class="h-full text-center" :data-cy="`subjectTile-${subject.subjectId}`">
+  <Card v-if="compact" class="h-full" :pt="{ body: { class: 'p-0! h-full!' }, content: { class: 'p-0! h-full!' } }" :data-cy="`subjectTile-${subject.subjectId}`">
     <template #content>
-      <div class="px-4 pt-4">
+      <component :is="attributes.isSummaryOnly ? 'div' : RouterLink"
+                 v-bind="attributes.isSummaryOnly ? {} : { to: subjectRoute, 'aria-label': `View ${subject.subject} ${attributes.subjectDisplayName.toLowerCase()}` }"
+                 :data-cy="attributes.isSummaryOnly ? undefined : 'subjectTileBtn'"
+                 class="group block h-full rounded-[var(--p-card-border-radius)] p-4 text-color sd-theme-primary-color sd-theme-tile-background"
+                 :class="{ 'hover:bg-surface-50 focus-visible:outline-2 focus-visible:outline-primary focus-visible:outline-offset-4 motion-safe:transition-colors dark:hover:bg-surface-800': !attributes.isSummaryOnly }">
+        <div class="flex items-start gap-3">
+          <span class="flex h-10 w-10 shrink-0 items-center justify-center" aria-hidden="true">
+            <i :class="[subject.iconClass, compactIconColor]" class="text-2xl sd-theme-subject-tile-icon" />
+          </span>
+          <div class="min-w-0 flex-1">
+            <h3 class="line-clamp-2 text-xl leading-7 font-medium sd-theme-primary-color" :title="subject.subject">{{ subject.subject }}</h3>
+            <div class="mt-1 text-base text-muted-color sd-theme-primary-color" data-cy="levelTitle">
+              {{ attributes.levelDisplayName }} <span class="font-semibold">{{ subject.skillsLevel }}</span>
+              <span class="mx-1">of</span>{{ subject.totalLevels }}
+            </div>
+          </div>
+          <span v-if="overallPercent === 100" class="text-emerald-700 dark:text-emerald-300" aria-label="All points earned">
+            <i class="fas fa-circle-check" aria-hidden="true" />
+          </span>
+        </div>
+        <div class="mt-4 flex flex-wrap items-baseline justify-between gap-1 text-base">
+          <div class="sd-theme-primary-color" data-cy="pointsProgress">
+            <span class="font-medium text-orange-700 dark:text-orange-300 sd-theme-primary-color">{{ numFormat.pretty(subject.points) }}</span>
+            / {{ numFormat.pretty(subject.totalPoints) }} {{ attributes.pointDisplayNamePlural.toLowerCase() }}
+          </div>
+          <span class="font-medium sd-theme-primary-color">{{ overallPercent }}%</span>
+        </div>
+        <div class="mt-2">
+          <vertical-progress-bar :total-progress="progress.total" :total-progress-before-today="progress.totalBeforeToday" :bar-size="5"
+                                 :aria-label="`Overall progress for ${subject.subject}: ${overallPercent}%`" />
+        </div>
+        <div class="mt-3 flex items-center justify-between gap-3 text-base">
+          <span v-if="progress.allLevelsComplete" class="text-emerald-800 dark:text-emerald-300 sd-theme-primary-color" data-cy="allLevelsComplete">All {{ attributes.levelDisplayNamePlural.toLowerCase() }} complete</span>
+          <span v-else class="text-muted-color sd-theme-primary-color" data-cy="levelProgress">
+            {{ numFormat.pretty(pointsToNextLevel) }} {{ attributes.pointDisplayNamePlural.toLowerCase() }} to {{ attributes.levelDisplayName }} {{ subject.skillsLevel + 1 }}
+          </span>
+          <span v-if="!attributes.isSummaryOnly" class="inline-flex shrink-0 items-center gap-2 font-medium text-primary sd-theme-primary-color">
+            <span class="group-hover:underline">View</span><i class="fas fa-arrow-right" aria-hidden="true" />
+          </span>
+        </div>
+      </component>
+    </template>
+  </Card>
+  <CardWithVericalSections v-else class="h-full text-center" :data-cy="`subjectTile-${subject.subjectId}`">
+    <template #content>
+      <div class="px-4 pt-3">
           <ribbon :color="ribbonColor" class="subject-tile-ribbon">
             <router-link v-if="!attributes.isSummaryOnly"
                          :to="{ name: skillsDisplayInfo.getContextSpecificRouteName('SubjectDetailsPage'), params: { subjectId: subject.subjectId } }"

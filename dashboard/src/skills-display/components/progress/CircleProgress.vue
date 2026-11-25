@@ -21,6 +21,7 @@ import {useThemesHelper} from "@/components/header/UseThemesHelper.js";
 import RadialPercentageChart from "@/components/utils/charts/RadialPercentageChart.vue";
 import {useChartSupportColors} from "@/components/metrics/common/UseChartSupportColors.js";
 import {useSkillsDisplayAttributesState} from "@/skills-display/stores/UseSkillsDisplayAttributesState.js";
+import {useChartSnapshotMode} from '@/skills-display/components/test/UseChartSnapshotMode.js'
 
 const props = defineProps({
   diameter: {
@@ -43,6 +44,7 @@ const themeState = useSkillsDisplayThemeState()
 const themeHelper = useThemesHelper()
 const chartSupportColors = useChartSupportColors()
 const attributes = useSkillsDisplayAttributesState()
+const chartSnapshotMode = useChartSnapshotMode()
 
 const chartColors = chartSupportColors.getColors()
 
@@ -94,6 +96,7 @@ const radialChartLabelStyle = computed(() => {
           :size-in-rem="sizeInRem"
           :completed-bar-color="barColor"
           :remaining-bar-color="remainingBarColor"
+          :disable-animation="chartSnapshotMode"
       >
         <template #center>
           <slot name="center" :percent-complete="percentComplete">

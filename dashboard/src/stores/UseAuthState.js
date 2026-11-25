@@ -21,6 +21,7 @@ import { useAppConfig } from '@/common-components/stores/UseAppConfig.js'
 import { useAppInfoState } from '@/stores/UseAppInfoState.js'
 import { useInceptionStore } from '@/stores/UseInceptionStore.js'
 import { useSkillsDisplayParentFrameState } from '@/skills-display/stores/UseSkillsDisplayParentFrameState.js'
+import SkillsClientPath from '@/router/SkillsClientPath.js'
 
 
 export const useAuthState = defineStore('authState', () => {
@@ -57,12 +58,16 @@ export const useAuthState = defineStore('authState', () => {
         userInfoState.value = null
         localAuth.value = false
         oAuthAuth.value = false
-        localStorage.removeItem('localAuth')
-        localStorage.removeItem('oAuthAuth')
-        localStorage.removeItem('expirationDate')
-        localStorage.removeItem('userInfo')
         delete axios.defaults.headers.common.Authorization
-        useSkillsDisplayParentFrameState().setAuthToken('')
+        useSkillsDisplayParentFrameState().clearAuthToken()
+        try {
+            localStorage.removeItem('localAuth')
+            localStorage.removeItem('oAuthAuth')
+            localStorage.removeItem('expirationDate')
+            localStorage.removeItem('userInfo')
+        } catch {
+            // Blocked browser storage must not prevent clearing in-memory authentication.
+        }
     }
 
     const handleLogin = (result) => {
@@ -145,9 +150,19 @@ export const useAuthState = defineStore('authState', () => {
             logout()
         }, expiresInMillis)
     }
-    const fetchUser = (storeInLocalStorage = true) => {
-        return axios.get('/app/userInfo')
+    const fetchUser = (storeInLocalStorage = true, requestConfig = {}) => {
+        return axios.get('/app/userInfo', requestConfig)
           .then((response) => {
+              const parentState = useSkillsDisplayParentFrameState()
+              if (!parentState.isCurrentAuthRequest(response.config)) {
+                  throw new axios.CanceledError('Authentication request was superseded')
+              }
+              if (SkillsClientPath.isSkillsClientIframePath()) {
+                  // An iframe renews credentials for its original learner. Verify before
+                  // storing identity or triggering user-dependent loaders; changing learners
+                  // requires a new iframe. Native login and admin previews remain unrestricted.
+                  parentState.verifyAuthenticatedUser(response.data?.userId)
+              }
               storeUser(response.data)
               if (storeInLocalStorage) {
                   localStorage.setItem('userInfo', JSON.stringify(response.data))

@@ -103,7 +103,7 @@ export const useInitializeUserProgress = (preview) => {
     timeout = setTimeout(checkProgress, refreshIntervalMs)
   })
 
-  const state = { isLoading, isProgressPending, contextRevision, progressRevision }
+  const state = { isLoading, isProgressPending, contextRevision, progressRevision, preview }
   provide(initializationKey, state)
   return state
 }

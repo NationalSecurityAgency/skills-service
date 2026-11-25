@@ -57,7 +57,8 @@ const props = defineProps({
 </script>
 
 <template>
-  <SkillsOverlay :show="props.loading || !props.hasData" opacity="50">
+  <SkillsOverlay :show="props.loading || !props.hasData" opacity="50"
+                 :data-metrics-loading="props.loading" :data-metrics-has-data="props.hasData">
     <slot></slot>
     <template #overlay>
       <div v-if="loading">

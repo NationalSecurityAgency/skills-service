@@ -692,6 +692,7 @@ describe('Quiz Question CRUD Tests', () => {
     });
 
     it('drag and drop to sort questions', function () {
+        cy.intercept('PATCH', '/admin/quiz-definitions/quiz1/questions/*').as('saveQuestionOrder');
         cy.createQuizDef(1);
         cy.createQuizQuestionDef(1, 1)
         cy.createQuizQuestionDef(1, 2)
@@ -703,11 +704,14 @@ describe('Quiz Question CRUD Tests', () => {
         const q3Card = '[data-cy="questionDisplayCard-3"] [data-cy="sortControlHandle"]';
 
         cy.validateElementsOrder('[data-cy="questionDisplayCard"]', ['question # 1', 'question # 2', 'question # 3']);
-        cy.get(q1Card).dragAndDrop(q2Card);
+        cy.get(q1Card).dragAndDrop(q2Card, { sortableContainer: '#questionsCard' });
         cy.validateElementsOrder('[data-cy="questionDisplayCard"]', ['question # 2', 'question # 1', 'question # 3']);
-        cy.get(q3Card).dragAndDrop(q2Card);
+        cy.wait('@saveQuestionOrder').its('response.statusCode').should('eq', 200);
+        cy.get('[data-cy="updatingSortMsg"]').should('not.exist');
+        cy.get(q3Card).dragAndDrop(q2Card, { sortableContainer: '#questionsCard' });
         cy.validateElementsOrder('[data-cy="questionDisplayCard"]', ['question # 3', 'question # 2', 'question # 1']);
 
+        cy.wait('@saveQuestionOrder').its('response.statusCode').should('eq', 200);
         cy.visit('/administrator/quizzes/quiz1');
         cy.validateElementsOrder('[data-cy="questionDisplayCard"]', ['question # 3', 'question # 2', 'question # 1']);
     });
@@ -740,8 +744,9 @@ describe('Quiz Question CRUD Tests', () => {
         const q2Card = '[data-cy="questionDisplayCard-2"] [data-cy="sortControlHandle"]';
 
         cy.validateElementsOrder('[data-cy="questionDisplayCard"]', ['question # 1', 'question # 2']);
-        cy.get(q1Card).dragAndDrop(q2Card);
+        cy.get(q1Card).dragAndDrop(q2Card, { sortableContainer: '#questionsCard' });
         cy.validateElementsOrder('[data-cy="questionDisplayCard"]', ['question # 2', 'question # 1']);
+        cy.get('[data-cy="updatingSortMsg"]').should('not.exist');
     });
 
     it('user keyboard to sort questions', function () {
@@ -1072,7 +1077,9 @@ describe('Quiz Question CRUD Tests', () => {
         cy.get('[data-cy="answerText-1"]').type('answer2')
         cy.get('[data-cy="answersError"]').contains('Answers can not contain duplicate terms or values')
 
-        cy.get('[data-cy="answerText-1"]').type('{selectall}new-answer')
+        cy.get('[data-cy="answerText-1"]').should('have.value', 'answer2').clear()
+        cy.get('[data-cy="answerText-1"]').type('new-answer')
+        cy.get('[data-cy="answerText-1"]').should('have.value', 'new-answer')
         cy.get('[data-cy="answersError"]').should('not.be.visible')
         cy.get('[data-cy="saveDialogBtn"]').should('not.be.disabled')
 
@@ -1317,18 +1324,28 @@ describe('Quiz Question CRUD Tests', () => {
         cy.get('[data-cy="question-1-answer-2"]').should('contain.text', 'Third Term')
         cy.get('[data-cy="question-1-answer-2"]').should('contain.text', 'Third Answer')
 
-        cy.get('[data-cy="termText-0"]').type('{selectall}term1')
-        cy.get('[data-cy="answerText-0"]').type('{selectall}answer1')
-        cy.get('[data-cy="termText-1"]').type('{selectall}term2')
-        cy.get('[data-cy="answerText-1"]').type('{selectall}{backspace}')
+        cy.get('[data-cy="termText-0"]').should('have.value', 'First Term').clear()
+        cy.get('[data-cy="termText-0"]').type('term1')
+        cy.get('[data-cy="termText-0"]').should('have.value', 'term1')
+        cy.get('[data-cy="answerText-0"]').should('have.value', 'First Answer').clear()
+        cy.get('[data-cy="answerText-0"]').type('answer1')
+        cy.get('[data-cy="answerText-0"]').should('have.value', 'answer1')
+        cy.get('[data-cy="termText-1"]').should('have.value', 'Second Term').clear()
+        cy.get('[data-cy="termText-1"]').type('term2')
+        cy.get('[data-cy="termText-1"]').should('have.value', 'term2')
+        cy.get('[data-cy="answerText-1"]').should('have.value', 'Second Answer').clear()
+        cy.get('[data-cy="answerText-1"]').should('have.value', '')
 
         cy.get('[data-cy="answersError"]').should('be.visible')
         cy.get('[data-cy="saveDialogBtn"]').should('be.disabled')
         cy.get('[data-cy="answersError"]').contains('Answers must include both a term and a value')
         cy.get('[data-cy="answerText-1"]').type('answer1')
+        cy.get('[data-cy="answerText-1"]').should('have.value', 'answer1')
         cy.get('[data-cy="answersError"]').contains('Answers can not contain duplicate terms or values')
 
-        cy.get('[data-cy="answerText-1"]').type('{selectall}answer2')
+        cy.get('[data-cy="answerText-1"]').clear()
+        cy.get('[data-cy="answerText-1"]').type('answer2')
+        cy.get('[data-cy="answerText-1"]').should('have.value', 'answer2')
         cy.get('[data-cy="answersError"]').should('not.be.visible')
         cy.get('[data-cy="saveDialogBtn"]').should('not.be.disabled')
 
@@ -1356,10 +1373,18 @@ describe('Quiz Question CRUD Tests', () => {
         cy.get('[data-cy="question-1-answer-2"]').should('contain.text', 'Third Term')
         cy.get('[data-cy="question-1-answer-2"]').should('contain.text', 'Third Answer')
 
-        cy.get('[data-cy="termText-0"]').type('{selectall}term1')
-        cy.get('[data-cy="answerText-0"]').type('{selectall}answer1')
-        cy.get('[data-cy="termText-1"]').type('{selectall}term2')
-        cy.get('[data-cy="answerText-1"]').type('{selectall}answer2')
+        cy.get('[data-cy="termText-0"]').should('have.value', 'First Term').clear()
+        cy.get('[data-cy="termText-0"]').type('term1')
+        cy.get('[data-cy="termText-0"]').should('have.value', 'term1')
+        cy.get('[data-cy="answerText-0"]').should('have.value', 'First Answer').clear()
+        cy.get('[data-cy="answerText-0"]').type('answer1')
+        cy.get('[data-cy="answerText-0"]').should('have.value', 'answer1')
+        cy.get('[data-cy="termText-1"]').should('have.value', 'Second Term').clear()
+        cy.get('[data-cy="termText-1"]').type('term2')
+        cy.get('[data-cy="termText-1"]').should('have.value', 'term2')
+        cy.get('[data-cy="answerText-1"]').should('have.value', 'Second Answer').clear()
+        cy.get('[data-cy="answerText-1"]').type('answer2')
+        cy.get('[data-cy="answerText-1"]').should('have.value', 'answer2')
         cy.get('[data-cy="answer-0"] [data-cy="addNewAnswer"]').click()
         cy.get('[data-cy="termText-1"]').type('new-term')
         cy.get('[data-cy="answerText-1"]').type('new-answer')

@@ -13,11 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import { matchMetricsSnapshot, visitMetricsSnapshotPage } from '../../support/metrics-snapshot-helpers';
 var moment = require('moment-timezone');
 
 describe('Metrics Tests', () => {
 
-    const waitForSnap = 6000;
     const visualRegressionOptions = { errorThreshold: 0.20 }
 
     beforeEach(() => {
@@ -28,7 +28,7 @@ describe('Metrics Tests', () => {
     });
 
     it('subjects - num users per level over time - not subjects', () => {
-        cy.visit('/administrator/projects/proj1/metrics/subjects');
+        visitMetricsSnapshotPage('/administrator/projects/proj1/metrics/subjects');
         cy.get('[data-cy=subjectNumUsersPerLevelOverTime]')
             .contains('Generate the chart using controls above!');
 
@@ -36,8 +36,9 @@ describe('Metrics Tests', () => {
             .contains('Generate')
             .should('be.disabled');
 
-        cy.wait(waitForSnap);
-        cy.matchSnapshotImageForElement('[data-cy=subjectNumUsersPerLevelOverTime]', visualRegressionOptions);
+        matchMetricsSnapshot('[data-cy=subjectNumUsersPerLevelOverTime]', {
+            ...visualRegressionOptions, noDataMessage: 'Generate the chart using controls above!'
+        });
     });
 
     it('subjects - num users per level over time - subject has no data', () => {
@@ -46,7 +47,7 @@ describe('Metrics Tests', () => {
             subjectId: 'subj1',
             name: 'Subject 1',
         });
-        cy.visit('/administrator/projects/proj1/metrics/subjects');
+        visitMetricsSnapshotPage('/administrator/projects/proj1/metrics/subjects');
         cy.get('[data-cy=subjectNumUsersPerLevelOverTime]')
             .contains('Generate the chart using controls above!');
 
@@ -64,8 +65,9 @@ describe('Metrics Tests', () => {
         cy.get('[data-cy=subjectNumUsersPerLevelOverTime]')
             .contains('Zero users achieved levels for this subject!');
 
-        cy.wait(waitForSnap);
-        cy.matchSnapshotImageForElement('[data-cy=subjectNumUsersPerLevelOverTime]', visualRegressionOptions);
+        matchMetricsSnapshot('[data-cy=subjectNumUsersPerLevelOverTime]', {
+            ...visualRegressionOptions, noDataMessage: 'Zero users achieved levels for this subject!'
+        });
     });
 
     it('subjects - num users per level over time - subject has little data', () => {
@@ -107,7 +109,7 @@ describe('Metrics Tests', () => {
         });
         // cy.reportHistoryOfEvents('proj1', 'user0Good@skills.org', 1, [], ['skill1', 'skill2', 'skill3']);
 
-        cy.visit('/administrator/projects/proj1/metrics/subjects');
+        visitMetricsSnapshotPage('/administrator/projects/proj1/metrics/subjects');
         cy.get('[data-cy=subjectNumUsersPerLevelOverTime]')
             .contains('Generate the chart using controls above!');
 
@@ -116,8 +118,7 @@ describe('Metrics Tests', () => {
         cy.get('[data-cy="genSubLevelsOverTimeBtn"]').click()
 
         cy.wait('@getLevelsOverTimeData');
-        cy.wait(waitForSnap);
-        cy.matchSnapshotImageForElement('[data-cy=subjectNumUsersPerLevelOverTime]', visualRegressionOptions);
+        matchMetricsSnapshot('[data-cy=subjectNumUsersPerLevelOverTime]', visualRegressionOptions);
     });
 
     function generateDayWiseTimeSeries(xValStart, count, increaseBy) {
@@ -171,7 +172,7 @@ describe('Metrics Tests', () => {
             })
             .as('getLevelsOverTimeData');
 
-        cy.visit('/administrator/projects/proj1/metrics/subjects');
+        visitMetricsSnapshotPage('/administrator/projects/proj1/metrics/subjects');
         cy.wait('@getSubjects');
 
         cy.get('[data-cy=subjectNumUsersPerLevelOverTime]')
@@ -183,8 +184,7 @@ describe('Metrics Tests', () => {
 
         cy.wait('@getLevelsOverTimeData');
 
-        cy.wait(waitForSnap);
-        cy.matchSnapshotImageForElement('[data-cy=subjectNumUsersPerLevelOverTime]', visualRegressionOptions);
+        matchMetricsSnapshot('[data-cy=subjectNumUsersPerLevelOverTime]', visualRegressionOptions);
     });
 
     it('subjects - num users per level over time - multiple levels with same # of users for all the achieved levels', () => {
@@ -242,7 +242,7 @@ describe('Metrics Tests', () => {
                 .format('x')
         });
 
-        cy.visit('/administrator/projects/proj1/metrics/subjects');
+        visitMetricsSnapshotPage('/administrator/projects/proj1/metrics/subjects');
         cy.wait('@getSubjects');
 
         cy.get('[data-cy=subjectNumUsersPerLevelOverTime]')
@@ -254,8 +254,7 @@ describe('Metrics Tests', () => {
 
         cy.wait('@getLevelsOverTimeData');
 
-        cy.wait(waitForSnap);
-        cy.matchSnapshotImageForElement('[data-cy=subjectNumUsersPerLevelOverTime]', visualRegressionOptions);
+        matchMetricsSnapshot('[data-cy=subjectNumUsersPerLevelOverTime]', visualRegressionOptions);
     });
 
     it('subjects - num users per level over time - long history', () => {
@@ -297,7 +296,7 @@ describe('Metrics Tests', () => {
             })
             .as('getLevelsOverTimeData');
 
-        cy.visit('/administrator/projects/proj1/metrics/subjects');
+        visitMetricsSnapshotPage('/administrator/projects/proj1/metrics/subjects');
         cy.wait('@getSubjects');
 
         cy.get('[data-cy=subjectNumUsersPerLevelOverTime]')
@@ -309,8 +308,7 @@ describe('Metrics Tests', () => {
 
         cy.wait('@getLevelsOverTimeData');
 
-        cy.wait(waitForSnap);
-        cy.matchSnapshotImageForElement('[data-cy=subjectNumUsersPerLevelOverTime]', visualRegressionOptions);
+        matchMetricsSnapshot('[data-cy=subjectNumUsersPerLevelOverTime]', visualRegressionOptions);
     });
 
     it('subjects - num users per level over time - many levels', () => {
@@ -344,7 +342,7 @@ describe('Metrics Tests', () => {
             })
             .as('getLevelsOverTimeData');
 
-        cy.visit('/administrator/projects/proj1/metrics/subjects');
+        visitMetricsSnapshotPage('/administrator/projects/proj1/metrics/subjects');
         cy.wait('@getSubjects');
 
         cy.get('[data-cy=subjectNumUsersPerLevelOverTime]')
@@ -356,8 +354,7 @@ describe('Metrics Tests', () => {
 
         cy.wait('@getLevelsOverTimeData');
 
-        cy.wait(waitForSnap);
-        cy.matchSnapshotImageForElement('[data-cy=subjectNumUsersPerLevelOverTime]', visualRegressionOptions);
+        matchMetricsSnapshot('[data-cy=subjectNumUsersPerLevelOverTime]', visualRegressionOptions);
     });
 
     it('subjects - num users per level over time - higher levels have more users than lower', () => {
@@ -390,7 +387,7 @@ describe('Metrics Tests', () => {
             })
             .as('getLevelsOverTimeData');
 
-        cy.visit('/administrator/projects/proj1/metrics/subjects');
+        visitMetricsSnapshotPage('/administrator/projects/proj1/metrics/subjects');
         cy.wait('@getSubjects');
 
         cy.get('[data-cy=subjectNumUsersPerLevelOverTime]')
@@ -402,8 +399,7 @@ describe('Metrics Tests', () => {
 
         cy.wait('@getLevelsOverTimeData');
 
-        cy.wait(waitForSnap);
-        cy.matchSnapshotImageForElement('[data-cy=subjectNumUsersPerLevelOverTime]', visualRegressionOptions);
+        matchMetricsSnapshot('[data-cy=subjectNumUsersPerLevelOverTime]', visualRegressionOptions);
     });
 
     it('subjects - num users per level', () => {
@@ -488,11 +484,10 @@ describe('Metrics Tests', () => {
                 .format('x')
         });
 
-        cy.visit('/administrator/projects/proj1/metrics/subjects');
+        visitMetricsSnapshotPage('/administrator/projects/proj1/metrics/subjects');
         cy.wait('@getChartData');
 
-        cy.wait(waitForSnap);
-        cy.matchSnapshotImageForElement('[data-cy=userCountsBySubjectMetric]', visualRegressionOptions);
+        matchMetricsSnapshot('[data-cy=userCountsBySubjectMetric]', visualRegressionOptions);
     });
 
     function createSubjectObj(name, numUsers) {
@@ -524,11 +519,10 @@ describe('Metrics Tests', () => {
             })
             .as('getChartData');
 
-        cy.visit('/administrator/projects/proj1/metrics/subjects');
+        visitMetricsSnapshotPage('/administrator/projects/proj1/metrics/subjects');
         cy.wait('@getChartData');
 
-        cy.wait(waitForSnap);
-        cy.matchSnapshotImageForElement('[data-cy=userCountsBySubjectMetric]', visualRegressionOptions);
+        matchMetricsSnapshot('[data-cy=userCountsBySubjectMetric]', visualRegressionOptions);
     });
 
     it('subjects - num users per level - many subjects', () => {
@@ -544,11 +538,10 @@ describe('Metrics Tests', () => {
             })
             .as('getChartData');
 
-        cy.visit('/administrator/projects/proj1/metrics/subjects');
+        visitMetricsSnapshotPage('/administrator/projects/proj1/metrics/subjects');
         cy.wait('@getChartData');
 
-        cy.wait(waitForSnap);
-        cy.matchSnapshotImageForElement('[data-cy=userCountsBySubjectMetric]', visualRegressionOptions);
+        matchMetricsSnapshot('[data-cy=userCountsBySubjectMetric]', visualRegressionOptions);
     });
 
     it('subjects - num users per level - many levels', () => {
@@ -570,11 +563,10 @@ describe('Metrics Tests', () => {
             })
             .as('getChartData');
 
-        cy.visit('/administrator/projects/proj1/metrics/subjects');
+        visitMetricsSnapshotPage('/administrator/projects/proj1/metrics/subjects');
         cy.wait('@getChartData');
 
-        cy.wait(waitForSnap);
-        cy.matchSnapshotImageForElement('[data-cy=userCountsBySubjectMetric]', visualRegressionOptions);
+        matchMetricsSnapshot('[data-cy=userCountsBySubjectMetric]', visualRegressionOptions);
     });
 
     it('subjects - num users per level - empty', () => {
@@ -586,11 +578,12 @@ describe('Metrics Tests', () => {
             })
             .as('getChartData');
 
-        cy.visit('/administrator/projects/proj1/metrics/subjects');
+        visitMetricsSnapshotPage('/administrator/projects/proj1/metrics/subjects');
         cy.wait('@getChartData');
 
-        cy.wait(waitForSnap);
-        cy.matchSnapshotImageForElement('[data-cy=userCountsBySubjectMetric]', visualRegressionOptions);
+        matchMetricsSnapshot('[data-cy=userCountsBySubjectMetric]', {
+            ...visualRegressionOptions, noDataMessage: 'Users have not achieved any levels, yet...'
+        });
     });
 
 });

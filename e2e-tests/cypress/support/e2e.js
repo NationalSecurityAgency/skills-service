@@ -45,6 +45,8 @@ Cypress.on('window:before:load', (win) => {
 });
 
 before(function () {
+    // Stateless iframe rejection specs never reach authentication or backend data.
+    if (Cypress.env('iframeTestSetup') === 'stateless') return;
     cy.fixture('vars.json').then((vars) => {
         cy.register(vars.rootUser, vars.defaultPass, true);
         if (!Cypress.env('verifyEmail')) {
@@ -71,6 +73,28 @@ beforeEach(function () {
     })
 
     clear();
+
+    // Opt-in, spec-local setup. Other specs retain the full email/root bootstrap.
+    const iframeSetup = Cypress.env('iframeTestSetup');
+    if (['stateless', 'isolated', 'shared'].includes(iframeSetup)) {
+        if (iframeSetup === 'isolated') {
+            cy.resetDb();
+            cy.loginAsAdminUser();
+        } else if (iframeSetup === 'shared') {
+            // The spec creates its baseline once. Only authentication is restored;
+            // every test still gets a fresh document, storage, intercepts and iframe.
+            cy.session(['iframe-admin', Boolean(Cypress.env('oauthMode'))], () => {
+                cy.loginAsAdminUser();
+            }, {
+                validate() {
+                    cy.request({ url: '/app/userInfo', failOnStatusCode: false }).its('status').should('eq', 200);
+                },
+            });
+        }
+        cy.suppressChartInitError();
+        cy.log(`[${Cypress.currentTest.title}] [${moment.utc().toISOString()}] start`);
+        return;
+    }
 
     let disable = Cypress.env('disableResetDb');
 

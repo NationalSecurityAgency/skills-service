@@ -151,72 +151,55 @@ Cypress.Commands.add("matchSnapshotImage", (maybeNameOtherwiseCommandOptions) =>
 })
 
 Cypress.Commands.add("doMatchSnapshotImage", (options) => {
-    cy.wait(2000);
-
     const visualRegressionOptions = {
         errorThreshold: 0.05 // in percent
     }
     if (options && (typeof options.errorThreshold === 'number' && Number.isFinite(options.errorThreshold))) {
         visualRegressionOptions.errorThreshold = options.errorThreshold
     }
-    if (options && options.blackout) {
-        cy
-            // wait for content to be ready
-            .get('body')
-            // hide ignored elements
-            .then($app => {
-                return new Cypress.Promise((resolve, reject) => {
-                    setTimeout(() => {
-                        $app.find(options.blackout).css("visibility", "hidden");
-                        resolve();
-                        // add a very small delay to wait for the elements to be there, but you should
-                        // make sure your test already handles this
-                    }, 300);
-                });
-            })
-            .then(() => {
-                if (options.selector) {
-                    return cy.get(options.selector).compareSnapshot(options.name, visualRegressionOptions)
-                } else {
-                    return cy.compareSnapshot(options.name, visualRegressionOptions);
-                }
-            });
-    } else {
-        if (options.selector) {
-            return cy.get(options.selector).compareSnapshot(options.name, visualRegressionOptions)
-        } else {
-            return cy.compareSnapshot(options.name, visualRegressionOptions);
+    // Callers must assert page data and canvas animation completion before capturing.
+    return cy.get(options.selector || 'body').should('be.visible').then(async ($element) => {
+        const element = $element[0];
+        const document = element.ownerDocument;
+        if (options.blackout) {
+            Cypress.$(document.body).find(options.blackout).css('visibility', 'hidden');
         }
-    }
-})
 
-// Cypress.Commands.add("doMatchSnapshotImage", (maybeNameOtherwiseCommandOptions, commandOptions, selector) => {
-//     cy.closeToasts();
-//     cy.wait(500);
-//
-//     let options = commandOptions ? commandOptions :
-//         ((maybeNameOtherwiseCommandOptions && typeof maybeNameOtherwiseCommandOptions === 'object') ? maybeNameOtherwiseCommandOptions : null);
-//     const namePresent = maybeNameOtherwiseCommandOptions && typeof maybeNameOtherwiseCommandOptions === 'string'
-//
-//     const snapDir = Cypress.env('customSnapshotsDir');
-//     if (snapDir) {
-//         options = {...options, customSnapshotsDir: snapDir }
-//     }
-//
-//     if (namePresent) {
-//         if (selector) {
-//             cy.get(selector).matchImageSnapshot(maybeNameOtherwiseCommandOptions, options);
-//         } else {
-//             cy.matchImageSnapshot(maybeNameOtherwiseCommandOptions, options);
-//         }
-//     } else {
-//         if (selector) {
-//             cy.get(selector).matchImageSnapshot(options);
-//         } else {
-//             cy.matchImageSnapshot(options);
-//         }
-//     }
-// })
+        const waitForElementResources = async (root) => {
+            const doc = root.ownerDocument;
+            const win = doc.defaultView;
+            await doc.fonts.ready;
+            const images = [...root.querySelectorAll('img')];
+            if (root.matches('img')) images.push(root);
+            await Promise.all(images.filter(image =>
+                (image.currentSrc || image.getAttribute('src') || image.getAttribute('srcset')) &&
+                image.getClientRects().length > 0 && win.getComputedStyle(image).visibility !== 'hidden'
+            ).map(image => image.decode()));
+
+            // An iframe screenshot includes its child document, not just the host's resources.
+            const frames = [...root.querySelectorAll('iframe')];
+            if (root.matches('iframe')) frames.push(root);
+            await Promise.all(frames.filter(frame =>
+                frame.getClientRects().length > 0 && win.getComputedStyle(frame).visibility !== 'hidden'
+            ).map(frame => {
+                const body = frame.contentDocument?.body;
+                if (!body) throw new Error('Snapshot resource readiness requires a loaded, accessible iframe document');
+                return waitForElementResources(body);
+            }));
+
+            // Allow layout and paint to commit after resources load and blackout styles change.
+            await new Cypress.Promise(resolve => {
+                win.requestAnimationFrame(() => win.requestAnimationFrame(() => resolve()));
+            });
+        };
+        await waitForElementResources(element);
+    }).then(() => {
+        if (options.selector) {
+            return cy.get(options.selector).compareSnapshot(options.name, visualRegressionOptions);
+        }
+        return cy.compareSnapshot(options.name, visualRegressionOptions);
+    });
+})
 
 Cypress.Commands.add("enableProdMode", (projNum) => {
     cy.request('POST', `/admin/projects/proj${projNum}/settings/production.mode.enabled`, {
@@ -1647,14 +1630,67 @@ Cypress.Commands.add('closeToasts', (retry=true) => {
 });
 
 
-Cypress.Commands.add('dragAndDrop', { prevSubject: 'element' }, (sourceElement, destSelector) => {
+Cypress.Commands.add('dragAndDrop', { prevSubject: 'element' }, (sourceElement, destSelector, { waitForSortableSwap = false, sortableContainer = null } = {}) => {
     const dataTransfer = new DataTransfer()
+    const sourceNode = sourceElement.get(0);
+
+    if (sortableContainer) {
+        // Insertion-style sorting uses wrapper cards, not matching-question list items.
+        return cy.get(sortableContainer).then(($container) => {
+            return cy.get(destSelector).then(($destination) => {
+                const destinationNode = $destination.get(0);
+                const $items = $container.children(':visible');
+                const sourceItem = $items.toArray().find(item => item.contains(sourceNode));
+                const destinationItem = $items.toArray().find(item => item.contains(destinationNode));
+                expect(sourceItem, 'source sortable card').to.exist;
+                expect(destinationItem, 'destination sortable card').to.exist;
+                const destinationIndex = $items.index(destinationItem);
+
+                cy.wrap(Cypress.$([sourceItem, destinationItem])).should(($cards) => {
+                    $cards.each((index, card) => {
+                        expect(Boolean(card.animated), 'Sortable card animation').to.equal(false);
+                    });
+                });
+                return cy.wrap(Cypress.$(sourceNode))
+                    .trigger('pointerdown', { eventConstructor: 'PointerEvent' })
+                    .trigger('dragstart', { dataTransfer, eventConstructor: 'DragEvent' })
+                    .then(() => cy.wrap(Cypress.$(sourceItem)).should('have.class', 'skills-sort-order-ghost-class'))
+                    .then(() => cy.wrap(Cypress.$(destinationNode)).trigger('dragover', { dataTransfer, eventConstructor: 'DragEvent' }))
+                    .then(() => {
+                        // Sortable inserts on dragover. Exclude its hidden clone and wait
+                        // for the intended position before dropping and invoking onUpdate.
+                        return cy.wrap($container).children(':visible').should(($cards) => {
+                            expect($cards.index(sourceItem), 'dragged card position').to.equal(destinationIndex);
+                        });
+                    })
+                    .then(() => cy.wrap(Cypress.$(destinationNode)).trigger('drop', { dataTransfer, eventConstructor: 'DragEvent' }));
+            });
+        });
+    }
 
     return cy.get(destSelector).then((destProject) => {
-        return cy.wrap(sourceElement.get(0))
+        const destinationNode = destProject.get(0);
+        if (waitForSortableSwap) {
+            // Sortable ignores pointerdown on items still animating from the previous swap.
+            cy.wrap(Cypress.$([sourceNode.closest('li'), destinationNode.closest('li')])).should(($items) => {
+                $items.each((index, item) => {
+                    expect(Boolean(item.animated), 'Sortable item animation').to.equal(false);
+                });
+            });
+        }
+        return cy.wrap(sourceNode)
             .trigger('pointerdown', { eventConstructor: 'PointerEvent' })
             .trigger('dragstart', { dataTransfer, eventConstructor: 'DragEvent' })
             .then(() => {
+                if (waitForSortableSwap) {
+                    // Sortable starts the drag asynchronously. Its ghost and swap classes
+                    // identify readiness without sleeping; callers assert the resulting order.
+                    cy.wrap(sourceNode.closest('li')).should('have.class', 'sortable-ghost');
+                    return cy.wrap(destinationNode)
+                        .trigger('dragover', { dataTransfer, eventConstructor: 'DragEvent' })
+                        .then(() => cy.wrap(Cypress.$(destinationNode.closest('li'))).should('have.class', 'sortable-swap-highlight'))
+                        .trigger('drop', { dataTransfer, eventConstructor: 'DragEvent' });
+                }
                 return cy.wrap(destProject.get(0))
                     .trigger('dragover', { dataTransfer, eventConstructor: 'DragEvent' })
                     .wait(1000)
@@ -1667,11 +1703,14 @@ Cypress.Commands.add('dragAndDrop', { prevSubject: 'element' }, (sourceElement, 
     })
 });
 Cypress.Commands.add("validateElementsOrder", (selector, containsValues) => {
-    cy.get(selector).should('have.length', containsValues.length).as('elements');
-    for (const [i, value] of containsValues.entries()) {
-        cy.get('@elements').eq(i).contains(value);
-    }
-    cy.wait(500)
+    // Retry the complete order against a fresh query, rather than retaining old
+    // elements while Vue reorders/replaces them and sleeping after the assertions.
+    return cy.get(selector).should(($elements) => {
+        expect($elements, 'ordered elements').to.have.length(containsValues.length);
+        containsValues.forEach((value, index) => {
+            expect($elements.eq(index), `element at position ${index}`).to.contain.text(String(value));
+        });
+    }).as('elements');
 });
 
 Cypress.Commands.add('formRequest', (method, url, formData, onComplete, includeXSRF = false) => {

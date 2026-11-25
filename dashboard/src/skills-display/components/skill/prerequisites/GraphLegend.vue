@@ -32,7 +32,7 @@ const legendItems = computed(() => {
   <div class='' data-cy="graphLegend" aria-hidden="true">
     <span class="italic text-muted-color">Legend:</span>
     <span v-for="item in legendItems" v-bind:key="item.label" class="ml-4">
-      <Avatar :icon="`fas ${item.iconClass}`" :style="`color: ${item.color}`" />
+      <Avatar :icon="`fas ${item.iconClass}`" :style="{ color: item.color }" />
       <span class="ml-1">{{ item.label }}</span>
     </span>
   </div>

@@ -17,6 +17,47 @@ var moment = require('moment-timezone')
 
 describe('Client Display Point History Tests', () => {
 
+  const waitForPointHistoryChart = (renderVersion = 1, expectPointHistoryData = true) => {
+    cy.get('[data-cy="pointHistoryChart"]').should('be.visible')
+    cy.get('[data-cy="pointHistoryChart-rendered"]', { timeout: 10000 })
+      .should('have.attr', 'data-render-version', `${renderVersion}`)
+    cy.get('[data-cy="pointHistoryChart"] [data-pc-name="progressspinner"]').should('not.exist')
+
+    const overlaySelector = `[data-cy="pointHistoryChart${expectPointHistoryData ? 'WithData' : 'NoData'}"]`
+    cy.get(overlaySelector).should('be.visible')
+    if (expectPointHistoryData) {
+      // The canvas can finish drawing before BlockUI finishes removing its loading mask.
+      cy.get(overlaySelector).should('have.attr', 'aria-busy', 'false')
+      return cy.get(`${overlaySelector} [data-pc-section="mask"]`).should('not.exist')
+    }
+    // Empty history intentionally keeps the mask behind the "Your Progress Awaits" message.
+    return cy.get(overlaySelector).should('have.attr', 'aria-busy', 'true')
+  }
+
+  const visitPointHistoryPage = (path = '/', expectPointHistoryData = true) => {
+    // Snapshot final chart geometry without waiting for animation; other specs retain animations.
+    cy.visit(`/test-skills-display/proj1${path}?disablePointHistoryChartAnimation=true`, {
+      onBeforeLoad(win) {
+        // PrimeVue's mask animation-end handler can cancel its removal timer when a large
+        // chart blocks the main thread. Disable only this chart's mask animation before
+        // mounting so unblocking reliably removes the mask, rather than hiding it in snapshots.
+        const style = win.document.createElement('style')
+        style.textContent = '[data-cy="pointHistoryChart"] .p-blockui-mask { animation: none !important; }'
+        win.document.head.appendChild(style)
+      },
+    })
+    cy.validatePoweredBy()
+    if (expectPointHistoryData) {
+      cy.get('[data-cy="pointHistoryChartWithData"]').should('be.visible')
+    }
+    return waitForPointHistoryChart(1, expectPointHistoryData)
+  }
+
+  const matchPointHistorySnapshot = ({ renderVersion = 1, expectPointHistoryData = true, ...options } = {}) => {
+    waitForPointHistoryChart(renderVersion, expectPointHistoryData)
+    return cy.matchSnapshotImageForElement('[data-cy="pointHistoryChart"]', options)
+  }
+
   beforeEach(() => {
     Cypress.env('disabledUILoginProp', true)
     cy.request('POST', '/app/projects/proj1', {
@@ -104,17 +145,13 @@ describe('Client Display Point History Tests', () => {
     }
 
     cy.intercept('/api/projects/proj1/pointHistory**', data)
-      .as('getPointHistory')
 
-    cy.cdVisit('/', true)
-    cy.wait('@getPointHistory')
-    // let's wait for animation to complete
-    cy.get('[data-cy="pointHistoryChart-animationEnded"]')
+    visitPointHistoryPage()
+    waitForPointHistoryChart()
     cy.injectAxe()
-    cy.wait(1000)
     cy.customA11y()
 
-    cy.matchSnapshotImageForElement('[data-cy=pointHistoryChart]')
+    matchPointHistorySnapshot()
   })
 
   it('point history with data from server', () => {
@@ -194,14 +231,10 @@ describe('Client Display Point History Tests', () => {
         .format('x')
     })
 
-    cy.intercept('/api/projects/proj1/pointHistory**')
-      .as('getPointHistory')
+    visitPointHistoryPage()
+    waitForPointHistoryChart()
 
-    cy.cdVisit('/', true)
-    cy.wait('@getPointHistory')
-    cy.get('[data-cy="pointHistoryChart-animationEnded"]')
-
-    cy.get('[data-cy="pointHistoryChart"]')
+    cy.get('[data-cy="pointHistoryChartWithData"]').should('be.visible')
   })
 
   it('multiple achievements at the last date', () => {
@@ -248,14 +281,10 @@ describe('Client Display Point History Tests', () => {
     }
 
     cy.intercept('/api/projects/proj1/pointHistory**', data)
-      .as('getPointHistory')
 
-    cy.cdVisit('/', true)
-    cy.wait('@getPointHistory')
+    visitPointHistoryPage()
 
-    // let's wait for animation to complete
-    cy.get('[data-cy="pointHistoryChart-animationEnded"]')
-    cy.matchSnapshotImageForElement('[data-cy=pointHistoryChart]')
+    matchPointHistorySnapshot()
   })
 
   it('multiple achievements on first date', () => {
@@ -302,14 +331,10 @@ describe('Client Display Point History Tests', () => {
     }
 
     cy.intercept('/api/projects/proj1/pointHistory**', data)
-      .as('getPointHistory')
 
-    cy.cdVisit('/', true)
-    cy.wait('@getPointHistory')
+    visitPointHistoryPage()
 
-    // let's wait for animation to complete
-    cy.get('[data-cy="pointHistoryChart-animationEnded"]')
-    cy.matchSnapshotImageForElement('[data-cy=pointHistoryChart]')
+    matchPointHistorySnapshot()
   })
 
   it('single achievements on the first date', () => {
@@ -356,14 +381,10 @@ describe('Client Display Point History Tests', () => {
     }
 
     cy.intercept('/api/projects/proj1/pointHistory**', data)
-      .as('getPointHistory')
 
-    cy.cdVisit('/', true)
-    cy.wait('@getPointHistory')
+    visitPointHistoryPage()
 
-    // let's wait for animation to complete
-    cy.get('[data-cy="pointHistoryChart-animationEnded"]')
-    cy.matchSnapshotImageForElement('[data-cy=pointHistoryChart]')
+    matchPointHistorySnapshot()
   })
 
   it('single achievement on the last date', () => {
@@ -410,14 +431,10 @@ describe('Client Display Point History Tests', () => {
     }
 
     cy.intercept('/api/projects/proj1/pointHistory**', data)
-      .as('getPointHistory')
 
-    cy.cdVisit('/', true)
-    cy.wait('@getPointHistory')
+    visitPointHistoryPage()
 
-    // let's wait for animation to complete
-    cy.get('[data-cy="pointHistoryChart-animationEnded"]')
-    cy.matchSnapshotImageForElement('[data-cy=pointHistoryChart]')
+    matchPointHistorySnapshot()
   })
 
   it('achievements throughout time', () => {
@@ -480,15 +497,11 @@ describe('Client Display Point History Tests', () => {
     }
 
     cy.intercept('/api/projects/proj1/pointHistory**', data)
-      .as('getPointHistory')
 
-    cy.cdVisit('/', true)
+    visitPointHistoryPage()
     cy.injectAxe()
-    cy.wait('@getPointHistory')
 
-    // let's wait for animation to complete
-    cy.get('[data-cy="pointHistoryChart-animationEnded"]')
-    cy.matchSnapshotImageForElement('[data-cy=pointHistoryChart]')
+    matchPointHistorySnapshot()
   })
 
   it('levels achieved on subsequent days', () => {
@@ -550,14 +563,10 @@ describe('Client Display Point History Tests', () => {
       }]
     }
     cy.intercept('/api/projects/proj1/pointHistory**', data)
-      .as('getPointHistory')
 
-    cy.cdVisit('/', true)
-    cy.wait('@getPointHistory')
+    visitPointHistoryPage()
 
-    // let's wait for animation to complete
-    cy.get('[data-cy="pointHistoryChart-animationEnded"]')
-    cy.matchSnapshotImageForElement('[data-cy=pointHistoryChart]')
+    matchPointHistorySnapshot()
   })
 
   function createTimeline(start, numDays, startScore, increaseBy, increaseEvery, stopIncreasingAfterDays = -1) {
@@ -597,16 +606,10 @@ describe('Client Display Point History Tests', () => {
       }]
     }
     cy.intercept('/api/projects/proj1/pointHistory**', data)
-      .as('getPointHistory')
 
-    cy.cdVisit('/', true)
-    cy.wait('@getPointHistory')
+    visitPointHistoryPage()
 
-    // let's wait for animation to complete
-    cy.get('[data-cy="pointHistoryChart-animationEnded"]')
-
-    cy.wait(4000)
-    cy.matchSnapshotImageForElement('[data-cy=pointHistoryChart]')
+    matchPointHistorySnapshot()
   })
 
   it('overlapping level achievements', () => {
@@ -627,16 +630,10 @@ describe('Client Display Point History Tests', () => {
       }]
     }
     cy.intercept('/api/projects/proj1/pointHistory**', data)
-        .as('getPointHistory')
 
-    cy.cdVisit('/', true)
-    cy.wait('@getPointHistory')
+    visitPointHistoryPage()
 
-    // let's wait for animation to complete
-    cy.get('[data-cy="pointHistoryChart-animationEnded"]')
-
-    cy.wait(4000)
-    cy.matchSnapshotImageForElement('[data-cy=pointHistoryChart]')
+    matchPointHistorySnapshot()
   })
 
     it('points earned on a single date', () => {
@@ -644,53 +641,35 @@ describe('Client Display Point History Tests', () => {
         cy.createSkill(1, 1, 2);
         cy.createSkill(1, 1, 3, {pointIncrement: 500});
         cy.reportSkill(1, 1, Cypress.env('proxyUser'), '2025-11-21 11:00')
-        cy.intercept('/api/projects/proj1/pointHistory**')
-            .as('getPointHistory')
-        cy.cdVisit('/', true)
-        cy.wait('@getPointHistory')
-        cy.get('[data-cy="pointHistoryChartWithData"]')
-
-        cy.get('[data-cy="pointHistoryChart-animationEnded"]')
-        cy.wait(5000)
-        cy.matchSnapshotImageForElement('[data-cy=pointHistoryChart]')
+        visitPointHistoryPage()
+        cy.get('[data-cy="pointHistoryChartWithData"]').should('be.visible')
+        matchPointHistorySnapshot()
     })
 
     it('chart is updated after the points are earned on subject page', () => {
         cy.createSkill(1, 1, 1, { selfReportingType: 'HonorSystem' });
         cy.createSkill(1, 1, 2, { selfReportingType: 'HonorSystem' });
         cy.createSkill(1, 1, 3, {pointIncrement: 500});
-        cy.intercept('/api/projects/proj1/subjects/subj1/pointHistory**')
-            .as('getPointHistory')
-        cy.cdVisit('/subjects/subj1', true)
-        cy.wait('@getPointHistory')
+        visitPointHistoryPage('/subjects/subj1', false)
         cy.get('[data-cy="pointHistoryChartNoData"]').contains('Your Progress Awaits')
-        cy.get('[data-cy="pointHistoryChart-animationEnded"]')
+        waitForPointHistoryChart(1, false)
 
         cy.get('[data-cy=toggleSkillDetails]').click();
 
         cy.get('[data-cy="skillDescription-skill1"] [data-cy="claimPointsBtn"]').click()
-        cy.wait('@getPointHistory')
-        cy.get('[data-cy="pointHistoryChart-animationEnded"]')
-        cy.get('[data-cy="pointHistoryChartWithData"]')
+        waitForPointHistoryChart(2)
+        cy.get('[data-cy="pointHistoryChartWithData"]').should('be.visible')
 
         cy.get('[data-cy="skillDescription-skill2"] [data-cy="claimPointsBtn"]').click()
-        cy.wait('@getPointHistory')
-        cy.get('[data-cy="pointHistoryChart-animationEnded"]')
-        cy.get('[data-cy="pointHistoryChartWithData"]')
-
-        cy.wait(5000)
-        cy.matchSnapshotImageForElement('[data-cy=pointHistoryChart]')
+        cy.get('[data-cy="pointHistoryChartWithData"]').should('be.visible')
+        matchPointHistorySnapshot({ renderVersion: 3 })
     })
 
   it('empty point history', () => {
-    cy.intercept('/api/projects/proj1/pointHistory**')
-      .as('getPointHistory')
-    cy.cdVisit('/')
-    cy.wait('@getPointHistory')
+    visitPointHistoryPage('/', false)
     cy.get('[data-cy="pointHistoryChartNoData"]').contains('Your Progress Awaits')
-    cy.matchSnapshotImageForElement('[data-cy=pointHistoryChart]', { errorThreshold: 0.1 })
+    matchPointHistorySnapshot({ expectPointHistoryData: false, errorThreshold: 0.1 })
   })
 
 
 })
-

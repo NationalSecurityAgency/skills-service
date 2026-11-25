@@ -22,23 +22,107 @@ limitations under the License.
 </head>
 <body>
   <div id="skills-client-container"></div>
+  <button data-cy="refreshDisplayAuthentication" hidden>Refresh display authentication</button>
+  <button data-cy="navigateDisplayHome">Display homepage</button>
+  <div>Route changes received: <output data-cy="routeChangedCount">0</output></div>
   <script>
-    const serviceUrl = new URLSearchParams(window.location.search).get('serviceUrl') || window.location.origin;
+    const params = new URLSearchParams(window.location.search);
+    const serviceUrl = params.get('serviceUrl') || window.location.origin;
+    const manualRecovery = params.get('manualRecovery') === 'true';
+    const autoHeight = params.get('autoHeight') === 'true';
+    const minHeight = params.get('minHeight') || (autoHeight ? '960px' : null);
+    const container = document.querySelector('#skills-client-container');
     new Postmate({
-      container: document.querySelector('#skills-client-container'),
+      container,
       // Keep the iframe on SkillTree even when the model supplies an attacker URL.
       url: `${window.location.origin}/static/clientPortal/index.html`,
-      model: { serviceUrl, projectId: 'proj1' },
+      model: {
+        serviceUrl,
+        projectId: 'proj1',
+        minHeight,
+        theme: params.has('theme') ? JSON.parse(params.get('theme')) : undefined,
+        ...(params.has('modelOverrides') ? JSON.parse(params.get('modelOverrides')) : {}),
+      },
     }).then((child) => {
+      if (params.get('observeFirstPointHistory') === 'true') {
+        // Install after the real handshake, but before registering the host's
+        // authenticator below. The child cannot issue authenticated XHRs yet.
+        const requestState = document.createElement('output');
+        requestState.dataset.cy = 'oldPointHistoryRequestState';
+        requestState.textContent = 'ready';
+        document.body.appendChild(requestState);
+        const childWindow = child.frame.contentWindow;
+        const xhrPrototype = childWindow.XMLHttpRequest.prototype;
+        const originalOpen = xhrPrototype.open;
+        xhrPrototype.open = function (method, url, ...args) {
+          const result = originalOpen.call(this, method, url, ...args);
+          if (method === 'GET' && new URL(url, childWindow.location.href).pathname === '/api/projects/proj1/pointHistory') {
+            // Track exactly the old request; replacement requests use the original API.
+            xhrPrototype.open = originalOpen;
+            // Let Cypress target this same native XHR, not another request/cache entry.
+            this.setRequestHeader('X-SkillTree-E2E-Point-History', 'old-request');
+            requestState.textContent = 'pending';
+            this.addEventListener('loadend', () => {
+              const status = this.status;
+              const channel = new childWindow.MessageChannel();
+              channel.port1.onmessage = () => {
+                // This child task runs after Axios/Vue response microtasks drain,
+                // even when no unhandledrejection event is emitted.
+                requestState.textContent = `${status}-processed`;
+                channel.port1.close();
+                channel.port2.close();
+              };
+              channel.port2.postMessage(null);
+            }, { once: true });
+          }
+          return result;
+        };
+      }
       child.frame.title = 'Skills Display';
       child.frame.style.width = '100%';
-      child.frame.style.height = '1000px';
-      child.on('needs-authentication', async () => {
+      if (autoHeight) {
+        // Match SkillsDisplayJS: the real child ResizeObserver drives the host's
+        // container height, with the SDK minimum, and the iframe fills that container.
+        child.frame.style.border = '0';
+        child.frame.style.height = '100%';
+        container.style.height = '0px';
+        child.on('height-changed', (height) => {
+          container.style.height = `${Math.max(height, parseFloat(minHeight))}px`;
+        });
+      } else {
+        child.frame.style.height = '1000px';
+      }
+      const refreshButton = document.querySelector('[data-cy="refreshDisplayAuthentication"]');
+      document.querySelector('[data-cy="navigateDisplayHome"]').addEventListener('click', () => {
+        child.call('navigate', { name: 'SkillsDisplaySkillsClient' });
+      });
+      // Allow a test to rotate the token while the initial user-information response is still pending.
+      if (params.get('allowManualRefresh') === 'true') refreshButton.hidden = false;
+      const routeChangedCount = document.querySelector('[data-cy="routeChangedCount"]');
+      let routeChanges = 0;
+      child.on('route-changed', () => {
+        routeChanges += 1;
+        routeChangedCount.textContent = routeChanges;
+      });
+      let authenticationRequests = 0;
+      const authenticate = async () => {
+        // Match the SDK contract: renew credentials through the same authenticator.
+        // The fixture has no live learner-switch operation; identity-mismatch tests
+        // override this endpoint to verify that the iframe rejects a contract violation.
         const response = await fetch('/api/projects/proj1/token');
         if (!response.ok) throw new Error('Unable to obtain the fixture authentication token');
         const token = await response.json();
         if (!token.access_token) throw new Error('Missing fixture authentication token');
         child.call('updateAuthenticationToken', token.access_token);
+      };
+      refreshButton.addEventListener('click', authenticate);
+      child.on('needs-authentication', async () => {
+        authenticationRequests += 1;
+        if (manualRecovery && authenticationRequests > 1) {
+          refreshButton.hidden = false;
+          return;
+        }
+        await authenticate();
       });
     });
   </script>

@@ -112,8 +112,8 @@ export default {
       .get(`/app/public/settings/${settingName}/group/${settingGroup}`)
       .then((remoteRes) => remoteRes.data)
   },
-  getConfig() {
-    return axios.get('/public/config').then((remoteRes) => remoteRes.data)
+  getConfig(requestConfig = {}) {
+    return axios.get('/public/config', requestConfig).then((remoteRes) => remoteRes.data)
   },
   getClientDisplayConfig(projectId) {
     return axios

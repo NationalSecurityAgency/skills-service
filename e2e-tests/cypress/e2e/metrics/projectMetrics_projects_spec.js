@@ -13,11 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import { matchMetricsSnapshot, visitMetricsSnapshotPage } from '../../support/metrics-snapshot-helpers';
 var moment = require('moment-timezone');
 
 describe('Metrics Tests', () => {
 
-    const waitForSnap = 4000;
     const oneDay = 1000*60*60*24
 
     beforeEach(() => {
@@ -186,12 +186,11 @@ describe('Metrics Tests', () => {
             })
             .as('distinctUsersOverTimeForProject');
 
-        cy.visit('/administrator/projects/proj1/');
+        visitMetricsSnapshotPage('/administrator/projects/proj1/');
         cy.clickNav('Metrics');
         cy.wait('@distinctUsersOverTimeForProject');
 
-        cy.wait(waitForSnap);
-        cy.matchSnapshotImageForElement('[data-cy=distinctNumUsersOverTime]');
+        matchMetricsSnapshot('[data-cy=distinctNumUsersOverTime]');
     });
 
     it('projects - Distinct number of users over time - empty project', () => {
@@ -232,12 +231,11 @@ describe('Metrics Tests', () => {
             .as('distinctUsersOverTimeForProject');
 
         cy.log(new Date().getTime())
-        cy.visit('/administrator/projects/proj1/');
+        visitMetricsSnapshotPage('/administrator/projects/proj1/');
         cy.clickNav('Metrics');
         cy.wait('@distinctUsersOverTimeForProject');
 
-        cy.wait(waitForSnap);
-        cy.matchSnapshotImageForElement('[data-cy=distinctNumUsersOverTime]');
+        matchMetricsSnapshot('[data-cy=distinctNumUsersOverTime]');
     });
 
     it('projects - Distinct number of users over time - one days', () => {
@@ -251,14 +249,15 @@ describe('Metrics Tests', () => {
             })
             .as('distinctUsersOverTimeForProject');
 
-        cy.visit('/administrator/projects/proj1/');
+        visitMetricsSnapshotPage('/administrator/projects/proj1/');
         cy.clickNav('Metrics');
         cy.wait('@distinctUsersOverTimeForProject');
         cy.get('[data-cy=distinctNumUsersOverTime]')
             .contains('This chart needs at least 2 days of user activity.');
 
-        cy.wait(waitForSnap);
-        cy.matchSnapshotImageForElement('[data-cy=distinctNumUsersOverTime]');
+        matchMetricsSnapshot('[data-cy=distinctNumUsersOverTime]', {
+            noDataMessage: 'This chart needs at least 2 days of user activity.'
+        });
     });
 
 });

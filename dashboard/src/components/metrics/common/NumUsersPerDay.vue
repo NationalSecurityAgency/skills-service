@@ -14,6 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <script setup>
+import { useMetricsChartSnapshot } from '@/components/metrics/common/UseMetricsChartSnapshot.js'
 import {computed, onMounted, ref} from 'vue';
 import {useRoute} from 'vue-router';
 import {useAppConfig} from '@/common-components/stores/UseAppConfig.js'
@@ -202,6 +203,9 @@ const dateOptionChanged = (option) => {
 }
 
 const chartJsOptions = ref();
+const { snapshotOptions, snapshotPlugins } = useMetricsChartSnapshot(chartJsOptions, () => {
+  usersChartAnimationCompleted.value = true
+})
 const setChartOptions = () => {
   const colors = chartSupportColors.getColors()
   const textColor = colors.textColor
@@ -314,7 +318,8 @@ const usersChartAnimationCompleted = ref(false)
                id="usersTimeChart"
                type="line"
                :data="distinctUsersOverTimeChartData"
-               :options="chartJsOptions"
+               :options="snapshotOptions"
+               :plugins="snapshotPlugins"
                class="h-[30rem]" />
         <div v-if="usersChartAnimationCompleted" data-cy="usersTimeChart_animationCompleted" />
       </metrics-overlay>

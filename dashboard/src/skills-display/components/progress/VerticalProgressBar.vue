@@ -65,7 +65,7 @@ const ariaLabelFullMsg = computed(() => {
 
 const rootPtObjectWithOptionalIncompleteColor = computed(() => {
   const incompleteColor = themeState.theme.progressIndicators?.incompleteColor
-  return incompleteColor ? { root: { style: `background-color: ${incompleteColor}`} } : {}
+  return incompleteColor ? { root: { style: { backgroundColor: incompleteColor } } } : {}
 })
 
 const firstProgressBarPt = computed(() => {
@@ -73,7 +73,7 @@ const firstProgressBarPt = computed(() => {
 
       const bgColor = themeState.theme.progressIndicators?.earnedTodayColor
       if (bgColor) {
-        return {...rootObj, value: {style: `background-color: ${bgColor}`}}
+        return {...rootObj, value: {style: { backgroundColor: bgColor }}}
       }
       return {...rootObj, value: {class: 'bg-teal-300!'}}
     }
@@ -82,7 +82,7 @@ const secondProgressBarPt = computed(() => {
       const rootPt = { root: { class: 'opacity-100! bg-transparent!' } }
       const bgColor = themeState.theme.progressIndicators?.beforeTodayColor
       if (bgColor) {
-        return { ...rootPt, value: {style: `background-color: ${bgColor}`} }
+        return { ...rootPt, value: {style: { backgroundColor: bgColor }} }
       }
       return { ...rootPt, value: {class: 'bg-teal-600!'} }
     }
@@ -91,7 +91,7 @@ const thirdProgressBarPt = computed(() => {
       const rootPt = props.disableDailyColor ? rootPtObjectWithOptionalIncompleteColor.value : {}
       const bgColor = themeState.theme.progressIndicators?.completeColor
       if (bgColor) {
-        return { ...rootPt, value: {style: `background-color: ${bgColor}`}}
+        return { ...rootPt, value: {style: { backgroundColor: bgColor }}}
       }
       return {...rootPt, value: {class: 'bg-green-700!'}}
     }
@@ -99,7 +99,7 @@ const thirdProgressBarPt = computed(() => {
 </script>
 
 <template>
-  <div class="user-skill-progress-layers" :style="`height: ${props.barSize+2}px`">
+  <div class="user-skill-progress-layers" :style="{ height: `${props.barSize+2}px` }">
     <ProgressBar v-if="!isCompleted && !disableDailyColor" :value="totalProgress"
                  :pt="firstProgressBarPt"
                  data-cy="firstProgressBar"

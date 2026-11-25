@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import { clickPrerequisiteNode, matchSkillsDisplaySnapshot, visitSkillsDisplaySnapshotPage, waitForPrerequisitesGraph } from '../../support/skills-display-snapshot-helpers';
 describe('Prerequisite tests', () => {
 
   beforeEach(() => {
@@ -141,19 +142,48 @@ describe('Prerequisite tests', () => {
     cy.enableBadge(1, 1);
   });
 
+  it('renders prerequisite labels and supports graph navigation when the icon font fails to load', () => {
+    cy.viewport(1200, 1000);
+    const drawnText = [];
+    cy.visit('/test-skills-display/proj1/subjects/subj1/skills/skill4?disableChartAnimations=true', {
+      onBeforeLoad(win) {
+        cy.stub(win.document.fonts, 'load').rejects(new Error('Icon font download failed')).as('loadIconFont');
+        const originalFillText = win.CanvasRenderingContext2D.prototype.fillText;
+        cy.stub(win.CanvasRenderingContext2D.prototype, 'fillText').callsFake(function (text, ...args) {
+          if (this.canvas.closest('[data-cy="prerequisitesGraph"]')) {
+            drawnText.push(String(text));
+          }
+          return originalFillText.call(this, text, ...args);
+        });
+      },
+    });
+
+    waitForPrerequisitesGraph();
+    cy.get('@loadIconFont').should('have.been.calledWith', '900 50px "Font Awesome 5 Free"', '\uf19d\uf559');
+    cy.wrap(null).should(() => {
+      const rendered = drawnText.join(' ');
+      expect(rendered).to.include('This Skill');
+      expect(rendered).to.include('This is 4');
+      expect(rendered).to.include('This is 2');
+    });
+    cy.get('[data-cy="prereqTable"] [data-cy="skillLink-proj1-skill2"]').should('be.visible');
+    clickPrerequisiteNode('proj1', 'skill2');
+    cy.get('[data-cy="skillProgressTitle"]').should('contain.text', 'This is 2');
+  });
+
   it('skill with dependency renders dependency graph', () => {
     cy.viewport(1200, 1000);
-    cy.cdVisit('/', true);
+    visitSkillsDisplaySnapshotPage('/', true);
     cy.cdClickSubj(0, 'Subject 1',true);
     cy.get('[data-cy=toggleSkillDetails]')
       .click();
     cy.get('[data-cy="skillProgress_index-3"] [data-cy="progressBarWithLock"]')
       .click();
 
-    cy.wait(4000);
-    cy.get('[data-cy="prereqTable"] [data-cy="skillLink-proj1-skill2"]')
+    waitForPrerequisitesGraph();
+    cy.get('[data-cy="prereqTable"] [data-cy="skillLink-proj1-skill2"]').should('be.visible')
     cy.get('[data-cy="prerequisitesCard"] [data-cy="graphLegend"]').should('not.exist')
-    cy.matchSnapshotImageForElement('[data-cy="skillsDisplayHome"]', {
+    matchSkillsDisplaySnapshot('[data-cy="skillsDisplayHome"]', {
       blackout: '[data-cy=pointHistoryChart]'
     });
   });

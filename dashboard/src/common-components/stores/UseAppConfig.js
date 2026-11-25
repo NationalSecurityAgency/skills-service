@@ -21,18 +21,23 @@ import log from 'loglevel';
 export const useAppConfig = defineStore('dashboardAppConfig', () => {
   const loadingConfig = ref(true)
   const config = ref({})
+  const hasLoadedConfig = ref(false)
+  let configRequestRevision = 0
 
-  const loadConfigState = () => {
+  const loadConfigState = (requestConfig = {}) => {
+    const revision = ++configRequestRevision
     loadingConfig.value = true
-    return SettingsService.getConfig()
+    return SettingsService.getConfig(requestConfig)
       .then((response) => {
+        if (revision !== configRequestRevision) return
         config.value = response
+        hasLoadedConfig.value = true
         if (config.value.logLevel) {
             log.setLevel(config.value.logLevel)
         }
       })
       .finally(() => {
-        loadingConfig.value = false
+        if (revision === configRequestRevision) loadingConfig.value = false
       })
   }
 
@@ -206,6 +211,7 @@ export const useAppConfig = defineStore('dashboardAppConfig', () => {
 
   return {
     loadConfigState,
+    hasLoadedConfig,
     refreshConfig,
     isLoadingConfig,
     defaultLandingPage,

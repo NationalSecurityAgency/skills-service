@@ -13,11 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import { matchMetricsSnapshot, visitMetricsSnapshotPage } from '../../support/metrics-snapshot-helpers';
 var moment = require('moment-timezone');
 
 describe('Metrics Tests - Skills', () => {
 
-    const waitForSnap = 4000;
     const visualRegressionOptions = { errorThreshold: 0.05 }
 
     before(() => {
@@ -234,12 +234,11 @@ describe('Metrics Tests - Skills', () => {
             }
         }
 
-        cy.visit('/administrator/projects/proj1/subjects/subj1/skills/skill1');
+        visitMetricsSnapshotPage('/administrator/projects/proj1/subjects/subj1/skills/skill1');
         cy.clickNav('Metrics');
         cy.wait('@singleSkillCountsChartBuilder');
 
-        cy.wait(waitForSnap);
-        cy.matchSnapshotImageForElement('[data-cy=numUsersAchievedOverTimeMetric]', visualRegressionOptions);
+        matchMetricsSnapshot('[data-cy=numUsersAchievedOverTimeMetric]', visualRegressionOptions);
     });
 
     it('skill metrics - empty', () => {
@@ -307,16 +306,26 @@ describe('Metrics Tests - Skills', () => {
             });
         }
 
-        cy.visit('/administrator/projects/proj1/subjects/subj1/skills/skill1');
+        visitMetricsSnapshotPage('/administrator/projects/proj1/subjects/subj1/skills/skill1');
         cy.clickNav('Metrics');
         cy.wait('@singleSkillCountsChartBuilder');
 
-        cy.wait(waitForSnap);
-        cy.matchSnapshotImageForElement('[data-cy=numUsersAchievedOverTimeMetric]', visualRegressionOptions);
+        matchMetricsSnapshot('[data-cy=numUsersAchievedOverTimeMetric]', visualRegressionOptions);
     });
 
     it('applied skill events over time', () => {
-        cy.intercept('/admin/projects/proj1/metrics/numUserAchievedOverTimeChartBuilder**')
+        const today = moment.utc().startOf('day');
+        const snapshotDateOffset = today.valueOf() - moment.utc('2020-09-16').valueOf();
+        cy.intercept('/admin/projects/proj1/metrics/skillEventsOverTimeChartBuilder**', req => {
+            req.continue(res => {
+                // Preserve real event counts and spacing, but keep snapshot axis labels fixed.
+                ['countsByDay', 'allEvents'].forEach(series => {
+                    res.body[series]?.forEach(item => {
+                        item.timestamp -= snapshotDateOffset;
+                    });
+                });
+            });
+        })
             .as('skillEventsOverTimeChartBuilder');
 
         cy.request('POST', '/admin/projects/proj1/subjects/subj1', {
@@ -326,11 +335,13 @@ describe('Metrics Tests - Skills', () => {
         });
 
         cy.createSkill(1, 1, 1);
-        cy.reportSkill(1, 1, 'user5Good@skills.org', '2020-09-13 11:00');
-        cy.reportSkill(1, 1, 'user6Good@skills.org', '2020-09-13 11:00');
-        cy.reportSkill(1, 1, 'user7Good@skills.org', '2020-09-13 11:00');
+        // Keep all fixture events inside the chart's default last-30-days window.
+        const m = today.clone().subtract(14, 'days').hour(11);
+        const laterEventDate = m.clone().add(11, 'days').format('YYYY-MM-DD HH:mm');
+        cy.reportSkill(1, 1, 'user5Good@skills.org', laterEventDate);
+        cy.reportSkill(1, 1, 'user6Good@skills.org', laterEventDate);
+        cy.reportSkill(1, 1, 'user7Good@skills.org', laterEventDate);
 
-        const m = moment.utc('2020-09-02 11', 'YYYY-MM-DD HH');
         const numDays = 3;
         for (let dayCounter = 1; dayCounter <= numDays; dayCounter += 1) {
             const numUsers = (dayCounter % 2 == 0) ? 2 : 4;
@@ -345,12 +356,11 @@ describe('Metrics Tests - Skills', () => {
             }
         }
 
-        cy.visit('/administrator/projects/proj1/subjects/subj1/skills/skill1');
+        visitMetricsSnapshotPage('/administrator/projects/proj1/subjects/subj1/skills/skill1');
         cy.clickNav('Metrics');
         cy.wait('@skillEventsOverTimeChartBuilder');
 
-        cy.wait(waitForSnap);
-        cy.matchSnapshotImageForElement('[data-cy=appliedSkillEventsOverTimeMetric]', visualRegressionOptions);
+        matchMetricsSnapshot('[data-cy=appliedSkillEventsOverTimeMetric]', visualRegressionOptions);
     });
 
     it('applied skill events over time - 1 skill', () => {
@@ -445,14 +455,13 @@ describe('Metrics Tests - Skills', () => {
             }
         }
 
-        cy.visit('/administrator/projects/proj1/subjects/subj1/skills/skill1');
+        visitMetricsSnapshotPage('/administrator/projects/proj1/subjects/subj1/skills/skill1');
         cy.clickNav('Metrics');
         cy.wait('@binnedUsagePostAchievementMetricsBuilder');
         cy.wait('@usagePostAchievementMetricsBuilder');
 
-        cy.wait(8000);
-        cy.matchSnapshotImageForElement('[data-cy=numUsersPostAchievement]', {...visualRegressionOptions, name: 'numUsersPostAchievement'});
-        cy.matchSnapshotImageForElement('[data-cy=binnedNumUsersPostAchievement]', {...visualRegressionOptions, name: 'binnedNumUsersPostAchievement'});
+        matchMetricsSnapshot('[data-cy=numUsersPostAchievement]', {...visualRegressionOptions, name: 'numUsersPostAchievement'});
+        matchMetricsSnapshot('[data-cy=binnedNumUsersPostAchievement]', {...visualRegressionOptions, name: 'binnedNumUsersPostAchievement'});
     });
 
     it('post achievement user table has data', () => {
@@ -726,13 +735,12 @@ describe('Metrics Tests - Skills', () => {
                   cy.login(vars.defaultUser, vars.defaultPass);
               });
 
-            cy.visit('/administrator/projects/proj1/subjects/subj1/skills/skill1');
+            visitMetricsSnapshotPage('/administrator/projects/proj1/subjects/subj1/skills/skill1');
             cy.wait('@getConfig');
             cy.clickNav('Metrics');
             cy.wait('@skillAchievementsByTagBuilder');
 
-            cy.wait(waitForSnap);
-            cy.matchSnapshotImageForElement('[data-cy=numUsersByTag]', visualRegressionOptions);
+            matchMetricsSnapshot('[data-cy=numUsersByTag]', visualRegressionOptions);
         });
     }
 });
