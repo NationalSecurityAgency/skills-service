@@ -15,26 +15,14 @@
  */
 
 export const hasOnlyImportedEventsRemaining = async (loadPage) => {
-  // Inspect unfiltered pages, not just the currently visible rows.
-  const limit = 50;
-  let page = 1;
-  let inspectedCount = 0;
-  while (true) {
-    const res = await loadPage({
-      query: '',
-      limit,
-      ascending: true,
-      page,
-      byColumn: 0,
-      orderBy: 'performedOn'
-    });
-    if (!res.data?.length || res.data.some((event) => event.importedSkill !== true)) {
-      return false;
-    }
-    inspectedCount += res.data.length;
-    if (inspectedCount >= res.count) {
-      return true;
-    }
-    page += 1;
-  }
+  // Sample the first unfiltered page, regardless of the table's current filters.
+  const { data } = await loadPage({
+    query: '',
+    limit: 5,
+    ascending: true,
+    page: 1,
+    byColumn: 0,
+    orderBy: 'performedOn'
+  });
+  return Boolean(data?.length) && data.every((event) => event.importedSkill === true);
 };

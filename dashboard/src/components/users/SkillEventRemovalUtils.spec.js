@@ -22,41 +22,31 @@ describe('remaining imported skill events', () => {
   it.each([
     ['empty results', { count: 0, data: [] }],
     ['missing data', { count: 0 }],
+    ['missing imported flag', { data: [{}] }],
+    ['truthy non-boolean imported flag', { data: [{ importedSkill: 'true' }] }],
     ['regular-only events', { count: 1, data: [{ importedSkill: false }] }],
     ['mixed events', { count: 2, data: [{ importedSkill: true }, { importedSkill: false }] }]
   ])('does not warn for %s', async (_name, response) => {
     const loadPage = vi.fn().mockResolvedValue(response);
     expect(await hasOnlyImportedEventsRemaining(loadPage)).toBe(false);
     expect(loadPage).toHaveBeenCalledTimes(1);
+    expect(loadPage).toHaveBeenCalledWith({ query: '', limit: 5, ascending: true, page: 1, byColumn: 0, orderBy: 'performedOn' });
   });
 
-  it('checks every unfiltered page before warning for more than 50 imported events', async () => {
+  it('warns when the first unfiltered page contains only imported events, without checking later pages', async () => {
     const loadPage = vi.fn()
-      .mockResolvedValueOnce({ count: 51, data: importedEvents(50) })
-      .mockResolvedValueOnce({ count: 51, data: importedEvents(1) });
+      .mockResolvedValueOnce({ count: 6, data: importedEvents(5) })
+      .mockResolvedValueOnce({ count: 6, data: [{ importedSkill: false }] });
 
     expect(await hasOnlyImportedEventsRemaining(loadPage)).toBe(true);
-    expect(loadPage).toHaveBeenCalledTimes(2);
-    const params = { query: '', limit: 50, ascending: true, byColumn: 0, orderBy: 'performedOn' };
-    expect(loadPage).toHaveBeenNthCalledWith(1, { ...params, page: 1 });
-    expect(loadPage).toHaveBeenNthCalledWith(2, { ...params, page: 2 });
+    expect(loadPage).toHaveBeenCalledTimes(1);
+    expect(loadPage).toHaveBeenCalledWith({ query: '', limit: 5, ascending: true, page: 1, byColumn: 0, orderBy: 'performedOn' });
   });
 
-  it('does not warn when a regular event remains on a later page', async () => {
-    const loadPage = vi.fn()
-      .mockResolvedValueOnce({ count: 51, data: importedEvents(50) })
-      .mockResolvedValueOnce({ count: 51, data: [{ importedSkill: false }] });
+  it('warns for a nonempty partial page without a total count', async () => {
+    const loadPage = vi.fn().mockResolvedValue({ data: importedEvents(1) });
 
-    expect(await hasOnlyImportedEventsRemaining(loadPage)).toBe(false);
-    expect(loadPage).toHaveBeenCalledTimes(2);
-  });
-
-  it('does not warn or continue paging when a later page is unexpectedly empty', async () => {
-    const loadPage = vi.fn()
-      .mockResolvedValueOnce({ count: 51, data: importedEvents(50) })
-      .mockResolvedValueOnce({ count: 51, data: [] });
-
-    expect(await hasOnlyImportedEventsRemaining(loadPage)).toBe(false);
-    expect(loadPage).toHaveBeenCalledTimes(2);
+    expect(await hasOnlyImportedEventsRemaining(loadPage)).toBe(true);
+    expect(loadPage).toHaveBeenCalledTimes(1);
   });
 });
