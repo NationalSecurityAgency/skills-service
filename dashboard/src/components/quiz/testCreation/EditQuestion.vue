@@ -473,9 +473,15 @@ const existingQuestionInfo = ref(null)
 const startAiAssistant = () => {
   const fieldValues = skillsInputFormDialogRef.value.getFieldValues()
   if (fieldValues.question?.trim()?.length > 0) {
+    const isMatching = QuestionType.isMatching(fieldValues.questionType?.id)
     existingQuestionInfo.value = {
       question: fieldValues.question,
-      answers: fieldValues.answers?.filter((a) => a.answer?.trim()?.length > 0).map((a) => ({...a}))
+      answers: fieldValues.answers?.filter((a) => isMatching
+        ? a.multiPartAnswer?.term?.trim() || a.multiPartAnswer?.value?.trim()
+        : a.answer?.trim()?.length > 0).map((a) => ({
+          ...a,
+          ...(a.multiPartAnswer ? { multiPartAnswer: { ...a.multiPartAnswer } } : {})
+        }))
     }
   } else {
     existingQuestionInfo.value = null

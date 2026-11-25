@@ -39,6 +39,11 @@ describe('AI Single Question Parsing and Validation', () => {
             answers.forEach((answer) => {
                 cy.get('[data-cy="aiMsg-2"] [data-cy="generatedAnswers"]').should('contain.text', answer);
             });
+            cy.intercept('POST', '/api/validation/description', (req) => {
+                if (req.body.value?.startsWith('Complete the Python expressions below.')) {
+                    req.alias = 'generatedQuestionValidation';
+                }
+            });
             cy.get('[data-cy="useGenValueBtn-2"]').should('be.enabled').click();
             cy.get('[data-cy="questionText"] [data-cy="markdownEditorInput"]')
                 .should('contain.text', '## Code example')
@@ -51,6 +56,8 @@ describe('AI Single Question Parsing and Validation', () => {
                 cy.get(`[data-cy="answer-${index}"] [data-cy="answerText"]`).should('have.value', answer);
             });
             cy.get('[data-cy="answer-2"]').should('not.exist');
+            // Applying AI content triggers debounced validation before saving.
+            cy.wait('@generatedQuestionValidation');
             cy.get('[data-cy="saveDialogBtn"]').should('be.enabled').click();
             cy.get('[data-cy="markdownEditorInput"]').should('not.exist');
             cy.get('[data-cy="questionDisplayCard-1"] [data-cy="questionDisplayText"]')

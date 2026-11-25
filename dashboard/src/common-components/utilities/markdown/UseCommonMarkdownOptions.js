@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 import * as emoji from 'node-emoji';
-export const useCommonMarkdownOptions = () => {
+import { sanitizeRestrictedMarkdown } from '@/common-components/utilities/markdown/MarkdownImagePolicy.js'
+
+export const useCommonMarkdownOptions = (restrictImages = false) => {
   const markdownOptions = {
     linkAttributes: {
       target: '_blank',
@@ -47,6 +49,9 @@ export const useCommonMarkdownOptions = () => {
         return result;
       },
     },
+  }
+  if (restrictImages) {
+    markdownOptions.customHTMLSanitizer = sanitizeRestrictedMarkdown
   }
 
   const getMenuItem = () => document.querySelector('.toastui-editor-popup-body [aria-role="menu"]')

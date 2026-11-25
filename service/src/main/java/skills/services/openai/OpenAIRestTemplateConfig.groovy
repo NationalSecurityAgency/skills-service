@@ -21,7 +21,7 @@ import org.apache.hc.client5.http.config.RequestConfig
 import org.apache.hc.client5.http.impl.classic.HttpClientBuilder
 import org.apache.hc.client5.http.impl.io.PoolingHttpClientConnectionManager
 import org.apache.hc.client5.http.socket.PlainConnectionSocketFactory
-import org.apache.hc.client5.http.ssl.NoopHostnameVerifier
+import org.apache.hc.client5.http.ssl.DefaultHostnameVerifier
 import org.apache.hc.client5.http.ssl.SSLConnectionSocketFactory
 import org.apache.hc.core5.http.config.RegistryBuilder
 import org.apache.hc.core5.ssl.SSLContexts
@@ -33,7 +33,6 @@ import org.springframework.http.client.HttpComponentsClientHttpRequestFactory
 import org.springframework.web.client.RestTemplate
 import org.springframework.web.reactive.function.client.WebClient
 
-import javax.net.ssl.HostnameVerifier
 import javax.net.ssl.SSLContext
 import java.util.concurrent.TimeUnit
 
@@ -58,12 +57,11 @@ class OpenAIRestTemplateConfig {
     @Bean
     HttpClient openAIClientHttpClient(OpenAIClientConfig config) {
         SSLContext sslContext = SSLContexts.createSystemDefault()
-        HostnameVerifier allowAllHosts = new NoopHostnameVerifier();
         SSLConnectionSocketFactory sslConnectionSocketFactory = new SSLConnectionSocketFactory(
                 sslContext,
                 ['TLSv1.2', 'TLSv1.3'] as String[],
                 null,
-                allowAllHosts
+                new DefaultHostnameVerifier()
         )
 
         PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager(

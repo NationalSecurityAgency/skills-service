@@ -129,16 +129,32 @@ export const useInstructionGenerator = () => {
       : `# Task: Generate a ${questionType.id} Question Type with answers based on the user's request.`;
 
     const usersRequestWord = existingQuestionInfo ? 'Feedback' : 'Request';
-    const additionalInstructions = !existingQuestionInfo ? '' :
-      `\n- At the end create a new section with the title of "Here is what was changed" - then list any comments or suggestions.\n`;
+    const additionalInstructions = [
+      existingQuestionInfo
+        ? '- At the end create a new section with the title of "Here is what was changed" - then list any comments or suggestions.'
+        : '',
+      instructionsToKeepPlaceholders || ''
+    ].filter(Boolean).join('\n');
+    const additionalInstructionsForPrompt = additionalInstructions
+      ? `\n${additionalInstructions}\n`
+      : '';
 
     let answersJson = [];
-    if (existingQuestionInfo?.answers?.length > 0 &&
-      (QuestionType.isMultipleChoice(questionType.id) || QuestionType.isSingleChoice(questionType.id) || QuestionType.isFillInTheBlank(questionType.id))) {
-      answersJson = existingQuestionInfo.answers.map((answer) => ({
-        answer: answer.answer,
-        isCorrect: answer.isCorrect
-      }));
+    if (existingQuestionInfo?.answers?.length > 0) {
+      if (QuestionType.isMatching(questionType.id)) {
+        answersJson = existingQuestionInfo.answers.map((answer) => ({
+          multiPartAnswer: {
+            term: answer.multiPartAnswer?.term ?? '',
+            value: answer.multiPartAnswer?.value ?? ''
+          },
+          isCorrect: true
+        }));
+      } else if (QuestionType.isMultipleChoice(questionType.id) || QuestionType.isSingleChoice(questionType.id) || QuestionType.isFillInTheBlank(questionType.id)) {
+        answersJson = existingQuestionInfo.answers.map((answer) => ({
+          answer: answer.answer,
+          isCorrect: answer.isCorrect
+        }));
+      }
     }
 
     const existingQuestionInfoString = !existingQuestionInfo ? '' :
@@ -150,7 +166,7 @@ export const useInstructionGenerator = () => {
       .replace(/\{\{\s*existingQuestionInfoString\s*\}\}/g, existingQuestionInfoString)
       .replace(/\{\{\s*usersRequestWord\s*\}\}/g, usersRequestWord)
       .replace(/\{\{\s*userInput\s*\}\}/g, userInput)
-      .replace(/\{\{\s*additionalInstructions\s*\}\}/g, additionalInstructions);
+      .replace(/\{\{\s*additionalInstructions\s*\}\}/g, additionalInstructionsForPrompt);
 
     log.debug(res);
     return res;

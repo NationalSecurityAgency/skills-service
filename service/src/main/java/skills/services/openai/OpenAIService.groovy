@@ -173,15 +173,21 @@ class OpenAIService {
                     }
                     String res = (String) genList.get(0).getOutput().getText()
                     res = res?.replaceAll('\\n', '<<newline>>')
-                    log.debug("Response: [{}]", res)
+                    if (logPromptAndResponseText) {
+                        log.debug("Response: [{}]", res)
+                    }
                     return res
                 } catch (Throwable t) {
-                    String chatResponseAsStr = ""
-                    try {
-                        chatResponseAsStr = JsonOutput.toJson(chatResponse)
-                    } catch (Throwable t2) {
+                    if (logPromptAndResponseText) {
+                        String chatResponseAsStr = ""
+                        try {
+                            chatResponseAsStr = JsonOutput.toJson(chatResponse)
+                        } catch (Throwable t2) {
+                        }
+                        log.error("Failed to process response from OpenAI, chatResponse=[${chatResponseAsStr}]", t)
+                    } else {
+                        log.error("Failed to process response from OpenAI", t)
                     }
-                    log.error("Failed to process response from OpenAI, chatResponse=[${chatResponseAsStr}]", t)
                     throw t
                 }
             }.doOnComplete {

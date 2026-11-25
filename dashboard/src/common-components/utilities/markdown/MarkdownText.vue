@@ -14,7 +14,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 <script setup>
-import { ref, watch } from 'vue'
+import { inject, ref, watch } from 'vue'
+import { restrictedMarkdownImagesKey } from '@/common-components/utilities/markdown/MarkdownImagePolicy.js'
 import { useCommonMarkdownOptions } from '@/common-components/utilities/markdown/UseCommonMarkdownOptions.js'
 import ToastUiViewer from '@/common-components/utilities/markdown/ToastUiViewer.vue'
 import { useThemesHelper } from '@/components/header/UseThemesHelper.js'
@@ -31,7 +32,7 @@ const props = defineProps({
   }
 })
 
-const commonOptions = useCommonMarkdownOptions()
+const commonOptions = useCommonMarkdownOptions(inject(restrictedMarkdownImagesKey, false))
 const viewerOptions = commonOptions.markdownOptions
 const themeHelper = useThemesHelper()
 const toastuiViewer = ref(null)

@@ -19,6 +19,7 @@ describe('AI restored content length', () => {
     const lengthError = 'The generated content exceeds the maximum allowed length.'
     const imageText = 'Bounded image content.'
     const plainText = 'This generated plain text is too long for the configured limit, even though it contains no image placeholders.'
+    const codeQuestion = `${plainText}\n\n\`\`\`text\nfirst line\n\nsecond line\n\`\`\``
     const preview = '[data-cy="aiMsg-2"] [data-cy="generatedSegment"]'
 
     const openAssistant = (context, maxLength, imageMarkdown = null) => {
@@ -108,13 +109,70 @@ describe('AI restored content length', () => {
         })
     })
 
-    it('rejects oversized displayed content even when the restored question fits', () => {
+    const formattingScenarios = [
+        { name: 'CRLF', question: codeQuestion.replaceAll('\n', '\r\n') },
+        { name: 'extra blank lines', question: codeQuestion }
+    ]
+    formattingScenarios.forEach(({ name, question }) => {
+        const lengthScenarios = [
+            { label: 'accepts a question exactly at the limit', maxLength: question.length },
+            { label: 'rejects a question one character over the limit', maxLength: question.length - 1, oversized: true },
+            // The editor can change Markdown length when serializing fenced code.
+            // Test saving separately from the generator's exact-length boundary.
+            { label: 'saves question code formatting and answers', maxLength: question.length + 100, save: true }
+        ]
+        lengthScenarios.forEach(({ label, maxLength, oversized, save }) => {
+            it(`${label} with ${name} around preview headings`, () => {
+                openAssistant('question', maxLength)
+                cy.get('[data-cy="instructionsInput"]').type(`AI question preview formatting - ${name}{enter}`)
+                if (oversized) {
+                    assertRejected()
+                } else {
+                    cy.get('[data-cy="aiMsg-2"] [data-cy="finalSegment"]').should('contain.text', completedMsg)
+                    // CRLF rendering can add DOM newlines; retain the meaningful
+                    // code lines and blank separation rather than exact DOM text.
+                    cy.get(`${preview} pre code`).invoke('text').should('match', /first line\n{2,}second line/)
+                    cy.get('[data-cy="aiMsg-2"] [data-cy="generatedAnswers"]')
+                        .should('contain.text', 'Triangle').and('contain.text', 'Circle')
+                    if (save) {
+                        cy.intercept('POST', '/api/validation/description', (req) => {
+                            if (req.body.value?.startsWith(plainText)) {
+                                req.alias = 'generatedQuestionValidation'
+                            }
+                        })
+                    }
+                    const editor = assertApplied('question', plainText)
+                    cy.get(editor).should('contain.text', 'first line').and('contain.text', 'second line')
+                    cy.get('[data-cy="answer-0"] [data-cy="answerText"]').should('have.value', 'Triangle')
+                    cy.get('[data-cy="answer-1"] [data-cy="answerText"]').should('have.value', 'Circle')
+                    if (save) {
+                        // Applying AI content triggers debounced validation; wait
+                        // for it before submitting, as in the other AI edit tests.
+                        cy.wait('@generatedQuestionValidation')
+                        cy.get('[data-cy="saveDialogBtn"]').should('be.enabled').click()
+                        cy.get('[data-cy="markdownEditorInput"]').should('not.exist')
+                        cy.get('[data-cy="questionDisplayCard-1"] [data-cy="questionDisplayText"]')
+                            .should('contain.text', plainText)
+                        cy.get('[data-cy="questionDisplayCard-1"] [data-cy="questionDisplayText"] pre code')
+                            .invoke('text').should('match', /first line\n{2,}second line/)
+                        cy.get('[data-cy="questionDisplayCard-1"]')
+                            .should('contain.text', 'Triangle').and('contain.text', 'Circle')
+                    }
+                }
+            })
+        })
+    })
+
+    it('omits pre-heading content from the preview when the restored question fits', () => {
         cy.fixture('valid_icon.png', 'base64').then((imageBase64) => {
             const imageMarkdown = `![Diagram](data:image/png;base64,${imageBase64})`
             const restoredQuestion = `${imageText}\n\n${imageMarkdown}`
             openAssistant('question', restoredQuestion.length, imageMarkdown)
             cy.get('[data-cy="instructionsInput"]').type('AI restored content length - preview overflow{enter}')
-            assertRejected()
+            cy.get('[data-cy="aiMsg-2"] [data-cy="finalSegment"]').should('contain.text', completedMsg)
+            cy.get(`${preview} img`).should('have.length', 1).and('have.attr', 'src', `data:image/png;base64,${imageBase64}`)
+            const editor = assertApplied('question', imageText)
+            cy.get(`${editor} .toastui-editor-ww-container img[alt="Diagram"]`).should('have.length', 1)
         })
     })
 })

@@ -16,6 +16,7 @@
 import {useLog} from "@/components/utils/misc/useLog.js";
 import Viewer from '@toast-ui/editor/dist/toastui-editor-viewer';
 import {useCommonMarkdownOptions} from '@/common-components/utilities/markdown/UseCommonMarkdownOptions.js';
+import {hasBlockedMarkdownImages} from '@/common-components/utilities/markdown/MarkdownImagePolicy.js';
 
 
 export const useImgHandler = () => {
@@ -140,7 +141,7 @@ export const useImgHandler = () => {
         return error;
     }
 
-    const validateImagePlacement = (markdown, probeUrls) => {
+    const renderInertMarkdown = (markdown) => {
         const renderedHtml = [];
         // Use the same renderer as the preview, but NEVER attach its generated HTML
         // to a live element. Even detached image elements can initiate requests.
@@ -155,20 +156,32 @@ export const useImgHandler = () => {
             }
         });
         try {
-            const html = renderedHtml.join('');
-            // Template contents are inert, including images and other remote resources.
-            const template = document.createElement('template');
-            template.innerHTML = html;
-            const imageSources = [...template.content.querySelectorAll('img')].map((image) => image.getAttribute('src'));
-            for (const probeUrl of probeUrls) {
-                // Each occurrence must become exactly one complete image src, and
-                // must not also appear in a link, attribute, raw HTML, or code sample.
-                if (html.split(probeUrl).length !== 2 || imageSources.filter((src) => src === probeUrl).length !== 1) {
-                    throw unsafeImagePlacementError();
-                }
-            }
+            return renderedHtml.join('');
         } finally {
             viewer.destroy();
+        }
+    }
+
+    const validateGeneratedImages = (markdown) => {
+        if (hasBlockedMarkdownImages(renderInertMarkdown(markdown))) {
+            const error = new Error('Generated content contains external or unsupported images.');
+            error.userMessage = 'The AI included external or unsupported images. Please ask it to regenerate without external images, using only the original inline images.';
+            throw error;
+        }
+    }
+
+    const validateImagePlacement = (markdown, probeUrls) => {
+        const html = renderInertMarkdown(markdown);
+        // Template contents are inert, including images and other remote resources.
+        const template = document.createElement('template');
+        template.innerHTML = html;
+        const imageSources = [...template.content.querySelectorAll('img')].map((image) => image.getAttribute('src'));
+        for (const probeUrl of probeUrls) {
+            // Each occurrence must become exactly one complete image src, and
+            // must not also appear in a link, attribute, raw HTML, or code sample.
+            if (html.split(probeUrl).length !== 2 || imageSources.filter((src) => src === probeUrl).length !== 1) {
+                throw unsafeImagePlacementError();
+            }
         }
     }
     // Helper function to escape special regex characters
@@ -183,6 +196,7 @@ export const useImgHandler = () => {
     return {
         extractImages,
         reinsertImages,
+        validateGeneratedImages,
         instructionsToKeepPlaceholders
     }
 

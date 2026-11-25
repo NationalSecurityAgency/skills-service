@@ -1,0 +1,21 @@
+{
+  "metadata": {
+    "license": "Copyright 2026 SkillTree\n\nLicensed under the Apache License, Version 2.0 (the \"License\");\nyou may not use this file except in compliance with the License.\nYou may obtain a copy of the License at\n\n    https://www.apache.org/licenses/LICENSE-2.0\n\nUnless required by applicable law or agreed to in writing, software\ndistributed under the License is distributed on an \"AS IS\" BASIS,\nWITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\nSee the License for the specific language governing permissions and\nlimitations under the License."
+  },
+  "priority": 1,
+  "request": {
+    "method": "POST",
+    "urlPath": "/v1/chat/completions",
+    "bodyPatterns": [
+      { "matchesJsonPath": { "expression": "$.messages[1].content", "contains": "AI existing matching pairs regression - proofread while keeping its answers" } },
+      { "matchesJsonPath": { "expression": "$.messages[1].content", "contains": "Update an existing Matching Question Type" } },
+      { "matchesJsonPath": { "expression": "$.messages[1].content", "contains": "### Answers:\n[{\"multiPartAnswer\":{\"term\":\"SSH\",\"value\":\"22\"},\"isCorrect\":true},{\"multiPartAnswer\":{\"term\":\"HTTPS\",\"value\":\"443\"},\"isCorrect\":true}]" } }
+    ]
+  },
+  "response": {
+    "status": 200,
+    "headers": { "Content-Type": "text/event-stream" },
+    "bodyFileName": "response-body-existing-matching-question.txt",
+    "chunkedDribbleDelay": { "numberOfChunks": 10, "totalDuration": 1000 }
+  }
+}
