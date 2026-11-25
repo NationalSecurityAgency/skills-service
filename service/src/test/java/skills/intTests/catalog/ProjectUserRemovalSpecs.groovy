@@ -20,10 +20,12 @@ import org.springframework.http.HttpStatus
 import skills.intTests.utils.SkillsClientException
 import skills.intTests.utils.SkillsService
 import skills.services.admin.SkillCatalogFinalizationService
+import skills.services.admin.skillReuse.SkillReuseIdUtil
 import skills.services.userActions.DashboardAction
 import skills.services.userActions.DashboardItem
 import skills.storage.model.ProjectParticipation.BackfillStatus
 import skills.storage.model.SkillDef.SelfReportingType
+import skills.storage.model.UserAchievement
 import skills.storage.model.auth.RoleName
 import skills.storage.model.auth.UserRole
 import skills.storage.repos.ArchivedUsersRepo
@@ -169,34 +171,121 @@ class ProjectUserRemovalSpecs extends CatalogBackfillSpecBase {
         !creditSnapshot('TestProject2', users[0])
     }
 
-    def "a removed imported-only user can participate again by #entry without duplicate credit"() {
+    def "a removed imported-only user can participate again by #entry without duplicate credit - reuse #reuse partial #partial queued #queued"() {
         Map fixture = catalogFixture()
         SkillsService learner = createService(users[0])
-        earnSource(fixture, users[0])
+        String reusedSkillId = SkillReuseIdUtil.addTag(fixture.sourceSkills[0].skillId, 0)
+        if (reuse) {
+            skillsService.createSubject(createSubject(2, 2))
+            skillsService.reuseSkillInAnotherSubject('TestProject2', fixture.sourceSkills[0].skillId, 'TestSubject2')
+        }
+        if (partial) {
+            // Keep the reused source skill incomplete while the other imported skill is complete.
+            skillsService.addSkill(fixture.sourceSkills[0], users[0], firstDate)
+            earnSource([sourceSkills: [fixture.sourceSkills[1]]], users[0])
+        } else {
+            earnSource(fixture, users[0])
+        }
+        List<Map> sourceBefore = creditSnapshot('TestProject1', users[0])
+        if (queued) {
+            queueBackfill()
+        }
         qualify(fixture, learner, 'visit')
-        waitForAsyncTasksCompletion.waitForAllScheduleTasks()
-        skillsService.removeUserFromProject('TestProject2', users[0])
+        if (!queued) {
+            waitForAsyncTasksCompletion.waitForAllScheduleTasks()
+        }
+        List<Map> queuedTasks = backfillTasks()
 
         expect:
+        participationRepo.readStatus('TestProject2', users[0]) == (queued ? BackfillStatus.PENDING : BackfillStatus.COMPLETED)
+        queued ? queuedTasks.size() == 1 : !queuedTasks
+        learner.getSkillsSummaryForCurrentUser('TestProject2').points == (queued ? 0 : expectedProjectPoints - localPoints)
+
+        when:
+        skillsService.removeUserFromProject('TestProject2', users[0])
+
+        then:
         learner.getSkillsSummaryForCurrentUser('TestProject2').points == 0
         skillsService.getProjectUsers('TestProject2').count == 0
+        !participationRepo.existsByProjectIdAndUserId('TestProject2', users[0])
+        !creditSnapshot('TestProject2', users[0])
+        backfillTasks() == queuedTasks
 
         when:
         qualify(fixture, learner, entry)
-        waitForAsyncTasksCompletion.waitForAllScheduleTasks()
-        learner.initializeProjectProgress('TestProject2')
-        waitForAsyncTasksCompletion.waitForAllScheduleTasks()
-        Map summary = learner.getSkillsSummaryForCurrentUser('TestProject2')
 
         then:
-        summary.points == (entry == 'visit' ? 400 : 500)
-        summary.skillsAchieved == 2
-        summary.badges.numBadgesCompleted == 1
+        if (queued) {
+            assert participationRepo.readStatus('TestProject2', users[0]) == BackfillStatus.PENDING
+            // Re-entry retains the task queued for the previous enrollment, not a new task.
+            assert backfillTasks() == queuedTasks
+            assert learner.getSkillsSummaryForCurrentUser('TestProject2').points == localPoints
+        }
+
+        when:
+        if (queued) {
+            releaseBackfill()
+        }
+        waitForAsyncTasksCompletion.waitForAllScheduleTasks()
+        Map ready = learner.initializeProjectProgress('TestProject2')
+        Map summary = learner.getSkillsSummaryForCurrentUser('TestProject2')
+        Map<String, Integer> expectedSkillPoints = [(fixture.sourceSkills[0].skillId): firstSkillPoints,
+                                                  (fixture.sourceSkills[1].skillId): 200,
+                                                  (fixture.local.skillId): localPoints]
+        if (reuse) {
+            expectedSkillPoints[reusedSkillId] = firstSkillPoints
+        }
+        List<Map> restoredCredit = creditSnapshot('TestProject2', users[0])
+
+        then:
+        ready.ready
+        ready.backfillStatus == 'COMPLETED'
+        summary.points == expectedProjectPoints
+        summary.skillsAchieved == (partial ? 1 : (reuse ? 3 : 2))
+        summary.subjects.collectEntries { Map subject -> [(subject.subjectId): subject.points] } ==
+                (reuse ? [TestSubject1: expectedSubjectPoints, TestSubject2: firstSkillPoints] : [TestSubject1: expectedSubjectPoints])
+        summary.badges.numBadgesCompleted == (partial ? 0 : 1)
+        expectedSkillPoints.each { String skillId, Integer expectedPoints ->
+            Map skillSummary = learner.getSingleSkillSummaryForCurrentUser('TestProject2', skillId)
+            assert skillSummary.points == expectedPoints
+            boolean completed = expectedPoints == 200 && skillId != fixture.local.skillId
+            assert (skillSummary.achievedOn != null) == completed
+            List<UserAchievement> awards = userAchievedRepo.findAllByUserIdAndProjectIdAndSkillId(users[0], 'TestProject2', skillId)
+                    .findAll { UserAchievement award -> award.level == null }
+            assert awards.size() == (completed ? 1 : 0)
+        }
+        // The summary sums subjects; also verify the independently stored project aggregate.
+        points('TestProject2', users[0], null) == expectedProjectPoints
+        [fixture.group.skillId, fixture.badge.badgeId].each { String skillId ->
+            assert userAchievedRepo.findAllByUserIdAndProjectIdAndSkillId(users[0], 'TestProject2', skillId)
+                    .count { UserAchievement award -> award.level == null } == (partial ? 0 : 1)
+        }
         participationRepo.readStatus('TestProject2', users[0]) == BackfillStatus.COMPLETED
         skillsService.getProjectUsers('TestProject2').count == 1
+        creditSnapshot('TestProject1', users[0]) == sourceBefore
+        !backfillTasks()
+
+        when:
+        3.times {
+            Map repeated = learner.initializeProjectProgress('TestProject2')
+            assert repeated.ready
+            assert repeated.backfillStatus == 'COMPLETED'
+        }
+        waitForAsyncTasksCompletion.waitForAllScheduleTasks()
+
+        then:
+        learner.getSkillsSummaryForCurrentUser('TestProject2') == summary
+        creditSnapshot('TestProject2', users[0]) == restoredCredit
+        creditSnapshot('TestProject1', users[0]) == sourceBefore
+        skillsService.getProjectUsers('TestProject2').count == 1
+        !backfillTasks()
 
         where:
-        entry << ['visit', 'local']
+        [entry, reuse, partial, queued] << [['visit', 'local'], [false, true], [false, true], [false, true]].combinations()
+        firstSkillPoints = partial ? 100 : 200
+        localPoints = entry == 'local' ? 100 : 0
+        expectedSubjectPoints = firstSkillPoints + 200 + localPoints
+        expectedProjectPoints = expectedSubjectPoints + (reuse ? firstSkillPoints : 0)
     }
 
     def "queued incremental import delivery cannot recreate removed progress - reuse #reuse"() {
