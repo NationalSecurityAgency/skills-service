@@ -299,6 +299,8 @@ class SkillEventAdminService {
         // answer to the provider and retry after removal, but their results cannot
         // restore deleted progress. This is an accepted tradeoff for infrequent removals.
         List<String> quizStatuses = cancelPendingQuizGrading ? ['PASSED', 'NEEDS_GRADING'] : ['PASSED']
+        // Deleting quiz attempts removes their answer records, not uploaded attachments.
+        // Existing attachment links may remain usable. Asynchronous cleanup is planned.
         userQuizAttemptRepo.deleteAllAttemptsForQuizzesAssociatedToProjectAndByUserId(projectId, userId, quizStatuses)
     }
 
