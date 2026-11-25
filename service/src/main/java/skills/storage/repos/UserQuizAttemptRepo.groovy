@@ -18,7 +18,6 @@ package skills.storage.repos
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.PageRequest
 import org.springframework.data.jpa.repository.JpaRepository
-import org.springframework.data.jpa.repository.Modifying
 import org.springframework.data.jpa.repository.Query
 import org.springframework.data.repository.query.Param
 import org.springframework.lang.Nullable
@@ -283,19 +282,43 @@ interface UserQuizAttemptRepo extends JpaRepository<UserQuizAttempt, Long> {
                     and q.status = ?3''')
     List<UserQuizAttempt> findBySkillRefIdAndUserIdAndByStatus(Integer skillRefId, String userId, QuizAttemptStatus status, PageRequest pageRequest)
 
-    @Modifying
-    @Query(value = '''delete from user_quiz_attempt
-                      where id in (select attempt.id
-                                 from skill_definition skill,
-                                      quiz_to_skill_definition q_to_s,
-                                      user_quiz_attempt attempt
-                                 where skill.project_id = ?1
-                                   and attempt.user_id = ?2
-                                   and self_reporting_type = 'Quiz'
-                                   and q_to_s.skill_ref_id = skill.id
-                                   and q_to_s.quiz_ref_id = attempt.quiz_definition_ref_id
-                                   and attempt.status = 'PASSED')''' , nativeQuery = true)
-    int deleteAllAttemptsForQuizzesAssociatedToProjectAndByUserId(String projectId, String userId)
+    @Query('''select distinct qtoS.skillRefId
+              from UserQuizAttempt q, QuizToSkillDef qtoS
+              where q.quizDefinitionRefId = qtoS.quizRefId
+                    and qtoS.skillRefId in ?1
+                    and q.userId = ?2
+                    and q.status = ?3''')
+    List<Integer> findSkillRefIdsByUserIdAndStatus(List<Integer> skillRefIds, String userId, QuizAttemptStatus status)
+
+    interface ProjectCleanupAttempt {
+        Integer getId()
+        String getStatus()
+    }
+
+    @Query(value = '''select attempt.id, attempt.status from user_quiz_attempt attempt
+                      where attempt.user_id = ?2 and exists (
+                          select 1 from quiz_to_skill_definition q
+                          join skill_definition s on s.id = q.skill_ref_id
+                          where q.quiz_ref_id = attempt.quiz_definition_ref_id
+                            and s.project_id = ?1 and s.self_reporting_type = 'Quiz'
+                      ) and attempt.status in ('PASSED', 'INPROGRESS', 'NEEDS_GRADING')
+                      order by attempt.id''', nativeQuery = true)
+    List<ProjectCleanupAttempt> findAttemptsForProjectCleanup(String projectId, String userId)
+
+    @Query(value = '''with deleted_attempts as (
+                          delete from user_quiz_attempt attempt
+                          where attempt.user_id = ?2 and attempt.status in ?3 and attempt.id in ?4
+                            and exists (
+                                select 1 from quiz_to_skill_definition q
+                                join skill_definition s on s.id = q.skill_ref_id
+                                where q.quiz_ref_id = attempt.quiz_definition_ref_id
+                                  and s.project_id = ?1 and s.self_reporting_type = 'Quiz'
+                            )
+                           returning attempt.quiz_definition_ref_id, attempt.status
+                       )
+                       select distinct quiz_definition_ref_id from deleted_attempts
+                       where status = 'PASSED' ''', nativeQuery = true)
+    List<Integer> deleteAttemptsForProjectAndUser(String projectId, String userId, List<String> statuses, List<Integer> attemptIds)
 
     static interface TagValueCount {
         String getTagValue()

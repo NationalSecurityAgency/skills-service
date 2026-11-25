@@ -670,15 +670,107 @@ describe('Performed Skills Table Tests', () => {
         ], 5);
 
         cy.openDialog('[data-cy="performedSkills-deleteAll"]')
-        cy.contains('This will delete all skill events for user1@skills.org.');
+        cy.contains('This will delete all removable skill events for user1@skills.org.');
+        cy.contains('Skill events for skills imported from the catalog cannot be deleted and may remain after deletion.').should('be.visible');
+        cy.contains('This also deletes the user\'s passing attempts for shared quizzes linked to this project\'s skills. Related skill credit may be removed from other projects after background cleanup.').should('be.visible');
         cy.get('[data-cy="currentValidationText"]').type('Delete Me')
         cy.clickSaveDialogBtn()
         cy.get('[data-cy="saveDialogBtn"]').should('not.exist')
 
         cy.get(tableSelector).contains('There are no records to show').should('exist')
 
+        cy.get('[data-cy="performedSkills-error"]').should('not.exist');
         cy.get('[data-cy="pageHeaderStat_Points"] [data-cy="statValue"]').should('have.text', '0');
         cy.get('[data-cy="pageHeaderStat_Skills"] [data-cy="statValue"]').should('have.text', '0');
+    });
+
+    it('keeps the successful deletion visible when the optional warning lookup fails', () => {
+        cy.createSkills(1);
+        cy.report(1, false);
+        cy.visit('/administrator/projects/proj1/users/user1@skills.org/skillEvents', {
+            onBeforeLoad(win) {
+                win.localStorage.setItem('userSkillsPerformed-tablePageSize', '10');
+            }
+        });
+        cy.get(tableSelector).contains('skill1').should('be.visible');
+        cy.intercept({
+            method: 'GET',
+            pathname: '/admin/projects/proj1/performedSkills/user1%40skills.org',
+            query: { limit: '5', page: '1' },
+        }, { statusCode: 500 }).as('warningLookup');
+
+        cy.openDialog('[data-cy="performedSkills-deleteAll"]');
+        cy.get('[data-cy="currentValidationText"]').type('Delete Me');
+        cy.clickSaveDialogBtn();
+
+        cy.wait('@warningLookup');
+        cy.get(tableSelector).contains('There are no records to show').should('be.visible');
+        cy.get('[data-cy="performedSkills-error"]').should('not.exist');
+        cy.get('[data-cy="pageHeaderStat_Points"] [data-cy="statValue"]').should('have.text', '0');
+    });
+
+    [
+        { includeLocalEvents: false, laterPage: false, scenario: 'imported-only events' },
+        { includeLocalEvents: true, laterPage: false, scenario: 'mixed events with an active filter' },
+        { includeLocalEvents: false, laterPage: true, scenario: 'later page with selected rows' },
+    ].forEach(({ includeLocalEvents, laterPage, scenario }) => {
+        it(`delete all skill events warns when only imported events remain - ${scenario}`, () => {
+            const userId = Cypress.env('proxyUser');
+            cy.createProject(2);
+            cy.createSubject(2, 1);
+            cy.createSkill(2, 1, 1, { numPerformToCompletion: 100 });
+            cy.exportSkillToCatalog(2, 1, 1);
+            for (let i = 0; i < 12; i += 1) {
+                cy.reportSkill(2, 1, userId, m.clone().add(i, 'day').format('YYYY-MM-DD HH:mm'));
+            }
+            cy.importSkillFromCatalog(1, 1, 2, 1);
+            cy.request('POST', '/api/projects/proj1/progress/initialize', {});
+            cy.finalizeCatalogImport(1);
+            cy.waitForBackendAsyncTasksToComplete();
+
+            if (includeLocalEvents) {
+                cy.createSkill(1, 1, 2);
+                cy.reportSkill(1, 2, userId, '2020-10-12 11:00');
+            }
+
+            cy.visit(`/administrator/projects/proj1/users/${userId}/skillEvents`, {
+                onBeforeLoad(win) {
+                    win.localStorage.setItem('userSkillsPerformed-tablePageSize', '10');
+                }
+            });
+            cy.get('[data-cy="skillsBTableTotalRows"]').should('have.text', includeLocalEvents ? '13' : '12');
+            if (laterPage) {
+                cy.get(`${tableSelector} button.p-paginator-next`).click();
+                cy.get(`${tableSelector} button.p-paginator-next`).should('be.disabled');
+                cy.get(`${tableSelector} [data-pc-name="pcrowcheckbox"]`).first().click();
+                cy.get('[data-cy="performedSkills-deleteSelected"]').should('not.be.disabled');
+            }
+            if (includeLocalEvents) {
+                // The warning must consider imported events hidden by the active filter.
+                cy.get('[data-cy="performedSkills-skillIdFilter"]').type('skill2{enter}');
+                cy.get('[data-cy="skillsBTableTotalRows"]').should('have.text', '1');
+            }
+
+            cy.openDialog('[data-cy="performedSkills-deleteAll"]');
+            cy.get('[data-cy="currentValidationText"]').type('Delete Me');
+            cy.clickSaveDialogBtn();
+            cy.get('[data-cy="saveDialogBtn"]').should('not.exist');
+            cy.get('[data-cy="performedSkills-error"]').should('be.visible')
+                .and('contain.text', 'Remaining skill events cannot be deleted because their skills are imported from the catalog.');
+
+            if (includeLocalEvents) {
+                cy.get(tableSelector).contains('There are no records to show').should('be.visible');
+                cy.get('[data-cy="performedSkills-resetBtn"]').click();
+            }
+            cy.get('[data-cy="skillsBTableTotalRows"]').should('have.text', '12');
+            cy.get(tableSelector).contains('skill1').should('be.visible');
+            cy.get(tableSelector).contains('skill2').should('not.exist');
+            if (laterPage) {
+                cy.get(`${tableSelector} button.p-paginator-next`).should('not.be.disabled');
+                cy.get('[data-cy="performedSkills-deleteSelected"]').should('be.disabled');
+                cy.get(`${tableSelector} [data-pc-name="pcrowcheckbox"] input:checked`).should('not.exist');
+            }
+        });
     });
 
     it('delete batch of skill events', () => {
@@ -706,7 +798,7 @@ describe('Performed Skills Table Tests', () => {
 
         cy.get('[data-cy="performedSkillsTable"] [data-p-index="1"] [data-pc-name="pcrowcheckbox"]').click()
         cy.get('[data-cy="performedSkills-deleteSelected"]').click()
-        cy.contains('Removing 1 selected skill(s).');
+        cy.contains('Removing 1 selected skill event(s).');
         cy.contains('YES, Delete Them!').click();
 
         cy.wait('@delete');
@@ -725,13 +817,53 @@ describe('Performed Skills Table Tests', () => {
         cy.get('[data-cy="performedSkillsTable"] [data-p-index="0"] [data-pc-name="pcrowcheckbox"]').click()
         cy.get('[data-cy="performedSkillsTable"] [data-p-index="1"] [data-pc-name="pcrowcheckbox"]').click()
         cy.get('[data-cy="performedSkills-deleteSelected"]').click()
-        cy.contains('Removing 2 selected skill(s)');
+        cy.contains('Removing 2 selected skill event(s)');
         cy.contains('YES, Delete Them!').click();
 
         cy.wait('@delete');
 
         cy.get(tableSelector).contains('There are no records to show').should('exist')
 
+    });
+
+    it('delete selected mixed skill events warns that imported events will remain', () => {
+        const userId = Cypress.env('proxyUser');
+        cy.createProject(2);
+        cy.createSubject(2, 1);
+        cy.createSkill(2, 1, 1);
+        cy.exportSkillToCatalog(2, 1, 1);
+        cy.reportSkill(2, 1, userId, '2020-09-12 11:00');
+        cy.importSkillFromCatalog(1, 1, 2, 1);
+        cy.request('POST', '/api/projects/proj1/progress/initialize', {});
+        cy.finalizeCatalogImport(1);
+        cy.waitForBackendAsyncTasksToComplete();
+
+        cy.createSkill(1, 1, 2);
+        cy.createSkill(1, 1, 3);
+        cy.reportSkill(1, 2, userId, '2020-09-13 11:00');
+        cy.reportSkill(1, 3, userId, '2020-09-14 11:00');
+        cy.visit(`/administrator/projects/proj1/users/${userId}/skillEvents`);
+        cy.validateTable(tableSelector, [
+            [{ colIndex: 1, value: 'skill3' }],
+            [{ colIndex: 1, value: 'skill2' }],
+            [{ colIndex: 1, value: 'skill1' }],
+        ], 5);
+
+        cy.get(`${tableSelector} [data-p-index="1"] [data-pc-name="pcrowcheckbox"]`).click();
+        cy.get(`${tableSelector} [data-p-index="2"] [data-pc-name="pcrowcheckbox"]`).click();
+        cy.get('[data-cy="performedSkills-deleteSelected"]').click();
+        cy.contains('Removing 1 of 2 selected skill event(s).').should('be.visible');
+        cy.contains('The 1 selected imported skill event(s) cannot be deleted from this project and will remain.').should('be.visible');
+        cy.contains('Deletion permanently removes the selected removable skill events for this user and cannot be undone.').should('be.visible');
+        cy.contains('YES, Delete Them!').click();
+
+        cy.get('[data-cy="skillsBTableTotalRows"]').should('have.text', '2');
+        cy.validateTable(tableSelector, [
+            [{ colIndex: 1, value: 'skill3' }],
+            [{ colIndex: 1, value: 'skill1' }],
+        ], 5);
+        cy.get(tableSelector).contains('skill2').should('not.exist');
+        cy.get('[data-cy="performedSkills-error"]').should('not.exist');
     });
 
     it('can not delete batch of skill events with dependencies', () => {
@@ -777,7 +909,8 @@ describe('Performed Skills Table Tests', () => {
         cy.get('[data-cy="performedSkillsTable"] [data-p-index="1"] [data-pc-name="pcrowcheckbox"]').click()
         cy.get('[data-cy="performedSkillsTable"] [data-p-index="2"] [data-pc-name="pcrowcheckbox"]').click()
         cy.get('[data-cy="performedSkills-deleteSelected"]').click()
-        cy.contains('Removing 3 selected skill(s).');
+        cy.contains('All 3 selected skill event(s) are for skills imported from the catalog.').should('be.visible');
+        cy.contains('Imported skill events cannot be deleted from this project, so no events will be deleted.').should('be.visible');
         cy.contains('YES, Delete Them!').click();
 
         cy.validateTable(tableSelector, [
@@ -795,7 +928,10 @@ describe('Performed Skills Table Tests', () => {
             }],
         ], 5);
 
-        cy.contains('Cannot delete skill events for skills imported from the catalog.')
+        cy.get('[data-cy="performedSkills-error"]').should('be.visible')
+            .and('contain.text', 'Cannot delete skill events for skills imported from the catalog.')
+            .and('contain.text', 'All selected skill events are imported, so no events were deleted.')
+            .and('contain.text', 'To remove these events, delete them in the project where the skills originated.');
     });
 
     it('view regular skill from performed skills table', () => {

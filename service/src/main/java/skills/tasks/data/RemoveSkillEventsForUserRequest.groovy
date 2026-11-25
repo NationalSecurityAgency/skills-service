@@ -19,4 +19,6 @@ class RemoveSkillEventsForUserRequest {
     String userId
     String projectId
     List<Integer> skillRefIds
+    Map<Integer, Integer> quizBySkill
+    Map<Integer, List<Integer>> eventIdsBySkill
 }

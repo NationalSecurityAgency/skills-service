@@ -114,14 +114,17 @@ class TaskSchedulerService {
                 Instant.now().plusSeconds(schedulingDelaySeconds))
     }
 
-    void removeSkillEventsForAUser(String userId, String projectId, List<Integer> skillRefIds) {
+    void removeSkillEventsForAUser(String userId, String projectId, List<Integer> skillRefIds,
+                                   Map<Integer, Integer> quizBySkill, Map<Integer, List<Integer>> eventIdsBySkill) {
         String id = "${userId}-${projectId}${UUID.randomUUID().toString()}}"
         log.info("removing skill events for specific skills for a single user [{}] using db-scheduler; skillIds={}", id, skillRefIds)
         scheduler.schedule(removeSkillEventsForAUser.instance(id,
                 new RemoveSkillEventsForUserRequest(
                         projectId: projectId,
                         userId: userId,
-                        skillRefIds: skillRefIds,
+                         skillRefIds: skillRefIds,
+                         quizBySkill: quizBySkill,
+                         eventIdsBySkill: eventIdsBySkill,
                 )), Instant.now().plusSeconds(schedulingDelaySeconds))
     }
 

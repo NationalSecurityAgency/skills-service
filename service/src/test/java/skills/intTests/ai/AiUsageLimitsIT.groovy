@@ -23,9 +23,10 @@ import org.springframework.context.annotation.Primary
 import org.springframework.test.context.TestPropertySource
 import skills.services.openai.OpenAIUsageLimiter
 import skills.services.openai.OpenAIUsageLimitsProperties
-import skills.intTests.utils.MockLlmServer
+import skills.intTests.utils.MockLlmServer.ControlledStream
 import spock.util.concurrent.PollingConditions
 
+import java.util.concurrent.CompletableFuture
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicLong
@@ -109,10 +110,12 @@ class AiUsageLimitsIT extends DefaultAiIntSpec {
 
     def 'active stream cap rejects immediately and completion releases capacity'() {
         given:
-        def slow = slowStream()
+        ControlledStream stream = mockLlmServer.stubControlledStream()
         CountDownLatch firstChunk = new CountDownLatch(1)
-        def first = client.stream(chatRequest()).doOnNext { firstChunk.countDown() }.collectList().toFuture()
-        assert firstChunk.await(10, TimeUnit.SECONDS)
+        CompletableFuture<List<String>> first = client.stream(chatRequest(['controlled stream']))
+                .doOnNext { firstChunk.countDown() }.collectList().toFuture()
+        assert firstChunk.await(10, TimeUnit.SECONDS): 'Controlled AI stream did not emit its first chunk'
+        assert !first.isDone()
 
         when:
         def response = client.exchange(chatRequest())
@@ -123,15 +126,17 @@ class AiUsageLimitsIT extends DefaultAiIntSpec {
         response.headers.getFirst('Retry-After') == null
 
         when:
+        stream.complete()
         first.get(10, TimeUnit.SECONDS)
-        mockLlmServer.mockServer.removeStub(slow)
+        mockLlmServer.mockServer.removeStub(stream.stub)
 
         then:
         client.exchange(chatRequest()).statusCode.value() == 200
         mockLlmServer.mockServer.verify(2, postRequestedFor(urlEqualTo('/v1/chat/completions')))
 
         cleanup:
-        first.cancel(true)
+        first?.cancel(true)
+        closeControlledStream(stream)
     }
 
     def 'provider error releases active stream capacity'() {
@@ -152,28 +157,36 @@ class AiUsageLimitsIT extends DefaultAiIntSpec {
 
     def 'client cancellation releases capacity once disconnect is observed'() {
         given:
-        def slow = slowStream()
+        ControlledStream stream = mockLlmServer.stubControlledStream()
         CountDownLatch firstChunk = new CountDownLatch(1)
-        def first = client.stream(chatRequest()).doOnNext { firstChunk.countDown() }.collectList().toFuture()
-        assert firstChunk.await(10, TimeUnit.SECONDS)
+        CompletableFuture<List<String>> first = client.stream(chatRequest(['controlled stream']))
+                .doOnNext { firstChunk.countDown() }.collectList().toFuture()
+        assert firstChunk.await(10, TimeUnit.SECONDS): 'Controlled AI stream did not emit its first chunk'
+        assert !first.isDone()
 
         when:
-        first.cancel(true)
-        mockLlmServer.mockServer.removeStub(slow)
+        assert first.cancel(true)
 
         then:
         new PollingConditions(timeout: 10).eventually {
+            // Keep emitting without completing so the servlet observes the disconnect.
+            stream.sendChunk()
             assert client.exchange(chatRequest()).statusCode.value() == 200
         }
 
         cleanup:
-        first.cancel(true)
+        first?.cancel(true)
+        closeControlledStream(stream)
     }
 
-    private def slowStream() {
-        String body = (1..30).collect { MockLlmServer.createStreamMsg('partial ') }.join('\n\n') + '\n\ndata: [DONE]\n\n'
-        return mockLlmServer.mockServer.stubFor(post(urlPathEqualTo('/v1/chat/completions')).atPriority(1)
-                .willReturn(ok().withHeader('Content-Type', 'text/event-stream').withChunkedDribbleDelay(30, 3000).withBody(body)))
+    private void closeControlledStream(ControlledStream stream) {
+        if (stream != null) {
+            stream.complete()
+            mockLlmServer.mockServer.removeStub(stream.stub)
+            if (stream.started.count == 0) {
+                assert stream.finished.await(10, TimeUnit.SECONDS): 'Controlled AI stream did not close'
+            }
+        }
     }
 
     @TestConfiguration

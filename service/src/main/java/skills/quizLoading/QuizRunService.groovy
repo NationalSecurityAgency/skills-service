@@ -763,6 +763,11 @@ class QuizRunService {
         }
         log.debug("Obtaining lock for quizAttemptId [${quizAttemptId}], grader [${graderUserId}]")
         lockingService.lockUserQuizAttempt(quizAttemptId)
+        if (aiAssistantGrader && !quizAttemptRepo.existsById(quizAttemptId)) {
+            // AI responses can arrive after project removal cancelled the pending attempt.
+            log.info('Discarding AI grade for deleted quiz attempt [{}]', quizAttemptId)
+            return new QuizAnswerGradingResult()
+        }
         UserQuizAttempt userQuizAttempt = getQuizAttempt(quizAttemptId)
         boolean wasQuizAlreadyPassed = userQuizAttempt.status == UserQuizAttempt.QuizAttemptStatus.PASSED
         validateAttempt(userQuizAttempt, quizDef, quizAttemptId, quizId, userId, gradeAnswerReq)
@@ -1064,6 +1069,10 @@ class QuizRunService {
     @Transactional
     int incrementAiGradingAttemptCount(Integer quizAttemptId, Integer answerDefId) {
         UserQuizAnswerAttempt userQuizAnswerAttempt = quizAttemptAnswerRepo.findByUserQuizAttemptRefIdAndQuizAnswerDefinitionRefId(quizAttemptId, answerDefId)
+        if (!userQuizAnswerAttempt) {
+            // Deleted answers have no retry budget or failure notification to update.
+            return 0
+        }
         log.debug("Incrementing aiGradingAttemptCount for userQuizAnswerAttempt=[{}]", userQuizAnswerAttempt)
         userQuizAnswerAttempt.aiGradingAttemptCount++
         return userQuizAnswerAttempt.aiGradingAttemptCount
@@ -1103,8 +1112,10 @@ class QuizRunService {
         if (userQuizAttempt.status == UserQuizAttempt.QuizAttemptStatus.PASSED) {
             List<ProjectIdAndSkillId> skills = quizToSkillDefRepo.getSkillsForQuiz(quizDefId)
             if (skills) {
-                // Shared quiz completions retain reporting locks across projects until commit.
-                // Acquire them in canonical project order, independent of repository enumeration.
+                // Shared quiz awards retain reporting/catalog qualification locks through commit.
+                // Report in canonical project order to reduce inverted-lock risk, independent of
+                // repository enumeration. Imports/reuse synchronize from these native sources.
+                // Ordering does not add locks to maximum-points reports or fence in-flight cleanup.
                 skills = skills.sort(false) { ProjectIdAndSkillId left, ProjectIdAndSkillId right ->
                     (left.projectId.toLowerCase(Locale.ROOT) <=> right.projectId.toLowerCase(Locale.ROOT)) ?:
                             (left.skillRefId <=> right.skillRefId)

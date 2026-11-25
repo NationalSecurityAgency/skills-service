@@ -27,6 +27,7 @@ interface ProjectParticipationRepo extends CrudRepository<ProjectParticipation, 
     @Nullable
     ProjectParticipation findByProjectIdAndUserId(String projectId, String userId)
     boolean existsByProjectIdAndUserId(String projectId, String userId)
+    void deleteByProjectIdAndUserId(String projectId, String userId)
 
     @Query(value = "select * from project_participation where project_id = ?1 and backfill_status = 'PENDING' and id > ?2 order by id", nativeQuery = true)
     List<ProjectParticipation> findPending(String projectId, Integer afterId, Pageable pageable)

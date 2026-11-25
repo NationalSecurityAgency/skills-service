@@ -28,9 +28,12 @@ import org.springframework.transaction.annotation.Transactional
 import skills.auth.UserInfoService
 import skills.controller.exceptions.ErrorCode
 import skills.controller.exceptions.SkillException
+import skills.controller.exceptions.SkillsValidator
 import skills.controller.result.model.RequestResult
 import skills.services.admin.BatchOperationsTransactionalAccessor
 import skills.services.admin.SkillCatalogService
+import skills.services.admin.SkillCatalogFinalizationService
+import skills.services.admin.SkillCatalogFinalizationService.FinalizeState
 import skills.services.events.*
 import skills.services.events.pointsAndAchievements.ImportedSkillsAchievementsHandler
 import skills.services.userActions.DashboardAction
@@ -62,6 +65,9 @@ class SkillEventAdminService {
 
     @Autowired
     UserAchievedLevelRepo achievedLevelRepo
+
+    @Autowired
+    ExpiredUserAchievementRepo expiredUserAchievementRepo
 
     @Autowired
     RuleSetDefGraphService ruleSetDefGraphService
@@ -124,6 +130,9 @@ class SkillEventAdminService {
     @Autowired LockingService lockingService
     @Autowired AchievedGlobalBadgeHandler achievedGlobalBadgeHandler
     @Autowired @Lazy ImportedSkillsAchievementsHandler importedSkillsAchievementsHandler
+    @Autowired ProjectParticipationRepo projectParticipationRepo
+    @Autowired ArchivedUsersRepo archivedUsersRepo
+    @Autowired SkillCatalogFinalizationService catalogFinalizationService
 
     @Value('#{"${skills.bulkUserLookup.minNumOfThreads:1}"}')
     Integer minNumOfThreads
@@ -213,38 +222,137 @@ class SkillEventAdminService {
     @Profile
     @Transactional
     RequestResult bulkDeleteSkillEventsForUser(String projectId, String userId) {
+        List<Integer> attemptIds = lockQuizAttemptsForProgressDeletion(projectId, userId)
         lockingService.lockForSkillReporting(userId, projectId)
         boolean hadLocalEvents = performedSkillRepository.existsLocalEventByProjectIdAndUserId(projectId, userId)
-        performedSkillRepository.deleteAllByUserIdAndProjectId(userId, projectId)
-        userEventService.removeAllEvents(projectId, userId)
-        achievedLevelRepo.deleteAllByProjectIdAndUserId(projectId, userId)
-        userPointsRepo.deleteAllByProjectIdAndUserId(projectId, userId)
-        skillApprovalRepo.deleteAllByProjectIdAndUserId(projectId, userId)
-        userQuizAttemptRepo.deleteAllAttemptsForQuizzesAssociatedToProjectAndByUserId(projectId, userId)
+        if (!hasProjectUserData(projectId, userId, hadLocalEvents)) {
+            return RequestResult.success()
+        }
+        List<Integer> deletedQuizIds = deleteUserProgress(projectId, userId, attemptIds)
 
         catalogBackfillService.reset(projectId, userId, hadLocalEvents)
         achievedGlobalBadgeHandler.reconcileGlobalBadgesForProject(userId, projectId)
 
-        propagateUpdatesToQuizSkillsAndImportedSkills(projectId, userId)
-
-        String userIdToDisplay = userAttrsRepo.findByUserIdIgnoreCase(userId)?.userIdForDisplay ?: userId
-        userActionsHistoryService.saveUserAction(new UserActionInfo(
-                action: DashboardAction.Delete,
-                item: DashboardItem.SkillEvents,
-                actionAttributes: [
-                        deletedAllForThisUser: true,
-                        userId: userIdToDisplay,
-                ],
-                itemId: userIdToDisplay,
-                projectId: projectId,
-        ))
-
+        propagateUpdatesToQuizSkillsAndImportedSkills(projectId, userId, deletedQuizIds)
+        recordUserProgressDeletion(projectId, userId, false)
         return RequestResult.success()
     }
 
     @Profile
-    private void propagateUpdatesToQuizSkillsAndImportedSkills(String projectId, String userId) {
-        List<QuizToSkillDefRepo.ProjectIdAndSkillId> skillsToUpdateInOtherProjects = quizToSkillDefRepo.getOtherProjectsSkillRefIdsWithQuizzesInThisProject(projectId)
+    @Transactional
+    RequestResult removeUserFromProject(String projectId, String userId) {
+        String canonicalProjectId = projDefAccessor.getProjDef(projectId).projectId
+        String canonicalUserId = userId.toLowerCase(Locale.ROOT)
+        List<Integer> attemptIds = lockQuizAttemptsForProgressDeletion(canonicalProjectId, canonicalUserId)
+        // Match qualification/delivery lock order. Hold init through commit so a new
+        // finalization cannot start between the state check and the removal.
+        lockingService.lockForSkillReporting(canonicalUserId, canonicalProjectId)
+        lockingService.lockForSkillsCatalogFinalizationInit(canonicalProjectId)
+        FinalizeState state = catalogFinalizationService.getCurrentState(canonicalProjectId)
+        SkillsValidator.isTrue(state != FinalizeState.RUNNING,
+                'This user cannot be removed while Skills Catalog finalization is running. Please try again after finalization completes.', canonicalProjectId)
+        SkillsValidator.isTrue(state != FinalizeState.FAILED,
+                'This user cannot be removed because Skills Catalog finalization failed. Please resolve finalization before trying again.', canonicalProjectId)
+
+        boolean hadLocalEvents = performedSkillRepository.existsLocalEventByProjectIdAndUserId(canonicalProjectId, canonicalUserId)
+        // Archived membership can outlive all active progress (for example, after expiration).
+        // Remove it independently; it must not authorize cross-project shared-quiz cleanup.
+        ArchivedUser archivedUser = archivedUsersRepo.findByProjectIdAndUserId(canonicalProjectId, canonicalUserId)
+        if (archivedUser) {
+            archivedUsersRepo.delete(archivedUser)
+        }
+        if (!hasProjectUserData(canonicalProjectId, canonicalUserId, hadLocalEvents)) {
+            if (archivedUser) {
+                recordUserProgressDeletion(canonicalProjectId, canonicalUserId, true)
+            }
+            return RequestResult.success()
+        }
+        List<Integer> deletedQuizIds = deleteUserProgress(canonicalProjectId, canonicalUserId, attemptIds, true)
+        projectParticipationRepo.deleteByProjectIdAndUserId(canonicalProjectId, canonicalUserId)
+        // Unlike Delete All, do not reset participation or restore imported credit.
+        achievedGlobalBadgeHandler.reconcileGlobalBadgesForProject(canonicalUserId, canonicalProjectId)
+        propagateUpdatesToQuizSkillsAndImportedSkills(canonicalProjectId, canonicalUserId, deletedQuizIds)
+        recordUserProgressDeletion(canonicalProjectId, canonicalUserId, true)
+        return RequestResult.success()
+    }
+
+    private boolean hasProjectUserData(String projectId, String userId, boolean hadLocalEvents) {
+        // Called under the reporting lock. A quiz association alone must not authorize
+        // deleting an absent user's passed attempts and credit in other projects.
+        // Check stored project-local data, not catalog source events from another project.
+        return hadLocalEvents ||
+                projectParticipationRepo.existsByProjectIdAndUserId(projectId, userId) ||
+                userPointsRepo.existsByProjectIdAndUserId(projectId, userId)
+    }
+
+    private List<Integer> lockQuizAttemptsForProgressDeletion(String projectId, String userId) {
+        // Grading and completion take the attempt lock before reporting credit.
+        // Match that order, and lock multiple attempts in ascending ID order.
+        // Only pending attempts need this coordination. Cleanup assumes admins do not
+        // override completed grades concurrently; that overlap is not protected.
+        List<UserQuizAttemptRepo.ProjectCleanupAttempt> attempts = userQuizAttemptRepo.findAttemptsForProjectCleanup(projectId, userId)
+        attempts.each { UserQuizAttemptRepo.ProjectCleanupAttempt attempt ->
+            if (attempt.status in ['INPROGRESS', 'NEEDS_GRADING']) {
+                lockingService.lockUserQuizAttempt(attempt.id)
+            }
+        }
+        return attempts.collect { UserQuizAttemptRepo.ProjectCleanupAttempt attempt -> attempt.id }
+    }
+
+    private List<Integer> deleteUserProgress(String projectId, String userId, List<Integer> attemptIds, boolean cancelPendingQuizGrading = false) {
+        performedSkillRepository.deleteAllByUserIdAndProjectId(userId, projectId)
+        userEventService.removeAllEvents(projectId, userId)
+        achievedLevelRepo.deleteAllByProjectIdAndUserId(projectId, userId)
+        expiredUserAchievementRepo.deleteAllByProjectIdAndUserId(projectId, userId)
+        userPointsRepo.deleteAllByProjectIdAndUserId(projectId, userId)
+        // Remove User and Delete All assume no skill approval is in flight for this learner.
+        // An approval already in progress can still award credit after cleanup.
+        // This overlap is an accepted limitation; the assumption is not enforced.
+        skillApprovalRepo.deleteAllByProjectIdAndUserId(projectId, userId)
+        // Remove User is intended for inactive learners. Only attempts found before
+        // taking the reporting lock are eligible; a newly started attempt is not covered.
+        // Concurrent quiz linking can still backfill credit that cleanup does not see.
+        // Removal must invalidate pending grading as well as earned quiz credit;
+        // otherwise an outstanding manual or AI grade can restore deleted progress.
+        // Queued AI grading tasks are not canceled: they may still submit the stored
+        // answer to the provider and retry after removal, but their results cannot
+        // restore deleted progress. This is an accepted tradeoff for infrequent removals.
+        // Keep failed attempts for quiz history. If a quiz admin later regrades one
+        // as passing, it can award skill credit and re-add the learner to the project.
+        List<String> quizStatuses = cancelPendingQuizGrading ? ['PASSED', 'NEEDS_GRADING'] : ['PASSED']
+        // Deleting quiz attempts removes their answer records, not uploaded attachments.
+        // Existing attachment links may remain usable. Asynchronous cleanup is planned.
+        return attemptIds ? userQuizAttemptRepo.deleteAttemptsForProjectAndUser(projectId, userId, quizStatuses, attemptIds) : []
+    }
+
+    private void recordUserProgressDeletion(String projectId, String userId, boolean removedFromProject) {
+        String userIdToDisplay = userAttrsRepo.findByUserIdIgnoreCase(userId)?.userIdForDisplay ?: userId
+        userActionsHistoryService.saveUserAction(new UserActionInfo(
+                action: DashboardAction.Delete,
+                item: removedFromProject ? DashboardItem.ProjectUser : DashboardItem.SkillEvents,
+                actionAttributes: removedFromProject ? [userId: userIdToDisplay, removedFromProject: true] :
+                        [deletedAllForThisUser: true, userId: userIdToDisplay],
+                itemId: userIdToDisplay,
+                projectId: projectId,
+        ))
+    }
+
+    @Profile
+    private void propagateUpdatesToQuizSkillsAndImportedSkills(String projectId, String userId, List<Integer> deletedQuizIds) {
+        Map<Integer, Integer> quizBySkill = [:]
+        List<QuizToSkillDefRepo.ProjectIdAndSkillId> skillsToUpdateInOtherProjects = deletedQuizIds.collectMany { Integer quizRefId ->
+            List<QuizToSkillDefRepo.ProjectIdAndSkillId> skills = quizToSkillDefRepo.getSkillsForQuiz(quizRefId)
+            skills.each { quizBySkill[it.skillRefId] = quizRefId }
+            skills
+        }.findAll { !it.projectId.equalsIgnoreCase(projectId) }
+        List<Integer> quizSkillIds = skillsToUpdateInOtherProjects.collect { it.skillRefId }.unique()
+        // Capture existing credit identity even if a retake kept an older event at max points.
+        // Captured IDs protect events recorded after cleanup is queued; they do not identify
+        // which quiz awarded the credit. If a skill was reassigned to this quiz, cleanup may
+        // also remove existing credit earned under the previous quiz. This is intentional.
+        Map<Integer, List<Integer>> eventIdsBySkill = quizSkillIds ?
+                performedSkillRepository.findSkillEventIds(userId, quizSkillIds).groupBy { it.skillRefId }
+                        .collectEntries { skillRefId, events -> [(skillRefId): events.collect { it.eventId }] } : [:]
         Map<String, List<Integer>> projAndSkillIds = [:]
         Closure addToProjAndSkillIds = { String proj, List<Integer> toAdd ->
             if (toAdd) {
@@ -287,7 +395,8 @@ class SkillEventAdminService {
 
         // notify other projects
         projAndSkillIds.each {
-            taskSchedulerService.removeSkillEventsForAUser(userId, it.key, it.value)
+            taskSchedulerService.removeSkillEventsForAUser(userId, it.key, it.value,
+                    quizBySkill.subMap(it.value), eventIdsBySkill.subMap(it.value))
         }
     }
 

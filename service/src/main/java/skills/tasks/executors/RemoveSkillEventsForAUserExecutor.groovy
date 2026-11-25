@@ -28,7 +28,10 @@ import skills.services.LockingService
 import skills.services.events.SkillDate
 import skills.services.events.pointsAndAchievements.ImportedSkillsAchievementsHandler
 import skills.storage.model.SkillDefMin
+import skills.storage.model.UserQuizAttempt.QuizAttemptStatus
 import skills.storage.repos.SkillDefRepo
+import skills.storage.repos.UserPerformedSkillRepo
+import skills.storage.repos.UserQuizAttemptRepo
 import skills.tasks.data.RemoveSkillEventsForUserRequest
 
 @Component
@@ -40,6 +43,8 @@ class RemoveSkillEventsForAUserExecutor implements VoidExecutionHandler<RemoveSk
     @Autowired SkillDefRepo skillDefRepo
     @Autowired LockingService lockingService
     @Autowired ImportedSkillsAchievementsHandler importedSkillsAchievementsHandler
+    @Autowired UserQuizAttemptRepo userQuizAttemptRepo
+    @Autowired UserPerformedSkillRepo userPerformedSkillRepo
 
     @Override
     @Transactional
@@ -54,6 +59,24 @@ class RemoveSkillEventsForAUserExecutor implements VoidExecutionHandler<RemoveSk
         lockingService.lockForSkillReporting(data.userId, data.projectId)
         List<SkillDefMin> skills = data.skillRefIds.collect { Integer id -> skillDefRepo.findSkillDefMinById(id) }.findAll { it != null }
         List<Integer> localIds = skills.findAll { SkillDefMin skill -> !skill.copiedFrom }.collect { SkillDefMin skill -> skill.id }
+        if (localIds) {
+            // Preserve retakes committed before this check, not completions still in flight.
+            // Operational constraint: Remove User and Delete All are maintenance for inactive
+            // learners; keep quiz taking/grading inactive until their queued cleanup completes.
+            // A maximum-points quiz report can return without taking the reporting lock, so
+            // an overlapping completion may commit a new pass after this check while cleanup
+            // removes its shared-project credit/achievements. This rare race is accepted rather
+            // than adding reporting locks to every passed-quiz completion; inactivity is not enforced here.
+            Set<Integer> passedQuizSkillIds = userQuizAttemptRepo.findSkillRefIdsByUserIdAndStatus(
+                    localIds, data.userId, QuizAttemptStatus.PASSED).toSet()
+            localIds = localIds.findAll { Integer id ->
+                Integer quizRefId = data.quizBySkill?.get(id)
+                List<Integer> eventIds = data.eventIdsBySkill?.get(id)
+                // Legacy requests have no attribution; never delete native credit on their behalf.
+                quizRefId != null && eventIds && !passedQuizSkillIds.contains(id) &&
+                        userPerformedSkillRepo.hasOnlyCapturedQuizEvents(quizRefId, id, data.userId, eventIds)
+            }
+        }
         if (localIds) {
             batchOperationsTransactionalAccessor.batchRemovePerformedSkillsForUserAndSpecificSkills(data.userId, data.projectId, localIds)
         }

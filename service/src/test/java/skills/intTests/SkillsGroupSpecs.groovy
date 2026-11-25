@@ -25,6 +25,8 @@ import skills.storage.model.SkillRelDef
 import skills.storage.model.UserPoints
 import skills.storage.repos.SkillRelDefRepo
 
+import java.time.Instant
+
 class SkillsGroupSpecs extends DefaultIntSpec {
 
     void "create and get initial SkillsGroup" () {
@@ -1511,7 +1513,7 @@ class SkillsGroupSpecs extends DefaultIntSpec {
 
         then:
         subjectUsers.data[0].userId == user
-        subjectUsers.data[0].lastUpdated == date.toInstant().toString()
+        Instant.parse(subjectUsers.data[0].lastUpdated) == date.toInstant()
     }
 
     void "get subject for SkillsGroup" () {

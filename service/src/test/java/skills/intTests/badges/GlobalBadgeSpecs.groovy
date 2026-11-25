@@ -25,6 +25,8 @@ import skills.storage.model.UserAchievement
 import skills.storage.repos.UserAchievedLevelRepo
 import spock.lang.IgnoreIf
 
+import java.time.Instant
+
 import static skills.intTests.utils.SkillsFactory.*
 
 class GlobalBadgeSpecs extends DefaultIntSpec {
@@ -1108,7 +1110,7 @@ class GlobalBadgeSpecs extends DefaultIntSpec {
         badgeUsers.data[0].skillsAchieved == 0
         badgeUsers.data[0].numLevelsAchieved == 0
         badgeUsers.data[0].totalProgress == 0
-        badgeUsers.data[0].lastUpdated == twoDaysAgo.toInstant().toString()
+        Instant.parse(badgeUsers.data[0].lastUpdated) == twoDaysAgo.toInstant()
     }
 
     @IgnoreIf({env["SPRING_PROFILES_ACTIVE"] == "pki" })

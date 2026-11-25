@@ -40,6 +40,7 @@ import { useNumberFormat } from '@/common-components/filter/UseNumberFormat.js'
 import TableNoRes from "@/components/utils/table/TableNoRes.vue";
 import {useStorage} from "@vueuse/core";
 import { useSkillOverviewRouteUtil } from '@/components/skills/UseSkillOverviewRouteUtil.js'
+import { hasOnlyImportedEventsRemaining } from '@/components/users/SkillEventRemovalUtils.js'
 
 const dialogMessages = useDialogMessages()
 const timeUtils = useTimeUtils()
@@ -137,19 +138,19 @@ onMounted(() => {
     loadData();
   });
 })
-const loadData = () => {
+const loadData = ({ keepBusy = false } = {}) => {
   UsersService.getUserInfo(projectId.value, userId.value).then((res) => {
     if (res) {
       userIdForDisplay.value = res.userIdForDisplay;
     }
   });
-  loadTableData();
+  return loadTableData({ keepBusy });
 };
-const loadTableData = () => {
+const loadTableData = ({ keepBusy = false } = {}) => {
   table.value.options.busy = true;
   overallErrMsg.value = null;
   const url = getUrl();
-  UsersService.ajaxCall(url, {
+  return UsersService.ajaxCall(url, {
     query: filters.value.global.value ? filters.value.global.value.trim() : '',
     limit: pageSize.value,
     ascending: sortInfo.value.sortOrder === 1,
@@ -164,7 +165,10 @@ const loadTableData = () => {
     });
     table.value.options.pagination.totalRows = res.count;
     totalRows.value = res.count
-    table.value.options.busy = false;
+  }).finally(() => {
+    if (!keepBusy) {
+      table.value.options.busy = false;
+    }
   });
 };
 const getUrl = () => {
@@ -188,8 +192,16 @@ const deleteSkill = (row) => {
 };
 const deleteSelectedSkills = () => {
   overallErrMsg.value = null;
+  const importedCount = selectedSkills.value.filter((event) => event.importedSkill).length;
+  const removableCount = selectedSkills.value.length - importedCount;
+  let message = `Removing ${selectedSkills.value.length} selected skill event(s). This will permanently remove the selected removable skill events for this user and cannot be undone.`;
+  if (importedCount === selectedSkills.value.length) {
+    message = `All ${importedCount} selected skill event(s) are for skills imported from the catalog. Imported skill events cannot be deleted from this project, so no events will be deleted. To remove these events, delete them in the project where the skills originated.`;
+  } else if (importedCount > 0) {
+    message = `Removing ${removableCount} of ${selectedSkills.value.length} selected skill event(s). The ${importedCount} selected imported skill event(s) cannot be deleted from this project and will remain. Deletion permanently removes the selected removable skill events for this user and cannot be undone.`;
+  }
   dialogMessages.msgConfirm({
-    message: `Removing ${selectedSkills.value.length} selected skill(s). This will permanently remove this user's performed skills and cannot be undone.`,
+    message,
     header: 'Please Confirm!',
     acceptLabel: 'YES, Delete Them!',
     rejectLabel: 'Cancel',
@@ -211,7 +223,7 @@ const deleteSelectedSkills = () => {
           table.value.options.busy = false;
         });
       } else {
-        overallErrMsg.value = `Cannot delete skill events for skills imported from the catalog.`;
+        overallErrMsg.value = 'Cannot delete skill events for skills imported from the catalog. All selected skill events are imported, so no events were deleted. To remove these events, delete them in the project where the skills originated.';
         table.value.options.busy = false;
       }
     },
@@ -240,10 +252,21 @@ const doDeleteAllSkills = () => {
   table.value.options.busy = true;
   overallErrMsg.value = null;
   UsersService.deleteAllSkillEvents(projectId.value, userId.value)
-      .then((data) => {
+      .then(async (data) => {
         if (data.success) {
-          loadData();
+          table.value.options.pagination.currentPage = 1;
+          selectedSkills.value = [];
+          // After deletion succeeds, table refresh failures still use standard error navigation.
+          await loadData({ keepBusy: true });
           projectUserState.loadUserDetailsState(projectId.value, userId.value);
+          try {
+            const loadRemainingEventsPage = (params) => UsersService.ajaxCall(getUrl(), params, { handleError: false });
+            if (await hasOnlyImportedEventsRemaining(loadRemainingEventsPage)) {
+              overallErrMsg.value = 'Remaining skill events cannot be deleted because their skills are imported from the catalog.';
+            }
+          } catch {
+            // The warning is optional; deletion has already succeeded.
+          }
         } else {
           overallErrMsg.value = `Skill events were not removed.  ${data.explanation}`;
         }
@@ -277,7 +300,7 @@ const selectedSkills = ref([]);
 <div>
   <SubPageHeader title="Performed Skills" aria-label="Performed Skills" />
 
-  <Message v-if="overallErrMsg" severity="error">{{overallErrMsg}}</Message>
+  <Message v-if="overallErrMsg" severity="error" data-cy="performedSkills-error">{{overallErrMsg}}</Message>
   <Card :pt="{ body: { class: 'p-0!' } }">
     <template #content>
 
@@ -299,6 +322,7 @@ const selectedSkills = ref([]);
             @filter="onFilter"
             @page="pageChanged"
             @sort="sortField"
+            :first="(table.options.pagination.currentPage - 1) * pageSize"
             :rows="pageSize"
             :rowsPerPageOptions="table.options.pagination.possiblePageSizes"
             :total-records="table.options.pagination.totalRows"
@@ -445,11 +469,17 @@ const selectedSkills = ref([]);
       v-if="showDeleteDialog"
       v-model="showDeleteDialog"
       @do-remove="doDeleteAllSkills"
-      removal-text-prefix="This will delete all skill events for"
+      removal-text-prefix="This will delete all removable skill events for"
       :item-name="userIdForDisplay"
       :enable-return-focus="true">
     <div>
-      Deletion <b>cannot</b> be undone and permanently removes all skill events for this user.
+      Deletion <b>cannot</b> be undone and permanently removes this user's skill events for skills native to this project.
+    </div>
+    <div class="mt-2">
+      Skill events for skills imported from the catalog cannot be deleted and may remain after deletion.
+    </div>
+    <div class="mt-2">
+      This also deletes the user's passing attempts for shared quizzes linked to this project's skills. Related skill credit may be removed from other projects after background cleanup.
     </div>
   </RemovalValidation>
 </div>

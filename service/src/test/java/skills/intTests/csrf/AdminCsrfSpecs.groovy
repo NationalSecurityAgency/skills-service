@@ -45,6 +45,8 @@ import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandl
 import skills.intTests.utils.DefaultIntSpec
 import skills.intTests.utils.QuizDefFactory
 import skills.intTests.utils.SkillsFactory
+import skills.intTests.utils.SkillsService
+import spock.lang.IgnoreIf
 import spock.lang.Unroll
 
 import javax.net.ssl.SSLContext
@@ -56,6 +58,74 @@ class AdminCsrfSpecs extends DefaultIntSpec {
     RequestMappingHandlerMapping requestMappingHandlerMapping
 
     Integer quizQuestionId
+
+    def 'project user DELETE rejects #scenario without changing progress and accepts a valid token'() {
+        skillsService.updateSkill(SkillsFactory.createSkill(1, 1, 1, 0, 1, 0, 100))
+        SkillsService learner = createService(getRandomUsers(1)[0])
+        learner.initializeProjectProgress('TestProject1')
+        skillsService.addSkill([projectId: 'TestProject1', skillId: 'skill1'], learner.userName)
+        RestTemplate client = probeClient()
+        String token = csrfToken()
+        HttpHeaders headers = new HttpHeaders()
+        headers.accept = [MediaType.APPLICATION_JSON]
+        headers.set(HttpHeaders.COOKIE, isPkiMode ? "XSRF-TOKEN=${token}" : "${sessionCookie()}; XSRF-TOKEN=${token}")
+        if (suppliedToken) {
+            headers.set('X-XSRF-TOKEN', suppliedToken)
+        }
+        String url = "${skillsService.wsHelper.skillsService}/admin/projects/TestProject1/users/${learner.userName}"
+
+        when:
+        client.exchange(url, HttpMethod.DELETE, new HttpEntity<>(headers), String)
+
+        then:
+        HttpClientErrorException failure = thrown()
+        failure.statusCode == HttpStatus.FORBIDDEN
+        assertCsrfResponse(failure)
+        skillsService.getProjectUsers('TestProject1').data*.userId == [learner.userName]
+        learner.getSkillsSummaryForCurrentUser('TestProject1').points == 100
+        learner.getSkillsSummaryForCurrentUser('TestProject1').skillsAchieved == 1
+
+        when:
+        headers.set('X-XSRF-TOKEN', token)
+        ResponseEntity<Map> response = client.exchange(url, HttpMethod.DELETE, new HttpEntity<>(headers), Map)
+
+        then:
+        response.statusCode == HttpStatus.OK
+        response.body.success
+        skillsService.getProjectUsers('TestProject1').count == 0
+        learner.getSkillsSummaryForCurrentUser('TestProject1').points == 0
+
+        where:
+        scenario         | suppliedToken
+        'missing header' | null
+        'invalid header' | 'deliberately-invalid-token'
+    }
+
+    @IgnoreIf({ env['SPRING_PROFILES_ACTIVE'] == 'pki' })
+    def 'unauthenticated project user DELETE with valid CSRF is rejected without changing progress'() {
+        skillsService.updateSkill(SkillsFactory.createSkill(1, 1, 1, 0, 1, 0, 100))
+        SkillsService learner = createService(getRandomUsers(1)[0])
+        learner.initializeProjectProgress('TestProject1')
+        skillsService.addSkill([projectId: 'TestProject1', skillId: 'skill1'], learner.userName)
+        RestTemplate anonymous = probeClient()
+        ResponseEntity<String> tokenResponse = anonymous.getForEntity("${skillsService.wsHelper.skillsService}/public/status", String)
+        String cookie = tokenResponse.headers.get(HttpHeaders.SET_COOKIE).find { it.startsWith('XSRF-TOKEN=') }.split(';')[0]
+        HttpHeaders headers = new HttpHeaders()
+        headers.accept = [MediaType.APPLICATION_JSON]
+        headers.set(HttpHeaders.COOKIE, cookie)
+        headers.set('X-XSRF-TOKEN', cookie.substring('XSRF-TOKEN='.length()))
+
+        when:
+        anonymous.exchange("${skillsService.wsHelper.skillsService}/admin/projects/TestProject1/users/${learner.userName}",
+                HttpMethod.DELETE, new HttpEntity<>(headers), String)
+
+        then:
+        HttpClientErrorException failure = thrown()
+        failure.statusCode == HttpStatus.UNAUTHORIZED
+        skillsService.getProjectUsers('TestProject1').data*.userId == [learner.userName]
+        learner.getSkillsSummaryForCurrentUser('TestProject1').points == 100
+        learner.getSkillsSummaryForCurrentUser('TestProject1').skillsAchieved == 1
+    }
 
     private static final List<List> MULTIPART_ENDPOINTS = [
             [HttpMethod.POST, '/admin/projects/TestProject1/upload', [file: new ClassPathResource('/testSlides/test-slides-1.pdf')]],

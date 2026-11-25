@@ -29,6 +29,24 @@ import skills.storage.model.UserTagCount
 @CompileStatic
 interface UserPerformedSkillRepo extends JpaRepository<UserPerformedSkill, Integer> {
 
+    interface SkillEventId {
+        Integer getSkillRefId()
+        Integer getEventId()
+    }
+
+    @Query('''select e.skillRefId as skillRefId, e.id as eventId from UserPerformedSkill e
+              where e.userId = :userId and e.skillRefId in :skillRefIds''')
+    List<SkillEventId> findSkillEventIds(@Param('userId') String userId, @Param('skillRefIds') Collection<Integer> skillRefIds)
+
+    @Query(value = '''select count(*) > 0 and count(*) = count(case when e.id in (:eventIds) then 1 end)
+                       from quiz_to_skill_definition q
+                       join skill_definition s on s.id = q.skill_ref_id
+                       join user_performed_skill e on e.skill_ref_id = s.id and e.user_id = :userId
+                       where q.quiz_ref_id = :quizRefId and s.id = :skillRefId
+                         and s.self_reporting_type = 'Quiz' and s.copied_from_skill_ref is null''', nativeQuery = true)
+    boolean hasOnlyCapturedQuizEvents(@Param('quizRefId') Integer quizRefId, @Param('skillRefId') Integer skillRefId,
+                                      @Param('userId') String userId, @Param('eventIds') List<Integer> eventIds)
+
     @Query(value = '''select distinct a.user_id from user_quiz_attempt a
         join quiz_to_skill_definition q on q.quiz_ref_id = a.quiz_definition_ref_id
         join skill_definition s on s.id = q.skill_ref_id

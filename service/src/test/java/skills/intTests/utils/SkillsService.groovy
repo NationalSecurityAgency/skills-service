@@ -557,6 +557,10 @@ class SkillsService {
         wsHelper.adminDelete(url, props)
     }
 
+    Map removeUserFromProject(String projectId, String userId) {
+        return wsHelper.adminDelete("/projects/${projectId}/users/${userId}")
+    }
+
     def getSkill(Map props) {
         wsHelper.adminGet(getSkillUrl(props.projectId, props.subjectId, props.skillId), props)
     }
@@ -2563,6 +2567,9 @@ class SkillsService {
     }
     def archiveUsers(List<String> userIds, String projectId) {
         return wsHelper.adminPost("/projects/${projectId}/users/archive", [userIds: userIds])
+    }
+    Map getArchivedUsers(String projectId) {
+        return wsHelper.adminGet("/projects/${projectId}/users/archive?page=1&limit=10&orderBy=userId&ascending=true".toString())
     }
     def restoreArchivedUser(String userId, String projectId) {
         return wsHelper.adminPost("/projects/${projectId}/users/${userId}/restore", [:])

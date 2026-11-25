@@ -17,8 +17,8 @@ import axios from 'axios'
 import dayjs from '@/common-components/DayJsCustomizer'
 
 export default {
-  ajaxCall(url, params) {
-    return axios.get(url, { params }).then((response) => response.data)
+  ajaxCall(url, params, { handleError = true } = {}) {
+    return axios.get(url, { params, handleError }).then((response) => response.data)
   },
 
   getUserSkillsMetrics(projectId, userId) {
@@ -60,6 +60,12 @@ export default {
         `/admin/projects/${encodeURIComponent(projectId)}/users/${encodeURIComponent(userId)}/events`
       )
       .then((res) => res.data)
+  },
+  removeUserFromProject(projectId, userId) {
+    return axios.delete(
+      `/admin/projects/${encodeURIComponent(projectId)}/users/${encodeURIComponent(userId)}`,
+      { handleError: false }
+    ).then((res) => res.data)
   },
   canAccess(projectId, userId) {
     return axios

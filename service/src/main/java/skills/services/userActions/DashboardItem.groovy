@@ -42,5 +42,6 @@ enum DashboardItem {
     ProjectInvite,
     UserPreference,
     AiGradingConfig,
-    SkillsBatch
+    SkillsBatch,
+    ProjectUser
 }
