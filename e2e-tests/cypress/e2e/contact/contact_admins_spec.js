@@ -194,6 +194,68 @@ describe('Contact Project Admins Specs', () => {
         })
     });
 
+    it('sanitizes unsafe editor links before exporting an email body', () => {
+        cy.visit('/administrator/contactAdmins');
+        cy.get('[data-cy="emailUsers_subject"]').type('Safe HTML export');
+        cy.get('[data-cy="markdownEditorInput"] .toastui-editor-mode-switch').contains('Markdown').click();
+        cy.get('[data-cy="markdownEditorInput"] .toastui-editor-md-container [contenteditable="true"]')
+            .should('be.visible').type('[unsafe](javascript:alert(1)) and [safe](https://example.com)');
+        cy.get('[data-cy="markdownEditorInput"] .toastui-editor-mode-switch').contains('WYSIWYG').click();
+        cy.get('[data-cy="markdownEditorInput"] .toastui-editor-contents').should('contain.text', 'unsafe and safe');
+
+        // The outbound body is the behavior under test: server-side cleaning must
+        // not hide a regression in the dashboard's HTML-export sanitization.
+        cy.intercept('POST', '/root/users/previewEmail', (request) => {
+            expect(request.body.emailBody).not.to.contain('javascript:');
+            expect(request.body.emailBody).to.contain('https://example.com');
+        }).as('safeHtmlPreview');
+        cy.get('[data-cy="previewAdminEmail"]').should('be.enabled').click();
+        cy.wait('@safeHtmlPreview');
+        cy.get('[data-cy="emailSent"]').should('be.visible');
+        cy.getEmails().then((emails) => {
+            expect(emails[0].html).not.to.contain('javascript:');
+            expect(emails[0].html).to.contain('https://example.com');
+            expect(emails[0].text).to.contain('unsafe');
+        });
+    });
+
+    ['preview', 'broadcast'].forEach((emailPath) => {
+        it(`preserves editor horizontal rules and table alignment in email ${emailPath}`, () => {
+            const editorSelector = '[data-cy="markdownEditorInput"]';
+            const contentSelector = `${editorSelector} .toastui-editor-ww-container [contenteditable="true"]`;
+            const markdown = 'Before rule\n\n---\n\n'
+                + '| Left | Center | Right |\n| :--- | :---: | ---: |\n| left cell | center cell | right cell |';
+            cy.visit('/administrator/contactAdmins');
+            cy.get('[data-cy="emailUsers_subject"]').type('Preserved formatting');
+            cy.get(`${editorSelector} .toastui-editor-mode-switch`).contains('Markdown').click();
+            cy.get(`${editorSelector} .toastui-editor-md-container [contenteditable="true"]`)
+                .should('be.visible').type(markdown);
+            cy.get(`${editorSelector} .toastui-editor-mode-switch`).contains('WYSIWYG').click();
+
+            cy.get(contentSelector).find('hr').should('have.length', 1);
+            ['th', 'td'].forEach((tag) => {
+                cy.get(contentSelector).find(tag).should('have.length', 3).each(($cell, index) => {
+                    cy.wrap($cell).should('have.attr', 'align', ['left', 'center', 'right'][index]);
+                });
+            });
+
+            const sendButton = emailPath === 'preview' ? 'previewAdminEmail' : 'emailUsers-submitBtn';
+            cy.get(`[data-cy="${sendButton}"]`).should('be.enabled').click();
+            cy.get('[data-cy="emailSent"]').should('be.visible');
+            cy.getEmails().then((emails) => {
+                const emailDocument = new DOMParser().parseFromString(emails[0].html, 'text/html');
+                expect(emailDocument.querySelectorAll('hr')).to.have.length(1);
+                ['th', 'td'].forEach((tag) => {
+                    const alignments = Array.from(emailDocument.querySelectorAll(tag), (cell) => cell.getAttribute('align'));
+                    expect(alignments).to.deep.equal(['left', 'center', 'right']);
+                });
+                expect(emailDocument.querySelector('table').textContent).to.contain('left cell');
+                expect(emailDocument.querySelector('table').textContent).to.contain('center cell');
+                expect(emailDocument.querySelector('table').textContent).to.contain('right cell');
+            });
+        });
+    });
+
     it('attachments are not enabled', () => {
 
         cy.intercept('GET', '/public/isFeatureSupported?feature=emailservice')

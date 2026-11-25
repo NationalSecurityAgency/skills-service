@@ -42,6 +42,7 @@ import GenerateDescriptionDialog1
 import GenerateDescriptionType from "@/common-components/utilities/learning-conent-gen/GenerateDescriptionType.js";
 import InsertTableDialog from '@/common-components/utilities/markdown/InsertTableDialog.vue'
 import {normalizeLineEndings} from '@/common-components/utilities/markdown/MarkdownPasteUtils.js'
+import InputSanitizer from '@/components/utils/InputSanitizer.js'
 
 const appConfig = useAppConfig()
 const quizConfig = useQuizConfig()
@@ -183,7 +184,7 @@ const markdownText = () => {
   return toastuiEditor.value.invoke('getMarkdown')
 }
 const htmlText = () => {
-  return toastuiEditor.value.invoke('getHTML')
+  return InputSanitizer.sanitize(toastuiEditor.value.invoke('getHTML'))
 }
 const focusOnMarkdownEditor = () => {
   return toastuiEditor.value.invoke('focus')
