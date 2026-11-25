@@ -672,6 +672,7 @@ describe('Performed Skills Table Tests', () => {
         cy.openDialog('[data-cy="performedSkills-deleteAll"]')
         cy.contains('This will delete all removable skill events for user1@skills.org.');
         cy.contains('Skill events for skills imported from the catalog cannot be deleted and may remain after deletion.').should('be.visible');
+        cy.contains('This also deletes the user\'s passing attempts for shared quizzes linked to this project\'s skills. Related skill credit may be removed from other projects after background cleanup.').should('be.visible');
         cy.get('[data-cy="currentValidationText"]').type('Delete Me')
         cy.clickSaveDialogBtn()
         cy.get('[data-cy="saveDialogBtn"]').should('not.exist')
@@ -681,6 +682,31 @@ describe('Performed Skills Table Tests', () => {
         cy.get('[data-cy="performedSkills-error"]').should('not.exist');
         cy.get('[data-cy="pageHeaderStat_Points"] [data-cy="statValue"]').should('have.text', '0');
         cy.get('[data-cy="pageHeaderStat_Skills"] [data-cy="statValue"]').should('have.text', '0');
+    });
+
+    it('keeps the successful deletion visible when the optional warning lookup fails', () => {
+        cy.createSkills(1);
+        cy.report(1, false);
+        cy.visit('/administrator/projects/proj1/users/user1@skills.org/skillEvents', {
+            onBeforeLoad(win) {
+                win.localStorage.setItem('userSkillsPerformed-tablePageSize', '10');
+            }
+        });
+        cy.get(tableSelector).contains('skill1').should('be.visible');
+        cy.intercept({
+            method: 'GET',
+            pathname: '/admin/projects/proj1/performedSkills/user1%40skills.org',
+            query: { limit: '5', page: '1' },
+        }, { statusCode: 500 }).as('warningLookup');
+
+        cy.openDialog('[data-cy="performedSkills-deleteAll"]');
+        cy.get('[data-cy="currentValidationText"]').type('Delete Me');
+        cy.clickSaveDialogBtn();
+
+        cy.wait('@warningLookup');
+        cy.get(tableSelector).contains('There are no records to show').should('be.visible');
+        cy.get('[data-cy="performedSkills-error"]').should('not.exist');
+        cy.get('[data-cy="pageHeaderStat_Points"] [data-cy="statValue"]').should('have.text', '0');
     });
 
     [

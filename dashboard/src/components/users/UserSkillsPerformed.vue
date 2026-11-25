@@ -258,10 +258,13 @@ const doDeleteAllSkills = () => {
           selectedSkills.value = [];
           await loadData({ keepBusy: true });
           projectUserState.loadUserDetailsState(projectId.value, userId.value);
-          const loadRemainingEventsPage = (params) => UsersService.ajaxCall(getUrl(), params);
-          const onlyImportedEventsRemain = await hasOnlyImportedEventsRemaining(loadRemainingEventsPage);
-          if (onlyImportedEventsRemain) {
-            overallErrMsg.value = 'Remaining skill events cannot be deleted because their skills are imported from the catalog.';
+          try {
+            const loadRemainingEventsPage = (params) => UsersService.ajaxCall(getUrl(), params, { handleError: false });
+            if (await hasOnlyImportedEventsRemaining(loadRemainingEventsPage)) {
+              overallErrMsg.value = 'Remaining skill events cannot be deleted because their skills are imported from the catalog.';
+            }
+          } catch {
+            // The warning is optional; deletion has already succeeded.
           }
         } else {
           overallErrMsg.value = `Skill events were not removed.  ${data.explanation}`;
@@ -473,6 +476,9 @@ const selectedSkills = ref([]);
     </div>
     <div class="mt-2">
       Skill events for skills imported from the catalog cannot be deleted and may remain after deletion.
+    </div>
+    <div class="mt-2">
+      This also deletes the user's passing attempts for shared quizzes linked to this project's skills. Related skill credit may be removed from other projects after background cleanup.
     </div>
   </RemovalValidation>
 </div>

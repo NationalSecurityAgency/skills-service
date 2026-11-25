@@ -17,8 +17,8 @@ import axios from 'axios'
 import dayjs from '@/common-components/DayJsCustomizer'
 
 export default {
-  ajaxCall(url, params) {
-    return axios.get(url, { params }).then((response) => response.data)
+  ajaxCall(url, params, { handleError = true } = {}) {
+    return axios.get(url, { params, handleError }).then((response) => response.data)
   },
 
   getUserSkillsMetrics(projectId, userId) {
