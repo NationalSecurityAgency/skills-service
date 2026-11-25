@@ -409,6 +409,48 @@ interface ProjDefRepo extends CrudRepository<ProjDef, Long> {
     @Nullable
     List<AvailableProjectSummary> getAvailableProjectSummariesInProduction(String userId, String userCommunityUserTagKey, String userCommunityUserTagValue)
 
+    // likePattern is a lower case LIKE pattern; names and descriptions (large objects) are compared lower case w/ &amp; decoded
+    @Query(value = """
+                SELECT pd.project_id
+                FROM project_definition pd
+                WHERE pd.project_id IN (?1) AND (
+                    replace(lower(pd.name), '&amp;', '&') LIKE ?2 OR
+                    replace(lower(coalesce(convert_from(lo_get(CAST(NULLIF(pd.description, '') AS oid)), 'UTF8'), '')), '&amp;', '&') LIKE ?2 OR
+                    EXISTS (
+                        SELECT 1 FROM skill_definition sd
+                        WHERE sd.project_id = pd.project_id
+                          AND sd.type IN ('Subject', 'SkillsGroup', 'Skill')
+                          AND sd.enabled = 'true'
+                          AND (replace(lower(sd.name), '&amp;', '&') LIKE ?2 OR
+                               replace(lower(coalesce(convert_from(lo_get(CAST(NULLIF(sd.description, '') AS oid)), 'UTF8'), '')), '&amp;', '&') LIKE ?2)
+                    )
+                )
+            """, nativeQuery = true)
+    List<String> findProjectIdsMatchingCatalogSearchTerm(Collection<String> projectIds, String likePattern)
+
+    @Query(value = """
+                SELECT pd.project_id
+                FROM project_definition pd
+                WHERE pd.project_id IN (?1) AND replace(lower(coalesce(convert_from(lo_get(CAST(NULLIF(pd.description, '') AS oid)), 'UTF8'), '')), '&amp;', '&') LIKE ?2
+            """, nativeQuery = true)
+    List<String> findProjectIdsWithDescriptionMatchingCatalogSearchTerm(Collection<String> projectIds, String likePattern)
+
+    static interface CatalogSearchSkillMatch {
+        String getProjectId()
+        String getName()
+    }
+
+    @Query(value = """
+                SELECT sd.project_id AS projectId, sd.name AS name
+                FROM skill_definition sd
+                WHERE sd.project_id IN (?1)
+                  AND sd.type = 'Skill'
+                  AND sd.enabled = 'true'
+                  AND (replace(lower(sd.name), '&amp;', '&') LIKE ?2 OR
+                       replace(lower(coalesce(convert_from(lo_get(CAST(NULLIF(sd.description, '') AS oid)), 'UTF8'), '')), '&amp;', '&') LIKE ?2)
+            """, nativeQuery = true)
+    List<CatalogSearchSkillMatch> findSkillsMatchingCatalogSearchTerm(Collection<String> projectIds, String likePattern)
+
     @Query(value="""
             SELECT pd.project_id as projectId,
                    GREATEST(

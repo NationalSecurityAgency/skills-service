@@ -976,6 +976,10 @@ class SkillsService {
         wsHelper.apiGet(url)
     }
 
+    def searchAvailableMyProjects(String query) {
+        wsHelper.apiGet("/availableForMyProjects/search", [query: query])
+    }
+
     def addMyProject(String projectId) {
         String url = "/myprojects/${projectId}"
         wsHelper.apiPost(url, null)

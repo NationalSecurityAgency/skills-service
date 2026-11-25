@@ -32,8 +32,10 @@ import skills.PublicProps
 import skills.controller.exceptions.ErrorCode
 import skills.controller.exceptions.SkillException
 import skills.controller.exceptions.SkillExceptionBuilder
+import skills.controller.exceptions.SkillsValidator
 import skills.controller.result.model.AvailableProjectResult
 import skills.controller.result.model.GlobalBadgeLevelRes
+import skills.controller.result.model.ProjectCatalogSearchResult
 import skills.controller.result.model.SettingsResult
 import skills.controller.result.model.SkillTagRes
 import skills.services.BadgeUtils
@@ -222,6 +224,72 @@ class SkillsLoader {
         }
 
         return res;
+    }
+
+    static final int CATALOG_SEARCH_MAX_LENGTH = 100
+    static final int CATALOG_SEARCH_MAX_WORDS = 10
+    static final int CATALOG_SEARCH_MAX_SKILL_NAMES = 5
+
+    /**
+     * Finds catalog projects where every search word appears in the project name, the project description,
+     * or the name or description of an enabled subject, group or skill. Only projects already in the user's catalog are searched.
+     */
+    @Profile
+    @Transactional(readOnly = true)
+    List<ProjectCatalogSearchResult> searchAvailableForMyProjects(String userId, String query) {
+        SkillsValidator.isTrue(query == null || query.length() <= CATALOG_SEARCH_MAX_LENGTH, "Search must not exceed ${CATALOG_SEARCH_MAX_LENGTH} characters")
+        List<String> words = (query ?: '').toLowerCase().trim().split(/\s+/).findAll { it }.unique()
+        SkillsValidator.isTrue(words.size() <= CATALOG_SEARCH_MAX_WORDS, "Search must not have more than ${CATALOG_SEARCH_MAX_WORDS} words")
+        if (!words) {
+            return []
+        }
+        List<String> likePatterns = words.collect { "%${escapeLikeWildcards(it)}%".toString() }
+
+        List<String> catalogProjectIds = getAvailableProjectSummaries(userId).collect { it.getProjectId() }
+        Set<String> matched = new HashSet<>(catalogProjectIds)
+        for (String likePattern : likePatterns) {
+            if (!matched) {
+                return []
+            }
+            matched = new HashSet<>(projDefRepo.findProjectIdsMatchingCatalogSearchTerm(matched, likePattern))
+        }
+        if (!matched) {
+            return []
+        }
+
+        Set<String> descriptionMatched = new HashSet<>()
+        Map<String, Map<String, CatalogSkillHit>> skillHitsByProject = [:]
+        for (String likePattern : likePatterns) {
+            descriptionMatched.addAll(projDefRepo.findProjectIdsWithDescriptionMatchingCatalogSearchTerm(matched, likePattern))
+            projDefRepo.findSkillsMatchingCatalogSearchTerm(matched, likePattern).each { ProjDefRepo.CatalogSearchSkillMatch skill ->
+                Map<String, CatalogSkillHit> hits = skillHitsByProject.computeIfAbsent(skill.getProjectId(), { [:] })
+                // reused skills share the name of the original; count each name once
+                String name = InputSanitizer.unsanitizeName(skill.getName())
+                CatalogSkillHit hit = hits.computeIfAbsent(name, { new CatalogSkillHit(name: name) })
+                hit.patterns.add(likePattern)
+            }
+        }
+
+        return catalogProjectIds.findAll { matched.contains(it) }.collect { String projectId ->
+            List<CatalogSkillHit> hits = (skillHitsByProject[projectId]?.values() ?: []).sort { CatalogSkillHit a, CatalogSkillHit b ->
+                b.patterns.size() <=> a.patterns.size() ?: a.name.toLowerCase() <=> b.name.toLowerCase()
+            }
+            new ProjectCatalogSearchResult(
+                    projectId: projectId,
+                    descriptionMatched: descriptionMatched.contains(projectId),
+                    matchedSkills: hits.take(CATALOG_SEARCH_MAX_SKILL_NAMES).collect { it.name },
+                    numMatchedSkills: hits.size(),
+            )
+        }
+    }
+
+    private static class CatalogSkillHit {
+        String name
+        Set<String> patterns = new HashSet<>()
+    }
+
+    private static String escapeLikeWildcards(String value) {
+        return value.replace('\\', '\\\\').replace('%', '\\%').replace('_', '\\_')
     }
 
     private List<ProjDefRepo.AvailableProjectSummary> getAvailableProjectSummaries(String userId) {

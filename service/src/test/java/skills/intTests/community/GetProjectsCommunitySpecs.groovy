@@ -109,6 +109,36 @@ class GetProjectsCommunitySpecs extends DefaultIntSpec {
         !forMyProjects[0].isMyProject
     }
 
+    def "project catalog search only returns user community projects to members of the UC"() {
+        List<String> users = getRandomUsers(3)
+        SkillsService allDragonsUser = createService(users[0])
+        SkillsService pristineDragonsUser = createService(users[1])
+        SkillsService otherPristineDragonsUser = createService(users[2])
+        SkillsService rootUser = createRootSkillService()
+        rootUser.saveUserTag(pristineDragonsUser.userName, 'dragons', ['DivineDragon'])
+        rootUser.saveUserTag(otherPristineDragonsUser.userName, 'dragons', ['DivineDragon'])
+        List projs = (1..2).collect { int numProj ->
+            def proj = SkillsFactory.createProject(numProj)
+            proj.enableProtectedUserCommunity = numProj == 2 // 2nd project has user community protection enabled
+            pristineDragonsUser.createProject(proj)
+            pristineDragonsUser.createSubject(SkillsFactory.createSubject(numProj, 1))
+            def skill = SkillsFactory.createSkill(numProj, 1, 1)
+            skill.name = "Dragon Lore ${numProj}".toString()
+            pristineDragonsUser.createSkill(skill)
+            pristineDragonsUser.enableProdMode(proj)
+            return proj
+        }
+
+        when:
+        def allDragonsRes = allDragonsUser.searchAvailableMyProjects("dragon lore")
+        def pristineDragonsRes = otherPristineDragonsUser.searchAvailableMyProjects("dragon lore")
+
+        then:
+        allDragonsRes.collect { it.projectId } == [projs[0].projectId]
+        pristineDragonsRes.collect { it.projectId } == [projs[0].projectId, projs[1].projectId]
+        pristineDragonsRes[1].matchedSkills == ["Dragon Lore 2"]
+    }
+
     def "user community project is included in availableForMyProjects when user is a member of the UC"() {
         List<String> users = getRandomUsers(2)
         SkillsService otherPristineDragonsUser = createService(users[0])
