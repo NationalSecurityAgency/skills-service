@@ -62,8 +62,20 @@ export const useSkillsDisplayAttributesState = defineStore('skillsDisplayAttribu
       withCredentials: false
     }).then((result) => {
       config.value = { ...result.data, configForProjectId: projectId.value }
+      registerCustomPlurals()
     }).finally(() => {
       loadingConfig.value = false
+    })
+  }
+
+  // custom plurals are registered so every pluralize call on a custom label uses them
+  const registerCustomPlurals = () => {
+    ['project', 'subject', 'group', 'skill', 'level', 'point'].forEach((label) => {
+      const singular = config.value[`${label}DisplayName`]
+      const customPlural = config.value[`${label}DisplayNamePlural`]
+      if (singular && customPlural) {
+        pluralize.addIrregularRule(singular, customPlural)
+      }
     })
   }
 

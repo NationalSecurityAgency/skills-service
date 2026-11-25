@@ -173,6 +173,12 @@ class PublicConfigController {
                     'skill.displayName',
                     'level.displayName',
                     'point.displayName',
+                    'project.displayNamePlural',
+                    'subject.displayNamePlural',
+                    'group.displayNamePlural',
+                    'skill.displayNamePlural',
+                    'level.displayNamePlural',
+                    'point.displayNamePlural',
                     Settings.GROUP_DESCRIPTIONS.settingName,
                     Settings.SHOW_PROJECT_DESCRIPTION_EVERYWHERE.settingName,
                     Settings.GROUP_INFO_ON_SKILL_PAGE.settingName,
@@ -205,6 +211,12 @@ class PublicConfigController {
             String customPointName = projectSettings?['point.displayName']
             if (customPointName) {
                 res["pointDisplayName"] = customPointName
+            }
+            ['project', 'subject', 'group', 'skill', 'level', 'point'].each { String label ->
+                String customPlural = projectSettings?["${label}.displayNamePlural".toString()]
+                if (customPlural) {
+                    res["${label}DisplayNamePlural".toString()] = customPlural
+                }
             }
             Boolean groupDescriptionsOn = Boolean.valueOf(projectSettings?[Settings.GROUP_DESCRIPTIONS.settingName])
             if (groupDescriptionsOn) {

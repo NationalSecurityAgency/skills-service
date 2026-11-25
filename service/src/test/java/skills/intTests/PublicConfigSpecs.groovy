@@ -16,6 +16,7 @@
 package skills.intTests
 
 import skills.intTests.utils.DefaultIntSpec
+import skills.intTests.utils.SkillsFactory
 import spock.lang.IgnoreIf
 import spock.lang.Requires
 
@@ -78,5 +79,29 @@ class PublicConfigSpecs extends DefaultIntSpec {
         config
         config.docsHost == "https://skilltreeplatform.dev"
         config.enablePageVisitReporting == false
+    }
+
+    def "Client Display configs include custom label plurals only when configured"() {
+        def proj = SkillsFactory.createProject()
+        skillsService.createProject(proj)
+        skillsService.addOrUpdateProjectSetting(proj.projectId, 'point.displayName', 'Punkt')
+
+        when:
+        def configBefore = skillsService.getPublicClientDisplayConfigs(proj.projectId)
+        skillsService.addOrUpdateProjectSetting(proj.projectId, 'point.displayNamePlural', 'Punkte')
+        skillsService.addOrUpdateProjectSetting(proj.projectId, 'level.displayNamePlural', 'Niveles')
+        def configAfter = skillsService.getPublicClientDisplayConfigs(proj.projectId)
+
+        then:
+        configBefore.pointDisplayName == 'Punkt'
+        !configBefore.pointDisplayNamePlural
+        configAfter.pointDisplayName == 'Punkt'
+        configAfter.pointDisplayNamePlural == 'Punkte'
+        configAfter.levelDisplayName == 'Level'
+        configAfter.levelDisplayNamePlural == 'Niveles'
+        !configAfter.projectDisplayNamePlural
+        !configAfter.subjectDisplayNamePlural
+        !configAfter.groupDisplayNamePlural
+        !configAfter.skillDisplayNamePlural
     }
 }
