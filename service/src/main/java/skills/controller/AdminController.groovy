@@ -50,6 +50,7 @@ import skills.services.adminGroup.AdminGroupService
 import skills.services.attributes.ExpirationAttrs
 import skills.services.attributes.SkillAttributeService
 import skills.services.attributes.SkillVideoAttrs
+import skills.services.attributes.FlashCardsAttrs
 import skills.services.attributes.SlidesAttrs
 import skills.services.events.AddSkillHelper
 import skills.services.events.BatchReportService
@@ -61,6 +62,7 @@ import skills.services.settings.ProjectSettingsValidator
 import skills.services.settings.Settings
 import skills.services.settings.SettingsService
 import skills.services.settings.listeners.ValidationRes
+import skills.services.flashCards.AdminFlashCardsService
 import skills.services.slides.AdminSlidesService
 import skills.services.userActions.DashboardAction
 import skills.services.userActions.DashboardItem
@@ -194,6 +196,9 @@ class AdminController {
 
     @Autowired
     AdminSlidesService adminSlidesService
+
+    @Autowired
+    AdminFlashCardsService adminFlashCardsService
 
     @Autowired
     UserAchievementExpirationService userAchievementExpirationService
@@ -720,6 +725,21 @@ class AdminController {
             throw new SkillException("Width cannot be greater than 100000", projectId, skillId, ErrorCode.BadParam)
         }
         return adminSlidesService.saveSlides(projectId, skillId, isAlreadyHosted, file, slidesUrl, width)
+    }
+
+    @RequestMapping(value = "/projects/{projectId}/skills/{skillId}/flashCards", method = [RequestMethod.POST, RequestMethod.PUT], produces = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseBody
+    FlashCardsAttrs saveFlashCards(@PathVariable("projectId") String projectId,
+                                   @PathVariable("skillId") String skillId,
+                                   @RequestBody FlashCardsAttrs flashCards) {
+        return adminFlashCardsService.saveFlashCards(projectId, skillId, flashCards)
+    }
+
+    @RequestMapping(value = "/projects/{projectId}/skills/{skillId}/flashCards", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseBody
+    FlashCardsAttrs getFlashCards(@PathVariable("projectId") String projectId,
+                                  @PathVariable("skillId") String skillId) {
+        return adminFlashCardsService.getFlashCards(projectId, skillId)
     }
 
     @RequestMapping(value = "/projects/{projectId}/skills/{skillId}/slides", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)

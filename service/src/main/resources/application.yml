@@ -258,6 +258,9 @@ skills:
       maxTagValueLengthInApprovalWorkloadConfig: 10
       maxVideoCaptionsLength: 5000
       maxVideoTranscriptLength: 20000
+      maxFlashCardsPerSkill: 100
+      maxFlashCardTextLength: 2000
+      maxFlashCardHintLength: 500
       motivationalSkillWarningGracePeriod: .3
       videoUploadWarningMessage:
       videoUploadLoadingBarLengthyCalculationTimeoutRatio: 75000

@@ -58,6 +58,18 @@ class SkillAttributeService {
         saveAttrs(projectId, skillId, SkillAttributesDef.SkillAttributesType.Video, videoAttrs)
     }
 
+    void saveFlashCardsAttrs(String projectId, String skillId, FlashCardsAttrs flashCardsAttrs) {
+        saveAttrs(projectId, skillId, SkillAttributesType.FlashCards, flashCardsAttrs)
+    }
+
+    FlashCardsAttrs getFlashCardsAttrs(String projectId, String skillId) {
+        return getAttrs(projectId, skillId, SkillAttributesType.FlashCards, FlashCardsAttrs.class)
+    }
+
+    FlashCardsAttrs getFlashCardsAttrs(Integer skillRefId) {
+        return convertAttrs(skillAttributesDefRepo.findBySkillRefIdAndType(skillRefId, SkillAttributesType.FlashCards), FlashCardsAttrs.class)
+    }
+
     void saveSlidesAttrs(String projectId, String skillId, SlidesAttrs slidesAttrs) {
         saveAttrs(projectId, skillId, SkillAttributesType.Slides, slidesAttrs)
     }

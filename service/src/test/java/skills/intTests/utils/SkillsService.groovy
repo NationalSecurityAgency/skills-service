@@ -2455,6 +2455,14 @@ class SkillsService {
         String url = (isQuiz ? "/quiz-definitions" : "/projects") + "/${quizOrProjectId}/" + (isQuiz ? "questions" : "skills") + "/${questionOrSkillId}/slides"
         return wsHelper.adminUpload(url, body, true)
     }
+    def saveFlashCards(String projectId, String skillId, Map flashCards) {
+        return wsHelper.adminPost("/projects/${projectId}/skills/${skillId}/flashCards".toString(), flashCards).body
+    }
+
+    def getFlashCards(String projectId, String skillId) {
+        return wsHelper.adminGet("/projects/${projectId}/skills/${skillId}/flashCards".toString())
+    }
+
     def getSlidesAttributes(String quizOrProjectId, String questionOrSkillId, Boolean isQuiz = false) {
         String url = (isQuiz ? "/quiz-definitions" : "/projects") + "/${quizOrProjectId}/" + (isQuiz ? "questions" : "skills") + "/${questionOrSkillId}/slides"
         return wsHelper.adminGet(url)

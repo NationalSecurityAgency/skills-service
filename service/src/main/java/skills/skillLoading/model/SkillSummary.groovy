@@ -16,6 +16,7 @@
 package skills.skillLoading.model
 
 import skills.controller.result.model.SkillTagRes
+import skills.services.attributes.FlashCardsAttrs
 import skills.storage.model.SimpleBadgeRes
 
 class SkillSummary extends SkillSummaryParent {
@@ -49,6 +50,7 @@ class SkillSummary extends SkillSummaryParent {
 
     VideoSummary videoSummary
     SlidesSummary slidesSummary
+    List<FlashCardsAttrs.FlashCard> flashCards
 
     Boolean isMotivationalSkill
     int daysOfInactivityBeforeExp

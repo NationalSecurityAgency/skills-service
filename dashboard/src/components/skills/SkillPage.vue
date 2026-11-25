@@ -92,6 +92,7 @@ const buildNavItems = () => {
   const items = []
   items.push({ name: 'Overview', iconClass: 'fa-info-circle skills-color-overview', page: `${suffix}`, params: routeProps.params })
   items.push({ name: 'Slides', iconClass: 'fa-solid fa-file-pdf', page: `ConfigureSlides${suffix}`, params: routeProps.params })
+  items.push({ name: 'Flash Cards', iconClass: 'fa-solid fa-clone', page: `ConfigureFlashCards${suffix}`, params: routeProps.params })
   items.push({ name: 'Audio/Video', iconClass: 'fa-play-circle skills-color-video', page: `ConfigureVideo${suffix}`, params: routeProps.params })
   items.push({
     name: 'Expiration',
