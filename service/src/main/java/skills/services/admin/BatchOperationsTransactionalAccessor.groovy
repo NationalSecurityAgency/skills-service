@@ -554,8 +554,12 @@ class BatchOperationsTransactionalAccessor {
         }.findAll { it != null }.unique { it.id }
         if (groups) {
             groups.each { SkillDef group ->
-                long userAchievementNumRemoved = userAchievedLevelRepo.deleteAllBySkillRefIdAndUserId(group.id, userId)
-                log.info("Removed [{}] UserAchievement records for user=[{}], group.id=[{}({})]", userAchievementNumRemoved, userId, group.skillId, group.id)
+                int required = skillsGroupAdminService.getActualNumSkillsRequred(group.numSkillsRequired, group.id)
+                int achieved = userAchievedLevelRepo.countAchievedChildren(userId, group.projectId, group.skillId, SkillRelDef.RelationshipType.SkillsGroupRequirement)
+                if (achieved < required) {
+                    long userAchievementNumRemoved = userAchievedLevelRepo.deleteAllBySkillRefIdAndUserId(group.id, userId)
+                    log.info("Removed [{}] UserAchievement records for user=[{}], group.id=[{}({})]", userAchievementNumRemoved, userId, group.skillId, group.id)
+                }
             }
         }
     }

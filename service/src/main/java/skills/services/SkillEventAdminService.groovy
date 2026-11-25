@@ -227,12 +227,12 @@ class SkillEventAdminService {
         if (!hasProjectUserData(projectId, userId, hadLocalEvents)) {
             return RequestResult.success()
         }
-        deleteUserProgress(projectId, userId)
+        List<Integer> deletedAttemptQuizIds = deleteUserProgress(projectId, userId)
 
         catalogBackfillService.reset(projectId, userId, hadLocalEvents)
         achievedGlobalBadgeHandler.reconcileGlobalBadgesForProject(userId, projectId)
 
-        propagateUpdatesToQuizSkillsAndImportedSkills(projectId, userId)
+        propagateUpdatesToQuizSkillsAndImportedSkills(projectId, userId, deletedAttemptQuizIds)
         recordUserProgressDeletion(projectId, userId, false)
         return RequestResult.success()
     }
@@ -265,11 +265,11 @@ class SkillEventAdminService {
             }
             return RequestResult.success()
         }
-        deleteUserProgress(canonicalProjectId, canonicalUserId, true)
+        List<Integer> deletedAttemptQuizIds = deleteUserProgress(canonicalProjectId, canonicalUserId, true)
         projectParticipationRepo.deleteByProjectIdAndUserId(canonicalProjectId, canonicalUserId)
         // Unlike Delete All, do not reset participation or restore imported credit.
         achievedGlobalBadgeHandler.reconcileGlobalBadgesForProject(canonicalUserId, canonicalProjectId)
-        propagateUpdatesToQuizSkillsAndImportedSkills(canonicalProjectId, canonicalUserId)
+        propagateUpdatesToQuizSkillsAndImportedSkills(canonicalProjectId, canonicalUserId, deletedAttemptQuizIds)
         recordUserProgressDeletion(canonicalProjectId, canonicalUserId, true)
         return RequestResult.success()
     }
@@ -283,7 +283,7 @@ class SkillEventAdminService {
                 userPointsRepo.existsByProjectIdAndUserId(projectId, userId)
     }
 
-    private void deleteUserProgress(String projectId, String userId, boolean cancelPendingQuizGrading = false) {
+    private List<Integer> deleteUserProgress(String projectId, String userId, boolean cancelPendingQuizGrading = false) {
         performedSkillRepository.deleteAllByUserIdAndProjectId(userId, projectId)
         userEventService.removeAllEvents(projectId, userId)
         achievedLevelRepo.deleteAllByProjectIdAndUserId(projectId, userId)
@@ -298,10 +298,14 @@ class SkillEventAdminService {
         // Queued AI grading tasks are not canceled: they may still submit the stored
         // answer to the provider and retry after removal, but their results cannot
         // restore deleted progress. This is an accepted tradeoff for infrequent removals.
+        // Keep failed attempts for quiz history. If a quiz admin later regrades one
+        // as passing, it can award skill credit and re-add the learner to the project.
         List<String> quizStatuses = cancelPendingQuizGrading ? ['PASSED', 'NEEDS_GRADING'] : ['PASSED']
         // Deleting quiz attempts removes their answer records, not uploaded attachments.
         // Existing attachment links may remain usable. Asynchronous cleanup is planned.
-        userQuizAttemptRepo.deleteAllAttemptsForQuizzesAssociatedToProjectAndByUserId(projectId, userId, quizStatuses)
+        return quizToSkillDefRepo.getQuizRefIdsForProject(projectId).findAll { Integer quizRefId ->
+            userQuizAttemptRepo.deleteAttemptsForQuizAndUser(quizRefId, userId, quizStatuses) > 0
+        }
     }
 
     private void recordUserProgressDeletion(String projectId, String userId, boolean removedFromProject) {
@@ -317,8 +321,10 @@ class SkillEventAdminService {
     }
 
     @Profile
-    private void propagateUpdatesToQuizSkillsAndImportedSkills(String projectId, String userId) {
-        List<QuizToSkillDefRepo.ProjectIdAndSkillId> skillsToUpdateInOtherProjects = quizToSkillDefRepo.getOtherProjectsSkillRefIdsWithQuizzesInThisProject(projectId)
+    private void propagateUpdatesToQuizSkillsAndImportedSkills(String projectId, String userId, List<Integer> deletedAttemptQuizIds) {
+        List<QuizToSkillDefRepo.ProjectIdAndSkillId> skillsToUpdateInOtherProjects = deletedAttemptQuizIds.collectMany { Integer quizRefId ->
+            quizToSkillDefRepo.getSkillsForQuiz(quizRefId)
+        }.findAll { !it.projectId.equalsIgnoreCase(projectId) }
         Map<String, List<Integer>> projAndSkillIds = [:]
         Closure addToProjAndSkillIds = { String proj, List<Integer> toAdd ->
             if (toAdd) {

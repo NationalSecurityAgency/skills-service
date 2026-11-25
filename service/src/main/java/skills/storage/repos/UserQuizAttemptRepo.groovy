@@ -293,17 +293,8 @@ interface UserQuizAttemptRepo extends JpaRepository<UserQuizAttempt, Long> {
 
     @Modifying
     @Query(value = '''delete from user_quiz_attempt
-                      where id in (select attempt.id
-                                 from skill_definition skill,
-                                      quiz_to_skill_definition q_to_s,
-                                      user_quiz_attempt attempt
-                                 where skill.project_id = ?1
-                                   and attempt.user_id = ?2
-                                   and self_reporting_type = 'Quiz'
-                                   and q_to_s.skill_ref_id = skill.id
-                                   and q_to_s.quiz_ref_id = attempt.quiz_definition_ref_id
-                                    and attempt.status in ?3)''' , nativeQuery = true)
-    int deleteAllAttemptsForQuizzesAssociatedToProjectAndByUserId(String projectId, String userId, List<String> statuses)
+                      where quiz_definition_ref_id = ?1 and user_id = ?2 and status in ?3''', nativeQuery = true)
+    int deleteAttemptsForQuizAndUser(Integer quizRefId, String userId, List<String> statuses)
 
     static interface TagValueCount {
         String getTagValue()

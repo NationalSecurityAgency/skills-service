@@ -22,6 +22,7 @@ import skills.intTests.utils.SkillsClientException
 import skills.intTests.utils.SkillsService
 import skills.storage.model.SkillDef.SelfReportingType
 import skills.storage.model.auth.RoleName
+import skills.storage.repos.UserAchievedLevelRepo
 import spock.util.concurrent.PollingConditions
 
 import javax.sql.DataSource
@@ -37,6 +38,7 @@ import static skills.intTests.utils.SkillsFactory.*
 class ProjectUserRemovalQuizSpecs extends QuizSkillAchievementsBaseIntSpec {
 
     @Autowired DataSource dataSource
+    @Autowired UserAchievedLevelRepo userAchievedLevelRepo
 
     def "removal waits for quiz completion to commit and clears shared credit without restoring participation"() {
         Map quiz = createQuiz(1)
@@ -230,6 +232,45 @@ class ProjectUserRemovalQuizSpecs extends QuizSkillAchievementsBaseIntSpec {
         skillsService.getPerformedSkills(learner.userName, 'TestProject2').data*.skillId == [unrelated.skillId]
         skillsService.getQuizRuns(quiz.quizId).data*.attemptId == [failedAttempt]
         skillsService.getProjectUsers('TestProject1').count == 0
+    }
+
+    def "removal reconciles a shared quiz skill group when quiz passed=#passedQuiz and group requires #required skills"() {
+        Map quiz = createQuiz(1)
+        Map source = createSkill(1, 1, 1, 0, 1, 0, 100) + [selfReportingType: SelfReportingType.Quiz, quizId: quiz.quizId]
+        Map local = createSkill(1, 1, 2, 0, 1, 0, 100)
+        Map shared = createSkill(2, 1, 1, 0, 1, 0, 100) + [selfReportingType: SelfReportingType.Quiz, quizId: quiz.quizId]
+        Map other = createSkill(2, 1, 2, 0, 1, 0, 100)
+        Map group = createSkillsGroup(2, 1, 3)
+        skillsService.createProjectAndSubjectAndSkills(createProject(1), createSubject(1, 1), [source, local])
+        skillsService.createProjectAndSubjectAndSkills(createProject(2), createSubject(2, 1), [group])
+        [shared, other].each { Map skill -> skillsService.assignSkillToSkillsGroup(group.skillId, skill) }
+        group.numSkillsRequired = required
+        skillsService.updateSkill(group, null)
+        SkillsService learner = createService(getRandomUsers(1)[0])
+        skillsService.addSkill(local, learner.userName)
+        if (passedQuiz) {
+            passQuiz(learner, quiz)
+        }
+        skillsService.addSkill(other, learner.userName)
+        waitForAsyncTasksCompletion.waitForAllScheduleTasks()
+
+        expect:
+        userAchievedLevelRepo.findAllByUserIdAndProjectIdAndSkillId(learner.userName, group.projectId, group.skillId).size() == 1
+
+        when:
+        skillsService.removeUserFromProject(source.projectId, learner.userName)
+        waitForAsyncTasksCompletion.waitForAllScheduleTasks()
+
+        then:
+        learner.getSkillsSummaryForCurrentUser(source.projectId).points == 0
+        learner.getSkillsSummaryForCurrentUser(group.projectId).skillsAchieved == 1
+        userAchievedLevelRepo.findAllByUserIdAndProjectIdAndSkillId(learner.userName, group.projectId, group.skillId).size() == remainingAchievements
+
+        where:
+        passedQuiz | required | remainingAchievements
+        false      | 1        | 1
+        true       | 1        | 1
+        true       | -1       | 0
     }
 
     def "project quiz association authorizes rolling removal without administering the shared quiz or other project"() {
