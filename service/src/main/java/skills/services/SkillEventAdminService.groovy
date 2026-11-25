@@ -222,12 +222,13 @@ class SkillEventAdminService {
     @Profile
     @Transactional
     RequestResult bulkDeleteSkillEventsForUser(String projectId, String userId) {
+        List<Integer> attemptIds = lockQuizAttemptsForProgressDeletion(projectId, userId)
         lockingService.lockForSkillReporting(userId, projectId)
         boolean hadLocalEvents = performedSkillRepository.existsLocalEventByProjectIdAndUserId(projectId, userId)
         if (!hasProjectUserData(projectId, userId, hadLocalEvents)) {
             return RequestResult.success()
         }
-        List<Integer> deletedQuizIds = deleteUserProgress(projectId, userId)
+        List<Integer> deletedQuizIds = deleteUserProgress(projectId, userId, attemptIds)
 
         catalogBackfillService.reset(projectId, userId, hadLocalEvents)
         achievedGlobalBadgeHandler.reconcileGlobalBadgesForProject(userId, projectId)
@@ -242,6 +243,7 @@ class SkillEventAdminService {
     RequestResult removeUserFromProject(String projectId, String userId) {
         String canonicalProjectId = projDefAccessor.getProjDef(projectId).projectId
         String canonicalUserId = userId.toLowerCase(Locale.ROOT)
+        List<Integer> attemptIds = lockQuizAttemptsForProgressDeletion(canonicalProjectId, canonicalUserId)
         // Match qualification/delivery lock order. Hold init through commit so a new
         // finalization cannot start between the state check and the removal.
         lockingService.lockForSkillReporting(canonicalUserId, canonicalProjectId)
@@ -265,7 +267,7 @@ class SkillEventAdminService {
             }
             return RequestResult.success()
         }
-        List<Integer> deletedQuizIds = deleteUserProgress(canonicalProjectId, canonicalUserId, true)
+        List<Integer> deletedQuizIds = deleteUserProgress(canonicalProjectId, canonicalUserId, attemptIds, true)
         projectParticipationRepo.deleteByProjectIdAndUserId(canonicalProjectId, canonicalUserId)
         // Unlike Delete All, do not reset participation or restore imported credit.
         achievedGlobalBadgeHandler.reconcileGlobalBadgesForProject(canonicalUserId, canonicalProjectId)
@@ -283,7 +285,21 @@ class SkillEventAdminService {
                 userPointsRepo.existsByProjectIdAndUserId(projectId, userId)
     }
 
-    private List<Integer> deleteUserProgress(String projectId, String userId, boolean cancelPendingQuizGrading = false) {
+    private List<Integer> lockQuizAttemptsForProgressDeletion(String projectId, String userId) {
+        // Grading and completion take the attempt lock before reporting credit.
+        // Match that order, and lock multiple attempts in ascending ID order.
+        // Only pending attempts need this coordination. Cleanup assumes admins do not
+        // override completed grades concurrently; that overlap is not protected.
+        List<UserQuizAttemptRepo.ProjectCleanupAttempt> attempts = userQuizAttemptRepo.findAttemptsForProjectCleanup(projectId, userId)
+        attempts.each { UserQuizAttemptRepo.ProjectCleanupAttempt attempt ->
+            if (attempt.status in ['INPROGRESS', 'NEEDS_GRADING']) {
+                lockingService.lockUserQuizAttempt(attempt.id)
+            }
+        }
+        return attempts.collect { UserQuizAttemptRepo.ProjectCleanupAttempt attempt -> attempt.id }
+    }
+
+    private List<Integer> deleteUserProgress(String projectId, String userId, List<Integer> attemptIds, boolean cancelPendingQuizGrading = false) {
         performedSkillRepository.deleteAllByUserIdAndProjectId(userId, projectId)
         userEventService.removeAllEvents(projectId, userId)
         achievedLevelRepo.deleteAllByProjectIdAndUserId(projectId, userId)
@@ -293,6 +309,9 @@ class SkillEventAdminService {
         // An approval already in progress can still award credit after cleanup.
         // This overlap is an accepted limitation; the assumption is not enforced.
         skillApprovalRepo.deleteAllByProjectIdAndUserId(projectId, userId)
+        // Remove User is intended for inactive learners. Only attempts found before
+        // taking the reporting lock are eligible; a newly started attempt is not covered.
+        // Concurrent quiz linking can still backfill credit that cleanup does not see.
         // Removal must invalidate pending grading as well as earned quiz credit;
         // otherwise an outstanding manual or AI grade can restore deleted progress.
         // Queued AI grading tasks are not canceled: they may still submit the stored
@@ -303,7 +322,7 @@ class SkillEventAdminService {
         List<String> quizStatuses = cancelPendingQuizGrading ? ['PASSED', 'NEEDS_GRADING'] : ['PASSED']
         // Deleting quiz attempts removes their answer records, not uploaded attachments.
         // Existing attachment links may remain usable. Asynchronous cleanup is planned.
-        return userQuizAttemptRepo.deleteAttemptsForProjectAndUser(projectId, userId, quizStatuses)
+        return attemptIds ? userQuizAttemptRepo.deleteAttemptsForProjectAndUser(projectId, userId, quizStatuses, attemptIds) : []
     }
 
     private void recordUserProgressDeletion(String projectId, String userId, boolean removedFromProject) {

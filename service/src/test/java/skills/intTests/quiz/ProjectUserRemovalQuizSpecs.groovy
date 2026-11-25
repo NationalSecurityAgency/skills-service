@@ -17,9 +17,12 @@ package skills.intTests.quiz
 
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpStatus
+import org.springframework.transaction.PlatformTransactionManager
+import org.springframework.transaction.support.TransactionTemplate
 import skills.intTests.utils.QuizDefFactory
 import skills.intTests.utils.SkillsClientException
 import skills.intTests.utils.SkillsService
+import skills.services.LockingService
 import skills.storage.model.SkillDef.SelfReportingType
 import skills.storage.model.auth.RoleName
 import skills.storage.repos.UserAchievedLevelRepo
@@ -39,9 +42,14 @@ class ProjectUserRemovalQuizSpecs extends QuizSkillAchievementsBaseIntSpec {
 
     @Autowired DataSource dataSource
     @Autowired UserAchievedLevelRepo userAchievedLevelRepo
+    @Autowired PlatformTransactionManager transactionManager
+    @Autowired LockingService lockingService
 
-    def "removal waits for quiz completion to commit and clears shared credit without restoring participation"() {
-        Map quiz = createQuiz(1)
+    def "removal waits for in-flight quiz #operation and clears shared credit without restoring participation"() {
+        Map quiz = QuizDefFactory.createQuiz(1)
+        skillsService.createQuizDef(quiz)
+        skillsService.createQuizQuestionDefs(manualGrade ? [QuizDefFactory.createTextInputQuestion(1, 1)] :
+                QuizDefFactory.createChoiceQuestions(1, 1, 2))
         Map source = createSkill(1, 1, 1, 0, 1, 0, 100) + [selfReportingType: SelfReportingType.Quiz, quizId: quiz.quizId]
         Map shared = createSkill(2, 1, 2, 0, 1, 0, 100) + [selfReportingType: SelfReportingType.Quiz, quizId: quiz.quizId]
         Map unrelated = createSkill(2, 1, 3, 0, 1, 0, 100)
@@ -51,20 +59,33 @@ class ProjectUserRemovalQuizSpecs extends QuizSkillAchievementsBaseIntSpec {
         learner.initializeProjectProgress('TestProject1')
         skillsService.addSkill(unrelated, learner.userName)
         Map attempt = learner.startQuizAttempt(quiz.quizId).body
-        learner.reportQuizAnswer(quiz.quizId, attempt.id, attempt.questions[0].answerOptions[0].id)
+        Integer answerId = attempt.questions[0].answerOptions[0].id
+        if (manualGrade) {
+            learner.reportQuizAnswer(quiz.quizId, attempt.id, answerId, [isSelected: true, answerText: 'Pending answer'])
+            assert learner.completeQuizAttempt(quiz.quizId, attempt.id).body.needsGrading
+        } else {
+            learner.reportQuizAnswer(quiz.quizId, attempt.id, answerId)
+        }
         long barrier = 4072402L
         Connection connection = dataSource.connection
         ExecutorService callers = Executors.newFixedThreadPool(2)
         connection.createStatement().execute("select pg_advisory_lock(${barrier})")
-        // A deferred trigger pauses commit after completion has awarded all linked credit.
+        String table = manualGrade ? 'user_quiz_answer_graded' : 'user_quiz_attempt'
+        String condition = manualGrade ? 'true' : "NEW.id = ${attempt.id} and NEW.status = 'PASSED'"
+        // Pause grading after the insert locks the answer but before credit reporting.
+        // Completion instead pauses at commit after awarding linked credit.
         jdbcTemplate.execute("""create function removal_quiz_commit_pause() returns trigger language plpgsql as \$\$
-            begin if NEW.id = ${attempt.id} and NEW.status = 'PASSED' then
+            begin if ${condition} then
                 perform pg_advisory_xact_lock(${barrier}); end if; return NEW; end; \$\$""")
-        jdbcTemplate.execute('''create constraint trigger removal_quiz_commit_pause after update on user_quiz_attempt
-            deferrable initially deferred for each row execute function removal_quiz_commit_pause()''')
+        String trigger = manualGrade ? 'trigger removal_quiz_commit_pause after insert on user_quiz_answer_graded' :
+                'constraint trigger removal_quiz_commit_pause after update on user_quiz_attempt deferrable initially deferred'
+        jdbcTemplate.execute("create ${trigger} for each row execute function removal_quiz_commit_pause()")
 
         when:
-        Future<Map> completion = callers.submit({ learner.completeQuizAttempt(quiz.quizId, attempt.id).body } as Callable<Map>)
+        Future<Boolean> completion = callers.submit({
+            manualGrade ? skillsService.gradeAnswer(learner.userName, quiz.quizId, attempt.id, answerId, true, 'Accepted').body.doneGradingAttempt :
+                    learner.completeQuizAttempt(quiz.quizId, attempt.id).body.passed
+        } as Callable<Boolean>)
         new PollingConditions(timeout: 15).eventually {
             assert jdbcTemplate.queryForObject("select count(*) from pg_locks where locktype = 'advisory' and objid = ? and not granted", Integer, barrier) > 0
         }
@@ -83,12 +104,12 @@ class ProjectUserRemovalQuizSpecs extends QuizSkillAchievementsBaseIntSpec {
 
         when:
         connection.createStatement().execute('select pg_advisory_unlock_all()')
-        Map result = completion.get(20, TimeUnit.SECONDS)
+        boolean result = completion.get(20, TimeUnit.SECONDS)
         Map removed = removal.get(20, TimeUnit.SECONDS)
         waitForAsyncTasksCompletion.waitForAllScheduleTasks()
 
         then:
-        result.passed
+        result
         removed.success
         skillsService.getProjectUsers('TestProject1').count == 0
         learner.getSkillsSummaryForCurrentUser('TestProject1').points == 0
@@ -103,8 +124,42 @@ class ProjectUserRemovalQuizSpecs extends QuizSkillAchievementsBaseIntSpec {
         connection?.close()
         callers?.shutdown()
         assert callers == null || callers.awaitTermination(30, TimeUnit.SECONDS)
-        jdbcTemplate.execute('drop trigger if exists removal_quiz_commit_pause on user_quiz_attempt')
-        jdbcTemplate.execute('drop function if exists removal_quiz_commit_pause()')
+        if (table) {
+            jdbcTemplate.execute("drop trigger if exists removal_quiz_commit_pause on ${table}")
+            jdbcTemplate.execute('drop function if exists removal_quiz_commit_pause()')
+        }
+
+        where:
+        operation    | manualGrade
+        'completion' | false
+        'grading'    | true
+    }
+
+    def "removal deletes a passed attempt without waiting on its grading lock"() {
+        Map quiz = createQuiz(1)
+        Map skill = createSkill(1, 1, 1, 0, 1, 0, 100) + [selfReportingType: SelfReportingType.Quiz, quizId: quiz.quizId]
+        skillsService.createProjectAndSubjectAndSkills(createProject(1), createSubject(1, 1), [skill])
+        SkillsService learner = createService(getRandomUsers(1)[0])
+        Integer attemptId = passQuiz(learner, quiz)
+        assert learner.getSkillsSummaryForCurrentUser('TestProject1').points == 100
+        ExecutorService caller = Executors.newSingleThreadExecutor()
+
+        when:
+        Map removed = new TransactionTemplate(transactionManager).execute {
+            // Hold the grading coordination lock, not the row that removal must delete.
+            lockingService.lockUserQuizAttempt(attemptId)
+            Future<Map> removal = caller.submit({ skillsService.removeUserFromProject('TestProject1', learner.userName) } as Callable<Map>)
+            return removal.get(15, TimeUnit.SECONDS)
+        }
+
+        then:
+        removed.success
+        skillsService.getQuizRuns(quiz.quizId).totalCount == 0
+        learner.getSkillsSummaryForCurrentUser('TestProject1').points == 0
+
+        cleanup:
+        caller?.shutdown()
+        assert caller == null || caller.awaitTermination(30, TimeUnit.SECONDS)
     }
 
     def "a stale manual grade after removal cannot restore a pending attempt or project credit"() {

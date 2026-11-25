@@ -290,9 +290,24 @@ interface UserQuizAttemptRepo extends JpaRepository<UserQuizAttempt, Long> {
                     and q.status = ?3''')
     List<Integer> findSkillRefIdsByUserIdAndStatus(List<Integer> skillRefIds, String userId, QuizAttemptStatus status)
 
+    interface ProjectCleanupAttempt {
+        Integer getId()
+        String getStatus()
+    }
+
+    @Query(value = '''select attempt.id, attempt.status from user_quiz_attempt attempt
+                      where attempt.user_id = ?2 and exists (
+                          select 1 from quiz_to_skill_definition q
+                          join skill_definition s on s.id = q.skill_ref_id
+                          where q.quiz_ref_id = attempt.quiz_definition_ref_id
+                            and s.project_id = ?1 and s.self_reporting_type = 'Quiz'
+                      ) and attempt.status in ('PASSED', 'INPROGRESS', 'NEEDS_GRADING')
+                      order by attempt.id''', nativeQuery = true)
+    List<ProjectCleanupAttempt> findAttemptsForProjectCleanup(String projectId, String userId)
+
     @Query(value = '''with deleted_attempts as (
                           delete from user_quiz_attempt attempt
-                          where attempt.user_id = ?2 and attempt.status in ?3
+                          where attempt.user_id = ?2 and attempt.status in ?3 and attempt.id in ?4
                             and exists (
                                 select 1 from quiz_to_skill_definition q
                                 join skill_definition s on s.id = q.skill_ref_id
@@ -303,7 +318,7 @@ interface UserQuizAttemptRepo extends JpaRepository<UserQuizAttempt, Long> {
                        )
                        select distinct quiz_definition_ref_id from deleted_attempts
                        where status = 'PASSED' ''', nativeQuery = true)
-    List<Integer> deleteAttemptsForProjectAndUser(String projectId, String userId, List<String> statuses)
+    List<Integer> deleteAttemptsForProjectAndUser(String projectId, String userId, List<String> statuses, List<Integer> attemptIds)
 
     static interface TagValueCount {
         String getTagValue()
