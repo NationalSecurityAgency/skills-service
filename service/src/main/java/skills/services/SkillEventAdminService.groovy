@@ -289,6 +289,9 @@ class SkillEventAdminService {
         achievedLevelRepo.deleteAllByProjectIdAndUserId(projectId, userId)
         expiredUserAchievementRepo.deleteAllByProjectIdAndUserId(projectId, userId)
         userPointsRepo.deleteAllByProjectIdAndUserId(projectId, userId)
+        // Remove User and Delete All assume no skill approval is in flight for this learner.
+        // An approval already in progress can still award credit after cleanup.
+        // This overlap is an accepted limitation; the assumption is not enforced.
         skillApprovalRepo.deleteAllByProjectIdAndUserId(projectId, userId)
         // Removal must invalidate pending grading as well as earned quiz credit;
         // otherwise an outstanding manual or AI grade can restore deleted progress.
