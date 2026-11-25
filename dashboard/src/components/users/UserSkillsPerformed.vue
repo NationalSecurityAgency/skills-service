@@ -256,6 +256,7 @@ const doDeleteAllSkills = () => {
         if (data.success) {
           table.value.options.pagination.currentPage = 1;
           selectedSkills.value = [];
+          // After deletion succeeds, table refresh failures still use standard error navigation.
           await loadData({ keepBusy: true });
           projectUserState.loadUserDetailsState(projectId.value, userId.value);
           try {

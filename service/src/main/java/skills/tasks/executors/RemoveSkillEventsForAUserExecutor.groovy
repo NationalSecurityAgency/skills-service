@@ -30,6 +30,7 @@ import skills.services.events.pointsAndAchievements.ImportedSkillsAchievementsHa
 import skills.storage.model.SkillDefMin
 import skills.storage.model.UserQuizAttempt.QuizAttemptStatus
 import skills.storage.repos.SkillDefRepo
+import skills.storage.repos.UserPerformedSkillRepo
 import skills.storage.repos.UserQuizAttemptRepo
 import skills.tasks.data.RemoveSkillEventsForUserRequest
 
@@ -43,6 +44,7 @@ class RemoveSkillEventsForAUserExecutor implements VoidExecutionHandler<RemoveSk
     @Autowired LockingService lockingService
     @Autowired ImportedSkillsAchievementsHandler importedSkillsAchievementsHandler
     @Autowired UserQuizAttemptRepo userQuizAttemptRepo
+    @Autowired UserPerformedSkillRepo userPerformedSkillRepo
 
     @Override
     @Transactional
@@ -67,7 +69,13 @@ class RemoveSkillEventsForAUserExecutor implements VoidExecutionHandler<RemoveSk
             // than adding reporting locks to every passed-quiz completion; inactivity is not enforced here.
             Set<Integer> passedQuizSkillIds = userQuizAttemptRepo.findSkillRefIdsByUserIdAndStatus(
                     localIds, data.userId, QuizAttemptStatus.PASSED).toSet()
-            localIds = localIds.findAll { Integer id -> !passedQuizSkillIds.contains(id) }
+            localIds = localIds.findAll { Integer id ->
+                Integer quizRefId = data.quizBySkill?.get(id)
+                List<Integer> eventIds = data.eventIdsBySkill?.get(id)
+                // Legacy requests have no attribution; never delete native credit on their behalf.
+                quizRefId != null && eventIds && !passedQuizSkillIds.contains(id) &&
+                        userPerformedSkillRepo.hasOnlyCapturedQuizEvents(quizRefId, id, data.userId, eventIds)
+            }
         }
         if (localIds) {
             batchOperationsTransactionalAccessor.batchRemovePerformedSkillsForUserAndSpecificSkills(data.userId, data.projectId, localIds)

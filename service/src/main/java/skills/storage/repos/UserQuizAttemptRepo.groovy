@@ -299,10 +299,10 @@ interface UserQuizAttemptRepo extends JpaRepository<UserQuizAttempt, Long> {
                                 where q.quiz_ref_id = attempt.quiz_definition_ref_id
                                   and s.project_id = ?1 and s.self_reporting_type = 'Quiz'
                             )
-                          returning attempt.quiz_definition_ref_id
-                      )
-                      select distinct quiz_definition_ref_id from deleted_attempts
-                      order by quiz_definition_ref_id''', nativeQuery = true)
+                           returning attempt.quiz_definition_ref_id, attempt.status
+                       )
+                       select distinct quiz_definition_ref_id from deleted_attempts
+                       where status = 'PASSED' ''', nativeQuery = true)
     List<Integer> deleteAttemptsForProjectAndUser(String projectId, String userId, List<String> statuses)
 
     static interface TagValueCount {

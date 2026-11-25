@@ -227,12 +227,12 @@ class SkillEventAdminService {
         if (!hasProjectUserData(projectId, userId, hadLocalEvents)) {
             return RequestResult.success()
         }
-        List<Integer> deletedAttemptQuizIds = deleteUserProgress(projectId, userId)
+        List<Integer> deletedQuizIds = deleteUserProgress(projectId, userId)
 
         catalogBackfillService.reset(projectId, userId, hadLocalEvents)
         achievedGlobalBadgeHandler.reconcileGlobalBadgesForProject(userId, projectId)
 
-        propagateUpdatesToQuizSkillsAndImportedSkills(projectId, userId, deletedAttemptQuizIds)
+        propagateUpdatesToQuizSkillsAndImportedSkills(projectId, userId, deletedQuizIds)
         recordUserProgressDeletion(projectId, userId, false)
         return RequestResult.success()
     }
@@ -265,11 +265,11 @@ class SkillEventAdminService {
             }
             return RequestResult.success()
         }
-        List<Integer> deletedAttemptQuizIds = deleteUserProgress(canonicalProjectId, canonicalUserId, true)
+        List<Integer> deletedQuizIds = deleteUserProgress(canonicalProjectId, canonicalUserId, true)
         projectParticipationRepo.deleteByProjectIdAndUserId(canonicalProjectId, canonicalUserId)
         // Unlike Delete All, do not reset participation or restore imported credit.
         achievedGlobalBadgeHandler.reconcileGlobalBadgesForProject(canonicalUserId, canonicalProjectId)
-        propagateUpdatesToQuizSkillsAndImportedSkills(canonicalProjectId, canonicalUserId, deletedAttemptQuizIds)
+        propagateUpdatesToQuizSkillsAndImportedSkills(canonicalProjectId, canonicalUserId, deletedQuizIds)
         recordUserProgressDeletion(canonicalProjectId, canonicalUserId, true)
         return RequestResult.success()
     }
@@ -319,10 +319,18 @@ class SkillEventAdminService {
     }
 
     @Profile
-    private void propagateUpdatesToQuizSkillsAndImportedSkills(String projectId, String userId, List<Integer> deletedAttemptQuizIds) {
-        List<QuizToSkillDefRepo.ProjectIdAndSkillId> skillsToUpdateInOtherProjects = deletedAttemptQuizIds.collectMany { Integer quizRefId ->
-            quizToSkillDefRepo.getSkillsForQuiz(quizRefId)
+    private void propagateUpdatesToQuizSkillsAndImportedSkills(String projectId, String userId, List<Integer> deletedQuizIds) {
+        Map<Integer, Integer> quizBySkill = [:]
+        List<QuizToSkillDefRepo.ProjectIdAndSkillId> skillsToUpdateInOtherProjects = deletedQuizIds.collectMany { Integer quizRefId ->
+            List<QuizToSkillDefRepo.ProjectIdAndSkillId> skills = quizToSkillDefRepo.getSkillsForQuiz(quizRefId)
+            skills.each { quizBySkill[it.skillRefId] = quizRefId }
+            skills
         }.findAll { !it.projectId.equalsIgnoreCase(projectId) }
+        List<Integer> quizSkillIds = skillsToUpdateInOtherProjects.collect { it.skillRefId }.unique()
+        // Capture existing credit identity even if a retake kept an older event at max points.
+        Map<Integer, List<Integer>> eventIdsBySkill = quizSkillIds ?
+                performedSkillRepository.findSkillEventIds(userId, quizSkillIds).groupBy { it.skillRefId }
+                        .collectEntries { skillRefId, events -> [(skillRefId): events.collect { it.eventId }] } : [:]
         Map<String, List<Integer>> projAndSkillIds = [:]
         Closure addToProjAndSkillIds = { String proj, List<Integer> toAdd ->
             if (toAdd) {
@@ -365,7 +373,8 @@ class SkillEventAdminService {
 
         // notify other projects
         projAndSkillIds.each {
-            taskSchedulerService.removeSkillEventsForAUser(userId, it.key, it.value)
+            taskSchedulerService.removeSkillEventsForAUser(userId, it.key, it.value,
+                    quizBySkill.subMap(it.value), eventIdsBySkill.subMap(it.value))
         }
     }
 

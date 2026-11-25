@@ -26,10 +26,14 @@ import org.springframework.context.annotation.Import
 import org.springframework.core.annotation.Order
 import org.springframework.http.HttpStatus
 import org.springframework.test.annotation.DirtiesContext
+import org.springframework.transaction.PlatformTransactionManager
+import org.springframework.transaction.support.TransactionTemplate
 import skills.intTests.utils.SkillsClientException
 import skills.intTests.utils.SkillsService
 import skills.quizLoading.QuizSettings
 import skills.storage.model.SkillDef.SelfReportingType
+import skills.storage.model.UserPerformedSkill
+import skills.storage.repos.UserPerformedSkillRepo
 import skills.tasks.data.RemoveSkillEventsForUserRequest
 
 import java.util.concurrent.CountDownLatch
@@ -42,6 +46,8 @@ import static skills.intTests.utils.SkillsFactory.*
 class SharedQuizCleanupRetakeIT extends QuizSkillAchievementsBaseIntSpec {
 
     @Autowired CleanupGate cleanupGate
+    @Autowired UserPerformedSkillRepo userPerformedSkillRepo
+    @Autowired PlatformTransactionManager transactionManager
 
     def cleanup() {
         cleanupGate.release.countDown()
@@ -124,10 +130,89 @@ class SharedQuizCleanupRetakeIT extends QuizSkillAchievementsBaseIntSpec {
         exception.httpStatus == HttpStatus.BAD_REQUEST
         exception.message.contains('already took and passed this quiz')
 
+        when: 'the learner is removed again after the retake kept the original destination event'
+        skillsService.removeUserFromProject('TestProject1', learner.userName)
+        waitForAsyncTasksCompletion.waitForAllScheduleTasks()
+
+        then:
+        skillsService.getQuizRuns(quiz.quizId).totalCount == 0
+        learner.getSkillsSummaryForCurrentUser('TestProject2').points == 100
+        learner.getSkillsSummaryForCurrentUser('TestProject2').skillsAchieved == 1
+        !learner.getBadgeSummary(null, 'TestProject2', badge.badgeId).badgeAchieved
+        skillsService.getPerformedSkills(learner.userName, 'TestProject2').data*.skillId == [unrelated.skillId]
+
         where:
         operation                  | removeFromProject
         'removal from the project' | true
         'deleting all progress'    | false
+    }
+
+    def "delayed shared quiz cleanup preserves credit earned after conversion to a non-quiz skill"() {
+        Map quiz = createQuiz(1)
+        Map source = createSkill(1, 1, 1, 0, 1, 0, 100) + [selfReportingType: SelfReportingType.Quiz, quizId: quiz.quizId]
+        Map destination = createSkill(2, 1, 1, 0, 1, 0, 100) + [selfReportingType: SelfReportingType.Quiz, quizId: quiz.quizId]
+        skillsService.createProjectAndSubjectAndSkills(createProject(1), createSubject(1, 1), [source])
+        skillsService.createProjectAndSubjectAndSkills(createProject(2), createSubject(2, 1), [destination])
+        SkillsService learner = createService(getRandomUsers(1)[0])
+        passQuiz(learner, quiz)
+        waitForAsyncTasksCompletion.waitForAllScheduleTasks()
+        cleanupGate.arm(learner.userName)
+
+        when:
+        skillsService.removeUserFromProject(source.projectId, learner.userName)
+        assert cleanupGate.arrived.await(30, TimeUnit.SECONDS): 'Shared quiz cleanup did not reach the test gate'
+        destination.remove('selfReportingType')
+        destination.remove('quizId')
+        skillsService.createSkill(destination)
+        skillsService.addSkill(destination, learner.userName)
+        cleanupGate.release.countDown()
+        waitForAsyncTasksCompletion.waitForAllScheduleTasks()
+
+        then:
+        skillsService.getQuizRuns(quiz.quizId).totalCount == 0
+        learner.getSkillsSummaryForCurrentUser(destination.projectId).points == 100
+        learner.getSkillsSummaryForCurrentUser(destination.projectId).skillsAchieved == 1
+        skillsService.getPerformedSkills(learner.userName, destination.projectId).data*.skillId == [destination.skillId]
+    }
+
+    def "delayed shared quiz cleanup preserves an uncaptured event for the same quiz association"() {
+        Map quiz = createQuiz(1)
+        Map source = createSkill(1, 1, 1, 0, 1, 0, 100) + [selfReportingType: SelfReportingType.Quiz, quizId: quiz.quizId]
+        Map destination = createSkill(2, 1, 1, 0, 1, 0, 100) + [selfReportingType: SelfReportingType.Quiz, quizId: quiz.quizId]
+        skillsService.createProjectAndSubjectAndSkills(createProject(1), createSubject(1, 1), [source])
+        skillsService.createProjectAndSubjectAndSkills(createProject(2), createSubject(2, 1), [destination])
+        SkillsService learner = createService(getRandomUsers(1)[0])
+        passQuiz(learner, quiz)
+        waitForAsyncTasksCompletion.waitForAllScheduleTasks()
+        cleanupGate.arm(learner.userName)
+
+        when:
+        skillsService.removeUserFromProject(source.projectId, learner.userName)
+        assert cleanupGate.arrived.await(30, TimeUnit.SECONDS): 'Shared quiz cleanup did not reach the test gate'
+        Map<Integer, List<Integer>> capturedEvents = cleanupGate.request.eventIdsBySkill
+        assert capturedEvents.size() == 1
+        Integer skillRefId = capturedEvents.keySet().first()
+        assert capturedEvents[skillRefId].size() == 1
+        Integer originalId = capturedEvents[skillRefId].first()
+        // Replace only the event identity. Leave the timestamp, quiz association and aggregates unchanged.
+        Integer replacementId = new TransactionTemplate(transactionManager).execute {
+            UserPerformedSkill original = userPerformedSkillRepo.findById(originalId).orElseThrow()
+            UserPerformedSkill replacement = new UserPerformedSkill(userId: original.userId, projectId: original.projectId,
+                    skillId: original.skillId, skillRefId: original.skillRefId, performedOn: original.performedOn)
+            userPerformedSkillRepo.delete(original)
+            userPerformedSkillRepo.flush()
+            userPerformedSkillRepo.saveAndFlush(replacement).id
+        }
+        assert replacementId != originalId
+        cleanupGate.release.countDown()
+        waitForAsyncTasksCompletion.waitForAllScheduleTasks()
+
+        then:
+        skillsService.getQuizRuns(quiz.quizId).totalCount == 0
+        learner.getSkillsSummaryForCurrentUser(destination.projectId).points == 100
+        learner.getSkillsSummaryForCurrentUser(destination.projectId).skillsAchieved == 1
+        skillsService.getPerformedSkills(learner.userName, destination.projectId).data*.skillId == [destination.skillId]
+        userPerformedSkillRepo.findById(replacementId).isPresent()
     }
 
     @TestConfiguration
@@ -140,10 +225,12 @@ class SharedQuizCleanupRetakeIT extends QuizSkillAchievementsBaseIntSpec {
     @Order(0)
     static class CleanupGate {
         volatile String userId
+        volatile RemoveSkillEventsForUserRequest request
         volatile CountDownLatch arrived = new CountDownLatch(1)
         volatile CountDownLatch release = new CountDownLatch(1)
 
         void arm(String learnerId) {
+            request = null
             arrived = new CountDownLatch(1)
             release = new CountDownLatch(1)
             userId = learnerId
@@ -154,6 +241,7 @@ class SharedQuizCleanupRetakeIT extends QuizSkillAchievementsBaseIntSpec {
         Object pauseCleanup(ProceedingJoinPoint joinPoint) {
             TaskInstance<RemoveSkillEventsForUserRequest> task = (TaskInstance<RemoveSkillEventsForUserRequest>) joinPoint.args[0]
             if (task.data.userId == userId && task.data.projectId == 'TestProject2') {
+                request = task.data
                 arrived.countDown()
                 assert release.await(60, TimeUnit.SECONDS): 'Shared quiz cleanup gate was not released'
             }
